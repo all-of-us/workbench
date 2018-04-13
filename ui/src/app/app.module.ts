@@ -21,6 +21,7 @@ import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
+import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
@@ -91,6 +92,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
+    BreadcrumbComponent,
     BugReportComponent,
     CohortEditComponent,
     ErrorHandlerComponent,
