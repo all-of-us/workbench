@@ -32,9 +32,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 
@@ -75,16 +77,9 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    // We suspect that security context, not having been cleared before, is still set here sometimes.
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null) {
-      log.info("No authentication already set");
-    } else {
-      log.info("Authentication already set!");
-      if (authentication instanceof UserAuthentication) {
-        log.info("User authentication = " + ((UserAuthentication) authentication).getPrincipal().getEmail());
-      }
-    }
+    // Clear the security context before we start, to make sure we're not using authentication
+    // from a previous request.
+    SecurityContextHolder.clearContext();
 
     // OPTIONS methods requests don't need authorization.
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
@@ -147,6 +142,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     String gsuiteDomainSuffix =
         "@" + workbenchConfig.googleDirectoryService.gSuiteDomain;
     if (!userEmail.endsWith(gsuiteDomainSuffix)) {
+      // Temporarily set the authentication with no user, so we can look up what user this
+      // corresponds to in FireCloud.
+      SecurityContextHolder.getContext().setAuthentication(
+          new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
       try {
         // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
         // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
@@ -188,6 +187,14 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     return true;
+  }
+
+  @Override
+  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+      ModelAndView modelAndView) throws Exception {
+    // Clear the security context, just to make sure nothing subsequently uses the credentials
+    // set up in here.
+    SecurityContextHolder.clearContext();
   }
 
   /**
