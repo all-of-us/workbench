@@ -19,7 +19,7 @@
   background-color: transparent;
 }
 
-::ng-deep .btn.dropdown-toggle {
+::ng-deep .btn-group-overflow .btn.dropdown-toggle {
   height: 100%;
   width: 2rem;
   background-color: transparent;
@@ -31,7 +31,7 @@
   border-bottom: none;
 }
 
-::ng-deep .btn.dropdown-toggle:hover {
+::ng-deep .btn-group-overflow .btn.dropdown-toggle:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
@@ -39,7 +39,7 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-::ng-deep .btn-top.btn-overflow {
+::ng-deep .btn-group-overflow .btn-top.btn-overflow {
   color: white;
   width: 2rem;
   border: none;
