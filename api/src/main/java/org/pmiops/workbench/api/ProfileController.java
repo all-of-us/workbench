@@ -391,13 +391,14 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> submitIdVerification() {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     User user = userProvider.get();
     if (user.getRequestedIdVerification() == null || user.getRequestedIdVerification() == false) {
       Properties props = new Properties();
       Session session = Session.getDefaultInstance(props, null);
       try {
         Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(user.getEmail()));
+        msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
         InternetAddress[] replyTo = new InternetAddress[1];
         replyTo[0] = new InternetAddress(user.getContactEmail());
         msg.setReplyTo(replyTo);
@@ -405,12 +406,12 @@ public class ProfileController implements ProfileApiDelegate {
         // than the group.
         // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
         msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-            "brubenst@broadinstitute.org"));
+            workbenchConfig.admin.adminIdVerification));
         msg.setSubject("[Id Verification Request]: " + user.getEmail());
         msg.setText(ID_VERIFICATION_TEXT + user.getEmail());
         Transport.send(msg);
       } catch (MessagingException e) {
-        throw new EmailException("Error sending bug report", e);
+        throw new EmailException("Error submitting id verification", e);
       }
       user.setRequestedIdVerification(true);
       userDao.save(user);
@@ -452,11 +453,12 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> requestInvitationKey(String email) {
+    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
     try {
       Message msg = new MimeMessage(session);
-      msg.setFrom(new InternetAddress("all-of-us-workbench-eng@googlegroups.com"));
+      msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
       InternetAddress[] replyTo = new InternetAddress[1];
       replyTo[0] = new InternetAddress(email);
       msg.setReplyTo(replyTo);
@@ -464,7 +466,7 @@ public class ProfileController implements ProfileApiDelegate {
       // than the group.
       // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
       msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-          "all-of-us-workbench-eng@googlegroups.com", "AofU Workbench Engineers"));
+          workbenchConfig.admin.supportGroup, "AofU Workbench Engineers"));
       msg.setSubject("[AofU Invitation Key Request]");
       msg.setText(email + " is requesting the invitation key.");
       Transport.send(msg);
