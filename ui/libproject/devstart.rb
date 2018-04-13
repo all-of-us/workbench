@@ -28,6 +28,7 @@ end
 def install_dependencies()
   common = Common.new
   common.run_inline %W{docker-compose run --rm ui yarn install}
+  Workbench::Swagger.download_swagger_codegen_cli
 end
 
 Common.register_command({
@@ -37,7 +38,7 @@ Common.register_command({
 })
 
 def swagger_regen(cmd_name)
-  ensure_docker cmd_name, %{}
+  ensure_docker cmd_name, []
 
   common = Common.new
   Workbench::Swagger.download_swagger_codegen_cli
@@ -143,7 +144,7 @@ class DeployUI
         --project #{@opts.project}
         --version #{@opts.version}
         #{opts.promote ? "--promote" : "--no-promote"}
-      } + @opts.quiet ? %{--quiet} : %{}
+      } + (@opts.quiet ? %W{--quiet} : [])
     end
   end
 end
@@ -193,7 +194,9 @@ def dev_up(*args)
 
   ENV["ENV_FLAG"] = "--environment=#{options.env}"
   at_exit { common.run_inline %W{docker-compose down} }
-  swagger_regen("swagger-regen")
+
+  # Can't use swagger_regen here as it enters docker.
+  common.run_inline %W{docker-compose run --rm ui yarn run codegen}
   common.run_inline %W{docker-compose run -d --service-ports tests}
 
   common.status "Tests started. Open\n"
