@@ -79,7 +79,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       throws Exception {
     // Clear the security context before we start, to make sure we're not using authentication
     // from a previous request.
-    SecurityContextHolder.getContext().setAuthentication(null);
+    SecurityContextHolder.clearContext();
 
     // OPTIONS methods requests don't need authorization.
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
@@ -194,7 +194,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       ModelAndView modelAndView) throws Exception {
     // Clear the security context, just to make sure nothing subsequently uses the credentials
     // set up in here.
-    SecurityContextHolder.getContext().setAuthentication(null);
+    SecurityContextHolder.clearContext();
   }
 
   /**
