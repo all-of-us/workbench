@@ -1196,7 +1196,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
         cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), request);
     ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
     assertResults(response2, p2Map);
-    assertThat(response2.getNextPageToken()).isNotNull();
+    assertThat(response2.getNextPageToken()).isNull();
   }
 
 
