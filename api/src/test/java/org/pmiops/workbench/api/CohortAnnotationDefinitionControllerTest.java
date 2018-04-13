@@ -224,6 +224,7 @@ public class CohortAnnotationDefinitionControllerTest {
         long annotationDefinitionId = 1;
 
         ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+        request.setColumnName("ignore");
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
@@ -261,6 +262,7 @@ public class CohortAnnotationDefinitionControllerTest {
         Workspace workspace = createWorkspace(namespace, name, badWorkspaceId);
 
         ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+        request.setColumnName("ignore");
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
@@ -301,6 +303,7 @@ public class CohortAnnotationDefinitionControllerTest {
         Workspace workspace = createWorkspace(namespace, name, workspaceId);
 
         ModifyCohortAnnotationDefinitionRequest request = new ModifyCohortAnnotationDefinitionRequest();
+        request.setColumnName("ignore");
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.WRITER)).thenReturn(owner);
