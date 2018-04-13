@@ -36,16 +36,18 @@ Common.register_command({
   :fn => Proc.new { |*args| install_dependencies(*args) }
 })
 
-def swagger_regen()
+def swagger_regen(cmd_name)
+  ensure_docker cmd_name, %{}
+
   common = Common.new
   Workbench::Swagger.download_swagger_codegen_cli
-  common.run_inline %W{docker-compose run --rm ui yarn run codegen}
+  common.run_inline %W{yarn run codegen}
 end
 
 Common.register_command({
   :invocation => "swagger-regen",
   :description => "Regenerates API client libraries from Swagger definitions.",
-  :fn => Proc.new { |*args| swagger_regen(*args) }
+  :fn => Proc.new { |*args| swagger_regen("swagger-regen") }
 })
 
 class BuildOptions
@@ -110,6 +112,10 @@ class DeployUI
                "Required: must set --promote or --no-promote") do
        @opts.promote = false
     end
+    @parser.on("--quiet",
+               "Whether to suppress user prompts; shown by default") do
+       @opts.quiet = true
+    end
   end
 
   def validate_options
@@ -130,13 +136,14 @@ class DeployUI
     }
     environment_name = environment_names[@opts.project]
 
+    swagger_regen(@cmd_name)
     build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, service_account=@opts.account).run do
       common.run_inline %W{gcloud app deploy
         --project #{@opts.project}
         --version #{@opts.version}
         #{opts.promote ? "--promote" : "--no-promote"}
-      }
+      } + @opts.quiet ? %{--quiet} : %{}
     end
   end
 end
@@ -186,7 +193,7 @@ def dev_up(*args)
 
   ENV["ENV_FLAG"] = "--environment=#{options.env}"
   at_exit { common.run_inline %W{docker-compose down} }
-  swagger_regen()
+  swagger_regen("swagger-regen")
   common.run_inline %W{docker-compose run -d --service-ports tests}
 
   common.status "Tests started. Open\n"
