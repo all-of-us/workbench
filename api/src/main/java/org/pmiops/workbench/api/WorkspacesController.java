@@ -755,7 +755,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     blobList = cloudStorageService.getBlobList(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY);
     blobList = blobList.stream()
         .filter(blob ->
-            blob.getName().matches("([^\\s]+(\\.(?i)(ipynb))$)"))
+            blob.getName().matches("(.+(\\.(?i)(ipynb))$)"))
         .collect(Collectors.toList());
     return convertBlobToFileDetail(blobList, bucketName);
 
