@@ -130,12 +130,14 @@ export class DemoFormComponent implements OnInit, OnDestroy {
           }
           return node;
         });
-        return nodes.size > 1 ? nodes : nodes.get(0);
+        return nodes;
       })
     );
     forkJoin(...calls).subscribe(([age, dec, gen, race, ethnicity]) => {
-      this.ageNode = age;
-      this.deceasedNode = dec;
+      /* Age and Deceased are single nodes we use as templates */
+      this.ageNode = age.get(0);
+      this.deceasedNode = dec.get(0);
+      /* Gender, Race, and Ethnicity are all used to generate option lists */
       this.genderNodes = gen;
       this.raceNodes = race;
       this.ethnicityNodes = ethnicity;

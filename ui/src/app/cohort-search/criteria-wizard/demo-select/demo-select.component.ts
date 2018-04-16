@@ -11,9 +11,8 @@ import {CohortSearchActions} from '../../redux';
   styleUrls: ['./demo-select.component.css']
 })
 export class DemoSelectComponent implements OnInit, OnDestroy {
-  @Input() label: string;
   @Input() includeSearchBox = true;
-  @Input() options;
+  @Input() options = List();
   @Input() set initialSelection(opts) {
     const _selections = opts.map(opt => opt.hashCode()).toSet();
     this.selected = this.selected.union(_selections);

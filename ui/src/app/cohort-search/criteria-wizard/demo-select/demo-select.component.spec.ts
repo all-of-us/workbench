@@ -45,7 +45,6 @@ describe('DemoSelectComponent', () => {
 
     fixture = TestBed.createComponent(DemoSelectComponent);
     component = fixture.componentInstance;
-    component.label = 'Test Selection Box';
     component.options = List();
     component.initialSelection = List();
     fixture.detectChanges();
