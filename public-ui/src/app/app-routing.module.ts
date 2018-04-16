@@ -3,15 +3,16 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
 import {HomeComponent} from './data-browser/home/home.component';
 import {SearchComponent} from './data-browser/search/search.component';
+import {SurveysComponent} from "./views/surveys/surveys.component";
 
 declare let gtag: Function;
 declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
-    path: 'data-browser/home',
-    component: HomeComponent,
-    data: {title: 'Data Browser'}
+    path: 'surveys',
+    component: SurveysComponent,
+    data: {title: 'Browse Survey Instruments'}
   },
   {
     path: 'data-browser/browse',
@@ -20,8 +21,8 @@ const routes: Routes = [
   },
   {
     path: '',
-    component: SearchComponent,
-    data: {title: 'Browse'}
+    component: SurveysComponent,
+    data: {title: 'Browse Survey Instruments'}
   }
 ];
 

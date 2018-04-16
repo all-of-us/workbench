@@ -1,5 +1,15 @@
-<router-outlet></router-outlet>
-<div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
-  <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
+<div class="main-container">
+  <app-db-header></app-db-header>
+  <div class="content-container">
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+    <div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
+      <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
+    </div>
+    <app-routing-spinner></app-routing-spinner>
+  </div>
 </div>
-<app-routing-spinner></app-routing-spinner>
+
+
+

@@ -8,11 +8,7 @@ import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
-import {InterceptedHttp} from './factory/InterceptedHttp';
-import {ErrorHandlingService} from './services/error-handling.service';
-import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
-import {ErrorHandlerComponent} from './views/error-handler/component';
 
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 
@@ -21,6 +17,8 @@ import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {AppRoutingModule} from './app-routing.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
+import { SurveysComponent } from './views/surveys/surveys.component';
+import { DbHeaderComponent } from './views/db-header/db-header.component';
 
 
 
@@ -49,19 +47,13 @@ function getBasePath() {
   ],
   declarations: [
     AppComponent,
-    ErrorHandlerComponent,
     RoutingSpinnerComponent,
+    SurveysComponent,
+    DbHeaderComponent,
   ],
   providers: [
-    ErrorHandlingService,
-    GoogleAnalyticsEventsService,
-    {
-      provide: Http,
-      useClass: InterceptedHttp,
-      deps: [XHRBackend, RequestOptions, ErrorHandlingService]
-    },
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, ErrorHandlerComponent]
+  bootstrap: [AppComponent]
 })
 export class AppModule {}
