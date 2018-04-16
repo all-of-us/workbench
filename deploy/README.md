@@ -29,8 +29,8 @@ these processes locally.
 - Ensure that Circle staging deployment succeeded.
 - Run deployment (automatically takes the current staging deployment):
   ```
-  deploy$ ./project.rb --project all-of-us-rw-stable \
-    --account DEPLOY_AS_ACCOUNT --promote
+  deploy$ ./project.rb deploy --project all-of-us-rw-stable \
+    --account deploy@all-of-us-rw-stable.iam.gserviceaccount.com --promote
   ```
 
 # Manual deployment details
