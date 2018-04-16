@@ -17,10 +17,8 @@ import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {AppRoutingModule} from './app-routing.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
-import { SurveysComponent } from './views/surveys/surveys.component';
 import { DbHeaderComponent } from './views/db-header/db-header.component';
-
-
+import { SurveysComponent } from './views/surveys/surveys.component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -55,5 +53,6 @@ function getBasePath() {
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent]
+
 })
 export class AppModule {}

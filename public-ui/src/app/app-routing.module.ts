@@ -3,6 +3,7 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
 import {HomeComponent} from './data-browser/home/home.component';
 import {SearchComponent} from './data-browser/search/search.component';
+
 import {SurveysComponent} from "./views/surveys/surveys.component";
 
 declare let gtag: Function;
