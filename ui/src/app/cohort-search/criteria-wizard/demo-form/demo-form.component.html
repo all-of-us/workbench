@@ -41,90 +41,121 @@
   </div>
 
   <div class="modal-body" id="demographics-modal-body">
-    <div id="demo-form-spinner" [class.show]="loading">
-      <div class="spinner spinner-lg">Loading...</div>
-    </div>
-
-    <div [class.blur]="loading">
-      <form [formGroup]="demoForm" (ngSubmit)="onSubmit()">
-        <section class="form-block">
-          <label>Select participants who are...</label>
-
-          <!-- Age -->
-          <div class="form-group">
-            <label>Within the age range</label>
-            <div class="slider-container">
-              <input type="number"
-                id="min-age"
-                [min]="minAge" [max]="maxAge"
-                formControlName="ageMin"
-                class="number-display">
-              <div class="slider">
-                <nouislider
-                  [min]="minAge" [max]="maxAge" [step]="1"
-                  [behaviour]="'drag'"
-                  [connect]="true"
-                  [formControl]="demoForm.controls.ageRange">
-                </nouislider>
-              </div>
-              <input type="number"
-                id="max-age"
-                [min]="minAge" [max]="maxAge"
-                formControlName="ageMax"
-                class="number-display">
-            </div>
+    <form [formGroup]="demoForm" (ngSubmit)="onSubmit()">
+      <!-- Age -->
+      <div class="form-row">
+        <div class="form-label">
+          Age
+        </div>
+        <div class="control-wrapper slider-wrapper">
+          <input type="number"
+            id="min-age"
+            [min]="minAge" [max]="maxAge"
+            formControlName="ageMin"
+            class="number-display">
+          <div class="slider">
+            <nouislider
+              [min]="minAge" [max]="maxAge" [step]="1"
+              [behaviour]="'drag'"
+              [connect]="true"
+              [formControl]="demoForm.controls.ageRange">
+            </nouislider>
           </div>
+          <input type="number"
+            id="max-age"
+            [min]="minAge" [max]="maxAge"
+            formControlName="ageMax"
+            class="number-display">
+        </div>
+      </div>
 
-          <!-- Genders -->
+      <!-- Genders -->
+      <div class="form-row">
+        <div class="form-label">
+          <div class="circle-wrapper">
+            <div class="and-circle">AND</div>
+          </div>
+          Gender
+        </div>
+        <div class="control-wrapper">
           <app-demo-select
             [label]="'genders'"
             [options]="genderNodes"
             [includeSearchBox]="false"
+            [initialSelection]="initialGenders"
             >
           </app-demo-select>
+        </div>
+      </div>
 
-          <!-- Races -->
+      <!-- Races -->
+      <div class="form-row">
+        <div class="form-label">
+          <div class="circle-wrapper">
+            <div class="and-circle">AND</div>
+          </div>
+          Race
+        </div>
+        <div class="control-wrapper">
           <app-demo-select
             [label]="'races'"
             [options]="raceNodes"
+            [initialSelection]="initialRaces"
             >
           </app-demo-select>
+        </div>
+      </div>
 
-          <!-- Ethnicities -->
+      <!-- Ethnicities -->
+      <div class="form-row">
+        <div class="form-label">
+          <div class="circle-wrapper">
+            <div class="and-circle">AND</div>
+          </div>
+          Ethnicity
+        </div>
+        <div class="control-wrapper">
           <app-demo-select
             [label]="'ethnicities'"
             [options]="ethnicityNodes"
+            [initialSelection]="initialEthnicities"
             >
           </app-demo-select>
+        </div>
+      </div>
 
-          <!-- Deceased status -->
-          <div class="form-group">
-            <label>
-              And are deceased
-            </label>
-            <div class="checkbox">
-              <input type="checkbox"
-                formControlName="deceased"
-                id="deceased"
-                name="deceased">
-              <label for="deceased">Deceased</label>
-            </div>
+      <!-- Deceased status -->
+      <div class="form-row">
+        <div class="form-label">
+          <div class="circle-wrapper">
+            <div class="and-circle">AND</div>
           </div>
-        </section>
-      </form>
-    </div>
-    <div class="form-footer">
-      <button type="button"
-        class="btn btn-secondary"
-        (click)="onCancel()">
-        Cancel
-      </button>
-      <button type="submit"
-        class="btn btn-primary"
-        (click)="onSubmit()"
-        [disabled]="demoForm.invalid || !hasSelection">
-        Finish
-      </button>
-    </div>
+          Deceased
+        </div>
+        <div class="control-wrapper">
+          <div class="checkbox">
+            <input type="checkbox"
+              formControlName="deceased"
+              id="deceased"
+              name="deceased">
+            <label for="deceased">Include Only Deceased Participants</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button type="button"
+          class="btn btn-secondary"
+          (click)="onCancel()">
+          Cancel
+        </button>
+        <button type="submit"
+          class="btn btn-primary"
+          (click)="onSubmit()"
+          [disabled]="demoForm.invalid || !hasSelection">
+          Finish
+        </button>
+      </div>
+    </form>
   </div>
 </clr-modal>

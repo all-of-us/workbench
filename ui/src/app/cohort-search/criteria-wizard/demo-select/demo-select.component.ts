@@ -1,7 +1,9 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, Input, OnInit, OnDestroy} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
+
+import {CohortSearchActions} from '../../redux';
 
 /*
  * Sorts a plain JS array of plain JS objects first by a 'count' key and then
@@ -21,16 +23,21 @@ function sortByCountThenName(critA, critB) {
   templateUrl: './demo-select.component.html',
   styleUrls: ['./demo-select.component.css']
 })
-export class DemoSelectComponent implements OnInit {
+export class DemoSelectComponent implements OnInit, OnDestroy {
   @Input() label: string;
-  @Input() includeSearchBox: boolean = true;
+  @Input() includeSearchBox = true;
   @Input() options;
-  @Output() selected = new EventEmitter<any>();
+  @Input() set initialSelection(opts) {
+    const _selections = opts.map(opt => opt.hashCode()).toSet();
+    this.selected = this.selected.union(_selections);
+  }
 
-  _selected = Set<number>();
+  selected = Set<number>();
   filter = new FormControl();
   regex = new RegExp('');
   subscription: Subscription;
+
+  constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
     this.subscription = this.filter.valueChanges
@@ -46,21 +53,21 @@ export class DemoSelectComponent implements OnInit {
   get filteredOptions() {
     return this.options
       .filter(opt => this.regex.test(opt.get('name', '')))
-      .filter(opt => !this._selected.has(opt.hashCode()));
+      .filter(opt => !this.selected.has(opt.hashCode()));
   }
 
   get selectedOptions() {
-    return this.options.filter(opt => this._selected.has(opt.hashCode()));
+    return this.options.filter(opt => this.selected.has(opt.hashCode()));
   }
 
   select(opt) {
-    this._selected = this._selected.add(opt.hashCode());
-    this.selected.emit(this.selectedOptions);
+    this.selected = this.selected.add(opt.hashCode());
+    this.actions.addParameter(opt);
   }
 
   unselect(opt) {
-    this._selected = this._selected.delete(opt.hashCode());
-    this.selected.emit(this.selectedOptions);
+    this.selected = this.selected.delete(opt.hashCode());
+    this.actions.removeParameter(opt.get('parameterId'));
   }
 
   unsetFilter() {

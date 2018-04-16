@@ -51,21 +51,23 @@ export class DemoFormComponent implements OnInit, OnDestroy {
     ageMin: new FormControl(0),
     ageMax: new FormControl(120),
     ageRange: new FormControl([this.minAge, this.maxAge]),
-    genders: new FormControl(),
-    races: new FormControl(),
     deceased: new FormControl(),
   });
-  get genders()  { return this.demoForm.get('genders');  }
-  get races()    { return this.demoForm.get('races');    }
   get ageRange() { return this.demoForm.get('ageRange'); }
   get deceased() { return this.demoForm.get('deceased'); }
 
   /* Storage for the demographics options (fetched via the API) */
   ageNode;
   deceasedNode;
+
   genderNodes = List();
+  initialGenders = List();
+
   raceNodes = List();
+  initialRaces = List();
+
   ethnicityNodes = List();
+  initialEthnicities = List();
 
   constructor(
     private route: ActivatedRoute,
@@ -88,8 +90,8 @@ export class DemoFormComponent implements OnInit, OnDestroy {
        * criteria already in the state (i.e. if we're editing a search group
        * item).  Finally we load the relevant criteria from the API.
        */
-      this.initGenders(selections);
-      this.initRaces(selections);
+      this.initialGenders = selections.filter(s => s.get('subtype') === GEN);
+      this.initialRaces = selections.filter(s => s.get('subtype') === RACE);
       this.initDeceased(selections);
       this.initAgeRange(selections);
       this.loadNodesFromApi();
@@ -244,34 +246,6 @@ export class DemoFormComponent implements OnInit, OnDestroy {
     }));
   }
 
-  initGenders(selections) {
-    const genDiff = this.genders.valueChanges.pairwise().map(([prior, latter]) => {
-      const add = latter.filter(item => !prior.includes(item));
-      const del = prior.filter(item => !latter.includes(item));
-      return [add, del];
-    });
-    this.subscription.add(genDiff.subscribe(([add, del]) => {
-      add.forEach(item => this.actions.addParameter(item));
-      del.forEach(item => this.actions.removeParameter(item.get('parameterId')));
-    }));
-    const initialGenders = selections.filter(s => s.get('subtype') === GEN).toArray();
-    this.genders.setValue(initialGenders);
-  }
-
-  initRaces(selections) {
-    const raceDiff = this.races.valueChanges.pairwise().map(([prior, latter]) => {
-      const add = latter.filter(item => !prior.includes(item));
-      const del = prior.filter(item => !latter.includes(item));
-      return [add, del];
-    });
-    this.subscription.add(raceDiff.subscribe(([add, del]) => {
-      add.forEach(item => this.actions.addParameter(item));
-      del.forEach(item => this.actions.removeParameter(item.get('parameterId')));
-    }));
-    const initialRaces = selections.filter(s => s.get('subtype') === RACE).toArray();
-    this.races.setValue(initialRaces);
-  }
-
   onCancel() {
     this.actions.cancelWizard();
   }
@@ -289,22 +263,6 @@ export class DemoFormComponent implements OnInit, OnDestroy {
   openChange(value: boolean) {
     if (!value) {
       this.onCancel();
-    }
-  }
-
-  /*
-   * When editing an existing set of demographics options, this function is
-   * critical for telling the select which option boxes to highlight.  See the
-   * [compareWith] function on each `option` element.
-   */
-  optionComparator(A, B): boolean {
-    // Sometimes (for some reason) A or B is undefined... not sure how or why :/
-    if (A && B) {
-      const idMatch = A.get('id') === B.get('id');
-      const subtypeAndCodeMatch =
-        A.get('subtype') === B.get('subtype')
-        && A.get('code') === B.get('code');
-      return idMatch || subtypeAndCodeMatch;
     }
   }
 }

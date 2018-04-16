@@ -2,13 +2,6 @@
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
-  margin: 0.5rem 0;
-}
-
-.ds-label {
-  min-width: 9.5rem;
-  align-self: center;
-  text-align: center;
 }
 
 .ds-options {
@@ -71,19 +64,5 @@
 .label.label-light-blue.clickable:hover,
 .option:hover {
   background-color: rgb(219, 228, 233);
-}
-
-.circle-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.and-circle {
-  background-color: rgb(226, 226, 233);
-  border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
-  line-height: 2rem;
-  text-align: center;
+  cursor: pointer;
 }
