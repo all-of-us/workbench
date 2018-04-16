@@ -20,15 +20,12 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 @Component({
   selector: 'app-public-aou',
-  styleUrls: ['./component.css',
-              '../../styles/buttons.css'],
+  styleUrls: ['./component.css'],
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit {
-  isSignedIn = false;
   overriddenUrl: string = null;
   private baseTitle: string;
-  private showCreateAccount = false;
   private overriddenPublicUrl: string = null;
 
 
@@ -45,19 +42,7 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
     this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
-    window['setAllOfUsApiUrl'] = (url: string) => {
-      if (url) {
-        if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
-          throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
-        }
-        this.overriddenUrl = url;
-        localStorage.setItem(overriddenUrlKey, url);
-      } else {
-        this.overriddenUrl = null;
-        localStorage.removeItem(overriddenUrlKey);
-      }
-      window.location.reload();
-    };
+
     window['setPublicApiUrl'] = (url: string) => {
       if (url) {
         if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {

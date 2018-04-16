@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-surveys',
   templateUrl: './surveys.component.html',
-  styleUrls: ['./surveys.component.css']
+  styleUrls: ['../../styles/page.css', './surveys.component.css']
 })
 export class SurveysComponent implements OnInit {
   title = 'Browse Survey Instruments';
