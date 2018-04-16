@@ -40,6 +40,7 @@
 /ui/**/*.js
 /ui/**/*.map
 /ui/dist/**
+/ui/sa-key.json
 /ui/yarn-error.log
 /libproject/swagger-codegen-cli.jar
 /ui/src/generated/*

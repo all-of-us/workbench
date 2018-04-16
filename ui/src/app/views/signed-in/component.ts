@@ -9,6 +9,7 @@ import {
 import {Observable} from 'rxjs/Observable';
 
 import {SignInService} from 'app/services/sign-in.service';
+import {BugReportComponent} from 'app/views/bug-report/component';
 import {environment} from 'environments/environment';
 
 import {AppComponent} from '../app/component';
@@ -34,6 +35,9 @@ export class SignedInComponent implements OnInit {
   familyName = '';
   profileImage = '';
   sidenavToggle = false;
+
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
 
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
 

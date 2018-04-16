@@ -1,0 +1,20 @@
+version: "3"
+services:
+  deploy:
+    build:
+      context: ../ci
+      dockerfile: Dockerfile.circle_build
+    entrypoint: /bootstrap-docker.sh
+    user: circleci
+    environment:
+      # Required: a GitHub release git tag, e.g. v1-0-rc1
+      - WORKBENCH_VERSION
+    volumes:
+      # Cache the codebase and gradle for deployment only.
+      - gradle-cache:/.gradle
+      - workbench:/home/circleci/workbench
+      - ./bootstrap-docker.sh:/bootstrap-docker.sh
+
+volumes:
+  workbench:
+  gradle-cache:

@@ -1,6 +1,7 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
@@ -37,6 +38,7 @@ class WorkspaceSharePage {
     this.fixture = testBed.createComponent(WorkspaceShareComponent);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
+    this.fixture.componentRef.instance.sharing = true;
     this.readPageData();
   }
 
@@ -46,7 +48,7 @@ class WorkspaceSharePage {
 
     this.workspaceNamespace = this.route[1].path;
     this.workspaceId = this.route[2].path;
-    const setOfUsers = queryAllByCss(this.fixture, '.user');
+    const setOfUsers = queryAllByCss(this.fixture, '.collaborator');
     this.userRolesOnPage = [];
     setOfUsers.forEach((user) => {
       this.userRolesOnPage.push({email: user.children[0].nativeElement.innerText,
@@ -64,7 +66,6 @@ const activatedRouteStub  = {
       {path: 'workspace'},
       {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
       {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
-      {path: 'share'}
     ],
     params: {
       'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -79,6 +80,7 @@ describe('WorkspaceShareComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        BrowserAnimationsModule,
         RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
@@ -90,11 +92,13 @@ describe('WorkspaceShareComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
-        { provide: ServerConfigService,
+        {
+          provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
-          }) }
-      ] }).compileComponents().then(() => {
+          })
+        }
+      ]}).compileComponents().then(() => {
         workspaceSharePage = new WorkspaceSharePage(TestBed);
       });
       tick();

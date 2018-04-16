@@ -42,16 +42,7 @@ import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationSta
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
-import org.pmiops.workbench.model.BillingProjectMembership;
-import org.pmiops.workbench.model.BillingProjectStatus;
-import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
-import org.pmiops.workbench.model.CreateAccountRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.IdVerificationRequest;
-import org.pmiops.workbench.model.InstitutionalAffiliation;
-import org.pmiops.workbench.model.InvitationVerificationRequest;
-import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,21 +160,6 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testSubmitIdVerification_success() throws Exception {
-    createUser();
-    when(blockscoreService.createPerson(eq("Bob"), eq(null), any(Address.class),
-        eq(null), eq(null), eq(null))).thenReturn(person);
-    when(person.getId()).thenReturn("id");
-    when(person.isValid()).thenReturn(true);
-    Profile profile = profileController.submitIdVerification(idVerificationRequest).getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getBlockscoreIdVerificationStatus()).isEqualTo(BlockscoreIdVerificationStatus.VERIFIED);
-    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
-    assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
-  }
-
-  @Test
   public void testSubmitDemographicSurvey_success() throws Exception {
     createUser();
     Profile profile = profileController.submitDemographicsSurvey().getBody();
@@ -219,8 +195,6 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
-    when(blockscoreService.createPerson(eq("Bob"), eq(null), any(Address.class),
-        eq(null), eq(null), eq(null))).thenReturn(person);
     when(mailChimpService.getMember(CONTACT_EMAIL)).thenReturn("subscribed");
     when(person.getId()).thenReturn("id");
     when(person.isValid()).thenReturn(true);
@@ -231,11 +205,12 @@ public class ProfileControllerTest {
     when(configProvider.get()).thenReturn(testConfig);
     Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    IdVerificationReviewRequest reviewStatus = new IdVerificationReviewRequest();
+    reviewStatus.setNewStatus(BlockscoreIdVerificationStatus.VERIFIED);
+    profileController.reviewIdVerification(profile.getUserId(), reviewStatus);
     profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     profile = profileController.submitTermsOfService().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    profile = profileController.submitIdVerification(idVerificationRequest).getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
     verify(fireCloudService).addUserToGroup("bob@researchallofus.org", "");
 

@@ -38,4 +38,5 @@
   <include file="changelog/db.changelog-28-default-rp-values.xml"/>
   <include file="changelog/db.changelog-29-admin-logging.xml"/>
   <include file="changelog/db.changelog-30-profile-text-fields-extension.xml"/>
+  <include file="changelog/db.changelog-31-requested-id-verification.xml"/>
 </databaseChangeLog>

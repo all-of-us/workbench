@@ -1,12 +1,15 @@
 package org.pmiops.workbench.cohortbuilder;
 
+import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.QueryResult;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,20 +18,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.QueryConfiguration.ColumnInfo;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnType;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.FieldSet;
+import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.ResultFilters;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.utils.OperatorUtils;
+import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +61,7 @@ public class FieldSetQueryBuilder {
       DateTimeFormat.forPattern(DATE_TIME_FORMAT_PATTERN).withZoneUTC();
 
   private final CohortQueryBuilder cohortQueryBuilder;
+  private final BigQueryService bigQueryService;
 
   /**
    * A container for state needed to turn a query into SQL. We pass this around to avoid having
@@ -85,8 +96,10 @@ public class FieldSetQueryBuilder {
   }
 
   @Autowired
-  public FieldSetQueryBuilder(CohortQueryBuilder cohortQueryBuilder) {
+  public FieldSetQueryBuilder(CohortQueryBuilder cohortQueryBuilder,
+      BigQueryService bigQueryService) {
     this.cohortQueryBuilder = cohortQueryBuilder;
+    this.bigQueryService = bigQueryService;
   }
 
   private ColumnConfig findPrimaryKey(Iterable<ColumnConfig> columnConfigs) {
@@ -436,7 +449,7 @@ public class FieldSetQueryBuilder {
     return orderBySql;
   }
 
-  public QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
+  private QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
       TableQueryAndConfig tableQueryAndConfig, long resultSize, long offset) {
     QueryState queryState = new QueryState();
     queryState.schemaConfig = tableQueryAndConfig.getConfig();
@@ -466,7 +479,7 @@ public class FieldSetQueryBuilder {
     return new QueryConfiguration(selectColumns.build(), jobConfiguration);
   }
 
-  public Map<String, Object> extractResults(TableQueryAndConfig tableQueryAndConfig,
+  private Map<String, Object> extractResults(TableQueryAndConfig tableQueryAndConfig,
       ImmutableList<ColumnInfo> columns,
       List<FieldValue> row) {
     TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
@@ -501,4 +514,19 @@ public class FieldSetQueryBuilder {
     }
     return results;
   }
+
+  /**
+   * Materializes a cohort with the specified table query and participant criteria, and returns
+   * a {@link Iterable} of {@link Map} objects representing dictionaries of key-value pairs.
+   */
+  public Iterable<Map<String, Object>> materializeTableQuery(TableQueryAndConfig tableQueryAndConfig,
+      ParticipantCriteria criteria, int limit, long offset) {
+    QueryConfiguration queryConfiguration = buildQuery(criteria, tableQueryAndConfig, limit, offset);
+    QueryResult result;
+    QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
+    result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
+    return Iterables.transform(result.iterateAll(),
+        (row) -> extractResults(tableQueryAndConfig, queryConfiguration.getSelectColumns(), row));
+  }
+
 }

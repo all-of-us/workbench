@@ -14,6 +14,7 @@ public class WorkbenchConfig {
   public GoogleCloudStorageServiceConfig googleCloudStorageService;
   public GoogleDirectoryServiceConfig googleDirectoryService;
   public ServerConfig server;
+  public AdminConfig admin;
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
@@ -46,5 +47,11 @@ public class WorkbenchConfig {
   public static class ServerConfig {
     public String publicApiKeyForErrorReports;
     public String projectId;
+  }
+
+  public static class AdminConfig {
+    public String adminIdVerification;
+    public String supportGroup;
+    public String verifiedSendingAddress;
   }
 }

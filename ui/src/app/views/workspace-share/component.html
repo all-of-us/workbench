@@ -1,49 +1,52 @@
-<div *ngIf="!notFound else notFoundMessage">
-  <a class="return-button" (click)="navigateBack()">&lt;&lt; Back to the workspace</a>
-  <div *ngIf="!loadingWorkspace else loading">
-    <h3>Share {{workspace.name}}</h3>
+<clr-modal [(clrModalOpen)]="sharing" [clrModalSize]="'lg'">
+  <div class="modal-title">
+    <h3 class="modal-title-text">Share {{workspace.name}}</h3>
+  </div>
+  <div class="modal-body" id="sharing-modal-body">
     <p class="paragraph-text">Workspaces can only be shared with existing All of Us users. If you want to
-    share your workspace with someone who is not yet a part of the All of Us
-    community, have them <a routerLink="">create an account</a> first and then you can share the
-    workspace with them.</p>
-   <div class="sharing-area">
-     <div class="adding-area">
-        <h4>Add a New Collaborator</h4>
-
+      share your workspace with someone who is not yet a part of the All of Us
+      community, have them <a routerLink="/" target="_blank">create an account</a> first and then you can share the
+      workspace with them.</p>
+    <div class="sharing-area">
+      <div class="adding-area">
         <div class="add-by-text-area">
-          <label class="text-label" class="find-collaborator-label">Find Collaborator</label>
+          <label class="text-label" class="collaborator-label">Find Collaborators</label>
           <input type="text" class="input share" name="to-share" autofocus
-              [(ngModel)]="toShare" placeholder="Enter username" (ngModelChange)="userNotFound = false"
+              [(ngModel)]="toShare" placeholder="enter {{gsuiteDomain}} ID" (ngModelChange)="userNotFound = false"
               #usernameSharingInput [disabled]="!hasPermission">
-          <span>@{{gsuiteDomain}}</span>
-          <clr-dropdown>
-            <button type="button" class="btn btn-outline-primary sharing-buttons permissions-button" clrDropdownTrigger [disabled]="!hasPermission">
-              {{selectedPermission}}
-              <clr-icon shape="caret down"></clr-icon>
-            </button>
-            <clr-dropdown-menu *clrIfOpen>
-              <button type="button" clrDropdownItem (click)="setAccess('Reader')">Reader</button>
-              <button type="button" clrDropdownItem (click)="setAccess('Writer')">Writer</button>
-              <button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>
-            </clr-dropdown-menu>
-          </clr-dropdown>
-          <button type="button" class="btn btn-primary sharing-buttons add-button" (click)="addCollaborator()" [disabled]="!hasPermission">Add Collaborator</button>
+          <button type="button" class="btn btn-primary sharing-buttons add-button" (click)="addCollaborator()" [disabled]="!hasPermission">Add</button>
+          <div>
+            <clr-dropdown>
+              <button type="button" class="btn btn-outline-primary permissions-button" clrDropdownTrigger [disabled]="!hasPermission">
+                {{selectedPermission}}
+                <clr-icon shape="caret down"></clr-icon>
+              </button>
+              <clr-dropdown-menu *clrIfOpen>
+                <button type="button" clrDropdownItem (click)="setAccess('Reader')">Reader</button>
+                <button type="button" clrDropdownItem (click)="setAccess('Writer')">Writer</button>
+                <button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>
+              </clr-dropdown-menu>
+            </clr-dropdown>
+          </div>
         </div>
         <div *ngIf="userNotFound" class="error-message">
           User {{toShare}} not found.
         </div>
       </div>
       <div class="removing-area">
+        <h4 class="collaborator-label">Current Collaborators</h4>
         <ul>
-          <div *ngFor="let user of workspace.userRoles" class="user">
-            <h5>
+          <div *ngFor="let user of workspace.userRoles" class="user" [ngClass]="{'owner' : (user.role.toString() == 'OWNER' || !hasPermission)}">
+            <div class="collaborator-icon">
               <clr-icon *ngIf="user.email !== userEmail && hasPermission"
-                  shape="minus-circle"
-                  class="is-solid remove-button"
-                  (click)="removeCollaborator(user)"></clr-icon>
-              {{user.email}}
-            </h5>
-            <div>{{user.role}}</div>
+                      shape="minus-circle"
+                      class="remove-button"
+                      (click)="removeCollaborator(user)" style="color: #8BC990"></clr-icon>
+            </div>
+            <div class="collaborator">
+              <h5 class="user-email">{{user.email}}</h5>
+              <div class="user-role">{{user.role}}</div>
+            </div>
           </div>
           <div *ngIf="usersLoading" class="loading-users">
             <span class="spinner spinner-sm"></span>
@@ -53,7 +56,7 @@
       </div>
     </div>
   </div>
-</div>
+</clr-modal>
 <clr-modal [(clrModalOpen)]="workspaceUpdateConflictError">
   <h3 class="modal-title">Conflicting update:</h3>
   <div class="modal-body">

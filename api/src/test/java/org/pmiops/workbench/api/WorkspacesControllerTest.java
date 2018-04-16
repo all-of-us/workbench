@@ -297,6 +297,7 @@ public class WorkspacesControllerTest {
     workspace.setResearchPurpose(researchPurpose);
     workspace.setUserRoles(new ArrayList<UserRole>());
     workspace.setCdrVersionId(cdrVersionId);
+    workspace.setGoogleBucketName(BUCKET_NAME);
     stubGetWorkspace("namespace", "name", LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     return workspace;
   }
