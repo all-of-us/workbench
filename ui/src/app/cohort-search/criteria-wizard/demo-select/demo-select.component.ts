@@ -1,22 +1,9 @@
-import {Component, Input, OnInit, OnDestroy} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {CohortSearchActions} from '../../redux';
-
-/*
- * Sorts a plain JS array of plain JS objects first by a 'count' key and then
- * by a 'name' key
- */
-function sortByCountThenName(critA, critB) {
-  const A = critA.count || 0;
-  const B = critB.count || 0;
-  const diff = B - A;
-  return diff === 0
-    ? (critA.name > critB.name ? 1 : -1)
-    : diff;
-}
 
 @Component({
   selector: 'app-demo-select',
