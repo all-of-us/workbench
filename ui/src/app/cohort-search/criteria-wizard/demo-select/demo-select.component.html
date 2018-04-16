@@ -1,0 +1,46 @@
+<div class="ds-wrapper">
+  <div class="ds-options">
+    <div class="select-box">
+      <div *ngIf="includeSearchBox" class="box-header">
+        <input
+          [formControl]="filter"
+          [name]="filter"
+          [id]="filter"
+          type="text"
+          placeholder="Search" />
+        <label for="filter">
+          <clr-icon *ngIf="filter.value && filter.value.trim()"
+            shape="window-close"
+            (click)="unsetFilter()">
+          </clr-icon>
+          <clr-icon *ngIf="!filter.value || !filter.value.trim()"
+            shape="search">
+          </clr-icon>
+        </label>
+      </div>
+      <div class="option-list">
+        <div *ngFor="let opt of filteredOptions" class="option" (click)="select(opt)">
+          {{ opt.get('name', '') | titlecase }}
+          <span *ngIf="opt.get('count')" class="badge badge-info">
+            {{ opt.get('count') }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ds-selected">
+    <div class="ds-selected-list">
+      <div *ngFor="let opt of selectedOptions"
+        (click)="unselect(opt)"
+        class="label label-light-blue clickable"
+        >
+        <clr-icon shape="window-close"></clr-icon>
+        {{ opt.get('name', '') | titlecase }}
+        <span *ngIf="opt.get('count')" class="badge">
+          {{ opt.get('count') }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
