@@ -45,15 +45,15 @@ def get_live_gae_version(project, validate_version=true)
     warning "Found 0 active GAE services in project '#{project}'"
     return nil
   elsif services != actives.map{|v| v["service"]}.to_set
-    warning "Found active services #{v}, expected #{services} for project " +
-            "'#{project}'"
+    warning "Found active services #{v}, expected " +
+            "[#{services.to_a.join(', ')}] for project '#{project}'"
     return nil
   end
 
   versions = actives.map{|v| v["id"]}.to_set
   if versions.length != 1
     warning "Found varying IDs across GAE services in project '#{project}': " +
-            "#{versions}"
+            "[#{versions.to_a.join(', ')}]"
     return nil
   end
   v = versions.to_a.first
