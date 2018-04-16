@@ -1,0 +1,68 @@
+.ds-wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+}
+
+.ds-options {
+  min-width: 12rem;
+  width: 12rem;
+}
+
+.ds-options,
+.ds-selected {
+  margin: 0.25rem 0.5rem 0.25rem 0;
+}
+
+.select-box {
+  border-radius: 2px;
+  border: 1px solid gray;
+}
+
+.box-header {
+  display: flex;
+  flex-flow: row nowrap;
+  border-bottom: 1px solid gray;
+}
+
+.box-header input {
+  flex: 1;
+  border: none;
+}
+
+.box-header label clr-icon {
+  cursor: pointer;
+}
+
+.box-header input:focus {
+  /* Undoes the clarity animated background */
+  background-size: 0;
+}
+
+.box-header:focus-within {
+  border: 1px solid #0094d2;
+  box-shadow: 0 0 2px 2px rgb(92, 183, 225);
+}
+
+.box-header clr-icon {
+  margin: 0.25rem;
+}
+
+.option-list {
+  height: 5rem;
+  overflow: auto;
+}
+
+.option {
+  font-size: 0.5rem;
+  font-weight: 400;
+  color: black;
+  padding: 0 .25rem;
+  cursor: pointer;
+}
+
+.label.label-light-blue.clickable:hover,
+.option:hover {
+  background-color: rgb(219, 228, 233);
+  cursor: pointer;
+}
