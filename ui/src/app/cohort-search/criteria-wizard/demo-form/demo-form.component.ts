@@ -15,6 +15,11 @@ const AGE = 'AGE';
 const DEC = 'DEC';
 const GEN = 'GEN';
 const RACE = 'RACE';
+/* NOTE / TODO: 'ETHN' is not an actual subtype.  At this point in time there
+ * is not actually any subtype corresponding to ethnicity.  When that subtype
+ * is added, we should be able to just plug it in here and everything should
+ * work */
+const ETHNICITY = 'ETHN';
 const minAge = 0;
 const maxAge = 120;
 
@@ -92,6 +97,7 @@ export class DemoFormComponent implements OnInit, OnDestroy {
        */
       this.initialGenders = selections.filter(s => s.get('subtype') === GEN);
       this.initialRaces = selections.filter(s => s.get('subtype') === RACE);
+      this.initialEthnicities = selections.filter(s => s.get('subtype') === ETHNICITY);
       this.initDeceased(selections);
       this.initAgeRange(selections);
       this.loadNodesFromApi();
@@ -112,7 +118,7 @@ export class DemoFormComponent implements OnInit, OnDestroy {
      * objects complete with deterministically generated `parameterId`s and
      * sort them by count, then by name.
      */
-    const calls = [AGE, DEC, GEN, RACE].map(code => this.api
+    const calls = [AGE, DEC, GEN, RACE, ETHNICITY].map(code => this.api
       .getCriteriaByTypeAndSubtype(cdrid, 'DEMO', code)
       .map(response => {
         const items = response.items;
@@ -127,11 +133,12 @@ export class DemoFormComponent implements OnInit, OnDestroy {
         return nodes.size > 1 ? nodes : nodes.get(0);
       })
     );
-    forkJoin(...calls).subscribe(([age, dec, gen, race]) => {
+    forkJoin(...calls).subscribe(([age, dec, gen, race, ethnicity]) => {
+      this.ageNode = age;
       this.deceasedNode = dec;
       this.genderNodes = gen;
       this.raceNodes = race;
-      this.ageNode = age;
+      this.ethnicityNodes = ethnicity;
       this.loading = false;
     });
   }
