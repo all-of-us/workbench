@@ -1180,42 +1180,37 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testNotebookFileList() throws Exception {
-    mockObjectsForBuckFileList();
-      // Will return 1 entry as only python files in notebook folder are return
-    List<FileDetail> result = workspacesController
-        .getNoteBookList("mockProjectName", "mockWorkspaceName").getBody();
-    assertEquals(result.size(), 1);
+    when(fireCloudService.getWorkspace("project", "workspace")).thenReturn(
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse()
+        .workspace(
+            new org.pmiops.workbench.firecloud.model.Workspace()
+            .bucketName("bucket")));
+    Blob mockBlob1 = mock(Blob.class);
+    Blob mockBlob2 = mock(Blob.class);
+    Blob mockBlob3 = mock(Blob.class);
+    when(mockBlob1.getName()).thenReturn("notebooks/mockFile.ipynb");
+    when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
+    when(mockBlob3.getName()).thenReturn("notebooks/two words.ipynb");
+    when(cloudStorageService.getBlobList("bucket", "notebooks")).thenReturn(
+        ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
+      // Will return 1 entry as only python files in notebook folder are return
+    List<String> gotNames = workspacesController
+        .getNoteBookList("project", "workspace").getBody()
+        .stream()
+        .map(details -> details.getName())
+        .collect(Collectors.toList());
+    assertEquals(gotNames, ImmutableList.of("mockFile.ipynb", "two words.ipynb"));
+  }
+
+  @Test
+  public void testNotebookFileListNotFound() throws Exception {
+    when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
     try {
       workspacesController.getNoteBookList("mockProject", "mockWorkspace");
       fail();
     } catch (NotFoundException ex) {
       //Expected
     }
-  }
-
-  private void mockObjectsForBuckFileList() throws ApiException {
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponseWithException =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    org.pmiops.workbench.firecloud.model.Workspace mockWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace();
-    org.pmiops.workbench.firecloud.model.Workspace mockWorkspaceEmpty =
-        new org.pmiops.workbench.firecloud.model.Workspace();
-    mockWorkspace.setBucketName("MockBucketName");
-    fcResponse.setWorkspace(mockWorkspace);
-    fcResponseWithException.setWorkspace(mockWorkspaceEmpty);
-    when(fireCloudService.getWorkspace("mockProjectName", "mockWorkspaceName")).thenReturn(
-        fcResponse
-    );
-    Blob mockBlob = mock(Blob.class);
-    Blob mockBlob1 = mock(Blob.class);
-    when(mockBlob.getName()).thenReturn("notebooks/mockFile.ipynb");
-    when(mockBlob1.getName()).thenReturn("notebooks/mockFile.text");
-    List<Blob> blobList = ImmutableList.of(mockBlob, mockBlob1);
-    when(cloudStorageService.getBlobList("MockBucketName", "notebooks")).thenReturn(blobList);
-    when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
-
   }
 }
