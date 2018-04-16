@@ -1,0 +1,32 @@
+[
+    {
+        "type": "string",
+        "name": "vocabulary_id",
+        "mode": "required",
+        "description": "A unique identifier for each Vocabulary, such as ICD9CM, SNOMED, Visit."
+    },
+    {
+        "type": "string",
+        "name": "vocabulary_name",
+        "mode": "required",
+        "description": "The name describing the vocabulary, for example \"International Classification of Diseases, Ninth Revision, Clinical Modification, Volume 1 and 2 (NCHS)\" etc."
+    },
+    {
+        "type": "string",
+        "name": "vocabulary_reference",
+        "mode": "nullable",
+        "description": "External reference to documentation or available download of the about the vocabulary."
+    },
+    {
+        "type": "string",
+        "name": "vocabulary_version",
+        "mode": "nullable",
+        "description": "Version of the Vocabulary as indicated in the source."
+    },
+    {
+        "type": "integer",
+        "name": "vocabulary_concept_id",
+        "mode": "required",
+        "description": "A foreign key that refers to a standard concept identifier in the CONCEPT table for the Vocabulary the VOCABULARY record belongs to."
+    }
+]

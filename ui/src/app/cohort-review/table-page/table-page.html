@@ -5,13 +5,13 @@
   <clr-dg-placeholder>No Participants</clr-dg-placeholder>
 
   <clr-dg-column [clrDgField]="'participantId'">
-    Participant ID
+    <span class="column-title">Participant ID</span>
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'birthDate'">
-    Date of Birth
+    <span class="column-title">Date of Birth</span>
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'gender'">
-    Gender
+    <span class="column-title">Gender</span>
     <clr-dg-filter [clrDgFilter]="genderFilter">
       <app-choice-filter
         #genderFilter
@@ -21,7 +21,7 @@
     </clr-dg-filter>
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'race'">
-    Race
+    <span class="column-title">Race</span>
     <clr-dg-filter [clrDgFilter]="raceFilter">
       <app-choice-filter
         #raceFilter
@@ -31,7 +31,7 @@
     </clr-dg-filter>
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'ethnicity'">
-    Ethnicity
+    <span class="column-title">Ethnicity</span>
     <clr-dg-filter [clrDgFilter]="ethnicityFilter">
       <app-choice-filter
         #ethnicityFilter
@@ -41,7 +41,7 @@
     </clr-dg-filter>
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'status'">
-    Review Status
+    <span class="column-title">Review Status</span>
     <clr-dg-filter [clrDgFilter]="statusFilter">
       <app-status-filter #statusFilter>
       </app-status-filter>

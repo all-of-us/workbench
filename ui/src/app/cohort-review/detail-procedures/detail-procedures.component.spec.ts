@@ -28,8 +28,8 @@ class StubRoute {
 }
 
 class ApiSpy {
-  getParticipantProcedures = jasmine
-    .createSpy('getParticipantConditions')
+  getParticipantData = jasmine
+    .createSpy('getParticipantData')
     .and
     .callFake((ns, wsid, cid, cdrid, pid, pageRequest) =>
       Observable.of({items: [], count: 0, pageRequest}));

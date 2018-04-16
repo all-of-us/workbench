@@ -3,6 +3,8 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
+import {ServerConfigService} from '../../services/server-config.service';
+
 import {ProfileService} from 'generated';
 import {UserRole} from 'generated';
 import {ShareWorkspaceResponse} from 'generated';
@@ -12,11 +14,16 @@ import {WorkspaceResponse} from 'generated';
 import {WorkspacesService} from 'generated';
 
 @Component({
-  styleUrls: ['./component.css'],
+  selector: 'app-workspace-share',
+  styleUrls: ['./component.css',
+    '../../styles/buttons.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceShareComponent implements OnInit {
-  workspace: Workspace;
+  workspace: Workspace = {
+    name: '',
+    userRoles: []
+  };
   loadingWorkspace = true;
   toShare = '';
   selectedPermission = 'Select Permission';
@@ -26,16 +33,22 @@ export class WorkspaceShareComponent implements OnInit {
   userEmail: string;
   usersLoading = true;
   userNotFound = false;
-  userNotFoundEmail = '';
   workspaceUpdateConflictError = false;
+  public sharing = false;
   @ViewChild('usernameSharingInput') input: ElementRef;
+  gsuiteDomain: string;
 
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
       private profileService: ProfileService,
       private workspacesService: WorkspacesService,
-  ) {}
+      private serverConfigService: ServerConfigService
+  ) {
+    serverConfigService.getConfig().subscribe((config) => {
+      this.gsuiteDomain = config.gsuiteDomain;
+    });
+  }
 
   ngOnInit(): void {
     this.loadWorkspace().subscribe((workspace) => {
@@ -45,10 +58,6 @@ export class WorkspaceShareComponent implements OnInit {
         this.userEmail = profile.username;
       });
     });
-  }
-
-  navigateBack(): void {
-    this.locationService.back();
   }
 
   setAccess(dropdownSelected: string): void {
@@ -63,7 +72,7 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   convertToEmail(username: string): string {
-    return username + '@fake-research-aou.org';
+    return username + '@' + this.gsuiteDomain;
   }
 
 
@@ -159,7 +168,16 @@ export class WorkspaceShareComponent implements OnInit {
     this.usersLoading = false;
   }
 
+  open(): void {
+    this.sharing = true;
+  }
+
   get hasPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
+
+  navigateBack(): void {
+    this.locationService.back();
+  }
+
 }

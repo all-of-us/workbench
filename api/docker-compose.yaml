@@ -26,7 +26,7 @@ services:
       - gradle-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
-    command: gradle appengineRun
+    command: ./project.rb start-api-and-incremental-build
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/api/sa-key.json
     env_file:

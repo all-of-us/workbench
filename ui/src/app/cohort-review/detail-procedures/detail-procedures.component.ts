@@ -54,7 +54,7 @@ export class DetailProceduresComponent implements OnInit, OnDestroy {
       .subscribe(([participant, cohort, workspace]) => {
         this.loading = true;
 
-        this.apiCaller = (request) => this.reviewApi.getParticipantProcedures(
+        this.apiCaller = (request) => this.reviewApi.getParticipantData(
           workspace.namespace,
           workspace.id,
           cohort.id,
