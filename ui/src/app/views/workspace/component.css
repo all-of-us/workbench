@@ -45,7 +45,7 @@ h3 {
 
 
 .btn.btn-primary.btn-create {
-  width: 7rem;
+  width: max-content;
 }
 
 
