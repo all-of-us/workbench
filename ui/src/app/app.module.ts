@@ -39,7 +39,6 @@ import {WorkspaceComponent} from './views/workspace/component';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
-import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 
 import {
@@ -83,8 +82,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
 
     IconsModule,
     NgxChartsModule,
-    ClarityModule,
-    DataBrowserModule,
+    ClarityModule
   ],
   declarations: [
     AccountCreationComponent,

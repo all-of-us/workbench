@@ -133,6 +133,31 @@ Other available operations may be discovered by running:
 ./project.rb swagger-regen
 ```
 
+### Public-UI (Data Browser and any other public pages)
+
+From the `public-ui/` directory:
+```Shell
+./project.rb dev-up
+```
+
+After webpack finishes the build, you can view your local UI server at
+http://localhost:4201/. You can view the tests at http://localhost:9877/debug.html.
+
+By default, this connects to our test API server. Use `--environment=$ENV` to
+use an alternate `src/environments/environment.$ENV.ts` file and connect to a
+different API server. To connect to your own API server running at
+`localhost:8081`, pass `--environment=local`.
+
+Other available operations may be discovered by running:
+```Shell
+./project.rb
+```
+
+#### You can regenerate classes from swagger with
+
+```Shell
+./project.rb swagger-regen
+```
 ## Deploying
 
 To deploy your local workbench API code to a given AppEngine project, in the api

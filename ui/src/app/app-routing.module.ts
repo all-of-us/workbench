@@ -1,11 +1,8 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
-
-import {HomeComponent} from './data-browser/home/home.component';
-import {SearchComponent} from './data-browser/search/search.component';
-
 import {SignInGuard} from './guards/sign-in-guard.service';
-
+import {CohortResolver} from './resolvers/cohort';
+import {WorkspaceResolver} from './resolvers/workspace';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
@@ -17,22 +14,11 @@ import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
-import {CohortResolver} from './resolvers/cohort';
-import {WorkspaceResolver} from './resolvers/workspace';
-
 declare let gtag: Function;
 declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
-    path: 'data-browser/home',
-    component: HomeComponent,
-    data: {title: 'Data Browser'}
-  }, {
-    path: 'data-browser/browse',
-    component: SearchComponent,
-    data: {title: 'Browse'}
-  }, {
     path: 'login',
     component: LoginComponent,
     data: {title: 'Sign In'}
