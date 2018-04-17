@@ -1,39 +1,42 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Component, Injectable} from '@angular/core';
+import {Location} from '@angular/common';
+import {NavigationError, Router} from '@angular/router';
 
-import {WorkspacesService} from 'generated/api/workspaces.service';
-
-export enum ResourceType { Workspace = 1 }
-
+// Mostly borrowed from the Job Manager.
 @Component({
-  templateUrl: './component.html',
-  styleUrls: ['./component.css']
+    selector: 'app-not-found',
+    templateUrl: './component.html',
+    styleUrls: ['./component.css']
 })
-export class NotFoundComponent implements OnInit {
-  notFoundMessage: string;
-  wsNamespace: string;
-  wsId: string;
-  resourceType: ResourceType;
+@Injectable()
+export class NotFoundComponent {
+  initialLoadErrorHeader: string;
+  initialLoadFailure = false;
 
-  ResourceType = ResourceType;
-
-  constructor(private route: ActivatedRoute,
-      private router: Router,
-      private workspacesService: WorkspacesService) {}
-
-  ngOnInit() {
-    this.resourceType = this.route.snapshot.params['mode'];
-
-    if (this.resourceType = ResourceType.Workspace) {
-      this.wsNamespace = this.route.snapshot.params['ns'];
-      this.wsId = this.route.snapshot.params['wsid'];
-
-      this.notFoundMessage = 'Workspace \'' + this.wsNamespace + '/' + this.wsId + '\'';
-
-      this.workspacesService.getWorkspace(this.wsNamespace, this.wsId).subscribe(() => {
-        this.router.navigate(['..'], {relativeTo: this.route});
-      });
-    }
+  constructor(router: Router, private loc: Location) {
+    router.events.subscribe((e) => {
+      if (e instanceof NavigationError && !router.navigated) {
+        // Hack: On navigation failure, Angular strips the path from the URL.
+        // This is undesirable in the event of a 500/503 on initial load refresh
+        // the page, or on other errors where the user may want to inspect the
+        // URL. Restore the URL here; luckily this doesn't cause another Angular
+        // Router nagivate.
+        loc.replaceState(e.url);
+        this.initialLoadFailure = true;
+        const status = e.error.status || 'unknown';
+        const title = e.error.title || 'Unknown error';
+        this.initialLoadErrorHeader = `${status}: ${title}`;
+      }
+      if (router.navigated) {
+        // In the event that one of our resolvers/activators did another
+        // navigate on failure, hide the error. Unexpected and not ideal as we'd
+        // briefly flash the error html on screen.
+        this.initialLoadFailure = false;
+      }
+    });
   }
 
+  reload(): void {
+    window.location.reload();
+  }
 }

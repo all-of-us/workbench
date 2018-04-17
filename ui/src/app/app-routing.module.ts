@@ -10,7 +10,6 @@ import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verifi
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {LoginComponent} from './views/login/component';
-import {NotFoundComponent, ResourceType} from './views/not-found/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
@@ -52,15 +51,6 @@ const routes: Routes = [
             path: '',
             component: WorkspaceListComponent,
             data: {title: 'View Workspaces'}
-          },
-          {
-            path: 'workspace/:ns/:wsid/notfound',
-            component: NotFoundComponent,
-            data: {
-              title: 'Workspace Not Found',
-              mode: ResourceType.Workspace,
-              breadcrumb: ':wsid Not Found'
-            }
           },
           {
             /* TODO The children under ./views need refactoring to use the data

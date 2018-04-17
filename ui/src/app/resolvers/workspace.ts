@@ -3,6 +3,7 @@ import {ActivatedRouteSnapshot, Resolve, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {Workspace, WorkspaceAccessLevel, WorkspacesService} from 'generated';
+import {NotFoundComponent} from "../views/not-found/component";
 
 /**
  * Flatten a layer of nesting
@@ -15,6 +16,7 @@ export interface WorkspaceData extends Workspace {
 export class WorkspaceResolver implements Resolve<WorkspaceData> {
   constructor(
     private api: WorkspacesService,
+    private notFoundComponent: NotFoundComponent,
     private router: Router
   ) {}
 
@@ -28,14 +30,10 @@ export class WorkspaceResolver implements Resolve<WorkspaceData> {
     const call = this.api
       .getWorkspace(ns, wsid)
       .map(({workspace, accessLevel}) => ({...workspace, accessLevel}))
-      .catch(
-        (e) => {
-          if (e.status === 404) {
-            this.router.navigate(['workspace', ns, wsid, 'notfound']);
-          }
-          return Observable.of(false);
-        }
-      );
+      .catch((e) => {
+        e.title = 'Workspace ' + ns + '/' + wsid + ' not found';
+        throw e;
+      });
     return (call as Observable<WorkspaceData>);
   }
 }

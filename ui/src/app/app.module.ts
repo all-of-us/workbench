@@ -136,8 +136,9 @@ export function getConfiguration(signInService: SignInService): Configuration {
       useClass: InterceptedHttp,
       deps: [XHRBackend, RequestOptions, ErrorHandlingService]
     },
+    NotFoundComponent,
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, ErrorHandlerComponent]
+  bootstrap: [AppComponent, ErrorHandlerComponent, NotFoundComponent]
 })
 export class AppModule {}
