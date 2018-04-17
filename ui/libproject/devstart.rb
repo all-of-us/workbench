@@ -212,6 +212,24 @@ Common.register_command({
   :fn => Proc.new { |*args| dev_up(*args) }
 })
 
+def test(*args)
+  common = Common.new
+
+  install_dependencies
+
+  at_exit { common.run_inline %W{docker-compose down} }
+
+  # Can't use swagger_regen here as it enters docker.
+  common.run_inline %W{docker-compose run --rm ui yarn run codegen}
+  common.run_inline %W{docker-compose run --rm --service-ports tests}
+end
+
+Common.register_command({
+  :invocation => "test",
+  :description => "Brings up the testing environment.",
+  :fn => Proc.new { |*args| test(*args) }
+})
+
 def run_linter()
   Common.new.run_inline %W{docker-compose run --rm ui yarn run lint}
 end
