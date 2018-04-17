@@ -3,7 +3,7 @@
   (clrDgRefresh)="update($event)"
   class="datagrid-compact">
 
-  <clr-dg-placeholder>No {{ tabName }} Data</clr-dg-placeholder>
+  <clr-dg-placeholder>No {{ tabname }} Data</clr-dg-placeholder>
 
   <clr-dg-column *ngFor="let col of columns"
     [clrDgField]="col.notField ? null : col.name"

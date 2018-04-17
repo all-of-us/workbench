@@ -12,6 +12,7 @@ import {CohortReviewService, PageFilterRequest, SortOrder} from 'generated';
   styleUrls: ['./detail-tab-table.component.css']
 })
 export class DetailTabTableComponent implements OnInit, OnDestroy {
+  @Input() tabname;
   @Input() columns;
   @Input() filterType;
   @Input() reverseEnum;

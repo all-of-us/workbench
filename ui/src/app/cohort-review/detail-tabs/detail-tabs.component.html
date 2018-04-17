@@ -12,6 +12,7 @@
     </button>
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
       <app-detail-tab-table
+        [tabname]="tab.name"
         [columns]="tab.columns"
         [filterType]="tab.filterType"
         [reverseEnum]="tab.reverseEnum"
