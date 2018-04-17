@@ -27,13 +27,13 @@ export class WorkspaceResolver implements Resolve<WorkspaceData> {
 
     const call = this.api
       .getWorkspace(ns, wsid)
-        .map(({workspace, accessLevel}) => ({...workspace, accessLevel}))
-        .catch(
-          (e) => {
-            this.router.navigate(['workspace', ns, wsid, 'notfound']);
-            return Observable.of({error: e});
-          }
-        );
+      .map(({workspace, accessLevel}) => ({...workspace, accessLevel}))
+      .catch(
+        (e) => {
+          this.router.navigate(['workspace', ns, wsid, 'notfound']);
+          return Observable.of({error: e});
+        }
+      );
     return (call as Observable<WorkspaceData>);
   }
 }
