@@ -14,4 +14,18 @@ input[type=url]:not([readonly]) {
   width: 80%;
 }
 
+.search-input-big {
+  padding: 0;
+  margin-left:-24px;
+}
+.input-icon {
+  position: relative;
+  left: 24px;
+  width: 24px;
+  height: 24px;
+}
 
+/* webkit solution */
+::-webkit-input-placeholder { text-align:left; padding-left:24px; }
+/* mozilla solution */
+input:-moz-placeholder { text-align:left; }
