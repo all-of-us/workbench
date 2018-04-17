@@ -20,6 +20,7 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.cdr.CdrDbConfig;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
@@ -47,6 +48,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -59,181 +61,48 @@ import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestWebMvcConfig.class})
+@SpringBootTest(classes = {TestWebMvcConfig.class, TestCdrDbConfig.class})
 public class ApplicationTest {
 
     @Autowired
-    private AuditController auditController;
-    @Autowired
-    private AuthDomainController authDomainController;
-    @Autowired
-    private AuthInterceptor authInterceptor;
-    @Autowired
-    private BigQueryConfig bigQueryConfig;
-    @Autowired
-    private BigQueryService bigQueryService;
-    @Autowired
-    private BlockscoreService blockscoreService;
-    @Autowired
-    private BugReportController bugReportController;
-    @Autowired
-    private CacheSpringConfiguration cacheSpringConfiguration;
-    @Autowired
-    private CdrConfig cdrConfig;
-    @Autowired
-    private CdrDbConfig cdrDbConfig;
-    @Autowired
-    private CdrVersionDao cdrVersionDao;
-    @Autowired
-    private ClearCdrVersionContextInterceptor clearCdrVersionContextInterceptor;
-    @Autowired
-    private ClusterController clusterController;
-    @Autowired
-    private CloudStorageService cloudStorageService;
-    @Autowired
-    private CodesQueryBuilder codesQueryBuilder;
-    @Autowired
-    private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
-    @Autowired
-    private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
-    @Autowired
-    private CohortBuilderController cohortBuilderController;
-    @Autowired
-    private CohortDao cohortDao;
-    @Autowired
-    private CohortMaterializationService cohortMaterializationService;
-    @Autowired
-    private CohortReviewController cohortReviewController;
-    @Autowired
-    private CohortReviewDao cohortReviewDao;
-    @Autowired
-    private CohortReviewService cohortReviewService;
-    @Autowired
-    private CohortsController cohortsController;
-    @Autowired
-    private CohortService cohortService;
-    @Autowired
-    private CommonConfig commonConfig;
-    @Autowired
-    private ConceptCacheConfiguration conceptCacheConfiguration;
-    @Autowired
-    private ConfigController configController;
-    @Autowired
-    private ConfigDao configDao;
-    @Autowired
-    private CriteriaDao criteriaDao;
-    @Autowired
-    private CronInterceptor cronInterceptor;
-    @Autowired
-    private DomainLookupService domainLookupService;
-    @Autowired
-    private DemoQueryBuilder demoQueryBuilder;
-    @Autowired
-    private DirectoryService directoryService;
-    @Autowired
-    private FireCloudConfig fireCloudConfig;
-    @Autowired
-    private FireCloudService fireCloudService;
-    @Autowired
-    private MailChimpService mailChimpService;
-    @Autowired
-    private NotebooksConfig notebooksConfig;
-    @Autowired
-    private NotebooksService notebooksService;
-    @Autowired
-    private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
-    @Autowired
-    private ParticipantCohortStatusDao participantCohortStatusDao;
-    @Autowired
-    private ParticipantCounter participantCounter;
-    @Autowired
-    private ProfileController profileController;
-    @Autowired
-    private ProfileService profileService;
-    @Autowired
-    private StatusController statusController;
-    @Autowired
-    private UserDao userDao;
-    @Autowired
-    private UserInfoService userInfoService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private QueryBuilderFactory queryBuilderFactory;
-    @Autowired
-    private WorkbenchConfig workbenchConfig;
-    @Autowired
-    private WorkbenchDbConfig workbenchDbConfig;
-    @Autowired
-    private WorkbenchEnvironment workbenchEnvironment;
-    @Autowired
-    private WorkspaceDao workspaceDao;
-    @Autowired
-    private WorkspacesController workspacesController;
-    @Autowired
-    private WorkspaceService workspaceService;
+    private ApplicationContext context;
 
     @Test
     public void contextLoads() throws Exception {
-        assertThat(auditController).isNotNull();
-        assertThat(authDomainController).isNotNull();
-        assertThat(authInterceptor).isNotNull();
-        assertThat(bigQueryConfig).isNotNull();
-        assertThat(bigQueryService).isNotNull();
-        assertThat(blockscoreService).isNotNull();
-        assertThat(bugReportController).isNotNull();
-        assertThat(cacheSpringConfiguration).isNotNull();
-        assertThat(cdrConfig).isNotNull();
-        assertThat(cdrDbConfig).isNotNull();
-        assertThat(cdrVersionDao).isNotNull();
-        assertThat(clearCdrVersionContextInterceptor).isNotNull();
-        assertThat(clusterController).isNotNull();
-        assertThat(cloudStorageService).isNotNull();
-        assertThat(codesQueryBuilder).isNotNull();
-        assertThat(cohortAnnotationDefinitionController).isNotNull();
-        assertThat(cohortAnnotationDefinitionDao).isNotNull();
-        assertThat(cohortBuilderController).isNotNull();
-        assertThat(cohortDao).isNotNull();
-        assertThat(cohortMaterializationService).isNotNull();
-        assertThat(cohortReviewController).isNotNull();
-        assertThat(cohortReviewDao).isNotNull();
-        assertThat(cohortReviewService).isNotNull();
-        assertThat(cohortsController).isNotNull();
-        assertThat(cohortService).isNotNull();
-        assertThat(commonConfig).isNotNull();
-        assertThat(conceptCacheConfiguration).isNotNull();
-        assertThat(configController).isNotNull();
-        assertThat(configDao).isNotNull();
-        assertThat(criteriaDao).isNotNull();
-        assertThat(cronInterceptor).isNotNull();
-        assertThat(domainLookupService).isNotNull();
-        assertThat(demoQueryBuilder).isNotNull();
-        assertThat(directoryService).isNotNull();
-        assertThat(fireCloudConfig).isNotNull();
-        assertThat(fireCloudService).isNotNull();
-        assertThat(mailChimpService).isNotNull();
-        assertThat(notebooksConfig).isNotNull();
-        assertThat(notebooksService).isNotNull();
-        assertThat(participantCohortAnnotationDao).isNotNull();
-        assertThat(participantCohortStatusDao).isNotNull();
-        assertThat(participantCounter).isNotNull();
-        assertThat(profileController).isNotNull();
-        assertThat(profileService).isNotNull();
-        assertThat(statusController).isNotNull();
-        assertThat(userDao).isNotNull();
-        assertThat(userInfoService).isNotNull();
-        assertThat(userService).isNotNull();
-        assertThat(queryBuilderFactory).isNotNull();
-        assertThat(workbenchConfig).isNotNull();
-        assertThat(workbenchDbConfig).isNotNull();
-        assertThat(workbenchEnvironment).isNotNull();
-        assertThat(workspaceDao).isNotNull();
-        assertThat(workspacesController).isNotNull();
-        assertThat(workspaceService).isNotNull();
+        CdrVersion cdrVersion = new CdrVersion();
+        cdrVersion.setCdrVersionId(1L);
+        CdrVersionContext.setCdrVersion(cdrVersion);
+        List<String> beansToNotCheck =
+          Arrays.asList(
+          "userAuthentication",
+            "userInfo",
+            "user",
+            "endUserApiClient",
+            "allOfUsApiClient",
+            "profileApi",
+            "workspacesApi",
+            "billingApi",
+            "groupsApi",
+            "notebooksApiClient",
+            "clusterApi",
+            "notebooksApi",
+            "jupyterApi");
+
+        String[] allBeanNames = context.getBeanDefinitionNames();
+        for (String beanName : allBeanNames) {
+            if (!beansToNotCheck.contains(beanName)) {
+                System.out.println(beanName);
+                assertThat(context.getBean(beanName)).isNotNull();
+            }
+        }
     }
 }
