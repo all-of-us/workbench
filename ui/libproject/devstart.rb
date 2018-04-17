@@ -214,7 +214,6 @@ Common.register_command({
 
 def test(*args)
   common = Common.new
-  options = BuildOptions.new.parse("dev-up", args)
 
   install_dependencies
 
