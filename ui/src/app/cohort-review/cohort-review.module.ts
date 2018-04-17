@@ -15,11 +15,8 @@ import {TablePage} from './table-page/table-page';
 
 import {ReviewNavComponent} from './review-nav/review-nav.component';
 
-import {DetailConditionsComponent} from './detail-conditions/detail-conditions.component';
-import {DetailDrugsComponent} from './detail-drugs/detail-drugs.component';
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
-import {DetailObservationsComponent} from './detail-observations/detail-observations.component';
-import {DetailProceduresComponent} from './detail-procedures/detail-procedures.component';
+import {DetailTabTableComponent} from './detail-tab-table/detail-tab-table.component';
 import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
@@ -88,10 +85,7 @@ import {CohortSearchModule} from '../cohort-search/cohort-search.module';
     DetailHeaderComponent,
 
     DetailTabsComponent,
-    DetailConditionsComponent,
-    DetailDrugsComponent,
-    DetailObservationsComponent,
-    DetailProceduresComponent,
+    DetailTabTableComponent,
   ],
   providers: [ReviewStateService]
 })

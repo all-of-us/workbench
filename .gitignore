@@ -41,6 +41,7 @@
 /ui/**/*.js
 /ui/**/*.map
 /ui/dist/**
+/ui/sa-key.json
 /ui/yarn-error.log
 /ui/src/generated/*
 /ui/src/publicGenerated/*

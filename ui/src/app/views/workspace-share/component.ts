@@ -14,11 +14,16 @@ import {WorkspaceResponse} from 'generated';
 import {WorkspacesService} from 'generated';
 
 @Component({
-  styleUrls: ['./component.css'],
+  selector: 'app-workspace-share',
+  styleUrls: ['./component.css',
+    '../../styles/buttons.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceShareComponent implements OnInit {
-  workspace: Workspace;
+  workspace: Workspace = {
+    name: '',
+    userRoles: []
+  };
   loadingWorkspace = true;
   toShare = '';
   selectedPermission = 'Select Permission';
@@ -28,8 +33,8 @@ export class WorkspaceShareComponent implements OnInit {
   userEmail: string;
   usersLoading = true;
   userNotFound = false;
-  userNotFoundEmail = '';
   workspaceUpdateConflictError = false;
+  public sharing = false;
   @ViewChild('usernameSharingInput') input: ElementRef;
   gsuiteDomain: string;
 
@@ -53,10 +58,6 @@ export class WorkspaceShareComponent implements OnInit {
         this.userEmail = profile.username;
       });
     });
-  }
-
-  navigateBack(): void {
-    this.locationService.back();
   }
 
   setAccess(dropdownSelected: string): void {
@@ -167,7 +168,16 @@ export class WorkspaceShareComponent implements OnInit {
     this.usersLoading = false;
   }
 
+  open(): void {
+    this.sharing = true;
+  }
+
   get hasPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
+
+  navigateBack(): void {
+    this.locationService.back();
+  }
+
 }
