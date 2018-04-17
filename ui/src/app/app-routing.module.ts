@@ -10,11 +10,11 @@ import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verifi
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {LoginComponent} from './views/login/component';
+import {NotFoundComponent, ResourceType} from './views/not-found/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
-import {WorkspaceNotFoundComponent} from './views/workspace-not-found/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -55,9 +55,10 @@ const routes: Routes = [
           },
           {
             path: 'workspace/:ns/:wsid/notfound',
-            component: WorkspaceNotFoundComponent,
+            component: NotFoundComponent,
             data: {
               title: 'Workspace Not Found',
+              mode: ResourceType.Workspace,
               breadcrumb: ':wsid Not Found'
             }
           },

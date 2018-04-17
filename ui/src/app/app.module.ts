@@ -27,6 +27,7 @@ import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
+import {NotFoundComponent} from './views/not-found/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
@@ -34,7 +35,6 @@ import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
-import {WorkspaceNotFoundComponent} from './views/workspace-not-found/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -100,13 +100,13 @@ export function getConfiguration(signInService: SignInService): Configuration {
     WorkspaceListComponent,
     InvitationKeyComponent,
     LoginComponent,
+    NotFoundComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
-    WorkspaceNotFoundComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
   ],

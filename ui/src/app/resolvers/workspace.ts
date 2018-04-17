@@ -30,8 +30,10 @@ export class WorkspaceResolver implements Resolve<WorkspaceData> {
       .map(({workspace, accessLevel}) => ({...workspace, accessLevel}))
       .catch(
         (e) => {
-          this.router.navigate(['workspace', ns, wsid, 'notfound']);
-          return Observable.of({error: e});
+          if (e.status === 404) {
+            this.router.navigate(['workspace', ns, wsid, 'notfound']);
+          }
+          return Observable.of(false);
         }
       );
     return (call as Observable<WorkspaceData>);
