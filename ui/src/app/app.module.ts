@@ -34,6 +34,7 @@ import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
+import {WorkspaceNotFoundComponent} from './views/workspace-not-found/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -105,6 +106,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     SignedInComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
+    WorkspaceNotFoundComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
   ],

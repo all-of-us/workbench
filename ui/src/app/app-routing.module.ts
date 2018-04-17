@@ -14,6 +14,7 @@ import {ProfilePageComponent} from './views/profile-page/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
+import {WorkspaceNotFoundComponent} from './views/workspace-not-found/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -51,6 +52,14 @@ const routes: Routes = [
             path: '',
             component: WorkspaceListComponent,
             data: {title: 'View Workspaces'}
+          },
+          {
+            path: 'workspace/:ns/:wsid/notfound',
+            component: WorkspaceNotFoundComponent,
+            data: {
+              title: 'Workspace Not Found',
+              breadcrumb: ':wsid Not Found'
+            }
           },
           {
             /* TODO The children under ./views need refactoring to use the data
