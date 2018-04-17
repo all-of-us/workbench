@@ -6,38 +6,28 @@
     </clr-tab-content>
   </clr-tab>
 
-  <clr-tab>
-    <button clrTabLink id="detail-conditions-tab">Conditions</button>
-    <clr-tab-content id="detail-conditions-content" *clrIfActive>
-      <app-detail-conditions></app-detail-conditions>
+  <clr-tab *ngFor="let tab of tabs">
+    <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab">
+      {{ tab.name | titlecase }}
+    </button>
+    <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
+      <app-detail-tab-table
+        [tabname]="tab.name"
+        [columns]="tab.columns"
+        [filterType]="tab.filterType"
+        [reverseEnum]="tab.reverseEnum"
+        >
+      </app-detail-tab-table>
     </clr-tab-content>
   </clr-tab>
 
-  <clr-tab>
-    <button clrTabLink id="detail-procedures-tab">Procedures</button>
-    <clr-tab-content id="detail-procedures-content" *clrIfActive>
-      <app-detail-procedures></app-detail-procedures>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-drugs-tab">Drugs</button>
-    <clr-tab-content id="detail-drugs-content" *clrIfActive>
-      <app-detail-drugs></app-detail-drugs>
-    </clr-tab-content>
-  </clr-tab>
-
+  <!-- Stubs: when the endpoint for each of these is available, make it a data
+       entry and put it in the above for loop.  OR if it is too custom, make it
+       a new component. -->
   <clr-tab>
     <button clrTabLink id="detail-measurements-tab">Measurements</button>
     <clr-tab-content id="detail-measurements-content" *clrIfActive>
       <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-observations-tab">Observations</button>
-    <clr-tab-content id="detail-observations-content" *clrIfActive>
-      <app-detail-observations></app-detail-observations>
     </clr-tab-content>
   </clr-tab>
 

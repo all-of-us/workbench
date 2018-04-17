@@ -1,38 +1,24 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {
-  CohortReviewService,
-  PageFilterRequest,
-  PageFilterType,
-  ParticipantObservation,
-  ParticipantObservationsColumns as Columns,
-  SortOrder,
-} from 'generated';
+import {CohortReviewService, PageFilterRequest, SortOrder} from 'generated';
 
 @Component({
-  selector: 'app-detail-observations',
-  templateUrl: './detail-observations.component.html',
-  styleUrls: ['./detail-observations.component.css']
+  selector: 'app-detail-tab-table',
+  templateUrl: './detail-tab-table.component.html',
+  styleUrls: ['./detail-tab-table.component.css']
 })
-export class DetailObservationsComponent implements OnInit, OnDestroy {
-  /* Maps string values to Enum values */
-  readonly reverseColumnEnum = {
-    itemDate: Columns.ItemDate,
-    standardVocabulary: Columns.StandardVocabulary,
-    standardName: Columns.StandardName,
-    sourceValue: Columns.SourceValue,
-    sourceVocabulary: Columns.SourceVocabulary,
-    sourceName: Columns.SourceName,
-    age: Columns.Age,
-  };
-
+export class DetailTabTableComponent implements OnInit, OnDestroy {
+  @Input() tabname;
+  @Input() columns;
+  @Input() filterType;
+  @Input() reverseEnum;
   loading = false;
 
-  observations: ParticipantObservation[];
+  data;
   request;
   totalCount: number;
   apiCaller: (any) => Observable<any>;
@@ -68,8 +54,8 @@ export class DetailObservationsComponent implements OnInit, OnDestroy {
           pageSize: 50,
           includeTotal: true,
           sortOrder: SortOrder.Asc,
-          sortColumn: Columns.ItemDate,
-          pageFilterType: PageFilterType.ParticipantObservations,
+          sortColumn: this.reverseEnum[this.columns[0].name],
+          pageFilterType: this.filterType,
         };
 
         this.callApi();
@@ -83,10 +69,10 @@ export class DetailObservationsComponent implements OnInit, OnDestroy {
   callApi() {
     this.loading = true;
     this.apiCaller(this.request).subscribe(resp => {
-      this.observations = resp.items;
+      this.data = resp.items;
       this.totalCount = resp.count;
       this.request = resp.pageRequest;
-      this.request.pageFilterType = PageFilterType.ParticipantObservations;
+      this.request.pageFilterType = this.filterType;
       this.loading = false;
     });
   }
@@ -100,7 +86,7 @@ export class DetailObservationsComponent implements OnInit, OnDestroy {
 
     if (state.sort) {
       const sortby = <string>(state.sort.by);
-      this.request.sortColumn = this.reverseColumnEnum[sortby];
+      this.request.sortColumn = this.reverseEnum[sortby];
       this.request.sortOrder = state.sort.reverse ? SortOrder.Desc : SortOrder.Asc;
     }
     this.callApi();
