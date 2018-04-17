@@ -1,5 +1,5 @@
-import {Component, Injectable} from '@angular/core';
 import {Location} from '@angular/common';
+import {Component, Injectable} from '@angular/core';
 import {NavigationError, Router} from '@angular/router';
 
 // Mostly borrowed from the Job Manager.

@@ -3,7 +3,6 @@ import {ActivatedRouteSnapshot, Resolve, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {Workspace, WorkspaceAccessLevel, WorkspacesService} from 'generated';
-import {NotFoundComponent} from "../views/not-found/component";
 
 /**
  * Flatten a layer of nesting
@@ -16,7 +15,6 @@ export interface WorkspaceData extends Workspace {
 export class WorkspaceResolver implements Resolve<WorkspaceData> {
   constructor(
     private api: WorkspacesService,
-    private notFoundComponent: NotFoundComponent,
     private router: Router
   ) {}
 
