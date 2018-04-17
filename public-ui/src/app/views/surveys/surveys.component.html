@@ -1,11 +1,73 @@
 <div class="row">
-  <div class="col-xs-1"></div>
-  <div class="col-xs-7">
-    <h6 class="view-title"> {{title}}</h6>
-    <div class="view-sub-title">{{subTitle}} </div>
+
+
+
+  <div class="col-xs-8">
+    <div class="page-header">
+      <div class="view-title"> {{title}}</div>
+      <div class="view-sub-title">{{subTitle}} </div>
+    </div>
+    <div class="white-box" >
+      <div class="search-top form-group">
+        <input type="text" id="search-db" placeholder="Keyword Search">
+      </div>
+
+      <div class="box-header">
+        <div class="box-title"> Survey Modules</div>
+        <div class="box-sub-title"> Explore each survey in depth. Click to view an interactive version of each survey response with distributions by age and gender.</div>
+      </div>
+
+      <div class="cards row">
+        <!-- Show a card for each survey -->
+        <div class="col-xs-3">
+          <div class="card clickable">
+            <div class="card-header">
+              The Basics
+            </div>
+            <div class="card-block">
+              <div class="card-title">
+                20000 Participants
+              </div>
+              <div class="card-text">
+                The Basics Module provides demographics and economic information for participants
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xs-3">
+          <div class="card clickable">
+            <div class="card-header">
+              The Basics
+            </div>
+            <div class="card-block">
+              <div class="card-title">
+                20000 Participants
+              </div>
+              <div class="card-text">
+                The Basics Module provides demographics and economic information for participants
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="box-header">
+        <div class="box-title"> Survey Metadata</div>
+        <div class="box-sub-title"> Interested in learning more about the instruments from which each survey question was derived? Explore the Survey Instruments explorer to view the full metadata of each question.</div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn btn-primary">Explore Survey Metadata </button>
+      </div>
+
+    </div>
   </div>
+
   <div class="col-xs-4">
     <img [src]="pageImage" />
   </div>
+
 </div>
 

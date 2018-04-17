@@ -1,5 +1,7 @@
-body#body {
-  background-color: #E0E0E1 !important;
+.content-container{
+    margin-top: 1em;
+    padding-left: 3rem;
+    padding-right: 3rem;
 }
 
 

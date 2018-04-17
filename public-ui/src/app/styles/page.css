@@ -1,11 +1,36 @@
+
+.page-header {
+    margin-top: .5rem;
+    margin-bottom: 1.5rem;
+}
 .view-title {
-    font-size: 24px;
+    font-size: 32px;
     color: #2F306F;
     padding-top: 12px;
     padding-bottom:12px;
+
 }
 
 .view-sub-title {
+    font-size: 14px;
+    color: #5A5A5A;
+}
+
+.white-box {
+    padding: 1rem;
+    background-color: white;
+}
+
+.box-header {
+    margin-top: 1.5rem;
+    margin-bottom: .5rem;
+}
+
+.box-title {
+    color: #2F306F;
+    font-size: 20px;
+}
+.box-sub-title {
     font-size: 14px;
     color: #5A5A5A;
 }

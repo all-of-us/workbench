@@ -1,31 +1,22 @@
 .header, header, .header-1, header.header-1 {
     background-color:inherit;
+    padding-top:24px;
+    margin-bottom: 24px;
 }
 
 .branding {
-    margin-right: 0;
+    margin-right: 12px;
     padding-right: 0;
 }
 .branding .logo {
-    padding-right: 24px;
-    width: 12rem;
+    padding-right: 0px;
+    padding-top: 12px;
 }
-.branding .title {
-    padding-right: 1rem;
-    padding-left: 0;
-    font-size:24px;
-    font-family: "Open Sans",open-sans,sans-serif;
-    border-bottom: solid 1px #000000;
-    margin-right: 0px;
-    margin-left: 6rem;
-    line-height: 3.5;
+.branding .logo img {
+    width:288px;
 }
-span.title-data {
-    color: #88BAE2;
-}
-span.title-browser {
-    color: #252660;
-}
+
+
 
 header .header-nav .nav-link {
     color:#4B4B81;
@@ -36,9 +27,31 @@ header .header-nav .nav-link {
 .header-nav {
     margin-left: 0px;
     border-bottom: solid 1px #000000;
-    line-height: 5.5;
-    width: 50%;
+
 }
+.header-nav.title {
+    padding-right: 1rem;
+    padding-left: 0;
+    font-size:20px;
+    font-family: "Open Sans",open-sans,sans-serif;
+    font-weight: bold;
+    margin-right: 0px;
+    margin-left: 0;
+    line-height: 4.25;
+
+}
+span.title-data {
+    color: #88BAE2;
+}
+span.title-browser {
+    color: #252660;
+}
+
+.header-nav.menu {
+    margin-left: 0px;
+    width:60%;
+}
+
 .header-nav a{
     line-height: 6.5;
 }

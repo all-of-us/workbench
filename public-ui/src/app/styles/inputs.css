@@ -8,15 +8,10 @@ input[type=text]:not([readonly]),
 input[type=time]:not([readonly]),
 input[type=url]:not([readonly]) {
   padding: 1rem;
-  border-radius: 5px;
+  border: none;
+  border-bottom: solid 1px;
   background-color: white;
-  font-family: "Gotham HTF"
+  width: 80%;
 }
 
-label {
-  color: #262262;
-  font-family: "Gotham HTF";
-  font-size: 12px;
-  font-weight: 300;
-  line-height: 14px;
-}
+

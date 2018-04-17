@@ -1,9 +1,28 @@
 .card {
-  padding: 1rem;
-  border-radius: 0.2rem;
-  box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
+    border-radius: 0.2rem;
+    box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
 }
 
 .card * {
-  margin-top: 0rem;
+    margin-top: 0rem;
+}
+
+.card-header {
+    border-bottom: none;
+    color: #2F306F;
+    font-size: .75rem;
+    font-weight: bold;
+}
+
+.card-title {
+    font-weight: bold;
+    letter-spacing: normal;
+    font-size: .55rem;
+    color: #2F306F;
+}
+
+.card-text {
+    color: #000;
+    font-size: .4rem;
+    font-weight: normal;
 }

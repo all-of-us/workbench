@@ -6,7 +6,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./db-header.component.css']
 })
 export class DbHeaderComponent implements OnInit {
-  logo = "/assets/images/all-of-us-logo.svg";
+  logo = "/assets/images/all-of-us-logo.png";
   constructor() { }
 
   ngOnInit() {
