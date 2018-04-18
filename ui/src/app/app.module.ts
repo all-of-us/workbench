@@ -12,6 +12,7 @@ import {InterceptedHttp} from './factory/InterceptedHttp';
 import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
+import {ProfileStorageService} from './services/profile-storage.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
@@ -127,6 +128,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
       deps: [ServerConfigService],
       useClass: ErrorReporterService,
     },
+    ProfileStorageService,
     SignInService,
     StatusCheckService,
     GoogleAnalyticsEventsService,

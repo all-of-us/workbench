@@ -6,10 +6,11 @@ import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
@@ -20,7 +21,6 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {ProfileService} from 'generated';
 import {UserRole} from 'generated';
 import {WorkspaceAccessLevel} from 'generated';
 import {WorkspacesService} from 'generated';
@@ -91,7 +91,7 @@ describe('WorkspaceShareComponent', () => {
       providers: [
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({

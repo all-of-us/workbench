@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+
 import {BugReportService} from 'generated';
 import {BugReport} from 'generated';
-import {ProfileService} from 'generated';
 
 @Component({
   selector: 'app-bug-report',
@@ -20,7 +21,7 @@ export class BugReportComponent implements OnInit {
 
   constructor(
     private bugReportService: BugReportService,
-    private profileService: ProfileService
+    private profileStorageService: ProfileStorageService
   ) {}
 
   ngOnInit() {
@@ -30,9 +31,10 @@ export class BugReportComponent implements OnInit {
     this.reporting = true;
     this.shortDescription = '';
     this.reproSteps = '';
-    this.profileService.getMe().subscribe(profile => {
+    this.profileStorageService.profile$.subscribe((profile) => {
       this.contactEmail = profile.contactEmail;
     });
+    this.profileStorageService.requestNewProfile();
   }
 
   send() {
