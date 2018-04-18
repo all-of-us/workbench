@@ -47,7 +47,6 @@ import {
   ApiModule,
   ConfigService,
   Configuration,
-  StatusService
 } from 'generated';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
