@@ -12,7 +12,7 @@ export class InitialErrorComponent {
   initialLoadErrorHeader: string;
   initialLoadFailure = false;
 
-  constructor(router: Router, private loc: Location) {
+  constructor(router: Router, public loc: Location) {
     router.events.subscribe((e) => {
       if (e instanceof NavigationError && !router.navigated) {
         /*
