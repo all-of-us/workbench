@@ -1,5 +1,5 @@
 .cohort-review-wrapper {
+  min-height: calc(100vh - 4rem);
   padding: 1rem;
-  margin-bottom: 1rem;
   position: relative;
 }
