@@ -25,9 +25,9 @@ import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
+import {InitialErrorComponent} from './views/initial-error/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
-import {NotFoundComponent} from './views/not-found/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
@@ -98,9 +98,9 @@ export function getConfiguration(signInService: SignInService): Configuration {
     CohortEditComponent,
     ErrorHandlerComponent,
     WorkspaceListComponent,
+    InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
-    NotFoundComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
@@ -136,9 +136,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
       useClass: InterceptedHttp,
       deps: [XHRBackend, RequestOptions, ErrorHandlingService]
     },
-    NotFoundComponent,
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, ErrorHandlerComponent, NotFoundComponent]
+  bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]
 })
 export class AppModule {}
