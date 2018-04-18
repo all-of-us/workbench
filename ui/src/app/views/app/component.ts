@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -8,13 +8,9 @@ import {
   Router,
 } from '@angular/router';
 
-import {Observable} from 'rxjs/Observable';
 
 import {environment} from 'environments/environment';
 
-import {Authority, ProfileService} from 'generated';
-
-declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
@@ -29,16 +25,11 @@ export class AppComponent implements OnInit {
   isSignedIn = false;
   overriddenUrl: string = null;
   private baseTitle: string;
-  private showCreateAccount = false;
   private overriddenPublicUrl: string = null;
 
 
   constructor(
-    /* Ours */
-    private profileService: ProfileService,
-    /* Angular's */
     private activatedRoute: ActivatedRoute,
-    private locationService: Location,
     private router: Router,
     private titleService: Title
   ) {}

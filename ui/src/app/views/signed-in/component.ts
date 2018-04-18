@@ -1,25 +1,13 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import {
-  ActivatedRoute,
-  Event as RouterEvent,
   Router,
 } from '@angular/router';
 
-import {Observable} from 'rxjs/Observable';
-
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {environment} from 'environments/environment';
-
-import {AppComponent} from '../app/component';
 
 import {Authority, ProfileService} from 'generated';
-
-declare const gapi: any;
-export const overriddenUrlKey = 'allOfUsApiUrlOverride';
-export const overriddenPublicUrlKey = 'publicApiUrlOverride';
-
 
 @Component({
   selector: 'app-signed-in',
@@ -53,7 +41,6 @@ export class SignedInComponent implements OnInit {
   }
   constructor(
     /* Ours */
-    private appComponent: AppComponent,
     private signInService: SignInService,
     private profileService: ProfileService,
     /* Angular's */
@@ -65,10 +52,6 @@ export class SignedInComponent implements OnInit {
 
     this.profileImage = this.signInService.profileImage;
     document.body.style.backgroundColor = '#f1f2f2';
-    this.profileService.getMe().subscribe(profile => {
-      this.givenName = profile.givenName;
-      this.familyName = profile.familyName;
-    });
     this.signInService.isSignedIn$.subscribe(signedIn => {
       if (signedIn) {
         this.profileService.getMe().subscribe(profile => {
@@ -77,6 +60,8 @@ export class SignedInComponent implements OnInit {
           this.hasReviewIdVerification =
             profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
             // this.email = profile.username;
+          this.givenName = profile.givenName;
+          this.familyName = profile.familyName;
         });
       } else {
         this.router.navigate(['/login', {
@@ -86,7 +71,7 @@ export class SignedInComponent implements OnInit {
     });
   }
 
-  signOut(e: Event): void {
+  signOut(): void {
     this.signInService.signOut();
   }
 
