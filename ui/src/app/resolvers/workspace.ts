@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, Resolve, Router} from '@angular/router';
+import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {Workspace, WorkspaceAccessLevel, WorkspacesService} from 'generated';
@@ -15,7 +15,6 @@ export interface WorkspaceData extends Workspace {
 export class WorkspaceResolver implements Resolve<WorkspaceData> {
   constructor(
     private api: WorkspacesService,
-    private router: Router
   ) {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<WorkspaceData> {
@@ -29,7 +28,9 @@ export class WorkspaceResolver implements Resolve<WorkspaceData> {
       .getWorkspace(ns, wsid)
       .map(({workspace, accessLevel}) => ({...workspace, accessLevel}))
       .catch((e) => {
-        e.title = 'Workspace ' + ns + '/' + wsid + ' not found';
+        if (e.status === 404) {
+          e.title = 'Workspace ' + ns + '/' + wsid + ' not found';
+        }
         throw e;
       });
     return (call as Observable<WorkspaceData>);
