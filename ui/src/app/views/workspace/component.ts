@@ -165,7 +165,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     window.removeEventListener('message', this.notebookAuthListener);
   }
 
-  openNotebook(notebook): void {
+  openNotebook(notebook: any): void {
     if (this.clusterLoading) {
       return;
     }
@@ -325,7 +325,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-  private localizeNotebooks(notebooks): Observable<void> {
+  private localizeNotebooks(notebooks: any): Observable<void> {
     const names: Array<string> = notebooks.map(n => n.name);
     return new Observable<void>(obs => {
       this.clusterService

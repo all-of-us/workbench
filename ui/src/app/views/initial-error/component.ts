@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, Injectable} from '@angular/core';
+import {Component} from '@angular/core';
 import {NavigationError, Router} from '@angular/router';
 
 // Mostly borrowed from the Job Manager.
@@ -12,7 +12,7 @@ export class InitialErrorComponent {
   initialLoadErrorHeader: string;
   initialLoadFailure = false;
 
-  constructor(router: Router, private loc: Location) {
+  constructor(router: Router, public loc: Location) {
     router.events.subscribe((e) => {
       if (e instanceof NavigationError && !router.navigated) {
         /*
