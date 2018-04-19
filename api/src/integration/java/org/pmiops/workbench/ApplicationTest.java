@@ -9,7 +9,8 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,15 +33,14 @@ public class ApplicationTest {
      */
     @Test
     public void contextLoads() throws Exception {
+        List<Object> beans = new ArrayList<>();
         //This loads all dao's that implement JPA repositories
-        Map<String, Object> repoBeans = context.getBeansWithAnnotation(NoRepositoryBean.class);
-        for (Map.Entry<String, Object> entry : repoBeans.entrySet()) {
-            assertThat(entry.getValue()).isNotNull();
-        }
+        beans.addAll(context.getBeansWithAnnotation(NoRepositoryBean.class).values());
         //This loads all @Service, @Controller, @Component and @Configuration annotations
-        Map<String, Object> componentBeans = context.getBeansWithAnnotation(Component.class);
-        for (Map.Entry<String, Object> entry : componentBeans.entrySet()) {
-            assertThat(entry.getValue()).isNotNull();
+        beans.addAll(context.getBeansWithAnnotation(Component.class).values());
+        for (Object object : beans) {
+            System.out.println(object);
+            assertThat(object).isNotNull();
         }
     }
 }
