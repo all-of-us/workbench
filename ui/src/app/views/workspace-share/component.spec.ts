@@ -112,6 +112,7 @@ describe('WorkspaceShareComponent', () => {
   }));
 
   it('adds users correctly', fakeAsync(() => {
+    workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
     workspaceSharePage.readPageData();
     simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField, 'sampleuser4');
     workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
@@ -127,6 +128,7 @@ describe('WorkspaceShareComponent', () => {
   }));
 
   it('removes users correctly and does not allow self removal', fakeAsync(() => {
+    workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
     workspaceSharePage.fixture.componentRef.instance.userEmail
         = 'sampleuser1@fake-research-aou.org';
     workspaceSharePage.readPageData();

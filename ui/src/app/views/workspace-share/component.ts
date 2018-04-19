@@ -44,7 +44,7 @@ export class WorkspaceShareComponent implements OnInit {
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
-      private profileStorageService: ProfileStorageService,
+      public profileStorageService: ProfileStorageService,
       private workspacesService: WorkspacesService,
       private serverConfigService: ServerConfigService
   ) {

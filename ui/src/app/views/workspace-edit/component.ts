@@ -130,7 +130,7 @@ export class WorkspaceEditComponent implements OnInit {
       private locationService: Location,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
-      private profileStorageService: ProfileStorageService,
+      public profileStorageService: ProfileStorageService,
       private router: Router,
   ) {}
 
