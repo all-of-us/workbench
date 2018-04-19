@@ -27,6 +27,10 @@ label clr-icon {
   margin-left: 0.25rem;
 }
 
+clr-icon.remove-icon:hover {
+  cursor: pointer;
+}
+
 div.field {
   display: inline-block;
   margin-right: 2rem;
