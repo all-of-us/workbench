@@ -25,13 +25,11 @@ public class ApplicationTest {
         //This loads all dao's that implement JPA repositories
         Map<String, Object> repoBeans = context.getBeansWithAnnotation(NoRepositoryBean.class);
         for (Map.Entry<String, Object> entry : repoBeans.entrySet()) {
-            System.out.println(entry.getKey());
             assertThat(entry.getValue()).isNotNull();
         }
         //This loads all @Service, @Controller, @Component and @Configuration annotations
         Map<String, Object> componentBeans = context.getBeansWithAnnotation(Component.class);
         for (Map.Entry<String, Object> entry : componentBeans.entrySet()) {
-            System.out.println(entry.getKey());
             assertThat(entry.getValue()).isNotNull();
         }
     }
