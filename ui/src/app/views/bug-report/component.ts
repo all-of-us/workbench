@@ -34,7 +34,6 @@ export class BugReportComponent implements OnInit {
     this.profileStorageService.profile$.subscribe((profile) => {
       this.contactEmail = profile.contactEmail;
     });
-    this.profileStorageService.reload();
   }
 
   send() {

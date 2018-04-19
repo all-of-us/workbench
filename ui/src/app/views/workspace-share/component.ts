@@ -64,7 +64,6 @@ export class WorkspaceShareComponent implements OnInit {
 
     this.loadWorkspace().subscribe((workspace) => {
       this.loadWorkspaceFinished = true;
-      this.profileStorageService.reload();
     });
   }
 
