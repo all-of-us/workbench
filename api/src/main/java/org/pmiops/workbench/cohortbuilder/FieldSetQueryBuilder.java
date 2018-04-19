@@ -380,7 +380,7 @@ public class FieldSetQueryBuilder {
         columnInfo.getColumnName(), paramName));
   }
 
-  private ColumnInfo getColumnInfo(QueryState queryState, String columnName) {
+  private ColumnInfo getColumnInfo(QueryState queryState, String columnName, boolean beforeLimitRequired) {
     List<String> columnParts = parseColumnName(columnName);
     ColumnConfig columnConfig;
     if (columnParts.size() == 1) {
@@ -392,7 +392,7 @@ public class FieldSetQueryBuilder {
       return new ColumnInfo(String.format("%s.%s", queryState.mainTableName, columnName),
           columnConfig);
     } else {
-      TableNameAndAlias tableNameAndAlias = getTableNameAndAlias(columnParts, queryState, true);
+      TableNameAndAlias tableNameAndAlias = getTableNameAndAlias(columnParts, queryState, beforeLimitRequired);
       Map<String, ColumnConfig> aliasConfig = getColumnConfigs(queryState,
           tableNameAndAlias.tableName, false);
       String columnEnd = columnParts.get(columnParts.size() - 1);
@@ -414,7 +414,7 @@ public class FieldSetQueryBuilder {
       throw new BadRequestException("Missing column name for column filter");
     }
 
-    ColumnInfo columnInfo = getColumnInfo(queryState, columnFilter.getColumnName());
+    ColumnInfo columnInfo = getColumnInfo(queryState, columnFilter.getColumnName(), true);
 
     if (columnFilter.getOperator() == null) {
       columnFilter.setOperator(Operator.EQUAL);
@@ -478,7 +478,7 @@ public class FieldSetQueryBuilder {
         descending = true;
       }
       OrderByColumn orderByColumn = new OrderByColumn();
-      orderByColumn.columnInfo = getColumnInfo(queryState, columnStart);
+      orderByColumn.columnInfo = getColumnInfo(queryState, columnStart, true);
       orderByColumn.descending = descending;
       orderByColumns.add(orderByColumn);
     }
@@ -498,7 +498,7 @@ public class FieldSetQueryBuilder {
 
   private String buildSql(ParticipantCriteria participantCriteria, QueryState queryState,
       ImmutableList<SelectedColumn> selectColumns, String whereSql,
-      ImmutableList<OrderByColumn> orderByColumns, String endSql) {
+      ImmutableList<OrderByColumn> orderByColumns, long resultSize, long offset) {
 
     // Joining to tables after applying the LIMIT performs better in BigQuery than
     // joining to them before. Figure out if there are any tables that can be joined to after
@@ -539,25 +539,22 @@ public class FieldSetQueryBuilder {
         outerSelectExpressions.add(columnSql);
       }
     }
-    Joiner commaJoiner = Joiner.on(", ");
-    if (hasAfterLimitTables) {
-      for (Entry<String, JoinedTableInfo> entry : afterLimitTables.entrySet()) {
-        // Columns that outer tables join to from inner tables must appear in the inner select clause.
-        JoinedTableInfo tableInfo = entry.getValue();
-        if (tableInfo.startTableAlias.equals(queryState.mainTableName)
-            || beforeLimitTables.containsKey(tableInfo.startTableAlias)) {
-          String joinColumn = String.format("%s.%s", tableInfo.startTableAlias,
-              tableInfo.startTableJoinColumn);
-          String columnAlias = getColumnAlias(joinColumn);
-          if (!innerSelectColumnAliases.contains(columnAlias)) {
-            innerSelectExpressions.add(String.format("%s %s", joinColumn, columnAlias));
-            innerSelectColumnAliases.add(columnAlias);
-          }
-          // Since the table is being joined to the result of a subquery, change the start table
-          // alias and column.
-          tableInfo.startTableAlias = "inner_results";
-          tableInfo.startTableJoinColumn = columnAlias;
+    for (Entry<String, JoinedTableInfo> entry : afterLimitTables.entrySet()) {
+      // Columns that outer tables join to from inner tables must appear in the inner select clause.
+      JoinedTableInfo tableInfo = entry.getValue();
+      if (tableInfo.startTableAlias.equals(queryState.mainTableName)
+          || beforeLimitTables.containsKey(tableInfo.startTableAlias)) {
+        String joinColumn = String.format("%s.%s", tableInfo.startTableAlias,
+            tableInfo.startTableJoinColumn);
+        String columnAlias = getColumnAlias(joinColumn);
+        if (!innerSelectColumnAliases.contains(columnAlias)) {
+          innerSelectExpressions.add(String.format("%s %s", joinColumn, columnAlias));
+          innerSelectColumnAliases.add(columnAlias);
         }
+        // Since the table is being joined to the result of a subquery, change the start table
+        // alias and column.
+        tableInfo.startTableAlias = "inner_results";
+        tableInfo.startTableJoinColumn = columnAlias;
       }
     }
     List<String> innerOrderByExpressions = new ArrayList<>();
@@ -568,14 +565,20 @@ public class FieldSetQueryBuilder {
         // Columns that appear in the inner ORDER BY appear in the outer ORDER BY, too; make sure
         // they get returned.
         String columnAlias = getColumnAlias(column.columnInfo.getColumnName());
-        log.info("COLUMN ALIAS = "  + columnAlias);
         if (!innerSelectColumnAliases.contains(columnAlias)) {
           innerSelectExpressions.add(String.format("%s %s", column.columnInfo.getColumnName(), columnAlias));
           innerSelectColumnAliases.add(columnAlias);
         }
       }
     }
+    StringBuilder limitOffsetSql = new StringBuilder("\nlimit ");
+    limitOffsetSql.append(resultSize);
+    if (offset > 0) {
+      limitOffsetSql.append(" offset ");
+      limitOffsetSql.append(offset);
+    }
 
+    Joiner commaJoiner = Joiner.on(", ");
     StringBuilder innerSql = new StringBuilder("select ");
     innerSql.append(commaJoiner.join(innerSelectExpressions));
     innerSql.append(String.format(
@@ -589,28 +592,30 @@ public class FieldSetQueryBuilder {
     innerSql.append("\norder by ");
     innerSql.append(commaJoiner.join(innerOrderByExpressions));
 
-    innerSql.append(endSql);
-    if (hasAfterLimitTables) {
-     StringBuilder outerSql = new StringBuilder("select ");
-     outerSql.append(commaJoiner.join(outerSelectExpressions));
-     outerSql.append("\nfrom (");
-     outerSql.append(innerSql);
-     outerSql.append(") inner_results");
-     for (Entry<String, JoinedTableInfo> entry : afterLimitTables.entrySet()) {
-       addJoin(outerSql, entry.getKey(), entry.getValue());
-     }
-     // In the outer SQL, refer to the order by columns using their aliases from the inner query.
-     outerSql.append("\norder by ");
-     List<String> outerOrderByExpressions = new ArrayList<>();
-     for (OrderByColumn column : orderByColumns) {
-       String columnAlias = getColumnAlias(column.columnInfo.getColumnName());
-       outerOrderByExpressions.add(column.descending ? columnAlias + " DESC" : columnAlias);
-     }
-     outerSql.append(commaJoiner.join(outerOrderByExpressions));
-     return outerSql.toString();
-    } else {
+    innerSql.append(limitOffsetSql);
+    if (!hasAfterLimitTables) {
       return innerSql.toString();
     }
+    StringBuilder outerSql = new StringBuilder("select ");
+    outerSql.append(commaJoiner.join(outerSelectExpressions));
+    outerSql.append("\nfrom (");
+    outerSql.append(innerSql);
+    outerSql.append(") inner_results");
+    for (Entry<String, JoinedTableInfo> entry : afterLimitTables.entrySet()) {
+      addJoin(outerSql, entry.getKey(), entry.getValue());
+    }
+    // In the outer SQL, refer to the order by columns using their aliases from the inner query.
+    outerSql.append("\norder by ");
+    List<String> outerOrderByExpressions = new ArrayList<>();
+    for (OrderByColumn column : orderByColumns) {
+      String columnAlias = getColumnAlias(column.columnInfo.getColumnName());
+      outerOrderByExpressions.add(column.descending ? columnAlias + " DESC" : columnAlias);
+    }
+    outerSql.append(commaJoiner.join(outerOrderByExpressions));
+    outerSql.append("\nlimit ");
+    outerSql.append(resultSize);
+
+    return outerSql.toString();
   }
 
   private QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
@@ -629,15 +634,9 @@ public class FieldSetQueryBuilder {
       whereSql.append("\nand\n");
     }
     ImmutableList<OrderByColumn> orderByColumns = handleOrderBy(queryState, tableQuery.getOrderBy());
-    StringBuilder endSql = new StringBuilder(" limit ");
-    endSql.append(resultSize);
-    if (offset > 0) {
-      endSql.append(" offset ");
-      endSql.append(offset);
-    }
     QueryJobConfiguration jobConfiguration = QueryJobConfiguration
         .newBuilder(buildSql(participantCriteria, queryState, selectColumns,
-            whereSql.toString(), orderByColumns, endSql.toString()))
+            whereSql.toString(), orderByColumns, resultSize, offset))
         .setNamedParameters(queryState.paramMap)
         .setUseLegacySql(false)
         .build();
