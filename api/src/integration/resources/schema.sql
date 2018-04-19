@@ -15,18 +15,3 @@ create table cdr_version (
   cdr_db_name varchar(20),
   public_db_name varchar(20)
 );
-
-create table concept (
-  concept_id int PRIMARY KEY,
-  concept_name varchar(255) NOT NULL,
-  domain_id varchar(20) NULL,
-  vocabulary_id varchar(20) NULL,
-  concept_class_id varchar(20) NULL,
-  standard_concept varchar(1) NULL,
-  concept_code varchar(50) NULL,
-  valid_start_date date NULL,
-  valid_end_date date NULL,
-  invalid_reason varchar(1),
-  count_value bigint NOT NULL,
-  prevalence DECIMAL NOT NULL
-);
