@@ -17,34 +17,19 @@
       </div>
 
       <div class="cards row">
-        <!-- Show a card for each survey -->
-        <div class="col-xs-12 col-sm-12 col-md-3">
-          <div class="card clickable">
-            <div class="card-header">
-              The Basics
-            </div>
-            <div class="card-block">
-              <div class="card-title">
-                20000 Participants
-              </div>
-              <div class="card-text">
-                The Basics Module provides demographics and economic information for participants
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div class="col-xs-12 col-sm-12 col-md-3">
+        <!-- Show a card for each survey -->
+        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3"*ngFor="let survey of surveys; let i = index" >
           <div class="card clickable">
             <div class="card-header">
-              The Basics
+              {{survey.domainDisplay}}
             </div>
             <div class="card-block">
               <div class="card-title">
-                20000 Participants
+                {{survey.numParticipants}} Participants
               </div>
               <div class="card-text">
-                The Basics Module provides demographics and economic information for participants
+                {{survey.domainDesc}}
               </div>
             </div>
           </div>

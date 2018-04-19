@@ -14,6 +14,10 @@ import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 
 
 /* Our Modules */
+import {
+  ApiModule,
+} from 'publicGenerated';
+
 import {AppRoutingModule} from './app-routing.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
@@ -32,6 +36,7 @@ function getBasePath() {
 
 @NgModule({
   imports: [
+    ApiModule,
     AppRoutingModule,
     BrowserModule,
     BrowserAnimationsModule,
