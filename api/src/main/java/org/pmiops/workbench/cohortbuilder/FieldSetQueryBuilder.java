@@ -431,7 +431,7 @@ public class FieldSetQueryBuilder {
       throw new BadRequestException("Exactly one of allOf, anyOf, or columnFilter must be "
           + "specified for result filters");
     }
-    if (resultFilters.getNot() != null && resultFilters.getNot()) {
+    if (resultFilters.getIfNot() != null && resultFilters.getIfNot()) {
       whereSql.append("not ");
     }
     if (resultFilters.getColumnFilter() != null) {
