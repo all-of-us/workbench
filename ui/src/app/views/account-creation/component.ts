@@ -30,9 +30,6 @@ export class AccountCreationComponent {
     familyName: '',
     contactEmail: ''
   };
-  givenName: string;
-  familyName: string;
-  username: string;
   password: string;
   passwordAgain: string;
   showAllFieldsRequiredError: boolean;
@@ -45,6 +42,9 @@ export class AccountCreationComponent {
   usernameCheckTimeout: NodeJS.Timer;
   contactEmailCheckTimeout: NodeJS.Timer;
 
+  // TODO: Injecting the parent component is a bad separation of concerns, as
+  // well as injecting LoginComponent. Should look at refactoring these
+  // interactions.
   constructor(
     private profileService: ProfileService,
     private invitationKeyService: InvitationKeyComponent,
@@ -104,6 +104,9 @@ export class AccountCreationComponent {
     this.usernameConflictError = false;
     clearTimeout(this.usernameCheckTimeout);
     this.usernameCheckTimeout = setTimeout(() => {
+      if (!this.profile.username) {
+        return;
+      }
       this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
         this.usernameConflictError = response.isTaken;
       });
