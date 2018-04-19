@@ -83,5 +83,20 @@
     "type": "string",
     "name": "qualifier_source_value",
     "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "value_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "value_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "questionnaire_response_id",
+    "mode": "nullable"
   }
 ]
