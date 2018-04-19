@@ -1,3 +1,4 @@
+-- This file is being used by ApplicationTest.java to setup tables that hold application configuration at startup.
 create table config (
   config_id varchar(80) PRIMARY KEY,
   configuration CLOB NOT NULL);

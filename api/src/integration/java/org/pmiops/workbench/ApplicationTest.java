@@ -60,17 +60,26 @@ import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.annotation.RequestScope;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestWebMvcConfig.class, TestCdrDbConfig.class})
+@SpringBootTest(classes = {TestWebMvcConfig.class})
 public class ApplicationTest {
 
     @Autowired
@@ -78,31 +87,17 @@ public class ApplicationTest {
 
     @Test
     public void contextLoads() throws Exception {
-        CdrVersion cdrVersion = new CdrVersion();
-        cdrVersion.setCdrVersionId(1L);
-        CdrVersionContext.setCdrVersion(cdrVersion);
-        List<String> beansToNotCheck =
-          Arrays.asList(
-          "userAuthentication",
-            "userInfo",
-            "user",
-            "endUserApiClient",
-            "allOfUsApiClient",
-            "profileApi",
-            "workspacesApi",
-            "billingApi",
-            "groupsApi",
-            "notebooksApiClient",
-            "clusterApi",
-            "notebooksApi",
-            "jupyterApi");
-
-        String[] allBeanNames = context.getBeanDefinitionNames();
-        for (String beanName : allBeanNames) {
-            if (!beansToNotCheck.contains(beanName)) {
-                System.out.println(beanName);
-                assertThat(context.getBean(beanName)).isNotNull();
-            }
+        //This loads all dao's that implement JPA repositories
+        Map<String, Object> repoBeans = context.getBeansWithAnnotation(NoRepositoryBean.class);
+        for (Map.Entry<String, Object> entry : repoBeans.entrySet()) {
+            System.out.println(entry.getKey());
+            assertThat(entry.getValue()).isNotNull();
+        }
+        //This loads all @Service, @Controller, @Component and @Configuration annotations
+        Map<String, Object> componentBeans = context.getBeansWithAnnotation(Component.class);
+        for (Map.Entry<String, Object> entry : componentBeans.entrySet()) {
+            System.out.println(entry.getKey());
+            assertThat(entry.getValue()).isNotNull();
         }
     }
 }
