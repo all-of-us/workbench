@@ -34,11 +34,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   private static final ImmutableMap<String, String> TYPE_CM =
     ImmutableMap.of("ICD9", "ICD9CM", "CPT", "CPT4");
 
-  public static final String ICD_10 = "ICD10";
-
   public enum GroupType {
     GROUP, NOT_GROUP
   }
+
+  public static final String ICD_10 = "ICD10";
+  public static final String WHERE = " where ";
+  public static final String AND = " and ";
 
   private static final String INNER_SQL_TEMPLATE =
     "select distinct a.person_id, a.${entryDate} as entry_date, b.concept_code\n" +
@@ -120,7 +122,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
     String middleSql = MIDDLE_SQL_TEMPLATE.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
     if (!modifierQueryParts.isEmpty()) {
-      middleSql = middleSql + " where " + String.join(" and ", modifierQueryParts);
+      middleSql = middleSql + WHERE + String.join(AND, modifierQueryParts);
     }
     if (!groupByModifier.isEmpty()) {
       middleSql = middleSql + groupByModifier;
