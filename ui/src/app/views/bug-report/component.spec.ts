@@ -70,6 +70,8 @@ describe('BugReportComponent', () => {
 
 
   it('submits a bug report', fakeAsync(() => {
+    bugReportPage.fixture.componentRef.instance.profileStorageService.reload();
+    tick();
     bugReportPage.fixture.componentRef.instance.reportBug();
     bugReportPage.readPageData();
     simulateInput(bugReportPage.fixture, bugReportPage.shortDescription, testShortDescription);

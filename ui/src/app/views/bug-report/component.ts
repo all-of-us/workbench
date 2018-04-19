@@ -21,7 +21,7 @@ export class BugReportComponent implements OnInit {
 
   constructor(
     private bugReportService: BugReportService,
-    private profileStorageService: ProfileStorageService
+    public profileStorageService: ProfileStorageService
   ) {}
 
   ngOnInit() {
