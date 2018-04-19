@@ -392,7 +392,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter.setColumnName("person_id");
     filter.setValueNumber(new BigDecimal(1L));
     ResultFilters resultFilters = makeResultFilters(filter);
-    resultFilters.setNot(true);
+    resultFilters.setIfNot(true);
     tableQuery.setFilters(resultFilters);
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
@@ -802,7 +802,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     filter3.setValueNumber(new BigDecimal(3L));
     ResultFilters resultFilters = new ResultFilters();
     ResultFilters anyOf = makeAnyOf(filter1, filter2);
-    anyOf.setNot(true);
+    anyOf.setIfNot(true);
     resultFilters.setAllOf(ImmutableList.of(makeResultFilters(filter3), anyOf));
     tableQuery.setFilters(resultFilters);
     FieldSet fieldSet = new FieldSet();
