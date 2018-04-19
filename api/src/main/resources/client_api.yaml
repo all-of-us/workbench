@@ -91,9 +91,7 @@ definitions:
       statusFilter:
         description: >
           An array of status values; participants with these statuses will be included.
-          For table queries, defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW] --
-          everything but EXCLUDED. For annotation queries, defaults to [INCLUDED, NEEDS_FURTHER_REVIEW];
-          participants that haven't been reviewed yet will not be returned.
+          Defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW] -- everything but EXCLUDED.
           Only valid for use with cohortName (cohorts saved in the database.)
         type: array
         items:
