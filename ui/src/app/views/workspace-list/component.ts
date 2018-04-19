@@ -43,11 +43,11 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
         this.billingProjectInitialized = true;
       } else {
         this.billingProjectQuery = setTimeout(() => {
-          this.queryBillingStatus();
+          this.profileStorageService.reload();
         }, 10000);
       }
     });
-    this.profileStorageService.requestNewProfile();
+    this.profileStorageService.reload();
 
     this.workspacesService.getWorkspaces()
         .subscribe(
@@ -66,12 +66,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.billingProjectQuery);
-  }
-
-  queryBillingStatus(): void {
-    // TODO (blrubenstein): When we have a home page, move this to the
-    //      home page and change from tooltip to more descriptive message.
-    this.profileStorageService.requestNewProfile();
   }
 
   addWorkspace(): void {

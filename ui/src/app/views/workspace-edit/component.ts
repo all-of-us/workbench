@@ -165,7 +165,7 @@ export class WorkspaceEditComponent implements OnInit {
       this.profileStorageService.profile$.subscribe(profile => {
         this.workspace.namespace = profile.freeTierBillingProjectName;
       });
-      this.profileStorageService.requestNewProfile();
+      this.profileStorageService.reload();
     }
     if (this.mode === WorkspaceEditMode.Edit || this.mode === WorkspaceEditMode.Clone) {
       // There is an existing workspace referenced in this flow.

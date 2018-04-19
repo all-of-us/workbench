@@ -9,7 +9,7 @@ export class ProfileStorageServiceStub {
   public profile$ = this.profile.asObservable();
   constructor() {}
 
-  public requestNewProfile() {
+  public reload() {
     this.profile.next(ProfileStubVariables.PROFILE_STUB);
   }
 }

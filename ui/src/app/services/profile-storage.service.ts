@@ -13,9 +13,11 @@ export class ProfileStorageService {
   private profile = new ReplaySubject<Profile>(1);
   public profile$ = this.profile.asObservable();
 
-  constructor(private profileService: ProfileService) {}
+  constructor(private profileService: ProfileService) {
+    this.reload();
+  }
 
-  requestNewProfile() {
+  reload() {
     if (!this.activeCall) {
       this.activeCall = true;
       this.profileService.getMe().subscribe((profile) => {

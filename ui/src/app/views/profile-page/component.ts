@@ -57,14 +57,14 @@ export class ProfilePageComponent implements OnInit {
 
     this.profileStorageService.profile$.subscribe(profile => {
       this.profile = profile;
-      if (this.editing === false) {
+      if (!this.editing) {
         this.workingProfile = <Profile> deepCopy(profile);
       }
       this.profileLoaded = true;
       this.reloadSpinner();
     });
 
-    this.profileStorageService.requestNewProfile();
+    this.profileStorageService.reload();
   }
 
   submitChanges(): void {
@@ -73,7 +73,7 @@ export class ProfilePageComponent implements OnInit {
       () => {
         this.profile = <Profile> deepCopy(this.workingProfile);
         this.editing = false;
-        this.profileStorageService.requestNewProfile();
+        this.profileStorageService.reload();
       },
       error => {
         // if MailChimp throws an error, display to the user
