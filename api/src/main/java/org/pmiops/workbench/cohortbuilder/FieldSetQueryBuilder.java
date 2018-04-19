@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -46,8 +45,6 @@ import org.springframework.stereotype.Service;
 // TODO: consider whether we want to impose limits on number of columns, joins, etc. requested
 @Service
 public class FieldSetQueryBuilder {
-
-  private static final Logger log = Logger.getLogger(FieldSetQueryBuilder.class.getName());
 
   private static final String TABLE_SEPARATOR = ".";
   private static final String ALIAS_SEPARATOR = "_";
