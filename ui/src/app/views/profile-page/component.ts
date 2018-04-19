@@ -28,7 +28,7 @@ export class ProfilePageComponent implements OnInit {
   profileLoaded = false;
   errorText: string;
   editing = false;
-  view: any[] = [135, 135];
+  view: any[] = [200, 200];
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
