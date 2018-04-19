@@ -23,6 +23,7 @@ import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 import { DbHeaderComponent } from './views/db-header/db-header.component';
 import { SurveysComponent } from './views/surveys/surveys.component';
+import { SurveyViewComponent } from './views/survey-view/survey-view.component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -53,6 +54,7 @@ function getBasePath() {
     RoutingSpinnerComponent,
     SurveysComponent,
     DbHeaderComponent,
+    SurveyViewComponent,
   ],
   providers: [
   ],

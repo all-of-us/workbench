@@ -5,6 +5,7 @@ import {HomeComponent} from './data-browser/home/home.component';
 import {SearchComponent} from './data-browser/search/search.component';
 
 import {SurveysComponent} from "./views/surveys/surveys.component";
+import {SurveyViewComponent} from "./views/survey-view/survey-view.component";
 
 declare let gtag: Function;
 declare let ga_tracking_id: string;
@@ -24,7 +25,12 @@ const routes: Routes = [
     path: '',
     component: SurveysComponent,
     data: {title: 'Browse Survey Instruments'}
-  }
+  },
+  {
+    path: 'survey/:id',
+    component: SurveyViewComponent,
+    data: {title: 'View Survey Questions and Answers'}
+  },
 ];
 
 @NgModule({
