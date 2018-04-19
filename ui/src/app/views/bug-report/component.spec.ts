@@ -5,9 +5,12 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
+
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
-import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {
   queryByCss,
   simulateClick,
@@ -15,7 +18,7 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {BugReportService, ProfileService} from 'generated';
+import {BugReportService} from 'generated';
 
 
 class BugReportPage {
@@ -58,7 +61,7 @@ describe('BugReportComponent', () => {
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
-        { provide: ProfileService, useValue: new ProfileServiceStub() }
+        { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
       ] }).compileComponents().then(() => {
         bugReportPage = new BugReportPage(TestBed);
       });
@@ -67,6 +70,8 @@ describe('BugReportComponent', () => {
 
 
   it('submits a bug report', fakeAsync(() => {
+    bugReportPage.fixture.componentRef.instance.profileStorageService.reload();
+    tick();
     bugReportPage.fixture.componentRef.instance.reportBug();
     bugReportPage.readPageData();
     simulateInput(bugReportPage.fixture, bugReportPage.shortDescription, testShortDescription);

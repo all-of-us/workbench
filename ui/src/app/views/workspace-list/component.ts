@@ -1,12 +1,11 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
 
 import {
   BillingProjectStatus,
   ErrorResponse,
-  Profile,
-  ProfileService,
   WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService
@@ -29,23 +28,27 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   workspaceAccessLevel = WorkspaceAccessLevel;
   firstSignIn: Date;
   constructor(
-      private profileService: ProfileService,
+      private profileStorageService: ProfileStorageService,
       private route: ActivatedRoute,
       private router: Router,
       private workspacesService: WorkspacesService,
   ) {}
   ngOnInit(): void {
     this.workspacesLoading = true;
-    this.profileService.getMe().subscribe((profile: Profile) => {
-      this.firstSignIn = new Date(profile.firstSignInTime);
+    this.profileStorageService.profile$.subscribe((profile) => {
+      if (this.firstSignIn === undefined) {
+        this.firstSignIn = new Date(profile.firstSignInTime);
+      }
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {
         this.billingProjectQuery = setTimeout(() => {
-          this.queryBillingStatus();
+          this.profileStorageService.reload();
         }, 10000);
       }
     });
+    this.profileStorageService.reload();
+
     this.workspacesService.getWorkspaces()
         .subscribe(
             workspacesReceived => {
@@ -63,20 +66,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.billingProjectQuery);
-  }
-
-  queryBillingStatus(): void {
-    // TODO (blrubenstein): When we have a home page, move this to the
-    //      home page and change from tooltip to more descriptive message.
-    this.profileService.getMe().subscribe((profile: Profile) => {
-      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-        this.billingProjectInitialized = true;
-      } else {
-        this.billingProjectQuery = setTimeout(() => {
-          this.queryBillingStatus();
-        }, 10000);
-      }
-    });
   }
 
   addWorkspace(): void {
