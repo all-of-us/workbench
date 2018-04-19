@@ -7,6 +7,3 @@ insert into config (config_id, configuration) values
 
 insert into cdr_version(cdr_version_id, name, data_access_level, release_number, bigquery_project, bigquery_dataset, creation_time, num_participants, cdr_db_name, public_db_name) VALUES
   (1, 'Test Registered CDR', 1, 1, 'all-of-us-ehr-dev', 'test_merge_dec26', SYSDATE(), 942637, 'cdr20180223', 'public20180223');
-
-insert into concept(concept_id, concept_name, vocabulary_id, count_value, prevalence) VALUES
-  (1, 'Gender', 'Gender', 0, 0);
