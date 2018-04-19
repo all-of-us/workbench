@@ -16,7 +16,10 @@
     "observation_source_value":"5",
     "observation_source_concept_id":5,
     "unit_source_value":"5",
-    "qualifier_source_value":"5"
+    "qualifier_source_value":"5",
+    "value_source_concept_id":6,
+    "value_source_value": "6",
+    "questionnaire_response_id":7
   },
   {
     "observation_id":6,

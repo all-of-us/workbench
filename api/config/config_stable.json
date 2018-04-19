@@ -23,5 +23,10 @@
   "server": {
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable"
+  },
+  "admin": {
+    "adminIdVerification": "stable-environment-manual-id-verification-requests@fake-research-aou.org",
+    "supportGroup": "all-of-us-workbench-eng@googlegroups.com",
+    "verifiedSendingAddress": "all-of-us-workbench-eng@googlegroups.com"
   }
 }

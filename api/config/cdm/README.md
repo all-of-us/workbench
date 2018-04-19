@@ -10,6 +10,31 @@
 
 * Add `"foreignKey": "TABLE_NAME"` for each foreign key column.
 
+* Add the following columns to the observation table configuration (they are not a part of the standard OMOP schema, but were
+added to support AllOfUs):
+
+```
+       {
+          "type": "integer",
+          "name": "value_source_concept_id",
+          "mode": "nullable",
+          "description": "A foreign key to a Concept for the value in the source data. This is applicable to observations where the result can be expressed as a non-standard concept.",
+          "foreignKey": "concept"
+        },
+        {
+          "type": "string",
+          "name": "value_source_value",
+          "mode": "nullable",
+          "description": "The name of the concept referred to be value_source_concept_id. This is applicable to observations where the result can be expressed as a non-standard concept."
+        },
+        {
+          "type": "integer",
+          "name": "questionnaire_response_id",
+          "mode": "nullable",
+          "description": "An ID for a questionnaire response that produced this observation. This is applicable to AllOfUs questionnaire answers only. All answers with the same questionnaire response ID were submitted in the same response."
+        }
+```
+
 * Replace all forward slashes with \/ (to allow for GSON deserialization.)
 
 When we start supporting a new CDM version, create a new file (either from

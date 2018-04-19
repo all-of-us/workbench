@@ -21,10 +21,11 @@ import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
+import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
-import {IdVerificationPageComponent} from './views/id-verification-page/component';
+import {InitialErrorComponent} from './views/initial-error/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
@@ -33,6 +34,7 @@ import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
+import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
@@ -45,7 +47,6 @@ import {
   ApiModule,
   ConfigService,
   Configuration,
-  StatusService
 } from 'generated';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -91,11 +92,12 @@ export function getConfiguration(signInService: SignInService): Configuration {
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
+    BreadcrumbComponent,
     BugReportComponent,
     CohortEditComponent,
     ErrorHandlerComponent,
     WorkspaceListComponent,
-    IdVerificationPageComponent,
+    InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
     PageTemplateSignedOutComponent,
@@ -104,6 +106,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     SignedInComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
+    WorkspaceNavBarComponent,
     WorkspaceShareComponent,
   ],
   providers: [
@@ -134,6 +137,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     },
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, BugReportComponent, ErrorHandlerComponent]
+  bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]
 })
 export class AppModule {}

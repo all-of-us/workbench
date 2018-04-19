@@ -13,7 +13,9 @@ export interface WorkspaceData extends Workspace {
 
 @Injectable()
 export class WorkspaceResolver implements Resolve<WorkspaceData> {
-  constructor(private api: WorkspacesService) {}
+  constructor(
+    private api: WorkspacesService,
+  ) {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<WorkspaceData> {
     const ns: Workspace['namespace'] = route.params.ns;
@@ -24,8 +26,13 @@ export class WorkspaceResolver implements Resolve<WorkspaceData> {
 
     const call = this.api
       .getWorkspace(ns, wsid)
-      .map(({workspace, accessLevel}) => ({...workspace, accessLevel}));
-
+      .map(({workspace, accessLevel}) => ({...workspace, accessLevel}))
+      .catch((e) => {
+        if (e.status === 404) {
+          e.title = 'Workspace ' + ns + '/' + wsid + ' not found';
+        }
+        throw e;
+      });
     return (call as Observable<WorkspaceData>);
   }
 }

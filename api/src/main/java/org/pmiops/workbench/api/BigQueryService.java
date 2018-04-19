@@ -7,23 +7,24 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResponse;
 import com.google.cloud.bigquery.QueryResult;
-
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
-
+import javax.servlet.http.HttpServletResponse;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 public class BigQueryService {
@@ -51,6 +52,17 @@ public class BigQueryService {
             response = bigquery.query(query, BigQuery.QueryOption.of(BigQuery.QueryResultsOption.maxWaitTime(60000L)));
         } catch (InterruptedException e) {
             throw new BigQueryException(500, "Something went wrong with BigQuery: " + e.getMessage());
+        } catch (BigQueryException e) {
+            if (e.getCode() == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+                throw new ServerUnavailableException("BigQuery was temporarily unavailable, try again later", e);
+            } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
+                throw new ForbiddenException("Access to the CDR is denied", e);
+            } else {
+                throw new ServerErrorException(
+                    String.format("An unexpected error occurred querying against BigQuery with "
+                            + "query = (%s), params = (%s)", query.getQuery(),
+                        query.getNamedParameters()), e);
+            }
         }
 
         return response.getResult();

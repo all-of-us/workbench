@@ -48,9 +48,20 @@ public class CohortQueryBuilder {
   public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
       String sqlTemplate, String endSql, String mainTable,
       Map<String, QueryParameterValue> params) {
-    SearchRequest request = participantCriteria.getSearchRequest();
     StringBuilder queryBuilder = new StringBuilder(sqlTemplate.replace("${mainTable}", mainTable));
+    addWhereClause(participantCriteria, mainTable, queryBuilder, params);
+    queryBuilder.append(endSql.replace("${mainTable}", mainTable));
 
+    return QueryJobConfiguration
+        .newBuilder(queryBuilder.toString())
+        .setNamedParameters(params)
+        .setUseLegacySql(false)
+        .build();
+  }
+
+  public void addWhereClause(ParticipantCriteria participantCriteria, String mainTable,
+      StringBuilder queryBuilder, Map<String, QueryParameterValue> params) {
+    SearchRequest request = participantCriteria.getSearchRequest();
     if (request == null) {
       queryBuilder.append(PERSON_ID_WHITELIST_TEMPLATE.replace("${mainTable}", mainTable));
       params.put(PERSON_ID_WHITELIST_PARAM, QueryParameterValue.array(
@@ -81,13 +92,6 @@ public class CohortQueryBuilder {
       }
       queryBuilder.append(joiner.toString());
     }
-    queryBuilder.append(endSql.replace("${mainTable}", mainTable));
-
-    return QueryJobConfiguration
-        .newBuilder(queryBuilder.toString())
-        .setNamedParameters(params)
-        .setUseLegacySql(false)
-        .build();
   }
 
   private StringJoiner buildQuery(List<SearchGroup> groups, String mainTable,

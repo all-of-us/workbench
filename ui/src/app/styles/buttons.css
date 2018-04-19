@@ -1,5 +1,5 @@
 button {
-  font-family: GothamMedium;
+  font-weight: 500;
   font-size: 12px;
 }
 
@@ -38,6 +38,10 @@ button.btn.btn-outline {
   color: #262262;
   letter-spacing: 0.02rem;
   line-height: 0.77rem;
+}
+
+button.btn.btn-secondary:active {
+  box-shadow: inset 0 2px 0 0 #4356a7;
 }
 
 button.btn.btn-secondary {

@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {deepCopy} from 'app/utils/index';
@@ -46,10 +45,7 @@ export class ProfilePageComponent implements OnInit {
     }
   ];
   constructor(
-      private errorHandlingService: ErrorHandlingService,
       private profileService: ProfileService,
-      private route: ActivatedRoute,
-      private router: Router,
       private signInService: SignInService
   ) {}
 
@@ -178,5 +174,12 @@ export class ProfilePageComponent implements OnInit {
         this.workingProfile.institutionalAffiliations.splice(positionOfValue, 1);
       }
     }
+  }
+
+  requestVerification(): void {
+    this.profileService.submitIdVerification().subscribe((profile) => {
+      this.profile.requestedIdVerification = profile.requestedIdVerification;
+      this.workingProfile.requestedIdVerification = profile.requestedIdVerification;
+    });
   }
 }

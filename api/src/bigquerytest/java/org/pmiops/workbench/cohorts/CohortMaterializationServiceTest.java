@@ -29,6 +29,7 @@ import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
+import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.ConceptCacheConfiguration;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -64,7 +66,8 @@ import org.springframework.context.annotation.Import;
 @Import({DemoQueryBuilder.class, QueryBuilderFactory.class, CohortMaterializationService.class,
         BigQueryService.class, ParticipantCounter.class, DomainLookupService.class,
         CohortQueryBuilder.class, FieldSetQueryBuilder.class, QueryBuilderFactory.class,
-        TestJpaConfig.class, ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class})
+        TestJpaConfig.class, ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class,
+        AnnotationQueryBuilder.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
@@ -1098,6 +1101,9 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortPersonConceptSelectColumns() {
+    // Here person is in the inner query; gender_concept, gender_concept.vocabulary,
+    // and gender_concept.vocabulary.vocabulary_concept are only referenced in the select clause
+    // and are in the outer query.
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("person");
     tableQuery.setColumns(ImmutableList.of("person_id", "gender_concept.concept_name",
@@ -1109,6 +1115,166 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     columnFilter.setOperator(Operator.NOT_EQUAL);
     columnFilter.setValueNumber(new BigDecimal(2L));
     tableQuery.setFilters(makeResultFilters(columnFilter));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 1L)
+        .put("gender_concept.concept_name", "MALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    ImmutableMap<String, Object> p2Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 102246L)
+        .put("gender_concept.concept_name", "FEMALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    assertResults(response, p1Map, p2Map);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortWhereInner() {
+    // person and gender_concept are in the inner query (since gender_concept is in the where clause.)
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id", "gender_concept.concept_name",
+        "gender_concept.vocabulary_id", "gender_concept.vocabulary.vocabulary_name",
+        "gender_concept.vocabulary.vocabulary_reference",
+        "gender_concept.vocabulary.vocabulary_concept.concept_name"));
+    ColumnFilter columnFilter1 = new ColumnFilter();
+    columnFilter1.setColumnName("person_id");
+    columnFilter1.setOperator(Operator.NOT_EQUAL);
+    columnFilter1.setValueNumber(new BigDecimal(2L));
+    ColumnFilter columnFilter2 = new ColumnFilter();
+    columnFilter2.setColumnName("gender_concept.vocabulary_id");
+    columnFilter2.setValue("Gender");
+    tableQuery.setFilters(makeAllOf(columnFilter1, columnFilter2));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 1L)
+        .put("gender_concept.concept_name", "MALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    ImmutableMap<String, Object> p2Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 102246L)
+        .put("gender_concept.concept_name", "FEMALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    assertResults(response, p1Map, p2Map);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortWhereNestedInner() {
+    // person and gender_concept.vocabulary are in the inner query, and thus so is gender_concept.
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id", "gender_concept.concept_name",
+        "gender_concept.vocabulary_id", "gender_concept.vocabulary.vocabulary_name",
+        "gender_concept.vocabulary.vocabulary_reference",
+        "gender_concept.vocabulary.vocabulary_concept.concept_name"));
+    ColumnFilter columnFilter1 = new ColumnFilter();
+    columnFilter1.setColumnName("person_id");
+    columnFilter1.setOperator(Operator.NOT_EQUAL);
+    columnFilter1.setValueNumber(new BigDecimal(2L));
+    ColumnFilter columnFilter2 = new ColumnFilter();
+    columnFilter2.setColumnName("gender_concept.vocabulary.vocabulary_name");
+    columnFilter2.setValue("Gender vocabulary");
+    tableQuery.setFilters(makeAllOf(columnFilter1, columnFilter2));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 1L)
+        .put("gender_concept.concept_name", "MALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    ImmutableMap<String, Object> p2Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 102246L)
+        .put("gender_concept.concept_name", "FEMALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    assertResults(response, p1Map, p2Map);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortOrderByInner() {
+    // person and gender_concept are in the inner query (since gender_concept is in order by).
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id", "gender_concept.concept_name",
+        "gender_concept.vocabulary_id", "gender_concept.vocabulary.vocabulary_name",
+        "gender_concept.vocabulary.vocabulary_reference",
+        "gender_concept.vocabulary.vocabulary_concept.concept_name"));
+    ColumnFilter columnFilter1 = new ColumnFilter();
+    columnFilter1.setColumnName("person_id");
+    columnFilter1.setOperator(Operator.NOT_EQUAL);
+    columnFilter1.setValueNumber(new BigDecimal(2L));
+    tableQuery.setFilters(makeResultFilters(columnFilter1));
+    tableQuery.setOrderBy(ImmutableList.of("gender_concept.concept_name"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+    ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 1L)
+        .put("gender_concept.concept_name", "MALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    ImmutableMap<String, Object> p2Map = ImmutableMap.<String, Object>builder()
+        .put("person_id", 102246L)
+        .put("gender_concept.concept_name", "FEMALE")
+        .put("gender_concept.vocabulary_id", "Gender")
+        .put("gender_concept.vocabulary.vocabulary_name", "Gender vocabulary")
+        .put("gender_concept.vocabulary.vocabulary_reference", "Gender reference")
+        .put("gender_concept.vocabulary.vocabulary_concept.concept_name", "Gender vocabulary concept")
+        .build();
+    assertResults(response, p2Map, p1Map);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortOrderByNestedInner() {
+    // person and gender_concept.vocabulary are in the inner query, and thus so is gender_concept.
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("person");
+    tableQuery.setColumns(ImmutableList.of("person_id", "gender_concept.concept_name",
+        "gender_concept.vocabulary_id", "gender_concept.vocabulary.vocabulary_name",
+        "gender_concept.vocabulary.vocabulary_reference",
+        "gender_concept.vocabulary.vocabulary_concept.concept_name"));
+    ColumnFilter columnFilter1 = new ColumnFilter();
+    columnFilter1.setColumnName("person_id");
+    columnFilter1.setOperator(Operator.NOT_EQUAL);
+    columnFilter1.setValueNumber(new BigDecimal(2L));
+    tableQuery.setFilters(makeResultFilters(columnFilter1));
+    tableQuery.setOrderBy(ImmutableList.of("DESCENDING(gender_concept.vocabulary.vocabulary_name)", "person_id"));
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
@@ -1162,6 +1328,38 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
         SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
     assertPersonIds(response, 102246L, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeAnnotationQueryNoPagination() {
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setAnnotationQuery(new AnnotationQuery());
+    MaterializeCohortResponse response =
+        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(),
+            makeRequest(fieldSet, 1000));
+    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
+    ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
+    assertResults(response, p1Map, p2Map);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeAnnotationQueryWithPagination() {
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setAnnotationQuery(new AnnotationQuery());
+    MaterializeCohortRequest request = makeRequest(fieldSet, 1);
+    MaterializeCohortResponse response =
+        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), request);
+    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
+    assertResults(response, p1Map);
+    assertThat(response.getNextPageToken()).isNotNull();
+
+    request.setPageToken(response.getNextPageToken());
+    MaterializeCohortResponse response2 =
+        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), request);
+    ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
+    assertResults(response2, p2Map);
+    assertThat(response2.getNextPageToken()).isNull();
   }
 
   private ResultFilters makeResultFilters(ColumnFilter columnFilter) {
