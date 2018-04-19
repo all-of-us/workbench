@@ -1,3 +1,4 @@
+-- This file is being used by ApplicationTest.java to load application configuration at initialization time.
 insert into config (config_id, configuration) values
   ('main', '{"firecloud":{"billingAccountId":"014D91-FCB792-33D2C0","billingProjectPrefix":"aou-test-f1-","debugEndpoints":false,"enforceRegistered":false,"jupyterUserScriptUri":"gs://all-of-us-workbench-test-scripts/setup_notebook_cluster.sh","registeredDomainName":"all-of-us-registered-test"},"auth":{"serviceAccountApiUsers":["all-of-us-workbench-test@appspot.gserviceaccount.com"]},"cdr":{"defaultCdrVersion":"Test Registered CDR"},"googleCloudStorageService":{"credentialsBucketName":"all-of-us-workbench-test-credentials"},"googleDirectoryService":{"gSuiteDomain":"fake-research-aou.org"},"server":{"stackdriverApiKey":"AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4","projectId":"all-of-us-workbench-test"}}');
 
