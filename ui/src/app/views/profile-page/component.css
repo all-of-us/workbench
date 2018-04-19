@@ -34,7 +34,7 @@ div.field {
 
 input[type=text]:not([readonly]) {
   padding: 0.75rem;
-  width: 14rem;
+  width: 15rem;
 }
 
 label {
@@ -53,10 +53,10 @@ button.btn.btn-secondary {
 
 .percentText {
   position: absolute;
-  top: 3.5rem;
+  top: 4.9rem;
   color: #8BC990;
   font-size: 22px;
-  width: 5.8rem;
+  width: 8.4rem;
   text-align: center;
   line-height: 17px;
 }
@@ -72,7 +72,7 @@ button.btn.btn-secondary {
 
 textarea {
   height: 142px;
-  width: 666px;
+  width: 32rem;
   resize: both;
   border-radius: 5px;
   border: 0.5px solid #C5C5C5;
