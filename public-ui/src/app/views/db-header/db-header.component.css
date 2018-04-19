@@ -1,57 +1,68 @@
-.header, header, .header-1, header.header-1 {
+
+
+.header {
+    height:96px;
     background-color:inherit;
     padding-top:24px;
     margin-bottom: 24px;
 }
 
 .branding {
-    margin-right: 12px;
-    padding-right: 0;
+    /* Show full logo on small screen */
+    min-width:10rem !important;
+   /* margin-right: 12px;
+    padding-right: 0;*/
 }
 .branding .logo {
     padding-right: 0px;
     padding-top: 12px;
 }
 .branding .logo img {
-    width:288px;
+    width: 231px;
 }
 
 
+span.title-data {
+    color: #6CACE4;
+    font-weight:bold;
+}
+span.title-browser {
+    color: #262262;
+    font-weight:bold;
+}
 
-header .header-nav .nav-link {
-    color:#4B4B81;
-    font-size:14px;
-    font-family: "Open Sans",open-sans,sans-serif;
+
+@media (max-width: 544px) {
+
+    .main-container .header.db-header .branding {
+        max-width: 8rem !important;
+        min-width: 0;
+        overflow: hidden;
+    }
 }
 
 .header-nav {
-    margin-left: 0px;
+    font-family: "Gotham HTF",open-sans,sans-serif;
     border-bottom: solid 1px #000000;
-
+    margin-top:-.25rem;
 }
-.header-nav.title {
-    padding-right: 1rem;
-    padding-left: 0;
+
+clr-header .header-nav .nav-link {
+    color: #302C71;;
+    font-size:14px;
+    /*font-weight: 300;*/
+    line-height: 3.75rem;
+}
+
+clr-header .header-nav .nav-link.title {
     font-size:20px;
-    font-family: "Open Sans",open-sans,sans-serif;
+    font-family: "Gotham HTF",open-sans,sans-serif;
     font-weight: bold;
-    margin-right: 0px;
-    margin-left: 0;
-    line-height: 4.25;
-
 }
-span.title-data {
-    color: #88BAE2;
-}
-span.title-browser {
-    color: #252660;
-}
-
+/*
 .header-nav.menu {
-    margin-left: 0px;
-    width:60%;
-}
 
-.header-nav a{
-    line-height: 6.5;
+    width:60%;
+    height: 29px
 }
+*/

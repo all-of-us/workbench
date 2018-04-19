@@ -1,19 +1,22 @@
 button {
   font-size: 12px;
-  font-weight: 100;
+  font-weight: 500;
+  font-family: "Gotham HTF",open-sans,sans-serif;;
+  line-height:14px;
 }
 
 button.btn.btn-primary {
-  background-color: #2F306F;
+  background-color: #302C71;;
   border: none;
   padding: 0rem 0.77rem;
-  border-radius: 0.3rem;
+  border-radius: 5px;
   cursor: pointer;
   cursor: hand;
   text-transform: uppercase;
   color: #fff;
   letter-spacing: 0.02rem;
   line-height: 0.77rem;
+  height: 44px;
 }
 
 button.btn.btn-primary:hover {
