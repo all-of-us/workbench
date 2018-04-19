@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cohortreview;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -71,9 +70,6 @@ public class AnnotationQueryBuilder {
   private static final String ANNOTATION_VALUE_JOIN_SQL =
       " LEFT OUTER JOIN cohort_annotation_enum_value ae%d "
       + "ON ae%d.cohort_annotation_enum_value_id = a%d.cohort_annotation_enum_value_id";
-
-  private static final ImmutableSet<CohortStatus> REVIEWED_STATUSES =
-      ImmutableSet.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW);
 
   private Map<String, CohortAnnotationDefinition> getAnnotationDefinitions(CohortReview cohortReview) {
     return Maps.uniqueIndex(
@@ -204,6 +200,9 @@ public class AnnotationQueryBuilder {
   public Iterable<Map<String, Object>> materializeAnnotationQuery(CohortReview cohortReview,
       List<CohortStatus> statusFilter,
       AnnotationQuery annotationQuery, int limit, long offset) {
+    if (statusFilter == null || statusFilter.isEmpty()) {
+      throw new BadRequestException("statusFilter cannot be empty");
+    }
     Map<String, CohortAnnotationDefinition> annotationDefinitions = null;
     List<String> columns = annotationQuery.getColumns();
     if (columns == null || columns.isEmpty()) {

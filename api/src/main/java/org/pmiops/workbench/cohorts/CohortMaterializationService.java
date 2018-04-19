@@ -48,7 +48,12 @@ public class CohortMaterializationService {
   @VisibleForTesting
   static final String PERSON_TABLE = "person";
 
-  private static final List<CohortStatus> ALL_STATUSES = Arrays.asList(CohortStatus.values());
+  private static final List<CohortStatus> NOT_EXCLUDED =
+      Arrays.asList(CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW,
+          CohortStatus.NOT_REVIEWED);
+
+  private static final List<CohortStatus> REVIEWED_NOT_EXCLUDED =
+      Arrays.asList(CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW);
 
   private final BigQueryService bigQueryService;
   private final ParticipantCounter participantCounter;
@@ -178,13 +183,13 @@ public class CohortMaterializationService {
       }
     }
     int limit = pageSize + 1;
-    if (statusFilter == null) {
-      statusFilter = ALL_STATUSES;
-    }
 
     MaterializeCohortResponse response = new MaterializeCohortResponse();
     Iterable<Map<String, Object>> results;
     if (fieldSet == null || fieldSet.getTableQuery() != null) {
+      if (statusFilter == null) {
+        statusFilter = NOT_EXCLUDED;
+      }
       ParticipantCriteria criteria = getParticipantCriteria(statusFilter, cohortReview,
           searchRequest);
       if (criteria.getParticipantIdsToInclude() != null
@@ -199,6 +204,9 @@ public class CohortMaterializationService {
       if (cohortReview == null) {
         // There is no cohort review, so there are no annotations; return empty results.
         return response;
+      }
+      if (statusFilter == null) {
+        statusFilter = REVIEWED_NOT_EXCLUDED;
       }
       results = annotationQueryBuilder.materializeAnnotationQuery(cohortReview, statusFilter,
           fieldSet.getAnnotationQuery(), limit, offset);
