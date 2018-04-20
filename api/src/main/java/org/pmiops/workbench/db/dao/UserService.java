@@ -227,10 +227,6 @@ public class UserService {
   }
 
   public boolean getContactEmailTaken(String contactEmail) {
-    User user = userDao.findUserByContactEmail(contactEmail);
-    if(user != null) {
-      return true;
-    }
-    return false;
+    return (userDao.findUserByContactEmail(contactEmail) != null);
   }
 }

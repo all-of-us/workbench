@@ -63,6 +63,9 @@ export class AccountCreationComponent {
   }
 
   createAccount(): void {
+    if (this.usernameConflictError || this.contactEmailConflictError) {
+      return;
+    }
     this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
     this.showPasswordsDoNotMatchError = false;

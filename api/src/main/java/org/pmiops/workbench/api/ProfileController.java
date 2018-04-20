@@ -363,7 +363,9 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-
+    if (userDao.findUserByContactEmail(request.getProfile().getContactEmail()) != null) {
+      throw new ConflictException("That contact email is already taken.");
+    }
     com.google.api.services.admin.directory.model.User googleUser;
     try {
       verifyInvitationKey(request.getInvitationKey());
