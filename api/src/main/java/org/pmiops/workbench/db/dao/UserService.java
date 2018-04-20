@@ -225,4 +225,12 @@ public class UserService {
     adminActionHistory.setTimestamp();
     adminActionHistoryDao.save(adminActionHistory);
   }
+
+  public boolean getContactEmailTaken(String contactEmail) {
+    User user = userDao.findUserByContactEmail(contactEmail);
+    if(user != null) {
+      return true;
+    }
+    return false;
+  }
 }
