@@ -108,6 +108,9 @@ export class AccountCreationComponent {
   }
 
   contactEmailChanged(): void {
+    if (!this.profile.contactEmail) {
+      return;
+    }
     this.contactEmailConflictError = false;
     clearTimeout(this.contactEmailCheckTimeout);
     this.contactEmailCheckTimeout = setTimeout(() => {
