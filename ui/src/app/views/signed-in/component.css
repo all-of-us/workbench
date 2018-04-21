@@ -29,6 +29,12 @@
   padding-top: 1rem;
   padding-bottom: 0.5rem;
   background-color: white;
+  /*
+   * NOTE: if you ever need to change this number, you need to ALSO change the
+   * min-height calc in .content-container or we'll wind up with a container
+   * that is either too short or so tall it creates a scrollbar
+   */
+  height: 4rem;
 }
 
 .nav-link:hover {

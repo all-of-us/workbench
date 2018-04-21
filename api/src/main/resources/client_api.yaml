@@ -228,7 +228,7 @@ definitions:
       A list of filters applied to the results of a query. Only results matching the filter criteria
       should be returned. Exactly one of "allOf", "anyOf", and "columnFilter" should be set.
     properties:
-      not:
+      if_not:
         description: >
          Set to true if a result matching allOf or anyOf below should result in a result *not*
          being returned.

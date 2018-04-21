@@ -58,11 +58,4 @@ export class InvitationKeyComponent {
       this.invitationKeyInvalid = true;
     });
   }
-
-  requestKey(): void {
-    this.profileService.requestInvitationKey(this.invitationKeyRequestEmail).subscribe(() => {
-      this.requestSent = true;
-    });
-  }
-
 }

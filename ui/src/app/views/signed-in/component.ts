@@ -1,25 +1,14 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import {
-  ActivatedRoute,
-  Event as RouterEvent,
   Router,
 } from '@angular/router';
 
-import {Observable} from 'rxjs/Observable';
-
+import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {environment} from 'environments/environment';
 
-import {AppComponent} from '../app/component';
-
-import {Authority, ProfileService} from 'generated';
-
-declare const gapi: any;
-export const overriddenUrlKey = 'allOfUsApiUrlOverride';
-export const overriddenPublicUrlKey = 'publicApiUrlOverride';
-
+import {Authority} from 'generated';
 
 @Component({
   selector: 'app-signed-in',
@@ -53,9 +42,8 @@ export class SignedInComponent implements OnInit {
   }
   constructor(
     /* Ours */
-    private appComponent: AppComponent,
     private signInService: SignInService,
-    private profileService: ProfileService,
+    private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
     private router: Router,
@@ -63,21 +51,20 @@ export class SignedInComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.profileImage = this.signInService.profileImage;
-    document.body.style.backgroundColor = '#f1f2f2';
-    this.profileService.getMe().subscribe(profile => {
+    this.profileStorageService.profile$.subscribe((profile) => {
+      this.hasReviewResearchPurpose =
+        profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+      this.hasReviewIdVerification =
+        profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
       this.givenName = profile.givenName;
       this.familyName = profile.familyName;
     });
+
+    document.body.style.backgroundColor = '#f1f2f2';
     this.signInService.isSignedIn$.subscribe(signedIn => {
       if (signedIn) {
-        this.profileService.getMe().subscribe(profile => {
-          this.hasReviewResearchPurpose =
-            profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-          this.hasReviewIdVerification =
-            profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
-            // this.email = profile.username;
-        });
+        this.profileImage = this.signInService.profileImage;
+        this.profileStorageService.reload();
       } else {
         this.router.navigate(['/login', {
           from: this.router.routerState.snapshot.url
@@ -86,7 +73,7 @@ export class SignedInComponent implements OnInit {
     });
   }
 
-  signOut(e: Event): void {
+  signOut(): void {
     this.signInService.signOut();
   }
 

@@ -12,6 +12,7 @@ import {InterceptedHttp} from './factory/InterceptedHttp';
 import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
+import {ProfileStorageService} from './services/profile-storage.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
@@ -25,6 +26,7 @@ import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
+import {InitialErrorComponent} from './views/initial-error/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
@@ -45,7 +47,6 @@ import {
   ApiModule,
   ConfigService,
   Configuration,
-  StatusService
 } from 'generated';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -95,6 +96,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     CohortEditComponent,
     ErrorHandlerComponent,
     WorkspaceListComponent,
+    InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
     PageTemplateSignedOutComponent,
@@ -124,6 +126,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
       deps: [ServerConfigService],
       useClass: ErrorReporterService,
     },
+    ProfileStorageService,
     SignInService,
     StatusCheckService,
     GoogleAnalyticsEventsService,
@@ -134,6 +137,6 @@ export function getConfiguration(signInService: SignInService): Configuration {
     },
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, ErrorHandlerComponent]
+  bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]
 })
 export class AppModule {}

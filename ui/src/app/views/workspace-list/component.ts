@@ -1,41 +1,15 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Comparator, StringFilter} from '@clr/angular';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
 
 import {
   BillingProjectStatus,
   ErrorResponse,
-  Profile,
-  ProfileService,
   WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService
 } from 'generated';
-
-/*
-* Search filters used by the workspace data table to
-* determine which of the cohorts loaded into client side memory
-* are displayed.
-*/
-class WorkspaceNameFilter implements StringFilter<WorkspaceResponse> {
-  accepts(workspaceResponse: WorkspaceResponse, search: string): boolean {
-    return workspaceResponse.workspace.name.toLowerCase().indexOf(search) >= 0;
-  }
-}
-
-class WorkspaceNameComparator implements Comparator<WorkspaceResponse> {
-  compare(a: WorkspaceResponse, b: WorkspaceResponse) {
-    return a.workspace.name.localeCompare(b.workspace.name);
-  }
-}
-
-// TODO: Change to research purpose?
-class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> {
-  accepts(workspaceResponse: WorkspaceResponse, search: string): boolean {
-    return workspaceResponse.workspace.description.toLowerCase().indexOf(search) >= 0;
-  }
-}
 
 
 @Component({
@@ -46,9 +20,6 @@ class WorkspaceResearchPurposeFilter implements StringFilter<WorkspaceResponse> 
 })
 export class WorkspaceListComponent implements OnInit, OnDestroy {
 
-  private workspaceNameFilter = new WorkspaceNameFilter();
-  private workspaceResearchPurposeFilter = new WorkspaceResearchPurposeFilter();
-  private workspaceNameComparator = new WorkspaceNameComparator();
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   errorText: string;
@@ -57,24 +28,27 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   workspaceAccessLevel = WorkspaceAccessLevel;
   firstSignIn: Date;
   constructor(
-      private errorHandlingService: ErrorHandlingService,
-      private profileService: ProfileService,
+      private profileStorageService: ProfileStorageService,
       private route: ActivatedRoute,
       private router: Router,
       private workspacesService: WorkspacesService,
   ) {}
   ngOnInit(): void {
     this.workspacesLoading = true;
-    this.profileService.getMe().subscribe((profile: Profile) => {
-      this.firstSignIn = new Date(profile.firstSignInTime);
+    this.profileStorageService.profile$.subscribe((profile) => {
+      if (this.firstSignIn === undefined) {
+        this.firstSignIn = new Date(profile.firstSignInTime);
+      }
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {
         this.billingProjectQuery = setTimeout(() => {
-          this.queryBillingStatus();
+          this.profileStorageService.reload();
         }, 10000);
       }
     });
+    this.profileStorageService.reload();
+
     this.workspacesService.getWorkspaces()
         .subscribe(
             workspacesReceived => {
@@ -92,20 +66,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.billingProjectQuery);
-  }
-
-  queryBillingStatus(): void {
-    // TODO (blrubenstein): When we have a home page, move this to the
-    //      home page and change from tooltip to more descriptive message.
-    this.profileService.getMe().subscribe((profile: Profile) => {
-      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-        this.billingProjectInitialized = true;
-      } else {
-        this.billingProjectQuery = setTimeout(() => {
-          this.queryBillingStatus();
-        }, 10000);
-      }
-    });
   }
 
   addWorkspace(): void {

@@ -22,7 +22,6 @@ export class WorkspaceNavBarComponent implements OnInit {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
 
-  dropdownOpen = false;
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;

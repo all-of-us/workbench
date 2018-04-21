@@ -5,9 +5,10 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {WorkspaceListComponent} from 'app/views/workspace-list/component';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   queryAllByCss,
@@ -15,7 +16,7 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {ProfileService, WorkspacesService} from 'generated';
+import {WorkspacesService} from 'generated';
 
 class WorkspaceListPage {
   fixture: ComponentFixture<WorkspaceListComponent>;
@@ -53,7 +54,7 @@ describe('WorkspaceListComponent', () => {
       providers: [
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
-        { provide: ProfileService, useValue: new ProfileServiceStub() }
+        { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
       ] }).compileComponents().then(() => {
         workspaceListPage = new WorkspaceListPage(TestBed);
       });

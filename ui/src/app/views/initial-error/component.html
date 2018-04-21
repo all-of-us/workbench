@@ -1,0 +1,6 @@
+<div *ngIf="initialLoadFailure" style="margin-top: 0rem; padding-top: 1rem; padding-left: 1rem;">
+  <h1>{{initialLoadErrorHeader}}</h1>
+  <p>
+    Please try <a [href]="loc.path()">reloading</a>, or navigating to the <a href="/">home page</a>.
+  </p>
+</div>

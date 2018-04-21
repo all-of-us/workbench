@@ -20,6 +20,7 @@ function isBlank(s: string) {
               '../../styles/template.css']
 })
 export class AccountCreationComponent {
+  contactEmailConflictError = false;
   containsLowerAndUpperError: boolean;
   profile: Profile = {
     username: '',
@@ -39,9 +40,10 @@ export class AccountCreationComponent {
   showPasswordLengthError: boolean;
   creatingAcccount: boolean;
   accountCreated: boolean;
-  conflictError = false;
+  usernameConflictError = false;
   gsuiteDomain: string;
   usernameCheckTimeout: NodeJS.Timer;
+  contactEmailCheckTimeout: NodeJS.Timer;
 
   constructor(
     private profileService: ProfileService,
@@ -61,6 +63,9 @@ export class AccountCreationComponent {
   }
 
   createAccount(): void {
+    if (this.usernameConflictError || this.contactEmailConflictError) {
+      return;
+    }
     this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
     this.showPasswordsDoNotMatchError = false;
@@ -96,11 +101,24 @@ export class AccountCreationComponent {
   }
 
   usernameChanged(): void {
-    this.conflictError = false;
+    this.usernameConflictError = false;
     clearTimeout(this.usernameCheckTimeout);
     this.usernameCheckTimeout = setTimeout(() => {
       this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
-        this.conflictError = response.isTaken;
+        this.usernameConflictError = response.isTaken;
+      });
+    }, 300);
+  }
+
+  contactEmailChanged(): void {
+    if (!this.profile.contactEmail) {
+      return;
+    }
+    this.contactEmailConflictError = false;
+    clearTimeout(this.contactEmailCheckTimeout);
+    this.contactEmailCheckTimeout = setTimeout(() => {
+      this.profileService.isContactEmailTaken(this.profile.contactEmail).subscribe((response) => {
+        this.contactEmailConflictError = response.isTaken;
       });
     }, 300);
   }
