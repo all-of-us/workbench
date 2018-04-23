@@ -240,7 +240,6 @@ public class ProfileControllerTest {
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, BILLING_PROJECT_NAME, true, null);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
-
     verify(fireCloudService).createAllOfUsBillingProject(BILLING_PROJECT_NAME);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, BILLING_PROJECT_NAME);
   }
@@ -436,7 +435,6 @@ public class ProfileControllerTest {
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, BILLING_PROJECT_NAME, true, true);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
-
     verify(fireCloudService).createAllOfUsBillingProject(BILLING_PROJECT_NAME);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, BILLING_PROJECT_NAME);
   }
