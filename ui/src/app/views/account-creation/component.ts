@@ -102,6 +102,7 @@ export class AccountCreationComponent {
 
   usernameChanged(): void {
     this.usernameConflictError = false;
+    // TODO: This should use a debounce, rather than manual setTimeout()s.
     clearTimeout(this.usernameCheckTimeout);
     this.usernameCheckTimeout = setTimeout(() => {
       if (!this.profile.username.trim()) {
