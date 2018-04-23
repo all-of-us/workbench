@@ -1054,6 +1054,39 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testShareWorkspaceNoRoleFailure() throws Exception{
+    User writerUser = new User();
+    writerUser.setEmail("writerfriend@gmail.com");
+    writerUser.setUserId(124L);
+    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
+    writerUser.setDisabled(false);
+
+    writerUser = userDao.save(writerUser);
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
+    UserRole creator = new UserRole();
+    creator.setEmail(LOGGED_IN_USER_EMAIL);
+    creator.setRole(WorkspaceAccessLevel.OWNER);
+    shareWorkspaceRequest.addItemsItem(creator);
+    UserRole writer = new UserRole();
+    writer.setEmail("writerfriend@gmail.com");
+    shareWorkspaceRequest.addItemsItem(writer);
+
+    // Simulate time between API calls to trigger last-modified/@Version changes.
+    CLOCK.increment(1000);
+    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
+    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    try {
+      workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+      fail("expected bad request exception for no role");
+    } catch(BadRequestException e) {
+      // Expected
+    }
+  }
+
+  @Test
   public void testUnshareWorkspace() throws Exception {
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
