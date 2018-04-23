@@ -32,10 +32,12 @@
     </div>
 
     <div class="form-section">
-      <button (click)="createAccount()" class="btn btn-primary short-button">Next</button>
-      <span class="spinner spinner-inline" *ngIf="creatingAcccount">
-        Creating account...
-      </span>
+      <button type="submit"
+          class="btn btn-primary short-button"
+          [disabled]="creatingAccount"
+          [clrLoading]="creatingAccount">
+        Next
+      </button>
     </div>
     <div *ngIf="showAllFieldsRequiredError" class="error">
       All fields are required.

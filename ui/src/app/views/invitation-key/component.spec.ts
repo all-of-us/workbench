@@ -1,6 +1,7 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
+import {By} from '@angular/platform-browser';
 import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
@@ -44,8 +45,10 @@ class InvitationKeyPage {
 
 describe('InvitationKeyComponent', () => {
   let invitationKeyPage: InvitationKeyPage;
+  let profileServiceStub: ProfileServiceStub;
 
   beforeEach(fakeAsync(() => {
+    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -63,7 +66,7 @@ describe('InvitationKeyComponent', () => {
       providers: [
         { provide: LoginComponent, useValue: {}},
         { provide: SignInService, useValue: {}},
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        { provide: ProfileService, useValue: profileServiceStub },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
@@ -116,4 +119,25 @@ describe('InvitationKeyComponent', () => {
     expect(app.invitationKeyInvalid).toBeFalsy();
   }));
 
+  it('should allow account creation', fakeAsync(() => {
+    const fixture = invitationKeyPage.fixture;
+    fixture.debugElement.componentInstance.invitationKey = 'dummy';
+    updateAndTick(fixture);
+    simulateClick(fixture, invitationKeyPage.nextButton);
+
+    const createDebugEl = fixture.debugElement.query(
+      By.css('app-account-creation'));
+    const createComponent = createDebugEl.componentInstance;
+    createComponent.profile.username = 'researcher';
+    createComponent.profile.givenName = 'Falco';
+    createComponent.profile.familyName = 'Lombardi';
+    createComponent.profile.contactEmail = 'fake@asdf.com';
+    createComponent.password = 'passworD';
+    createComponent.passwordAgain = 'passworD';
+    updateAndTick(fixture);
+    createDebugEl.query(By.css('button[type=submit]')).nativeElement.click();
+
+    updateAndTick(fixture);
+    expect(profileServiceStub.accountCreates).toEqual(1);
+  }));
 });
