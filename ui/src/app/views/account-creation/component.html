@@ -34,6 +34,7 @@
     <div class="form-section">
       <button type="submit"
           class="btn btn-primary short-button"
+          [disabled]="creatingAcccount"
           [clrLoading]="creatingAcccount">
         Next
       </button>
