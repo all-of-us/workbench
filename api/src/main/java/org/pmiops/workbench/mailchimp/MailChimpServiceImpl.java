@@ -10,7 +10,10 @@ import com.ecwid.maleorang.method.v3_0.lists.members.EditMemberMethod.Create;
 import com.ecwid.maleorang.method.v3_0.lists.members.GetMemberMethod;
 import java.io.IOException;
 import javax.inject.Provider;
+
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,8 +68,12 @@ public class MailChimpServiceImpl implements MailChimpService {
 
     try(MailchimpClient client = new MailchimpClient(apiKey)) {
       return client.execute(method);
-    } catch (IOException | MailchimpException e) {
-      throw new RuntimeException(e);
+    } catch (IOException e) {
+      WorkbenchException we = new WorkbenchException(new ErrorResponse().statusCode(500).errorClassName(e.getClass().getName()).message(e.getMessage()));
+      throw we;
+    } catch (MailchimpException e) {
+      WorkbenchException we = new WorkbenchException(new ErrorResponse().statusCode(e.code).errorClassName(e.getClass().getName()).message(e.getMessage()));
+      throw we;
     }
   }
 
