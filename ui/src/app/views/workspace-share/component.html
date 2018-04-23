@@ -32,6 +32,9 @@
         <div *ngIf="userNotFound" class="error-message">
           User {{toShare}} not found.
         </div>
+        <div *ngIf="roleNotSelected" class="error-message">
+          Please select a permission level.
+        </div>
       </div>
       <div class="removing-area">
         <h4 class="collaborator-label">Current Collaborators</h4>
