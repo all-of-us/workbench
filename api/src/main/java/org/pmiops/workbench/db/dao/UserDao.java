@@ -11,8 +11,10 @@ import org.springframework.data.repository.query.Param;
 public interface UserDao extends CrudRepository<User, Long> {
 
   User findUserByEmail(String email);
-  User findUserByContactEmail(String contactEmail);
   User findUserByUserId(long userId);
+
+  List<User> findUserByContactEmail(String contactEmail);
+
 
   /**
    * Returns the users who's identities have not been validated by BlockScore

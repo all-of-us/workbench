@@ -39,7 +39,14 @@
             <label class="long-text-field" style="padding-top: 1.5rem">Username:</label>
             <div *ngIf="profileLoaded else loading">{{workingProfile.username}}</div>
           </div>
-          <div class="alert alert-warning"*ngIf="workingProfile.emailVerificationStatus !== 'subscribed'">
+          <div class="alert alert-danger"*ngIf="workingProfile.contactEmailFailure">
+            <div class="alert-items">
+              <div class="alert-item static">
+                <span class="alert-text-waiting">Your email address could not be verified. Please try a different contact email.</span>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-warning"*ngIf="workingProfile.emailVerificationStatus === 'pending'">
             <div class="alert-items">
               <div class="alert-item static">
                 <span class="alert-text-waiting">Your email address is awaiting verification. Please check your inbox for an email from All of Us Researcher Workbench, click on the link inside and then reload this page.</span>
