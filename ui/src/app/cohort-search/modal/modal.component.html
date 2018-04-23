@@ -1,3 +1,36 @@
-<p>
-  modal works!
-</p>
+<div class="modal-container" [class.show-modal]="open">
+  <div class="modal-content">
+
+    <div class="top-bar">
+      <div class="btn-group btn-link">
+        <button type="button" class="btn">
+          Page A
+        </button>
+        <button type="button" class="btn">
+          Page B
+        </button>
+        <button type="button" class="btn">
+          Page C
+        </button>
+      </div>
+      <button
+        (click)="open = false"
+        class="btn btn-link btn-icon">
+        <clr-icon class="close-button" size="24" shape="close"></clr-icon>
+      </button>
+    </div>
+
+    <div class="content">
+      <div class="page-A">
+        Lorem Ipsum A
+      </div>
+      <div class="page-B">
+        Lorem Ipsum B
+      </div>
+      <div class="page-C">
+        Lorem Ipsum C
+      </div>
+    </div>
+
+  </div>
+</div>
