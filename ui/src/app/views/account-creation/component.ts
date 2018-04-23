@@ -35,7 +35,7 @@ export class AccountCreationComponent {
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
   showPasswordLengthError: boolean;
-  creatingAcccount: boolean;
+  creatingAccount: boolean;
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
@@ -91,12 +91,12 @@ export class AccountCreationComponent {
       profile: this.profile, password: this.password,
       invitationKey: this.invitationKeyService.invitationKey
     };
-    this.creatingAcccount = true;
+    this.creatingAccount = true;
     this.profileService.createAccount(request).subscribe(() => {
-      this.creatingAcccount = false;
+      this.creatingAccount = false;
       this.accountCreated = true;
     }, () => {
-      this.creatingAcccount = false;
+      this.creatingAccount = false;
     });
   }
 
