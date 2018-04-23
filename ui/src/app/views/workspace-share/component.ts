@@ -88,7 +88,7 @@ export class WorkspaceShareComponent implements OnInit {
   addCollaborator(): void {
     if (this.selectedAccessLevel === undefined) {
       this.roleNotSelected = true;
-      // return;
+      return;
     }
     if (!this.usersLoading) {
       this.usersLoading = true;
