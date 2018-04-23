@@ -227,6 +227,6 @@ public class UserService {
   }
 
   public boolean getContactEmailTaken(String contactEmail) {
-    return (userDao.findUserByContactEmail(contactEmail) != null);
+    return (!userDao.findUserByContactEmail(contactEmail).isEmpty());
   }
 }
