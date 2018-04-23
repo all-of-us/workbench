@@ -94,14 +94,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       for (String domain : domainMap.keySet()) {
         final List<SearchParameter> searchParameterList = domainMap.get(domain);
         final SearchParameter parameter = searchParameterList.get(0);
-        final String type = parameter.getType();
-        final String subtype = parameter.getSubtype();
+        final boolean modifiersExist = !params.getModifiers().isEmpty();
         List<String> codes =
           searchParameterList.stream().map(SearchParameter::getValue).collect(Collectors.toList());
         if (group.equals(GroupType.NOT_GROUP)) {
-          buildNotGroupQuery(type, subtype, queryParts, queryParams, domain, codes, params.getModifiers());
+          buildNotGroupQuery(parameter, queryParts, queryParams, codes, modifiersExist);
         } else {
-          buildGroupQuery(type, subtype, queryParts, queryParams, domain, codes, params.getModifiers());
+          buildGroupQuery(parameter, queryParts, queryParams, codes, modifiersExist);
         }
       }
     }
@@ -148,76 +147,70 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       .build();
   }
 
-  private void buildGroupQuery(String type,
-                               String subtype,
+  private void buildGroupQuery(SearchParameter parameter,
                                List<String> queryParts,
                                Map<String, QueryParameterValue> queryParams,
-                               String domain, List<String> codes,
-                               List<Modifier> modifiers) {
+                               List<String> codes,
+                               boolean modifiersExist) {
     for (String code : codes) {
-      buildInnerQuery(type,
-        subtype,
+      buildInnerQuery(parameter,
         queryParts,
         queryParams,
-        domain,
         QueryParameterValue.string(code + "%"),
         GROUP_CODE_LIKE_TEMPLATE,
-        modifiers);
+        modifiersExist);
     }
   }
 
-  private void buildNotGroupQuery(String type,
-                                  String subtype,
+  private void buildNotGroupQuery(SearchParameter parameter,
                                   List<String> queryParts,
                                   Map<String, QueryParameterValue> queryParams,
-                                  String domain, List<String> codes,
-                                  List<Modifier> modifiers) {
-    buildInnerQuery(type,
-      subtype,
+                                  List<String> codes,
+                                  boolean modifiersExist) {
+    buildInnerQuery(parameter,
       queryParts,
       queryParams,
-      domain,
       QueryParameterValue.array(codes.stream().toArray(String[]::new), String.class),
       CHILD_CODE_IN_CLAUSE_TEMPLATE,
-      modifiers);
+      modifiersExist);
   }
 
-  private void buildInnerQuery(String type,
-                               String subtype,
+  private void buildInnerQuery(SearchParameter parameter,
                                List<String> queryParts,
                                Map<String, QueryParameterValue> queryParams,
-                               String domain, QueryParameterValue codes,
+                               QueryParameterValue codes,
                                String groupOrChildSql,
-                               List<Modifier> modifiers) {
+                               boolean modifiersExist) {
+    String domain = parameter.getDomain();
     String inClauseSql = "";
     final String uniqueName = getUniqueNamedParameterPostfix();
     final String cmUniqueParam = "cm" + uniqueName;
     final String procUniqueParam = "proc" + uniqueName;
     final String cmOrProcUniqueParam = "cmOrProc" + uniqueName;
-    final String namedParameter = domain + uniqueName;
+    final String codesParameter = domain + uniqueName;
 
     ImmutableMap.Builder<String, String> paramNames = ImmutableMap.builder();
     paramNames.put("${tableName}", DomainTableEnum.getTableName(domain));
     paramNames.put("${tableId}", DomainTableEnum.getSourceConceptId(domain));
-    paramNames.put("${conceptCodes}", "@" + namedParameter);
-    if (!modifiers.isEmpty()) {
+    paramNames.put("${conceptCodes}", "@" + codesParameter);
+    if (modifiersExist) {
       paramNames.put("${entryDate}", DomainTableEnum.getEntryDate(domain));
     }
 
-    queryParams.put(namedParameter, codes);
-    if (type.equals(ICD_10)) {
-      queryParams.put(cmOrProcUniqueParam, QueryParameterValue.string(subtype));
+    queryParams.put(codesParameter, codes);
+    if (parameter.equals(ICD_10)) {
+      queryParams.put(cmOrProcUniqueParam, QueryParameterValue.string(parameter.getSubtype()));
       inClauseSql = ICD10_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
       paramNames.put("${cmOrProc}", "@" + cmOrProcUniqueParam);
     } else {
-      queryParams.put(cmUniqueParam, QueryParameterValue.string(TYPE_CM.get(type)));
-      queryParams.put(procUniqueParam, QueryParameterValue.string(TYPE_PROC.get(type)));
+      queryParams.put(cmUniqueParam, QueryParameterValue.string(TYPE_CM.get(parameter.getType())));
+      queryParams.put(procUniqueParam, QueryParameterValue.string(TYPE_PROC.get(parameter.getType())));
       inClauseSql = ICD9_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
       paramNames.put("${cm}", "@" + cmUniqueParam);
       paramNames.put("${proc}", "@" + procUniqueParam);
     }
 
-    String modifierSql = modifiers.isEmpty() ? "" : MODIFIER_COLUMNS_TEMPLATE;
+    String modifierSql = modifiersExist ? MODIFIER_COLUMNS_TEMPLATE : "";
     String innerSql = INNER_SQL_TEMPLATE.replace("${modifierColumns}", modifierSql);
 
     queryParts.add(filterSql(innerSql + inClauseSql + groupOrChildSql, paramNames.build()));
