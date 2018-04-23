@@ -22,6 +22,7 @@ import {SearchGroupItemComponent} from './search-group-item/search-group-item.co
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {SearchGroupSelectComponent} from './search-group-select/search-group-select.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
+import {SelectionInfoComponent} from './selection-info/selection-info.component';
 import {TreePageComponent} from './tree-page/tree-page.component';
 
 /* Other Objects */
@@ -65,6 +66,7 @@ const routes: Routes = [{
     SearchGroupItemComponent,
     SearchGroupListComponent,
     SearchGroupSelectComponent,
+    SelectionInfoComponent,
     TreePageComponent,
   ],
   exports: [

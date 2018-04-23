@@ -35,3 +35,17 @@
     height: 100%;
   }
 }
+
+.selection-wrapper {
+  border: 2px solid #d7d7d7;
+  height: 100%;
+  padding-left: 0.4rem;
+  border-radius: 5px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.selection-title {
+  margin-top: 0;
+}
+

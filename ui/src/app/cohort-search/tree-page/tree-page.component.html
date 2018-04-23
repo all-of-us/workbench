@@ -8,7 +8,16 @@
     <div *ngIf="error"><em>Error! Oh Noes!</em></div>
     <crit-node *ngFor="let item of children" [node]="item"></crit-node>
   </div>
+
   <div class="selection">
-    Selections
+    <div class="selection-wrapper">
+      <h5>{{ selectionTitle }}</h5>
+      <crit-selection-info
+        *ngFor="let parameter of (criteriaList$ | async); let i = index"
+        [index]="i"
+        [parameter]="parameter">
+      </crit-selection-info>
+    </div>
   </div>
+
 </div>
