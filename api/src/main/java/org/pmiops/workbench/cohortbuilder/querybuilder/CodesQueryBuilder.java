@@ -43,7 +43,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   public static final String AND = " and ";
 
   private static final String INNER_SQL_TEMPLATE =
-    "select distinct a.person_id, a.${entryDate} as entry_date, b.concept_code\n" +
+    "select distinct a.person_id ${modifierColumns}\n" +
       "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n" +
       "where a.${tableId} = b.concept_id\n";
 
@@ -59,9 +59,11 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   private static final String OUTER_SQL_TEMPLATE = "select person_id\n" +
     "from `${projectId}.${dataSetId}.person` p\n" +
-    "where person_id in (${middleSqlTemplate})\n";
+    "where person_id in (${innerSqlTemplate})\n";
 
-  private static final String MIDDLE_SQL_TEMPLATE =
+  private static final String MODIFIER_COLUMNS_TEMPLATE = ", a.${entryDate} as entry_date, b.concept_code";
+
+  private static final String MODIFIER_SQL_TEMPLATE =
     "select criteria.person_id from (${innerSqlTemplate}) criteria\n" +
       "join `${projectId}.${dataSetId}.person` p on (criteria.person_id = p.person_id)\n";
 
@@ -72,6 +74,11 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   private static final String OCCURRENCES_SQL_TEMPLATE = "group by criteria.person_id\n" +
     "having count(criteria.person_id)";
+
+  @Override
+  public FactoryKey getType() {
+    return FactoryKey.CODES;
+  }
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters params) {
@@ -92,9 +99,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         List<String> codes =
           searchParameterList.stream().map(SearchParameter::getValue).collect(Collectors.toList());
         if (group.equals(GroupType.NOT_GROUP)) {
-          buildNotGroupQuery(type, subtype, queryParts, queryParams, domain, codes);
+          buildNotGroupQuery(type, subtype, queryParts, queryParams, domain, codes, params.getModifiers());
         } else {
-          buildGroupQuery(type, subtype, queryParts, queryParams, domain, codes);
+          buildGroupQuery(type, subtype, queryParts, queryParams, domain, codes, params.getModifiers());
         }
       }
     }
@@ -120,14 +127,19 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
           QueryParameterValue.date(modifier.getOperands().get(0)));
       }
     }
-    String middleSql = MIDDLE_SQL_TEMPLATE.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
-    if (!modifierQueryParts.isEmpty()) {
-      middleSql = middleSql + WHERE + String.join(AND, modifierQueryParts);
+    String finalSql = "";
+    if (params.getModifiers().isEmpty()) {
+      finalSql = OUTER_SQL_TEMPLATE.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
+    } else {
+      String modifierSql = MODIFIER_SQL_TEMPLATE.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
+      if (!modifierQueryParts.isEmpty()) {
+        modifierSql = modifierSql + WHERE + String.join(AND, modifierQueryParts);
+      }
+      if (!groupByModifier.isEmpty()) {
+        modifierSql = modifierSql + groupByModifier;
+      }
+      finalSql = OUTER_SQL_TEMPLATE.replace("${innerSqlTemplate}", modifierSql);
     }
-    if (!groupByModifier.isEmpty()) {
-      middleSql = middleSql + groupByModifier;
-    }
-    String finalSql = OUTER_SQL_TEMPLATE.replace("${middleSqlTemplate}", middleSql);
 
     return QueryJobConfiguration
       .newBuilder(finalSql)
@@ -140,7 +152,8 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                                String subtype,
                                List<String> queryParts,
                                Map<String, QueryParameterValue> queryParams,
-                               String domain, List<String> codes) {
+                               String domain, List<String> codes,
+                               List<Modifier> modifiers) {
     for (String code : codes) {
       buildInnerQuery(type,
         subtype,
@@ -148,7 +161,8 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         queryParams,
         domain,
         QueryParameterValue.string(code + "%"),
-        GROUP_CODE_LIKE_TEMPLATE);
+        GROUP_CODE_LIKE_TEMPLATE,
+        modifiers);
     }
   }
 
@@ -156,14 +170,16 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                                   String subtype,
                                   List<String> queryParts,
                                   Map<String, QueryParameterValue> queryParams,
-                                  String domain, List<String> codes) {
+                                  String domain, List<String> codes,
+                                  List<Modifier> modifiers) {
     buildInnerQuery(type,
       subtype,
       queryParts,
       queryParams,
       domain,
       QueryParameterValue.array(codes.stream().toArray(String[]::new), String.class),
-      CHILD_CODE_IN_CLAUSE_TEMPLATE);
+      CHILD_CODE_IN_CLAUSE_TEMPLATE,
+      modifiers);
   }
 
   private void buildInnerQuery(String type,
@@ -171,47 +187,40 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                                List<String> queryParts,
                                Map<String, QueryParameterValue> queryParams,
                                String domain, QueryParameterValue codes,
-                               String groupOrChildSql) {
+                               String groupOrChildSql,
+                               List<Modifier> modifiers) {
     String inClauseSql = "";
-    ImmutableMap paramNames = null;
     final String uniqueName = getUniqueNamedParameterPostfix();
     final String cmUniqueParam = "cm" + uniqueName;
     final String procUniqueParam = "proc" + uniqueName;
     final String cmOrProcUniqueParam = "cmOrProc" + uniqueName;
     final String namedParameter = domain + uniqueName;
 
+    ImmutableMap.Builder<String, String> paramNames = ImmutableMap.builder();
+    paramNames.put("${tableName}", DomainTableEnum.getTableName(domain));
+    paramNames.put("${tableId}", DomainTableEnum.getSourceConceptId(domain));
+    paramNames.put("${conceptCodes}", "@" + namedParameter);
+    if (!modifiers.isEmpty()) {
+      paramNames.put("${entryDate}", DomainTableEnum.getEntryDate(domain));
+    }
+
     queryParams.put(namedParameter, codes);
     if (type.equals(ICD_10)) {
       queryParams.put(cmOrProcUniqueParam, QueryParameterValue.string(subtype));
       inClauseSql = ICD10_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
-      paramNames = new ImmutableMap.Builder<String, String>()
-        .put("${tableName}", DomainTableEnum.getTableName(domain))
-        .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
-        .put("${entryDate}", DomainTableEnum.getEntryDate(domain))
-        .put("${conceptCodes}", "@" + namedParameter)
-        .put("${cmOrProc}", "@" + cmOrProcUniqueParam)
-        .build();
+      paramNames.put("${cmOrProc}", "@" + cmOrProcUniqueParam);
     } else {
       queryParams.put(cmUniqueParam, QueryParameterValue.string(TYPE_CM.get(type)));
       queryParams.put(procUniqueParam, QueryParameterValue.string(TYPE_PROC.get(type)));
       inClauseSql = ICD9_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
-      paramNames = new ImmutableMap.Builder<String, String>()
-        .put("${tableName}", DomainTableEnum.getTableName(domain))
-        .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
-        .put("${entryDate}", DomainTableEnum.getEntryDate(domain))
-        .put("${conceptCodes}", "@" + namedParameter)
-        .put("${cm}", "@" + cmUniqueParam)
-        .put("${proc}", "@" + procUniqueParam)
-        .build();
+      paramNames.put("${cm}", "@" + cmUniqueParam);
+      paramNames.put("${proc}", "@" + procUniqueParam);
     }
 
-    queryParts.add(filterSql(INNER_SQL_TEMPLATE + inClauseSql +
-      groupOrChildSql, paramNames));
-  }
+    String modifierSql = modifiers.isEmpty() ? "" : MODIFIER_COLUMNS_TEMPLATE;
+    String innerSql = INNER_SQL_TEMPLATE.replace("${modifierColumns}", modifierSql);
 
-  @Override
-  public FactoryKey getType() {
-    return FactoryKey.CODES;
+    queryParts.add(filterSql(innerSql + inClauseSql + groupOrChildSql, paramNames.build()));
   }
 
   protected Map<GroupType, ListMultimap<String, SearchParameter>> getMappedParameters(List<SearchParameter> searchParameters) {
