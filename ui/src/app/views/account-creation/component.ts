@@ -30,21 +30,21 @@ export class AccountCreationComponent {
     familyName: '',
     contactEmail: ''
   };
-  givenName: string;
-  familyName: string;
-  username: string;
   password: string;
   passwordAgain: string;
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
   showPasswordLengthError: boolean;
-  creatingAcccount: boolean;
+  creatingAccount: boolean;
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
   usernameCheckTimeout: NodeJS.Timer;
   contactEmailCheckTimeout: NodeJS.Timer;
 
+  // TODO: Injecting the parent component is a bad separation of concerns, as
+  // well as injecting LoginComponent. Should look at refactoring these
+  // interactions.
   constructor(
     private profileService: ProfileService,
     private invitationKeyService: InvitationKeyComponent,
@@ -91,19 +91,23 @@ export class AccountCreationComponent {
       profile: this.profile, password: this.password,
       invitationKey: this.invitationKeyService.invitationKey
     };
-    this.creatingAcccount = true;
+    this.creatingAccount = true;
     this.profileService.createAccount(request).subscribe(() => {
-      this.creatingAcccount = false;
+      this.creatingAccount = false;
       this.accountCreated = true;
     }, () => {
-      this.creatingAcccount = false;
+      this.creatingAccount = false;
     });
   }
 
   usernameChanged(): void {
     this.usernameConflictError = false;
+    // TODO: This should use a debounce, rather than manual setTimeout()s.
     clearTimeout(this.usernameCheckTimeout);
     this.usernameCheckTimeout = setTimeout(() => {
+      if (!this.profile.username.trim()) {
+        return;
+      }
       this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
         this.usernameConflictError = response.isTaken;
       });
