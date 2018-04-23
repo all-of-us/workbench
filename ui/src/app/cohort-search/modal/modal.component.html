@@ -4,16 +4,18 @@
     <div class="title-bar">
       <div class="btn-group btn-link">
         <div class="title">{{ title }}</div>
-        <div class="vbar"></div>
-        <button type="button" class="btn">
-          Criteria Tree
-        </button>
-        <button type="button" class="btn">
-          Modifiers
-        </button>
-        <button type="button" class="btn">
-          Summary
-        </button>
+        <ng-container *ngIf="ctype !== 'demo'">
+          <div class="vbar"></div>
+          <button type="button" class="btn" (click)="mode = 'tree'">
+            Criteria Tree
+          </button>
+          <button type="button" class="btn" (click)="mode = 'modifiers'">
+            Modifiers
+          </button>
+          <button type="button" class="btn" (click)="mode = 'summary'">
+            Summary
+          </button>
+        </ng-container>
       </div>
       <button
         (click)="cancel()"
@@ -22,23 +24,45 @@
       </button>
     </div>
 
-    <div class="content">
-      <div class="page-A">
-        Lorem Ipsum A
-      </div>
-      <div class="page-B">
-        Lorem Ipsum B
-      </div>
-      <div class="page-C">
-        Lorem Ipsum C
-      </div>
+    <!-- Wrapping the content in an ngIf makes sure that the various forms
+      included in the content are destroyed and recreated each time the modal
+      is opened / closed; i.e. modal state doesn't "leak" from one "instance"
+      to another
+    -->
+    <div class="content" *ngIf="open">
+      <ng-container [ngSwitch]="ctype">
+        <crit-demographics *ngSwitchCase="'demo'"
+          (cancel)="cancel()"
+          (finish)="finish()">
+        </crit-demographics>
+
+        <ng-container *ngSwitchDefault>
+          <div *ngIf="mode === 'tree'">
+            Tree
+          </div>
+          <div *ngIf="mode === 'modifiers'">
+            Modifiers
+          </div>
+          <div *ngIf="mode === 'summary'">
+            Summary
+          </div>
+        </ng-container>
+      </ng-container>
     </div>
 
-    <div class="footer">
+    <div *ngIf="ctype !== 'demo'" class="footer">
       <button type="button"
         (click)="cancel()"
         class="btn btn-link">
         Cancel
+      </button>
+      <button *ngIf="hasNextPage"
+        [disabled]="noSelection"
+        (click)="nextPage()"
+        type="button"
+        class="btn btn-secondary"
+        >
+        Next
       </button>
       <button type="button"
         [disabled]="noSelection"

@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -20,7 +20,7 @@ import {CRITERIA_TYPES} from '../constant';
     '../../styles/buttons.css',
   ]
 })
-export class ModalComponent {
+export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeParameterList) selection$;
@@ -31,6 +31,7 @@ export class ModalComponent {
   open = false;
   noSelection = true;
   title = '';
+  mode = 'tree'; // default to criteria tree
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -45,7 +46,7 @@ export class ModalComponent {
       .subscribe(ctype => {
         this.ctype = ctype;
         this.title = 'Codes';
-        for (let crit of CRITERIA_TYPES) {
+        for (const crit of CRITERIA_TYPES) {
           const regex = new RegExp(`.*${crit.type}.*`, 'i');
           if (regex.test(this.ctype)) {
             this.title = crit.name;
@@ -55,7 +56,7 @@ export class ModalComponent {
     );
 
     this.subscription.add(this.selection$
-      .map(sel => sel.size == 0)
+      .map(sel => sel.size === 0)
       .subscribe(sel => this.noSelection = sel)
     );
   }
@@ -72,5 +73,20 @@ export class ModalComponent {
   finish() {
     this.open = false;
     this.actions.finishWizard();
+  }
+
+  get hasNextPage() {
+    if (this.ctype === 'demo' || this.mode === 'summary') {
+      return false;
+    }
+    return true;
+  }
+
+  nextPage() {
+    if (this.mode === 'tree') {
+      this.mode = 'modifiers';
+    } else if (this.mode === 'modifiers') {
+      this.mode = 'summary';
+    }
   }
 }

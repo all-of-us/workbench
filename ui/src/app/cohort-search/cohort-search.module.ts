@@ -5,13 +5,16 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {ComboChartComponent} from './combo-chart/combo-chart.component';
+import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {ModalComponent} from './modal/modal.component';
+import {MultiSelectComponent} from './multi-select/multi-select.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
@@ -41,14 +44,17 @@ const routes: Routes = [{
     NgReduxModule,
     NgxChartsModule,
     NgxPopperModule,
+    NouisliderModule,
     // Ours
     CriteriaWizardModule,
   ],
   declarations: [
     CohortSearchComponent,
     ComboChartComponent,
+    DemographicsComponent,
     GenderChartComponent,
     ModalComponent,
+    MultiSelectComponent,
     OverviewComponent,
     SearchGroupComponent,
     SearchGroupItemComponent,
