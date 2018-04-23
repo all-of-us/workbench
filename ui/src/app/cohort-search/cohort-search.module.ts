@@ -20,6 +20,7 @@ import {SearchGroupItemComponent} from './search-group-item/search-group-item.co
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {SearchGroupSelectComponent} from './search-group-select/search-group-select.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
+import {TreePageComponent} from './tree-page/tree-page.component';
 
 /* Other Objects */
 import {CriteriaWizardModule} from './criteria-wizard/criteria-wizard.module';
@@ -60,6 +61,7 @@ const routes: Routes = [{
     SearchGroupItemComponent,
     SearchGroupListComponent,
     SearchGroupSelectComponent,
+    TreePageComponent,
   ],
   exports: [
     // TODO: Remove this once no longer needed by CohortReviewModule.

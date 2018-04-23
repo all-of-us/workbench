@@ -1,18 +1,24 @@
-<div class="modal-container" [class.show-modal]="open">
-  <div class="modal-content">
+<div class="crit-modal-container" [class.show]="open">
+  <div class="crit-modal-content">
 
     <div class="title-bar">
       <div class="btn-group btn-link">
         <div class="title">{{ title }}</div>
         <ng-container *ngIf="ctype !== 'demo'">
           <div class="vbar"></div>
-          <button type="button" class="btn" (click)="mode = 'tree'">
+          <button type="button" class="btn"
+            [class.active]="mode === 'tree'"
+            (click)="mode = 'tree'">
             Criteria Tree
           </button>
-          <button type="button" class="btn" (click)="mode = 'modifiers'">
+          <button type="button" class="btn"
+            [class.active]="mode === 'modifiers'"
+            (click)="mode = 'modifiers'">
             Modifiers
           </button>
-          <button type="button" class="btn" (click)="mode = 'summary'">
+          <button type="button" class="btn"
+            [class.active]="mode === 'summary'"
+            (click)="mode = 'summary'">
             Summary
           </button>
         </ng-container>
@@ -37,13 +43,13 @@
         </crit-demographics>
 
         <ng-container *ngSwitchDefault>
-          <div *ngIf="mode === 'tree'">
-            Tree
+          <div id="tree" class="panel" [class.show]="mode === 'tree'">
+            <crit-tree-page></crit-tree-page>
           </div>
-          <div *ngIf="mode === 'modifiers'">
+          <div id="modifiers" class="panel" [class.show]="mode === 'modifiers'">
             Modifiers
           </div>
-          <div *ngIf="mode === 'summary'">
+          <div id="summary" class="panel" [class.show]="mode === 'summary'">
             Summary
           </div>
         </ng-container>

@@ -1,4 +1,4 @@
-.modal-container {
+.crit-modal-container {
   position: fixed;
   top: 0;
   left: 0;
@@ -11,13 +11,13 @@
   transition: visibility 0.25s linear, opacity 0.25s 0s, transform 0.25s;
 }
 
-.show-modal {
+.crit-modal-container.show {
   opacity: 1;
   visibility: visible;
   transform: scale(1.0);
 }
 
-.modal-content {
+.crit-modal-content {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -57,6 +57,10 @@
   border: 1px solid #979797;
 }
 
+button.active {
+  color: rgb(0, 74, 112);
+}
+
 .close-button {
   color: rgb(245, 135, 113);
 }
@@ -80,4 +84,18 @@
 
 .footer > button {
   margin-left: 0.5rem;
+}
+
+.panel {
+  display: none;
+}
+
+.panel.show {
+  display: block;
+  animation: fadeEffect 1s;
+}
+
+@keyframes fadeEffect {
+  from {opacity: 0;}
+  to {opacity: 1;}
 }

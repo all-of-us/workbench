@@ -85,7 +85,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    console.log('Initializing demographics form...');
     // Set back to false at the end of loadNodesFromApi (i.e. the end of the
     // initialization routine)
     this.loading = true;
@@ -110,7 +109,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('Destroying demographics form...');
     this.subscription.unsubscribe();
   }
 
