@@ -17,6 +17,7 @@ import java.util.List;
 import javax.inject.Provider;
 import javax.servlet.ServletContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -101,7 +102,14 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
-    ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
+    try {
+      ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
+    } catch (GoogleJsonResponseException e) {
+      if (ExceptionUtils.isGoogleConflictException(e)) {
+        throw new ConflictException(e);
+      }
+      throw e;
+    }
     return user;
   }
 
