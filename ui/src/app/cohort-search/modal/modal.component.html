@@ -1,8 +1,10 @@
 <div class="modal-container" [class.show-modal]="open">
   <div class="modal-content">
 
-    <div class="top-bar">
+    <div class="title-bar">
       <div class="btn-group btn-link">
+        <div class="title">{{ title }}</div>
+        <div class="vbar"></div>
         <button type="button" class="btn">
           Criteria Tree
         </button>
@@ -39,6 +41,7 @@
         Cancel
       </button>
       <button type="button"
+        [disabled]="noSelection"
         (click)="finish()"
         class="btn btn-primary">
         Finish

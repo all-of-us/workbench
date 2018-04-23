@@ -11,14 +11,12 @@ import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
 import {
-  activeCriteriaType,
   chartData,
   CohortSearchActions,
   excludeGroups,
   includeGroups,
   isRequstingTotal,
   totalCount,
-  wizardOpen,
 } from '../redux';
 
 const pixel = (n: number) => `${n}px`;
@@ -30,14 +28,11 @@ const ONE_REM = 24;  // value in pixels
   styleUrls: ['./cohort-search.component.css'],
 })
 export class CohortSearchComponent implements OnInit, OnDestroy {
-
   @select(includeGroups) includeGroups$: Observable<List<any>>;
   @select(excludeGroups) excludeGroups$: Observable<List<any>>;
-  @select(wizardOpen) open$: Observable<boolean>;
   @select(totalCount) total$: Observable<number>;
   @select(chartData) chartData$: Observable<List<any>>;
   @select(isRequstingTotal) isRequesting$: Observable<boolean>;
-  @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
 
   @ViewChild('wrapper') wrapper;
