@@ -1,6 +1,12 @@
 <div class="page">
   <div class="main-panel">
-    Tree
+    <div *ngIf="loading">
+      <div class="spinner" [style.left.%]="50">
+        Loading...
+      </div>
+    </div>
+    <div *ngIf="error"><em>Error! Oh Noes!</em></div>
+    <crit-node *ngFor="let item of children" [node]="item"></crit-node>
   </div>
   <div class="selection">
     Selections

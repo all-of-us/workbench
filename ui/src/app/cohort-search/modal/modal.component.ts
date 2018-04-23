@@ -1,5 +1,6 @@
 import {select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -88,5 +89,13 @@ export class ModalComponent implements OnInit, OnDestroy {
     } else if (this.mode === 'modifiers') {
       this.mode = 'summary';
     }
+  }
+
+  /* Used to bootstrap the criteria tree */
+  get rootNode() {
+    return Map({
+      type: this.ctype,
+      id: 0,    // root parent ID is always 0
+    });
   }
 }

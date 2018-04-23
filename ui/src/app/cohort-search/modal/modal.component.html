@@ -44,7 +44,7 @@
 
         <ng-container *ngSwitchDefault>
           <div id="tree" class="panel" [class.show]="mode === 'tree'">
-            <crit-tree-page></crit-tree-page>
+            <crit-tree-page [node]="rootNode"></crit-tree-page>
           </div>
           <div id="modifiers" class="panel" [class.show]="mode === 'modifiers'">
             Modifiers
