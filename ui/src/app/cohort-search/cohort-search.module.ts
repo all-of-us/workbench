@@ -10,13 +10,13 @@ import {NgxPopperModule} from 'ngx-popper';
 /* Components */
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {ComboChartComponent} from './combo-chart/combo-chart.component';
+import {GenderChartComponent} from './gender-chart/gender-chart.component';
+import {ModalComponent} from './modal/modal.component';
 import {OverviewComponent} from './overview/overview.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {SearchGroupSelectComponent} from './search-group-select/search-group-select.component';
 import {SearchGroupComponent} from './search-group/search-group.component';
-
-import {GenderChartComponent} from './gender-chart/gender-chart.component';
 
 /* Other Objects */
 import {CriteriaWizardModule} from './criteria-wizard/criteria-wizard.module';
@@ -48,10 +48,11 @@ const routes: Routes = [{
     CohortSearchComponent,
     ComboChartComponent,
     GenderChartComponent,
+    ModalComponent,
+    OverviewComponent,
     SearchGroupComponent,
     SearchGroupItemComponent,
     SearchGroupListComponent,
-    OverviewComponent,
     SearchGroupSelectComponent,
   ],
   exports: [
