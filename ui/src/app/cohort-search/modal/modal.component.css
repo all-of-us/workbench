@@ -8,14 +8,13 @@
   opacity: 0;
   visibility: hidden;
   transform: scale(1.1);
-  transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
+  transition: visibility 0.25s linear, opacity 0.25s 0s, transform 0.25s;
 }
 
 .show-modal {
   opacity: 1;
   visibility: visible;
   transform: scale(1.0);
-  transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
 }
 
 .modal-content {
@@ -27,6 +26,9 @@
   height: 80%;
   background-color: white;
   border-radius: 4px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
 }
 
 .top-bar {
@@ -40,10 +42,29 @@
 }
 
 .close-button {
-  fill: red;
+  color: rgb(245, 135, 113);
+}
+
+.close-button:hover {
+  color: rgb(255, 186, 164);
 }
 
 .content {
+  flex: 1;
   padding: 0.2rem;
 }
 
+.footer {
+  /*
+  border-top: 1px solid #d7d7d7;
+  box-shadow: 0 -0.12rem 0.125rem 0 #d7d7d7;
+  */
+  margin-top: 0.5rem;
+  padding: 0.2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.footer > button {
+  margin-left: 0.5rem;
+}

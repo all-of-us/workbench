@@ -1,7 +1,11 @@
 import {select} from '@angular-redux/store';
 import {Component, Input, OnInit} from '@angular/core';
+import {Observable} from 'rxjs/Observable';
 
-import {wizardOpen} from '../redux';
+import {
+  CohortSearchActions,
+  wizardOpen,
+} from '../redux';
 
 @Component({
   selector: 'app-modal',
@@ -12,11 +16,25 @@ export class ModalComponent {
   @select(wizardOpen) open$: Observable<boolean>;
   open = false;
 
+  constructor(private actions: CohortSearchActions) {}
+
   ngOnInit() {
-    this.subscription = this.open$.subscribe(open => this.open = open);
+    this.subscription = this.open$
+      .filter(open => !!open)
+      .subscribe(open => this.open = open);
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  cancel() {
+    this.open = false;
+    this.actions.cancelWizard();
+  }
+
+  finish() {
+    this.open = false;
+    this.actions.finishWizard();
   }
 }

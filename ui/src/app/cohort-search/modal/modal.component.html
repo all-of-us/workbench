@@ -4,17 +4,17 @@
     <div class="top-bar">
       <div class="btn-group btn-link">
         <button type="button" class="btn">
-          Page A
+          Criteria Tree
         </button>
         <button type="button" class="btn">
-          Page B
+          Modifiers
         </button>
         <button type="button" class="btn">
-          Page C
+          Summary
         </button>
       </div>
       <button
-        (click)="open = false"
+        (click)="cancel()"
         class="btn btn-link btn-icon">
         <clr-icon class="close-button" size="24" shape="close"></clr-icon>
       </button>
@@ -32,5 +32,17 @@
       </div>
     </div>
 
+    <div class="footer">
+      <button type="button"
+        (click)="cancel()"
+        class="btn btn-link">
+        Cancel
+      </button>
+      <button type="button"
+        (click)="finish()"
+        class="btn btn-primary">
+        Finish
+      </button>
+    </div>
   </div>
 </div>
