@@ -19,8 +19,8 @@
       <div class="cards row">
 
         <!-- Show a card for each survey -->
-        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3"*ngFor="let survey of surveys; let i = index" >
-          <div class="card clickable">
+        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 survey-cards"*ngFor="let survey of surveys; let i = index" >
+          <a routerLink="/survey/{{survey.domainId.toLowerCase()}}" class="card clickable">
             <div class="card-header">
               {{survey.domainDisplay}}
             </div>
@@ -32,7 +32,7 @@
                 {{survey.domainDesc}}
               </div>
             </div>
-          </div>
+          </a>
         </div>
 
       </div>
