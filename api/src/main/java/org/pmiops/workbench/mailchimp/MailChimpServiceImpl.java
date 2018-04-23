@@ -69,10 +69,10 @@ public class MailChimpServiceImpl implements MailChimpService {
     try(MailchimpClient client = new MailchimpClient(apiKey)) {
       return client.execute(method);
     } catch (IOException e) {
-      WorkbenchException we = new WorkbenchException(new ErrorResponse().statusCode(500).errorClassName("IO Exception").message(e.getMessage()));
+      WorkbenchException we = new WorkbenchException(new ErrorResponse().statusCode(500).errorClassName(e.getClass().getName()).message(e.getMessage()));
       throw we;
     } catch (MailchimpException e) {
-      WorkbenchException we = new WorkbenchException(new ErrorResponse().statusCode(e.code).errorClassName("Mailchimp Exception").message(e.getMessage()));
+      WorkbenchException we = new WorkbenchException(new ErrorResponse().statusCode(e.code).errorClassName(e.getClass().getName()).message(e.getMessage()));
       throw we;
     }
   }
