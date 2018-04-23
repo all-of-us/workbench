@@ -34,10 +34,9 @@
     <div class="form-section">
       <button type="submit"
           class="btn btn-primary short-button"
-          [disabled]="creatingAcccount">
+          [clrLoading]="creatingAcccount">
         Next
       </button>
-      <span class="spinner spinner-inline" *ngIf="creatingAcccount"></span>
     </div>
     <div *ngIf="showAllFieldsRequiredError" class="error">
       All fields are required.

@@ -104,7 +104,7 @@ export class AccountCreationComponent {
     this.usernameConflictError = false;
     clearTimeout(this.usernameCheckTimeout);
     this.usernameCheckTimeout = setTimeout(() => {
-      if (!this.profile.username) {
+      if (!this.profile.username.trim()) {
         return;
       }
       this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
