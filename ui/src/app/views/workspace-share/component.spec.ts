@@ -147,5 +147,11 @@ describe('WorkspaceShareComponent', () => {
         .toEqual(WorkspaceAccessLevel.OWNER);
   }));
 
-
+  it('validates and allows usernames or email addresses', fakeAsync(() => {
+    let asEmailAddress = workspaceSharePage.fixture.componentRef.instance.convertToEmail('bob');
+    expect(asEmailAddress).toEqual('bob@fake-research-aou.org');
+    asEmailAddress =
+      workspaceSharePage.fixture.componentRef.instance.convertToEmail(asEmailAddress);
+    expect(asEmailAddress).toEqual('bob@fake-research-aou.org');
+  }));
 });
