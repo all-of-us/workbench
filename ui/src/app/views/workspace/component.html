@@ -24,7 +24,7 @@
       <div>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
           <button *ngIf="tabOpen===Tabs.Cohorts" class="btn btn-primary btn-create"
-                  [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview" (click)="buildCohort()">
+                  [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview || !writePermission" (click)="buildCohort()">
             + Add a Cohort
           </button>
           <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
