@@ -168,7 +168,7 @@ describe('WorkspaceShareComponent', () => {
     simulateClick(workspaceSharePage.fixture,
       queryByCss(workspaceSharePage.fixture, '.add-button'));
     workspaceSharePage.readPageData();
-    expect(workspaceSharePage.fixture.componentRef.instance.workspacesService.shareWorkspace)
+    expect(TestBed.get(WorkspacesService).shareWorkspace)
         .toHaveBeenCalledWith('defaultNamespace', '1', userValues);
   }));
 
@@ -195,7 +195,7 @@ describe('WorkspaceShareComponent', () => {
     simulateClick(workspaceSharePage.fixture,
       queryByCss(workspaceSharePage.fixture, '.add-button'));
     workspaceSharePage.readPageData();
-    expect(workspaceSharePage.fixture.componentRef.instance.workspacesService.shareWorkspace)
+    expect(TestBed.get(WorkspacesService).shareWorkspace)
       .toHaveBeenCalledWith('defaultNamespace', '1', userValues);
   }));
 });
