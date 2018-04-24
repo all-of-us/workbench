@@ -13,11 +13,11 @@ import {
 import {Modifier} from 'generated';
 
 @Component({
-  selector: 'crit-modifiers',
-  templateUrl: './modifiers.component.html',
-  styleUrls: ['./modifiers.component.css']
+  selector: 'crit-modifier-page',
+  templateUrl: './modifier-page.component.html',
+  styleUrls: ['./modifier-page.component.css']
 })
-export class ModifiersComponent implements OnInit, OnDestroy {
+export class ModifierPageComponent implements OnInit, OnDestroy {
   existing = List();
   subscription: Subscription;
 
