@@ -1,5 +1,5 @@
 <div class="page">
-  <div class="main-panel">
+  <div class="tree-view">
 
     <div *ngIf="loading" class="spinner" [style.left.%]="50">
       Loading...
@@ -9,18 +9,17 @@
       <em>Error! Oh Noes!</em>
     </div>
 
-    <crit-node *ngFor="let item of children" [node]="item"></crit-node>
-  </div>
-
-  <div class="selection">
-    <div class="selection-wrapper">
-      <h5>{{ selectionTitle }}</h5>
-      <crit-selection-info
-        *ngFor="let parameter of (criteriaList$ | async); let i = index"
-        [index]="i"
-        [parameter]="parameter">
-      </crit-selection-info>
+    <div class="node-list">
+      <crit-node *ngFor="let item of children" [node]="item"></crit-node>
     </div>
   </div>
 
+  <div class="selected">
+    <h5 class="selection-title">{{ selectionTitle }}</h5>
+    <crit-selection-info
+      *ngFor="let parameter of (criteriaList$ | async); let i = index"
+      [index]="i"
+      [parameter]="parameter">
+    </crit-selection-info>
+  </div>
 </div>

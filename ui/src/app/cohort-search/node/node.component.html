@@ -2,7 +2,9 @@
   <div *ngIf="error">
     <em>Error! Oh Noes!</em>
   </div>
+
   <crit-node-info *ngIf="!error" [node]="node"></crit-node-info>
+
   <ng-template *ngIf="node.get('group')"
     clrIfExpanded
     (clrIfExpandedChange)="loadChildren($event)">
@@ -10,4 +12,5 @@
       <crit-node *ngFor="let item of children" [node]="item"></crit-node>
     </ng-container>
   </ng-template>
+
 </clr-tree-node>
