@@ -1,5 +1,4 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
-//org.pmiops.workbench.api.cohortbuilder.querybuilder
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -7,8 +6,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
@@ -85,7 +86,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     Map<GroupType, ListMultimap<String, SearchParameter>> paramMap = getMappedParameters(params.getParameters());
     List<String> queryParts = new ArrayList<String>();
     List<String> modifierQueryParts = new ArrayList<String>();
-    String groupByModifier = "";
+    List<String> groupByModifier = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
     for (GroupType group : paramMap.keySet()) {
@@ -106,38 +107,17 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     for (Modifier modifier : params.getModifiers()) {
-      if (modifier.getName().equals(ModifierType.AGE_AT_EVENT)) {
-        String ageAtEventParameter = "age" + getUniqueNamedParameterPostfix();
-        modifierQueryParts.add(AGE_AT_EVENT_SQL_TEMPLATE + " "
-          + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + ageAtEventParameter + "\n");
-        queryParams.put(ageAtEventParameter,
-          QueryParameterValue.int64(new Long(modifier.getOperands().get(0))));
-      } else if (modifier.getName().equals(ModifierType.NUM_OF_OCCURRENCES)) {
-        String occurrencesParameter = "occ" + getUniqueNamedParameterPostfix();
-        groupByModifier = OCCURRENCES_SQL_TEMPLATE + " "
-          + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + occurrencesParameter + "\n";
-        queryParams.put(occurrencesParameter,
-          QueryParameterValue.int64(new Long(modifier.getOperands().get(0))));
-      } else if (modifier.getName().equals(ModifierType.EVENT_DATE)) {
-        String eventParameter = "event" + getUniqueNamedParameterPostfix();
-        modifierQueryParts.add(EVENT_DATE_SQL_TEMPLATE + " "
-          + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + eventParameter + "\n");
-        queryParams.put(eventParameter,
-          QueryParameterValue.date(modifier.getOperands().get(0)));
-      }
+      buildModifierQuery(modifier, modifierQueryParts, groupByModifier, queryParams);
     }
-    String finalSql = "";
-    if (params.getModifiers().isEmpty()) {
-      finalSql = OUTER_SQL_TEMPLATE.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
-    } else {
-      String modifierSql = MODIFIER_SQL_TEMPLATE.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
-      if (!modifierQueryParts.isEmpty()) {
-        modifierSql = modifierSql + WHERE + String.join(AND, modifierQueryParts);
-      }
+    String finalSql = params.getModifiers().isEmpty() ? OUTER_SQL_TEMPLATE : MODIFIER_SQL_TEMPLATE;
+    finalSql = finalSql.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
+    String modifierSql = "";
+    if (!modifierQueryParts.isEmpty()) {
+      modifierSql = modifierSql + WHERE + String.join(AND, modifierQueryParts);
       if (!groupByModifier.isEmpty()) {
-        modifierSql = modifierSql + groupByModifier;
+        modifierSql = modifierSql + groupByModifier.get(0);
       }
-      finalSql = OUTER_SQL_TEMPLATE.replace("${innerSqlTemplate}", modifierSql);
+      finalSql = finalSql.replace("${innerSqlTemplate}", modifierSql);
     }
 
     return QueryJobConfiguration
@@ -145,6 +125,67 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       .setNamedParameters(queryParams)
       .setUseLegacySql(false)
       .build();
+  }
+
+  private void buildModifierQuery(Modifier modifier,
+                                  List<String> modifierQueryParts,
+                                  List<String> groupByModifier,
+                                  Map<String, QueryParameterValue> queryParams) {
+    validateOperands(modifier);
+    if (modifier.getName().equals(ModifierType.AGE_AT_EVENT)) {
+      for (String operand : modifier.getOperands()) {
+        String ageAtEventParameter = "age" + getUniqueNamedParameterPostfix();
+        modifierQueryParts.add(AGE_AT_EVENT_SQL_TEMPLATE + " "
+          + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + ageAtEventParameter + "\n");
+        queryParams.put(ageAtEventParameter, QueryParameterValue.int64(newLong(operand)));
+      }
+    } else if (modifier.getName().equals(ModifierType.EVENT_DATE)) {
+      for (String operand : modifier.getOperands()) {
+        String eventParameter = "event" + getUniqueNamedParameterPostfix();
+        modifierQueryParts.add(EVENT_DATE_SQL_TEMPLATE + " "
+          + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + eventParameter + "\n");
+        queryParams.put(eventParameter, QueryParameterValue.date(operand));
+      }
+    } else if (modifier.getName().equals(ModifierType.NUM_OF_OCCURRENCES)) {
+      if (!groupByModifier.isEmpty()) {
+        throw new BadRequestException(String.format(
+          "%s modifier can only be used once.", modifier.getName()));
+      }
+      for (String operand : modifier.getOperands()) {
+        String occurrencesParameter = "occ" + getUniqueNamedParameterPostfix();
+        groupByModifier.add(OCCURRENCES_SQL_TEMPLATE + " "
+          + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + occurrencesParameter + "\n");
+        queryParams.put(occurrencesParameter, QueryParameterValue.int64(newLong(operand)));
+      }
+    }
+  }
+
+  private Long newLong(String operand) {
+    try {
+      return new Long(operand);
+    } catch (NumberFormatException nfe) {
+      throw new BadRequestException(String.format(
+        "Operand has to be convertable to long: %s", operand));
+    }
+  }
+
+  private void validateOperands(Modifier modifier) {
+    if (modifier.getOperator().equals(Operator.BETWEEN)) {
+      if (modifier.getOperands().size() != 2) {
+        throw new BadRequestException(String.format(
+          "Modifiers can only have 2 operands when using the %s operator", modifier.getOperator().name()));
+      }
+    } else if (modifier.getOperator().equals(Operator.IN)) {
+      if (modifier.getOperands().size() == 0) {
+        throw new BadRequestException(String.format(
+          "Modifiers must have 1 or more operands when using the %s operator", modifier.getOperator().name()));
+      }
+    } else {
+      if (modifier.getOperands().size() != 1) {
+        throw new BadRequestException(String.format(
+          "Modifiers can only have 1 operand when using the %s operator", modifier.getOperator().name()));
+      }
+    }
   }
 
   private void buildGroupQuery(SearchParameter parameter,
@@ -198,7 +239,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     queryParams.put(codesParameter, codes);
-    if (parameter.equals(ICD_10)) {
+    if (parameter.getType().equals(ICD_10)) {
       queryParams.put(cmOrProcUniqueParam, QueryParameterValue.string(parameter.getSubtype()));
       inClauseSql = ICD10_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
       paramNames.put("${cmOrProc}", "@" + cmOrProcUniqueParam);
