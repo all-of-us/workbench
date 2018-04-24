@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="brianfreeman" id="changelog-7">
+
+        <createTable tableName="concept_ancestor">
+            <column name="ancestor_concept_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descendant_concept_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="min_levels_of_separation" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_levels_of_separation" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex
+                indexName="idx_concept_ancestor"
+                tableName="concept_ancestor"
+                unique="true">
+            <column name="ancestor_concept_id"/>
+            <column name="descendant_concept_id"/>
+        </createIndex>
+
+        <createIndex
+                indexName="idx_ancestor_concept_id"
+                tableName="concept_ancestor"
+                unique="false">
+            <column name="ancestor_concept_id"/>
+        </createIndex>
+
+        <createIndex
+                indexName="idx_descendant_concept_id"
+                tableName="concept_ancestor"
+                unique="false">
+            <column name="descendant_concept_id"/>
+        </createIndex>
+
+
+    </changeSet>
+
+</databaseChangeLog>

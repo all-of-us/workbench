@@ -1,0 +1,22 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "ancestor_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "descendant_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "min_levels_of_separation",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "max_levels_of_separation",
+    "type": "INTEGER"
+  }
+]
