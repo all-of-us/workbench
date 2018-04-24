@@ -3,12 +3,12 @@
     <em>Error! Oh Noes!</em>
   </div>
 
-  <div class="clr-treenode-link container">
+  <div class="clr-treenode-link container" (click)="toggleExpanded()">
     <crit-node-info *ngIf="!error" [node]="node"></crit-node-info>
   </div>
 
   <ng-template *ngIf="node.get('group')"
-    clrIfExpanded
+    [clrIfExpanded]="expanded"
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
       <div class="node-list">

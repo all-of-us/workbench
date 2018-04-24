@@ -19,6 +19,7 @@ import {
 export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
 
+  expanded = false;
   children = List<any>();
   loading = false;
   error = false;
@@ -59,5 +60,9 @@ export class NodeComponent implements OnInit, OnDestroy {
     const _type = this.node.get('type').toLowerCase();
     const parentId = this.node.get('id');
     this.actions.fetchCriteria(_type, parentId);
+  }
+
+  toggleExpanded() {
+    this.expanded = !this.expanded;
   }
 }

@@ -109,7 +109,12 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
    * If the node does NOT need an attribute we give it a deterministic ID and
    * add it to the selected params in the state.
    */
-  select() {
+  select(event) {
+    /* Prevents the click from reaching the treenode link, which would then
+     * fire a request for children (if there are any)
+     */
+    event.stopPropagation();
+
     if (needsAttributes(this.node)) {
       this.actions.setWizardFocus(this.node);
     } else {
