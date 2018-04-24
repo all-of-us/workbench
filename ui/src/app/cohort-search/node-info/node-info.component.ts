@@ -65,7 +65,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
    * (the name div), not the initialization of _this_ component.
    */
   ngAfterViewInit() {
-    setTimeout(() => this.checkTruncation(), 0);
+    setTimeout(() => this.checkTruncation(), 1);
   }
 
   @HostListener('window:resize')

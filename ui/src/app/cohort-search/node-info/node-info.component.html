@@ -1,37 +1,38 @@
-<div class="clr-treenode-link flex-container">
-
-  <div class="item-info">
+<div class="item">
+  <div class="info">
+    <!-- SELECT BTN -->
     <button
         *ngIf="selectable"
         type="button"
         class="btn btn-sm btn-link"
         [disabled]="isSelected"
         (click)="select()">
-      <clr-icon *ngIf="isSelected" shape="check-circle" size="20"></clr-icon>
-      <clr-icon *ngIf="!isSelected" shape="plus-circle" size="20"></clr-icon>
+      <clr-icon *ngIf="isSelected" shape="check-circle" size="20" class="selection-icon"></clr-icon>
+      <clr-icon *ngIf="!isSelected" shape="plus-circle" size="20" class="selection-icon"></clr-icon>
     </button>
-    <div class="code">
-      <small class="font-weight-bold">
-        {{ displayCode }}
-      </small>
+
+    <!-- CODE -->
+    <div class="code font-weight-bold">
+      {{ displayCode }}
     </div>
+
+    <!-- NAME -->
     <div #name
       [popper]="displayName"
       [popperTrigger]="'hover'"
       [popperPlacement]="'bottom'"
       [popperDisabled]="!isTruncated"
-      class="name">
-      <small class="text-muted">
-        {{ displayName }}
-      </small>
+      class="name text-muted">
+      {{ displayName }}
     </div>
   </div>
 
-  <div *ngIf="nonZeroCount" class="item-count">
+  <!-- COUNT -->
+  <div *ngIf="nonZeroCount" class="count">
     <span class="text-muted">&#124;</span>
     <span class="badge badge-info">
       {{ node.get('count') }}
     </span>
   </div>
-
 </div>
+

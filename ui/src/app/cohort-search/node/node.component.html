@@ -3,13 +3,17 @@
     <em>Error! Oh Noes!</em>
   </div>
 
-  <crit-node-info *ngIf="!error" [node]="node"></crit-node-info>
+  <div class="clr-treenode-link container">
+    <crit-node-info *ngIf="!error" [node]="node"></crit-node-info>
+  </div>
 
   <ng-template *ngIf="node.get('group')"
     clrIfExpanded
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
-      <crit-node *ngFor="let item of children" [node]="item"></crit-node>
+      <div class="node-list">
+        <crit-node *ngFor="let item of children" [node]="item"></crit-node>
+      </div>
     </ng-container>
   </ng-template>
 
