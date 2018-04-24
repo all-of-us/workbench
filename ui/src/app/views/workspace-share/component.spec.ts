@@ -100,7 +100,8 @@ describe('WorkspaceShareComponent', () => {
         }
       ]}).compileComponents().then(() => {
         workspaceSharePage = new WorkspaceSharePage(TestBed);
-      });
+        workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
+    });
       tick();
   }));
 
@@ -112,7 +113,6 @@ describe('WorkspaceShareComponent', () => {
   }));
 
   it('adds users correctly', fakeAsync(() => {
-    workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
     workspaceSharePage.readPageData();
     simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField, 'sampleuser4');
     workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
@@ -128,7 +128,6 @@ describe('WorkspaceShareComponent', () => {
   }));
 
   it('removes users correctly and does not allow self removal', fakeAsync(() => {
-    workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
     workspaceSharePage.fixture.componentRef.instance.userEmail
         = 'sampleuser1@fake-research-aou.org';
     workspaceSharePage.readPageData();
@@ -148,7 +147,7 @@ describe('WorkspaceShareComponent', () => {
   }));
 
   it('validates and allows usernames', fakeAsync(() => {
-    spyOn(workspaceSharePage.fixture.componentRef.instance.workspacesService, 'shareWorkspace')
+    spyOn(TestBed.get(WorkspacesService), 'shareWorkspace')
       .and.callThrough();
 
     const userValues = {
@@ -161,7 +160,6 @@ describe('WorkspaceShareComponent', () => {
       ]
     };
 
-    workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
     workspaceSharePage.readPageData();
     simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField, 'sampleuser4');
     workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
@@ -175,7 +173,7 @@ describe('WorkspaceShareComponent', () => {
   }));
 
   it('validates and allows email addresses', fakeAsync(() => {
-    spyOn(workspaceSharePage.fixture.componentRef.instance.workspacesService, 'shareWorkspace')
+    spyOn(TestBed.get(WorkspacesService), 'shareWorkspace')
       .and.callThrough();
 
     const userValues = {
@@ -188,7 +186,6 @@ describe('WorkspaceShareComponent', () => {
       ]
     };
 
-    workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
     workspaceSharePage.readPageData();
     simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField,
       'sampleuser4@fake-research-aou.org');

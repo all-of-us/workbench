@@ -46,7 +46,7 @@ export class WorkspaceShareComponent implements OnInit {
       private locationService: Location,
       private route: ActivatedRoute,
       public profileStorageService: ProfileStorageService,
-      public workspacesService: WorkspacesService,
+      private workspacesService: WorkspacesService,
       private serverConfigService: ServerConfigService
   ) {
     serverConfigService.getConfig().subscribe((config) => {
