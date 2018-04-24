@@ -107,6 +107,14 @@ button.btn.btn-link {
   font-size: 14px;
 }
 
+button.btn.btn-icon {
+  border: 0;
+}
+
+button.btn.btn-icon:hover {
+  border: 1px solid;
+}
+
 .alert-text-waiting {
   color: #E28327;
 }
