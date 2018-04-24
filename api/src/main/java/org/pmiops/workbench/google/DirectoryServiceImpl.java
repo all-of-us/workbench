@@ -105,10 +105,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     try {
       ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
     } catch (GoogleJsonResponseException e) {
-      if (ExceptionUtils.isGoogleConflictException(e)) {
-        throw new ConflictException(e);
-      }
-      throw e;
+      throw ExceptionUtils.convertGoogleIOException(e);
     }
     return user;
   }
