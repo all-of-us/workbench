@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {deepCopy} from 'app/utils/index';
 
@@ -27,7 +28,7 @@ export class ProfilePageComponent implements OnInit {
   profileLoaded = false;
   errorText: string;
   editing = false;
-  view: any[] = [135, 135];
+  view: any[] = [200, 200];
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
@@ -46,19 +47,24 @@ export class ProfilePageComponent implements OnInit {
   ];
   constructor(
       private profileService: ProfileService,
+      private profileStorageService: ProfileStorageService,
       private signInService: SignInService
   ) {}
 
   ngOnInit(): void {
     this.profileImage = this.signInService.profileImage;
     this.errorText = null;
-    this.profileService.getMe().subscribe(
-      (profile: Profile) => {
-        this.profile = profile;
+
+    this.profileStorageService.profile$.subscribe(profile => {
+      this.profile = profile;
+      if (!this.editing) {
         this.workingProfile = <Profile> deepCopy(profile);
-        this.profileLoaded = true;
-        this.reloadSpinner();
-      });
+      }
+      this.profileLoaded = true;
+      this.reloadSpinner();
+    });
+
+    this.profileStorageService.reload();
   }
 
   submitChanges(): void {
@@ -67,6 +73,7 @@ export class ProfilePageComponent implements OnInit {
       () => {
         this.profile = <Profile> deepCopy(this.workingProfile);
         this.editing = false;
+        this.profileStorageService.reload();
       },
       error => {
         // if MailChimp throws an error, display to the user

@@ -239,7 +239,7 @@ public class FieldSetQueryBuilder {
         ColumnConfig columnConfig = queryState.mainTableColumns.get(columnName);
         if (columnConfig == null) {
           throw new BadRequestException(
-              String.format("No column %s found on table %s", tableName, columnName));
+              String.format("No column %s found on table %s", columnName, tableName));
         }
         SelectedColumn selectedColumn = new SelectedColumn();
         selectedColumn.columnInfo = new ColumnInfo(columnName, columnConfig);
@@ -256,8 +256,8 @@ public class FieldSetQueryBuilder {
         ColumnConfig columnConfig = aliasConfig.get(columnEnd);
         if (columnConfig == null) {
           throw new BadRequestException(
-              String.format("No column %s found on table %s", tableNameAndAlias.tableName,
-                  columnEnd));
+              String.format("No column %s found on table %s", columnEnd,
+                  tableNameAndAlias.tableName));
         }
         SelectedColumn selectedColumn = new SelectedColumn();
         selectedColumn.columnInfo = new ColumnInfo(columnName, columnConfig);
@@ -396,8 +396,7 @@ public class FieldSetQueryBuilder {
       columnConfig = aliasConfig.get(columnEnd);
       if (columnConfig == null) {
         throw new BadRequestException(
-            String.format("No column %s found on table %s", tableNameAndAlias.tableName,
-                columnEnd));
+            String.format("No column %s found on table %s", columnEnd, tableNameAndAlias.tableName));
       }
       return new ColumnInfo(
           String.format("%s.%s", tableNameAndAlias.alias, columnEnd),
@@ -431,7 +430,7 @@ public class FieldSetQueryBuilder {
       throw new BadRequestException("Exactly one of allOf, anyOf, or columnFilter must be "
           + "specified for result filters");
     }
-    if (resultFilters.getNot() != null && resultFilters.getNot()) {
+    if (resultFilters.getIfNot() != null && resultFilters.getIfNot()) {
       whereSql.append("not ");
     }
     if (resultFilters.getColumnFilter() != null) {

@@ -20,6 +20,7 @@ function isBlank(s: string) {
               '../../styles/template.css']
 })
 export class AccountCreationComponent {
+  contactEmailConflictError = false;
   containsLowerAndUpperError: boolean;
   profile: Profile = {
     username: '',
@@ -29,20 +30,21 @@ export class AccountCreationComponent {
     familyName: '',
     contactEmail: ''
   };
-  givenName: string;
-  familyName: string;
-  username: string;
   password: string;
   passwordAgain: string;
   showAllFieldsRequiredError: boolean;
   showPasswordsDoNotMatchError: boolean;
   showPasswordLengthError: boolean;
-  creatingAcccount: boolean;
+  creatingAccount: boolean;
   accountCreated: boolean;
-  conflictError = false;
+  usernameConflictError = false;
   gsuiteDomain: string;
   usernameCheckTimeout: NodeJS.Timer;
+  contactEmailCheckTimeout: NodeJS.Timer;
 
+  // TODO: Injecting the parent component is a bad separation of concerns, as
+  // well as injecting LoginComponent. Should look at refactoring these
+  // interactions.
   constructor(
     private profileService: ProfileService,
     private invitationKeyService: InvitationKeyComponent,
@@ -61,6 +63,9 @@ export class AccountCreationComponent {
   }
 
   createAccount(): void {
+    if (this.usernameConflictError || this.contactEmailConflictError) {
+      return;
+    }
     this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
     this.showPasswordsDoNotMatchError = false;
@@ -86,21 +91,38 @@ export class AccountCreationComponent {
       profile: this.profile, password: this.password,
       invitationKey: this.invitationKeyService.invitationKey
     };
-    this.creatingAcccount = true;
+    this.creatingAccount = true;
     this.profileService.createAccount(request).subscribe(() => {
-      this.creatingAcccount = false;
+      this.creatingAccount = false;
       this.accountCreated = true;
     }, () => {
-      this.creatingAcccount = false;
+      this.creatingAccount = false;
     });
   }
 
   usernameChanged(): void {
-    this.conflictError = false;
+    this.usernameConflictError = false;
+    // TODO: This should use a debounce, rather than manual setTimeout()s.
     clearTimeout(this.usernameCheckTimeout);
     this.usernameCheckTimeout = setTimeout(() => {
+      if (!this.profile.username.trim()) {
+        return;
+      }
       this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
-        this.conflictError = response.isTaken;
+        this.usernameConflictError = response.isTaken;
+      });
+    }, 300);
+  }
+
+  contactEmailChanged(): void {
+    if (!this.profile.contactEmail) {
+      return;
+    }
+    this.contactEmailConflictError = false;
+    clearTimeout(this.contactEmailCheckTimeout);
+    this.contactEmailCheckTimeout = setTimeout(() => {
+      this.profileService.isContactEmailTaken(this.profile.contactEmail).subscribe((response) => {
+        this.contactEmailConflictError = response.isTaken;
       });
     }, 300);
   }

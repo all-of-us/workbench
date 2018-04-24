@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
+import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationListResponse;
@@ -355,8 +356,16 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
+  public ResponseEntity<ContactEmailTakenResponse> isContactEmailTaken(String contactEmail) {
+    return ResponseEntity.ok(
+        new ContactEmailTakenResponse().isTaken(userService.getContactEmailTaken(contactEmail)));
+  }
 
+  @Override
+  public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
+    if (userService.getContactEmailTaken(request.getProfile().getContactEmail())) {
+      throw new ConflictException("That contact email is already taken.");
+    }
     com.google.api.services.admin.directory.model.User googleUser;
     try {
       verifyInvitationKey(request.getInvitationKey());

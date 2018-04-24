@@ -35,7 +35,7 @@ export class SignInService {
   }
 
   public signIn(): void {
-    gapi.auth2.getAuthInstance().signIn();
+    gapi.auth2.getAuthInstance().signIn({'prompt': 'select_account'});
   }
 
   public signOut(): void {

@@ -142,6 +142,24 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
+  /v1/is-contact-email-taken:
+    get:
+      tags:
+        - profile
+      description: Checks to see if the given contact email is not available.
+      operationId: isContactEmailTaken
+      security: []
+      parameters:
+        - in: query
+          name: contactEmail
+          type: string
+          required: true
+      responses:
+        200:
+          description: The answer.
+          schema:
+            $ref: "#/definitions/ContactEmailTakenResponse"
+
   /v1/invitation-key-verification:
     post:
       tags:
@@ -1218,6 +1236,9 @@ definitions:
       contactEmail:
         description: email address that can be used to contact the user
         type: string
+      contactEmailFailure:
+        description: Whether or not contact email could be added to verification list
+        type: boolean
       firstSignInTime:
         type: integer
         format: int64
@@ -1279,6 +1300,7 @@ definitions:
           $ref: "#/definitions/InstitutionalAffiliation"
       requestedIdVerification:
         type: boolean
+
 
   InstitutionalAffiliation:
     type: object
@@ -1464,6 +1486,17 @@ definitions:
     properties:
       isTaken:
         description: Boolean response to whether username is already taken.
+        type: boolean
+    example:
+      isTaken: false
+
+  ContactEmailTakenResponse:
+    type: object
+    required:
+      - isTaken
+    properties:
+      isTaken:
+        description: Boolean response to whether contact email is already taken.
         type: boolean
     example:
       isTaken: false

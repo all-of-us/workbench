@@ -8,12 +8,15 @@
       <input type="text" class="long-input" id="familyName" name="familyName" [(ngModel)]="profile.familyName" placeholder="Family Name">
     </div>
     <div class="form-section">
-      <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" placeholder="Email Address">
+      <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" (ngModelChange)="contactEmailChanged()" placeholder="Email Address">
+      <div *ngIf="contactEmailConflictError" class="error">
+        Contact Email is already in use.
+      </div>
     </div>
     <div class="form-section">
       <input type="text" class="short-input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" placeholder="Create Account">
       <h5 style="display: inline-block;">@{{gsuiteDomain}}</h5>
-      <div *ngIf="conflictError" class="error">
+      <div *ngIf="usernameConflictError" class="error">
         Username is already taken.
       </div>
     </div>
@@ -29,10 +32,12 @@
     </div>
 
     <div class="form-section">
-      <button (click)="createAccount()" class="btn btn-primary short-button">Next</button>
-      <span class="spinner spinner-inline" *ngIf="creatingAcccount">
-        Creating account...
-      </span>
+      <button type="submit"
+          class="btn btn-primary short-button"
+          [disabled]="creatingAccount"
+          [clrLoading]="creatingAccount">
+        Next
+      </button>
     </div>
     <div *ngIf="showAllFieldsRequiredError" class="error">
       All fields are required.

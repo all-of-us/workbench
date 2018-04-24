@@ -7,6 +7,8 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {IconsModule} from 'app/icons/icons.module';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -15,14 +17,14 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 import {
   ClusterService,
   CohortsService,
-  ProfileService,
   WorkspaceAccessLevel,
   WorkspacesService} from 'generated';
 
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
+import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {
@@ -30,8 +32,6 @@ import {
   queryByCss,
   updateAndTick
 } from 'testing/test-helpers';
-import {ServerConfigServiceStub} from '../../../testing/stubs/server-config-service-stub';
-import {ServerConfigService} from '../../services/server-config.service';
 
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
@@ -108,7 +108,7 @@ describe('WorkspaceComponent', () => {
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: Http, useValue: new HttpStub() },
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },

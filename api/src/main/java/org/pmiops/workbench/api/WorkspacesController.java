@@ -695,6 +695,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
     for (UserRole user : request.getItems()) {
+      if (user.getRole() == null || user.getRole().toString().trim().equals("")) {
+        throw new BadRequestException("Role required.");
+      }
       WorkspaceUserRole newUserRole = new WorkspaceUserRole();
       User newUser = userDao.findUserByEmail(user.getEmail());
       if (newUser == null) {

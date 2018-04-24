@@ -14,7 +14,8 @@
     </div>
   </div>
 </div>
-<div style="display: flex; justify-content: space-between;">
+<div style="display: flex; justify-content: flex-start;">
+  <img [src]="profileImage" style="border-radius: 100px; width: 140px; height: 140px; margin-right: 1rem;">
   <div style="display: block">
     <div class="field-wrapper">
       <div class="field">
@@ -38,7 +39,14 @@
             <label class="long-text-field" style="padding-top: 1.5rem">Username:</label>
             <div *ngIf="profileLoaded else loading">{{workingProfile.username}}</div>
           </div>
-          <div class="alert alert-warning"*ngIf="workingProfile.emailVerificationStatus !== 'subscribed'">
+          <div class="alert alert-danger"*ngIf="workingProfile.contactEmailFailure">
+            <div class="alert-items">
+              <div class="alert-item static">
+                <span class="alert-text-waiting">Your email address could not be verified. Please try a different contact email.</span>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-warning"*ngIf="workingProfile.emailVerificationStatus === 'pending'">
             <div class="alert-items">
               <div class="alert-item static">
                 <span class="alert-text-waiting">Your email address is awaiting verification. Please check your inbox for an email from All of Us Researcher Workbench, click on the link inside and then reload this page.</span>
@@ -66,34 +74,89 @@
       <div class="field">
         <label for="aboutYou" class="long-text-field">About You:</label>
         <textarea *ngIf="profileLoaded else loading"
-          [(ngModel)]="workingProfile.aboutYou" id="areaOfResearch" [disabled]="!editing">
+          [(ngModel)]="workingProfile.aboutYou" id="aboutYou" [disabled]="!editing">
         </textarea>
       </div>
     </div>
-    <h2 style="margin-top: 0">Institution Affiliations:</h2>
-    <div *ngIf="profileLoaded">
-      <div *ngFor="let affiliation of workingProfile.institutionalAffiliations">
-        <div class="field-wrapper">
-          <div class="field">
-            <label class="long-text-field">Institution:</label>
-            <input type="text" [(ngModel)]="affiliation.institution" [disabled]="!editing">
+    <div class="field-wrapper" style="padding-right: 2rem;">
+      <h2 style="margin-top: 0">Profile Completion Progress:</h2>
+      <div class="card" style="height: 10.4rem;">
+        <div style="display: flex; align-items: center;">
+          <div style="height: 7.8rem;">
+            <ngx-charts-pie-chart
+                [view]="view"
+                [scheme]="colorScheme"
+                [results]="spinnerValues"
+                [doughnut]="true"
+                [tooltipDisabled]="true">
+            </ngx-charts-pie-chart>
+            <div class="percentText">
+              {{completedTasksAsPercentage}}%
+            </div>
           </div>
-          <div class="field" style="margin-right: 0.2rem;">
-            <label class="long-text-field">Role:</label>
-            <input type="text" [(ngModel)]="affiliation.role" [disabled]="!editing">
+          <div *ngIf="profileLoaded">
+            <div>
+              <button class="btn btn-secondary" (click)="requestVerification()"
+                      [disabled]="workingProfile.blockscoreIdVerificationStatus === 'VERIFIED' || workingProfile.requestedIdVerification">
+                Submit Identity Verification
+                <clr-tooltip *ngIf="workingProfile.blockscoreIdVerificationStatus === 'REJECTED'">
+                  <clr-icon clrTooltipTrigger shape="warning-standard"></clr-icon>
+                  <clr-tooltip-content clrPosition="top-left" clrSize="md" *clrIfOpen>
+                    <span>Your identity could not be verified. Please try again or contact an administrator</span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+              </button>
+            </div>
+            <div>
+              <button class="btn btn-secondary" (click)="submitTermsOfService()"
+                      [disabled]="email || this.workingProfile.termsOfServiceCompletionTime">
+                Submit Terms of Service
+              </button>
+            </div>
           </div>
-          <clr-icon *ngIf="editing"
-              shape="times"
-              class="remove-icon"
-              (click)="removeAffiliation(affiliation)">
-          </clr-icon>
+          <div *ngIf="profileLoaded">
+            <div>
+              <button class="btn btn-secondary" (click)="completeEthicsTraining()"
+                      [disabled]="email || this.workingProfile.ethicsTrainingCompletionTime">
+                Complete Ethics Training
+              </button>
+            </div>
+            <div>
+              <button class="btn btn-secondary" (click)="submitDemographicSurvey()"
+                      [disabled]="email || this.workingProfile.demographicSurveyCompletionTime">
+                Submit Demographics Survey
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div *ngIf="editing" style="display: flex; justify-content: left; align-items: center;">
-      <hr />
-      <clr-icon shape="plus-circle" class="add-icon" (click)="pushAffiliation()"></clr-icon>
-      <hr />
+    <div class="field-wrapper">
+      <h2>Institution Affiliations:</h2>
+      <div *ngIf="profileLoaded">
+        <div *ngFor="let affiliation of workingProfile.institutionalAffiliations">
+          <div class="field-wrapper">
+            <div class="field">
+              <label class="long-text-field">Institution:</label>
+              <input type="text" [(ngModel)]="affiliation.institution" [disabled]="!editing">
+            </div>
+            <div class="field" style="margin-right: 0.2rem;">
+              <label class="long-text-field">Role:</label>
+              <input type="text" [(ngModel)]="affiliation.role" [disabled]="!editing">
+            </div>
+            <clr-icon *ngIf="editing"
+                shape="times"
+                class="remove-icon"
+                (click)="removeAffiliation(affiliation)">
+            </clr-icon>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="editing" style="display: flex; justify-content: left; align-items: center;">
+        <hr />
+        <clr-icon shape="plus-circle" class="add-icon" (click)="pushAffiliation()"></clr-icon>
+        <hr />
+      </div>
     </div>
     <ng-template #loading>
       <div class="loading-area">
@@ -103,63 +166,6 @@
     <div style="margin-top: 2rem;">
       <button *ngIf="editing" (click)="submitChanges()" class="btn btn-primary">Save Profile</button>
       <button *ngIf="editing" (click)="reloadProfile()" class="btn btn-link">Cancel</button>
-    </div>
-  </div>
-  <div *ngIf="profileLoaded" style="width: 13rem">
-    <div class="card">
-      <div style="display: flex; justify-content: space-around">
-        <img [src]="profileImage" style="border-radius: 100px">
-        <h6 style="padding: 1.2rem 0.8rem 0.8rem 0.8rem; line-height: 17px">
-          {{workingProfile.givenName}} {{workingProfile.familyName}} Profile Image
-        </h6>
-      </div>
-    </div>
-    <div class="card">
-      <div style="height: 5rem;">
-        <ngx-charts-pie-chart
-            [view]="view"
-            [scheme]="colorScheme"
-            [results]="spinnerValues"
-            [doughnut]="true"
-            [tooltipDisabled]="true">
-        </ngx-charts-pie-chart>
-        <div class="percentText">
-          {{completedTasksAsPercentage}}%
-        </div>
-        <h6 class="profileCompletionText">
-          Profile Completion Progress
-        </h6>
-      </div>
-      <div>
-        <button class="btn btn-secondary" (click)="requestVerification()"
-            [disabled]="workingProfile.blockscoreIdVerificationStatus === 'VERIFIED' || workingProfile.requestedIdVerification">
-          Submit Identity Verification
-          <clr-tooltip *ngIf="workingProfile.blockscoreIdVerificationStatus === 'REJECTED'">
-            <clr-icon clrTooltipTrigger shape="warning-standard"></clr-icon>
-            <clr-tooltip-content clrPosition="top-left" clrSize="md" *clrIfOpen>
-              <span>Your identity could not be verified. Please try again or contact an administrator</span>
-            </clr-tooltip-content>
-          </clr-tooltip>
-        </button>
-      </div>
-      <div>
-        <button class="btn btn-secondary" (click)="submitTermsOfService()"
-            [disabled]="email || this.workingProfile.termsOfServiceCompletionTime">
-          Submit Terms of Service
-        </button>
-      </div>
-      <div>
-        <button class="btn btn-secondary" (click)="completeEthicsTraining()"
-            [disabled]="email || this.workingProfile.ethicsTrainingCompletionTime">
-          Complete Ethics Training
-        </button>
-      </div>
-      <div>
-        <button class="btn btn-secondary" (click)="submitDemographicSurvey()"
-            [disabled]="email || this.workingProfile.demographicSurveyCompletionTime">
-          Submit Demographics Survey
-        </button>
-      </div>
     </div>
   </div>
 </div>

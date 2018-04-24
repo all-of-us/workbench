@@ -3,12 +3,12 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
+import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {isBlank} from 'app/utils';
 
 import {
   CloneWorkspaceResponse,
   DataAccessLevel,
-  ProfileService,
   UnderservedPopulationEnum,
   Workspace,
   WorkspaceAccessLevel,
@@ -130,7 +130,7 @@ export class WorkspaceEditComponent implements OnInit {
       private locationService: Location,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
-      private profileService: ProfileService,
+      public profileStorageService: ProfileStorageService,
       private router: Router,
   ) {}
 
@@ -161,7 +161,8 @@ export class WorkspaceEditComponent implements OnInit {
     if (this.mode === WorkspaceEditMode.Create || this.mode === WorkspaceEditMode.Clone) {
       // There is a new workspace to be created via this flow.
       this.accessLevel = WorkspaceAccessLevel.OWNER;
-      this.profileService.getMe().subscribe(profile => {
+
+      this.profileStorageService.profile$.subscribe(profile => {
         this.workspace.namespace = profile.freeTierBillingProjectName;
       });
     }

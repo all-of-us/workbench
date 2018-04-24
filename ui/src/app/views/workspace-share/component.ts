@@ -3,15 +3,17 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {ServerConfigService} from '../../services/server-config.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 
-import {ProfileService} from 'generated';
-import {UserRole} from 'generated';
-import {ShareWorkspaceResponse} from 'generated';
-import {Workspace} from 'generated';
-import {WorkspaceAccessLevel} from 'generated';
-import {WorkspaceResponse} from 'generated';
-import {WorkspacesService} from 'generated';
+import {
+  ShareWorkspaceResponse,
+  UserRole,
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspaceResponse,
+  WorkspacesService,
+} from 'generated';
 
 @Component({
   selector: 'app-workspace-share',
@@ -25,8 +27,10 @@ export class WorkspaceShareComponent implements OnInit {
     userRoles: []
   };
   loadingWorkspace = true;
+  loadWorkspaceFinished = false;
   toShare = '';
   selectedPermission = 'Select Permission';
+  roleNotSelected = false;
   private accessLevel: WorkspaceAccessLevel;
   selectedAccessLevel: WorkspaceAccessLevel;
   notFound = false;
@@ -41,7 +45,7 @@ export class WorkspaceShareComponent implements OnInit {
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
-      private profileService: ProfileService,
+      public profileStorageService: ProfileStorageService,
       private workspacesService: WorkspacesService,
       private serverConfigService: ServerConfigService
   ) {
@@ -51,12 +55,16 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadWorkspace().subscribe((workspace) => {
-      this.profileService.getMe().subscribe(profile => {
-        this.usersLoading = false;
+    this.profileStorageService.profile$.subscribe((profile) => {
+      this.usersLoading = false;
+      if (this.loadWorkspaceFinished === true) {
         this.loadingWorkspace = false;
-        this.userEmail = profile.username;
-      });
+      }
+      this.userEmail = profile.username;
+    });
+
+    this.loadWorkspace().subscribe((workspace) => {
+      this.loadWorkspaceFinished = true;
     });
   }
 
@@ -69,6 +77,7 @@ export class WorkspaceShareComponent implements OnInit {
     } else {
       this.selectedAccessLevel = WorkspaceAccessLevel.READER;
     }
+    this.roleNotSelected = false;
   }
 
   convertToEmail(username: string): string {
@@ -77,6 +86,10 @@ export class WorkspaceShareComponent implements OnInit {
 
 
   addCollaborator(): void {
+    if (this.selectedAccessLevel === undefined) {
+      this.roleNotSelected = true;
+      return;
+    }
     if (!this.usersLoading) {
       this.usersLoading = true;
       const updateList = Array.from(this.workspace.userRoles);

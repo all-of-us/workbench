@@ -5,16 +5,20 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
-import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-import {ProfileService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
-import {ServerConfigService} from '../../services/server-config.service';
+import {updateAndTick} from 'testing/test-helpers';
+
+import {WorkspaceAccessLevel, WorkspacesService} from 'generated';
 
 
 describe('WorkspaceEditComponent', () => {
@@ -71,7 +75,7 @@ describe('WorkspaceEditComponent', () => {
         // Wrap in a factory function so we can later mutate the value if needed
         // for testing.
         { provide: ActivatedRoute, useFactory: () => activatedRouteStub },
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
@@ -117,6 +121,8 @@ describe('WorkspaceEditComponent', () => {
       workspacesService.workspaceAccess.set(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, WorkspaceAccessLevel.READER);
       setupComponent(WorkspaceEditMode.Clone);
+      fixture.componentRef.instance.profileStorageService.reload();
+      tick();
       expect(testComponent.workspace.name).toBe(
         `Clone of ${WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME}`);
       expect(testComponent.hasPermission).toBeTruthy(
@@ -127,7 +133,6 @@ describe('WorkspaceEditComponent', () => {
         .triggerEventHandler('click', null);
       fixture.detectChanges();
       tick();
-
       expect(workspacesService.workspaces.length).toBe(2);
       const got = workspacesService.workspaces.find(w => w.name === testComponent.workspace.name);
       expect(got).not.toBeNull();
