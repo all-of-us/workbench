@@ -9,17 +9,16 @@
   color: rgb(98, 164, 32);
   align-self: center;
 
-  /* Undo clarity's .btn styles */
+  /* Redo clarity's .btn styles */
   margin: 0;
   padding: 0;
-  min-width: unset;
-  max-width: unset;
-  min-height: unset;
-  max-height: unset;
-
-  /* So we can size it ourselves */
   width: 1.25rem;
   height: 1.25rem;
+  /* These have to specified or Clarity's will override us */
+  min-width: 1.25rem;;
+  max-width: 1.25rem;;
+  min-height: 1.25rem;
+  max-height: 1.25rem;
 }
 
 .selection-icon {

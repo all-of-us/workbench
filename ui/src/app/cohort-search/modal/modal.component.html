@@ -44,15 +44,38 @@
 
         <ng-container *ngSwitchDefault>
           <div id="tree" class="panel" [class.show]="mode === 'tree'">
-            <crit-tree-page [node]="rootNode"></crit-tree-page>
+            <div class="panel-left">
+              <crit-tree [node]="rootNode"></crit-tree>
+            </div>
+            <div class="panel-right selected">
+              <h5 class="selection-title">{{ selectionTitle }}</h5>
+              <crit-selection-info
+                *ngFor="let parameter of (selection$ | async); let i = index"
+                [index]="i"
+                [parameter]="parameter">
+              </crit-selection-info>
+            </div>
           </div>
+
           <div id="modifiers" class="panel" [class.show]="mode === 'modifiers'">
-            <crit-modifier-page></crit-modifier-page>
+            <div class="panel-left">
+              <crit-modifier-page></crit-modifier-page>
+            </div>
+            <div class="panel-right selected">
+              <h5 class="selection-title">{{ selectionTitle }}</h5>
+              <crit-selection-info
+                *ngFor="let parameter of (selection$ | async); let i = index"
+                [index]="i"
+                [parameter]="parameter">
+              </crit-selection-info>
+            </div>
           </div>
+
           <div id="summary" class="panel" [class.show]="mode === 'summary'">
             Summary
           </div>
         </ng-container>
+
       </ng-container>
     </div>
 

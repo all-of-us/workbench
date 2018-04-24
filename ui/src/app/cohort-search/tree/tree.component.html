@@ -1,0 +1,7 @@
+<div *ngIf="loading" class="spinner" [style.left.%]="50">
+  Loading...
+</div>
+<div *ngIf="error">
+  <em>Error! Oh Noes!</em>
+</div>
+<crit-node *ngFor="let item of children" [node]="item"></crit-node>

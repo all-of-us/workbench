@@ -10,6 +10,7 @@ import {
   CohortSearchActions,
   wizardOpen,
 } from '../redux';
+import {typeToTitle} from '../utils';
 
 import {CRITERIA_TYPES} from '../constant';
 
@@ -101,5 +102,12 @@ export class ModalComponent implements OnInit, OnDestroy {
       type: this.ctype,
       id: 0,    // root parent ID is always 0
     });
+  }
+
+  get selectionTitle() {
+    const title = typeToTitle(this.ctype);
+    return title
+      ? `Selected ${title} Codes`
+      : 'No Selection';
   }
 }
