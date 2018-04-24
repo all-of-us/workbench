@@ -14,6 +14,7 @@ import {ComboChartComponent} from './combo-chart/combo-chart.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {ModalComponent} from './modal/modal.component';
+import {ModifiersComponent} from './modifiers/modifiers.component';
 import {MultiSelectComponent} from './multi-select/multi-select.component';
 import {NodeInfoComponent} from './node-info/node-info.component';
 import {NodeComponent} from './node/node.component';
@@ -58,6 +59,7 @@ const routes: Routes = [{
     DemographicsComponent,
     GenderChartComponent,
     ModalComponent,
+    ModifiersComponent,
     MultiSelectComponent,
     NodeComponent,
     NodeInfoComponent,
