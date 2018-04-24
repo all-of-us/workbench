@@ -39,7 +39,11 @@ export class ModalComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.open$
       .filter(open => !!open)
-      .subscribe(open => this.open = open);
+      .subscribe(_ => {
+        // reset to default each time the modal is opened
+        this.mode = 'tree';
+        this.open = true;
+      });
 
     this.subscription.add(this.criteriaType$
       .filter(ctype => !!ctype)
