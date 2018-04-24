@@ -1,11 +1,14 @@
 <div class="page">
   <div class="main-panel">
-    <div *ngIf="loading">
-      <div class="spinner" [style.left.%]="50">
-        Loading...
-      </div>
+
+    <div *ngIf="loading" class="spinner" [style.left.%]="50">
+      Loading...
     </div>
-    <div *ngIf="error"><em>Error! Oh Noes!</em></div>
+
+    <div *ngIf="error">
+      <em>Error! Oh Noes!</em>
+    </div>
+
     <crit-node *ngFor="let item of children" [node]="item"></crit-node>
   </div>
 

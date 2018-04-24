@@ -88,6 +88,7 @@ button.active {
 
 .panel {
   display: none;
+  height: 100%;
 }
 
 .panel.show {

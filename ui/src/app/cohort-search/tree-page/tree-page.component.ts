@@ -12,7 +12,6 @@ import {typeToTitle} from '../utils';
 })
 export class TreePageComponent extends NodeComponent implements OnInit {
   @select(activeParameterList) criteriaList$;
-  /* Functions of SearchParameters */
 
   ngOnInit() {
     super.ngOnInit();
