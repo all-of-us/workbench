@@ -103,6 +103,10 @@ class DeployUI
           "The name of the version to deploy. Required.") do |version|
        @opts.version = version
     end
+    @parser.on("--key-file [keyfile]",
+               "Service account key file to use for deployment authorization") do |key_file|
+      @opts.key_file = key_file
+    end
     @parser.on("--promote",
                "Promote this version to immediately begin serving UI traffic. " +
                "Required: must set --promote or --no-promote") do
@@ -139,7 +143,7 @@ class DeployUI
 
     swagger_regen(@cmd_name)
     build(@cmd_name, %W{--environment #{environment_name}})
-    ServiceAccountContext.new(@opts.project, service_account=@opts.account).run do
+    ServiceAccountContext.new(@opts.project, service_account=@opts.account, path=@opts.key_file).run do
       common.run_inline %W{gcloud app deploy
         --project #{@opts.project}
         --version #{@opts.version}

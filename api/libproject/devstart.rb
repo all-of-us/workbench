@@ -1070,11 +1070,11 @@ def load_config(project)
   end
 end
 
-def with_cloud_proxy_and_db(gcc, service_account = nil)
+def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   ENV.update(read_db_vars(gcc))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
   common = Common.new
-  CloudSqlProxyContext.new(gcc.project, account=service_account).run do
+  CloudSqlProxyContext.new(gcc.project, account=service_account, path=key_file).run do
     yield(gcc)
   end
 end
@@ -1106,6 +1106,11 @@ def deploy(cmd_name, args)
   )
   op.add_validator lambda {|opts| raise ArgumentError unless opts.version}
   op.add_option(
+    "--key-file [keyfile]",
+    lambda {|opts, v| opts.key_file = v},
+    "Service account key file to use for deployment authorization"
+  )
+  op.add_option(
     "--promote",
     lambda {|opts, v| opts.promote = true},
     "Promote this version to immediately begin serving API traffic"
@@ -1136,7 +1141,7 @@ def deploy(cmd_name, args)
       --version #{op.opts.version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
-    }
+    } + (op.opts.key_file.nil? ? [] : %W{--key-file #{op.opts.key_file}})
     deploy_api(cmd_name, deploy_args)
     deploy_public_api(cmd_name, deploy_args)
   end

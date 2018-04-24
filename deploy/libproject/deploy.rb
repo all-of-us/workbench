@@ -58,8 +58,8 @@ def get_live_gae_version(project, validate_version=true)
   end
   v = versions.to_a.first
   if validate_version and not VERSION_RE.match(v)
-    warning "Found a live version '#{v}' in project '#{project}', but it " +
-            "doesn't match the expected release version format"
+    warning "Found a live version '#{v}' in project '#{project}', but " +
+            "it doesn't match the expected release version format"
     return nil
   end
   return v
@@ -185,16 +185,14 @@ def deploy(cmd_name, args)
   if op.opts.git_version.nil?
     raise ArgumentError.new("--git_version is required when running within docker")
   end
-  # TODO: This helper should throw - not exit, else we don't hit the finally
-  # and clean up the creds file.
   common.run_inline %W{gcloud auth activate-service-account -q --key-file #{op.opts.key_file}}
 
   # TODO: Create/update the Jira ticket.
-  # TODO: Don't grab another key inside of here.
   common.run_inline %W{
     ../api/project.rb deploy
       --project #{op.opts.project}
       --account #{op.opts.account}
+      --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
   }
@@ -203,6 +201,7 @@ def deploy(cmd_name, args)
     ../ui/project.rb deploy-ui
       --project #{op.opts.project}
       --account #{op.opts.account}
+      --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
