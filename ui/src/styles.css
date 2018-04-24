@@ -91,17 +91,6 @@ input[type=text]:focus, input[type=password]:focus {
   background: rgb(92, 183, 225);
 }
 
-/**
- * Overrides crap in clr-tree so it truncates correctly in cohort-search
- */
-.clr-treenode-children {
-  overflow: hidden!important;
-}
-
-.clr-treenode-content {
-  width: 100%!important;
-}
-
 /*
  * Override clarity fonts
  */
