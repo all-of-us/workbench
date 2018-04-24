@@ -108,7 +108,11 @@ button.btn.btn-link {
 }
 
 button.btn.btn-icon {
-  border: 0
+  border: 0;
+}
+
+button.btn.btn-icon:hover {
+  border: 1px solid;
 }
 
 .alert-text-waiting {
