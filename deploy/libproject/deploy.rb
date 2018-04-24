@@ -194,7 +194,7 @@ def deploy(cmd_name, args)
   op.parse.validate
 
   if op.opts.update_jira.nil?
-    op.opts.update_jira = op.opts.project in RELEASE_MANAGED_PROJECTS
+     op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
   end
   op.opts.update_jira = op.opts.update_jira and op.opts.promote
 
