@@ -1,30 +1,28 @@
 <div class="item">
-  <div class="info">
-    <!-- SELECT BTN -->
-    <button
-        *ngIf="selectable"
-        type="button"
-        class="btn btn-sm btn-link"
-        [disabled]="isSelected"
-        (click)="select()">
-      <clr-icon *ngIf="isSelected" shape="check-circle" size="20" class="selection-icon"></clr-icon>
-      <clr-icon *ngIf="!isSelected" shape="plus-circle" size="20" class="selection-icon"></clr-icon>
-    </button>
+  <!-- SELECT BTN -->
+  <button
+      *ngIf="selectable"
+      type="button"
+      class="btn btn-sm btn-link selection-button"
+      [disabled]="isSelected"
+      (click)="select()">
+    <clr-icon *ngIf="isSelected" shape="check-circle" size="20" class="selection-icon"></clr-icon>
+    <clr-icon *ngIf="!isSelected" shape="plus-circle" size="20" class="selection-icon"></clr-icon>
+  </button>
 
-    <!-- CODE -->
-    <div class="code font-weight-bold">
-      {{ displayCode }}
-    </div>
+  <!-- CODE -->
+  <div class="code font-weight-bold">
+    {{ displayCode }}
+  </div>
 
-    <!-- NAME -->
-    <div #name
-      [popper]="displayName"
-      [popperTrigger]="'hover'"
-      [popperPlacement]="'bottom'"
-      [popperDisabled]="!isTruncated"
-      class="name text-muted">
-      {{ displayName }}
-    </div>
+  <!-- NAME -->
+  <div #name
+    [popper]="displayName"
+    [popperTrigger]="'hover'"
+    [popperPlacement]="'bottom'"
+    [popperDisabled]="!isTruncated"
+    class="name text-muted">
+    {{ displayName }}
   </div>
 
   <!-- COUNT -->

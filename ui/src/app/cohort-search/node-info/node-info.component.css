@@ -1,22 +1,11 @@
-* {
-  white-space: nowrap;
-}
-
 .item {
-  width: 100%;
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
+  max-width: 100%;
 }
 
-.info {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: flex-start;
-  min-width: 0;
-}
-
-.info > button {
+.selection-button {
   color: rgb(98, 164, 32);
   align-self: center;
 
@@ -38,18 +27,20 @@
 }
 
 .code {
+  white-space: nowrap;
   font-size: smaller;
 }
 
-.info > .name {
+.name {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
   margin: 0 0.2rem;
   font-size: smaller;
 }
 
 .count {
+  white-space: nowrap;
   align-self: baseline;
 }
