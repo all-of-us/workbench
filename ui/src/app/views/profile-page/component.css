@@ -107,6 +107,10 @@ button.btn.btn-link {
   font-size: 14px;
 }
 
+button.btn.btn-icon {
+  border: 0
+}
+
 .alert-text-waiting {
   color: #E28327;
 }
