@@ -147,11 +147,58 @@ describe('WorkspaceShareComponent', () => {
         .toEqual(WorkspaceAccessLevel.OWNER);
   }));
 
-  it('validates and allows usernames or email addresses', fakeAsync(() => {
-    let asEmailAddress = workspaceSharePage.fixture.componentRef.instance.convertToEmail('bob');
-    expect(asEmailAddress).toEqual('bob@fake-research-aou.org');
-    asEmailAddress =
-      workspaceSharePage.fixture.componentRef.instance.convertToEmail(asEmailAddress);
-    expect(asEmailAddress).toEqual('bob@fake-research-aou.org');
+  it('validates and allows usernames', fakeAsync(() => {
+    spyOn(workspaceSharePage.fixture.componentRef.instance.workspacesService, 'shareWorkspace')
+      .and.callThrough();
+
+    const userValues = {
+      workspaceEtag: undefined,
+      items: [
+        { email: 'sampleuser1@fake-research-aou.org', role: 'OWNER' },
+        { email: 'sampleuser2@fake-research-aou.org', role: 'WRITER' },
+        { email: 'sampleuser3@fake-research-aou.org', role: 'READER' },
+        { email: 'sampleuser4@fake-research-aou.org', role: 'WRITER' }
+      ]
+    };
+
+    workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
+    workspaceSharePage.readPageData();
+    simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField, 'sampleuser4');
+    workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
+
+
+    simulateClick(workspaceSharePage.fixture,
+      queryByCss(workspaceSharePage.fixture, '.add-button'));
+    workspaceSharePage.readPageData();
+    expect(workspaceSharePage.fixture.componentRef.instance.workspacesService.shareWorkspace)
+        .toHaveBeenCalledWith('defaultNamespace', '1', userValues);
+  }));
+
+  it('validates and allows email addresses', fakeAsync(() => {
+    spyOn(workspaceSharePage.fixture.componentRef.instance.workspacesService, 'shareWorkspace')
+      .and.callThrough();
+
+    const userValues = {
+      workspaceEtag: undefined,
+      items: [
+        { email: 'sampleuser1@fake-research-aou.org', role: 'OWNER' },
+        { email: 'sampleuser2@fake-research-aou.org', role: 'WRITER' },
+        { email: 'sampleuser3@fake-research-aou.org', role: 'READER' },
+        { email: 'sampleuser4@fake-research-aou.org', role: 'WRITER' }
+      ]
+    };
+
+    workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
+    workspaceSharePage.readPageData();
+    simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField,
+      'sampleuser4@fake-research-aou.org');
+    workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
+
+
+    simulateClick(workspaceSharePage.fixture,
+      queryByCss(workspaceSharePage.fixture, '.add-button'));
+    workspaceSharePage.readPageData();
+    expect(workspaceSharePage.fixture.componentRef.instance.workspacesService.shareWorkspace)
+      .toHaveBeenCalledWith('defaultNamespace', '1', userValues);
   }));
 });
