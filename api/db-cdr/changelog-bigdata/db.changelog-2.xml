@@ -121,4 +121,37 @@
       tableName="concept_relationship"/>
   </changeSet>
 
+  <changeSet author="brianfreeman" id="drop idx_concept_ancestor" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="idx_concept_ancestor"/>
+    </preConditions>
+    <dropIndex
+            tableName="concept_ancestor"
+            indexName="idx_concept_ancestor"
+    />
+  </changeSet>
+
+  <changeSet author="brianfreeman" id="drop idx_ancestor_concept_id" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="idx_ancestor_concept_id"/>
+    </preConditions>
+    <dropIndex
+            tableName="concept_ancestor"
+            indexName="idx_ancestor_concept_id"
+    />
+  </changeSet>
+
+  <changeSet author="brianfreeman" id="drop idx_descendant_concept_id" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="idx_descendant_concept_id"/>
+    </preConditions>
+    <dropIndex
+            tableName="concept_ancestor"
+            indexName="idx_descendant_concept_id"
+    />
+  </changeSet>
+
 </databaseChangeLog>
