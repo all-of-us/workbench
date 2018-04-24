@@ -1128,7 +1128,7 @@ def deploy(cmd_name, args)
 
   common = Common.new
   common.status "Running database migrations..."
-  with_cloud_proxy_and_db(gcc, service_account=op.opts.account) do |ctx|
+  with_cloud_proxy_and_db(gcc, service_account=op.opts.account, key_file=op.opts.key_file) do |ctx|
     migrate_database
     load_config(ctx.project)
 
@@ -1141,7 +1141,7 @@ def deploy(cmd_name, args)
       --version #{op.opts.version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
-    } + (op.opts.key_file.nil? ? [] : %W{--key-file #{op.opts.key_file}})
+    }
     deploy_api(cmd_name, deploy_args)
     deploy_public_api(cmd_name, deploy_args)
   end
