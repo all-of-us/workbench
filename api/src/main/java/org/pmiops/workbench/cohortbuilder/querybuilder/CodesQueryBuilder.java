@@ -7,18 +7,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.Modifier;
-import org.pmiops.workbench.model.ModifierType;
-import org.pmiops.workbench.model.Operator;
-import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -39,10 +32,20 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     GROUP, NOT_GROUP
   }
 
+  private static final List<Operator> MODIFIER_OPERATORS =
+    Arrays.asList(Operator.BETWEEN, Operator.GREATER_THAN_OR_EQUAL_TO,
+      Operator.LESS_THAN_OR_EQUAL_TO);
+
+  private static final List<ModifierType> INCLUDED_MODIFIER_TYPES =
+    Arrays.asList(ModifierType.AGE_AT_EVENT, ModifierType.EVENT_DATE);
+
   public static final String ICD_10 = "ICD10";
   public static final String WHERE = " where ";
   public static final String AND = " and ";
   public static final String DISTINCT = "distinct";
+  public static final String AGE_AT_EVENT_PREFIX = "age";
+  public static final String EVENT_DATE_PREFIX = "event";
+  public static final String OCCURRENCES_PREFIX = "occ";
 
   private static final String INNER_SQL_TEMPLATE =
     "select ${modifierDistinct} a.person_id ${modifierColumns}\n" +
@@ -112,13 +115,12 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
     String finalSql = params.getModifiers().isEmpty() ? OUTER_SQL_TEMPLATE : MODIFIER_SQL_TEMPLATE;
     finalSql = finalSql.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
-    String modifierSql = "";
     if (!modifierQueryParts.isEmpty()) {
-      modifierSql = modifierSql + WHERE + String.join(AND, modifierQueryParts);
+      String modifierSql = finalSql + WHERE + String.join(AND, modifierQueryParts);
       if (!groupByModifier.isEmpty()) {
         modifierSql = modifierSql + groupByModifier.get(0);
       }
-      finalSql = finalSql.replace("${innerSqlTemplate}", modifierSql);
+      finalSql = OUTER_SQL_TEMPLATE.replace("${innerSqlTemplate}", modifierSql);
     }
 
     return QueryJobConfiguration
@@ -132,31 +134,46 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                                   List<String> modifierQueryParts,
                                   List<String> groupByModifier,
                                   Map<String, QueryParameterValue> queryParams) {
-    validateOperands(modifier);
-    if (modifier.getName().equals(ModifierType.AGE_AT_EVENT)) {
-      for (String operand : modifier.getOperands()) {
-        String ageAtEventParameter = "age" + getUniqueNamedParameterPostfix();
-        modifierQueryParts.add(AGE_AT_EVENT_SQL_TEMPLATE + " "
-          + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + ageAtEventParameter + "\n");
-        queryParams.put(ageAtEventParameter, QueryParameterValue.int64(newLong(operand)));
-      }
-    } else if (modifier.getName().equals(ModifierType.EVENT_DATE)) {
-      for (String operand : modifier.getOperands()) {
-        String eventParameter = "event" + getUniqueNamedParameterPostfix();
-        modifierQueryParts.add(EVENT_DATE_SQL_TEMPLATE + " "
-          + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + eventParameter + "\n");
-        queryParams.put(eventParameter, QueryParameterValue.date(operand));
+    if (INCLUDED_MODIFIER_TYPES.contains(modifier.getName())) {
+      ModifierType modifierType = modifier.getName();
+      if (MODIFIER_OPERATORS.contains(modifier.getOperator())
+        && modifier.getOperator().equals(Operator.BETWEEN)) {
+        validateBetweenOperator(modifier);
+        List<String> modifierParams = new ArrayList<>();
+        for (String operand : modifier.getOperands()) {
+          String modifierParameter = getModifierTypePrefix(modifierType)
+            + getUniqueNamedParameterPostfix();
+          modifierParams.add(" @" + modifierParameter);
+          queryParams.put(modifierParameter, getQueryParameterValue(modifierType, operand));
+        }
+        modifierQueryParts.add(getModifierSqlTemplate(modifierType) + " "
+          + OperatorUtils.getSqlOperator(modifier.getOperator())
+          + String.join(AND, modifierParams) + "\n");
+      } else if (MODIFIER_OPERATORS.contains(modifier.getOperator())
+        && !modifier.getOperator().equals(Operator.BETWEEN)) {
+        validateNotBetweenOperator(modifier);
+        for (String operand : modifier.getOperands()) {
+          String modifierParameter = getModifierTypePrefix(modifierType)
+            + getUniqueNamedParameterPostfix();
+          modifierQueryParts.add(getModifierSqlTemplate(modifierType) + " "
+            + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + modifierParameter + "\n");
+          queryParams.put(modifierParameter, getQueryParameterValue(modifierType, operand));
+        }
+      } else {
+        createBadRequest(modifier);
       }
     } else if (modifier.getName().equals(ModifierType.NUM_OF_OCCURRENCES)) {
       if (!groupByModifier.isEmpty()) {
         throw new BadRequestException(String.format(
           "%s modifier can only be used once.", modifier.getName()));
       }
+      ModifierType modifierType = modifier.getName();
       for (String operand : modifier.getOperands()) {
-        String occurrencesParameter = "occ" + getUniqueNamedParameterPostfix();
-        groupByModifier.add(OCCURRENCES_SQL_TEMPLATE + " "
+        String occurrencesParameter = getModifierTypePrefix(modifierType)
+          + getUniqueNamedParameterPostfix();
+        groupByModifier.add(getModifierSqlTemplate(modifierType) + " "
           + OperatorUtils.getSqlOperator(modifier.getOperator()) + " @" + occurrencesParameter + "\n");
-        queryParams.put(occurrencesParameter, QueryParameterValue.int64(newLong(operand)));
+        queryParams.put(occurrencesParameter, getQueryParameterValue(modifierType, operand));
       }
     }
   }
@@ -168,6 +185,64 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       throw new BadRequestException(String.format(
         "Operand has to be convertable to long: %s", operand));
     }
+  }
+
+  private void validateBetweenOperator(Modifier modifier) {
+    if (modifier.getOperands().size() != 2) {
+      throw new BadRequestException(String.format(
+        "Modifier: %s can only have 2 operands when using the %s operator",
+        modifier.getName(),
+        modifier.getOperator().name()));
+    }
+  }
+
+  private void validateNotBetweenOperator(Modifier modifier) {
+    if (modifier.getOperands().size() != 1) {
+      throw new BadRequestException(String.format(
+        "Modifier: %s can only have 1 operand when using the %s operator",
+        modifier.getName(),
+        modifier.getOperator().name()));
+    }
+  }
+
+  private String getModifierTypePrefix(ModifierType modifierType){
+    if (modifierType.equals(ModifierType.AGE_AT_EVENT)) {
+      return AGE_AT_EVENT_PREFIX;
+    } else if(modifierType.equals(ModifierType.EVENT_DATE)) {
+      return EVENT_DATE_PREFIX;
+    } else if(modifierType.equals(ModifierType.NUM_OF_OCCURRENCES)) {
+      return OCCURRENCES_PREFIX;
+    }
+    return null;
+  }
+
+  private String getModifierSqlTemplate(ModifierType modifierType){
+    if (modifierType.equals(ModifierType.AGE_AT_EVENT)) {
+      return AGE_AT_EVENT_SQL_TEMPLATE;
+    } else if(modifierType.equals(ModifierType.EVENT_DATE)) {
+      return EVENT_DATE_SQL_TEMPLATE;
+    } else if(modifierType.equals(ModifierType.NUM_OF_OCCURRENCES)) {
+      return OCCURRENCES_SQL_TEMPLATE;
+    }
+    return null;
+  }
+
+  private QueryParameterValue getQueryParameterValue(ModifierType modifierType, String operand){
+    if (modifierType.equals(ModifierType.AGE_AT_EVENT)) {
+      return QueryParameterValue.int64(newLong(operand));
+    } else if(modifierType.equals(ModifierType.EVENT_DATE)) {
+      return QueryParameterValue.date(operand);
+    } else if(modifierType.equals(ModifierType.NUM_OF_OCCURRENCES)) {
+      return QueryParameterValue.int64(newLong(operand));
+    }
+    return null;
+  }
+
+  private void createBadRequest(Modifier modifier) {
+    throw new BadRequestException(String.format(
+      "Modifier: %s can only use the following operators: %s",
+      modifier.getName(), String.join(", ",
+        MODIFIER_OPERATORS.stream().map(Operator::name).collect(Collectors.toList()))));
   }
 
   private void validateOperands(Modifier modifier) {
