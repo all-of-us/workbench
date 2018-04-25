@@ -496,21 +496,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     org.pmiops.workbench.db.model.Workspace dbWorkspace;
-    List<org.pmiops.workbench.firecloud.model.Workspace> fcWorkspaces;
+    List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces;
     User user = userProvider.get();
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
     if (user != null) {
       try {
-        fcWorkspaces = firecloudService.getWorkspaces();
+        fcWorkspaces = fireCloudService.getWorkspaces();
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
         throw ExceptionUtils.convertFirecloudException(e);
       }
-      for ( org.pmiops.workbench.firecloud.model.Workspace fcWorkspace : fcWorkspaces) {
+      for ( org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace : fcWorkspaces) {
         WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-        dbWorkspace = workspaceService.get(fcWorkspace.getWorkspaceNamespace(), fcWorkspace.getWorkspaceName());
+        dbWorkspace = workspaceService.get(fcWorkspace.getWorkspace().getNamespace(), fcWorkspace.getWorkspace().getName());
         if(dbWorkspace != null) {
           currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
-          currentWorkspace.setAccessLevel(fcWorkspace.getDataAccessLevel());
+          currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
           responseList.add(currentWorkspace);
         }
       }
