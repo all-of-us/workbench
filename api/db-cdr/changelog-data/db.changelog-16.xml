@@ -3,9 +3,12 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="srushtigangireddy" id="changelog-6">
+  <changeSet author="srushtigangireddy" id="changelog-16" runAlways="true" context="local or cloud">
+
+    <validCheckSum>ANY</validCheckSum>
+
 
     <delete tableName="db_domain"/>
 
@@ -19,8 +22,7 @@
       <column name="count_value" type="NUMERIC" />
     </loadData>
 
-
   </changeSet>
-
 </databaseChangeLog>
+
 
