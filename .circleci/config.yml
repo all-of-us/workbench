@@ -2,7 +2,7 @@ version: 2
 
 defaults: &defaults
   docker:
-    - image: allofustest/workbench:buildimage-0.0.11
+    - image: allofustest/workbench:buildimage-0.0.12
   working_directory: ~/workbench
 java_defaults: &java_defaults
   <<: *defaults
@@ -42,7 +42,7 @@ jobs:
 
   api-local-test:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.11
+      - image: allofustest/workbench:buildimage-0.0.12
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
