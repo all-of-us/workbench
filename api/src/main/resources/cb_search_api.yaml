@@ -305,6 +305,7 @@ definitions:
     required:
       - type
       - searchParameters
+      - modifiers
     properties:
       id:
         description: Unique within the cohort definition
