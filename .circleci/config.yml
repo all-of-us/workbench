@@ -262,7 +262,7 @@ jobs:
               --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
               --git-version "${CIRCLE_TAG}" \
               --app-version "${CIRCLE_TAG}" \
-              --circle-url "${CIRCLE_BUILD_URL}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
               --key-file circle-sa-key.json \
               --promote
 
