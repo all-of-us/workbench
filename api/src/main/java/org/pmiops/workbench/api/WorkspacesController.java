@@ -495,17 +495,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    // TODO: use FireCloud to determine what workspaces to return, instead of just returning
-    // workspaces from our database.
+    org.pmiops.workbench.db.model.Workspace dbWorkspace;
+    List<org.pmiops.workbench.firecloud.model.Workspace> fcWorkspaces;
     User user = userProvider.get();
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
     if (user != null) {
-      for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
-        // TODO: Use FireCloud to determine access roles, not our DB
+      try {
+        fcWorkspaces = firecloudService.getWorkspaces();
+      } catch (org.pmiops.workbench.firecloud.ApiException e) {
+        throw ExceptionUtils.convertFirecloudException(e);
+      }
+      for ( org.pmiops.workbench.firecloud.model.Workspace fcWorkspace : fcWorkspaces) {
         WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-        currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()));
-        currentWorkspace.setAccessLevel(userRole.getRole());
-        responseList.add(currentWorkspace);
+        dbWorkspace = workspaceService.get(fcWorkspace.getWorkspaceNamespace(), fcWorkspace.getWorkspaceName());
+        if(dbWorkspace != null) {
+          currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+          currentWorkspace.setAccessLevel(fcWorkspace.getDataAccessLevel());
+          responseList.add(currentWorkspace);
+        }
       }
     }
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
