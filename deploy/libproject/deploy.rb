@@ -284,7 +284,7 @@ def deploy(cmd_name, args)
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
 
   if create_ticket
-    jira_client.create_ticket(op.opts.project, live_staging_version,
+    jira_client.create_ticket(op.opts.project, from_version,
                               op.opts.git_version, op.opts.circle_url)
   end
 end
