@@ -495,6 +495,31 @@ group by co1.measurement_concept_id, stratum_2"
 # group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 #
 
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
+set count_value=
+(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
+WHERE o.observation_source_concept_id in
+(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1586134))
+where concept_id=1586134"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
+set count_value=
+(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
+WHERE o.observation_source_concept_id in
+(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1585855))
+where concept_id=1585855"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
+set count_value=
+(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
+WHERE o.observation_source_concept_id in
+(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1585710))
+where concept_id=1585710"
+
+
 # Set the survey answer count for all the survey questions that belong to each module
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
