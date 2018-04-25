@@ -123,17 +123,19 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             TO_CLIENT_DBDOMAIN =
             new Function<DbDomain, org.pmiops.workbench.model.DbDomain>() {
                 @Override
-                public org.pmiops.workbench.model.DbDomain apply(org.pmiops.workbench.cdr.model.DbDomain cdr) {
+                public org.pmiops.workbench.model.DbDomain apply(org.pmiops.workbench.cdr.model.DbDomain dbd) {
                     return new org.pmiops.workbench.model.DbDomain()
-                            .domainId( cdr.getDomainId())
-                            .domainDisplay(cdr.getDomainDisplay())
-                            .domainDesc(cdr.getDomainDesc())
-                            .domainParent(cdr.getDomainParent())
-                            .domainRoute(cdr.getDomainRoute());
-
+                            .domainId(dbd.getDomainId())
+                            .domainDisplay(dbd.getDomainDisplay())
+                            .domainDesc(dbd.getDomainDesc())
+                            .dbType(dbd.getDbType())
+                            .domainRoute(dbd.getDomainRoute())
+                            .conceptId(dbd.getConceptId())
+                            .countValue(dbd.getCountValue());
 
                 }
             };
+
 
 
 
