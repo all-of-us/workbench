@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.SearchParameter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,8 +14,8 @@ import java.util.List;
 public class QueryParameters {
 
     private String type;
-    private List<Modifier> modifiers;
-    private List<SearchParameter> parameters;
+    private List<Modifier> modifiers = new ArrayList<>();
+    private List<SearchParameter> parameters = new ArrayList<>();
 
     public String getType() {
         return type;

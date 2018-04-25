@@ -42,9 +42,10 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   public static final String ICD_10 = "ICD10";
   public static final String WHERE = " where ";
   public static final String AND = " and ";
+  public static final String DISTINCT = "distinct";
 
   private static final String INNER_SQL_TEMPLATE =
-    "select distinct a.person_id ${modifierColumns}\n" +
+    "select ${modifierDistinct} a.person_id ${modifierColumns}\n" +
       "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n" +
       "where a.${tableId} = b.concept_id\n";
 
@@ -252,7 +253,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     String modifierSql = modifiersExist ? MODIFIER_COLUMNS_TEMPLATE : "";
+    String modifierDistinctSql = modifiersExist ? DISTINCT : "";
     String innerSql = INNER_SQL_TEMPLATE.replace("${modifierColumns}", modifierSql);
+    innerSql = innerSql.replace("${modifierDistinct}", modifierDistinctSql);
 
     queryParts.add(filterSql(innerSql + inClauseSql + groupOrChildSql, paramNames.build()));
   }
