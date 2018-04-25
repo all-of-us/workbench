@@ -369,4 +369,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const asDate = new Date(this.workspace.lastModifiedTime);
     return asDate.toDateString();
   }
+
+  get writePermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER
+      || this.accessLevel === WorkspaceAccessLevel.WRITER;
+  }
 }
