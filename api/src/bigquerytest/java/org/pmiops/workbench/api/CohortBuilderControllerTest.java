@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -146,7 +147,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     Modifier modifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("25"));
     SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
       Arrays.asList(icd9), Arrays.asList(modifier));
@@ -159,7 +160,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     String operand = "zz";
     Modifier modifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList(operand));
     SearchRequest searchRequest =
       createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
@@ -179,7 +180,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     String operand2 = "2";
     Modifier modifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList(operand1, operand2));
     SearchRequest searchRequest =
       createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
@@ -188,15 +189,23 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     } catch (BadRequestException bre) {
       assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifiers can only have 1 operand when using the %s operator", Operator.GREATER_THAN.name()));
+        "Modifier: %s can only have 1 operand when using the %s operator",
+        modifier.getName(),
+        modifier.getOperator().name()));
     }
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetween() throws Exception {
+    DateTime birthDate = new DateTime(1980, 2, 17, 0, 0, 0, 0);
+    DateTime eventDate = new DateTime(2008, 7, 22, 0, 0, 0, 0);
+
+    Period period = new Period(birthDate, eventDate);
+    period.getYears();
+
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    String operand1 = "24";
-    String operand2 = "26";
+    String operand1 = Integer.toString(period.getYears() - 1);
+    String operand2 = Integer.toString(period.getYears() + 1);
     Modifier modifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
       .operator(Operator.BETWEEN)
@@ -224,7 +233,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     } catch (BadRequestException bre) {
       assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifiers can only have 2 operands when using the %s operator", Operator.BETWEEN.name()));
+        "Modifier: %s can only have 2 operands when using the %s operator",
+        modifier.getName(),
+        modifier.getOperator().name()));
     }
   }
 
@@ -243,7 +254,9 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     } catch (BadRequestException bre) {
       assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifiers can only have 2 operands when using the %s operator", Operator.BETWEEN.name()));
+        "Modifier: %s can only have 2 operands when using the %s operator",
+        modifier.getName(),
+        modifier.getOperator().name()));
     }
   }
 
@@ -291,7 +304,7 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     Modifier modifier1 = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("25"));
     Modifier modifier2 = new Modifier()
       .name(ModifierType.NUM_OF_OCCURRENCES)
@@ -307,15 +320,15 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     Modifier modifier1 = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("25"));
     Modifier modifier2 = new Modifier()
       .name(ModifierType.NUM_OF_OCCURRENCES)
-      .operator(Operator.EQUAL)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("1"));
     Modifier modifier3 = new Modifier()
       .name(ModifierType.EVENT_DATE)
-      .operator(Operator.EQUAL)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("2009-12-03"));
     SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
       Arrays.asList(icd9), Arrays.asList(modifier1, modifier2, modifier3));
@@ -375,9 +388,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoAge() throws Exception {
-    LocalDate birthdate = LocalDate.of(1980, 8, 01);
-    LocalDate now = LocalDate.now();
-    Integer age = Period.between(birthdate, now).getYears();
+    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime now = new DateTime();
+    Period period = new Period(birthDate, now);
+    Integer age = period.getYears();
     Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
     SearchParameter demo = createSearchParameter(demoAge, null);
     demo.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
@@ -390,9 +404,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
-    LocalDate birthdate = LocalDate.of(1980, 8, 01);
-    LocalDate now = LocalDate.now();
-    Integer age = Period.between(birthdate, now).getYears();
+    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime now = new DateTime();
+    Period period = new Period(birthDate, now);
+    Integer age = period.getYears();
     Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
     SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
     demoAgeSearchParam.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
@@ -406,9 +421,10 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
     Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
-    LocalDate birthdate = LocalDate.of(1980, 8, 01);
-    LocalDate now = LocalDate.now();
-    Integer age = Period.between(birthdate, now).getYears();
+    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime now = new DateTime();
+    Period period = new Period(birthDate, now);
+    Integer age = period.getYears();
     Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
     SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
     demoAgeSearchParam.attribute(new Attribute().operator("=").operands(Arrays.asList(age.toString())));
