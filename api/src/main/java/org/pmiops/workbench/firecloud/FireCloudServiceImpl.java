@@ -111,7 +111,6 @@ public class FireCloudServiceImpl implements FireCloudService {
       throws ApiException {
     ProfileApi profileApi = profileApiProvider.get();
     Profile profile = new Profile();
-    profile.setContactEmail(contactEmail);
     profile.setFirstName(firstName);
     profile.setLastName(lastName);
     // TODO: make these fields not required in Firecloud and stop passing them in, or prompt for
