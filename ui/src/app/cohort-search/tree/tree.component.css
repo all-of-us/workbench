@@ -1,0 +1,15 @@
+/**
+ * We have to override this so that the text will truncate correctly
+ */
+::ng-deep .clr-treenode-content {
+  width: 100%!important;
+}
+
+.root-spinner {
+  left: 50%;
+  top: 50%;
+}
+
+.error {
+  color: red;
+}

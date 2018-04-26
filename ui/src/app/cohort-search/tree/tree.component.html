@@ -1,0 +1,9 @@
+<div *ngIf="loading" class="spinner root-spinner">
+  Loading...
+</div>
+<!-- TODO: This error handling is a stub until we can get a designer to look at it -->
+<div *ngIf="error" class="error">
+  <clr-icon shape="error-standard"></clr-icon>
+  <em>Failed to Load Criteria</em>
+</div>
+<crit-node *ngFor="let item of children" [node]="item"></crit-node>

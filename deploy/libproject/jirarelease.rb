@@ -87,7 +87,7 @@ class JiraReleaseClient
     if not jira_creds
       raise RuntimeError.new "failed to read JIRA login from '#{gcs_uri}'"
     end
-    jira_json = JSON.parse(jira_json)
+    jira_json = JSON.parse(jira_creds)
     return JiraReleaseClient.new(jira_json['username'], jira_json['password'])
   end
 
