@@ -44,7 +44,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  private org.pmiops.workbench.notebooks.model.ClusterRequest createFirecloudClusterRequest(String userEmail) {
+  private ClusterRequest createFirecloudClusterRequest(String userEmail) {
     ClusterRequest firecloudClusterRequest = new ClusterRequest();
     Map<String, String> labels = new HashMap<String, String>();
     labels.put(CLUSTER_LABEL_AOU, "true");
