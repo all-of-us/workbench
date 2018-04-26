@@ -22,7 +22,12 @@
     </clr-button>
     <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
   </span>
-  <clr-button [clrInMenu]="true" class="btn" (click)="share()">Share</clr-button>
+  <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
+    <clr-button [clrInMenu]="true" class="btn" [disabled]="!ownerPermission" (click)="share()">Share</clr-button>
+    <span *ngIf="!ownerPermission" class="tooltip-content">
+      Owner access is required to share the workspace.
+    </span>
+  </span>
   <clr-button [clrInMenu]="true" class="btn" [routerLink]="['/workspace', wsNamespace, wsId, 'clone']" routerLinkActive="active">
     Clone
   </clr-button>

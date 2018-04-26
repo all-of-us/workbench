@@ -374,4 +374,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
       || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
+
+  get ownerPermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER;
+  }
 }
