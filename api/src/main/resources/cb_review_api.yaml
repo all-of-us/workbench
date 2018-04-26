@@ -268,7 +268,7 @@ paths:
           schema:
             $ref: "#/definitions/MasterParticipantDataListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/detail/{domain}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/detail/{dataId}/{domain}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -281,6 +281,12 @@ paths:
       description: Returns detailed domain data for the specified params for a participant.
       operationId: "getDetailParticipantData"
       parameters:
+        - in: path
+          name: dataId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which domain the details belong to.
         - in: path
           name: domain
           type: string
@@ -666,6 +672,7 @@ definitions:
   MasterParticipantData:
     type: object
     required:
+      - dataId
       - itemDate
       - domain
       - standardVocabulary
@@ -674,6 +681,10 @@ definitions:
       - sourceVocabulary
       - sourceName
     properties:
+      dataId:
+        type: integer
+        format: int64
+        description: Primary key of this data
       itemDate:
         type: string
         description: The date of the condition occurrence
