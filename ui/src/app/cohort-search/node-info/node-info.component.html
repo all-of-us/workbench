@@ -1,0 +1,35 @@
+<div class="item">
+  <!-- SELECT BTN -->
+  <button
+      *ngIf="selectable"
+      type="button"
+      class="btn btn-sm btn-link selection-button"
+      [disabled]="isSelected"
+      (click)="select($event)">
+    <clr-icon *ngIf="isSelected" shape="check-circle" size="20" class="selection-icon"></clr-icon>
+    <clr-icon *ngIf="!isSelected" shape="plus-circle" size="20" class="selection-icon"></clr-icon>
+  </button>
+
+  <!-- CODE -->
+  <div class="code font-weight-bold">
+    {{ displayCode }}
+  </div>
+
+  <!-- NAME -->
+  <div #name
+    [popper]="displayName"
+    [popperTrigger]="'hover'"
+    [popperPlacement]="'bottom'"
+    [popperDisabled]="!isTruncated"
+    class="name text-muted">
+    {{ displayName }}
+  </div>
+
+  <!-- COUNT -->
+  <div *ngIf="nonZeroCount" class="count">
+    <span class="text-muted">&#124;</span>
+    <span class="badge badge-info">
+      {{ node.get('count') }}
+    </span>
+  </div>
+</div>

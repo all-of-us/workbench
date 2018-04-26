@@ -25,8 +25,4 @@
     </div>
   </div>
 </div>
-<app-criteria-wizard
-  *ngIf="open$ | async"
-  [open]="open$ | async"
-  [criteriaType]="criteriaType$ | async">
-</app-criteria-wizard>
+<app-modal></app-modal>
