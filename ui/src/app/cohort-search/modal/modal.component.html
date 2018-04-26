@@ -1,0 +1,96 @@
+<div class="crit-modal-container" [class.show]="open">
+  <div class="crit-modal-content">
+
+    <div class="title-bar">
+      <div class="btn-group btn-link">
+        <div class="title">{{ title }}</div>
+        <ng-container *ngIf="ctype !== 'demo'">
+          <div class="vbar"></div>
+          <button type="button" class="btn"
+            [class.active]="mode === 'tree'"
+            (click)="mode = 'tree'">
+            Criteria Tree
+          </button>
+          <button type="button" class="btn"
+            [class.active]="mode === 'modifiers'"
+            (click)="mode = 'modifiers'">
+            Modifiers
+          </button>
+          <button type="button" class="btn"
+            [class.active]="mode === 'summary'"
+            (click)="mode = 'summary'">
+            Summary
+          </button>
+        </ng-container>
+      </div>
+      <button
+        (click)="cancel()"
+        class="btn btn-link btn-icon">
+        <clr-icon class="close-button" size="24" shape="close"></clr-icon>
+      </button>
+    </div>
+
+    <!-- Wrapping the content in an ngIf makes sure that the various forms
+      included in the content are destroyed and recreated each time the modal
+      is opened / closed; i.e. modal state doesn't "leak" from one "instance"
+      to another
+    -->
+    <div class="content" *ngIf="open">
+      <ng-container [ngSwitch]="ctype">
+        <crit-demographics *ngSwitchCase="'demo'"
+          (cancel)="cancel()"
+          (finish)="finish()">
+        </crit-demographics>
+
+        <ng-container *ngSwitchDefault>
+          <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers'">
+            <!-- Tree Page -->
+            <div class="panel-left" [class.show]="mode === 'tree'">
+              <crit-tree [node]="rootNode"></crit-tree>
+            </div>
+            <!-- Modifiers Page -->
+            <div class="panel-left" [class.show]="mode === 'modifiers'">
+              <crit-modifier-page></crit-modifier-page>
+            </div>
+            <div class="panel-right selected">
+              <h5 class="selection-title">{{ selectionTitle }}</h5>
+              <crit-selection-info
+                *ngFor="let parameter of (selection$ | async); let i = index"
+                [index]="i"
+                [parameter]="parameter">
+              </crit-selection-info>
+            </div>
+          </div>
+
+          <!-- Summary Page -->
+          <div id="summary" class="panel" [class.show]="mode === 'summary'">
+            Summary
+          </div>
+        </ng-container>
+
+      </ng-container>
+    </div>
+
+    <div *ngIf="ctype !== 'demo'" class="footer">
+      <button type="button"
+        (click)="cancel()"
+        class="btn btn-link">
+        Cancel
+      </button>
+      <button *ngIf="hasNextPage"
+        [disabled]="noSelection"
+        (click)="nextPage()"
+        type="button"
+        class="btn btn-secondary"
+        >
+        Next
+      </button>
+      <button type="button"
+        [disabled]="noSelection"
+        (click)="finish()"
+        class="btn btn-primary">
+        Finish
+      </button>
+    </div>
+  </div>
+</div>

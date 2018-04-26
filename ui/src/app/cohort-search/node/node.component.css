@@ -1,0 +1,15 @@
+.clr-treenode-link.container {
+  width: 90%;
+  height: 1.25rem;
+  min-height: 1.25rem;
+  max-height: 1.25rem;
+}
+
+.node-list {
+  width: 100%;
+  overflow: hidden;
+}
+
+.error {
+  color: red;
+}
