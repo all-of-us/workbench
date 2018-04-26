@@ -245,25 +245,6 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         MODIFIER_OPERATORS.stream().map(Operator::name).collect(Collectors.toList()))));
   }
 
-  private void validateOperands(Modifier modifier) {
-    if (modifier.getOperator().equals(Operator.BETWEEN)) {
-      if (modifier.getOperands().size() != 2) {
-        throw new BadRequestException(String.format(
-          "Modifiers can only have 2 operands when using the %s operator", modifier.getOperator().name()));
-      }
-    } else if (modifier.getOperator().equals(Operator.IN)) {
-      if (modifier.getOperands().size() == 0) {
-        throw new BadRequestException(String.format(
-          "Modifiers must have 1 or more operands when using the %s operator", modifier.getOperator().name()));
-      }
-    } else {
-      if (modifier.getOperands().size() != 1) {
-        throw new BadRequestException(String.format(
-          "Modifiers can only have 1 operand when using the %s operator", modifier.getOperator().name()));
-      }
-    }
-  }
-
   private void buildGroupQuery(SearchParameter parameter,
                                List<String> queryParts,
                                Map<String, QueryParameterValue> queryParams,
