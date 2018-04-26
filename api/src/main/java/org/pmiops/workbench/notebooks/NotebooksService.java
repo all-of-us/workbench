@@ -18,7 +18,7 @@ public interface NotebooksService {
    * @param clusterName the user assigned/auto-generated name for this notebooks cluster
    * @param clusterRequest an object with information about the google bucket and user service account credentials.
    */
-  Cluster createCluster(String googleProject, String clusterName, ClusterRequest clusterRequest)
+  Cluster createCluster(String googleProject, String clusterName, String userEmail)
       throws WorkbenchException;
 
   /**

@@ -64,6 +64,8 @@ public class ExceptionUtils {
       return new ForbiddenException();
     } else if (code == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
       return new ServerUnavailableException();
+    } else if (code == HttpServletResponse.SC_CONFLICT) {
+      return new ConflictException();
     } else {
       return new ServerErrorException();
     }

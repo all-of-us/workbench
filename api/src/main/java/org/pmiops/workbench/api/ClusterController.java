@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -13,7 +12,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 
 import org.json.JSONObject;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -28,6 +26,7 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ClusterController implements ClusterApiDelegate {
-  private static final String DEFAULT_CLUSTER_NAME = "all-of-us";
-  private static final String CLUSTER_LABEL_AOU = "all-of-us";
-  private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
+
 
   // Writing this file to a directory on a Leonardo cluster will result in
   // delocalization of saved files back to a given GCS location. See
@@ -81,7 +78,6 @@ public class ClusterController implements ClusterApiDelegate {
   private Provider<User> userProvider;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final String apiHostName;
 
   @Autowired
@@ -89,13 +85,11 @@ public class ClusterController implements ClusterApiDelegate {
       Provider<User> userProvider,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       @Qualifier("apiHostName") String apiHostName) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.apiHostName = apiHostName;
   }
 
@@ -110,25 +104,14 @@ public class ClusterController implements ClusterApiDelegate {
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
-      fcCluster = this.notebooksService.getCluster(project, DEFAULT_CLUSTER_NAME);
+      fcCluster = this.notebooksService.getCluster(project, NotebooksServiceImpl.getDefaultClusterName());
     } catch (NotFoundException e) {
       fcCluster = this.notebooksService.createCluster(
-          project, DEFAULT_CLUSTER_NAME, createFirecloudClusterRequest());
+          project, NotebooksServiceImpl.getDefaultClusterName(), userProvider.get().getEmail());
     }
     ClusterListResponse resp = new ClusterListResponse();
     resp.setDefaultCluster(TO_ALL_OF_US_CLUSTER.apply(fcCluster));
     return ResponseEntity.ok(resp);
-  }
-
-  private org.pmiops.workbench.notebooks.model.ClusterRequest createFirecloudClusterRequest() {
-    org.pmiops.workbench.notebooks.model.ClusterRequest firecloudClusterRequest = new org.pmiops.workbench.notebooks.model.ClusterRequest();
-    Map<String, String> labels = new HashMap<String, String>();
-    labels.put(CLUSTER_LABEL_AOU, "true");
-    labels.put(CLUSTER_LABEL_CREATED_BY, userProvider.get().getEmail());
-    firecloudClusterRequest.setLabels(labels);
-    firecloudClusterRequest.setJupyterUserScriptUri(
-        workbenchConfigProvider.get().firecloud.jupyterUserScriptUri);
-    return firecloudClusterRequest;
   }
 
   @Override
