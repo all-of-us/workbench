@@ -38,3 +38,4 @@ RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 > /tmp/cloud
   && sudo mv /tmp/cloud_sql_proxy /usr/local/bin && sudo chmod +x /usr/local/bin/cloud_sql_proxy
 
 RUN sudo apt-get install gradle
+RUN sudo gem install jira-ruby

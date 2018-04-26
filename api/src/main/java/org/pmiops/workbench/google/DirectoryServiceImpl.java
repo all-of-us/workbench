@@ -101,7 +101,11 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
-    ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
+    try {
+      ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
+    } catch (GoogleJsonResponseException e) {
+      throw ExceptionUtils.convertGoogleIOException(e);
+    }
     return user;
   }
 

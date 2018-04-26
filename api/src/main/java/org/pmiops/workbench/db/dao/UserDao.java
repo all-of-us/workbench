@@ -11,8 +11,15 @@ import org.springframework.data.repository.query.Param;
 public interface UserDao extends CrudRepository<User, Long> {
 
   User findUserByEmail(String email);
-  User findUserByContactEmail(String contactEmail);
   User findUserByUserId(long userId);
+
+  /**
+   * We know that there is no unique constraint in the DB currently,
+   * it is only enforced in code, but we intend to support multiple
+   * accounts for the same contact email at some point in the future.
+   */
+  List<User> findUserByContactEmail(String contactEmail);
+
 
   /**
    * Returns the users who's identities have not been validated by BlockScore

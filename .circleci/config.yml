@@ -2,7 +2,7 @@ version: 2
 
 defaults: &defaults
   docker:
-    - image: allofustest/workbench:buildimage-0.0.11
+    - image: allofustest/workbench:buildimage-0.0.12
   working_directory: ~/workbench
 java_defaults: &java_defaults
   <<: *defaults
@@ -42,7 +42,7 @@ jobs:
 
   api-local-test:
     docker:
-      - image: allofustest/workbench:buildimage-0.0.11
+      - image: allofustest/workbench:buildimage-0.0.12
       - image: mysql:5.7
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
@@ -89,7 +89,7 @@ jobs:
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
-  api-deploy:
+  api-deploy-to-test:
     <<: *java_defaults
     steps:
       - checkout
@@ -111,21 +111,12 @@ jobs:
           name: Deploy to App Engine
           working_directory: ~/workbench/api
           command: |
-            if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
-              ./project.rb deploy \
-                --project all-of-us-workbench-test \
-                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-                --version circle-ci-test \
-                --promote
-            elif [[ "${CIRCLE_TAG}" = v* ]]; then
-             ./project.rb deploy \
-               --project all-of-us-rw-staging \
-               --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-               --version "${CIRCLE_TAG}" \
-               --promote
-            else
-              echo "Not master branch or tagged release, skipping deploy"
-            fi
+            ./project.rb deploy \
+              --project all-of-us-workbench-test \
+              --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+              --version circle-ci-test \
+              --key-file circle-sa-key.json \
+              --promote
 
   api-deps-check:
     <<: *java_defaults
@@ -228,7 +219,7 @@ jobs:
           paths:
             - ui
 
-  ui-deploy:
+  ui-deploy-to-test:
     <<: *defaults
     steps:
       - checkout
@@ -241,30 +232,45 @@ jobs:
           name: Deploy to App Engine
           working_directory: ~/workbench/ui
           command: |
-            if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
-              ../ci/activate_creds.sh circle-sa-key.json
-              ./project.rb deploy-ui \
-                --project all-of-us-workbench-test \
-                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-                --version circle-ci-test \
-                --promote
-            elif [[ "${CIRCLE_TAG}" = v* ]]; then
-              ../ci/activate_creds.sh circle-sa-key.json
-              ./project.rb deploy-ui \
-                --project all-of-us-rw-staging \
-                --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
-                --version "${CIRCLE_TAG}" \
-                --promote
-            else
-              echo "Not master branch or tagged release, skipping deploy"
-            fi
+            ../ci/activate_creds.sh circle-sa-key.json
+            ./project.rb deploy-ui \
+              --project all-of-us-workbench-test \
+              --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+              --version circle-ci-test \
+              --key-file circle-sa-key.json \
+              --promote
 
-# This filter includes all branches (no branch constraint) + tags with
-# a prefix of "v". See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
-filter_all: &filter_all
+  # In staging, we deploy all at once in order to track and control the release
+  # for a tagged version only. In "test", we maintain individual release jobs
+  # for API and UI to allow faster deploys and because we lack a version tag.
+  deploy-staging:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          command: git submodule update --init --recursive
+      - restore_cache:
+          keys:
+          - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
+          - api-cache-
+      - deploy:
+          working_directory: ~/workbench/deploy
+          command: |
+            ../ci/activate_creds.sh circle-sa-key.json
+            ./project.rb deploy \
+              --project all-of-us-rw-staging \
+              --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+              --git-version "${CIRCLE_TAG}" \
+              --app-version "${CIRCLE_TAG}" \
+              --circle-url "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}" \
+              --key-file circle-sa-key.json \
+              --promote
+
+# See https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
+filter_master: &filter_master
   filters:
-    tags:
-      only: /^v.*/
+    branches:
+      only: master
 filter_releases: &filter_releases
   filters:
     branches:
@@ -272,48 +278,48 @@ filter_releases: &filter_releases
     tags:
       only: /^v.*/
 
-# Note: We block on these jobs, *if they run*. A requirement is
-# considered to be satisfied if that job did not run for the given
-# branch/filter. For example, on master merge "api-deploy" would
-# still be triggered despite "api-integration-test" being skipped.
-deploy_config: &deploy_config
-  requires:
-    - api-local-test
-    - api-build-test
-    - api-bigquery-test
-    - api-deps-check
-    - api-integration-test
-    - ui-build-test
-  # Only deploy on master merge or release.
-  filters:
-    branches:
-      only: master
-    tags:
-      only: /^v.*/
-
 workflows:
   version: 2
   build-test-deploy:
     jobs:
-      # Always run basic test/lint/compilation (open PRs, master merge, tags).
+      # Always run basic test/lint/compilation (open PRs, master merge).
+      # Note: by default tags are not picked up.
+      - api-local-test
+      - api-build-test
+      - ui-build-test
+      # Run deployment to "test" on master merges.
+      - api-deploy-to-test:
+          <<: *filter_master
+          requires:
+            - api-build-test
+      - ui-deploy-to-test:
+          <<: *filter_master
+          requires:
+            - ui-build-test
+  deploy-staging:
+    jobs:
       - api-local-test:
-          <<: *filter_all
+          <<: *filter_releases
       - api-build-test:
-          <<: *filter_all
+          <<: *filter_releases
       - ui-build-test:
-          <<: *filter_all
-      # Run slower integration tests and dep checks on release tag.
+          <<: *filter_releases
+      # Run slower integration tests and dep checks on release tags only.
       - api-bigquery-test:
           <<: *filter_releases
       - api-deps-check:
           <<: *filter_releases
       - api-integration-test:
           <<: *filter_releases
-      # Run deployment to "test" on master merge, or "staging" on release tag.
-      - api-deploy:
-          <<: *deploy_config
-      - ui-deploy:
-          <<: *deploy_config
+      - deploy-staging:
+          <<: *filter_releases
+          requires:
+            - api-local-test
+            - api-build-test
+            - api-bigquery-test
+            - api-deps-check
+            - api-integration-test
+            - ui-build-test
   integration-test:
     triggers:
       - schedule:

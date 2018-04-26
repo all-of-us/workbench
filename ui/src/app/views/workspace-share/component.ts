@@ -30,6 +30,7 @@ export class WorkspaceShareComponent implements OnInit {
   loadWorkspaceFinished = false;
   toShare = '';
   selectedPermission = 'Select Permission';
+  roleNotSelected = false;
   private accessLevel: WorkspaceAccessLevel;
   selectedAccessLevel: WorkspaceAccessLevel;
   notFound = false;
@@ -76,14 +77,22 @@ export class WorkspaceShareComponent implements OnInit {
     } else {
       this.selectedAccessLevel = WorkspaceAccessLevel.READER;
     }
+    this.roleNotSelected = false;
   }
 
   convertToEmail(username: string): string {
+    if (username.endsWith('@' + this.gsuiteDomain)) {
+      return username;
+    }
     return username + '@' + this.gsuiteDomain;
   }
 
 
   addCollaborator(): void {
+    if (this.selectedAccessLevel === undefined) {
+      this.roleNotSelected = true;
+      return;
+    }
     if (!this.usersLoading) {
       this.usersLoading = true;
       const updateList = Array.from(this.workspace.userRoles);

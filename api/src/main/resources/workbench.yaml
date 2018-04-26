@@ -1236,6 +1236,9 @@ definitions:
       contactEmail:
         description: email address that can be used to contact the user
         type: string
+      contactEmailFailure:
+        description: Whether or not contact email could be added to verification list
+        type: boolean
       firstSignInTime:
         type: integer
         format: int64
@@ -1297,6 +1300,7 @@ definitions:
           $ref: "#/definitions/InstitutionalAffiliation"
       requestedIdVerification:
         type: boolean
+
 
   InstitutionalAffiliation:
     type: object

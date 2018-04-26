@@ -21,6 +21,7 @@ export class ProfileStubVariables {
 
 export class ProfileServiceStub {
   public profile: Profile;
+  public accountCreates = 0;
 
   constructor() {
     this.profile = ProfileStubVariables.PROFILE_STUB;
@@ -30,6 +31,16 @@ export class ProfileServiceStub {
     return new Observable<Profile>(observer => {
       setTimeout(() => {
         observer.next(this.profile);
+        observer.complete();
+      }, 0);
+    });
+  }
+
+  createAccount(): Observable<Profile> {
+    this.accountCreates++;
+    return new Observable<Profile>(observer => {
+      setTimeout(() => {
+        observer.next(undefined);
         observer.complete();
       }, 0);
     });
