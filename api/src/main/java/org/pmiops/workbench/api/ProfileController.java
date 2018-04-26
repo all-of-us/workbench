@@ -302,7 +302,6 @@ public class ProfileController implements ProfileApiDelegate {
         return userDao.save(user);
 
       case READY:
-        org.pmiops.workbench.notebooks.model.Cluster fcCluster;
         try {
           this.notebooksService.createCluster(
               user.getFreeTierBillingProjectName(), NotebooksServiceImpl.getDefaultClusterName(), user.getEmail());
