@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -304,6 +305,8 @@ public class ProfileController implements ProfileApiDelegate {
         } catch (ConflictException e) {
           log.log(Level.INFO, String.format("Cluster %s/%s already exists",
               user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
+        } catch (GatewayTimeoutException e) {
+          log.log(Level.WARNING, "Socket Timeout creating cluster.");
         }
         break;
 

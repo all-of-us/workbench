@@ -4,6 +4,8 @@ package org.pmiops.workbench.exceptions;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import java.io.IOException;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
@@ -48,16 +50,23 @@ public class ExceptionUtils {
 
   public static RuntimeException convertFirecloudException(ApiException e) {
     log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling FireCloud", e);
+    if (e.getCause() instanceof SocketTimeoutException) {
+      throw new GatewayTimeoutException();
+    }
     throw codeToException(e.getCode());
   }
 
   public static RuntimeException convertNotebookException(
       org.pmiops.workbench.notebooks.ApiException e) {
     log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling notebooks API", e);
+    if (e.getCause() instanceof SocketTimeoutException) {
+      throw new GatewayTimeoutException();
+    }
     throw codeToException(e.getCode());
   }
 
   private static RuntimeException codeToException(int code) {
+
     if (code == HttpServletResponse.SC_NOT_FOUND) {
       return new NotFoundException();
     } else if (code == HttpServletResponse.SC_FORBIDDEN) {
