@@ -10,8 +10,6 @@ import {
   CohortSearchState,
 } from '../redux';
 
-import {Modifier, ModifierType, Operator} from 'generated';
-
 @Component({
     selector: 'crit-modifier-page',
     templateUrl: './modifier-page.component.html',
@@ -22,12 +20,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
 
   existing = List();
   subscription: Subscription;
-    existing = List();
-    subscription: Subscription;
-    ageAtEventMap: any;
-    numOfOccurrencesMap: any;
-    eventDateMap: any;
-    ageAtEventMapEntries: any;
 
   readonly modifiers = [{
     name: 'ageAtEvent',
