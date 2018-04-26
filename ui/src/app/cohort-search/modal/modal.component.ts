@@ -91,7 +91,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   nextPage() {
     if (this.mode === 'tree') {
       this.mode = 'modifiers';
-    } else if (this.mode === 'modifiers') {
+    } else {
       this.mode = 'summary';
     }
   }
