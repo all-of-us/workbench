@@ -280,7 +280,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDomainFilters() {
-        List<DbDomain> domains=dbDomainDao.findByDbType("domain_filter");
+        List<DbDomain> domains=dbDomainDao.findByDbTypeAAndConceptIdNot("domain_filter",0);
         DbDomainListResponse resp=new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
@@ -288,7 +288,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getSurveyList() {
-        List<DbDomain> domains=dbDomainDao.findSurveys("survey");
+        List<DbDomain> domains=dbDomainDao.findByDbTypeAAndConceptIdNot("survey",0);
         DbDomainListResponse resp=new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);

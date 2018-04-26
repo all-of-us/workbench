@@ -9,8 +9,5 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
     // TODO -- maybe add order by
     List<DbDomain> findAll();
 
-    List<DbDomain> findByDbType(String db_type);
-
-    @Query(nativeQuery = true,value = "select * from db_domain where db_type=?1 and concept_id <> 0")
-    List<DbDomain> findSurveys(String db_type);
+    List<DbDomain> findByDbTypeAAndConceptIdNot(String db_type,long conceptId);
 }
