@@ -19,6 +19,18 @@ import {
 export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
 
+  /*
+   * Each node component represents one criterion.  If that criterion has any
+   * descendent criteria, then it is expandable (`node.get('group')` should
+   * return true).  If the criterion has no children, none of the following
+   * attributes apply; otherwise: `expanded`: is the tree node expanded?
+   * `loading`: are we in the process of fetching this criterion's children?
+   * `error`: was there an error loading the children of this criterion?
+   * `children`: when loaded, this node's children are stored here.
+   *
+   * The initial load of the children is deferred until the subtree is first
+   * expanded.
+   */
   expanded = false;
   children = List<any>();
   loading = false;
@@ -59,6 +71,9 @@ export class NodeComponent implements OnInit, OnDestroy {
     if (!event) { return ; }
     const _type = this.node.get('type').toLowerCase();
     const parentId = this.node.get('id');
+    /* Criteria are cached, so this will result in an API call only the first
+     * time this function is called.  Subsequent calls are no-ops
+     */
     this.actions.fetchCriteria(_type, parentId);
   }
 

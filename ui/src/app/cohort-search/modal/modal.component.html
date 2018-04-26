@@ -45,11 +45,11 @@
         <ng-container *ngSwitchDefault>
           <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers'">
             <!-- Tree Page -->
-            <div class="panel panel-left" [class.show]="mode === 'tree'">
+            <div class="panel-left" [class.show]="mode === 'tree'">
               <crit-tree [node]="rootNode"></crit-tree>
             </div>
             <!-- Modifiers Page -->
-            <div class="panel panel-left" [class.show]="mode === 'modifiers'">
+            <div class="panel-left" [class.show]="mode === 'modifiers'">
               <crit-modifier-page></crit-modifier-page>
             </div>
             <div class="panel-right selected">

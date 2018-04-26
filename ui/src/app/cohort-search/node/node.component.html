@@ -1,10 +1,7 @@
 <clr-tree-node >
-  <div *ngIf="error">
-    <em>Error! Oh Noes!</em>
-  </div>
 
   <div class="clr-treenode-link container" (click)="toggleExpanded()">
-    <crit-node-info *ngIf="!error" [node]="node"></crit-node-info>
+    <crit-node-info [node]="node"></crit-node-info>
   </div>
 
   <ng-template *ngIf="node.get('group')"
@@ -12,6 +9,12 @@
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
       <div class="node-list">
+        <!-- TODO: This error handling is a stub until we can get a designer to look at it -->
+        <div *ngIf="error" class="error">
+          <clr-icon shape="error-standard"></clr-icon>
+          <em>Failed to Load Criteria</em>
+        </div>
+
         <crit-node *ngFor="let item of children" [node]="item"></crit-node>
       </div>
     </ng-container>

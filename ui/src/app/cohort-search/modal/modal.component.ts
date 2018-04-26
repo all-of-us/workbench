@@ -25,7 +25,7 @@ import {CRITERIA_TYPES} from '../constant';
 export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
-  @select(activeParameterList) selection$;
+  @select(activeParameterList) selection$: Observable<any>;
 
   ctype: string;
   subscription;
