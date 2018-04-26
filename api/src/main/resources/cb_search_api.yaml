@@ -295,7 +295,6 @@ definitions:
           $ref: "#/definitions/SearchGroupItem"
 
   SearchGroupItem:
-    # TODO: When we add in modifiers we'll add that to the official description
     description: >
       A SearchGroupItem is the "line item" of the Cohort Builder.  It specifies
       a set of criteria of a given kind, possibly alongside a set of modifiers,
