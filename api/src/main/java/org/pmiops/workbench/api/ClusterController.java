@@ -104,10 +104,10 @@ public class ClusterController implements ClusterApiDelegate {
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
-      fcCluster = this.notebooksService.getCluster(project, NotebooksServiceImpl.getDefaultClusterName());
+      fcCluster = this.notebooksService.getCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
     } catch (NotFoundException e) {
       fcCluster = this.notebooksService.createCluster(
-          project, NotebooksServiceImpl.getDefaultClusterName(), userProvider.get().getEmail());
+          project, NotebooksService.DEFAULT_CLUSTER_NAME, userProvider.get().getEmail());
     }
     ClusterListResponse resp = new ClusterListResponse();
     resp.setDefaultCluster(TO_ALL_OF_US_CLUSTER.apply(fcCluster));

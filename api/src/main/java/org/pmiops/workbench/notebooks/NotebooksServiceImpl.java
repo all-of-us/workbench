@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 public class NotebooksServiceImpl implements NotebooksService {
   private static final String CLUSTER_LABEL_AOU = "all-of-us";
   private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
-  private static final String DEFAULT_CLUSTER_NAME = "all-of-us";
 
 
   private static final Logger log = Logger.getLogger(NotebooksServiceImpl.class.getName());
@@ -155,6 +154,4 @@ public class NotebooksServiceImpl implements NotebooksService {
       throw ExceptionUtils.convertNotebookException(e);
     }
   }
-
-  public static String getDefaultClusterName() {return DEFAULT_CLUSTER_NAME;}
 }

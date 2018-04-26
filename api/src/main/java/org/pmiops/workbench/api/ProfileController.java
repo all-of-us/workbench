@@ -304,8 +304,11 @@ public class ProfileController implements ProfileApiDelegate {
       case READY:
         try {
           this.notebooksService.createCluster(
-              user.getFreeTierBillingProjectName(), NotebooksServiceImpl.getDefaultClusterName(), user.getEmail());
-        } catch (ConflictException e) {}
+              user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME, user.getEmail());
+        } catch (ConflictException e) {
+          log.log(Level.INFO, String.format("Cluster %s/%s already exists",
+              user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
+        }
         break;
 
       default:
