@@ -3,7 +3,7 @@
   "firecloud": {
     "billingAccountId": "014D91-FCB792-33D2C0",
     "billingProjectPrefix": "aou-test-f1-",
-    "debugEndpoints": true,
+    "debugEndpoints": false,
     "enforceRegistered": false,
     "jupyterUserScriptUri": "gs:\/\/all-of-us-workbench-test-scripts/setup_notebook_cluster.sh",
     "registeredDomainName": "all-of-us-registered-test"
