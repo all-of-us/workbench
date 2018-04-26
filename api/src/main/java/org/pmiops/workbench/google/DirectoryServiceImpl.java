@@ -83,7 +83,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         return null;
       }
-      throw e;
+      throw ExceptionUtils.convertGoogleIOException(e);
     }
   }
 
@@ -120,7 +120,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         // Deleting a user that doesn't exist will have no effect.
         return;
       }
-      throw e;
+      throw ExceptionUtils.convertGoogleIOException(e);
     }
   }
 }
