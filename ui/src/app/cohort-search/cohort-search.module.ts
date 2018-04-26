@@ -27,7 +27,6 @@ import {SelectionInfoComponent} from './selection-info/selection-info.component'
 import {TreeComponent} from './tree/tree.component';
 
 /* Other Objects */
-import {CriteriaWizardModule} from './criteria-wizard/criteria-wizard.module';
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 
 
@@ -50,8 +49,6 @@ const routes: Routes = [{
     NgxChartsModule,
     NgxPopperModule,
     NouisliderModule,
-    // Ours
-    CriteriaWizardModule,
   ],
   declarations: [
     CohortSearchComponent,
