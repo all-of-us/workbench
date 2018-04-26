@@ -60,13 +60,13 @@ public class CodesQueryBuilderTest {
         String expected =
                 "select person_id\n" +
                         "from `${projectId}.${dataSetId}.person` p\n" +
-                        "where person_id in (select person_id\n" +
+                        "where person_id in (select  a.person_id \n" +
                         "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.condition_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
                         "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
                         " union all\n" +
-                        "select person_id\n" +
+                        "select  a.person_id \n" +
                         "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.measurement_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@" + cmMeasurementParameter + ",@" + procMeasurementParameter + ")\n" +
@@ -145,19 +145,19 @@ public class CodesQueryBuilderTest {
         String expected =
                 "select person_id\n" +
                         "from `${projectId}.${dataSetId}.person` p\n" +
-                        "where person_id in (select person_id\n" +
+                        "where person_id in (select  a.person_id \n" +
                         "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.measurement_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@" + cmMeasurementParameter + ",@" + procMeasurementParameter + ")\n" +
                         "and b.concept_code like @" + measurementNamedParameter + "\n" +
                         " union all\n" +
-                        "select person_id\n" +
+                        "select  a.person_id \n" +
                         "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.procedure_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
                         "and b.concept_code like @" + procedureNamedParameter + "\n" +
                         " union all\n" +
-                        "select person_id\n" +
+                        "select  a.person_id \n" +
                         "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                         "where a.condition_source_concept_id = b.concept_id\n" +
                         "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +

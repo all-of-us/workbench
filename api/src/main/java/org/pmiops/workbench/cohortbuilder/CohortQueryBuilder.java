@@ -104,7 +104,8 @@ public class CohortQueryBuilder {
             .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
             .buildQueryJobConfig(new QueryParameters()
                 .type(includeItem.getType())
-                .parameters(includeItem.getSearchParameters()));
+                .parameters(includeItem.getSearchParameters())
+                .modifiers(includeItem.getModifiers()));
         params.putAll(queryRequest.getNamedParameters());
         queryParts.add(queryRequest.getQuery());
       }

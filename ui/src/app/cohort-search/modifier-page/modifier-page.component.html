@@ -1,56 +1,19 @@
 <form [formGroup]="form">
   <section class="form-block">
     <label>The Following Modifiers are Optional</label>
-
-    <div class="form-group" formGroupName="ageAtEvent">
-      <label for="age-at-event">Age at Event</label>
+    <div *ngFor="let mod of modifiers"
+      class="form-group" [formGroupName]="mod.name">
+      <label [for]="mod.name">{{ mod.label }}</label>
       <div class="select">
         <select formControlName="operator">
-          <option value="equal">Equal To</option>
-          <option value="greater">Greater Than</option>
-          <option value="lesser">Less Than</option>
+          <option *ngFor="let opt of mod.operators" [value]="opt.value">
+            {{ opt.name}}
+          </option>
         </select>
       </div>
-      <input type="number"
-        formControlName="value"
-        name="age-at-event"
-        id="age-at-event"
-        [min]="-1" [max]="121"
-        >
+      <input formControlName="valueA" [type]="mod.inputType">
+      <input *ngIf="showValueB(mod.name)"
+        formControlName="valueB" [type]="mod.inputType">
     </div>
-
-    <div class="form-group" formGroupName="numOfOccurrences">
-      <label for="num-of-occurrences">Number of Occurrences</label>
-      <div class="select">
-        <select formControlName="operator">
-          <option value="equal">Equal To</option>
-          <option value="greater">Greater Than</option>
-          <option value="lesser">Less Than</option>
-        </select>
-      </div>
-      <input type="number"
-        formControlName="value"
-        name="num-of-occurrences"
-        id="num-of-occurrences"
-        [min]="-1" [max]="10001"
-        >
-    </div>
-
-    <div class="form-group" formGroupName="eventDate">
-      <label for="event-date">Date of Event</label>
-      <div class="select">
-        <select formControlName="operator">
-          <option value="equal">On</option>
-          <option value="greater">After</option>
-          <option value="lesser">Before</option>
-        </select>
-      </div>
-      <input type="date"
-        formControlName="value"
-        name="event-date"
-        id="event-date"
-        >
-    </div>
-
   </section>
 </form>
