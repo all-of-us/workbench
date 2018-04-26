@@ -144,7 +144,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       if (!operator || !valueA || (between && !valueB)) {
         return ;
       }
-      let operands = [valueA];
+      const operands = [valueA];
       if (between) { operands.push(valueB); }
       const mod = <Modifier>{name: modType, operator, operands};
       return fromJS(mod);
