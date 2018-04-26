@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
