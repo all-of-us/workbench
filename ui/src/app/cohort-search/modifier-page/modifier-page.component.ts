@@ -10,8 +10,6 @@ import {
   CohortSearchState,
 } from '../redux';
 
-import {Modifier, ModifierType, Operator} from 'generated';
-
 @Component({
     selector: 'crit-modifier-page',
     templateUrl: './modifier-page.component.html',
@@ -30,28 +28,28 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     modType: 'AGE_AT_EVENT',
     operators: [{
       name: 'Greater Than or Equal To',
-      value: Operator.GREATER_THAN_OR_EQUAL_TO,
+      value: 'GREATER_THAN_OR_EQUAL_TO',
     }, {
       name: 'Less Than or Equal To',
-      value: Operator.LESS_THAN_OR_EQUAL_TO,
+      value: 'LESS_THAN_OR_EQUAL_TO',
     }, {
       name: 'Between',
-      value: Operator.BETWEEN,
+      value: 'BETWEEN',
     }]
   }, {
     name: 'eventDate',
     label: 'Event Date',
-    inputType: 'date'
+    inputType: 'date',
     modType: 'EVENT_DATE',
     operators: [{
       name: 'Is On or Before',
-      value: Operator.GREATER_THAN_OR_EQUAL_TO,
+      value: 'GREATER_THAN_OR_EQUAL_TO',
     }, {
       name: 'Is On or After',
-      value: Operator.LESS_THAN_OR_EQUAL_TO,
+      value: 'LESS_THAN_OR_EQUAL_TO',
     }, {
       name: 'Is Between',
-      value: Operator.BETWEEN,
+      value: 'BETWEEN',
     }]
   }, {
     name: 'hasOccurrences',
@@ -60,7 +58,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     modType: 'NUM_OF_OCCURRENCES',
     operators: [{
       name: 'N or More',
-      value: Operator.GREATER_THAN_OR_EQUAL_TO,
+      value: 'GREATER_THAN_OR_EQUAL_TO',
     }]
   }];
 
@@ -140,18 +138,17 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   currentMods(vals) {
     return this.modifiers.map(({name, inputType, modType}) => {
       const {operator, valueA, valueB} = vals[name];
-      const between = operator === Operator.BETWEEN;
+      const between = operator === 'BETWEEN';
       if (!operator || !valueA || (between && !valueB)) {
         return ;
       }
       const operands = [valueA];
       if (between) { operands.push(valueB); }
-      const mod = <Modifier>{name: modType, operator, operands};
-      return fromJS(mod);
+      return fromJS({name: modType, operator, operands});
     });
   }
 
   showValueB(modName) {
-    return this.form.get([modName, 'operator']).value === Operator.BETWEEN;
+    return this.form.get([modName, 'operator']).value === 'BETWEEN';
   }
 }
