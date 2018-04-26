@@ -225,14 +225,14 @@ paths:
       tags:
         - cohortReview
       description:  >
-            Returns a collection of ParticipantConditions for the specified params. This endpoint
+            Returns a collection of participant data for the specified params based off the PageFilterRequest. This endpoint
             does pagination based on page, limit, order and column.
       operationId: "getParticipantData"
       parameters:
         - in: body
           name: request
           required: true
-          description: request body for getting list of ParticipantConditions.
+          description: request body for getting list of participant data.
           schema:
             $ref: "#/definitions/PageFilterRequest"
       responses:
@@ -240,6 +240,62 @@ paths:
           description: A collection of ParticipantConditions.
           schema:
             $ref: "#/definitions/ParticipantDataListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/master:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/participantId'
+    post:
+      tags:
+        - cohortReview
+      description:  >
+            Returns a collection of all domain data for the specified params for a participant. This endpoint
+            does pagination based on page, limit, order and column.
+      operationId: "getMasterParticipantData"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of participant data.
+          schema:
+            $ref: "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of ParticipantConditions.
+          schema:
+            $ref: "#/definitions/MasterParticipantDataListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/detail/{dataId}/{domain}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortReview
+      description: Returns detailed domain data for the specified params for a participant.
+      operationId: "getDetailParticipantData"
+      parameters:
+        - in: path
+          name: dataId
+          type: integer
+          format: int64
+          required: true
+          description: specifies which domain the details belong to.
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: specifies which domain the details belong to.
+      responses:
+        200:
+          description: A detail for the specified participant and domain
+          schema:
+            $ref: "#/definitions/ParticipantData"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
@@ -484,6 +540,14 @@ definitions:
             $ref: "#/definitions/ParticipantDrugsColumns"
             description: Column upon which to sort (default is 'itemDate')
 
+  ParticipantMaster:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantMasterColumns"
+            description: Column upon which to sort (default is 'itemDate')
+
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
@@ -503,6 +567,10 @@ definitions:
   ParticipantDrugsColumns:
     type: string
     enum: [itemDate, standardVocabulary, standardName, signature, sourceValue, sourceVocabulary, sourceName, age]
+
+  ParticipantMasterColumns:
+    type: string
+    enum: [itemDate, domain, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
 
   PageFilterType:
     type: string
@@ -589,6 +657,51 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/CohortSummary"
+
+  MasterParticipantDataListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/MasterParticipantData"
+
+  MasterParticipantData:
+    type: object
+    required:
+      - dataId
+      - itemDate
+      - domain
+      - standardVocabulary
+      - standardName
+      - sourceValue
+      - sourceVocabulary
+      - sourceName
+    properties:
+      dataId:
+        type: integer
+        format: int64
+        description: Primary key of this data
+      itemDate:
+        type: string
+        description: The date of the condition occurrence
+      standardVocabulary:
+        type: string
+        description: The standard vocabulary of this condition
+      standardName:
+        type: string
+        description: The standard name of this condition
+      sourceValue:
+        type: string
+        description: The source value of this condition
+      sourceVocabulary:
+        type: string
+        description: The source vocabulary of this condition
+      sourceName:
+        type: string
+        description: The source name of this condition.
 
   ParticipantCohortAnnotation:
     type: object
