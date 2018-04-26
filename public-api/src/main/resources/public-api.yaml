@@ -424,13 +424,20 @@ definitions:
         domainDesc:
           description:  full desc text
           type: string
-        domainParent:
-          description:  parent id
+        dbType:
+          description:  type of domain
           type: string
         domainRoute:
           description:  route
           type: string
-
+        conceptId:
+          description: concept id of domain
+          type: integer
+          format: int64
+        countValue:
+          description: count value
+          type: integer
+          format: int64
 
   DbDomainListResponse:
       type: object
