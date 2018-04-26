@@ -494,3 +494,144 @@ group by co1.measurement_concept_id, stratum_2"
 #join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
 # group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 #
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
+set count_value=
+(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
+WHERE o.observation_source_concept_id in
+(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1586134))
+where concept_id=1586134"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
+set count_value=
+(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
+WHERE o.observation_source_concept_id in
+(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1585855))
+where concept_id=1585855"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
+set count_value=
+(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
+WHERE o.observation_source_concept_id in
+(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1585710))
+where concept_id=1585710"
+
+
+# Set the survey answer count for all the survey questions that belong to each module
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,count_value)
+SELECT 0 as id, 3110 as analysis_id,CAST(dbd.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
+CAST(o.value_source_concept_id as string) as stratum_3,o.value_as_string as stratum_4,
+Count(*) as count_value FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+On o.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
+Where (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0) and (dbd.db_type = 'survey' and dbd.concept_id <> 0)
+Group by o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,dbd.concept_id"
+
+# Set the survey answer count for all the survey questions that belong to each module(value as number)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id,analysis_id,stratum_1,stratum_2,stratum_4,count_value)
+SELECT 0 as id, 3110 as analysis_id,CAST(dbd.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
+CAST(o.value_as_number as string) as stratum_4,Count(*) as count_value
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+On o.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
+Where (o.observation_source_concept_id > 0 and o.value_as_number is not null) and (dbd.db_type = 'survey' and dbd.concept_id <> 0)
+and (cr.concept_id_1 != 1585966 and o.value_as_number > 0)
+Group by o.observation_source_concept_id,o.value_as_number,dbd.concept_id"
+
+
+# Survey question answers count by gender
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_3,stratum_4,stratum_5,count_value)
+select 0,3111 as analysis_id,CAST(dbd.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
+CAST(o.value_source_concept_id as string) as stratum_3,o.value_as_string as stratum_4,
+CAST(p.gender_concept_id as string) as stratum_5,count(distinct p.person_id) as count_value
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id=cr.concept_id_1
+join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2=dbd.concept_id where (dbd.db_type='survey' and dbd.concept_id <> 0) and (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
+group by dbd.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_number,o.value_as_string,p.gender_concept_id"
+
+
+# Survey question answers count by gender(value_as_number not null)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_4,stratum_5,count_value)
+select 0,3111 as analysis_id,CAST(dbd.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
+CAST(o.value_as_number as string) as stratum_4,CAST(p.gender_concept_id as string) as stratum_5,count(distinct p.person_id) as count_value
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id=cr.concept_id_1
+join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2=dbd.concept_id
+where (dbd.db_type='survey' and dbd.concept_id <> 0) and (o.observation_source_concept_id > 0 and o.value_as_number is not null)
+and (o.observation_source_concept_id != 1585966)
+group by dbd.concept_id,o.observation_source_concept_id,o.value_as_number,p.gender_concept_id"
+
+
+# Survey Question Answer Count by age decile  30+ yr old deciles
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_3,stratum_4,stratum_5,count_value)
+select 0, 3112 as analysis_id,CAST(dbd.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
+CAST(o.value_source_concept_id as string) as stratum_3,o.value_as_string as stratum_4,
+CAST(floor((extract(year from o.observation_date) - p.year_of_birth)/10) AS STRING) as stratum_5,COUNT(distinct p.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id = cr.concept_id_1
+join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2=dbd.concept_id where (dbd.db_type='survey' and dbd.concept_id <> 0) and (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
+and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
+group by dbd.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,stratum_5"
+
+
+# Survey Question Answer Count by age decile  18-29 yr old decile 2
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_3,stratum_4,stratum_5,count_value)
+select 0, 3112 as analysis_id,CAST(dbd.concept_id as string) as stratum_1,
+CAST(o.observation_source_concept_id as string) as stratum_2,CAST(o.value_source_concept_id as string) as stratum_3,
+o.value_as_string as stratum_4,
+'2' as stratum_5,COUNT(distinct p.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id = cr.concept_id_1
+join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2=dbd.concept_id
+where (dbd.db_type='survey' and dbd.concept_id <> 0) and (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
+and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
+group by dbd.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,stratum_5"
+
+
+# Survey Question Answer Count by age decile  30+ yr old deciles(value as number not null)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_4,stratum_5,count_value)
+select 0, 3112 as analysis_id,CAST(dbd.concept_id as string) as stratum_1,
+CAST(o.observation_source_concept_id as string) as stratum_2,CAST(o.value_as_number as string) as stratum_4,
+CAST(floor((extract(year from o.observation_date) - p.year_of_birth)/10) AS STRING) as stratum_5,COUNT(distinct p.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id = cr.concept_id_1
+join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2=dbd.concept_id
+where (dbd.db_type='survey' and dbd.concept_id <> 0) and (o.observation_source_concept_id > 0 and o.value_as_number is not null)
+and (o.observation_source_concept_id != 1585966)
+and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
+group by dbd.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5"
+
+
+# Survey Question Answer Count by age decile  18-29 yr old decile 2(value as number not null)
+# Excluded Zipcode question (1585966)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_4,stratum_5,count_value)
+select 0, 3112 as analysis_id,CAST(dbd.concept_id as string) as stratum_1,
+CAST(o.observation_source_concept_id as string) as stratum_2,CAST(o.value_as_number as string) as stratum_4,
+'2' as stratum_5,COUNT(distinct p.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id = cr.concept_id_1
+join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2=dbd.concept_id
+where (dbd.db_type='survey' and dbd.concept_id <> 0) and (o.observation_source_concept_id > 0 and o.value_as_number is not null)
+and (o.observation_source_concept_id != 1585966)
+and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
+group by dbd.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5"
+
