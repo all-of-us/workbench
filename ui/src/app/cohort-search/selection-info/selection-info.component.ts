@@ -14,7 +14,7 @@ export class SelectionInfoComponent {
 
   constructor(private actions: CohortSearchActions) {}
 
-  remove(parameter): void {
+  remove(): void {
     const paramId = this.parameter.get('parameterId');
     this.actions.removeParameter(paramId);
   }
