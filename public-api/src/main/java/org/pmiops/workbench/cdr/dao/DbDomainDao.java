@@ -9,5 +9,7 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
     // TODO -- maybe add order by
     List<DbDomain> findAll();
 
-    List<DbDomain> findByDbTypeAndConceptIdNot(String db_type,long conceptId);
+    List<DbDomain> findByDbType(String db_type);
+
+    List<DbDomain> findByDbTypeAndAndConceptIdNotNull(String db_type);
 }
