@@ -291,7 +291,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                     String workspaceId,
                                                                     Long cohortId,
                                                                     Long cdrVersionId,
-                                                                    Long participantId,
                                                                     Long dataId,
                                                                     String domain) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantData());

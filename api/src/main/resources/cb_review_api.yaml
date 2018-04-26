@@ -274,7 +274,6 @@ paths:
       - $ref: '#/parameters/workspaceId'
       - $ref: '#/parameters/cohortId'
       - $ref: '#/parameters/cdrVersionId'
-      - $ref: '#/parameters/participantId'
     get:
       tags:
         - cohortReview
