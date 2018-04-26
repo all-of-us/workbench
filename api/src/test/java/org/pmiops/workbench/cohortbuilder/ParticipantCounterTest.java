@@ -158,7 +158,7 @@ public class ParticipantCounterTest {
                 "where\n" +
                 "person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select person_id\n" +
+                "where person_id in (select  a.person_id \n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
@@ -174,7 +174,7 @@ public class ParticipantCounterTest {
                 "(select 'x' from\n" +
                 "(select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select person_id\n" +
+                "where person_id in (select  a.person_id \n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
@@ -267,7 +267,7 @@ public class ParticipantCounterTest {
                 "where\n" +
                 "person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select person_id\n" +
+                "where person_id in (select  a.person_id \n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
@@ -283,7 +283,7 @@ public class ParticipantCounterTest {
                 "(select 'x' from\n" +
                 "(select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select person_id\n" +
+                "where person_id in (select  a.person_id \n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
@@ -387,7 +387,7 @@ public class ParticipantCounterTest {
                 "where\n" +
                 "person.person_id in (select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select person_id\n" +
+                "where person_id in (select  a.person_id \n" +
                 "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.condition_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
@@ -403,7 +403,7 @@ public class ParticipantCounterTest {
                 "(select 'x' from\n" +
                 "(select person_id\n" +
                 "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select person_id\n" +
+                "where person_id in (select  a.person_id \n" +
                 "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
                 "where a.procedure_source_concept_id = b.concept_id\n" +
                 "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +

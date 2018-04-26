@@ -15,6 +15,7 @@ public class OperatorUtils {
           .put(Operator.LESS_THAN, "<")
           .put(Operator.LESS_THAN_OR_EQUAL_TO, "<=")
           .put(Operator.LIKE, "LIKE")
+          .put(Operator.BETWEEN, "BETWEEN")
           .build();
 
   public static String getSqlOperator(Operator operator) {
