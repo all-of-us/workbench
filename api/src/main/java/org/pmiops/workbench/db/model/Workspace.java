@@ -72,6 +72,7 @@ public class Workspace {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Set<Cohort> cohorts = new HashSet<Cohort>();
+  private String firecloudUuid;
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;
@@ -86,7 +87,6 @@ public class Workspace {
   private boolean containsUnderservedPopulation;
   private Set<UnderservedPopulationEnum> underservedPopulationSet =
       new HashSet<UnderservedPopulationEnum>();
-  private String firecloudUuid;
 
   private Boolean reviewRequested;
   private Boolean approved;
