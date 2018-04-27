@@ -45,7 +45,7 @@ public class DbDomain {
         this.domainDisplay = domainDisplay;
     }
 
-    public DbDomain DomainDisplay(String domainDisplay) {
+    public DbDomain domainDisplay(String domainDisplay) {
         this.domainDisplay = domainDisplay;
         return this;
     }
