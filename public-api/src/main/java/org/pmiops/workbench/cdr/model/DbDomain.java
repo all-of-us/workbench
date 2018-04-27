@@ -92,7 +92,7 @@ public class DbDomain {
         return this;
     }
 
-    @Column(name = "concept_id")
+    @Column(name = "concept_id",nullable = true)
     public Long getConceptId() {
         return conceptId;
     }

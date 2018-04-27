@@ -76,7 +76,7 @@ public class DbDomainDaoTest {
                 .domainDesc("Domain description")
                 .dbType(dbType)
                 .domainRoute("Domain Route")
-                .conceptId((Long)null)
+                .conceptId(Long.valueOf(0))
                 .countValue(Long.valueOf(0));
     }
 
