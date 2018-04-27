@@ -2,20 +2,17 @@ package org.pmiops.workbench.google;
 
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
-import com.google.api.client.http.HttpTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
 import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserName;
-import java.io.InputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
-import javax.servlet.ServletContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,26 +73,27 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   @Override
-  public User getUser(String email) throws IOException {
+  public User getUser(String email) {
     try {
       return ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().get(email));
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         return null;
       }
-      throw e;
+      throw ExceptionUtils.convertGoogleIOException(e);
+    } catch (IOException e) {
+      throw ExceptionUtils.convertGoogleIOException(e);
     }
   }
 
   @Override
-  public boolean isUsernameTaken(String username) throws IOException {
+  public boolean isUsernameTaken(String username) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     return getUser(username + "@" + gSuiteDomain) != null;
   }
 
   @Override
-  public User createUser(String givenName, String familyName, String username, String password)
-      throws IOException {
+  public User createUser(String givenName, String familyName, String username, String password) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     User user = new User()
       .setPrimaryEmail(username+"@"+gSuiteDomain)
@@ -103,14 +101,14 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
     try {
       ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
-    } catch (GoogleJsonResponseException e) {
+    } catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
     return user;
   }
 
   @Override
-  public void deleteUser(String username) throws IOException {
+  public void deleteUser(String username) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
       ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users()
@@ -120,7 +118,9 @@ public class DirectoryServiceImpl implements DirectoryService {
         // Deleting a user that doesn't exist will have no effect.
         return;
       }
-      throw e;
+      throw ExceptionUtils.convertGoogleIOException(e);
+    } catch (IOException e) {
+      throw ExceptionUtils.convertGoogleIOException(e);
     }
   }
 }
