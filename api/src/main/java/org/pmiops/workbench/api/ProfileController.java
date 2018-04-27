@@ -36,7 +36,6 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -347,12 +346,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
-    try {
-      return ResponseEntity.ok(
-          new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
-    } catch (IOException e) {
-      throw ExceptionUtils.convertGoogleIOException(e);
-    }
+    return ResponseEntity.ok(
+        new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
   }
 
   @Override
@@ -366,16 +361,12 @@ public class ProfileController implements ProfileApiDelegate {
     if (userService.getContactEmailTaken(request.getProfile().getContactEmail())) {
       throw new ConflictException("That contact email is already taken.");
     }
-    com.google.api.services.admin.directory.model.User googleUser;
-    try {
-      verifyInvitationKey(request.getInvitationKey());
-      googleUser = directoryService.createUser(request.getProfile().getGivenName(),
-      request.getProfile().getFamilyName(), request.getProfile().getUsername(),
-      request.getPassword());
-    }
-    catch (IOException e) {
-      throw ExceptionUtils.convertGoogleIOException(e);
-    }
+
+    verifyInvitationKey(request.getInvitationKey());
+    com.google.api.services.admin.directory.model.User googleUser =
+        directoryService.createUser(request.getProfile().getGivenName(),
+            request.getProfile().getFamilyName(), request.getProfile().getUsername(),
+            request.getPassword());
 
     // Create a user that has no data access or FC user associated.
     // We create this account before they sign in so we can keep track of which users we have
