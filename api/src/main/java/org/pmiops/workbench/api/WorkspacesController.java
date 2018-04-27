@@ -6,11 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -22,6 +18,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -495,22 +492,40 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace;
-    List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces;
     User user = userProvider.get();
+    // This code is to migrate firecloud uuid to current workspaces
+    // once we are confident this has been done we can rework/remove
+    // much of this logic
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
     if (user != null) {
+      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces;
       try {
         fcWorkspaces = fireCloudService.getWorkspaces();
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
         throw ExceptionUtils.convertFirecloudException(e);
       }
-      for ( org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace : fcWorkspaces) {
-        WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-        dbWorkspace = workspaceService.get(fcWorkspace.getWorkspace().getNamespace(), fcWorkspace.getWorkspace().getName());
-        if(dbWorkspace != null) {
-          currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
-          currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
+      for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
+        org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace;
+        org.pmiops.workbench.db.model.Workspace dbWorkspace =
+                new org.pmiops.workbench.db.model.Workspace();
+        dbWorkspace = workspaceService.getRequired(userRole.getWorkspace().getWorkspaceNamespace(), userRole.getWorkspace().getFirecloudName());
+        fcWorkspace = fcWorkspaces.stream().filter(w -> w.getWorkspace().getName().equals(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()).getId())).collect(Collectors.toList()).get(0);
+        if (fcWorkspace == null) {
+          //  remove from our database
+          workspaceService.getDao().delete(dbWorkspace);
+        } else {
+          if (userRole.getWorkspace().getFirecloudUuid() == null) {
+            // populate UUID
+            dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspace().getWorkspaceId());
+            workspaceService.getDao().save(dbWorkspace);
+          }
+          WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+          currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()));
+          if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+            currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
+          } else {
+            currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
+          }
           responseList.add(currentWorkspace);
         }
       }
