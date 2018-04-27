@@ -81,6 +81,9 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   convertToEmail(username: string): string {
+    if (username.endsWith('@' + this.gsuiteDomain)) {
+      return username;
+    }
     return username + '@' + this.gsuiteDomain;
   }
 

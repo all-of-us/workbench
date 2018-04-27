@@ -15,12 +15,20 @@
         "type": "STRING"
       },
       {
-        "name": "domain_parent",
+        "name": "db_type",
         "type": "STRING"
       },
       {
       "name": "domain_route",
       "type": "STRING"
+      },
+      {
+        "name": "concept_id",
+        "type": "INTEGER"
+      },
+      {
+        "name": "count_value",
+        "type": "INTEGER"
       }
 ]
 

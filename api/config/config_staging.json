@@ -12,7 +12,7 @@
   },
   "cdr": {
     "defaultCdrVersion": "Test Registered CDR",
-    "debugQueries": false
+    "debugQueries": true
   },
   "googleCloudStorageService": {
     "credentialsBucketName": "all-of-us-rw-staging-credentials"

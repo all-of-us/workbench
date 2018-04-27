@@ -1,0 +1,45 @@
+.item {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  max-width: 100%;
+}
+
+.selection-button {
+  color: rgb(98, 164, 32);
+  align-self: center;
+
+  /* Redo clarity's .btn styles */
+  margin: 0;
+  padding: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  /* These have to specified or Clarity's will override us */
+  min-width: 1.25rem;;
+  max-width: 1.25rem;;
+  min-height: 1.25rem;
+  max-height: 1.25rem;
+}
+
+.selection-icon {
+  margin: calc((1.25rem - 20px) / 2);
+}
+
+.code {
+  white-space: nowrap;
+  font-size: smaller;
+}
+
+.name {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0.2rem;
+  font-size: smaller;
+}
+
+.count {
+  white-space: nowrap;
+  align-self: baseline;
+}

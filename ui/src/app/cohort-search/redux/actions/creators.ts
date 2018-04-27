@@ -36,7 +36,7 @@ import {
 } from './types';
 /* tslint:enable:ordered-imports */
 
-import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
+import {ChartInfo, Criteria, SearchRequest} from 'generated';
 
 /**
  * Criteria loading mgmt
@@ -126,12 +126,12 @@ export const removeParameter =
   ({type: REMOVE_PARAMETER, parameterId});
 
 export const addModifier =
-  (modifier: Modifier
+  (modifier: any
   ): ActionTypes[typeof ADD_MODIFIER] =>
   ({type: ADD_MODIFIER, modifier});
 
 export const removeModifier =
-  (modifier: Modifier
+  (modifier: any
   ): ActionTypes[typeof REMOVE_MODIFIER] =>
   ({type: REMOVE_MODIFIER, modifier});
 

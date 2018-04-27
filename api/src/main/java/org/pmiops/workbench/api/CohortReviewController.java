@@ -287,6 +287,26 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
+    public ResponseEntity<ParticipantData> getDetailParticipantData(String workspaceNamespace,
+                                                                    String workspaceId,
+                                                                    Long cohortId,
+                                                                    Long cdrVersionId,
+                                                                    Long dataId,
+                                                                    String domain) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantData());
+    }
+
+    @Override
+    public ResponseEntity<MasterParticipantDataListResponse> getMasterParticipantData(String workspaceNamespace,
+                                                                                      String workspaceId,
+                                                                                      Long cohortId,
+                                                                                      Long cdrVersionId,
+                                                                                      Long participantId,
+                                                                                      PageFilterRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new MasterParticipantDataListResponse());
+    }
+
+    @Override
     public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(String workspaceNamespace,
                                                                                                    String workspaceId,
                                                                                                    Long cohortId,

@@ -1,0 +1,89 @@
+h3 {
+  margin-left: 7rem;
+}
+
+/* Form grid / layout */
+.form-row {
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  min-height: 2rem;
+  margin: 0.25rem 0;
+}
+
+.form-row:first-child {
+  margin-top: 0;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  min-width: 7rem;
+  align-self: center;
+  text-align: center;
+}
+
+.circle-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.and-circle {
+  background-color: rgb(226, 226, 233);
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  line-height: 1.25rem;
+  text-align: center;
+  font-size: 0.45rem;
+}
+
+.control-wrapper {
+  width: 80%;
+  margin: 0 1rem 0 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Slider elements */
+.control-wrapper.slider-wrapper {
+  width: 70%;
+}
+
+.slider {
+  flex: 1;
+  padding: 0 0.5rem;
+  margin: 0 0.5rem;
+}
+
+.number-display {
+  padding: 0 0.5rem;
+  border: 1px solid black;
+  border-radius: 3px;
+  width: 1rem;
+  font-weight: 300;
+  font-size: 0.5rem;
+}
+
+#min-age {
+  margin-right: 0.5rem;
+}
+
+#max-age {
+  margin-left: 0.5rem;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Deceased status text */
+label[for="deceased"] {
+  font-weight: 400;
+  font-size: 0.5rem;
+  color: black;
+}

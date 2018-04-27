@@ -1,0 +1,19 @@
+<form [formGroup]="form">
+  <section class="form-block">
+    <label>The Following Modifiers are Optional</label>
+    <div *ngFor="let mod of modifiers"
+      class="form-group" [formGroupName]="mod.name">
+      <label [for]="mod.name">{{ mod.label }}</label>
+      <div class="select">
+        <select formControlName="operator">
+          <option *ngFor="let opt of mod.operators" [value]="opt.value">
+            {{ opt.name}}
+          </option>
+        </select>
+      </div>
+      <input formControlName="valueA" [type]="mod.inputType">
+      <input *ngIf="showValueB(mod.name)"
+        formControlName="valueB" [type]="mod.inputType">
+    </div>
+  </section>
+</form>

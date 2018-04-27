@@ -1,0 +1,31 @@
+.container {
+  display: flex;
+  width: 100%;
+  padding: 0 0.5rem 0 0;
+}
+
+.item-info {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+}
+
+.item-info > small:not(:first-child):before {
+  content: "\00a0";
+}
+
+.item-info > .name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-info > .name:hover {
+  overflow: visible;
+  white-space: normal;
+  text-align: justify;
+}
