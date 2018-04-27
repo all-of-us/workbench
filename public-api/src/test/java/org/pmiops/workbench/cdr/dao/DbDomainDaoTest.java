@@ -23,7 +23,7 @@ import java.util.List;
 public class DbDomainDaoTest {
 
     @Autowired
-    DbDomainDao dao;
+    private DbDomainDao dao;
 
     private DbDomain dbDomain1;
 
