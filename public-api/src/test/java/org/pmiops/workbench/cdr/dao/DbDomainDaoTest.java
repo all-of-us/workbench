@@ -49,24 +49,24 @@ public class DbDomainDaoTest {
     public void findAllDbDomains() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findAll();
-        assert(obj1.getDomainId() == "Domain1");
-        assert(list.get(0).getDomainId() == obj1.getDomainId());
+        assert(obj1.getDomainId().equals("Domain1"));
+        assert(list.get(0).getDomainId().equals(obj1.getDomainId()));
     }
 
     @Test
     public void findDbDomainsByDbType() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findByDbType("Sample Domain");
-        assert(obj1.getDomainId() == "Domain1");
-        assert(list.get(0).getDomainId() == obj1.getDomainId());
+        assert(obj1.getDomainId().equals("Domain1"));
+        assert(list.get(0).getDomainId().equals(obj1.getDomainId()));
     }
 
     @Test
     public void findDbDomainsByDbTypeAndConceptId() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findByDbTypeAndAndConceptIdNotNull("Sample Domain");
-        assert(obj1.getDomainId() == "Domain1");
-        assert(list.get(0).getDomainId() == obj1.getDomainId());
+        assert(obj1.getDomainId().equals("Domain1"));
+        assert(list.get(0).getDomainId().equals(obj1.getDomainId()));
     }
 
     private DbDomain createDbDomain(String domainId, String dbType) {
