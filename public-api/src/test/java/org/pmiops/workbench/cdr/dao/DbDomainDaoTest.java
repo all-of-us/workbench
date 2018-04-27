@@ -23,50 +23,51 @@ public class DbDomainDaoTest {
 
     @Autowired
     DbDomainDao dao;
-    private DbDomain obj1;
-    private DbDomain obj2;
-    private DbDomain obj3;
-    private DbDomain obj4;
-    private DbDomain obj5;
+
+    private DbDomain dbDomain1;
+    private DbDomain dbDomain2;
+    private DbDomain dbDomain3;
+    private DbDomain dbDomain4;
+    private DbDomain dbDomain5;
 
     @Before
     public void setUp() {
 
-        obj1 = createDbDomain("Domain1","Sample Domain");
-        obj2 = createDbDomain("Domain2","Sample Domain");
-        obj3 = createDbDomain("Domain3","Sample Domain");
-        obj4 = createDbDomain("Domain4","Sample Domain");
-        obj5 = createDbDomain("Domain5","Sample Domain");
+        dbDomain1 = createDbDomain("Domain1","Sample Domain");
+        dbDomain2 = createDbDomain("Domain2","Sample Domain");
+        dbDomain3 = createDbDomain("Domain3","Sample Domain");
+        dbDomain4 = createDbDomain("Domain4","Sample Domain");
+        dbDomain5 = createDbDomain("Domain5","Sample Domain");
 
-        dao.save(obj1);
-        dao.save(obj2);
-        dao.save(obj3);
-        dao.save(obj4);
-        dao.save(obj5);
+        dao.save(dbDomain1);
+        dao.save(dbDomain2);
+        dao.save(dbDomain3);
+        dao.save(dbDomain4);
+        dao.save(dbDomain5);
     }
 
     @Test
     public void findAllDbDomains() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findAll();
-        assert(obj1.getDomainId().equals("Domain1"));
-        assert(list.get(0).getDomainId().equals(obj1.getDomainId()));
+        assert(dbDomain1.getDomainId().equals("Domain1"));
+        assert(list.get(0).getDomainId().equals(dbDomain1.getDomainId()));
     }
 
     @Test
     public void findDbDomainsByDbType() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findByDbType("Sample Domain");
-        assert(obj1.getDomainId().equals("Domain1"));
-        assert(list.get(0).getDomainId().equals(obj1.getDomainId()));
+        assert(dbDomain1.getDomainId().equals("Domain1"));
+        assert(list.get(0).getDomainId().equals(dbDomain1.getDomainId()));
     }
 
     @Test
     public void findDbDomainsByDbTypeAndConceptId() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findByDbTypeAndAndConceptIdNotNull("Sample Domain");
-        assert(obj1.getDomainId().equals("Domain1"));
-        assert(list.get(0).getDomainId().equals(obj1.getDomainId()));
+        assert(dbDomain1.getDomainId().equals("Domain1"));
+        assert(list.get(0).getDomainId().equals(dbDomain1.getDomainId()));
     }
 
     private DbDomain createDbDomain(String domainId, String dbType) {
