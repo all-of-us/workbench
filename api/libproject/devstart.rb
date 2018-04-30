@@ -909,8 +909,8 @@ def delete_clusters(cmd_name, *args)
     Dir.chdir("tools") do
       common = Common.new
       common.run_inline %W{
-         gradle --info deleteClusters
-        -PappArgs=[#{op.opts.min_age_days},'#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
+         gradle --info manageClusters
+        -PappArgs=['delete',#{op.opts.min_age_days},'#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
     end
   end
 end
@@ -919,6 +919,29 @@ Common.register_command({
   :invocation => "delete-clusters",
   :description => "Delete all clusters in this environment",
   :fn => lambda { |*args| delete_clusters("delete-clusters", *args) }
+})
+
+def list_clusters(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  # TODO: We don't currently need DB access here, but the @SpringBootApplication
+  # causes autoloading which requires a DB connection.
+  with_cloud_proxy_and_db(gcc) do |ctx|
+    Dir.chdir("tools") do
+      common = Common.new
+      common.run_inline %W{gradle --info manageClusters -PappArgs=['list']}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "list-clusters",
+  :description => "List all clusters in this environment",
+  :fn => lambda { |*args| list_clusters("list-clusters", *args) }
 })
 
 def get_test_service_account()

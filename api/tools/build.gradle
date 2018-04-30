@@ -41,9 +41,9 @@ task setAuthority(type: JavaExec, dependsOn: ':generateApi') {
   }
 }
 
-task deleteClusters(type: JavaExec) {
+task manageClusters(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
-  main = "org.pmiops.workbench.tools.DeleteClusters"
+  main = "org.pmiops.workbench.tools.ManageClusters"
   systemProperties = dbProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
