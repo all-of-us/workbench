@@ -27,6 +27,8 @@ import org.pmiops.workbench.model.UnderservedPopulationEnum;
 @Table(name = "workspace")
 public class Workspace {
 
+  private String firecloudUuid;
+
   public static class FirecloudWorkspaceId {
     private final String workspaceNamespace;
     private final String workspaceName;
@@ -72,7 +74,6 @@ public class Workspace {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Set<Cohort> cohorts = new HashSet<Cohort>();
-  private String firecloudUuid;
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;
