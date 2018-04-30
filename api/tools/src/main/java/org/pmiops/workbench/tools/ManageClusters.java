@@ -27,8 +27,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 
 /**
- * ManageClusters is a operation utility for destroying all clusters available
- * to the current user.
+ * ManageClusters is an operational utility for interacting with the Leonardo Notebook clusters
+ * available to the application default user. This should generally be used while authorized as the
+ * App Engine default service account for a given environment.
  */
 @SpringBootApplication
 public class ManageClusters {
@@ -63,7 +64,7 @@ public class ManageClusters {
   private static String formatTabular(Cluster c) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(c.getLabels()).getAsJsonObject();
-    return String.format("deleted cluster: %-40.40s %-40.40s %-15s",
+    return String.format("%-40.40s %-40.40s %-15s",
         clusterId(c), labels.get("created-by").getAsString(), c.getCreatedDate());
   }
 
@@ -109,7 +110,7 @@ public class ManageClusters {
               }
               remaining.remove(cid);
               deleted.getAndIncrement();
-              System.out.println(dryMsg + formatTabular(c));
+              System.out.println(dryMsg + "deleted cluster: " + formatTabular(c));
             });
     if (!remaining.isEmpty()) {
       log.log(Level.SEVERE, "failed to find/delete clusters: {1}",
