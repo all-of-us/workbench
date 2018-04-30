@@ -48,10 +48,7 @@ public class ExceptionUtils {
   }
 
   public static boolean isSocketTimeoutException(Exception e) {
-    if (e instanceof SocketTimeoutException) {
-      return true;
-    }
-    return false;
+    return (e instanceof SocketTimeoutException);
   }
 
 
