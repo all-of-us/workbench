@@ -1,6 +1,9 @@
 import {Component} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+
 
 import {
+  CohortReviewService,
   PageFilterType,
   ParticipantConditionsColumns,
   ParticipantDrugsColumns,
@@ -54,7 +57,16 @@ const ageAtEvent = {
   styleUrls: ['./detail-tabs.component.css']
 })
 export class DetailTabsComponent {
-  readonly tabs = [{
+
+  readonly stubs = [
+    'measurements',
+    'visits',
+    'physical-measurements',
+    'ppi',
+    'device',
+  ];
+
+  readonly allEvents = {
     name: 'All Events',
     filterType: PageFilterType.ParticipantMasters,
     columns: [
@@ -68,7 +80,9 @@ export class DetailTabsComponent {
       sourceValue: ParticipantMasterColumns.SourceValue,
       sourceVocabulary: ParticipantMasterColumns.SourceVocabulary,
     }
-  }, {
+  };
+
+  readonly tabs = [{
     name: 'Conditions',
     filterType: PageFilterType.ParticipantConditions,
     columns: [
@@ -126,4 +140,27 @@ export class DetailTabsComponent {
       age: ParticipantObservationsColumns.Age,
     }
   }];
+
+
+  detailsLoading = false;
+  details;
+
+  constructor(
+    private route: ActivatedRoute,
+    private reviewApi: CohortReviewService,
+  ) {}
+
+  detailView(datum) {
+    this.detailsLoading = true;
+    const {participant} = this.route.snapshot.data;
+    const {cohort, workspace} = this.route.parent.snapshot.data;
+    this.reviewApi.getDetailParticipantData(
+      workspace.namespace,
+      workspace.id,
+      cohort.id,
+      workspace.cdrVersionId,
+      datum.dataId,
+      datum.domain
+    ).subscribe(details => this.details = details);
+  }
 }

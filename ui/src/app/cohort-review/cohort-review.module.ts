@@ -39,6 +39,7 @@ import {WorkspacesService} from 'generated';
 
 // This is a temporary measure until we have specs and APIs for overview specific charts
 import {CohortSearchModule} from '../cohort-search/cohort-search.module';
+import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
 /* tslint:enable:max-line-length */
 
 
@@ -86,6 +87,7 @@ import {CohortSearchModule} from '../cohort-search/cohort-search.module';
 
     DetailTabsComponent,
     DetailTabTableComponent,
+    DetailAllEventsComponent,
   ],
   providers: [ReviewStateService]
 })
