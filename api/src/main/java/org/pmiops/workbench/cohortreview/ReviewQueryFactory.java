@@ -46,4 +46,24 @@ public class ReviewQueryFactory {
         }
         return queryBuilder;
     }
+
+    /**
+     * Users of this method should use the following:
+     * {@link PageFilterType}
+     *
+     * @param domain
+     * @return
+     */
+    public static ReviewQueryBuilder getQueryBuilder(String domain) {
+        for (PageFilterType pft : PageFilterType.values()) {
+            if (pft.name().toLowerCase().contains(domain.toLowerCase())) {
+                ReviewQueryBuilder queryBuilder = queryBuilderCache.get(pft);
+                if (queryBuilder != null) {
+                    return queryBuilder;
+                }
+            }
+        }
+        throw new BadRequestException(String.format(
+          "Unknown queryBuilder type: %s", domain));
+    }
 }

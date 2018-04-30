@@ -1,8 +1,6 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.BigQueryException;
-import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.*;
 import com.google.gson.Gson;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
@@ -31,12 +29,7 @@ import javax.inject.Provider;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -296,12 +289,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
           cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
-//        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-//          reviewTabQueryBuilder.buildQuery(queryBuilder.getQuery(), pageRequest.getSortColumn(),
-//            participantId, pageRequest)));
+        Map<String, QueryParameterValue> params = new HashMap<>();
+        params.put("dataId", QueryParameterValue.int64(dataId));
+        params.put("domain", QueryParameterValue.string(domain));
+        QueryJobConfiguration qjc =
+          QueryJobConfiguration
+          .newBuilder(ReviewQueryFactory.getQueryBuilder(domain).getCountQuery())
+          .setNamedParameters(params)
+          .setUseLegacySql(false)
+          .build();
+        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         ParticipantData response = new ParticipantData();
+        //TODO convert response
 
         return ResponseEntity.ok(response);
     }
