@@ -1,15 +1,14 @@
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
-
 import {
   CohortReviewService,
   PageFilterType,
   ParticipantConditionsColumns,
   ParticipantDrugsColumns,
+  ParticipantMasterColumns,
   ParticipantObservationsColumns,
   ParticipantProceduresColumns,
-  ParticipantMasterColumns,
 } from 'generated';
 
 /* The most common column types */
