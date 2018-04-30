@@ -58,10 +58,7 @@ module Workbench
       exit 0
     end
 
-    command = ARGV.first
-    args = ARGV.drop(1)
-
-    common.handle_or_die(command, *args)
+    common.handle_or_die(ARGV)
   end
   module_function :handle_argv_or_die
 
