@@ -293,7 +293,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                     Long cdrVersionId,
                                                                     Long dataId,
                                                                     String domain) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ParticipantData());
+        CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+          cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+
+//        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+//          reviewTabQueryBuilder.buildQuery(queryBuilder.getQuery(), pageRequest.getSortColumn(),
+//            participantId, pageRequest)));
+        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+        ParticipantData response = new ParticipantData();
+
+        return ResponseEntity.ok(response);
     }
 
     @Override
