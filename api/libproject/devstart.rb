@@ -885,6 +885,7 @@ Common.register_command({
 def delete_clusters(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.min_age_days = 0
   op.opts.dry_run = true
   op.add_option(
       "--min-age-days [DAYS]",

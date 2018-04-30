@@ -5,17 +5,11 @@ import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.Period;
-import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -29,7 +23,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 
 /**
  * DeleteClusters is a operation utility for destroying all clusters available
@@ -41,8 +34,7 @@ public class DeleteClusters {
   private static final Logger log = Logger.getLogger(DeleteClusters.class.getName());
   private static final String[] BILLING_SCOPES = new String[] {
       "https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/userinfo.email",
-      "https://www.googleapis.com/auth/cloud-billing"
+      "https://www.googleapis.com/auth/userinfo.email"
   };
 
   private static Set<String> commaDelimitedStringToSet(String str) {
