@@ -6,6 +6,7 @@ import {
   ParticipantDrugsColumns,
   ParticipantObservationsColumns,
   ParticipantProceduresColumns,
+  ParticipantMasterColumns,
 } from 'generated';
 
 /* The most common column types */
@@ -13,6 +14,10 @@ const itemDate = {
   name: 'itemDate',
   classNames: ['date-col'],
   displayName: 'Date',
+};
+const domain = {
+  name: 'domain',
+  displayName: 'Domain',
 };
 const standardVocabulary = {
   name: 'standardVocabulary',
@@ -50,6 +55,20 @@ const ageAtEvent = {
 })
 export class DetailTabsComponent {
   readonly tabs = [{
+    name: 'All Events',
+    filterType: PageFilterType.ParticipantMasters,
+    columns: [
+      itemDate, domain, standardVocabulary, standardName, sourceVocabulary, sourceValue,
+    ],
+    reverseEnum: {
+      itemDate: ParticipantMasterColumns.ItemDate,
+      domain: ParticipantMasterColumns.Domain,
+      standardVocabulary: ParticipantMasterColumns.StandardVocabulary,
+      standardName: ParticipantMasterColumns.StandardName,
+      sourceValue: ParticipantMasterColumns.SourceValue,
+      sourceVocabulary: ParticipantMasterColumns.SourceVocabulary,
+    }
+  }, {
     name: 'Conditions',
     filterType: PageFilterType.ParticipantConditions,
     columns: [
