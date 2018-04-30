@@ -12,7 +12,7 @@
     {{ col.displayName }}
   </clr-dg-column>
 
-  <clr-dg-row *ngFor="let datum of data">
+  <clr-dg-row *ngFor="let datum of data" (click)="onClick(datum)">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
       <ng-container [ngSwitch]="col.name">
         <span *ngSwitchCase="'itemDate'">
