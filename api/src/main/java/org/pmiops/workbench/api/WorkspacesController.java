@@ -394,6 +394,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
+    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
@@ -505,8 +506,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
       for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
         org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace;
-        org.pmiops.workbench.db.model.Workspace dbWorkspace =
-                new org.pmiops.workbench.db.model.Workspace();
+        org.pmiops.workbench.db.model.Workspace dbWorkspace;
         dbWorkspace = workspaceService.getRequired(userRole.getWorkspace().getWorkspaceNamespace(), userRole.getWorkspace().getFirecloudName());
         fcWorkspace = fcWorkspaces.stream().filter(w -> w.getWorkspace().getName().equals(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()).getId())).collect(Collectors.toList()).get(0);
         if (fcWorkspace == null) {
