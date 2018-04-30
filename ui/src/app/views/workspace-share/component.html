@@ -39,7 +39,7 @@
       <div class="removing-area">
         <h4 class="collaborator-label">Current Collaborators</h4>
         <ul>
-          <div *ngFor="let user of workspace.userRoles" class="user" [ngClass]="{'owner' : (user.role.toString() == 'OWNER' || !hasPermission)}">
+          <div *ngFor="let user of workspace.userRoles" class="user" [ngClass]="{'owner' : (user.email === userEmail || !hasPermission)}">
             <div class="collaborator-icon">
               <clr-icon *ngIf="user.email !== userEmail && hasPermission"
                       shape="minus-circle"

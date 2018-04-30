@@ -155,6 +155,12 @@ public class ClusterControllerTest {
   }
 
   @Test
+  public void testDeleteCluster() throws Exception {
+    clusterController.deleteCluster(WORKSPACE_NS, "cluster");
+    verify(notebookService).deleteCluster(WORKSPACE_NS, "cluster");
+  }
+
+  @Test
   public void testLocalize_differentNamespace() throws Exception {
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
     req.setWorkspaceNamespace(WORKSPACE_NS);

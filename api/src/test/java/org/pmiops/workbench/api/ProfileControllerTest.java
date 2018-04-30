@@ -227,7 +227,7 @@ public class ProfileControllerTest {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
 
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
-        .thenThrow(new IOException());
+        .thenThrow(new ServerErrorException());
     profileController.createAccount(createAccountRequest);
   }
 

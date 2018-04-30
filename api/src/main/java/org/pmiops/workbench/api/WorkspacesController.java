@@ -6,11 +6,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -398,6 +394,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
+    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
@@ -495,17 +492,41 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    // TODO: use FireCloud to determine what workspaces to return, instead of just returning
-    // workspaces from our database.
     User user = userProvider.get();
+    // This code is to migrate firecloud uuid to current workspaces
+    // once we are confident this has been done we can rework/remove
+    // much of this logic
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
     if (user != null) {
+      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces;
+      try {
+        fcWorkspaces = fireCloudService.getWorkspaces();
+      } catch (org.pmiops.workbench.firecloud.ApiException e) {
+        throw ExceptionUtils.convertFirecloudException(e);
+      }
       for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
-        // TODO: Use FireCloud to determine access roles, not our DB
-        WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-        currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()));
-        currentWorkspace.setAccessLevel(userRole.getRole());
-        responseList.add(currentWorkspace);
+        org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace;
+        org.pmiops.workbench.db.model.Workspace dbWorkspace;
+        dbWorkspace = workspaceService.getRequired(userRole.getWorkspace().getWorkspaceNamespace(), userRole.getWorkspace().getFirecloudName());
+        fcWorkspace = fcWorkspaces.stream().filter(w -> w.getWorkspace().getName().equals(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()).getId())).collect(Collectors.toList()).get(0);
+        if (fcWorkspace == null) {
+          //  remove from our database
+          workspaceService.getDao().delete(dbWorkspace);
+        } else {
+          if (userRole.getWorkspace().getFirecloudUuid() == null) {
+            // populate UUID
+            dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspace().getWorkspaceId());
+            workspaceService.getDao().save(dbWorkspace);
+          }
+          WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+          currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()));
+          if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+            currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
+          } else {
+            currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
+          }
+          responseList.add(currentWorkspace);
+        }
       }
     }
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();

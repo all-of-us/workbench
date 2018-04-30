@@ -37,21 +37,11 @@ public class ExceptionUtils {
     return false;
   }
 
-  public static boolean isGoogleBadRequestException(IOException e) {
-    if (e instanceof GoogleJsonResponseException) {
-      int code = ((GoogleJsonResponseException) e).getDetails().getCode();
-      return code == 400;
-    }
-    return false;
-  }
-
   public static RuntimeException convertGoogleIOException(IOException e) {
     if (isGoogleServiceUnavailableException(e)) {
       throw new ServerUnavailableException(e);
     } else if (isGoogleConflictException(e)) {
       throw new ConflictException(e);
-    } else if (isGoogleBadRequestException(e)) {
-      throw new BadRequestException(e);
     }
     throw new ServerErrorException(e);
   }

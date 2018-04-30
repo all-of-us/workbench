@@ -392,6 +392,33 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/clusters/{clusterNamespace}/{clusterName}:
+    delete:
+      summary: Delete a cluster by name.
+      operationId: deleteCluster
+      tags:
+        - cluster
+      parameters:
+      - in: path
+        name: clusterNamespace
+        description: clusterNamespace
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      responses:
+        202:
+          description: Deletion success
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/clusters/{clusterNamespace}/{clusterName}/localize:
     post:
       summary: >
@@ -522,7 +549,6 @@ paths:
         202:
           description: Workspace deletion request accepted
           schema:
-
             $ref: '#/definitions/EmptyResponse'
 
   /v1/admin/workspaces/review:
