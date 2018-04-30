@@ -138,7 +138,6 @@ describe('WorkspaceComponent', () => {
     });
     tick();
     workspacePage.readPageData();
-
     expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
   }));
 
