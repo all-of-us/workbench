@@ -903,9 +903,7 @@ def delete_clusters(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  # TODO: We don't currently need DB access here, but the @SpringBootApplication
-  # causes autoloading which requires a DB connection.
-  with_cloud_proxy_and_db(gcc) do |ctx|
+  ServiceAccountContext.new(gcc.project).run do
     Dir.chdir("tools") do
       common = Common.new
       common.run_inline %W{
@@ -928,9 +926,7 @@ def list_clusters(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  # TODO: We don't currently need DB access here, but the @SpringBootApplication
-  # causes autoloading which requires a DB connection.
-  with_cloud_proxy_and_db(gcc) do |ctx|
+  ServiceAccountContext.new(gcc.project).run do
     Dir.chdir("tools") do
       common = Common.new
       common.run_inline %W{gradle --info manageClusters -PappArgs=['list']}

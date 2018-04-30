@@ -16,22 +16,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.pmiops.workbench.notebooks.ApiClient;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * ManageClusters is an operational utility for interacting with the Leonardo Notebook clusters
  * available to the application default user. This should generally be used while authorized as the
  * App Engine default service account for a given environment.
+ *
+ * Note: If this utility later needs database access, replace @Configuration with
+ * @SpringBootApplication.
  */
-@SpringBootApplication
+@Configuration
 public class ManageClusters {
 
   private static final Logger log = Logger.getLogger(ManageClusters.class.getName());
