@@ -2,13 +2,16 @@ package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javax.inject.Provider;
+
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -23,6 +26,7 @@ import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -125,6 +129,12 @@ public class ClusterController implements ClusterApiDelegate {
     firecloudClusterRequest.setJupyterUserScriptUri(
         workbenchConfigProvider.get().firecloud.jupyterUserScriptUri);
     return firecloudClusterRequest;
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> deleteCluster(String projectName, String clusterName) {
+    this.notebooksService.deleteCluster(projectName, clusterName);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
