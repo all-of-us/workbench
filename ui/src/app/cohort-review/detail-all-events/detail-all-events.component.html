@@ -12,11 +12,13 @@
     {{ col.displayName }}
   </clr-dg-column>
 
-  <clr-dg-row *ngFor="let datum of data">
+  <clr-dg-row *ngFor="let datum of data"
+    (click)="onClick(datum)"
+    [style.cursor]="'pointer'">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
       <ng-container [ngSwitch]="col.name">
         <span *ngSwitchCase="'itemDate'">
-          {{ datum.itemDate }}
+          {{ datum.itemDate | date:'yyyy-MM-dd HH:mm:ss' }}
         </span>
         <span *ngSwitchCase="'sourceVocabulary'"
           [style.width.%]="100"
