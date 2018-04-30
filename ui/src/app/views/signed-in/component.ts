@@ -66,9 +66,12 @@ export class SignedInComponent implements OnInit {
         this.profileImage = this.signInService.profileImage;
         this.profileStorageService.reload();
       } else {
-        this.router.navigate(['/login', {
-          from: this.router.routerState.snapshot.url
-        }]);
+        const params = {};
+        const url = this.router.routerState.snapshot.url;
+        if (url && url !== '/') {
+          params['from'] = url;
+        }
+        this.router.navigate(['/login', params]);
       }
     });
   }
