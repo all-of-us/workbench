@@ -41,7 +41,7 @@ task setAuthority(type: JavaExec, dependsOn: ':generateApi') {
   }
 }
 
-task manageClusters(type: JavaExec) {
+task manageClusters(type: JavaExec, dependsOn: ':generateNotebooksClient') {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ManageClusters"
   systemProperties = dbProperties
@@ -59,24 +59,51 @@ buildscript {    // Configuration for building
   }
 }
 
-configurations {
-  compile.extendsFrom project(':').configurations.compile
-  runtime.extendsFrom project(':').configurations.runtime
-}
 
 sourceSets {
   main {
     java {
       srcDirs = ['src/main/java', '../src/main/java', '../src/generated/java']
-      compileClasspath += project(':').sourceSets.main.output
-      runtimeClasspath += project(':').sourceSets.main.output
+      includes = ['org/pmiops/workbench/tools/**/*.java',
+                  'org/pmiops/workbench/db/**/*.java',
+                  'org/pmiops/workbench/notebooks/**/*.java',
+                  // In general, command-line tools won't need access to
+                  // org.pmiops.workbench.model (Swagger-generated classes),
+                  // so we selectively whitelist as needed.
+                  'org/pmiops/workbench/config/CdrBigQuerySchemaConfig.java',
+                  'org/pmiops/workbench/config/WorkbenchConfig.java',
+                  'org/pmiops/workbench/model/Authority.java',
+                  'org/pmiops/workbench/model/BlockscoreVerificationStatus.java',
+                  'org/pmiops/workbench/model/BillingProjectStatus.java',
+                  'org/pmiops/workbench/model/ContactEmailTakenResponse.java',
+                  'org/pmiops/workbench/model/DataAccessLevel.java',
+                  'org/pmiops/workbench/model/EmailVerificationStatus.java',
+                  'org/pmiops/workbench/model/ErrorCode.java',
+                  'org/pmiops/workbench/model/ErrorResponse.java',
+                  'org/pmiops/workbench/model/WorkspaceAccessLevel.java',
+                  'org/pmiops/workbench/model/CohortStatus.java',
+                  'org/pmiops/workbench/model/CohortReview.java',
+                  'org/pmiops/workbench/model/ParticipantCohortStatus.java',
+                  'org/pmiops/workbench/model/ReviewStatus.java',
+                  'org/pmiops/workbench/model/UnderservedPopulationEnum.java',
+                  'org/pmiops/workbench/model/AnnotationType.java']
+      excludes = ['org/pmiops/workbench/db/dao/UserService.java',
+                  'org/pmiops/workbench/db/dao/WorkspaceService.java',
+                  'org/pmiops/workbench/db/dao/WorkspaceServiceImpl.java',
+                  'org/pmiops/workbench/db/dao/ParticipantCohortStatusDao.java',
+                  'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoImpl.java',
+                  'org/pmiops/workbench/cohortreview/util/*.java',
+                  'org/pmiops/workbench/model/Filter.java',
+                  'org/pmiops/workbench/model/Operator.java',
+                  'org/pmiops/workbench/model/ParticipantCohortStatusColumns.java',
+                  'org/pmiops/workbench/model/SortOrder.java',
+                  'org/pmiops/workbench/notebooks/NotebooksService.java',
+                  'org/pmiops/workbench/notebooks/NotebooksServiceImpl.java',
+                  'org/pmiops/workbench/notebooks/NotebooksConfig.java',
+                  'org/pmiops/workbench/db/dao/CohortService.java',
+                  'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoCustom.java']
     }
   }
-}
-
-dependencies {
-  compile project(':')
-  compile project(path: ':', configuration: 'generatedCompile')
 }
 
 repositories {   // repositories for Jar's you access in your code
@@ -94,6 +121,10 @@ dependencies {
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.code.gson:gson:+'
   compile 'org.hibernate:hibernate-validator:+'
+
+  // Just added...
+  compile 'com.squareup.okhttp:okhttp:2.6.0'
+  compile 'com.squareup.okhttp:logging-interceptor:2.6.0'
 }
 
 
