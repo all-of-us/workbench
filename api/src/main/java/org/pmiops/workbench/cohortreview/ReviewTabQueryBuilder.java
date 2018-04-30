@@ -4,8 +4,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.cohortreview.querybuilder.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cdm.ParticipantConditionDbInfo;
-import org.pmiops.workbench.model.ParticipantConditionsColumns;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,13 +12,15 @@ import java.util.Map;
 @Service
 public class ReviewTabQueryBuilder {
 
-    public QueryJobConfiguration buildQuery(String query, Long participantId, PageRequest pageRequest) {
-        ParticipantConditionsColumns sortColumn = ParticipantConditionsColumns.fromValue(pageRequest.getSortColumn());
+    public QueryJobConfiguration buildQuery(String query,
+                                            String sortColumnDatabaseColumnName,
+                                            Long participantId,
+                                            PageRequest pageRequest) {
         String finalSql = String.format(query,
-                ParticipantConditionDbInfo.fromName(sortColumn).getDbName(),
-                pageRequest.getSortOrder().toString(),
-                pageRequest.getPageSize(),
-                pageRequest.getPageNumber() * pageRequest.getPageSize());
+          sortColumnDatabaseColumnName,
+          pageRequest.getSortOrder().toString(),
+          pageRequest.getPageSize(),
+          pageRequest.getPageNumber() * pageRequest.getPageSize());
 
         return buildQuery(finalSql, participantId);
     }

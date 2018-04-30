@@ -15,12 +15,12 @@ import java.util.Optional;
 public class ObservationQueryBuilder implements ReviewQueryBuilder {
 
     public static final String OBSERVATIONS_SQL_TEMPLATE =
-            "select ob.observation_datetime as item_date,\n" +
-                    "       c1.vocabulary_id as standard_vocabulary,\n" +
-                    "       c1.concept_name as standard_name,\n" +
-                    "       ob.value_as_string as source_value,\n" +
-                    "       c2.vocabulary_id as source_vocabulary,\n" +
-                    "       c2.concept_name as source_name,\n" +
+            "select ob.observation_datetime as itemDate,\n" +
+                    "       c1.vocabulary_id as standardVocabulary,\n" +
+                    "       c1.concept_name as standardName,\n" +
+                    "       ob.value_as_string as sourceValue,\n" +
+                    "       c2.vocabulary_id as sourceVocabulary,\n" +
+                    "       c2.concept_name as sourceName,\n" +
                     "       CAST(FLOOR(DATE_DIFF(observation_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) as age\n" +
                     "from `${projectId}.${dataSetId}.observation` ob\n" +
                     "left join `${projectId}.${dataSetId}.concept` c1 on ob.observation_concept_id = c1.concept_id\n" +

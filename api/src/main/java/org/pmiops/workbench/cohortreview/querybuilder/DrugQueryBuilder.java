@@ -15,13 +15,13 @@ import java.util.Optional;
 public class DrugQueryBuilder implements ReviewQueryBuilder {
 
     public static final String DRUGS_SQL_TEMPLATE =
-            "select de.drug_exposure_start_datetime as item_date,\n" +
-                    "       c1.vocabulary_id as standard_vocabulary,\n" +
-                    "       c1.concept_name as standard_name,\n" +
-                    "       de.drug_source_value as source_value,\n" +
+            "select de.drug_exposure_start_datetime as itemDate,\n" +
+                    "       c1.vocabulary_id as standardVocabulary,\n" +
+                    "       c1.concept_name as standardName,\n" +
+                    "       de.drug_source_value as sourceValue,\n" +
                     "       de.sig as signature,\n" +
-                    "       c2.vocabulary_id as source_vocabulary,\n" +
-                    "       c2.concept_name as source_name,\n" +
+                    "       c2.vocabulary_id as sourceVocabulary,\n" +
+                    "       c2.concept_name as sourceName,\n" +
                     "       CAST(FLOOR(DATE_DIFF(drug_exposure_start_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) as age\n" +
                     "from `${projectId}.${dataSetId}.drug_exposure` de\n" +
                     "left join `${projectId}.${dataSetId}.concept` c1 on de.drug_concept_id = c1.concept_id\n" +

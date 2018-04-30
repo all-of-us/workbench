@@ -297,16 +297,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     @Override
-    public ResponseEntity<MasterParticipantDataListResponse> getMasterParticipantData(String workspaceNamespace,
-                                                                                      String workspaceId,
-                                                                                      Long cohortId,
-                                                                                      Long cdrVersionId,
-                                                                                      Long participantId,
-                                                                                      PageFilterRequest request) {
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new MasterParticipantDataListResponse());
-    }
-
-    @Override
     public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(String workspaceNamespace,
                                                                                                    String workspaceId,
                                                                                                    Long cohortId,
@@ -400,7 +390,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                     "Please provide a valid PageFilterType.");
         }
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                reviewTabQueryBuilder.buildQuery(queryBuilder.getQuery(), participantId, pageRequest)));
+                reviewTabQueryBuilder.buildQuery(queryBuilder.getQuery(), pageRequest.getSortColumn(),
+                  participantId, pageRequest)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
         ParticipantDataListResponse response = new ParticipantDataListResponse();
@@ -591,14 +582,27 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                         ParticipantData data) {
         if (data instanceof ParticipantDrug) {
             ((ParticipantDrug) data).signature(bigQueryService.getString(row, rm.get("signature")));
+            ((ParticipantDrug) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
         }
-        return data.itemDate(bigQueryService.getDateTime(row, rm.get("item_date")))
-                .standardVocabulary(bigQueryService.getString(row, rm.get("standard_vocabulary")))
-                .standardName(bigQueryService.getString(row, rm.get("standard_name")))
-                .sourceValue(bigQueryService.getString(row, rm.get("source_value")))
-                .sourceVocabulary(bigQueryService.getString(row, rm.get("source_vocabulary")))
-                .sourceName(bigQueryService.getString(row, rm.get("source_name")))
-                .age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        if (data instanceof ParticipantCondition) {
+            ((ParticipantCondition) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        }
+        if (data instanceof ParticipantProcedure) {
+            ((ParticipantProcedure) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        }
+        if (data instanceof ParticipantObservation) {
+            ((ParticipantObservation) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        }
+        if (data instanceof ParticipantMaster) {
+            ((ParticipantMaster) data).dataId(bigQueryService.getLong(row, rm.get("dataId")));
+            ((ParticipantMaster) data).domain(bigQueryService.getString(row, rm.get("domain")));
+        }
+        return data.itemDate(bigQueryService.getDateTime(row, rm.get("itemDate")))
+                .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
+                .standardName(bigQueryService.getString(row, rm.get("standardName")))
+                .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
+                .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
+                .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
     }
 
 }
