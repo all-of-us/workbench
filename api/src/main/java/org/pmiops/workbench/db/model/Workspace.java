@@ -27,6 +27,8 @@ import org.pmiops.workbench.model.UnderservedPopulationEnum;
 @Table(name = "workspace")
 public class Workspace {
 
+  private String firecloudUuid;
+
   public static class FirecloudWorkspaceId {
     private final String workspaceNamespace;
     private final String workspaceName;
@@ -86,7 +88,6 @@ public class Workspace {
   private boolean containsUnderservedPopulation;
   private Set<UnderservedPopulationEnum> underservedPopulationSet =
       new HashSet<UnderservedPopulationEnum>();
-
 
   private Boolean reviewRequested;
   private Boolean approved;
@@ -359,6 +360,11 @@ public class Workspace {
   public Set<WorkspaceUserRole> getWorkspaceUserRoles() {
     return usersWithAccess;
   }
+
+  @Column(name = "firecloud_uuid")
+  public String getFirecloudUuid() {return this.firecloudUuid; }
+
+  public void setFirecloudUuid(String firecloudUuid) {this.firecloudUuid = firecloudUuid;}
 
   /**
    * Necessary for Spring initialization of the object.

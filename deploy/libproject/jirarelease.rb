@@ -26,21 +26,6 @@ h2. deployed to %{project}, listing changes since %{prev}
 JIRA_INSTANCE_URL = "https://precisionmedicineinitiative.atlassian.net/"
 JIRA_PROJECT_NAME = "PD"
 
-# TODO(calbach): Factor these utils down into common.rb
-def capture_stdout(cmd)
-  # common.capture_stdout suppresses stderr, which is not desired.
-  out, _ = Open3.capture2(*cmd)
-  return out
-end
-
-def yellow_term_text(text)
-  "\033[0;33m#{text}\033[0m"
-end
-
-def warning(text)
-  STDERR.puts yellow_term_text(text)
-end
-
 def linkify_pull_request_ids(text)
   # Converts all substrings like "(#123)" to links to pull requests.
   return text.gsub(
@@ -50,7 +35,7 @@ end
 
 def get_release_notes_between_tags(project, from_tag, to_tag)
   """Formats release notes for JIRA from commit messages, between the two tags."""
-  commit_messages = capture_stdout(
+  commit_messages = Common.new.capture_stdout(
     ['git', 'log', "#{from_tag}..#{to_tag}", LOG_LINE_FORMAT])
   if not commit_messages
     raise RuntimeError.new "failed to retrieve commits"
@@ -83,7 +68,7 @@ class JiraReleaseClient
 
   def self.from_gcs_creds(project)
     gcs_uri = "gs://#{project}-credentials/jira-login.json"
-    jira_creds = capture_stdout(['gsutil', 'cat', gcs_uri])
+    jira_creds = Common.new.capture_stdout(['gsutil', 'cat', gcs_uri])
     if not jira_creds
       raise RuntimeError.new "failed to read JIRA login from '#{gcs_uri}'"
     end
@@ -137,8 +122,8 @@ class JiraReleaseClient
       raise StandardError.new "no JIRA ticket found for summary \"#{summary}\""
     end
     if issues.length > 1
-      warning "Found multiple release tracker matches, using newest: " +
-              issues.map { |iss| "[#{iss.key}] #{iss.fields['summary']}" }.join(', ')
+      common.warning "Found multiple release tracker matches, using newest: " +
+                     issues.map { |iss| "[#{iss.key}] #{iss.fields['summary']}" }.join(', ')
     end
     issue = issues.first
     comment = issue.comments.build

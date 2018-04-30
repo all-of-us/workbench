@@ -16,24 +16,9 @@ RELEASE_MANAGED_PROJECTS = [STAGING_PROJECT, STABLE_PROJECT]
 
 VERSION_RE = /^v[[:digit:]]+-[[:digit:]]+-rc[[:digit:]]+$/
 
-# TODO(calbach): Factor these utils down into common.rb
-def capture_stdout(cmd)
-  # common.capture_stdout suppresses stderr, which is not desired.
-  out, _ = Open3.capture2(*cmd)
-  return out
-end
-
-def yellow_term_text(text)
-  "\033[0;33m#{text}\033[0m"
-end
-
-def warning(text)
-  STDERR.puts yellow_term_text(text)
-end
-
 def get_live_gae_version(project, validate_version=true)
   common = Common.new
-  versions = capture_stdout %W{
+  versions = common.capture_stdout %W{
     gcloud app
     --format json(id,service,traffic_split)
     --project #{project}
@@ -46,24 +31,24 @@ def get_live_gae_version(project, validate_version=true)
   services = Set["api", "default", "public-api"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   if actives.empty?
-    warning "Found 0 active GAE services in project '#{project}'"
+    common.warning "Found 0 active GAE services in project '#{project}'"
     return nil
   elsif services != actives.map{|v| v["service"]}.to_set
-    warning "Found active services #{v}, expected " +
-            "[#{services.to_a.join(', ')}] for project '#{project}'"
+    common.warning "Found active services #{v}, expected " +
+                   "[#{services.to_a.join(', ')}] for project '#{project}'"
     return nil
   end
 
   versions = actives.map{|v| v["id"]}.to_set
   if versions.length != 1
-    warning "Found varying IDs across GAE services in project '#{project}': " +
-            "[#{versions.to_a.join(', ')}]"
+    common.warning "Found varying IDs across GAE services in project '#{project}': " +
+                   "[#{versions.to_a.join(', ')}]"
     return nil
   end
   v = versions.to_a.first
   if validate_version and not VERSION_RE.match(v)
-    warning "Found a live version '#{v}' in project '#{project}', but " +
-            "it doesn't match the expected release version format"
+    common.warning "Found a live version '#{v}' in project '#{project}', but " +
+                   "it doesn't match the expected release version format"
     return nil
   end
   return v

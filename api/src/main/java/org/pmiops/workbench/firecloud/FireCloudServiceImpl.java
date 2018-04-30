@@ -210,6 +210,11 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
+  public List<WorkspaceResponse> getWorkspaces() throws ApiException {
+    return workspacesApiProvider.get().listWorkspaces();
+  }
+
+  @Override
   public void deleteWorkspace(String projectName, String workspaceName) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     workspacesApi.deleteWorkspace(projectName, workspaceName);
