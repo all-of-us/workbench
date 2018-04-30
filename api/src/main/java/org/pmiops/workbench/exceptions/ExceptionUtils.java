@@ -47,14 +47,14 @@ public class ExceptionUtils {
     throw new ServerErrorException(e);
   }
 
-  public static boolean isSocketTimeoutException(Exception e) {
+  public static boolean isSocketTimeoutException(Throwable e) {
     return (e instanceof SocketTimeoutException);
   }
 
 
   public static RuntimeException convertFirecloudException(ApiException e) {
     log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling FireCloud", e);
-    if (isSocketTimeoutException(e)) {
+    if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
     throw codeToException(e.getCode());
