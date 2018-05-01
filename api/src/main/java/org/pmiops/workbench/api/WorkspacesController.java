@@ -507,19 +507,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
         org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace;
         org.pmiops.workbench.db.model.Workspace dbWorkspace;
-        dbWorkspace = workspaceService.getRequired(userRole.getWorkspace().getWorkspaceNamespace(), userRole.getWorkspace().getFirecloudName());
+        dbWorkspace = userRole.getWorkspace();
         fcWorkspace = fcWorkspaces.stream().filter(w -> w.getWorkspace().getName().equals(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()).getId())).collect(Collectors.toList()).get(0);
         if (fcWorkspace == null) {
           //  remove from our database
           workspaceService.getDao().delete(dbWorkspace);
         } else {
-          if (userRole.getWorkspace().getFirecloudUuid() == null) {
+          if (dbWorkspace.getFirecloudUuid() == null) {
             // populate UUID
             dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspace().getWorkspaceId());
             workspaceService.getDao().save(dbWorkspace);
           }
           WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-          currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()));
+          currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
           if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
             currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
           } else {
