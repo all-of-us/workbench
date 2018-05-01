@@ -56,15 +56,11 @@ h3 {
 
 .right-sidebar {
   background-color: #E2E2EA;
-  width: 2rem;
+  width: 16rem;
   margin-right: -0.6rem;
   padding-left: 0.5rem;
   box-shadow: -3px 0 4px 0 rgba(0,0,0,0.15);
   z-index: 1;
-}
-
-.right-sidebar.right-sidebar-open {
-  width: 16rem;
 }
 
 .workspace-container {
@@ -72,7 +68,7 @@ h3 {
   justify-content: space-between;
   width: 100%;
   flex-grow: 1;
-  height: 100%;
+  height: calc(100% - 60px);
 }
 
 .subheader {

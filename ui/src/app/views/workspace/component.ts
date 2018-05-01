@@ -112,7 +112,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   alertCategory: string;
   alertMsg: string;
   tabOpen = Tabs.Notebooks;
-  rightSidebarClosed = true;
 
   constructor(
     private route: ActivatedRoute,
