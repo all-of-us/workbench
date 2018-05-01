@@ -6,6 +6,34 @@
     </clr-tab-content>
   </clr-tab>
 
+  <!-- All Events: the "combined tabs" view -->
+  <clr-tab>
+    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab">
+      {{ allEvents.name | titlecase }}
+    </button>
+    <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
+      <div class="all-events-container">
+        <app-detail-all-events
+          [tabname]="allEvents.name"
+          [columns]="allEvents.columns"
+          [filterType]="allEvents.filterType"
+          [reverseEnum]="allEvents.reverseEnum"
+          (onRowClick)="detailView($event)"
+          >
+        </app-detail-all-events>
+        <div class="details">
+          <h4>Details</h4>
+          <div *ngIf="detailsLoading" class="spinner">Loading...</div>
+          <div *ngIf="!detailsLoading && !details">No data</div>
+          <div *ngIf="!detailsLoading && details">
+            {{ details | json }}
+          </div>
+        </div>
+      </div>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Individual Tab Views -->
   <clr-tab *ngFor="let tab of tabs">
     <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab">
       {{ tab.name | titlecase }}
@@ -24,37 +52,11 @@
   <!-- Stubs: when the endpoint for each of these is available, make it a data
        entry and put it in the above for loop.  OR if it is too custom, make it
        a new component. -->
-  <clr-tab>
-    <button clrTabLink id="detail-measurements-tab">Measurements</button>
-    <clr-tab-content id="detail-measurements-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-visits-tab">Visits</button>
-    <clr-tab-content id="detail-visits-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-physical-measurements-tab">Physical Measurements</button>
-    <clr-tab-content id="detail-physical-measurements-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-ppi-tab">PPI</button>
-    <clr-tab-content id="detail-ppi-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-device-tab">Device</button>
-    <clr-tab-content id="detail-device-content" *clrIfActive>
+  <clr-tab *ngFor="let stub of stubs">
+    <button clrTabLink id="detail-{{ stub }}-tab">
+      {{ stub.replace('-', ' ') | titlecase }}
+    </button>
+    <clr-tab-content id="detail-{{ stub }}-content" *clrIfActive>
       <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
