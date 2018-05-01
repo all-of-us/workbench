@@ -20,7 +20,7 @@ def dbProperties = [
 
 // Run this via ./project.rb update-cloud-config or (locally) docker-compose run update-config,
 // which is automatically run during api/project.rb dev-up.
-task loadConfig(type: JavaExec, dependsOn: ':generateApi') {
+task loadConfig(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ConfigLoader"
   systemProperties = dbProperties
@@ -30,7 +30,7 @@ task loadConfig(type: JavaExec, dependsOn: ':generateApi') {
 // See api/project.rb set-authority.
 // This evals the value of the -PappArgs flag given to Gradle and passes the
 // result to the Java main method.
-task setAuthority(type: JavaExec, dependsOn: ':generateApi') {
+task setAuthority(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.SetAuthority"
   systemProperties = dbProperties
@@ -41,8 +41,7 @@ task setAuthority(type: JavaExec, dependsOn: ':generateApi') {
   }
 }
 
-task manageClusters(type: JavaExec,
-                    dependsOn: [':generateApi', ':generateNotebooksClient']) {
+task manageClusters(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ManageClusters"
   systemProperties = dbProperties
@@ -106,6 +105,9 @@ sourceSets {
     }
   }
 }
+
+compileJava.dependsOn ':generateApi'
+compileJava.dependsOn ':generateNotebooksClient'
 
 repositories {   // repositories for Jar's you access in your code
   jcenter()
