@@ -160,6 +160,11 @@ export class DetailTabsComponent {
       workspace.cdrVersionId,
       datum.dataId,
       datum.domain
-    ).subscribe(details => this.details = details);
+    ).subscribe(
+        details => {
+          this.details = details;
+          this.detailsLoading = false;
+        }
+    );
   }
 }

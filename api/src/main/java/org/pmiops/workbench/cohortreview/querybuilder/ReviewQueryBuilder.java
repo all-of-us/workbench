@@ -8,8 +8,11 @@ import org.pmiops.workbench.model.ParticipantData;
 public interface ReviewQueryBuilder {
 
     String NAMED_PARTICIPANTID_PARAM = "participantId";
+    String NAMED_DATAID_PARAM = "dataId";
 
     String getQuery();
+
+    String getDetailsQuery();
 
     String getCountQuery();
 

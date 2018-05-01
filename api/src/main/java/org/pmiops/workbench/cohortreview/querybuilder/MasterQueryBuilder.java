@@ -49,6 +49,11 @@ public class MasterQueryBuilder implements ReviewQueryBuilder {
   }
 
   @Override
+  public String getDetailsQuery() {
+    return "";
+  }
+
+  @Override
   public String getCountQuery() {
     return this.MASTER_SQL_COUNT_TEMPLATE.replace("${masterSqlTemplate}", String.join(UNION, buildDomainSql()));
   }

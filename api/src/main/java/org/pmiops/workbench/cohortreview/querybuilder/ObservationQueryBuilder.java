@@ -41,6 +41,11 @@ public class ObservationQueryBuilder implements ReviewQueryBuilder {
     }
 
     @Override
+    public String getDetailsQuery() {
+        return "";
+    }
+
+    @Override
     public String getCountQuery() {
         return this.OBSERVATIONS_SQL_COUNT_TEMPLATE;
     }
