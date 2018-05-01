@@ -14,7 +14,7 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
   @Input() includeSearchBox = true;
   @Input() options = List();
   @Input() set initialSelection(opts) {
-    const _selections = opts.map(opt => opt.hashCode()).toSet();
+    const _selections = opts.map(opt => opt.get('parameterId')).toSet();
     this.selected = this.selected.union(_selections);
   }
 
@@ -39,20 +39,20 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
   get filteredOptions() {
     return this.options
       .filter(opt => this.regex.test(opt.get('name', '')))
-      .filter(opt => !this.selected.has(opt.hashCode()));
+      .filter(opt => !this.selected.has(opt.get('parameterId')));
   }
 
   get selectedOptions() {
-    return this.options.filter(opt => this.selected.has(opt.hashCode()));
+    return this.options.filter(opt => this.selected.has(opt.get('parameterId')));
   }
 
   select(opt) {
-    this.selected = this.selected.add(opt.hashCode());
+    this.selected = this.selected.add(opt.get('parameterId'));
     this.actions.addParameter(opt);
   }
 
   unselect(opt) {
-    this.selected = this.selected.delete(opt.hashCode());
+    this.selected = this.selected.delete(opt.get('parameterId'));
     this.actions.removeParameter(opt.get('parameterId'));
   }
 
