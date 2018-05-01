@@ -427,6 +427,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(String workspaceNamespace, String workspaceId) {
+    //general note. When you delete a workspace the related rows in the following tables will also be deleted
+    //Cohort, cohort review, cohort annotation definition, cohort annotation enum value,
+    //participant cohort annotations, participant cohort status. Please see liquibase/db for more
+    //details on how these tables relate to each other.
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     try {
