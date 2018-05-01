@@ -41,7 +41,8 @@ task setAuthority(type: JavaExec, dependsOn: ':generateApi') {
   }
 }
 
-task manageClusters(type: JavaExec, dependsOn: ':generateNotebooksClient') {
+task manageClusters(type: JavaExec,
+                    dependsOn: [':generateApi', ':generateNotebooksClient']) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ManageClusters"
   systemProperties = dbProperties
