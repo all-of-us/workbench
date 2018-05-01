@@ -85,7 +85,10 @@ public class Cohort {
     this.workspaceId = workspaceId;
   }
 
-  @Column(name = "criteria")
+  // This is actually a BLOB type. The default length limit in Spring Data for
+  // strings is 255 - override to 16KiB for now. We may want to consider using a
+  // different field type if we need larger criteria blobs than this.
+  @Column(name = "criteria", length = 16<<10)
   public String getCriteria() {
     return criteria;
   }
