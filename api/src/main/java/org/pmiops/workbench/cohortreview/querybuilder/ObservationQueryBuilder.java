@@ -30,6 +30,20 @@ public class ObservationQueryBuilder implements ReviewQueryBuilder {
                     "order by %s %s, observation_id\n" +
                     "limit %d offset %d\n";
 
+    private static final String OBSERVATIONS_DETAIL_SQL_TEMPLATE =
+      "select ob.observation_datetime as itemDate,\n" +
+        "       c1.vocabulary_id as standardVocabulary,\n" +
+        "       c1.concept_name as standardName,\n" +
+        "       ob.value_as_string as sourceValue,\n" +
+        "       c2.vocabulary_id as sourceVocabulary,\n" +
+        "       c2.concept_name as sourceName,\n" +
+        "       CAST(FLOOR(DATE_DIFF(observation_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) as age\n" +
+        "from `${projectId}.${dataSetId}.observation` ob\n" +
+        "left join `${projectId}.${dataSetId}.concept` c1 on ob.observation_concept_id = c1.concept_id\n" +
+        "left join `${projectId}.${dataSetId}.concept` c2 on ob.observation_source_concept_id = c2.concept_id\n" +
+        "join `${projectId}.${dataSetId}.person` p on ob.person_id = p.person_id\n" +
+        "where ob.observation_id = @" + NAMED_DATAID_PARAM + "\n";
+
     public static final String OBSERVATIONS_SQL_COUNT_TEMPLATE =
             "select count(*) as count\n" +
                     "from `${projectId}.${dataSetId}.observation`\n" +
@@ -42,7 +56,7 @@ public class ObservationQueryBuilder implements ReviewQueryBuilder {
 
     @Override
     public String getDetailsQuery() {
-        return "";
+        return this.OBSERVATIONS_DETAIL_SQL_TEMPLATE;
     }
 
     @Override
