@@ -18,22 +18,28 @@ import {
   ApiModule,
 } from 'publicGenerated';
 
+
 import {AppRoutingModule} from './app-routing.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 import { DbHeaderComponent } from './views/db-header/db-header.component';
-import { SurveysComponent } from './views/surveys/surveys.component';
 import { SurveyViewComponent } from './views/survey-view/survey-view.component';
+import { SurveysComponent } from './views/surveys/surveys.component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
 // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/2
 (<any>window).StackTrace = StackTrace;
 
-function getBasePath() {
-  return localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
+import {DataBrowserService} from 'publicGenerated';
+import { overriddenPublicUrlKey } from './views/app/component';
+function getPublicBasePath() {
+  return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
 }
 
+const DataBrowserServiceFactory = (http: Http) => {
+  return new DataBrowserService(http, getPublicBasePath(), null);
+};
 
 @NgModule({
   imports: [
@@ -47,7 +53,7 @@ function getBasePath() {
     IconsModule,
     NgxChartsModule,
     ClarityModule,
-    DataBrowserModule,
+    DataBrowserModule
   ],
   declarations: [
     AppComponent,
@@ -57,6 +63,11 @@ function getBasePath() {
     SurveyViewComponent,
   ],
   providers: [
+    {
+      provide: DataBrowserService,
+      useFactory: DataBrowserServiceFactory,
+      deps: [Http]
+    },
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent]

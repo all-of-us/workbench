@@ -1,1 +1,42 @@
 
+
+.survey-results {
+    position: relative;
+    margin-top: 1rem;
+
+}
+.survey-results-background {
+    width: 100%;
+    opacity: 0.59;
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0) 100%);
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+    padding: 1rem;
+    /* Opacity trick so the question cards can be white and not inherit these */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.survey-results .question-card {
+    width: 100%;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 0;
+    opacity: 1;
+    background: #FFFFFF;
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+    position: relative;
+    /*margin-right: 12px;
+    margin-left: 12px;
+    */
+}
+
+.survey-results .search-input-big {
+    margin-left: -.5rem;
+    margin-bottom: 1rem;
+}
+
+.survey-results .box-sub-title {
+    margin-left: .5rem;
+
+}
