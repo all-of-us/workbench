@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.notebooks.ApiClient;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
@@ -81,7 +82,7 @@ public class ManageClusters {
     System.out.println(String.format("listed %d clusters", count.get()));
   }
 
-  private static void deleteClusters(Instant oldest, Set<String> ids, boolean dryRun)
+  private static void deleteClusters(@Nullable Instant oldest, Set<String> ids, boolean dryRun)
       throws IOException, ApiException {
     Set<String> remaining = new HashSet<>(ids);
     String dryMsg = dryRun? "[DRY RUN]: would have... " : "";
@@ -144,11 +145,11 @@ public class ManageClusters {
             throw new IllegalArgumentException(
                 "Expected 3 args (min_age, ids, dry_run). Got " + Arrays.asList(args));
           }
-          Duration age = Duration.ZERO;
+          Instant oldest = null;
           if (!args[0].isEmpty()) {
-            age = Duration.ofDays(Long.parseLong(args[0]));
+            Duration age = Duration.ofDays(Long.parseLong(args[0]));
+            oldest = Clock.systemUTC().instant().minus(age);
           }
-          Instant oldest = Clock.systemUTC().instant().minus(age);
           log.info("only clusters created before " + oldest + " will be considered");
 
           // Note: IDs are optional, this set may be empty.
