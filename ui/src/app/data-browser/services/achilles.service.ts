@@ -58,7 +58,6 @@ export class AchillesService {
   getSectionAnalyses( aids: number[]): Promise<IAnalysis[]> {
     return null;
   }
-  
   getConceptResults(args) {
 
     /* Todo make object to pass with search params
