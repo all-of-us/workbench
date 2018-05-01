@@ -41,4 +41,5 @@
   <include file="changelog/db.changelog-31-requested-id-verification.xml"/>
   <include file="changelog/db.changelog-32-firecloud-uuid.xml"/>
   <include file="changelog/db.changelog-33-uniq-fc-uuid.xml"/>
+  <include file="changelog/db.changelog-34-update-fk-rules.xml"/>
 </databaseChangeLog>
