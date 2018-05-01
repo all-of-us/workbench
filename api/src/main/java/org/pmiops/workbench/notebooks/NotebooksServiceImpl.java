@@ -1,10 +1,13 @@
 package org.pmiops.workbench.notebooks;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
@@ -18,26 +21,44 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
+  private static final String CLUSTER_LABEL_AOU = "all-of-us";
+  private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
+
+
   private static final Logger log = Logger.getLogger(NotebooksServiceImpl.class.getName());
 
   private final Provider<ClusterApi> clusterApiProvider;
   private final Provider<NotebooksApi> notebooksApiProvider;
   private final Provider<JupyterApi> jupyterApiProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public NotebooksServiceImpl(Provider<ClusterApi> clusterApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
-      Provider<JupyterApi> jupyterApiProvider) {
+      Provider<JupyterApi> jupyterApiProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.clusterApiProvider = clusterApiProvider;
     this.notebooksApiProvider = notebooksApiProvider;
     this.jupyterApiProvider = jupyterApiProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+  }
+
+  private ClusterRequest createFirecloudClusterRequest(String userEmail) {
+    ClusterRequest firecloudClusterRequest = new ClusterRequest();
+    Map<String, String> labels = new HashMap<String, String>();
+    labels.put(CLUSTER_LABEL_AOU, "true");
+    labels.put(CLUSTER_LABEL_CREATED_BY, userEmail);
+    firecloudClusterRequest.setLabels(labels);
+    firecloudClusterRequest.setJupyterUserScriptUri(
+        workbenchConfigProvider.get().firecloud.jupyterUserScriptUri);
+    return firecloudClusterRequest;
   }
 
   @Override
-  public Cluster createCluster(String googleProject, String clusterName, ClusterRequest clusterRequest) {
+  public Cluster createCluster(String googleProject, String clusterName, String userEmail) {
     ClusterApi clusterApi = clusterApiProvider.get();
     try {
-      return clusterApi.createCluster(googleProject, clusterName, clusterRequest);
+      return clusterApi.createCluster(googleProject, clusterName, createFirecloudClusterRequest(userEmail));
     } catch (ApiException e) {
       throw ExceptionUtils.convertNotebookException(e);
     }
