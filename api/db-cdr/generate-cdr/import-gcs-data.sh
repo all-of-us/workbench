@@ -37,7 +37,7 @@ REMOTE_DATA_LOC=https://storage.googleapis.com/$BUCKET
 echo "Importing data files from $REMOTE_DATA_LOC"
 
 # Add tables names of files to import here
-TABLES=(achilles_analysis achilles_results achilles_results_concept db_domain domain vocabulary criteria concept concept_relationship)
+TABLES=(achilles_analysis achilles_results achilles_results_concept db_domain domain vocabulary criteria concept concept_relationship concept_ancestor)
 
 # Make a dir for the csvs
 local_fpath=/tmp/$CDR_DB_NAME
