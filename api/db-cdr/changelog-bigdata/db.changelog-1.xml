@@ -169,4 +169,41 @@
       tableName="concept_relationship"/>
   </changeSet>
 
+  <changeSet id="add idx_concept_ancestor" author="brianfreeman" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_concept_ancestor"/>
+      </not>
+    </preConditions>
+    <createIndex tableName="concept_ancestor" indexName="idx_concept_ancestor">
+      <column name="ancestor_concept_id"/>
+      <column name="descendant_concept_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="add idx_ancestor_concept_id" author="brianfreeman" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_ancestor_concept_id"/>
+      </not>
+    </preConditions>
+    <createIndex tableName="concept_ancestor" indexName="idx_ancestor_concept_id">
+      <column name="ancestor_concept_id"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="add idx_descendant_concept_id" author="brianfreeman" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="idx_descendant_concept_id"/>
+      </not>
+    </preConditions>
+    <createIndex tableName="concept_ancestor" indexName="idx_descendant_concept_id">
+      <column name="descendant_concept_id"/>
+    </createIndex>
+  </changeSet>
+
 </databaseChangeLog>
