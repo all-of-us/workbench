@@ -45,7 +45,7 @@ public class DbDomain {
         this.domainDisplay = domainDisplay;
     }
 
-    public DbDomain DomainDisplay(String domainDisplay) {
+    public DbDomain domainDisplay(String domainDisplay) {
         this.domainDisplay = domainDisplay;
         return this;
     }
@@ -92,7 +92,7 @@ public class DbDomain {
         return this;
     }
 
-    @Column(name = "concept_id")
+    @Column(name = "concept_id",nullable = true)
     public Long getConceptId() {
         return conceptId;
     }
