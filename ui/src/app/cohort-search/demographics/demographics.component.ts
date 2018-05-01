@@ -223,7 +223,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
           operator: 'between',
           operands: [lo, hi],
         });
-        const paramId = attr.hashCode();
+        const paramId = `age-param${attr.hashCode()}`;
         return this.ageNode
           .set('parameterId', paramId)
           .set('attribute', attr);
