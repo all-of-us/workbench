@@ -49,26 +49,16 @@ export class AchillesService {
   }
 
   getAnalysisResults(a: IAnalysis): Promise<any[]> {
-
       // Todo take out databrowser in next merge from ui
-      return this.api.getSurveyList()
-
-          .toPromise()
-          .then(response => {
-            return null
-            })
-          .catch(this.handleError);
+      return null;
   }
-
 
   /* Get all the analysis Objects we want to run for an analysisSection
      If justThese is an array , just return ones with id in array  */
   getSectionAnalyses( aids: number[]): Promise<IAnalysis[]> {
     return null;
-
   }
-
-
+  
   getConceptResults(args) {
 
     /* Todo make object to pass with search params
