@@ -149,8 +149,8 @@ public class ManageClusters {
           if (!args[0].isEmpty()) {
             Duration age = Duration.ofDays(Long.parseLong(args[0]));
             oldest = Clock.systemUTC().instant().minus(age);
+            log.info("only clusters created before " + oldest + " will be considered");
           }
-          log.info("only clusters created before " + oldest + " will be considered");
 
           // Note: IDs are optional, this set may be empty.
           Set<String> ids = commaDelimitedStringToSet(args[1]);

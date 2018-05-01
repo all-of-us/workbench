@@ -885,7 +885,6 @@ Common.register_command({
 def delete_clusters(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.min_age_days = 0
   op.opts.dry_run = true
   op.add_option(
       "--min-age-days [DAYS]",
@@ -908,7 +907,7 @@ def delete_clusters(cmd_name, *args)
       common = Common.new
       common.run_inline %W{
          gradle --info manageClusters
-        -PappArgs=['delete',#{op.opts.min_age_days},'#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
+        -PappArgs=['delete','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
     end
   end
 end
