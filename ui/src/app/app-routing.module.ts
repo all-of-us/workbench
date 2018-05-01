@@ -93,13 +93,13 @@ const routes: Routes = [
               path: 'cohorts/build',
               loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
               data: {
-                breadcrumb: 'Cohort Builder'
+                breadcrumb: 'Add a Cohort'
               }
             }, {
               path: 'cohorts/:cid/review',
               loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
               data: {
-                breadcrumb: 'Cohort Review'
+                breadcrumb: 'Cohort'
               }
             }, {
               path: 'cohorts/:cid/edit',
