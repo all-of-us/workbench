@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -85,10 +87,8 @@ public class Cohort {
     this.workspaceId = workspaceId;
   }
 
-  // This is actually a BLOB type. The default length limit in Spring Data for
-  // strings is 255 - override to 16KiB for now. We may want to consider using a
-  // different field type if we need larger criteria blobs than this.
-  @Column(name = "criteria", length = 16<<10)
+  @Lob
+  @Column(name = "criteria")
   public String getCriteria() {
     return criteria;
   }
