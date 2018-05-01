@@ -521,6 +521,22 @@ definitions:
             $ref: "#/definitions/ParticipantMasterColumns"
             description: Column upon which to sort (default is 'itemDate')
 
+  ParticipantDevices:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantDevicesColumns"
+            description: Column upon which to sort (default is 'itemDate')
+
+  ParticipantVisits:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantVisitsColumns"
+            description: Column upon which to sort (default is 'itemDate')
+
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
@@ -545,13 +561,23 @@ definitions:
     type: string
     enum: [dataId, itemDate, domain, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName]
 
+  ParticipantDevicesColumns:
+    type: string
+    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+
+  ParticipantVisitsColumns:
+    type: string
+    enum: [itemDate, endDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+
   PageFilterType:
     type: string
-    enum: [ParticipantCohortStatuses, ParticipantConditions, ParticipantProcedures, ParticipantObservations, ParticipantDrugs, ParticipantMasters]
+    enum: [ParticipantCohortStatuses, ParticipantConditions, ParticipantProcedures, ParticipantObservations,
+    ParticipantDrugs, ParticipantMasters, ParticipantDevices, ParticipantVisits]
 
   DataType:
     type: string
-    enum: [ParticipantCondition, ParticipantProcedure, ParticipantObservation, ParticipantDrug, ParticipantMaster]
+    enum: [ParticipantCondition, ParticipantProcedure, ParticipantObservation, ParticipantDrug, ParticipantMaster,
+    ParticipantDevice, ParticipantVisit]
 
   SortOrder:
     type: string
@@ -778,22 +804,22 @@ definitions:
     properties:
       itemDate:
         type: string
-        description: The date of the condition occurrence
+        description: The date of the data
       standardVocabulary:
         type: string
-        description: The standard vocabulary of this condition
+        description: The standard vocabulary of this data
       standardName:
         type: string
-        description: The standard name of this condition
+        description: The standard name of this data
       sourceValue:
         type: string
-        description: The source value of this condition
+        description: The source value of this data
       sourceVocabulary:
         type: string
-        description: The source vocabulary of this condition
+        description: The source vocabulary of this data
       sourceName:
         type: string
-        description: The source name of this condition.
+        description: The source name of this data.
       dataType:
         $ref: "#/definitions/DataType"
 
@@ -843,6 +869,25 @@ definitions:
           domain:
             type: string
             description: the domain of this data.
+
+  ParticipantDevice:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
+
+  ParticipantVisit:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
+          endDate:
+            type: string
+            description: The end date of the visit occurrence
 
   AnnotationType:
     type: string

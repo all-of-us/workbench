@@ -30,6 +30,20 @@ public class ProcedureQueryBuilder implements ReviewQueryBuilder {
                     "order by %s %s, procedure_occurrence_id\n" +
                     "limit %d offset %d\n";
 
+    private static final String PROCEDURES_DETAIL_SQL_TEMPLATE =
+      "select po.procedure_datetime as itemDate,\n" +
+        "       c1.vocabulary_id as standardVocabulary,\n" +
+        "       c1.concept_name as standardName,\n" +
+        "       po.procedure_source_value as sourceValue,\n" +
+        "       c2.vocabulary_id as sourceVocabulary,\n" +
+        "       c2.concept_name as sourceName,\n" +
+        "       CAST(FLOOR(DATE_DIFF(procedure_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) as age\n" +
+        "from `${projectId}.${dataSetId}.procedure_occurrence` po\n" +
+        "left join `${projectId}.${dataSetId}.concept` c1 on po.procedure_concept_id = c1.concept_id\n" +
+        "left join `${projectId}.${dataSetId}.concept` c2 on po.procedure_source_concept_id = c2.concept_id\n" +
+        "join `${projectId}.${dataSetId}.person` p on po.person_id = p.person_id\n" +
+        "where po.procedure_occurrence_id = @" + NAMED_DATAID_PARAM + "\n";
+
     public static final String PROCEDURES_SQL_COUNT_TEMPLATE =
             "select count(*) as count\n" +
                     "from `${projectId}.${dataSetId}.procedure_occurrence`\n" +
@@ -42,7 +56,7 @@ public class ProcedureQueryBuilder implements ReviewQueryBuilder {
 
     @Override
     public String getDetailsQuery() {
-        return "";
+        return this.PROCEDURES_DETAIL_SQL_TEMPLATE;
     }
 
     @Override

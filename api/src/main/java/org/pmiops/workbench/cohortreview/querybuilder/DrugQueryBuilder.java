@@ -30,6 +30,22 @@ public class DrugQueryBuilder implements ReviewQueryBuilder {
                     "where de.person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
                     "order by %s %s, drug_exposure_id\n" +
                     "limit %d offset %d\n";
+
+    private static final String DRUGS_DETAIL_SQL_TEMPLATE =
+      "select de.drug_exposure_start_datetime as itemDate,\n" +
+        "       c1.vocabulary_id as standardVocabulary,\n" +
+        "       c1.concept_name as standardName,\n" +
+        "       de.drug_source_value as sourceValue,\n" +
+        "       de.sig as signature,\n" +
+        "       c2.vocabulary_id as sourceVocabulary,\n" +
+        "       c2.concept_name as sourceName,\n" +
+        "       CAST(FLOOR(DATE_DIFF(drug_exposure_start_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) as age\n" +
+        "from `${projectId}.${dataSetId}.drug_exposure` de\n" +
+        "left join `${projectId}.${dataSetId}.concept` c1 on de.drug_concept_id = c1.concept_id\n" +
+        "left join `${projectId}.${dataSetId}.concept` c2 on de.drug_source_concept_id = c2.concept_id\n" +
+        "join `${projectId}.${dataSetId}.person` p on de.person_id = p.person_id\n" +
+        "where de.drug_exposure_id = @" + NAMED_DATAID_PARAM + "\n";
+
     public static final String DRUGS_SQL_COUNT_TEMPLATE =
             "select count(*) as count\n" +
                     "from `${projectId}.${dataSetId}.drug_exposure`\n" +
@@ -47,7 +63,7 @@ public class DrugQueryBuilder implements ReviewQueryBuilder {
 
     @Override
     public String getDetailsQuery() {
-        return "";
+        return this.DRUGS_DETAIL_SQL_TEMPLATE;
     }
 
     @Override
