@@ -41,6 +41,11 @@ public class ProcedureQueryBuilder implements ReviewQueryBuilder {
     }
 
     @Override
+    public String getDetailsQuery() {
+        return "";
+    }
+
+    @Override
     public String getCountQuery() {
         return this.PROCEDURES_SQL_COUNT_TEMPLATE;
     }

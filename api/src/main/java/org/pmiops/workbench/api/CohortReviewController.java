@@ -291,18 +291,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
         Map<String, QueryParameterValue> params = new HashMap<>();
         params.put("dataId", QueryParameterValue.int64(dataId));
-        params.put("domain", QueryParameterValue.string(domain));
+        ReviewQueryBuilder queryBuilder = ReviewQueryFactory.getQueryBuilder(domain);
         QueryJobConfiguration qjc =
           QueryJobConfiguration
-          .newBuilder(ReviewQueryFactory.getQueryBuilder(domain).getCountQuery())
+          .newBuilder(queryBuilder.getDetailsQuery())
           .setNamedParameters(params)
           .setUseLegacySql(false)
           .build();
         QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
-        ParticipantData response = new ParticipantData();
-        //TODO convert response
+        ParticipantData response = queryBuilder.createParticipantData();
+        convertRowToParticipantData(rm, result.getValues().iterator().next(), response);
 
         return ResponseEntity.ok(response);
     }

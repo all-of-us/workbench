@@ -46,6 +46,11 @@ public class DrugQueryBuilder implements ReviewQueryBuilder {
     }
 
     @Override
+    public String getDetailsQuery() {
+        return "";
+    }
+
+    @Override
     public ParticipantData createParticipantData() {
         return new ParticipantDrug().dataType(DataType.PARTICIPANTDRUG);
     }

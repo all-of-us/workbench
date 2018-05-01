@@ -26,7 +26,13 @@
           <div *ngIf="detailsLoading" class="spinner">Loading...</div>
           <div *ngIf="!detailsLoading && !details">No data</div>
           <div *ngIf="!detailsLoading && details">
-            {{ details | json }}
+            <div><b>Date:</b> {{ details.itemDate }} </div>
+            <div><b>Standard Vocabulary:</b> {{ details.standardVocabulary }} </div>
+            <div><b>Standard Name:</b> {{ details.standardName }} </div>
+            <div><b>Source Value:</b> {{ details.sourceValue }} </div>
+            <div><b>Source Vocabulary:</b> {{ details.sourceVocabulary }} </div>
+            <div><b>Source Name:</b> {{ details.sourceName }} </div>
+            <div><b>Age At Event:</b> {{ details.age }} </div>
           </div>
         </div>
       </div>
