@@ -1,12 +1,12 @@
 package org.pmiops.workbench.cdr.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.Criteria;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.List;
 
 
 @Entity
@@ -25,6 +25,7 @@ public class AchillesAnalysis {
     private String stratum5Name;
     private String chartType;
     private String dataType;
+    private List<AchillesResult> results = new ArrayList<>();
 
 
     @Id
@@ -135,6 +136,20 @@ public class AchillesAnalysis {
         this.dataType = val;
         return this;
     }
+
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "analysis")
+    public List<AchillesResult> getResults() {
+        return results;
+    }
+    public void setResults(List<AchillesResult> results) {
+        this.results = results;
+    }
+    public AchillesAnalysis results(List<AchillesResult> results) {
+        this.results = results;
+        return this;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {

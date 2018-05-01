@@ -1,18 +1,19 @@
 package org.pmiops.workbench.publicapi;
 
 
-import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
-import org.pmiops.workbench.cdr.dao.DbDomainDao;
+import org.pmiops.workbench.cdr.dao.*;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
+
+import org.pmiops.workbench.cdr.model.QuestionConcept;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.DbDomain;
-import org.pmiops.workbench.cdr.dao.AnalysisResultDao;
-import org.pmiops.workbench.cdr.model.AnalysisResult;
+import org.pmiops.workbench.cdr.model.AchillesResult;
 import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.persistence.EntityManager;
 
 import java.util.*;
 import java.util.function.Function;
@@ -24,22 +25,53 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Autowired
     private ConceptDao conceptDao;
-
     @Autowired
-    private AnalysisResultDao analysisResultDao;
-
+    private QuestionConceptDao  questionConceptDao;
     @Autowired
     private AchillesAnalysisDao achillesAnalysisDao;
-
+    @Autowired
+    private AchillesResultDao achillesResultDao;
     @Autowired
     private DbDomainDao dbDomainDao;
+    @Autowired
+    private EntityManager entityManager;
 
     public static final long PARTICIPANT_COUNT_ANALYSIS_ID = 1;
     public static final long COUNT_ANALYSIS_ID = 3000;
     public static final long GENDER_ANALYSIS_ID = 3101;
     public static final long AGE_ANALYSIS_ID = 3102;
+    public static final long SURVEY_COUNT_ANALYSIS_ID = 3100;
+    public static final long SURVEY_GENDER_ANALYSIS_ID = 3111;
+    public static final long SURVEY_AGE_ANALYSIS_ID = 3112;
+
+    public static Map<String, String> ageStratumNameMap  = new HashMap<String, String>();
+    public static Map<String, String> genderStratumNameMap = new HashMap<String, String>();
 
 
+    public void setAgeStratumNameMap() {
+        ageStratumNameMap.put("1", "0-18 yrs old");
+        ageStratumNameMap.put("2", "18-29 yrs old");
+        ageStratumNameMap.put("3", "30-39 yrs old");
+        ageStratumNameMap.put("4", "40-49 yrs old");
+        ageStratumNameMap.put("5", "50-59 yrs old");
+        ageStratumNameMap.put("6", "60-69 yrs old");
+        ageStratumNameMap.put("7", "70-79 yrs old");
+        ageStratumNameMap.put("8", "80-89 yrs old");
+        ageStratumNameMap.put("9", "90-99 yrs old");
+        ageStratumNameMap.put("10", "100-109 yrs old");
+        ageStratumNameMap.put("11", "110-119 yrs old");
+        ageStratumNameMap.put("12", "120-129 yrs old");
+        ageStratumNameMap.put("13", "130-139 yrs old");
+    }
+
+    public void setGenderStratumNameMap() {
+        /* This is to slow to use the db */
+        genderStratumNameMap.put("8507", "Male");
+        genderStratumNameMap.put("8532", "Female");
+        genderStratumNameMap.put("8521", "Other");
+        genderStratumNameMap.put("8551", "Unknown");
+        genderStratumNameMap.put("8570", "Ambiguous");
+    }
 
     private static final Logger log = Logger.getLogger(DataBrowserController.class.getName());
 
@@ -53,42 +85,37 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 @Override
                 public org.pmiops.workbench.model.Concept apply(Concept concept) {
                     return new org.pmiops.workbench.model.Concept()
-                                .conceptId(concept.getConceptId())
-                                .conceptName(concept.getConceptName())
-                                .standardConcept(concept.getStandardConcept())
-                                .conceptCode(concept.getConceptCode())
-                                .conceptClassId(concept.getConceptClassId())
-                                .vocabularyId(concept.getVocabularyId())
-                                .domainId(concept.getDomainId())
-                                .countValue(concept.getCountValue())
-                                .prevalence(concept.getPrevalence());
+                            .conceptId(concept.getConceptId())
+                            .conceptName(concept.getConceptName())
+                            .standardConcept(concept.getStandardConcept())
+                            .conceptCode(concept.getConceptCode())
+                            .conceptClassId(concept.getConceptClassId())
+                            .vocabularyId(concept.getVocabularyId())
+                            .domainId(concept.getDomainId())
+                            .countValue(concept.getCountValue())
+                            .prevalence(concept.getPrevalence());
                 }
             };
-
-
     /**
      * Converter function from backend representation (used with Hibernate) to
      * client representation (generated by Swagger).
      */
-    private static final Function<AnalysisResult, org.pmiops.workbench.model.AnalysisResult>
-            TO_CLIENT_ANALYSIS_RESULT =
-            new Function<AnalysisResult, org.pmiops.workbench.model.AnalysisResult>() {
+    private static final Function<QuestionConcept, org.pmiops.workbench.model.QuestionConcept>
+            TO_CLIENT_QUESTION_CONCEPT =
+            new Function<QuestionConcept, org.pmiops.workbench.model.QuestionConcept>() {
                 @Override
-                public org.pmiops.workbench.model.AnalysisResult apply(org.pmiops.workbench.cdr.model.AnalysisResult cdr) {
-                    return new org.pmiops.workbench.model.AnalysisResult()
-                            .id(cdr.getId())
-                            .analysisId( cdr.getAnalysisId())
-                            .stratum1(cdr.getStratum1())
-                            .stratum1Name(cdr.getStratum1Name())
-                            .stratum2(cdr.getStratum2())
-                            .stratum2Name(cdr.getStratum2Name())
-                            .stratum3(cdr.getStratum3())
-                            .stratum3Name(cdr.getStratum3Name())
-                            .stratum4(cdr.getStratum4())
-                            .stratum4Name(cdr.getStratum4Name())
-                            .stratum5(cdr.getStratum5Name())
-                            .countValue(cdr.getCountValue());
+                public org.pmiops.workbench.model.QuestionConcept apply(QuestionConcept concept) {
+                    List<AchillesAnalysis> alist = concept.getAnalyses();
+                    List<org.pmiops.workbench.model.Analysis> analyses = alist.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList());
 
+                    return new org.pmiops.workbench.model.QuestionConcept()
+                            .conceptId(concept.getConceptId())
+                            .conceptName(concept.getConceptName())
+                            .conceptCode(concept.getConceptCode())
+                            .domainId(concept.getDomainId())
+                            .countValue(concept.getCountValue())
+                            .prevalence(concept.getPrevalence())
+                            .analyses(analyses);
                 }
             };
 
@@ -100,9 +127,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             TO_CLIENT_ANALYSIS =
             new Function<AchillesAnalysis, org.pmiops.workbench.model.Analysis>() {
                 @Override
-                public org.pmiops.workbench.model.Analysis apply(org.pmiops.workbench.cdr.model.AchillesAnalysis cdr) {
+                public org.pmiops.workbench.model.Analysis apply(AchillesAnalysis cdr) {
+                    List<org.pmiops.workbench.model.AchillesResult> results = new ArrayList<>();
+                    if (!cdr.getResults().isEmpty()) {
+                        results = cdr.getResults().stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList());
+                    }
+
                     return new org.pmiops.workbench.model.Analysis()
-                            .analysisId( cdr.getAnalysisId())
+                            .analysisId(cdr.getAnalysisId())
                             .analysisName(cdr.getAnalysisName())
                             .stratum1Name(cdr.getStratum1Name())
                             .stratum2Name(cdr.getStratum2Name())
@@ -110,7 +142,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .stratum4Name(cdr.getStratum4Name())
                             .stratum5Name(cdr.getStratum5Name())
                             .chartType(cdr.getChartType())
-                            .dataType(cdr.getDataType());
+                            .dataType(cdr.getDataType())
+                            .results(results);
 
                 }
             };
@@ -123,21 +156,121 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             TO_CLIENT_DBDOMAIN =
             new Function<DbDomain, org.pmiops.workbench.model.DbDomain>() {
                 @Override
-                public org.pmiops.workbench.model.DbDomain apply(org.pmiops.workbench.cdr.model.DbDomain dbd) {
+                public org.pmiops.workbench.model.DbDomain apply(DbDomain cdr) {
                     return new org.pmiops.workbench.model.DbDomain()
-                            .domainId(dbd.getDomainId())
-                            .domainDisplay(dbd.getDomainDisplay())
-                            .domainDesc(dbd.getDomainDesc())
-                            .dbType(dbd.getDbType())
-                            .domainRoute(dbd.getDomainRoute())
-                            .conceptId(dbd.getConceptId())
-                            .countValue(dbd.getCountValue());
-
+                            .domainId(cdr.getDomainId())
+                            .domainDisplay(cdr.getDomainDisplay())
+                            .domainDesc(cdr.getDomainDesc())
+                            .dbType(cdr.getDbType())
+                            .domainRoute(cdr.getDomainRoute())
+                            .conceptId(cdr.getConceptId())
+                            .countValue(cdr.getCountValue());
                 }
             };
 
 
 
+
+
+    /**
+     * Converter function from backend representation (used with Hibernate) to
+     * client representation (generated by Swagger).
+     */
+    private static final Function<AchillesResult, org.pmiops.workbench.model.AchillesResult>
+            TO_CLIENT_ACHILLES_RESULT =
+            new Function<AchillesResult, org.pmiops.workbench.model.AchillesResult>() {
+                @Override
+                public org.pmiops.workbench.model.AchillesResult apply(AchillesResult o) {
+
+                    return new org.pmiops.workbench.model.AchillesResult()
+                            .id(o.getId())
+                            .analysisId(o.getAnalysisId())
+                            .stratum1(o.getStratum1())
+                            .stratum2(o.getStratum2())
+                            .stratum3(o.getStratum3())
+                            .stratum4(o.getStratum4())
+                            .stratum5(o.getStratum5())
+                            .stratum5Name(o.getStratum5Name())
+                            .countValue(o.getCountValue());
+                }
+            };
+
+
+    /* Final api functions put on top */
+    @Override
+    public ResponseEntity<DbDomainListResponse> getDomainFilters() {
+        List<DbDomain> domains=dbDomainDao.findByDbType("domain_filter");
+        DbDomainListResponse resp=new DbDomainListResponse();
+        resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
+    @Override
+    public ResponseEntity<DbDomainListResponse> getSurveyList() {
+        List<DbDomain> domains=dbDomainDao.findByDbTypeAndAndConceptIdNotNull("survey");
+        DbDomainListResponse resp=new DbDomainListResponse();
+        resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
+
+
+    @Override
+    public ResponseEntity<QuestionConceptListResponse> getSurveyResults(String surveyConceptId) {
+        /* Set up the age and gender names */
+        // Too slow and concept names wrong so we hardcode list
+        // List<Concept> genders = conceptDao.findByConceptClassId("Gender");
+        this.setAgeStratumNameMap();
+        this.setGenderStratumNameMap();
+        long longSurveyConceptId = Long.parseLong(surveyConceptId);
+        List<QuestionConcept> questions = questionConceptDao.findSurveyQuestions(longSurveyConceptId);
+        QuestionConceptListResponse resp = new QuestionConceptListResponse();
+        DbDomain survey = dbDomainDao.findByConceptId(longSurveyConceptId);
+        resp.setSurvey(TO_CLIENT_DBDOMAIN.apply(survey));
+
+        if (!questions.isEmpty()) {
+            for (int x = 0; x < questions.size() - 1; x++)  {
+                QuestionConcept q = questions.get(x);
+                String qid = Long.toString(q.getConceptId());
+
+                /*** Important -- when calling these dao functions in a loop, baceause the analyses share same id ,
+                 * and we are filtering by a property in the related reluslts table, the first results get cached and
+                 * put on all questions. So we have to detach the entity from the session
+                 */
+                List<AchillesAnalysis> analyses = achillesAnalysisDao.findQuestionAnalysisResults(surveyConceptId, qid);
+                //THIS IS THE IMPORTANT PART
+                //You have to detach the entity from the session otherwise all the results are same as the first
+                // question... Thank you https://stackoverflow.com/a/49452056/2627999
+                analyses.forEach(analysis -> {
+                    this.entityManager.detach(analysis);
+                    for (AchillesResult r : analysis.getResults()) {
+                        if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
+                            r.setStratum5Name(this.ageStratumNameMap.get(r.getStratum5()));
+                        }
+                        if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
+                            r.setStratum5Name(this.genderStratumNameMap.get(r.getStratum5()));
+                        }
+                    }
+
+                });
+                q.setAnalyses(analyses);
+            }
+
+        }
+        resp.setItems(questions.stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+
+    }
+
+    @Override
+    public ResponseEntity<AnalysisListResponse> getQuestionAnalyses(String surveyConceptId, String questionConceptId) {
+        List<AchillesAnalysis> results = achillesAnalysisDao.findQuestionAnalysisResults(surveyConceptId, questionConceptId);
+        AnalysisListResponse resp = new AnalysisListResponse();
+        resp.setItems(results.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
+    /* End Final api functions. Put new api functions above here when done. */
 
     /**
      * This method searches concepts
@@ -164,8 +297,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         if (conceptName != null) {
             conceptList = conceptDao.findConceptLikeName(conceptName);
-        }
-        else {
+        } else {
             conceptList = conceptDao.findConceptsOrderedByCount();
         }
 
@@ -203,72 +335,15 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(resp);
     }
 
-    /**
-     * This method searches concepts
-     *
-     * @param analysisId
-     * @param stratum1
-     * @param stratum2
-     * @return
-     */
-    @Override
-    public ResponseEntity<AnalysisResultListResponse> getAnalysisResults(
-            Long analysisId,
-            String stratum1,
-            String stratum2
-           ) {
 
-        final List<AnalysisResult> resultList;
-
-        if ( (stratum1 != null && !stratum1.isEmpty()) && (stratum2 != null && !stratum2.isEmpty()))  {
-             resultList = analysisResultDao.findAnalysisResultsByAnalysisIdAndStratum1AndStratum2(analysisId, stratum1, stratum2);
-        }
-        else if ((stratum1 != null && !stratum1.isEmpty())) {
-            resultList = analysisResultDao.findAnalysisResultsByAnalysisIdAndStratum1(analysisId, stratum1);
-        }
-        else {
-            resultList = analysisResultDao.findAnalysisResultsByAnalysisId(analysisId);
-        }
-
-        AnalysisResultListResponse resp = new AnalysisResultListResponse();
-        resp.setItems(resultList.stream().map(TO_CLIENT_ANALYSIS_RESULT).collect(Collectors.toList()));
-
-
-        return ResponseEntity.ok(resp);
-    }
 
     @Override
-    public ResponseEntity<org.pmiops.workbench.model.AnalysisResult> getParticipantCount() {
-        AnalysisResult result  =  analysisResultDao.findAnalysisResultByAnalysisId(PARTICIPANT_COUNT_ANALYSIS_ID);
-        return ResponseEntity.ok(TO_CLIENT_ANALYSIS_RESULT.apply(result));
+    public ResponseEntity<org.pmiops.workbench.model.AchillesResult> getParticipantCount() {
+        AchillesResult result = achillesResultDao.findAchillesResultByAnalysisId(PARTICIPANT_COUNT_ANALYSIS_ID);
+        return ResponseEntity.ok(TO_CLIENT_ACHILLES_RESULT.apply(result));
     }
 
-    /* getConceptCount(conceptId)
-     * Returns
-     */
-    @Override
-    public ResponseEntity<AnalysisResultListResponse> getConceptCount(String conceptId) {
-        return this.getAnalysisResults(COUNT_ANALYSIS_ID, conceptId, null);
-    }
 
-    @Override
-    public ResponseEntity<AnalysisResultListResponse> getConceptCountByGender(String conceptId) {
-        return this.getAnalysisResults(GENDER_ANALYSIS_ID, conceptId, null);
-    }
-
-    @Override
-    public ResponseEntity<AnalysisResultListResponse> getConceptCountByAge(String conceptId) {
-        return this.getAnalysisResults(AGE_ANALYSIS_ID, conceptId, null);
-    }
-
-    @Override
-    public ResponseEntity<AnalysisListResponse> getAnalyses() {
-
-        List<AchillesAnalysis> resultList = achillesAnalysisDao.findAll();
-        AnalysisListResponse resp = new AnalysisListResponse();
-        resp.setItems(resultList.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-    }
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDbDomains() {
@@ -278,19 +353,5 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(resp);
     }
 
-    @Override
-    public ResponseEntity<DbDomainListResponse> getDomainFilters() {
-        List<DbDomain> domains=dbDomainDao.findByDbType("domain_filter");
-        DbDomainListResponse resp=new DbDomainListResponse();
-        resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-    }
 
-    @Override
-    public ResponseEntity<DbDomainListResponse> getSurveyList() {
-        List<DbDomain> domains=dbDomainDao.findByDbTypeAndAndConceptIdNotNull("survey");
-        DbDomainListResponse resp=new DbDomainListResponse();
-        resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-    }
 }
