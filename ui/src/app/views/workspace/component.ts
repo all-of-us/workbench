@@ -111,7 +111,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   notebookAuthListener: EventListenerOrEventListenerObject;
   alertCategory: string;
   alertMsg: string;
-  tabOpen = Tabs.Cohorts;
+  tabOpen = Tabs.Notebooks;
   rightSidebarClosed = true;
 
   constructor(

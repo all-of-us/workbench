@@ -1,7 +1,5 @@
 package org.pmiops.workbench.api;
 
-import com.blockscore.models.Address;
-import com.blockscore.models.Person;
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -33,10 +31,7 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.EmailException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.*;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
@@ -51,12 +46,12 @@ import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationListResponse;
-import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -116,6 +111,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final BlockscoreService blockscoreService;
   private final MailChimpService mailChimpService;
+  private final NotebooksService notebooksService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
 
@@ -127,6 +123,7 @@ public class ProfileController implements ProfileApiDelegate {
       DirectoryService directoryService,
       CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
       MailChimpService mailChimpService,
+      NotebooksService notebooksService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment) {
     this.profileService = profileService;
@@ -140,6 +137,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.blockscoreService = blockscoreService;
     this.mailChimpService = mailChimpService;
+    this.notebooksService = notebooksService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
   }
@@ -300,6 +298,15 @@ public class ProfileController implements ProfileApiDelegate {
         return userDao.save(user);
 
       case READY:
+        try {
+          this.notebooksService.createCluster(
+              user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME, user.getEmail());
+        } catch (ConflictException e) {
+          log.log(Level.INFO, String.format("Cluster %s/%s already exists",
+              user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
+        } catch (GatewayTimeoutException e) {
+          log.log(Level.WARNING, "Socket Timeout creating cluster.");
+        }
         break;
 
       default:

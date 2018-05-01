@@ -126,6 +126,9 @@ describe('WorkspaceComponent', () => {
 
 
   it('displays correct information when cohorts selected.', fakeAsync(() => {
+    workspacePage.fixture.componentRef.instance.tabOpen =
+      workspacePage.fixture.componentRef.instance.Tabs.Cohorts;
+    tick();
     let expectedCohorts: number;
     workspacePage.cohortsService.getCohortsInWorkspace(
         workspacePage.workspaceNamespace,
@@ -134,13 +137,11 @@ describe('WorkspaceComponent', () => {
       expectedCohorts = cohorts.items.length;
     });
     tick();
+    workspacePage.readPageData();
     expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
   }));
 
   it('displays correct information when notebooks selected.', fakeAsync(() => {
-    workspacePage.fixture.componentRef.instance.tabOpen =
-        workspacePage.fixture.componentRef.instance.Tabs.Notebooks;
-    tick();
     workspacePage.readPageData();
     tick();
     expect(workspacePage.notebookTableRows.length).toEqual(1);

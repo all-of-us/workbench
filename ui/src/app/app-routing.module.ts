@@ -89,13 +89,6 @@ const routes: Routes = [
                 breadcrumb: 'Clone Workspace'
               }
             }, {
-              path: 'share',
-              component: WorkspaceShareComponent,
-              data: {
-                title: 'Share Workspace',
-                breadcrumb: 'Share Workspace'
-              }
-            }, {
               path: 'cohorts/build',
               loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
               data: {

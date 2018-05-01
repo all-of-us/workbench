@@ -9,7 +9,7 @@
 
     <sql dbms="mysql">
       ALTER TABLE db_domain
-      ADD concept_id INTEGER;
+      ADD concept_id INTEGER NULL;
     </sql>
 
     <sql dbms="mysql">
@@ -21,6 +21,7 @@
       ALTER TABLE db_domain
       change column domain_parent db_type varchar(100);
     </sql>
+
 
 
   </changeSet>

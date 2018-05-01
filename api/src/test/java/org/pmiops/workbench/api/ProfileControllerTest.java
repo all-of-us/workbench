@@ -44,6 +44,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,8 @@ public class ProfileControllerTest {
   private FireCloudService fireCloudService;
   @Mock
   private MailChimpService mailChimpService;
+  @Mock
+  private NotebooksService notebooksService;
   @Mock
   private DirectoryService directoryService;
   @Mock
@@ -135,10 +138,10 @@ public class ProfileControllerTest {
     ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), environment);
+        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment);
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, Providers.of(config), cloudEnvironment);
+        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), cloudEnvironment);
   }
 
   @Test(expected = BadRequestException.class)

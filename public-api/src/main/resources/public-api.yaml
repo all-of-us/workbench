@@ -204,6 +204,36 @@ paths:
           schema:
             $ref: "#/definitions/DbDomainListResponse"
 
+  /v1/databrowser/domain-filters:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets domain filters
+      operationId: "getDomainFilters"
+      parameters: []
+      responses:
+        200:
+          description: A collection of domain filters
+          schema:
+            $ref: "#/definitions/DbDomainListResponse"
+
+  /v1/databrowser/survey-list:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets survey list
+      operationId: "getSurveyList"
+      parameters: []
+      responses:
+        200:
+          description: A collection of surveys
+          schema:
+            $ref: "#/definitions/DbDomainListResponse"
+
   /v1/databrowser/child-concepts:
     get:
       security: []
