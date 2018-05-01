@@ -1,16 +1,16 @@
-"domain_id","domain_display","domain_desc","db_type","domain_route",concept_id,count_value
-"Condition","Conditions","Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient.","domain","condition",19,0
+"domain_id","domain_display","domain_desc","db_type","domain_route","concept_id","count_value"
+"Condition","Diagnoses","Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient.","domain_filter","condition",19,0
 "CPT4","CPT4","CPT or Current Procedural Terminology (CPT) is a product of the American Medical Association (AMA). CPT codes are used by health care professionals for billing of medical services and procedures to public and private health insurance programs. CPT is a list of descriptive terms and identifying numeric codes for medical services and procedures that are provided by physicians and health care professionals.","standard","cpt4",44819100,0
-"Drug","Drug","Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.","domain","drug",13,0
-"Fam Med His","Family Medical History","The Family module provides information on family medical history","survey","PPI",0,0
+"Drug","Medications","Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.","domain_filter","drug",13,0
+"Fam Med His","Family Medical History","The Family module provides information on family medical history","survey","PPI",,0
 "ICD10","ICD10","ICD-10 Procedure Coding System (CMS)","source","icd10",44819125,0
 "ICD10CM","ICD10CM","International Classification of Diseases, Tenth Revision, Clinical Modification (NCHS)","source","icd10cm",44819098,0
 "ICD9CM","ICD9CM","International Classification of Diseases, Ninth Revision, Clinical Modification, Volume 1 and 2 (NCHS)","source","icd9cm",5046,0
 "Lifestyle","Lifestyle","The Lifestyle module provides information on smoking, alcohol and recreational drug use","survey","PPI",1585855,568120
-"Measurement","Measurement","Measurement","hide","measurment",21,0
+"Measurement","Labs","Measurement","domain_filter","measurment",21,0
 "Overall Health","Overall Health","The Overall Health module provides a general picture of current health","survey","PPI",1585710,567857
-"Per Med His","Personal Medical History","The Personal Medical History module provides information on personal health history","survey","PPI",0,0
-"Procedure","Procedures","Procedure","domain","procedures",10,0
+"Per Med His","Personal Medical History","The Personal Medical History module provides information on personal health history","survey","PPI",,0
+"Procedure","Procedures","Procedure","domain_filter","procedures",10,0
 "RxNorm","RXNORM","RxNorm is the standard vocabulary for recording medication and drug exposures","standard","rxnorm",44819104,0
 "SNOMED","SNOMED","SNOMED is the Standardized vocabulary for conditions and procedures. All source vocabularies are ultimately mapped to the SNOMED vocabulary.","standard","snomed",44819097,0
 "TheBasics","The Basics","The Basics module provides demographics and economic information for participants","survey","PPI",1586134,567437

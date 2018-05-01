@@ -242,6 +242,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         AnalysisResult result  =  analysisResultDao.findAnalysisResultByAnalysisId(PARTICIPANT_COUNT_ANALYSIS_ID);
         return ResponseEntity.ok(TO_CLIENT_ANALYSIS_RESULT.apply(result));
     }
+
     /* getConceptCount(conceptId)
      * Returns
      */
@@ -274,6 +275,22 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         List<DbDomain> resultList = dbDomainDao.findAll();
         DbDomainListResponse resp = new DbDomainListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
+    @Override
+    public ResponseEntity<DbDomainListResponse> getDomainFilters() {
+        List<DbDomain> domains=dbDomainDao.findByDbType("domain_filter");
+        DbDomainListResponse resp=new DbDomainListResponse();
+        resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
+    @Override
+    public ResponseEntity<DbDomainListResponse> getSurveyList() {
+        List<DbDomain> domains=dbDomainDao.findByDbTypeAndAndConceptIdNotNull("survey");
+        DbDomainListResponse resp=new DbDomainListResponse();
+        resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
     }
 }
