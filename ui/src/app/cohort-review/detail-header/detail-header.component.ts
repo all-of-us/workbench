@@ -14,7 +14,6 @@ import {
   SortOrder
 } from 'generated';
 import {PageFilterType} from '../../../generated/model/pageFilterType';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 
 @Component({
