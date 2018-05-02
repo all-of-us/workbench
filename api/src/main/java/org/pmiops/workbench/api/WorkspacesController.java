@@ -509,10 +509,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw ExceptionUtils.convertFirecloudException(e);
       }
       for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
-        org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace;
+        org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace = null;
         org.pmiops.workbench.db.model.Workspace dbWorkspace;
         dbWorkspace = userRole.getWorkspace();
-        fcWorkspace = fcWorkspaces.stream().filter(w -> w.getWorkspace().getName().equals(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()).getId())).collect(Collectors.toList()).get(0);
+        List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> filteredFcWorkspaces =
+                fcWorkspaces.
+                        stream().
+                        filter(w -> w.getWorkspace().getName().equals(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()).getId())).
+                        collect(Collectors.toList());
+        if (!filteredFcWorkspaces.isEmpty()) {
+          fcWorkspace = filteredFcWorkspaces.get(0);
+        }
         if (fcWorkspace == null) {
           //  remove from our database
           workspaceService.getDao().delete(dbWorkspace);
