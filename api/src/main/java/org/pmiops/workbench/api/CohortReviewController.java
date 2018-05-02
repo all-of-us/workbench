@@ -594,17 +594,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         if (data instanceof ParticipantDrug) {
             ((ParticipantDrug) data).signature(bigQueryService.getString(row, rm.get("signature")));
             ((ParticipantDrug) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        }
-        if (data instanceof ParticipantCondition) {
+        } else if (data instanceof ParticipantCondition) {
             ((ParticipantCondition) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        }
-        if (data instanceof ParticipantProcedure) {
+        } else if (data instanceof ParticipantProcedure) {
             ((ParticipantProcedure) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        }
-        if (data instanceof ParticipantObservation) {
+        } else if (data instanceof ParticipantObservation) {
             ((ParticipantObservation) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        }
-        if (data instanceof ParticipantMaster) {
+        } else if (data instanceof ParticipantVisit) {
+            ((ParticipantVisit) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+            ((ParticipantVisit) data).endDate(bigQueryService.getDateTime(row, rm.get("endDate")));
+        } else if (data instanceof ParticipantMeasurement) {
+            ((ParticipantMeasurement) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (data instanceof ParticipantMaster) {
             ((ParticipantMaster) data).dataId(bigQueryService.getLong(row, rm.get("dataId")));
             ((ParticipantMaster) data).domain(bigQueryService.getString(row, rm.get("domain")));
         }

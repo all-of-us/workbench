@@ -537,6 +537,14 @@ definitions:
             $ref: "#/definitions/ParticipantVisitsColumns"
             description: Column upon which to sort (default is 'itemDate')
 
+  ParticipantMeasurements:
+    allOf:
+      - $ref: '#/definitions/PageFilterRequest'
+      - properties: # extra properties
+          sortColumn:
+            $ref: "#/definitions/ParticipantMeasurementsColumns"
+            description: Column upon which to sort (default is 'itemDate')
+
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
@@ -569,15 +577,19 @@ definitions:
     type: string
     enum: [itemDate, endDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
 
+  ParticipantMeasurementsColumns:
+    type: string
+    enum: [itemDate, endDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+
   PageFilterType:
     type: string
     enum: [ParticipantCohortStatuses, ParticipantConditions, ParticipantProcedures, ParticipantObservations,
-    ParticipantDrugs, ParticipantMasters, ParticipantDevices, ParticipantVisits]
+    ParticipantDrugs, ParticipantMasters, ParticipantDevices, ParticipantVisits, ParticipantMeasurements]
 
   DataType:
     type: string
     enum: [ParticipantCondition, ParticipantProcedure, ParticipantObservation, ParticipantDrug, ParticipantMaster,
-    ParticipantDevice, ParticipantVisit]
+    ParticipantDevice, ParticipantVisit, ParticipantMeasurement]
 
   SortOrder:
     type: string
@@ -888,6 +900,14 @@ definitions:
           endDate:
             type: string
             description: The end date of the visit occurrence
+
+  ParticipantMeasurement:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
 
   AnnotationType:
     type: string

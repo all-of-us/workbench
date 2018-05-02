@@ -12,6 +12,7 @@ public class VisitQueryBuilder implements ReviewQueryBuilder {
 
   private static final String VISITS_SQL_TEMPLATE =
     "select vo.visit_start_datetime as itemDate,\n" +
+      "       vo.visit_end_datetime as endDate,\n" +
       "       c1.vocabulary_id as standardVocabulary,\n" +
       "       c1.concept_name as standardName,\n" +
       "       vo.visit_source_value as sourceValue,\n" +
