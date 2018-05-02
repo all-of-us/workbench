@@ -51,7 +51,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
 
         this.request = <PageFilterRequest>{
           page: 0,
-          pageSize: 50,
+          pageSize: 25,
           includeTotal: true,
           sortOrder: SortOrder.Asc,
           sortColumn: this.reverseEnum[this.columns[0].name],
