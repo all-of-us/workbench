@@ -13,11 +13,10 @@ import {LoginComponent} from './views/login/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
-import {WorkspaceComponent} from './views/workspace/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
-import {WorkspaceShareComponent} from './views/workspace-share/component';
+import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
 import {WorkspaceResolver} from './resolvers/workspace';
