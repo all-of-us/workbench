@@ -38,8 +38,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   @ViewChild('wrapper') wrapper;
 
-  private subscription;
-
   constructor(
     private actions: CohortSearchActions,
     private route: ActivatedRoute,
@@ -49,26 +47,23 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     console.log(`Entering CohortSearchComponent.ngOnInit with route:`);
     console.dir(this.route);
 
-    const query$ = flattenedRouteQueryParams(this.route);
-    const data$ = flattenedRouteData(this.route);
-    this.subscription = Observable.combineLatest(query$, data$).subscribe(([params, data]) => {
-      /* EVERY time the route changes, reset the store first */
-      this.actions.resetStore();
-      this.actions.cdrVersionId = data.workspace.cdrVersionId;
+    const params = flattenedRouteQueryParams(this.route);
+    const data = flattenedRouteData(this.route);
+    /* EVERY time the route changes, reset the store first */
+    this.actions.resetStore();
+    this.actions.cdrVersionId = data.workspace.cdrVersionId;
 
-      /* If a criteria string is given in the route, we initialize state with
-       * it */
-      const criteria = params.criteria;
-      if (criteria) {
-        this.actions.loadFromJSON(criteria);
-        this.actions.runAllRequests();
-      }
-    });
+    /* If a criteria string is given in the route, we initialize state with
+     * it */
+    const criteria = params.criteria;
+    if (criteria) {
+      this.actions.loadFromJSON(criteria);
+      this.actions.runAllRequests();
+    }
     this.updateWrapperDimensions();
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 
   @HostListener('window:resize')
