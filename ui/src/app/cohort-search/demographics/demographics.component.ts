@@ -6,6 +6,7 @@ import {fromJS, List} from 'immutable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
 
+import { flattenedRouteData } from '../../utils';
 import {activeParameterList, CohortSearchActions} from '../redux';
 
 import {Attribute, CohortBuilderService} from 'generated';
@@ -53,7 +54,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   readonly maxAge = maxAge;
   loading = false;
   subscription = new Subscription();
+  dataSubscription;
   hasSelection = false;
+  cdrid;
 
   /* The Demographics form controls and associated convenience lenses */
   demoForm = new FormGroup({
@@ -92,6 +95,10 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
     this.initAgeControls();
 
+    this.dataSubscription = flattenedRouteData(this.route).subscribe(data => {
+      this.cdrid = data.workspace.cdrVersionId;
+    });
+
     this.selection$.first().subscribe(selections => {
       /*
        * Each subtype of DEMO requires subtly different initialization, which
@@ -110,10 +117,10 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    this.dataSubscription.unsubscribe();
   }
 
   loadNodesFromApi() {
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     /*
      * Each subtype's possible criteria is loaded via the API.  Race and Gender
      * criteria nodes become options in their respective dropdowns; deceased
@@ -123,7 +130,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
      * sort them by count, then by name.
      */
     const calls = [AGE, DEC, GEN, RACE, ETHNICITY].map(code => this.api
-      .getCriteriaByTypeAndSubtype(cdrid, 'DEMO', code)
+      .getCriteriaByTypeAndSubtype(this.cdrid, 'DEMO', code)
       .map(response => {
         const items = response.items;
         items.sort(sortByCountThenName);
