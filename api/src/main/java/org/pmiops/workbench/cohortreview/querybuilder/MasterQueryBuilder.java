@@ -86,6 +86,7 @@ public class MasterQueryBuilder implements ReviewQueryBuilder {
         this.MASTER_SQL_TEMPLATE
           .replace("${tablePrimaryKey}", DomainTableEnum.getPrimaryKey(domainTable.getDomainId()))
           .replace("${tableStartDateTime}", DomainTableEnum.getEntryDateTime(domainTable.getDomainId()))
+          .replace( "${tableStartDate}", DomainTableEnum.getEntryDate(domainTable.getDomainId()))
           .replace("${domain}", domainTable.getDomainId())
           .replace("${tableSourceValue}", DomainTableEnum.getSourceValue(domainTable.getDomainId()))
           .replace("${tableName}", DomainTableEnum.getTableName(domainTable.getDomainId()))
