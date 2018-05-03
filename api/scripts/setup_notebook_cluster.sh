@@ -4,5 +4,5 @@
 
 
 for v in "2.7" "3.4"; do
-  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-7.zip#egg=aou_workbench_client&subdirectory=py'
+  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-8.zip#egg=aou_workbench_client&subdirectory=py'
 done
