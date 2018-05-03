@@ -6,6 +6,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {SettingsComponent} from 'app/views/settings/component';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
+import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {ClusterService} from 'generated';
 
@@ -34,27 +35,23 @@ describe('SettingsComponent', () => {
     fixture = TestBed.createComponent(SettingsComponent);
     // Trigger ngOnInit, tick() the promise, then update again to undisable the
     // "reset" button.
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
+    updateAndTick(fixture);
+    updateAndTick(fixture);
   }));
 
   it('should open the cluster reset modal', fakeAsync(() => {
     const de = fixture.debugElement;
     expect(de.queryAll(By.css('.modal-body')).length).toEqual(0);
-    de.query(By.css('.notebook-settings button')).nativeElement.click();
-    fixture.detectChanges();
+    simulateClick(fixture, de.query(By.css('.notebook-settings button')));
     expect(de.queryAll(By.css('.modal-body')).length).toEqual(1);
   }));
 
   it('should delete cluster on reset', fakeAsync(() => {
     const spy = spyOn(clusterService, 'deleteCluster').and.callThrough();
     const de = fixture.debugElement;
-    de.query(By.css('.notebook-settings button')).nativeElement.click();
-    fixture.detectChanges();
-    de.query(By.css('.reset-modal-button')).nativeElement.click();
-    tick();
-    fixture.detectChanges();
+    simulateClick(fixture, de.query(By.css('.notebook-settings button')));
+    simulateClick(fixture, de.query(By.css('.reset-modal-button')));
+    updateAndTick(fixture);
 
     expect(spy).toHaveBeenCalledWith(
       clusterService.cluster.clusterNamespace,
@@ -65,11 +62,8 @@ describe('SettingsComponent', () => {
   it('should only close modal on cancel', fakeAsync(() => {
     const spy = spyOn(clusterService, 'deleteCluster').and.callThrough();
     const de = fixture.debugElement;
-    de.query(By.css('.notebook-settings button')).nativeElement.click();
-    fixture.detectChanges();
-    de.query(By.css('.cancel-modal-button')).nativeElement.click();
-    tick();
-    fixture.detectChanges();
+    simulateClick(fixture, de.query(By.css('.notebook-settings button')));
+    simulateClick(fixture, de.query(By.css('.cancel-modal-button')));
 
     expect(spy).not.toHaveBeenCalled();
     expect(de.queryAll(By.css('.modal-body')).length).toEqual(0);
