@@ -1,6 +1,6 @@
 <h2>Profile</h2>
 <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
-    (click)="editing = true" class="btn btn-icon">
+    (click)="editing = true" [disabled]="!profileLoaded" class="btn btn-icon">
   <app-edit-icon [editHover]="editHover"></app-edit-icon>
 </button>
 <span *ngIf="!profileLoaded" class="spinner spinner-sm"></span>

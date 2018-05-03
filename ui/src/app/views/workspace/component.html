@@ -1,6 +1,6 @@
+<app-workspace-nav-bar></app-workspace-nav-bar>
 <div class="workspace-container">
   <div class="main-body">
-    <app-workspace-nav-bar></app-workspace-nav-bar>
     <h2>{{workspace.name}}</h2>
     <div style="display: flex; justify-content: space-between">
       <div style="margin-left: -0.5rem;">
@@ -117,64 +117,56 @@
       </div>
     </div>
   </div>
-  <div [class.right-sidebar-open]="!rightSidebarClosed" class="right-sidebar">
-    <a *ngIf="rightSidebarClosed" (click)="rightSidebarClosed=false">
-      <<
-    </a>
-    <div *ngIf="!rightSidebarClosed">
-      <a (click)="rightSidebarClosed=true">
-        >>
-      </a>
-      <div>
-        <h6 class="collaborator-text">Collaborators:</h6>
-        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
-          <button class="btn btn-secondary btn-short" [disabled]="!ownerPermission" (click)="navBar.share()">Share</button>
-          <span *ngIf="!ownerPermission" class="tooltip-content">
-            Owner access is required to share the workspace.
-          </span>
+  <div class="right-sidebar">
+    <div>
+      <h6 class="collaborator-text">Collaborators:</h6>
+      <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
+        <button class="btn btn-secondary btn-short" [disabled]="!ownerPermission" (click)="navBar.share()">Share</button>
+        <span *ngIf="!ownerPermission" class="tooltip-content">
+          Owner access is required to share the workspace.
         </span>
+      </span>
 
-      </div>
-      <div *ngFor="let user of workspace.userRoles">
-        <div>{{user.role}}: {{user.email}}</div>
-      </div>
-      <h6>Workspace Information</h6>
-      <div class="information-area">
-        <div class="information-box">
-          <div class="information-header">
-            CDR
-          </div>
-          <div class="information-body cdr-version-text">
-            {{workspace.cdrVersionId}}
-          </div>
-        </div>
-        <div class="information-box">
-          <div class="information-header">
-            Creation Date
-          </div>
-          <div class="information-body">
-            {{workspaceCreationTime}}
-          </div>
-        </div>
-        <div class="information-box">
-          <div class="information-header">
-            Last Updated
-          </div>
-          <div class="information-body">
-            {{workspaceLastModifiedTime}}
-          </div>
-        </div>
-        <div class="information-box">
-          <div class="information-header">
-            Data Access Level
-          </div>
-          <div class="information-body">
-            {{workspace.dataAccessLevel | titlecase}}
-          </div>
-        </div>
-      </div>
-      <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}">Google Bucket</a>
     </div>
+    <div *ngFor="let user of workspace.userRoles">
+      <div>{{user.role}}: {{user.email}}</div>
+    </div>
+    <h6>Workspace Information</h6>
+    <div class="information-area">
+      <div class="information-box">
+        <div class="information-header">
+          CDR
+        </div>
+        <div class="information-body cdr-version-text">
+          {{workspace.cdrVersionId}}
+        </div>
+      </div>
+      <div class="information-box">
+        <div class="information-header">
+          Creation Date
+        </div>
+        <div class="information-body">
+          {{workspaceCreationTime}}
+        </div>
+      </div>
+      <div class="information-box">
+        <div class="information-header">
+          Last Updated
+        </div>
+        <div class="information-body">
+          {{workspaceLastModifiedTime}}
+        </div>
+      </div>
+      <div class="information-box">
+        <div class="information-header">
+          Data Access Level
+        </div>
+        <div class="information-body">
+          {{workspace.dataAccessLevel | titlecase}}
+        </div>
+      </div>
+    </div>
+    <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}">Google Bucket</a>
   </div>
 </div>
 
