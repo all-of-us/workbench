@@ -1,9 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
-import org.pmiops.workbench.cdr.model.AchillesResult;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 

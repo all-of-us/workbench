@@ -2,7 +2,6 @@ package org.pmiops.workbench.cdr.dao;
 import org.pmiops.workbench.cdr.model.QuestionConcept;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
