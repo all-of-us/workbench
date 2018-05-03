@@ -7,6 +7,7 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Clock;
 import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -26,21 +27,22 @@ public class DirectoryServiceImplIntegrationTest {
   }
 
   @Test
-  public void testDummyUsernameIsNotTaken() throws IOException {
+  public void testDummyUsernameIsNotTaken() {
     assertThat(service.isUsernameTaken("username-that-should-not-exist")).isFalse();
   }
 
   @Test
-  public void testDirectoryServiceUsernameIsTaken() throws IOException {
+  public void testDirectoryServiceUsernameIsTaken() {
     assertThat(service.isUsernameTaken("directory-service")).isTrue();
   }
 
   @Test
-  public void testCreateAndDeleteTestUser() throws IOException {
-    service.createUser("Integration", "Test", "integration.test", "notasecret");
-    assertThat(service.isUsernameTaken("integration.test")).isTrue();
-    service.deleteUser("integration.test");
-    assertThat(service.isUsernameTaken("integration.test")).isFalse();
+  public void testCreateAndDeleteTestUser() {
+    String userName = String.format("integration.test.%d", Clock.systemUTC().millis());
+    service.createUser("Integration", "Test", userName, "notasecret");
+    assertThat(service.isUsernameTaken(userName)).isTrue();
+    service.deleteUser(userName);
+    assertThat(service.isUsernameTaken(userName)).isFalse();
   }
 
   private static GoogleCredential getGoogleCredential() {
