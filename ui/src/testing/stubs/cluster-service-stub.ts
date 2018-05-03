@@ -28,6 +28,17 @@ export class ClusterServiceStub {
       extraHttpRequestParams?: any): Observable<{}> {
     return new Observable<{}>(observer => {
       setTimeout(() => {
+        observer.next({});
+        observer.complete();
+      }, 0);
+    });
+  }
+
+  deleteCluster(projectName: string, clusterName: string,
+      extraHttpRequestParams?: any): Observable<{}> {
+    return new Observable<{}>(observer => {
+      setTimeout(() => {
+        observer.next({});
         observer.complete();
       }, 0);
     });
