@@ -1,5 +1,6 @@
-import {Router} from '@angular/router';
+import {ActivatedRoute, Data, Params, Router} from '@angular/router';
 import {fromJS} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -24,4 +25,16 @@ export function navigateLogin(router: Router, fromUrl: string): Promise<boolean>
     params['from'] = fromUrl;
   }
   return router.navigate(['/login', params]);
+}
+
+export function flattenedRouteData(route: ActivatedRoute): Observable<Data> {
+  return Observable.of(route.pathFromRoot.reduce((res, curr) => {
+    return Object.assign({}, res, curr.snapshot.data);
+  }, ({})));
+}
+
+export function flattenedRouteQueryParams(route: ActivatedRoute): Observable<Params> {
+  return Observable.of(route.pathFromRoot.reduce((res, curr) => {
+    return Object.assign({}, res, curr.snapshot.queryParams);
+  }, ({})));
 }

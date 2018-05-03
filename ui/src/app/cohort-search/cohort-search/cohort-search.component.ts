@@ -10,6 +10,7 @@ import {ActivatedRoute} from '@angular/router';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
+import { flattenedRouteData, flattenedRouteQueryParams } from '../../utils';
 import {
   chartData,
   CohortSearchActions,
@@ -48,7 +49,8 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     console.log(`Entering CohortSearchComponent.ngOnInit with route:`);
     console.dir(this.route);
 
-    const {queryParams: query$, data: data$} = this.route;
+    const query$ = flattenedRouteQueryParams(this.route);
+    const data$ = flattenedRouteData(this.route);
     this.subscription = Observable.combineLatest(query$, data$).subscribe(([params, data]) => {
       /* EVERY time the route changes, reset the store first */
       this.actions.resetStore();
