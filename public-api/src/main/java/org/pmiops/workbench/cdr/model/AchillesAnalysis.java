@@ -1,12 +1,11 @@
 package org.pmiops.workbench.cdr.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.Criteria;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.List;
+import java.util.Objects;
 
 
 @Entity

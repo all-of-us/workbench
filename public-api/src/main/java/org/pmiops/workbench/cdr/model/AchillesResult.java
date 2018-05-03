@@ -1,13 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Objects;
-
-import org.pmiops.workbench.cdr.model.AchillesAnalysis;
 
 @Entity
 //TODO need to add a way to dynamically switch between database versions

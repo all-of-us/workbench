@@ -1,8 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
 
-import org.pmiops.workbench.cdr.model.AchillesResult;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
