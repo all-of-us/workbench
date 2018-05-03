@@ -32,6 +32,7 @@ import {LoginComponent} from './views/login/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
+import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
@@ -104,6 +105,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
+    SettingsComponent,
     SignedInComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,

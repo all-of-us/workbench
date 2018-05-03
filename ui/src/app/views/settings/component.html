@@ -1,0 +1,35 @@
+<h2>Settings</h2>
+<h3>Notebooks</h3>
+<div class="notebook-settings">
+  <button class="btn btn-secondary btn-short tooltip tooltip-right"
+          [clrLoading]="!cluster"
+          [disabled]="!cluster"
+          (click)="openResetClusterModal()">
+    Reset Notebook Server
+    <span *ngIf="!cluster" class="tooltip-content">
+      Your notebook server is still being created
+    </span>
+  </button>
+</div>
+<clr-modal [(clrModalOpen)]="resetClusterModal">
+  <h3 class="modal-title">Reset Notebook Server?</h3>
+  <div class="modal-body">
+    <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
+    and your cluster will be offline for 5-10 minutes.
+    <br><br>
+    Resetting should not be necessary under normal conditions. Please help us to
+    improve this experience by using "Report a Bug" from the profile drop-down
+    to describe the reason for this reset.
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary reset-modal-button"
+            [clrLoading]="resetClusterPending"
+            (click)="resetCluster()">
+      Reset
+    </button>
+    <button type="button" class="btn btn-secondary cancel-modal-button"
+            (click)="closeResetClusterModal()">
+      Cancel
+    </button>
+  </div>
+</clr-modal>
