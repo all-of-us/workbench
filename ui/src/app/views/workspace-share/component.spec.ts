@@ -1,6 +1,7 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
+import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -14,8 +15,6 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
-  queryAllByCss,
-  queryByCss,
   simulateClick,
   simulateInput,
   updateAndTick
@@ -48,15 +47,16 @@ class WorkspaceSharePage {
 
     this.workspaceNamespace = this.route[1].path;
     this.workspaceId = this.route[2].path;
-    const setOfUsers = queryAllByCss(this.fixture, '.collaborator');
+    const de = this.fixture.debugElement;
+    const setOfUsers = de.queryAll(By.css('.collaborator'));
     this.userRolesOnPage = [];
     setOfUsers.forEach((user) => {
       this.userRolesOnPage.push({email: user.children[0].nativeElement.innerText,
           role: user.children[1].nativeElement.innerText});
     });
-    this.emailField = queryByCss(this.fixture, '.input');
+    this.emailField = de.query(By.css('.input'));
     this.fixture.componentRef.instance.input = this.emailField;
-    this.permissionsField = queryByCss(this.fixture, '.permissions-button');
+    this.permissionsField = de.query(By.css('.permissions-button'));
   }
 }
 
@@ -119,7 +119,7 @@ describe('WorkspaceShareComponent', () => {
 
 
     simulateClick(workspaceSharePage.fixture,
-        queryByCss(workspaceSharePage.fixture, '.add-button'));
+        workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
     workspaceSharePage.readPageData();
     expect(workspaceSharePage.userRolesOnPage)
         .toEqual(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
@@ -131,7 +131,8 @@ describe('WorkspaceShareComponent', () => {
     workspaceSharePage.fixture.componentRef.instance.userEmail
         = 'sampleuser1@fake-research-aou.org';
     workspaceSharePage.readPageData();
-    queryAllByCss(workspaceSharePage.fixture, '.remove-button').forEach((removeButton) => {
+    const de = workspaceSharePage.fixture.debugElement;
+    de.queryAll(By.css('.remove-button')).forEach((removeButton) => {
       simulateClick(workspaceSharePage.fixture, removeButton);
     });
     workspaceSharePage.readPageData();
@@ -166,7 +167,7 @@ describe('WorkspaceShareComponent', () => {
 
 
     simulateClick(workspaceSharePage.fixture,
-      queryByCss(workspaceSharePage.fixture, '.add-button'));
+      workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
     workspaceSharePage.readPageData();
     expect(TestBed.get(WorkspacesService).shareWorkspace)
         .toHaveBeenCalledWith('defaultNamespace', '1', userValues);
@@ -193,7 +194,7 @@ describe('WorkspaceShareComponent', () => {
 
 
     simulateClick(workspaceSharePage.fixture,
-      queryByCss(workspaceSharePage.fixture, '.add-button'));
+      workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
     workspaceSharePage.readPageData();
     expect(TestBed.get(WorkspacesService).shareWorkspace)
       .toHaveBeenCalledWith('defaultNamespace', '1', userValues);

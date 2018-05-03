@@ -1,5 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
 import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
@@ -11,8 +12,6 @@ import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stu
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
-  queryAllByCss,
-  queryByCss,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -34,8 +33,9 @@ class WorkspaceListPage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.workspaceCards = queryAllByCss(this.fixture, '.card');
-    this.loggedOutMessage = queryByCss(this.fixture, '.logged-out-message');
+    const de = this.fixture.debugElement;
+    this.workspaceCards = de.queryAll(By.css('.card'));
+    this.loggedOutMessage = de.query(By.css('.logged-out-message'));
   }
 }
 

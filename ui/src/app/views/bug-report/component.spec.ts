@@ -1,6 +1,7 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
+import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
@@ -12,7 +13,6 @@ import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {
-  queryByCss,
   simulateClick,
   simulateInput,
   updateAndTick
@@ -38,9 +38,10 @@ class BugReportPage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.sendButton = queryByCss(this.fixture, '#send-bug-report');
-    this.shortDescription = queryByCss(this.fixture, '#bug-report-short-descr');
-    this.reproSteps = queryByCss(this.fixture, '#bug-report-repro-steps');
+    const de = this.fixture.debugElement;
+    this.sendButton = de.query(By.css('#send-bug-report'));
+    this.shortDescription = de.query(By.css('#bug-report-short-descr'));
+    this.reproSteps = de.query(By.css('#bug-report-repro-steps'));
   }
 }
 

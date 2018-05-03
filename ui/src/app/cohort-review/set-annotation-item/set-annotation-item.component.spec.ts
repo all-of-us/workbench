@@ -8,7 +8,6 @@ import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationItemComponent} from './set-annotation-item.component';
 
 import {
-  queryByCss,
   updateAndTick,
 } from 'testing/test-helpers';
 

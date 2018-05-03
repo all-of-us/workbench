@@ -2,6 +2,7 @@ import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {Http} from '@angular/http';
+import {By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
@@ -27,11 +28,7 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-import {
-  queryAllByCss,
-  queryByCss,
-  updateAndTick
-} from 'testing/test-helpers';
+import {updateAndTick} from 'testing/test-helpers';
 
 class WorkspacePage {
   fixture: ComponentFixture<WorkspaceComponent>;
@@ -60,12 +57,13 @@ class WorkspacePage {
     updateAndTick(this.fixture);
     this.workspaceNamespace = this.route[1].path;
     this.workspaceId = this.route[2].path;
-    this.cohortsTableRows = queryAllByCss(this.fixture, '.cohort-table-row');
-    this.notebookTableRows = queryAllByCss(this.fixture, '.notebook-table-row');
-    this.cdrText = queryByCss(this.fixture, '.cdr-version-text');
-    this.workspaceDescription = queryByCss(this.fixture, '.description-text');
-    this.loggedOutMessage = queryByCss(this.fixture, '.logged-out-message');
-    this.createAndLaunch = queryByCss(this.fixture, '#createAndLaunch');
+    const de = this.fixture.debugElement;
+    this.cohortsTableRows = de.queryAll(By.css('.cohort-table-row'));
+    this.notebookTableRows = de.queryAll(By.css('.notebook-table-row'));
+    this.cdrText = de.query(By.css('.cdr-version-text'));
+    this.workspaceDescription = de.query(By.css('.description-text'));
+    this.loggedOutMessage = de.query(By.css('.logged-out-message'));
+    this.createAndLaunch = de.query(By.css('#createAndLaunch'));
   }
 }
 
