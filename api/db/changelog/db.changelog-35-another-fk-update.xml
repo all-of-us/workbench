@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="ursastutsman" id="changelog-35">
+        <dropForeignKeyConstraint baseTableName="underserved_populations" constraintName="fk_underserved_population_workspace_id"/>
+
+        <addForeignKeyConstraint baseTableName="underserved_populations"
+                                 baseColumnNames="workspace_id"
+                                 constraintName="fk_underserved_population_workspace_id"
+                                 referencedTableName="workspace"
+                                 referencedColumnNames="workspace_id"
+                                 onDelete="CASCADE"/>
+
+    </changeSet>
+</databaseChangeLog>

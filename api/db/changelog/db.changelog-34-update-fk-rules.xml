@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="ursastutsman" id="changelog-33">
+        <dropForeignKeyConstraint baseTableName="cohort_annotation_definition" constraintName="fk_annotation_cohort_id"/>
+
+        <addForeignKeyConstraint baseTableName="cohort_annotation_definition"
+                                 baseColumnNames="cohort_id"
+                                 constraintName="fk_annotation_cohort_id"
+                                 referencedTableName="cohort"
+                                 referencedColumnNames="cohort_id"
+                                 onDelete="CASCADE"/>
+
+        <dropForeignKeyConstraint baseTableName="cohort_review" constraintName="fk_cohort_id"/>
+
+        <addForeignKeyConstraint baseTableName="cohort_review"
+                                 baseColumnNames="cohort_id"
+                                 constraintName="fk_cohort_id"
+                                 referencedTableName="cohort"
+                                 referencedColumnNames="cohort_id"
+                                 onDelete="CASCADE"/>
+
+        <dropForeignKeyConstraint baseTableName="participant_cohort_annotations" constraintName="fk_annotation_cohort_review_id"/>
+
+        <addForeignKeyConstraint baseTableName="participant_cohort_annotations"
+                                 baseColumnNames="cohort_review_id"
+                                 constraintName="fk_annotation_cohort_review_id"
+                                 referencedTableName="cohort_review"
+                                 referencedColumnNames="cohort_review_id"
+                                 onDelete="CASCADE"/>
+
+        <dropForeignKeyConstraint baseTableName="cohort_annotation_enum_value" constraintName="fk_enum_cohort_annotation_definition_id"/>
+
+        <addForeignKeyConstraint baseTableName="cohort_annotation_enum_value"
+                                 baseColumnNames="cohort_annotation_definition_id"
+                                 constraintName="fk_enum_cohort_annotation_definition_id"
+                                 referencedTableName="cohort_annotation_definition"
+                                 referencedColumnNames="cohort_annotation_definition_id"
+                                 onDelete="CASCADE"/>
+
+        <dropForeignKeyConstraint baseTableName="participant_cohort_annotations" constraintName="fk_cohort_annotation_definition_id"/>
+
+        <addForeignKeyConstraint baseTableName="participant_cohort_annotations"
+                                 baseColumnNames="cohort_annotation_definition_id"
+                                 constraintName="fk_cohort_annotation_definition_id"
+                                 referencedTableName="cohort_annotation_definition"
+                                 referencedColumnNames="cohort_annotation_definition_id"
+                                 onDelete="CASCADE"/>
+
+        <dropForeignKeyConstraint baseTableName="participant_cohort_annotations" constraintName="fk_enum_cohort_annotation_enum_value_id"/>
+
+        <addForeignKeyConstraint baseTableName="participant_cohort_annotations"
+                                 baseColumnNames="cohort_annotation_enum_value_id"
+                                 constraintName="fk_enum_cohort_annotation_enum_value_id"
+                                 referencedTableName="cohort_annotation_enum_value"
+                                 referencedColumnNames="cohort_annotation_enum_value_id"
+                                 onDelete="CASCADE"/>
+
+    </changeSet>
+</databaseChangeLog>

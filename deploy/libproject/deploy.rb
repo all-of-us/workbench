@@ -167,7 +167,7 @@ def deploy(cmd_name, args)
     "are still applied"
   )
   op.add_option(
-    "--circle-url",
+    "--circle-url [circle url]",
     lambda {|opts, v| opts.circle_url = v},
     "Circle test output URL to attach to the release tracker; only " +
     "relevant for runs where a release ticket is created (staging)"

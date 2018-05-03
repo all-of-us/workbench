@@ -882,6 +882,63 @@ Common.register_command({
   :fn => lambda { |*args| set_authority("set-authority", *args) }
 })
 
+def delete_clusters(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.add_option(
+      "--min-age-days [DAYS]",
+      lambda {|opts, v| opts.min_age_days = v},
+      "Optional minimum age filter in days for clusters to delete, e.g. 21")
+  op.add_option(
+      "--ids [CLUSTER_ID1,...]",
+      lambda {|opts, v| opts.cluster_ids = v},
+      "Optional cluster IDs to delete, e.g. 'aou-test-f1-1/all-of-us'")
+  op.add_option(
+      "--nodry-run",
+      lambda {|opts, v| opts.dry_run = false},
+      "Actually delete clusters, defaults to dry run")
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  ServiceAccountContext.new(gcc.project).run do
+    Dir.chdir("tools") do
+      common = Common.new
+      common.run_inline %W{
+         gradle --info manageClusters
+        -PappArgs=['delete','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "delete-clusters",
+  :description => "Delete all clusters in this environment",
+  :fn => lambda { |*args| delete_clusters("delete-clusters", *args) }
+})
+
+def list_clusters(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  ServiceAccountContext.new(gcc.project).run do
+    Dir.chdir("tools") do
+      common = Common.new
+      common.run_inline %W{gradle --info manageClusters -PappArgs=['list']}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "list-clusters",
+  :description => "List all clusters in this environment",
+  :fn => lambda { |*args| list_clusters("list-clusters", *args) }
+})
+
 def get_test_service_account()
   ServiceAccountContext.new(TEST_PROJECT).run do
     print "Service account key is now in sa-key.json"
