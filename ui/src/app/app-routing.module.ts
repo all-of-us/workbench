@@ -19,7 +19,6 @@ import {WorkspaceShareComponent} from './views/workspace-share/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
-import {WorkspaceResolver} from './resolvers/workspace';
 
 declare let gtag: Function;
 declare let ga_tracking_id: string;
@@ -61,10 +60,6 @@ const routes: Routes = [
             data: {
               title: 'View Workspace Details',
               breadcrumb: ':wsid'
-            },
-            runGuardsAndResolvers: 'always',
-            resolve: {
-              workspace: WorkspaceResolver,
             },
             children: [{
               path: '',
@@ -146,7 +141,6 @@ const routes: Routes = [
   providers: [
     CohortResolver,
     SignInGuard,
-    WorkspaceResolver,
   ]
 })
 export class AppRoutingModule {

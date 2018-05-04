@@ -22,6 +22,6 @@ export class AnnotationDefinitionsResolver implements Resolve<CohortAnnotationDe
     // console.log(`Resolving annotation definitions for ${ns}/${wsid}:${cid}`);
 
     const call = this.api.getCohortAnnotationDefinitions(ns, wsid, cid).pluck('items');
-    return (call as Observable<CohortAnnotationDefinition[]>);
+    return (call as Observable<CohortAnnotationDefinition[]>).first();
   }
 }

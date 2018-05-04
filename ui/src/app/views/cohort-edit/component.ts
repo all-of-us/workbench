@@ -1,20 +1,21 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {Cohort, CohortsService, Workspace} from 'generated';
+import {Cohort, CohortsService} from 'generated';
 
 @Component({templateUrl: './component.html'})
-export class CohortEditComponent {
+export class CohortEditComponent implements OnInit {
   /* Properties */
   loading = false;
   form: FormGroup;
+  wsNamespace: string;
+  wsId: string;
 
   /* Convenience property aliases */
   get name(): FormControl         { return this.form.get('name') as FormControl; }
   get description(): FormControl  { return this.form.get('description') as FormControl; }
   get cohort(): Cohort            { return this.route.snapshot.data.cohort; }
-  get workspace(): Workspace      { return this.route.snapshot.data.workspace; }
 
   constructor(
     private route: ActivatedRoute,
@@ -28,6 +29,11 @@ export class CohortEditComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.wsNamespace = this.route.snapshot.params['ns'];
+    this.wsId = this.route.snapshot.params['wsid'];
+  }
+
   save(): void {
     this.loading = true;
 
@@ -38,8 +44,8 @@ export class CohortEditComponent {
     };
 
     const call = this.cohortService.updateCohort(
-      this.workspace.namespace,
-      this.workspace.id,
+      this.wsNamespace,
+      this.wsId,
       newCohort.id,
       newCohort
     );
@@ -54,7 +60,7 @@ export class CohortEditComponent {
   }
 
   backToWorkspace(): void {
-    this.router.navigate(['workspace', this.workspace.namespace, this.workspace.id]);
+    this.router.navigate(['workspace', this.wsNamespace, this.wsId]);
   }
 
   get canSave(): boolean {

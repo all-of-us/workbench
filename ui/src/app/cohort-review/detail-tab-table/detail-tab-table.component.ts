@@ -5,6 +5,8 @@ import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 import {CohortReviewService, PageFilterRequest, SortOrder} from 'generated';
 
 @Component({
@@ -17,6 +19,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   @Input() columns;
   @Input() filterType;
   @Input() reverseEnum;
+  cdrId: number;
   loading = false;
 
   data;
@@ -28,24 +31,33 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private reviewApi: CohortReviewService,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
   ngOnInit() {
+    console.dir(this.route);
+
+    this.workspaceStorageService.activeWorkspace$.subscribe((workspace) => {
+      this.cdrId = parseInt(workspace.cdrVersionId, 10);
+    });
+    this.workspaceStorageService.reloadIfNew(
+      this.route.snapshot.parent.params['ns'],
+      this.route.snapshot.parent.params['wsid']);
+
     this.subscription = this.route.data
       .map(({participant}) => participant)
       .withLatestFrom(
         this.route.parent.data.map(({cohort}) => cohort),
-        this.route.parent.data.map(({workspace}) => workspace),
       )
       .distinctUntilChanged()
-      .subscribe(([participant, cohort, workspace]) => {
+      .subscribe(([participant, cohort]) => {
         this.loading = true;
 
         this.apiCaller = (request) => this.reviewApi.getParticipantData(
-          workspace.namespace,
-          workspace.id,
+          this.route.snapshot.parent.params['ns'],
+          this.route.snapshot.parent.params['wsid'],
           cohort.id,
-          workspace.cdrVersionId,
+          this.cdrId,
           participant.participantId,
           request
         );

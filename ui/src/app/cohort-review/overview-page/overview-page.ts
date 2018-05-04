@@ -5,6 +5,8 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 import {ChartInfoListResponse, CohortBuilderService, SearchRequest} from 'generated';
 
 
@@ -14,19 +16,28 @@ import {ChartInfoListResponse, CohortBuilderService, SearchRequest} from 'genera
 export class OverviewPage implements OnInit, OnDestroy {
 
   data = List();
+  private cdrId: number;
   private subscription: Subscription;
 
   constructor(
     private chartAPI: CohortBuilderService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
   ngOnInit() {
-    const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
+    this.workspaceStorageService.activeWorkspace$.subscribe((workspace) => {
+      this.cdrId = parseInt(workspace.cdrVersionId, 10);
+    });
+    console.log(this.route);
+    this.workspaceStorageService.reloadIfNew(
+      this.route.snapshot.parent.params['ns'],
+      this.route.snapshot.parent.params['wsid']);
+
     this.subscription = this.state.cohort$
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
-      .switchMap(request => this.chartAPI.getChartInfo(cdrVersionId, request))
+      .switchMap(request => this.chartAPI.getChartInfo(this.cdrId, request))
       .map(response => (<ChartInfoListResponse>response).items)
       .subscribe(data => this.data = fromJS(data));
   }

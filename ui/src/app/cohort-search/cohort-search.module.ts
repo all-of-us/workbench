@@ -8,6 +8,8 @@ import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 /* Components */
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {ComboChartComponent} from './combo-chart/combo-chart.component';
@@ -76,6 +78,7 @@ const routes: Routes = [{
     CohortSearchActions,
     CohortSearchEpics,
     ConfigureStore,
+    WorkspaceStorageService,
   ]
 })
 export class CohortSearchModule {

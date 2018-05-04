@@ -7,6 +7,7 @@ import {Observable} from 'rxjs/Observable';
 import {CohortEditComponent} from './component';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {CohortsService} from 'generated';
 
@@ -17,12 +18,17 @@ class RouterStub {
 }
 
 class ActivatedRouteStub {
-  snapshot: any;
+  snapshot: any = {
+    params: {
+      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+    }
+  };
 
   constructor(cohortStub: CohortsServiceStub) {
     const cohort = cohortStub.cohorts[0];
     const workspace = cohortStub.workspaces[0];
-    this.snapshot = {data: {cohort, workspace}};
+    this.snapshot.data = {cohort, workspace};
   }
 }
 

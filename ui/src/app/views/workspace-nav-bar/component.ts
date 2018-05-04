@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
+import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
@@ -28,21 +28,27 @@ export class WorkspaceNavBarComponent implements OnInit {
   awaitingReview = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
+  workspaceLoaded = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private workspacesService: WorkspacesService
+    private workspacesService: WorkspacesService,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
   ngOnInit(): void {
-    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
-    this.workspace = wsData;
-    this.accessLevel = wsData.accessLevel;
-    const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.awaitingReview = reviewRequested && !approved;
+    this.workspaceStorageService.activeWorkspace$.subscribe((wsData: WorkspaceData) => {
+      this.workspace = wsData;
+      this.accessLevel = wsData.accessLevel;
+      const {approved, reviewRequested} = this.workspace.researchPurpose;
+      this.awaitingReview = reviewRequested && !approved;
+      this.workspaceLoaded = true;
+    });
+
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    this.workspaceStorageService.reloadIfNew(this.wsNamespace, this.wsId);
   }
 
   delete(): void {

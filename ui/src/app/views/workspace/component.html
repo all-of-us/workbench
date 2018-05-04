@@ -1,13 +1,13 @@
 <app-workspace-nav-bar></app-workspace-nav-bar>
-<div class="workspace-container">
+<div class="workspace-container" *ngIf="workspaceLoaded else loading">
   <div class="main-body">
     <h2>{{workspace.name}}</h2>
     <div style="display: flex; justify-content: space-between">
       <div style="margin-left: -0.5rem;">
-        <button class="btn btn-link" [class.selected]="tabOpen === Tabs.Notebooks" (click)="tabOpen = Tabs.Notebooks">
+        <button class="btn btn-link" [class.selected]="tabOpen === Tabs.Notebooks" (click)="openNotebookTab()">
           Notebooks ({{notebookList.length}})
         </button>
-        <button class="btn btn-link final" [class.selected]="tabOpen === Tabs.Cohorts" (click)="tabOpen = Tabs.Cohorts">
+        <button class="btn btn-link final" [class.selected]="tabOpen === Tabs.Cohorts" (click)="openCohortTab()">
           Cohorts ({{cohortList.length}})
         </button>
         <div class="alert {{alertCategory}}" *ngIf="showAlerts">
@@ -169,6 +169,11 @@
     <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}">Google Bucket</a>
   </div>
 </div>
+<ng-template #loading>
+  <div style="margin-top: 1.5rem;">
+    <span class="spinner spinner-lg" style="padding-top: 1rem"></span>
+  </div>
+</ng-template>
 
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>

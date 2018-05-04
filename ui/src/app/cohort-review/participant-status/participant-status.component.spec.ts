@@ -5,21 +5,23 @@ import {Observable} from 'rxjs/Observable';
 
 import {ParticipantStatusComponent} from './participant-status.component';
 
-import {CohortReviewService, CohortStatus} from 'generated';
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
+import {CohortReviewService, CohortStatus, WorkspacesService} from 'generated';
 import {ReviewStateService} from '../review-state.service';
 
+import {WorkspacesServiceStub} from '../../../testing/stubs/workspace-service-stub';
 import {updateAndTick} from '../../../testing/test-helpers';
 import {Participant} from '../participant.model';
 
 class StubRoute {
   snapshot = {
-    params: {
-      ns: 'workspaceNamespace',
-      wsid: 'workspaceId',
-      cid: 1
-    },
-    data: {
-      workspace: {cdrVersionId: 1}
+    parent: {
+      params: {
+        ns: 'workspaceNamespace',
+        wsid: 'workspaceId',
+        cid: 1
+      }
     }
   };
 }
@@ -50,14 +52,16 @@ describe('ParticipantStatusComponent', () => {
       providers: [
         {provide: ReviewStateService, useClass: ReviewStateService},
         {provide: CohortReviewService, useValue: new ApiSpy()},
-        {provide: ActivatedRoute, useClass: StubRoute}
+        {provide: ActivatedRoute, useClass: StubRoute},
+        {provide: WorkspaceStorageService, useClass: WorkspaceStorageService},
+        {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
       ],
     }).compileComponents().then((resp) => {
       fixture = TestBed.createComponent(ParticipantStatusComponent);
 
       component = fixture.componentInstance;
       component.participant = participant;
-      fixture.detectChanges();
+      updateAndTick(fixture);
 
       reviewStateService = TestBed.get(ReviewStateService);
       cohortReviewService = TestBed.get(CohortReviewService);

@@ -1,7 +1,9 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
@@ -21,8 +23,10 @@ import {PageFilterType} from '../../../generated/model/pageFilterType';
   templateUrl: './detail-header.component.html',
   styleUrls: ['./detail-header.component.css']
 })
-export class DetailHeaderComponent implements OnChanges {
+export class DetailHeaderComponent implements OnChanges, OnInit {
   @Input() participant: Participant;
+
+  cdrId: number;
 
   isFirstParticipant: boolean;
   isLastParticipant: boolean;
@@ -34,10 +38,20 @@ export class DetailHeaderComponent implements OnChanges {
     private state: ReviewStateService,
     private route: ActivatedRoute,
     private router: Router,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
   ngOnChanges(changes) {
     this.state.review$.subscribe(review => this.update(review));
+  }
+
+  ngOnInit() {
+    this.workspaceStorageService.activeWorkspace$.subscribe((workspace) => {
+      this.cdrId = parseInt(workspace.cdrVersionId, 10);
+    });
+    this.workspaceStorageService.reloadIfNew(
+      this.route.snapshot.parent.params['ns'],
+      this.route.snapshot.parent.params['wsid']);
   }
 
   update(review) {
@@ -110,8 +124,7 @@ export class DetailHeaderComponent implements OnChanges {
   }
 
   private callAPI = (page: number, size: number): Observable<CohortReview> => {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid, cid} = this.route.snapshot.parent.params;
     const request = {
         page: page,
         pageSize: size,
@@ -119,7 +132,7 @@ export class DetailHeaderComponent implements OnChanges {
         sortOrder: SortOrder.Asc,
         pageFilterType: PageFilterType.ParticipantCohortStatuses
     };
-    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
+    return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, this.cdrId, request);
   }
 
   private navigateById = (id: number): void => {

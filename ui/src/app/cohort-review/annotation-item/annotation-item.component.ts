@@ -2,6 +2,8 @@ import {Component, Input, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 import {
   AnnotationType,
   CohortAnnotationDefinition,
@@ -27,12 +29,14 @@ export class AnnotationItemComponent implements OnInit {
   @Input() annotation: Annotation;
   @Input() showDataType: boolean;
 
+  private cdrId: number;
   private control = new FormControl();
   private expandText = false;
 
   constructor(
     private reviewAPI: CohortReviewService,
     private route: ActivatedRoute,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
   ngOnInit() {
@@ -40,13 +44,18 @@ export class AnnotationItemComponent implements OnInit {
     if (oldValue !== undefined) {
       this.control.setValue(oldValue);
     }
+    this.workspaceStorageService.activeWorkspace$.subscribe((workspace) => {
+      this.cdrId = parseInt(workspace.cdrVersionId, 10);
+    });
+    this.workspaceStorageService.reloadIfNew(
+      this.route.snapshot.parent.params['ns'],
+      this.route.snapshot.parent.params['wsid']);
   }
 
   handleInput() {
     /* Parameters from the path */
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.parent.params;
     const pid = this.annotation.value.participantId;
-    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
 
     const newValue = this.control.value;
     const oldValue = this.annotation.value[this.valuePropertyName];
@@ -66,13 +75,13 @@ export class AnnotationItemComponent implements OnInit {
       // If the new value isn't anything, this is a delete
       if (newValue === '' || newValue === null) {
         apiCall = this.reviewAPI
-          .deleteParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId);
+          .deleteParticipantCohortAnnotation(ns, wsid, cid, this.cdrId, pid, annoId);
       } else {
         const request = <ModifyParticipantCohortAnnotationRequest>{
           [this.valuePropertyName]: newValue,
         };
         apiCall = this.reviewAPI
-          .updateParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId, request);
+          .updateParticipantCohortAnnotation(ns, wsid, cid, this.cdrId, pid, annoId, request);
       }
     } else {
     // There's no annotation ID so this must be a create
@@ -82,7 +91,7 @@ export class AnnotationItemComponent implements OnInit {
         [this.valuePropertyName]: newValue,
       };
       apiCall = this.reviewAPI
-        .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
+        .createParticipantCohortAnnotation(ns, wsid, cid, this.cdrId, pid, request);
     }
 
     apiCall.subscribe();

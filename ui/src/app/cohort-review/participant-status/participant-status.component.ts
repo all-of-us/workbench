@@ -6,6 +6,8 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from '../participant.model';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 import {
   CohortReviewService,
   CohortStatus,
@@ -33,6 +35,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   }));
 
   private _participant: Participant;
+  private cdrId: number;
 
   @Input() set participant(p: Participant) {
     this._participant = p;
@@ -50,9 +53,17 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   constructor(
     private reviewAPI: CohortReviewService,
     private route: ActivatedRoute,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
   ngOnInit() {
+    this.workspaceStorageService.activeWorkspace$.subscribe((workspace) => {
+      this.cdrId = parseInt(workspace.cdrVersionId, 10);
+    });
+    this.workspaceStorageService.reloadIfNew(
+      this.route.snapshot.parent.params['ns'],
+      this.route.snapshot.parent.params['wsid']);
+
     this.subscription = this.statusControl.valueChanges
       .filter(status => validStatuses.includes(status))
       .switchMap(status => this.updateStatus(status))
@@ -66,8 +77,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   updateStatus(status): Observable<ParticipantCohortStatus> {
     const pid = this.participant.id;
     const request = <ModifyCohortStatusRequest>{status};
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
-    return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
+    const {ns, wsid, cid} = this.route.parent.snapshot.parent.params;
+    return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, this.cdrId, pid, request);
   }
 }
