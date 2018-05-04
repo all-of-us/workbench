@@ -7,8 +7,6 @@ import java.util.List;
 
 
 @Entity
-//TODO need to add a way to dynamically switch between database versions
-//this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "concept")
 public class QuestionConcept {
 
@@ -105,19 +103,6 @@ public class QuestionConcept {
         return this;
     }
 
-    /*@OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
-    @JoinColumn(name="stratum_2")
-    public List<AchillesResult> getAnswers() {
-        return answers;
-    }
-    public void setAnswers(List<AchillesResult> answers) {
-        this.answers = answers;
-    }
-    public QuestionConcept answers(List<AchillesResult> answers) {
-        this.answers = answers;
-        return this;
-    }*/
-
     @Transient
     public List<AchillesAnalysis> getAnalyses() {
         return analyses;
@@ -130,27 +115,4 @@ public class QuestionConcept {
         return this;
     }
 
-    /*
-    public AchillesAnalysis getAnalysisWithAnswers(long analysisId) {
-        List<AchillesResult> allAnswers = this.getAnswers();
-        List<AchillesResult> results = new ArrayList<>();
-        AchillesAnalysis a = new AchillesAnalysis();
-
-        for (AchillesResult r : allAnswers) {
-            if (r.getAnalysisId() == analysisId) {
-                results.add(r);
-            }
-        }
-        // Pull analysis object off first result
-        if (!results.isEmpty()) {
-            a = results.get(0).getAnalysis();
-            a.setResults(results);
-            AchillesResult ar = a.getResults().get(0);
-        } else {
-            a.setAnalysisId(analysisId);
-            a.setResults(results);
-        }
-        return a;
-    }
-    */
 }

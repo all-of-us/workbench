@@ -7,8 +7,9 @@ import java.util.List;
 
 public interface QuestionConceptDao extends CrudRepository<QuestionConcept, Long> {
 
-    @Query(nativeQuery=true, value="SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_code, " +
-            "count_value, prevalence  from concept c join concept_relationship  r on c.concept_id = r.concept_id_2 " +
+    @Query(nativeQuery=true, value="SELECT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_code, " +
+            "c.count_value, c.prevalence  " +
+            "from concept c join concept_relationship  r on c.concept_id = r.concept_id_2 " +
             "where r.concept_id_1=?1")
     List<QuestionConcept> findSurveyQuestions(long survey_concept_id);
 }
