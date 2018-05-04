@@ -40,38 +40,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public static final long COUNT_ANALYSIS_ID = 3000;
     public static final long GENDER_ANALYSIS_ID = 3101;
     public static final long AGE_ANALYSIS_ID = 3102;
-    public static final long SURVEY_COUNT_ANALYSIS_ID = 3100;
-    public static final long SURVEY_GENDER_ANALYSIS_ID = 3111;
-    public static final long SURVEY_AGE_ANALYSIS_ID = 3112;
-
-    public static Map<String, String> ageStratumNameMap  = new HashMap<String, String>();
-    public static Map<String, String> genderStratumNameMap = new HashMap<String, String>();
 
 
-    public void setAgeStratumNameMap() {
-        ageStratumNameMap.put("1", "0-18 yrs old");
-        ageStratumNameMap.put("2", "18-29 yrs old");
-        ageStratumNameMap.put("3", "30-39 yrs old");
-        ageStratumNameMap.put("4", "40-49 yrs old");
-        ageStratumNameMap.put("5", "50-59 yrs old");
-        ageStratumNameMap.put("6", "60-69 yrs old");
-        ageStratumNameMap.put("7", "70-79 yrs old");
-        ageStratumNameMap.put("8", "80-89 yrs old");
-        ageStratumNameMap.put("9", "90-99 yrs old");
-        ageStratumNameMap.put("10", "100-109 yrs old");
-        ageStratumNameMap.put("11", "110-119 yrs old");
-        ageStratumNameMap.put("12", "120-129 yrs old");
-        ageStratumNameMap.put("13", "130-139 yrs old");
-    }
 
-    public void setGenderStratumNameMap() {
-        /* This is to slow to use the db */
-        genderStratumNameMap.put("8507", "Male");
-        genderStratumNameMap.put("8532", "Female");
-        genderStratumNameMap.put("8521", "Other");
-        genderStratumNameMap.put("8551", "Unknown");
-        genderStratumNameMap.put("8570", "Ambiguous");
-    }
 
     private static final Logger log = Logger.getLogger(DataBrowserController.class.getName());
 
@@ -220,46 +191,31 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         /* Set up the age and gender names */
         // Too slow and concept names wrong so we hardcode list
         // List<Concept> genders = conceptDao.findByConceptClassId("Gender");
-        this.setAgeStratumNameMap();
-        this.setGenderStratumNameMap();
+
         long longSurveyConceptId = Long.parseLong(surveyConceptId);
+
+        // Get questions for survey
         List<QuestionConcept> questions = questionConceptDao.findSurveyQuestions(longSurveyConceptId);
+
+        // Get survey definition
         QuestionConceptListResponse resp = new QuestionConceptListResponse();
         DbDomain survey = dbDomainDao.findByConceptId(longSurveyConceptId);
         resp.setSurvey(TO_CLIENT_DBDOMAIN.apply(survey));
 
+        // Get all analyses for question list and put the analyses on the question objects
         if (!questions.isEmpty()) {
-            for (int x = 0; x < questions.size() - 1; x++)  {
-                QuestionConcept q = questions.get(x);
-                String qid = Long.toString(q.getConceptId());
-
-                /*** Important -- when calling these dao functions in a loop, baceause the analyses share same id ,
-                 * and we are filtering by a property in the related reluslts table, the first results get cached and
-                 * put on all questions. So we have to detach the entity from the session
-                 */
-                List<AchillesAnalysis> analyses = achillesAnalysisDao.findQuestionAnalysisResults(surveyConceptId, qid);
-                //THIS IS THE IMPORTANT PART
-                //You have to detach the entity from the session otherwise all the results are same as the first
-                // question... Thank you https://stackoverflow.com/a/49452056/2627999
-                analyses.forEach(analysis -> {
-                    this.entityManager.detach(analysis);
-                    for (AchillesResult r : analysis.getResults()) {
-                        if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
-                            r.setStratum5Name(this.ageStratumNameMap.get(r.getStratum5()));
-                        }
-                        if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
-                            r.setStratum5Name(this.genderStratumNameMap.get(r.getStratum5()));
-                        }
-                    }
-
-                });
-                q.setAnalyses(analyses);
+            // Put ids in array for query to get all results at once
+            List<String> qlist= new ArrayList();
+            for (QuestionConcept q : questions) {
+                qlist.add(String.valueOf(q.getConceptId()));
             }
 
+            List<AchillesAnalysis> analyses = achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, qlist);
+            QuestionConcept.addAnalysesToQuestions(questions, analyses);
         }
+
         resp.setItems(questions.stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
-
     }
 
     @Override

@@ -136,7 +136,7 @@ public class AchillesAnalysis {
         return this;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "analysis")
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "analysis")
     public List<AchillesResult> getResults() {
         return results;
     }
