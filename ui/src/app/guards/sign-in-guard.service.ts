@@ -9,7 +9,7 @@ import {
 import {Observable} from 'rxjs/Observable';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {navigateLogin} from 'app/utils/index';
+import {navigateLogin} from 'app/utils';
 
 
 declare const gapi: any;

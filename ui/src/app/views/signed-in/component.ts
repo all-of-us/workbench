@@ -6,7 +6,7 @@ import {
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
-import {navigateLogin} from 'app/utils/index';
+import {navigateLogin} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {Authority} from 'generated';
