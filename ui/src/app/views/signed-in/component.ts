@@ -6,6 +6,7 @@ import {
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {navigateLogin} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {Authority} from 'generated';
@@ -66,12 +67,7 @@ export class SignedInComponent implements OnInit {
         this.profileImage = this.signInService.profileImage;
         this.profileStorageService.reload();
       } else {
-        const params = {};
-        const url = this.router.routerState.snapshot.url;
-        if (url && url !== '/') {
-          params['from'] = url;
-        }
-        this.router.navigate(['/login', params]);
+        navigateLogin(this.router, this.router.routerState.snapshot.url);
       }
     });
   }
