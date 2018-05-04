@@ -50,6 +50,3 @@ up volume file permissions for the circleci UID (specified in our Dockerfile).
 **Note**: Local changes to deploy.rb or devstart.rb are **not** currently picked
 up by the deployment process; it uses the tools code from the commit version
 specified for deployment.
-
-TODO(calbach): Switch Circle to use this script for consistency, instead of
-individually running the deploy methods.
