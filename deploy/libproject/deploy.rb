@@ -97,7 +97,8 @@ def setup_and_enter_docker(cmd_name, opts)
     exit 1
   end
 
-  key_file = Tempfile.new(["#{opts.account}-key", ".json"])
+  # By default Tempfile on OS X does not use a docker-friendly location
+  key_file = Tempfile.new(["#{opts.account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
     opts.project, account=opts.account, path=key_file.path).run do
     common.run_inline %W{docker-compose build deploy}
