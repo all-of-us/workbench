@@ -13,7 +13,7 @@ import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
 import {
-    queryByCss, simulateClick,
+    simulateClick,
     updateAndTick
 } from '../../../testing/test-helpers';
 import {ServerConfigService} from '../../services/server-config.service';
@@ -39,7 +39,7 @@ class InvitationKeyPage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.nextButton = queryByCss(this.fixture, '#next');
+    this.nextButton = this.fixture.debugElement.query(By.css('#next'));
   }
 }
 
