@@ -20,6 +20,8 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static org.pmiops.workbench.cdr.model.QuestionConcept.*;
+
 @RestController
 public class DataBrowserController implements DataBrowserApiDelegate {
 
@@ -76,8 +78,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             new Function<QuestionConcept, org.pmiops.workbench.model.QuestionConcept>() {
                 @Override
                 public org.pmiops.workbench.model.QuestionConcept apply(QuestionConcept concept) {
-                    List<AchillesAnalysis> alist = concept.getAnalyses();
-                    List<org.pmiops.workbench.model.Analysis> analyses = alist.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList());
+
+                    org.pmiops.workbench.model.Analysis countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
+                    org.pmiops.workbench.model.Analysis genderAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderAnalysis());
+                    org.pmiops.workbench.model.Analysis ageAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getAgeAnalysis());
 
                     return new org.pmiops.workbench.model.QuestionConcept()
                             .conceptId(concept.getConceptId())
@@ -86,7 +90,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .domainId(concept.getDomainId())
                             .countValue(concept.getCountValue())
                             .prevalence(concept.getPrevalence())
-                            .analyses(analyses);
+                            .countAnalysis(countAnalysis)
+                            .genderAnalysis(genderAnalysis)
+                            .ageAnalysis(ageAnalysis);
                 }
             };
 
@@ -211,7 +217,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             }
 
             List<AchillesAnalysis> analyses = achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, qlist);
-            QuestionConcept.addAnalysesToQuestions(questions, analyses);
+            QuestionConcept.mapAnalysesToQuestions(questions, analyses);
         }
 
         resp.setItems(questions.stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList()));

@@ -311,11 +311,15 @@ definitions:
         description: prevalence among participants percent count divided num participants
         type: number
         format: float
-      analyses:
-        description: analyses with answer results to questions
-        type: array
-        items:
-          $ref: "#/definitions/Analysis"
+      countAnalysis:
+        description: count analysis
+        $ref: "#/definitions/Analysis"
+      genderAnalysis:
+        description: gender analysis
+        $ref: "#/definitions/Analysis"
+      ageAnalysis:
+        description: age analysis
+        $ref: "#/definitions/Analysis"
 
   QuestionConceptListResponse:
     type: object

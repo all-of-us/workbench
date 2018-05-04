@@ -26,6 +26,36 @@ public class AchillesAnalysis {
     private String dataType;
     private List<AchillesResult> results = new ArrayList<>();
 
+    AchillesAnalysis() {}
+
+    // Copy constructor for copying everything but results
+    AchillesAnalysis(AchillesAnalysis a) {
+        this.analysisId(a.getAnalysisId())
+            .analysisName(a.getAnalysisName())
+            .stratum1Name(a.getStratum1Name())
+            .stratum2Name(a.getStratum2Name())
+            .stratum3Name(a.getStratum3Name())
+            .stratum4Name(a.getStratum4Name())
+            .stratum5Name(a.getStratum5Name())
+            .chartType(a.getChartType())
+            .dataType(a.getDataType())
+            .results(new ArrayList<>());
+    }
+
+    // Copy constructor for copying everything but results
+    public static AchillesAnalysis initAnalysis(AchillesAnalysis a) {
+        AchillesAnalysis newAnalysis = new AchillesAnalysis();
+        return newAnalysis.analysisId(a.getAnalysisId())
+                .analysisName(a.getAnalysisName())
+                .stratum1Name(a.getStratum1Name())
+                .stratum2Name(a.getStratum2Name())
+                .stratum3Name(a.getStratum3Name())
+                .stratum4Name(a.getStratum4Name())
+                .stratum5Name(a.getStratum5Name())
+                .chartType(a.getChartType())
+                .dataType(a.getDataType())
+                .results(new ArrayList<>());
+    }
 
     @Id
     @Column(name="analysis_id")
@@ -147,6 +177,10 @@ public class AchillesAnalysis {
         this.results = results;
         return this;
     }
+    public void addResult(AchillesResult result) {
+        this.results.add(result);
+    }
+
 
 
 
