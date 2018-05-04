@@ -261,7 +261,7 @@ export class WorkspaceEditComponent implements OnInit {
         () => {
           this.workspaceStorageService.reloadWorkspace(
             this.workspace.namespace,
-            this.workspace.id).subscribe(() => {
+            this.workspace.id).then(() => {
               this.router.navigate(['..'], {relativeTo: this.route});
           });
         },
