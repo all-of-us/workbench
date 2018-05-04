@@ -32,9 +32,3 @@ export function flattenedRouteData(route: ActivatedRoute): Data {
     return Object.assign({}, res, curr.data);
   }, ({}));
 }
-
-export function flattenedRouteQueryParams(route: ActivatedRoute): Params {
-  return route.snapshot.pathFromRoot.reduce((res, curr) => {
-    return Object.assign({}, res, curr.queryParams);
-  }, ({}));
-}
