@@ -4,7 +4,9 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {isBlank} from 'app/utils';
+import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
+import {deepCopy, isBlank} from 'app/utils';
 
 import {
   CloneWorkspaceResponse,
@@ -130,6 +132,7 @@ export class WorkspaceEditComponent implements OnInit {
       private locationService: Location,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
+      private workspaceStorageService: WorkspaceStorageService,
       public profileStorageService: ProfileStorageService,
       private router: Router,
   ) {}
@@ -174,48 +177,37 @@ export class WorkspaceEditComponent implements OnInit {
     }
   }
 
-  loadWorkspace(): Observable<WorkspaceResponse> {
-    const obs: Observable<WorkspaceResponse> = this.workspacesService.getWorkspace(
-      this.oldWorkspaceNamespace, this.oldWorkspaceName);
-    obs.subscribe(
-      (resp) => {
-        if (this.mode === WorkspaceEditMode.Edit) {
-          this.workspace = resp.workspace;
-          this.accessLevel = resp.accessLevel;
-        } else if (this.mode === WorkspaceEditMode.Clone) {
-          this.workspace.name = 'Clone of ' + resp.workspace.name;
-          this.workspace.description = resp.workspace.description;
-          const fromPurpose = resp.workspace.researchPurpose;
-          this.workspace.researchPurpose = {
-            ...fromPurpose,
-            // Heuristic for whether the user will want to request a review,
-            // assuming minimal changes to the existing research purpose.
-            reviewRequested: (
-              fromPurpose.reviewRequested && !fromPurpose.approved),
-            timeRequested: null,
-            approved: null,
-            timeReviewed: null,
-            additionalNotes: null
-          };
-        }
-      },
-      (error) => {
-        if (error.status === 404) {
-          this.notFound = true;
-        }
-      }
-    );
-    return obs;
+  loadWorkspace(): void {
+    const wsData: WorkspaceData = deepCopy(this.route.snapshot.data.workspace) as WorkspaceData;
+    if (this.mode === WorkspaceEditMode.Edit) {
+      this.workspace = wsData;
+      this.accessLevel = wsData.accessLevel;
+    } else if (this.mode === WorkspaceEditMode.Clone) {
+      this.workspace.name = 'Clone of ' + wsData.name;
+      this.workspace.description = wsData.description;
+      const fromPurpose = wsData.researchPurpose;
+      this.workspace.researchPurpose = {
+        ...fromPurpose,
+        // Heuristic for whether the user will want to request a review,
+        // assuming minimal changes to the existing research purpose.
+        reviewRequested: (
+          fromPurpose.reviewRequested && !fromPurpose.approved),
+        timeRequested: null,
+        approved: null,
+        timeReviewed: null,
+        additionalNotes: null
+      };
+    }
   }
+
 
   navigateBack(): void {
     this.locationService.back();
   }
 
   reloadConflictingWorkspace(): void {
-    this.loadWorkspace().subscribe(() => {
-      this.resetWorkspaceEditor();
-    });
+    this.loadWorkspace();
+    this.resetWorkspaceEditor();
   }
 
   resetWorkspaceEditor(): void {
@@ -243,7 +235,13 @@ export class WorkspaceEditComponent implements OnInit {
     this.savingWorkspace = true;
     this.workspacesService.createWorkspace(this.workspace).subscribe(
         () => {
-          this.navigateBack();
+          this.router.navigate(
+            [
+              '..',
+              this.workspace.namespace,
+              this.workspace.id
+            ], {relativeTo: this.route}
+          );
         },
         (error) => {
           this.workspaceCreationError = true;
@@ -261,7 +259,11 @@ export class WorkspaceEditComponent implements OnInit {
       {workspace: this.workspace})
       .subscribe(
         () => {
-          this.navigateBack();
+          this.workspaceStorageService.reloadWorkspace(
+            this.workspace.namespace,
+            this.workspace.id).subscribe(() => {
+              this.router.navigate(['..'], {relativeTo: this.route});
+          });
         },
         (error) => {
           if (error.status === 409) {
