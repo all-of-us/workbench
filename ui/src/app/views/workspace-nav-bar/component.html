@@ -32,7 +32,7 @@
     Clone
   </clr-button>
   <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-    <clr-button [clrInMenu]="true" class="btn" [disabled]="!ownerPermission" (click)="delete()">
+    <clr-button [clrInMenu]="true" class="btn" [disabled]="!ownerPermission || !workspaceLoaded" (click)="delete()">
       Delete
     </clr-button>
     <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>

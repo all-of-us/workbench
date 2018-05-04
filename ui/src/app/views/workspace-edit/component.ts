@@ -4,6 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {BLANK_WORKSPACE, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import {isBlank} from 'app/utils';
 
 import {
@@ -32,7 +33,7 @@ export class WorkspaceEditComponent implements OnInit {
   Mode = WorkspaceEditMode;
 
   mode: WorkspaceEditMode;
-  workspace: Workspace;
+  workspace: Workspace = BLANK_WORKSPACE;
   workspaceId: string;
   oldWorkspaceName: string;
   oldWorkspaceNamespace: string;
@@ -40,6 +41,7 @@ export class WorkspaceEditComponent implements OnInit {
   nameNotEntered = false;
   notFound = false;
   workspaceCreationError = false;
+  workspaceLoaded = false;
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
   private accessLevel: WorkspaceAccessLevel;
@@ -130,29 +132,43 @@ export class WorkspaceEditComponent implements OnInit {
       private locationService: Location,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
+      private workspaceStorageService: WorkspaceStorageService,
       public profileStorageService: ProfileStorageService,
       private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.workspace = {
-      name: '',
-      description: '',
-      dataAccessLevel: DataAccessLevel.Registered,
-      // TODO - please set this properly
-      cdrVersionId: '1',
-      researchPurpose: {
-        diseaseFocusedResearch: false,
-        methodsDevelopment: false,
-        controlSet: false,
-        aggregateAnalysis: false,
-        ancestry: false,
-        commercialPurpose: false,
-        population: false,
-        reviewRequested: false,
-        containsUnderservedPopulation: false,
-        underservedPopulationDetails: []
-      }};
+    this.workspaceStorageService.activeWorkspace$.subscribe(
+      (resp) => {
+        if (this.mode === WorkspaceEditMode.Edit) {
+          this.workspace = resp;
+          this.accessLevel = resp.accessLevel;
+        } else if (this.mode === WorkspaceEditMode.Clone) {
+          this.workspace.name = 'Clone of ' + resp.name;
+          this.workspace.description = resp.description;
+          const fromPurpose = resp.researchPurpose;
+          this.workspace.researchPurpose = {
+            ...fromPurpose,
+            // Heuristic for whether the user will want to request a review,
+            // assuming minimal changes to the existing research purpose.
+            reviewRequested: (
+            fromPurpose.reviewRequested && !fromPurpose.approved),
+            timeRequested: null,
+            approved: null,
+            timeReviewed: null,
+            additionalNotes: null
+          };
+        }
+        if (this.workspace !== BLANK_WORKSPACE) {
+          this.workspaceLoaded = true;
+        }
+      },
+      (error) => {
+        if (error.status === 404) {
+          this.notFound = true;
+        }
+      }
+    );
     this.mode = WorkspaceEditMode.Edit;
     if (this.route.routeConfig.data.mode) {
       this.mode = this.route.routeConfig.data.mode;
@@ -170,42 +186,14 @@ export class WorkspaceEditComponent implements OnInit {
       // There is an existing workspace referenced in this flow.
       this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
       this.oldWorkspaceName = this.route.snapshot.params['wsid'];
-      this.loadWorkspace();
+      this.workspaceStorageService.reloadIfNew(
+        this.oldWorkspaceNamespace,
+        this.oldWorkspaceName).subscribe(() => {
+          this.workspaceLoaded = true;
+      });
+    } else {
+      this.workspaceLoaded = true;
     }
-  }
-
-  loadWorkspace(): Observable<WorkspaceResponse> {
-    const obs: Observable<WorkspaceResponse> = this.workspacesService.getWorkspace(
-      this.oldWorkspaceNamespace, this.oldWorkspaceName);
-    obs.subscribe(
-      (resp) => {
-        if (this.mode === WorkspaceEditMode.Edit) {
-          this.workspace = resp.workspace;
-          this.accessLevel = resp.accessLevel;
-        } else if (this.mode === WorkspaceEditMode.Clone) {
-          this.workspace.name = 'Clone of ' + resp.workspace.name;
-          this.workspace.description = resp.workspace.description;
-          const fromPurpose = resp.workspace.researchPurpose;
-          this.workspace.researchPurpose = {
-            ...fromPurpose,
-            // Heuristic for whether the user will want to request a review,
-            // assuming minimal changes to the existing research purpose.
-            reviewRequested: (
-              fromPurpose.reviewRequested && !fromPurpose.approved),
-            timeRequested: null,
-            approved: null,
-            timeReviewed: null,
-            additionalNotes: null
-          };
-        }
-      },
-      (error) => {
-        if (error.status === 404) {
-          this.notFound = true;
-        }
-      }
-    );
-    return obs;
   }
 
   navigateBack(): void {
@@ -213,8 +201,9 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   reloadConflictingWorkspace(): void {
-    this.loadWorkspace().subscribe(() => {
-      this.resetWorkspaceEditor();
+    this.workspaceStorageService.reload(
+      this.oldWorkspaceNamespace, this.oldWorkspaceName).subscribe(() => {
+        this.resetWorkspaceEditor();
     });
   }
 
@@ -261,7 +250,11 @@ export class WorkspaceEditComponent implements OnInit {
       {workspace: this.workspace})
       .subscribe(
         () => {
-          this.navigateBack();
+          this.workspaceStorageService.reload(
+            this.oldWorkspaceNamespace,
+            this.oldWorkspaceName).subscribe(() => {
+              this.navigateBack();
+          });
         },
         (error) => {
           if (error.status === 409) {
@@ -283,7 +276,10 @@ export class WorkspaceEditComponent implements OnInit {
         workspace: this.workspace,
       }).subscribe(
         (r: CloneWorkspaceResponse) => {
-          this.router.navigate(['/workspace', r.workspace.namespace, r.workspace.id]);
+          this.workspaceStorageService.reload(
+            r.workspace.namespace, r.workspace.id).subscribe(() => {
+              this.router.navigate(['/workspace', r.workspace.namespace, r.workspace.id]);
+          });
         },
         () => {
           // Only expected errors are transient, so allow the user to try again.

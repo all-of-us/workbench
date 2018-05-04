@@ -8,6 +8,8 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {activeParameterList, CohortSearchActions} from '../redux';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 import {Attribute, CohortBuilderService} from 'generated';
 
 /* Demographic Criteria Subtypes and Constants */
@@ -51,6 +53,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   @select(activeParameterList) selection$;
   readonly minAge = minAge;
   readonly maxAge = maxAge;
+  cdrId: number;
   loading = false;
   subscription = new Subscription();
   hasSelection = false;
@@ -82,6 +85,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private api: CohortBuilderService,
     private actions: CohortSearchActions,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
   ngOnInit() {
@@ -104,6 +108,12 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.initialEthnicities = selections.filter(s => s.get('subtype') === ETHNICITY);
       this.initDeceased(selections);
       this.initAgeRange(selections);
+      this.workspaceStorageService.activeWorkspace$.subscribe((workspace) => {
+        this.cdrId = parseInt(workspace.cdrVersionId, 10);
+      });
+      this.workspaceStorageService.reloadIfNew(
+        this.route.snapshot.params['ns'],
+        this.route.snapshot.params['wsid']);
       this.loadNodesFromApi();
     });
   }
@@ -113,7 +123,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   loadNodesFromApi() {
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     /*
      * Each subtype's possible criteria is loaded via the API.  Race and Gender
      * criteria nodes become options in their respective dropdowns; deceased
@@ -123,7 +132,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
      * sort them by count, then by name.
      */
     const calls = [AGE, DEC, GEN, RACE, ETHNICITY].map(code => this.api
-      .getCriteriaByTypeAndSubtype(cdrid, 'DEMO', code)
+      .getCriteriaByTypeAndSubtype(this.cdrId, 'DEMO', code)
       .map(response => {
         const items = response.items;
         items.sort(sortByCountThenName);

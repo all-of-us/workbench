@@ -16,7 +16,6 @@ export class CohortResolver implements Resolve<Cohort> {
 
     // console.log(`Resolving cohort ${cid}:`);
     // console.dir(route);
-
-    return this.api.getCohort(ns, wsid, cid);
+    return this.api.getCohort(ns, wsid, cid).first();
   }
 }

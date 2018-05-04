@@ -71,7 +71,7 @@ export class SetAnnotationItemComponent {
     }
 
     const request = <ModifyCohortAnnotationDefinitionRequest>{columnName};
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.parent.params;
     const id = this.definition.cohortAnnotationDefinitionId;
     this.isPosting.emit(true);
 
@@ -97,7 +97,7 @@ export class SetAnnotationItemComponent {
   }
 
   delete(): void {
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.parent.params;
     const id = this.definition.cohortAnnotationDefinitionId;
     this.isPosting.emit(true);
 

@@ -56,7 +56,7 @@ export class SetAnnotationCreateComponent {
 
   create(): void {
     this.posting = true;
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = this.route.snapshot.parent.params;
 
     const request = <CohortAnnotationDefinition>{
       cohortId: cid,

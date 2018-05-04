@@ -20,11 +20,11 @@ import {
 
 
 class StubRoute {
-  snapshot = {params: {
+  snapshot = {parent: {params: {
     ns: 'workspaceNamespace',
     wsid: 'workspaceId',
     cid: 1
-  }};
+  }}};
 }
 
 const stubRoute = new StubRoute();
@@ -164,9 +164,9 @@ describe('SetAnnotationItemComponent', () => {
     updateAndTick(fixture);
 
     expect(spy.updateCohortAnnotationDefinition).toHaveBeenCalledWith(
-      stubRoute.snapshot.params.ns,
-      stubRoute.snapshot.params.wsid,
-      stubRoute.snapshot.params.cid,
+      stubRoute.snapshot.parent.params.ns,
+      stubRoute.snapshot.parent.params.wsid,
+      stubRoute.snapshot.parent.params.cid,
       stubDefinition.cohortAnnotationDefinitionId,
       <ModifyCohortAnnotationDefinitionRequest>{columnName: testValue}
     );

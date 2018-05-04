@@ -11,9 +11,10 @@ import {IconsModule} from 'app/icons/icons.module';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
-import {WorkspaceComponent} from 'app/views/workspace/component';
+import {Tabs, WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
   ClusterService,
@@ -76,7 +77,13 @@ const activatedRouteStub  = {
     ],
     params: {
       'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
+      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      'activeTab': Tabs.Notebooks
+    },
+    queryParamMap: {
+      'get': (arg: string) => {
+        return activatedRouteStub.snapshot.params[arg];
+      }
     },
     data: {
       workspace: {
@@ -109,6 +116,7 @@ describe('WorkspaceComponent', () => {
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
+        { provide: WorkspaceStorageService, useClass: WorkspaceStorageService },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         {
           provide: ServerConfigService,
@@ -140,6 +148,8 @@ describe('WorkspaceComponent', () => {
   }));
 
   it('displays correct information when notebooks selected.', fakeAsync(() => {
+    workspacePage.fixture.componentRef.instance.tabOpen =
+      workspacePage.fixture.componentRef.instance.Tabs.Notebooks;
     workspacePage.readPageData();
     tick();
     expect(workspacePage.notebookTableRows.length).toEqual(1);

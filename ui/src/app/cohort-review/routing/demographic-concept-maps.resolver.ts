@@ -1,6 +1,9 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
+
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 
 import {
   CohortBuilderService,
@@ -10,16 +13,22 @@ import {
 
 @Injectable()
 export class DemographicConceptMapsResolver implements Resolve<ParticipantDemographics> {
+  private cdrId: number;
 
-  constructor(private builderAPI: CohortBuilderService) {}
+  constructor(
+    private builderAPI: CohortBuilderService,
+    private workspaceStorageService: WorkspaceStorageService,
+  ) {
+    this.workspaceStorageService.activeWorkspace$.subscribe((workspace) => {
+      this.cdrId = parseInt(workspace.cdrVersionId, 10);
+    });
+  }
 
   resolve(route: ActivatedRouteSnapshot): Observable<ParticipantDemographics> {
-    const cdrid = +route.parent.data.workspace.cdrVersionId;
-
-    console.log(`Loading Demographics concept maps from resolver`);
-    console.log(`cdr id: ${cdrid}`);
-    console.dir(route);
-
-    return this.builderAPI.getParticipantDemographics(cdrid);
+    return this.workspaceStorageService.reloadIfNew(
+      route.parent.params['ns'], route.parent.params['wsid'])
+      .switchMap(() => this.workspaceStorageService.activeWorkspace$)
+      .switchMap(cdrId => this.builderAPI.getParticipantDemographics(this.cdrId))
+      .first();
   }
 }

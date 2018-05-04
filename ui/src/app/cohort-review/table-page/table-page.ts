@@ -7,6 +7,8 @@ import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 import {
   Cohort,
   CohortReview,
@@ -47,6 +49,7 @@ export class TablePage implements OnInit, OnDestroy {
 
   participants: Participant[];
 
+  cdrId: number;
   review: CohortReview;
   loading: boolean;
   subscription: Subscription;
@@ -60,6 +63,7 @@ export class TablePage implements OnInit, OnDestroy {
     private state: ReviewStateService,
     private route: ActivatedRoute,
     private router: Router,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
   ngOnInit() {
@@ -74,6 +78,13 @@ export class TablePage implements OnInit, OnDestroy {
     this.races = this.extractDemographics(concepts.raceList);
     this.genders = this.extractDemographics(concepts.genderList);
     this.ethnicities = this.extractDemographics(concepts.ethnicityList);
+
+    this.workspaceStorageService.activeWorkspace$.subscribe((workspace) => {
+      this.cdrId = parseInt(workspace.cdrVersionId, 10);
+    });
+    this.workspaceStorageService.reloadIfNew(
+      this.route.snapshot.parent.params['ns'],
+      this.route.snapshot.parent.params['wsid']);
   }
 
   ngOnDestroy() {
@@ -136,7 +147,7 @@ export class TablePage implements OnInit, OnDestroy {
     const ns: Workspace['namespace'] = params.ns;
     const wsid: Workspace['id'] = params.wsid;
     const cid: Cohort['id'] = +(params.cid);
-    const cdrid = +(data.workspace.cdrVersionId);
+    const cdrid = +(this.cdrId);
     return {ns, wsid, cid, cdrid};
   }
 

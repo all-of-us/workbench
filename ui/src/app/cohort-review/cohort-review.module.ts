@@ -35,6 +35,8 @@ import {SidebarContentComponent} from './sidebar-content/sidebar-content.compone
 import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 import {WorkspacesService} from 'generated';
 
 // This is a temporary measure until we have specs and APIs for overview specific charts
@@ -87,6 +89,6 @@ import {CohortSearchModule} from '../cohort-search/cohort-search.module';
     DetailTabsComponent,
     DetailTabTableComponent,
   ],
-  providers: [ReviewStateService]
+  providers: [ReviewStateService, WorkspaceStorageService]
 })
 export class CohortReviewModule {}

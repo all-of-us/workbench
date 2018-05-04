@@ -7,6 +7,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -49,12 +50,6 @@ describe('WorkspaceEditComponent', () => {
           'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
           'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
         },
-        data: {
-          workspace: {
-            ...WorkspacesServiceStub.stubWorkspace(),
-            accessLevel: WorkspaceAccessLevel.OWNER,
-          }
-        }
       },
       routeConfig: {data: {}}
     };
@@ -76,13 +71,16 @@ describe('WorkspaceEditComponent', () => {
         // for testing.
         { provide: ActivatedRoute, useFactory: () => activatedRouteStub },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
+        { provide: WorkspaceStorageService, useClass: WorkspaceStorageService },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
         }
-      ]}).compileComponents();
+      ]}).compileComponents().then(() => {
+        tick();
+      });
   }));
 
 
@@ -103,11 +101,11 @@ describe('WorkspaceEditComponent', () => {
   it('should support creating a workspace', fakeAsync(() => {
     workspacesService.workspaces = [];
     setupComponent(WorkspaceEditMode.Create);
-
+    fixture.detectChanges();
+    tick();
     testComponent.workspace.namespace = 'foo';
     testComponent.workspace.name = 'created';
     fixture.detectChanges();
-
     fixture.debugElement.query(By.css('.add-button'))
       .triggerEventHandler('click', null);
     fixture.detectChanges();
@@ -123,7 +121,8 @@ describe('WorkspaceEditComponent', () => {
       setupComponent(WorkspaceEditMode.Clone);
       fixture.componentRef.instance.profileStorageService.reload();
       tick();
-      expect(testComponent.workspace.name).toBe(
+      const name = testComponent.workspace.name;
+      expect(name).toBe(
         `Clone of ${WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME}`);
       expect(testComponent.hasPermission).toBeTruthy(
         'cloner should be able to edit cloned workspace');
@@ -134,7 +133,7 @@ describe('WorkspaceEditComponent', () => {
       fixture.detectChanges();
       tick();
       expect(workspacesService.workspaces.length).toBe(2);
-      const got = workspacesService.workspaces.find(w => w.name === testComponent.workspace.name);
+      const got = workspacesService.workspaces.find(w => w.name === name);
       expect(got).not.toBeNull();
       expect(got.namespace).toBe(
         ProfileStubVariables.PROFILE_STUB.freeTierBillingProjectName);

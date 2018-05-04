@@ -4,8 +4,12 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
+import {
+  BLANK_WORKSPACE,
+  WorkspaceData,
+  WorkspaceStorageService
+} from 'app/services/workspace-storage.service';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 
 import {
@@ -63,7 +67,7 @@ class NotebookNameComparator implements Comparator<FileDetail> {
   }
 }
 
-enum Tabs {
+export enum Tabs {
   Cohorts,
   Notebooks,
 }
@@ -112,6 +116,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   alertCategory: string;
   alertMsg: string;
   tabOpen = Tabs.Notebooks;
+  workspaceLoaded = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -121,17 +126,28 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
-  ) {
-    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
-    this.workspace = wsData;
-    this.accessLevel = wsData.accessLevel;
-    const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.awaitingReview = reviewRequested && !approved;
-  }
+    private workspaceStorageService: WorkspaceStorageService,
+  ) {}
 
   ngOnInit(): void {
+    this.workspaceStorageService.activeWorkspace$.subscribe((wsData: WorkspaceData) => {
+      this.workspace = wsData;
+      this.accessLevel = wsData.accessLevel;
+      const {approved, reviewRequested} = this.workspace.researchPurpose;
+      this.awaitingReview = reviewRequested && !approved;
+      if (this.workspace !== BLANK_WORKSPACE) {
+        this.workspaceLoaded = true;
+      }
+    });
+
+
+
+    if (this.route.snapshot.queryParamMap.get('activeTab') !== null) {
+      this.tabOpen = Tabs[this.route.snapshot.queryParamMap.get('activeTab')];
+    }
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    this.workspaceStorageService.reloadIfNew(this.wsNamespace, this.wsId);
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
       .subscribe(
         cohortsReceived => {
@@ -357,6 +373,18 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.alertCategory = '';
     this.alertMsg = '';
     this.showAlerts = false;
+  }
+
+  openNotebookTab(): void {
+    this.tabOpen = Tabs.Notebooks;
+    this.router.navigate(['.'], {relativeTo: this.route,
+      queryParams: {activeTab: Tabs[Tabs.Notebooks]}});
+  }
+
+  openCohortTab(): void {
+    this.tabOpen = Tabs.Cohorts;
+    this.router.navigate(['.'], {relativeTo: this.route,
+      queryParams: {activeTab: Tabs[Tabs.Cohorts]}});
   }
 
   get workspaceCreationTime(): string {
