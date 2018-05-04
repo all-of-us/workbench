@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 //TODO need to add a way to dynamically switch between database versions
@@ -160,33 +161,18 @@ public class AchillesResult  {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         AchillesResult that = (AchillesResult) o;
-
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (analysisId != null ? !analysisId.equals(that.analysisId) : that.analysisId != null) return false;
-        if (analysis != null ? !analysis.equals(that.analysis) : that.analysis != null) return false;
-        if (stratum1 != null ? !stratum1.equals(that.stratum1) : that.stratum1 != null) return false;
-        if (stratum2 != null ? !stratum2.equals(that.stratum2) : that.stratum2 != null) return false;
-        if (stratum3 != null ? !stratum3.equals(that.stratum3) : that.stratum3 != null) return false;
-        if (stratum4 != null ? !stratum4.equals(that.stratum4) : that.stratum4 != null) return false;
-        if (stratum5 != null ? !stratum5.equals(that.stratum5) : that.stratum5 != null) return false;
-        if (countValue != null ? !countValue.equals(that.countValue) : that.countValue != null) return false;
-        return stratum5Name != null ? stratum5Name.equals(that.stratum5Name) : that.stratum5Name == null;
+        return analysisId == that.analysisId &&
+                Objects.equals(stratum1, that.stratum1) &&
+                Objects.equals(stratum2, that.stratum2) &&
+                Objects.equals(stratum3, that.stratum3) &&
+                Objects.equals(stratum4, that.stratum4) &&
+                Objects.equals(stratum5, that.stratum5) &&
+                Objects.equals(countValue, that.countValue);
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (analysisId != null ? analysisId.hashCode() : 0);
-        result = 31 * result + (analysis != null ? analysis.hashCode() : 0);
-        result = 31 * result + (stratum1 != null ? stratum1.hashCode() : 0);
-        result = 31 * result + (stratum2 != null ? stratum2.hashCode() : 0);
-        result = 31 * result + (stratum3 != null ? stratum3.hashCode() : 0);
-        result = 31 * result + (stratum4 != null ? stratum4.hashCode() : 0);
-        result = 31 * result + (stratum5 != null ? stratum5.hashCode() : 0);
-        result = 31 * result + (countValue != null ? countValue.hashCode() : 0);
-        result = 31 * result + (stratum5Name != null ? stratum5Name.hashCode() : 0);
-        return result;
+        return Objects.hash(analysisId, analysis, stratum1, stratum2, stratum3, stratum4, stratum5, countValue);
     }
 }
