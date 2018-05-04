@@ -1,10 +1,6 @@
 import 'rxjs/Rx';
 
 import {Injectable} from '@angular/core';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {Observable} from 'rxjs/Observable';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
-
 
 import {Workspace} from 'generated';
 import {WorkspaceResponse} from 'generated';
@@ -17,83 +13,43 @@ export interface WorkspaceData extends Workspace {
 
 @Injectable()
 export class WorkspaceStorageService {
-  private activeCall = false;
-  private activeCallObservable: Observable<WorkspaceResponse>;
-  private loadingWorkspace = new ReplaySubject<WorkspaceData>(1);
-  private cachedWorkspace: WorkspaceData = {
-    accessLevel: WorkspaceAccessLevel.NOACCESS,
-    name: '',
-    researchPurpose: {
-      diseaseFocusedResearch: false,
-      methodsDevelopment: false,
-      controlSet: false,
-      aggregateAnalysis: false,
-      ancestry: false,
-      commercialPurpose: false,
-      population: false,
-      reviewRequested: false,
-    }
-  };
-
-  public loadingWorkspace$ = this.loadingWorkspace.asObservable();
+  // Cache of loading or completed Promises for workspace data. Key is of the
+  // form "ns/id".
+  private cache = new Map<string, Promise<WorkspaceData>>();
 
   constructor(private workspacesService: WorkspacesService) {}
 
-  reloadWorkspace(wsNs: string, wsId: string): Observable<WorkspaceData> {
-    if (!this.activeCall) {
-      this.activeCallObservable = this.workspacesService.getWorkspace(wsNs, wsId);
-      this.activeCall = true;
-    }
-    this.activeCallObservable.subscribe(
-      (workspaceResponse) => {
-        const workspaceData: WorkspaceData = {
-          ...workspaceResponse.workspace,
-          accessLevel: workspaceResponse.accessLevel
-        };
-        console.log(this);
-        this.loadingWorkspace.next(workspaceData);
-        this.cachedWorkspace = workspaceData;
-        this.activeCall = false;
-      },
-      (e) => {
-        if (e.status === 404) {
-          e.title = 'Workspace ' + wsNs + '/' + wsId + ' not found';
-        }
-        this.activeCall = false;
-        throw e;
-      }
-    );
-    return this.loadingWorkspace$.first();
+  private wsKey(wsNs, wsId: string): string {
+    return `${wsNs}/${wsId}`;
   }
 
-  getWorkspace(wsNs: string, wsId: string): Observable<WorkspaceData> {
-    if (!this.activeCall) {
-      if (this.cachedWorkspace.namespace !== wsNs || this.cachedWorkspace.id !== wsId) {
-        this.reloadWorkspace(wsNs, wsId);
-      } else {
-        this.loadingWorkspace.next(this.cachedWorkspace);
-      }
-    } else {
-      this.activeCallObservable.subscribe(
-        (workspaceResponse) => {
-          const workspaceData: WorkspaceData = {
-            ...workspaceResponse.workspace,
-            accessLevel: workspaceResponse.accessLevel
-          };
-          console.log(this);
-          this.loadingWorkspace.next(workspaceData);
-          this.cachedWorkspace = workspaceData;
-          this.activeCall = false;
-        },
-        (e) => {
-          if (e.status === 404) {
-            e.title = 'Workspace ' + wsNs + '/' + wsId + ' not found';
-          }
-          this.activeCall = false;
-          throw e;
+  reloadWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
+    const key = this.wsKey(wsNs, wsId);
+    const load = this.workspacesService.getWorkspace(wsNs, wsId)
+      .toPromise()
+      .then((resp) => {
+        return {
+          ...resp.workspace,
+          accessLevel: resp.accessLevel
+        };
+      })
+      .catch((e) => {
+        // Purge the cache on error to allow for retries.
+        this.cache.delete(key);
+        if (e.status === 404) {
+          e.title = `Workspace ${key} not found`;
         }
-      );
+        throw e;
+      });
+    this.cache.set(key, load);
+    return load;
+  }
+
+  getWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
+    const key = this.wsKey(wsNs, wsId);
+    if (!this.cache.has(key)) {
+      return this.reloadWorkspace(wsNs, wsId);
     }
-    return this.loadingWorkspace$.first();
+    return this.cache.get(key);
   }
 }
