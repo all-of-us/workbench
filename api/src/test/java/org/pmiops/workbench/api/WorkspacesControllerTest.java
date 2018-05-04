@@ -94,6 +94,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -1246,4 +1247,16 @@ public class WorkspacesControllerTest {
       //Expected
     }
   }
+
+  @Test
+  public void testEmptyFireCloudWorkspaces() throws Exception {
+    when(fireCloudService.getWorkspaces()).thenReturn(new ArrayList<org.pmiops.workbench.firecloud.model.WorkspaceResponse>());
+    try {
+      ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response = workspacesController.getWorkspaces();
+      assertThat(response.getBody().getItems()).isEmpty();
+    } catch (Exception ex) {
+      fail();
+    }
+  }
+
 }

@@ -1,6 +1,7 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
+import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -30,13 +31,13 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    console.dir(this.route);
     this.subscription = this.route.data
       .map(({participant}) => participant)
       .withLatestFrom(
         this.route.parent.data.map(({cohort}) => cohort),
         this.route.parent.data.map(({workspace}) => workspace),
       )
+      .distinctUntilChanged()
       .subscribe(([participant, cohort, workspace]) => {
         this.loading = true;
 
@@ -58,6 +59,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
           pageFilterType: this.filterType,
         };
 
+        // console.log(`Fetching tab ${this.tabname} from ngOnInit`);
         this.callApi();
       });
   }
@@ -78,17 +80,26 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   }
 
   update(state: ClrDatagridStateInterface) {
-    console.log('Datagrid state: ');
-    console.dir(state);
+    // console.log('Datagrid state: ');
+    // console.dir(state);
     const page = Math.floor(state.page.from / state.page.size);
     const pageSize = state.page.size;
-    this.request = {...this.request, page, pageSize};
+    const oldRequest = {...this.request};
+    const newRequest = {...this.request, page, pageSize};
 
     if (state.sort) {
       const sortby = <string>(state.sort.by);
-      this.request.sortColumn = this.reverseEnum[sortby];
-      this.request.sortOrder = state.sort.reverse ? SortOrder.Desc : SortOrder.Asc;
+      newRequest.sortColumn = this.reverseEnum[sortby];
+      newRequest.sortOrder = state.sort.reverse ? SortOrder.Desc : SortOrder.Asc;
     }
+
+    /* If the old state is the same as the new state, do nothing */
+    if (fromJS(oldRequest).equals(fromJS(newRequest))) {
+      return ;
+    }
+
+    this.request = newRequest;
+    // console.log(`Fetching tab ${this.tabname} from clrDgRefresh`);
     this.callApi();
   }
 }
