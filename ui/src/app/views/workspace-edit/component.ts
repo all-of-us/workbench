@@ -206,10 +206,12 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   reloadConflictingWorkspace(): void {
-    this.workspaceStorageService.reloadWorkspace(this.workspace.namespace, this.workspace.id).then((workspace) => {
-      this.workspace = workspace;
-      this.accessLevel = workspace.accessLevel;
-      this.resetWorkspaceEditor();
+    this.workspaceStorageService.reloadWorkspace(
+      this.workspace.namespace,
+      this.workspace.id).then((workspace) => {
+        this.workspace = workspace;
+        this.accessLevel = workspace.accessLevel;
+        this.resetWorkspaceEditor();
     });
   }
 
