@@ -8,8 +8,6 @@ import java.net.SocketTimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
-
-import com.google.api.gax.rpc.UnauthenticatedException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
