@@ -5,8 +5,9 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
-    // TODO -- maybe add order by
     List<DbDomain> findAll();
+    
+    DbDomain findByConceptId(long conceptId);
 
     List<DbDomain> findByDbType(String db_type);
 

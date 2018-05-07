@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="brianfreeman" id="changelog-36">
+        <validCheckSum>ANY</validCheckSum>
+        <createTable tableName="concept">
+            <column name="concept_id" type="INTEGER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="concept_name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="domain_id" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="vocabulary_id" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="concept_class_id" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="standard_concept" type="VARCHAR(1)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="concept_code" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="valid_start_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="valid_end_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="invalid_reason" type="VARCHAR(1)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <loadData tableName="concept" file="csv/concept.csv" encoding="UTF-8" quotchar='"'>
+            <column name="concept_id" type="NUMERIC"/>
+            <column name="concept_name" type="STRING"/>
+            <column name="domain_id" type="STRING"/>
+            <column name="vocabulary_id" type="STRING"/>
+            <column name="concept_class_id" type="STRING"/>
+            <column name="standard_concept" type="STRING"/>
+            <column name="concept_code" type="STRING"/>
+            <column name="valid_start_date" type="DATE"/>
+            <column name="valid_end_date" type="DATE"/>
+            <column name="invalid_reason" type="STRING"/>
+        </loadData>
+
+    </changeSet>
+</databaseChangeLog>
