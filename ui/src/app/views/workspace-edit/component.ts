@@ -240,13 +240,7 @@ export class WorkspaceEditComponent implements OnInit {
     this.savingWorkspace = true;
     this.workspacesService.createWorkspace(this.workspace).subscribe(
         () => {
-          this.router.navigate(
-            [
-              '..',
-              this.workspace.namespace,
-              this.workspace.id
-            ], {relativeTo: this.route}
-          );
+          this.navigateBack();
         },
         (error) => {
           this.workspaceCreationError = true;
@@ -267,7 +261,7 @@ export class WorkspaceEditComponent implements OnInit {
           this.workspaceStorageService.reloadWorkspace(
             this.workspace.namespace,
             this.workspace.id).then(() => {
-              this.router.navigate(['..'], {relativeTo: this.route});
+              this.navigateBack();
           });
         },
         (error) => {
