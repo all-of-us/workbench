@@ -1,9 +1,7 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import * as highcharts from 'highcharts';
 
-import {Analysis} from '../AnalysisClasses';
-import {Concept} from '../ConceptClasses';
-import {AchillesService} from '../services/achilles.service';
+import {Analysis} from '../../../publicGenerated/model/analysis';
 
 
 @Component({
@@ -12,15 +10,12 @@ import {AchillesService} from '../services/achilles.service';
   styleUrls: ['./chart.component.css']
 })
 export class ChartComponent implements OnChanges {
-  @Input() redraw;
   @Input() analysis: Analysis;
-  @Input() concepts: Concept[];
-  chartType;
-  chartOptions;
+  @Input() chartOptions;
   chart;
-  localAnalysis: Analysis;
+  chartType = 'column';
 
-  constructor(private achillesService: AchillesService) {
+  constructor() {
     highcharts.setOptions({
       lang: { thousandsSep: ',' },
       colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4']
@@ -37,15 +32,10 @@ export class ChartComponent implements OnChanges {
 
   // If analysis object results changed , update the chart
   ngOnChanges() {
-    this.chartOptions = null;
-    if (this.concepts && this.concepts.length) {
-      const a  = this.achillesService.makeConceptsCountAnalysis(this.concepts);
-      this.chartOptions = a.hcChartOptions();
-      this.chartType = a.chartType;
-    } else if (this.analysis && this.analysis.results.length) {
+  console.log("On changes", this.chartOptions);
+   if (this.analysis && this.analysis.results.length) {
       // HC automatically redraws when changing chart options
-      this.chartOptions = this.analysis.hcChartOptions();
-      this.chartType = this.analysis.chartType;
+
     }
   }
 

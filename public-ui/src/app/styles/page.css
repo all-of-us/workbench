@@ -6,7 +6,7 @@
     margin-bottom: 1.5rem;
 }
 
-.title, .view-title, .box-title,  {
+.title, .view-title, .box-title  {
     color: #302C71;
 }
 
@@ -14,7 +14,14 @@
     font-size: 32px;
     padding-top: 12px;
     padding-bottom:12px;
-
+    font-family: "Gotham HTF", open-sans, sans-serif;
+}
+.survey-view .view-title {
+    font-size: 35px;
+    padding-top: 0px;
+    padding-bottom:12px;
+    color: #302C71;
+    font-weight:300;
 }
 
 .view-sub-title, .box-sub-title {
@@ -23,9 +30,16 @@
     font-size: 14px;
     font-weight: 300;
     line-height: 20px;
+    font-family: "Gotham HTF", open-sans, sans-serif;
 }
 
-
+.survey-view .view-sub-title {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-bottom:12px;
+    color: #302C71;
+    line-height: 40px;
+}
 .white-box {
     padding: 1rem;
     background-color: white;
@@ -40,8 +54,3 @@
     font-size: 20px;
 }
 
-
-.box-sub-title {
-    font-size: 14px;
-    color: #5A5A5A;
-}

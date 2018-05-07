@@ -1,9 +1,68 @@
-<div class="row">
+<div class="survey-view">
 
-  <div class="col-xs-12 col-sm-12 col-md-8">
-    <div class="page-header">
-      <div class="view-title"> {{title}} {{survey.domainId}}</div>
-      <div class="view-sub-title">{{survey.domainDesc}} </div>
+  <div class="row">
+
+    <div class="col-xs-12">
+      <div class="page-header">
+        <div *ngIf="survey && survey.conceptId">
+          <div class="view-title"> {{survey.domainDisplay}} Survey Module </div>
+          <div class="view-sub-title">{{survey.domainDesc}} </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+    <div *ngIf="survey && survey.conceptId" class="col-xs-12 col-sm-6 col-md-4">
+      <div class="card stats-card">
+
+        <div class="card-block card-title">
+              Number Completed
+        </div>
+        <div class="card-block card-stat">
+          {{survey.numParticipants | number }}
+        </div>
+
+      </div>
+    </div>
+    <div *ngIf="(resultsComplete )" class="col-md-3 col-sm-4 col-xs-12">
+      <div class="card stats-card">
+
+        <div class="card-block card-title">
+          Questions
+        </div>
+        <div class="card-block card-stat">
+          {{ surveyResult.items.length }}
+        </div>
+
+      </div>
     </div>
   </div>
+
+  <div class="survey-results" *ngIf="resultsComplete">
+    <div class="survey-results-background"></div>
+    <div class="container">
+
+      <div class="search-input-big">
+        <clr-icon shape="search" class="input-icon is-info"></clr-icon>
+        <input type="text" id="search-db" placeholder="Keyword Search">
+      </div>
+      <div class="box-sub-title"> Click on each response to view branding logic and age and gender distributions</div>
+      <div class="row question-result" *ngFor="let q of surveyResult.items, let i = index, let countAnalysis = q.analyses.shift()">
+        <div class="row question-card">
+          <div class="col-md-6 col-xs-12 col-sm-12">
+            <div class="box-title"> Question {{i + 1}}</div>
+            <div class="box-sub-title"> {{ q.conceptName}} </div>
+          </div>
+          <div class="col-md-6 col-xs-12 col-sm-12">
+            <div class="response-dist">
+              <app-chart *ngIf="countAnalysis" [analysis]="countAnalysis" [chartOptions]="hcChartOptions(countAnalysis)" ></app-chart>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 </div>

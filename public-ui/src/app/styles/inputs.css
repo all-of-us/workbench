@@ -10,7 +10,7 @@ input[type=url]:not([readonly]) {
   padding: 1rem;
   border: none;
   border-bottom: solid 1px;
-  background-color: white;
+  background-color: inherit;
   width: 80%;
 }
 
