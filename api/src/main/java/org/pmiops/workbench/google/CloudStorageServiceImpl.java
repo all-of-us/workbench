@@ -6,15 +6,12 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageOptions;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.CopyWriter;
-import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
-import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.FileDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
