@@ -8,6 +8,12 @@
   cursor: pointer;
 }
 
+.header-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
 .sidenav-toggle {
   transform: rotate(0deg);
   display: inline-block;
