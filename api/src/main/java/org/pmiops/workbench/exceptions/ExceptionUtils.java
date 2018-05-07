@@ -73,6 +73,8 @@ public class ExceptionUtils {
 
     if (code == HttpServletResponse.SC_NOT_FOUND) {
       return new NotFoundException();
+    } else if (code == HttpServletResponse.SC_UNAUTHORIZED) {
+      return new UnauthorizedException();
     } else if (code == HttpServletResponse.SC_FORBIDDEN) {
       return new ForbiddenException();
     } else if (code == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
