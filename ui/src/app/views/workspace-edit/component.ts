@@ -190,8 +190,7 @@ export class WorkspaceEditComponent implements OnInit {
         ...fromPurpose,
         // Heuristic for whether the user will want to request a review,
         // assuming minimal changes to the existing research purpose.
-        reviewRequested: (
-          fromPurpose.reviewRequested && !fromPurpose.approved),
+        reviewRequested: (fromPurpose.reviewRequested && !fromPurpose.approved),
         timeRequested: null,
         approved: null,
         timeReviewed: null,
