@@ -80,8 +80,8 @@ public class QuestionConcept {
                 }
                 AchillesAnalysis questionAnalysis = q.getAnalysis(analysis.getAnalysisId());
                 questionAnalysis.addResult(r);
-
-                if (r.getStratum5Name().equals(null) || r.getStratum5Name().equals("")) {
+                String rStratum5Name = r.getStratum5Name();
+                if (rStratum5Name == null || rStratum5Name.equals("")) {
                     if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
                         r.setStratum5Name(ageStratumNameMap.get(r.getStratum5()));
                     }
