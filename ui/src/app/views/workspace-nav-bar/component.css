@@ -29,6 +29,8 @@
   color: white;
   border-top: none;
   border-bottom: none;
+  position: relative;
+  right: 0;
 }
 
 ::ng-deep #workspace-top-nav-bar .btn-group-overflow .btn.dropdown-toggle:hover {
