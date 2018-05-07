@@ -16,6 +16,7 @@ import {ProfileStorageService} from './services/profile-storage.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
+import {WorkspaceStorageService} from './services/workspace-storage.service';
 
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AccountCreationComponent} from './views/account-creation/component';
@@ -134,6 +135,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
     SignInService,
     StatusCheckService,
     GoogleAnalyticsEventsService,
+    WorkspaceStorageService,
     {
       provide: Http,
       useClass: InterceptedHttp,

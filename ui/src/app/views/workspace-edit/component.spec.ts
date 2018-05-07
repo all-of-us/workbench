@@ -7,6 +7,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -72,6 +73,7 @@ describe('WorkspaceEditComponent', () => {
       ],
       providers: [
         { provide: WorkspacesService, useValue: workspacesService },
+        { provide: WorkspaceStorageService, useClass: WorkspaceStorageService },
         // Wrap in a factory function so we can later mutate the value if needed
         // for testing.
         { provide: ActivatedRoute, useFactory: () => activatedRouteStub },
@@ -106,6 +108,7 @@ describe('WorkspaceEditComponent', () => {
 
     testComponent.workspace.namespace = 'foo';
     testComponent.workspace.name = 'created';
+    testComponent.workspace.id = 'created';
     fixture.detectChanges();
 
     fixture.debugElement.query(By.css('.add-button'))
