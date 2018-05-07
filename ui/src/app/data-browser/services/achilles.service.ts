@@ -49,71 +49,15 @@ export class AchillesService {
   }
 
   getAnalysisResults(a: IAnalysis): Promise<any[]> {
-
-      return this.api.getAnalysisResults(a.analysis_id, a.stratum[0], a.stratum[1],
-          a.stratum[2])
-          .toPromise()
-          .then(response => {
-            const data = response.items;
-            if (!data.length) {
-                return [];
-            }
-            let results =  data.map(item => {
-              let ar = null;
-              if (a.dataType === 'distribution') {
-                ar = new AnalysisDistResult(item);
-                return ar;
-              }
-              if (a.chartType === 'map') {
-                ar = new AnalysisResult(item);
-              } else {
-                  ar = new AnalysisResult(item);
-              }
-              return ar;
-            });
-
-            // If age decile results , arrange them in order filling in any missing deciles
-            if (a.analysis_id === 3102) {
-              results = Analysis.arrangeAgeDecileResults(results);
-            }
-            return results;
-
-          })
-          .catch(this.handleError);
+      // Todo take out databrowser in next merge from ui
+      return null;
   }
-
 
   /* Get all the analysis Objects we want to run for an analysisSection
      If justThese is an array , just return ones with id in array  */
   getSectionAnalyses( aids: number[]): Promise<IAnalysis[]> {
-    return this.api.getAnalyses()
-      .toPromise()
-      .then(response => {
-
-        let data = response.items;
-        // If justThese array analysis_ids then ,  filter list to those analysis_ids
-        if (aids && aids.length) {
-          data = data.filter((item) => aids.indexOf(item.analysisId) !== -1);
-        }
-
-        const myanalyses =  data.map(item => {
-
-          if (item.dataType === 'distribution') {
-            const a = new AnalysisDist(item);
-            //
-            return a;
-          }
-          // Return generic count analysis
-          return new Analysis(item);
-        });
-        return myanalyses;
-
-
-      });
-
+    return null;
   }
-
-
   getConceptResults(args) {
 
     /* Todo make object to pass with search params
