@@ -43,4 +43,5 @@
   <include file="changelog/db.changelog-33-uniq-fc-uuid.xml"/>
   <include file="changelog/db.changelog-34-update-fk-rules.xml"/>
   <include file="changelog/db.changelog-35-another-fk-update.xml"/>
+  <include file="changelog/db.changelog-36.xml"/>
 </databaseChangeLog>

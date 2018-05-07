@@ -25,8 +25,6 @@ import java.util.logging.Logger;
 
 public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDaoCustom {
 
-    public static final String cdrDbName = "${cdrDbName}";
-
     public static final String SELECT_SQL_TEMPLATE = "select cohort_review_id as cohortReviewId,\n" +
             "participant_id as participantId,\n" +
             "status,\n" +
@@ -38,9 +36,9 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             "ethnicity_concept_id as ethnicityConceptId,\n" +
             "ethnicity.concept_name as ethnicity\n" +
             "from participant_cohort_status pcs\n" +
-            "left join " + cdrDbName + "concept gender on (gender.concept_id = pcs.gender_concept_id and gender.vocabulary_id = 'Gender')\n" +
-            "left join " + cdrDbName + "concept race on (race.concept_id = pcs.race_concept_id and race.vocabulary_id = 'Race')\n" +
-            "left join " + cdrDbName + "concept ethnicity on (ethnicity.concept_id = pcs.ethnicity_concept_id and ethnicity.vocabulary_id = 'Ethnicity')\n";
+            "left join concept gender on (gender.concept_id = pcs.gender_concept_id and gender.vocabulary_id = 'Gender')\n" +
+            "left join concept race on (race.concept_id = pcs.race_concept_id and race.vocabulary_id = 'Race')\n" +
+            "left join concept ethnicity on (ethnicity.concept_id = pcs.ethnicity_concept_id and ethnicity.vocabulary_id = 'Ethnicity')\n";
 
     private static final String WHERE_CLAUSE_TEMPLATE = "where cohort_review_id = :cohortReviewId\n";
 
@@ -117,8 +115,6 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
     public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
         ParticipantCohortStatusColumns sortColumnEnum = ParticipantCohortStatusColumns.fromValue(pageRequest.getSortColumn());
         String sortColumn = ParticipantCohortStatusDbInfo.fromName(sortColumnEnum).getDbName();
-        String schemaPrefix = CdrVersionContext.getCdrVersion().getCdrDbName();
-        schemaPrefix = schemaPrefix.isEmpty() ? schemaPrefix : schemaPrefix + ".";
 
         sortColumn = (sortColumn.equals(ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName()))
                 ? ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
@@ -132,7 +128,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
                 + String.format(ORDERBY_SQL_TEMPLATE, sortColumn)
                 + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPageNumber() * pageRequest.getPageSize(), pageRequest.getPageSize());
 
-        return namedParameterJdbcTemplate.query(sqlStatement.replace(cdrDbName, schemaPrefix),
+        return namedParameterJdbcTemplate.query(sqlStatement,
                 parameters,
                 new ParticipantCohortStatusRowMapper());
     }
