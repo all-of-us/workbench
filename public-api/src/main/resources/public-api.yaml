@@ -28,31 +28,6 @@ produces:
 paths:
 
   # Data Browser #######################################################################
-  /v1/databrowser/question-analyses:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets list of analysis and results by analysis id and question concept id
-      operationId: "getQuestionAnalyses"
-      parameters:
-        - in: query
-          name: survey_concept_id
-          type: string
-          format: int64
-          required: true
-          description: survey concept id
-        - in: query
-          name: question_concept_id
-          type: string
-          required: false
-          description: question concept id
-      responses:
-        200:
-          description: List of all analyses with results
-          schema:
-            $ref: "#/definitions/AnalysisListResponse"
 
   /v1/databrowser/survey-results:
     get:

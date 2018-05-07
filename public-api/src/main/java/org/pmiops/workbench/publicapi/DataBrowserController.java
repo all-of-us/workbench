@@ -2,25 +2,19 @@ package org.pmiops.workbench.publicapi;
 
 
 import org.pmiops.workbench.cdr.dao.*;
-import org.pmiops.workbench.cdr.model.AchillesAnalysis;
-
-import org.pmiops.workbench.cdr.model.QuestionConcept;
-import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.DbDomain;
-import org.pmiops.workbench.cdr.model.AchillesResult;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.cdr.model.*;
+import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.DbDomainListResponse;
+import org.pmiops.workbench.model.QuestionConceptListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.persistence.EntityManager;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static org.pmiops.workbench.cdr.model.QuestionConcept.*;
 
 @RestController
 public class DataBrowserController implements DataBrowserApiDelegate {
@@ -35,8 +29,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private AchillesResultDao achillesResultDao;
     @Autowired
     private DbDomainDao dbDomainDao;
-    @Autowired
-    private EntityManager entityManager;
 
     public static final long PARTICIPANT_COUNT_ANALYSIS_ID = 1;
     public static final long COUNT_ANALYSIS_ID = 3000;
@@ -173,7 +165,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             };
 
 
-    /* Final api functions put on top */
     @Override
     public ResponseEntity<DbDomainListResponse> getDomainFilters() {
         List<DbDomain> domains=dbDomainDao.findByDbType("domain_filter");
@@ -189,8 +180,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
     }
-
-
 
     @Override
     public ResponseEntity<QuestionConceptListResponse> getSurveyResults(String surveyConceptId) {
@@ -211,7 +200,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // Get all analyses for question list and put the analyses on the question objects
         if (!questions.isEmpty()) {
             // Put ids in array for query to get all results at once
-            List<String> qlist= new ArrayList();
+            List<String> qlist = new ArrayList();
             for (QuestionConcept q : questions) {
                 qlist.add(String.valueOf(q.getConceptId()));
             }
@@ -223,16 +212,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         resp.setItems(questions.stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
     }
-
-    @Override
-    public ResponseEntity<AnalysisListResponse> getQuestionAnalyses(String surveyConceptId, String questionConceptId) {
-        List<AchillesAnalysis> results = achillesAnalysisDao.findQuestionAnalysisResults(surveyConceptId, questionConceptId);
-        AnalysisListResponse resp = new AnalysisListResponse();
-        resp.setItems(results.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-    }
-
-    /* End Final api functions. Put new api functions above here when done. */
 
     /**
      * This method searches concepts
@@ -297,15 +276,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(resp);
     }
 
-
-
     @Override
     public ResponseEntity<org.pmiops.workbench.model.AchillesResult> getParticipantCount() {
         AchillesResult result = achillesResultDao.findAchillesResultByAnalysisId(PARTICIPANT_COUNT_ANALYSIS_ID);
         return ResponseEntity.ok(TO_CLIENT_ACHILLES_RESULT.apply(result));
     }
-
-
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDbDomains() {

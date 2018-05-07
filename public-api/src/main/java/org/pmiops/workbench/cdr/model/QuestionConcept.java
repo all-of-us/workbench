@@ -2,7 +2,6 @@ package org.pmiops.workbench.cdr.model;
 
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,43 +27,6 @@ public class QuestionConcept {
     public static Map<String, String> ageStratumNameMap  = new HashMap<String, String>();
     public static Map<String, String> genderStratumNameMap = new HashMap<String, String>();
 
-    /* Take analysis list with results and put them on the list of questions.
-     * This is used when we get a whole list of Analysis with the results for a list of questions from tha dao
-     * so that the return to the ui is a nice question object with analyses and results
-     * Questions updated by reference
-     */
-    public static void mapAnalysesToQuestions(List<QuestionConcept> questions, List<AchillesAnalysis> analyses ) {
-        Map<Long, QuestionConcept> questionMap = new HashMap<Long, QuestionConcept>();
-        for (QuestionConcept q : questions) {
-            questionMap.put(q.getConceptId(), q);
-        }
-        setAgeStratumNameMap();
-        setGenderStratumNameMap();
-        for (AchillesAnalysis analysis : analyses) {
-            // Add stratum5Name to the results for the ui -- ie Male, Female , Age Decile name
-            for (AchillesResult r : analysis.getResults()) {
-                // Add analysis to question if need to
-                Long qid = Long.valueOf(r.getStratum2());
-                QuestionConcept q = questionMap.get(qid);
-
-                if ( q.getAnalysis(analysis.getAnalysisId())  == null) {
-                    q.setAnalysis(new AchillesAnalysis(analysis));
-                }
-                AchillesAnalysis questionAnalysis = q.getAnalysis(analysis.getAnalysisId());
-                questionAnalysis.addResult(r);
-
-                if (r.getStratum5Name() == null || r.getStratum5Name() == "") {
-                    if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
-                        r.setStratum5Name(ageStratumNameMap.get(r.getStratum5()));
-                    }
-                    if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
-                        r.setStratum5Name(genderStratumNameMap.get(r.getStratum5()));
-                    }
-                }
-            }
-        }
-    }
-
     /* Todo Find right place for these static things to be generated from db if possible and live */
     public static void setAgeStratumNameMap() {
         ageStratumNameMap.put("1", "0-18 yrs old");
@@ -88,6 +50,47 @@ public class QuestionConcept {
         genderStratumNameMap.put("8521", "Other");
         genderStratumNameMap.put("8551", "Unknown");
         genderStratumNameMap.put("8570", "Ambiguous");
+    }
+
+    static {
+        setAgeStratumNameMap();
+        setGenderStratumNameMap();
+    }
+
+    /* Take analysis list with results and put them on the list of questions.
+     * This is used when we get a whole list of Analysis with the results for a list of questions from tha dao
+     * so that the return to the ui is a nice question object with analyses and results
+     * Questions updated by reference
+     */
+    public static void mapAnalysesToQuestions(List<QuestionConcept> questions, List<AchillesAnalysis> analyses ) {
+        Map<Long, QuestionConcept> questionMap = new HashMap<Long, QuestionConcept>();
+        for (QuestionConcept q : questions) {
+            questionMap.put(q.getConceptId(), q);
+        }
+
+        for (AchillesAnalysis analysis : analyses) {
+            // Add stratum5Name to the results for the ui -- ie Male, Female , Age Decile name
+            for (AchillesResult r : analysis.getResults()) {
+                // Add analysis to question if need to
+                Long qid = Long.valueOf(r.getStratum2());
+                QuestionConcept q = questionMap.get(qid);
+
+                if ( q.getAnalysis(analysis.getAnalysisId())  == null) {
+                    q.setAnalysis(new AchillesAnalysis(analysis));
+                }
+                AchillesAnalysis questionAnalysis = q.getAnalysis(analysis.getAnalysisId());
+                questionAnalysis.addResult(r);
+
+                if (r.getStratum5Name().equals(null) || r.getStratum5Name().equals("")) {
+                    if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
+                        r.setStratum5Name(ageStratumNameMap.get(r.getStratum5()));
+                    }
+                    if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
+                        r.setStratum5Name(genderStratumNameMap.get(r.getStratum5()));
+                    }
+                }
+            }
+        }
     }
 
     @Id
