@@ -17,7 +17,7 @@
 }
 
 .row .checkbox-group {
-  width: 20rem;
+  width: 50%;
   display: inline-block;
   padding-right: 2rem;
 }
@@ -54,4 +54,19 @@
 
 .row {
   display: flex;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.card {
+  width: 60%
+}
+
+.col-xs-6 {
+  padding: 0;
+}
+
+.button {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
