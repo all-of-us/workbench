@@ -84,7 +84,7 @@ describe('InvitationKeyComponent', () => {
     const app = fixture.debugElement.componentInstance;
     updateAndTick(fixture);
     expect(app).toBeTruthy();
-    expect(app.invitationKeyVerifed).toBeFalsy();
+    expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeFalsy();
   }));
@@ -94,7 +94,7 @@ describe('InvitationKeyComponent', () => {
     simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
     updateAndTick(invitationKeyPage.fixture);
-    expect(app.invitationKeyVerifed).toBeFalsy();
+    expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeTruthy();
     expect(app.invitationKeyInvalid).toBeFalsy();
   }));
@@ -104,7 +104,7 @@ describe('InvitationKeyComponent', () => {
     app.invitationKey = 'invalid';
     updateAndTick(invitationKeyPage.fixture);
     simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
-    expect(app.invitationKeyVerifed).toBeFalsy();
+    expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeTruthy();
   }));
@@ -114,7 +114,7 @@ describe('InvitationKeyComponent', () => {
     app.invitationKey = 'dummy';
     updateAndTick(invitationKeyPage.fixture);
     simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
-    expect(app.invitationKeyVerifed).toBeTruthy();
+    expect(app.invitationKeyVerified).toBeTruthy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeFalsy();
   }));

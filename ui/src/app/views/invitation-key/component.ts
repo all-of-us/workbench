@@ -17,7 +17,7 @@ function isBlank(s: string) {
 
 export class InvitationKeyComponent {
   invitationKey: string;
-  invitationKeyVerifed: boolean;
+  invitationKeyVerified: boolean;
   invitationKeyReq: boolean;
   invitationKeyInvalid: boolean;
   invitationKeyRequestEmail: string;
@@ -27,7 +27,7 @@ export class InvitationKeyComponent {
       private profileService: ProfileService,
       private loginComponent: LoginComponent
   ) {
-      this.invitationKeyVerifed = false;
+      this.invitationKeyVerified = false;
       this.invitationKeyReq = false;
       this.invitationKeyInvalid = false;
       this.requestSent = false;
@@ -53,7 +53,7 @@ export class InvitationKeyComponent {
       invitationKey: this.invitationKey
     };
     this.profileService.invitationKeyVerification(request).subscribe(() => {
-      this.invitationKeyVerifed = true;
+      this.invitationKeyVerified = true;
     }, () => {
       this.invitationKeyInvalid = true;
     });
