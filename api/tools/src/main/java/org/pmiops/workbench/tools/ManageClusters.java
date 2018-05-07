@@ -67,8 +67,8 @@ public class ManageClusters {
   private static String formatTabular(Cluster c) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(c.getLabels()).getAsJsonObject();
-    return String.format("%-40.40s %-40.40s %-15s",
-        clusterId(c), labels.get("created-by").getAsString(), c.getCreatedDate());
+    return String.format("%-30.30s %-50.50s %-10s %-15s",
+        clusterId(c), labels.get("created-by").getAsString(), c.getStatus(), c.getCreatedDate());
   }
 
   private static void listClusters() throws IOException, ApiException {
