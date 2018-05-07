@@ -2,6 +2,8 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+
 import {Workspace, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 
 /**
@@ -15,24 +17,16 @@ export interface WorkspaceData extends Workspace {
 export class WorkspaceResolver implements Resolve<WorkspaceData> {
   constructor(
     private api: WorkspacesService,
+    private workspaceStorageService: WorkspaceStorageService,
   ) {}
 
-  resolve(route: ActivatedRouteSnapshot): Observable<WorkspaceData> {
+  resolve(route: ActivatedRouteSnapshot): Promise<WorkspaceData> {
     const ns: Workspace['namespace'] = route.params.ns;
     const wsid: Workspace['id'] = route.params.wsid;
 
     // console.log(`Resolving Workspace ${ns}/${wsid}:`);
     // console.dir(route);
 
-    const call = this.api
-      .getWorkspace(ns, wsid)
-      .map(({workspace, accessLevel}) => ({...workspace, accessLevel}))
-      .catch((e) => {
-        if (e.status === 404) {
-          e.title = 'Workspace ' + ns + '/' + wsid + ' not found';
-        }
-        throw e;
-      });
-    return (call as Observable<WorkspaceData>);
+    return this.workspaceStorageService.getWorkspace(ns, wsid);
   }
 }
