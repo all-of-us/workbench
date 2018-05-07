@@ -79,6 +79,8 @@ export class ErrorHandlingService {
 
         const errorResponse = ErrorHandlingService.convertAPIError(e);
         switch (errorResponse.statusCode) {
+          case 401:
+            break;
           case 503:
             break;
           case 500:
