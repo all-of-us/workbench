@@ -15,7 +15,7 @@ import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
-import {WorkspaceShareComponent} from './views/workspace-share/component';
+import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
@@ -58,6 +58,7 @@ const routes: Routes = [
              * provided by the route rather than double-requesting it.
              */
             path: 'workspace/:ns/:wsid',
+            component: WorkspaceNavBarComponent,
             data: {
               title: 'View Workspace Details',
               breadcrumb: ':wsid'
@@ -93,13 +94,13 @@ const routes: Routes = [
               path: 'cohorts/build',
               loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
               data: {
-                breadcrumb: 'Cohort Builder'
+                breadcrumb: 'Add a Cohort'
               }
             }, {
               path: 'cohorts/:cid/review',
               loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
               data: {
-                breadcrumb: 'Cohort Review'
+                breadcrumb: 'Cohort'
               }
             }, {
               path: 'cohorts/:cid/edit',

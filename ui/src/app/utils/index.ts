@@ -1,4 +1,4 @@
-import {Router} from '@angular/router';
+import {ActivatedRoute, Data, Params, Router} from '@angular/router';
 import {fromJS} from 'immutable';
 
 export function isBlank(toTest: String): boolean {
@@ -24,4 +24,11 @@ export function navigateLogin(router: Router, fromUrl: string): Promise<boolean>
     params['from'] = fromUrl;
   }
   return router.navigate(['/login', params]);
+}
+
+
+export function flattenedRouteData(route: ActivatedRoute): Data {
+  return route.snapshot.pathFromRoot.reduce((res, curr) => {
+    return Object.assign({}, res, curr.data);
+  }, ({}));
 }

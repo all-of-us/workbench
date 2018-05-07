@@ -6,6 +6,7 @@ import {fromJS, List} from 'immutable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
 
+import { flattenedRouteData } from '../../utils';
 import {activeParameterList, CohortSearchActions} from '../redux';
 
 import {Attribute, CohortBuilderService} from 'generated';
@@ -113,7 +114,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   loadNodesFromApi() {
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
+    const cdrid = flattenedRouteData(this.route).workspace.cdrVersionId;
     /*
      * Each subtype's possible criteria is loaded via the API.  Race and Gender
      * criteria nodes become options in their respective dropdowns; deceased
