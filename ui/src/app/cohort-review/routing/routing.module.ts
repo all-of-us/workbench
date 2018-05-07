@@ -40,11 +40,17 @@ const routes: Routes = [{
   }, {
     path: 'overview',
     component: OverviewPage,
+    data: {
+      breadcrumb: 'Overview'
+    }
   }, {
     path: 'participants',
     component: TablePage,
     resolve: {
       concepts: DemographicConceptMapsResolver,
+    },
+    data: {
+      breadcrumb: 'Participants'
     }
   }, {
     path: 'participants/:pid',
@@ -52,6 +58,9 @@ const routes: Routes = [{
     resolve: {
       participant: ParticipantResolver,
       annotations: ParticipantAnnotationsResolver,
+    },
+    data: {
+      breadcrumb: 'Participant :pid'
     }
   }],
 }];
