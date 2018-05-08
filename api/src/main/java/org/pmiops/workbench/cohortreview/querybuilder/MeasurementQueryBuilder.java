@@ -49,7 +49,7 @@ public class MeasurementQueryBuilder implements ReviewQueryBuilder {
 
   @Override
   public ParticipantData createParticipantData() {
-    return new ParticipantMeasurement().dataType(DataType.PARTICIPANTMEASUREMENT);
+    return new Measurement().domainType(DomainType.MEASUREMENT);
   }
 
   @Override

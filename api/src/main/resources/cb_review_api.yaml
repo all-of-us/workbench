@@ -586,10 +586,9 @@ definitions:
     enum: [ParticipantCohortStatuses, ParticipantConditions, ParticipantProcedures, ParticipantObservations,
     ParticipantDrugs, ParticipantMasters, ParticipantDevices, ParticipantVisits, ParticipantMeasurements]
 
-  DataType:
+  DomainType:
     type: string
-    enum: [ParticipantCondition, ParticipantProcedure, ParticipantObservation, ParticipantDrug, ParticipantMaster,
-    ParticipantDevice, ParticipantVisit, ParticipantMeasurement]
+    enum: [Condition, Procedure, Observation, Drug, Master, Device, Visit, Measurement]
 
   SortOrder:
     type: string
@@ -804,7 +803,7 @@ definitions:
         description: the count for this criteria type in the cohort
 
   ParticipantData:
-    discriminator: dataType
+    discriminator: domainType
     required:
       - itemDate
       - standardVocabulary
@@ -812,7 +811,7 @@ definitions:
       - sourceValue
       - sourceVocabulary
       - sourceName
-      - dataType # required for inheritance to work
+      - domainType # required for inheritance to work
     properties:
       itemDate:
         type: string
@@ -832,10 +831,10 @@ definitions:
       sourceName:
         type: string
         description: The source name of this data.
-      dataType:
-        $ref: "#/definitions/DataType"
+      domainType:
+        $ref: "#/definitions/DomainType"
 
-  ParticipantCondition:
+  Condition:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
@@ -843,7 +842,7 @@ definitions:
             type: integer
             description: The age of event for the participant
 
-  ParticipantProcedure:
+  Procedure:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
@@ -851,7 +850,7 @@ definitions:
             type: integer
             description: The age of event for the participant
 
-  ParticipantObservation:
+  Observation:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
@@ -859,7 +858,7 @@ definitions:
             type: integer
             description: The age of event for the participant
 
-  ParticipantDrug:
+  Drug:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
@@ -870,7 +869,7 @@ definitions:
             type: string
             description: signature of drug
 
-  ParticipantMaster:
+  Master:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
@@ -882,7 +881,7 @@ definitions:
             type: string
             description: the domain of this data.
 
-  ParticipantDevice:
+  Device:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
@@ -890,7 +889,7 @@ definitions:
             type: integer
             description: The age of event for the participant
 
-  ParticipantVisit:
+  Visit:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
@@ -901,7 +900,7 @@ definitions:
             type: string
             description: The end date of the visit occurrence
 
-  ParticipantMeasurement:
+  Measurement:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties

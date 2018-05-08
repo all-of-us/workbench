@@ -588,23 +588,23 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     private ParticipantData convertRowToParticipantData(Map<String, Integer> rm,
                                                         List<FieldValue> row,
                                                         ParticipantData data) {
-        if (data instanceof ParticipantDrug) {
-            ((ParticipantDrug) data).signature(bigQueryService.getString(row, rm.get("signature")));
-            ((ParticipantDrug) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof ParticipantCondition) {
-            ((ParticipantCondition) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof ParticipantProcedure) {
-            ((ParticipantProcedure) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof ParticipantObservation) {
-            ((ParticipantObservation) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof ParticipantVisit) {
-            ((ParticipantVisit) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-            ((ParticipantVisit) data).endDate(bigQueryService.getDateTime(row, rm.get("endDate")));
-        } else if (data instanceof ParticipantMeasurement) {
-            ((ParticipantMeasurement) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof ParticipantMaster) {
-            ((ParticipantMaster) data).dataId(bigQueryService.getLong(row, rm.get("dataId")));
-            ((ParticipantMaster) data).domain(bigQueryService.getString(row, rm.get("domain")));
+        if (data instanceof Drug) {
+            ((Drug) data).signature(bigQueryService.getString(row, rm.get("signature")));
+            ((Drug) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (data instanceof Condition) {
+            ((Condition) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (data instanceof Procedure) {
+            ((Procedure) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (data instanceof Observation) {
+            ((Observation) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (data instanceof Visit) {
+            ((Visit) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+            ((Visit) data).endDate(bigQueryService.getDateTime(row, rm.get("endDate")));
+        } else if (data instanceof Measurement) {
+            ((Measurement) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (data instanceof Master) {
+            ((Master) data).dataId(bigQueryService.getLong(row, rm.get("dataId")));
+            ((Master) data).domain(bigQueryService.getString(row, rm.get("domain")));
         }
         return data.itemDate(bigQueryService.getDateTime(row, rm.get("itemDate")))
                 .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))

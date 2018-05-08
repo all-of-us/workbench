@@ -55,7 +55,7 @@ public class DrugQueryBuilder implements ReviewQueryBuilder {
 
     @Override
     public ParticipantData createParticipantData() {
-        return new ParticipantDrug().dataType(DataType.PARTICIPANTDRUG);
+        return new Drug().domainType(DomainType.DRUG);
     }
 
     @Override

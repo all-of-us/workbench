@@ -51,7 +51,7 @@ public class VisitQueryBuilder implements ReviewQueryBuilder {
 
   @Override
   public ParticipantData createParticipantData() {
-    return new ParticipantVisit().dataType(DataType.PARTICIPANTVISIT);
+    return new Visit().domainType(DomainType.VISIT);
   }
 
   @Override

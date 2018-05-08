@@ -49,7 +49,7 @@ public class DeviceQueryBuilder implements ReviewQueryBuilder {
 
   @Override
   public ParticipantData createParticipantData() {
-    return new ParticipantDevice().dataType(DataType.PARTICIPANTDEVICE);
+    return new Device().domainType(DomainType.DEVICE);
   }
 
   @Override

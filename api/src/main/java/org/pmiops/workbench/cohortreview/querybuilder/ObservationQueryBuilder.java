@@ -53,7 +53,7 @@ public class ObservationQueryBuilder implements ReviewQueryBuilder {
 
     @Override
     public ParticipantData createParticipantData() {
-        return new ParticipantObservation().dataType(DataType.PARTICIPANTOBSERVATION);
+        return new Observation().domainType(DomainType.OBSERVATION);
     }
 
     @Override
