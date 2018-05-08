@@ -15,20 +15,19 @@ import java.util.Optional;
 public class ConditionQueryBuilder implements ReviewQueryBuilder {
 
     private static final String CONDITIONS_SQL_TEMPLATE =
-            "select co.condition_start_datetime as itemDate,\n" +
-                    "       c1.vocabulary_id as standardVocabulary,\n" +
-                    "       c1.concept_name as standardName,\n" +
-                    "       co.condition_source_value as sourceValue,\n" +
-                    "       c2.vocabulary_id as sourceVocabulary,\n" +
-                    "       c2.concept_name as sourceName,\n" +
-                    "       CAST(FLOOR(DATE_DIFF(condition_start_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64) as age\n" +
-                    "from `${projectId}.${dataSetId}.condition_occurrence` co\n" +
-                    "left join `${projectId}.${dataSetId}.concept` c1 on co.condition_concept_id = c1.concept_id\n" +
-                    "left join `${projectId}.${dataSetId}.concept` c2 on co.condition_source_concept_id = c2.concept_id\n" +
-                    "join `${projectId}.${dataSetId}.person` p on co.person_id = p.person_id\n" +
-                    "where co.person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
-                    "order by %s %s, condition_occurrence_id\n" +
-                    "limit %d offset %d\n";
+      "select item_date as itemDate,\n" +
+        "       standard_vocabulary as standardVocabulary,\n" +
+        "       standard_name as standardName,\n" +
+        "       source_value as sourceValue,\n" +
+        "       source_vocabulary as sourceVocabulary,\n" +
+        "       source_name as sourceName,\n" +
+        "       age_at_event as age\n" +
+        "       signature as signature\n" +
+        "       item_end_date as itemEndDate\n" +
+        "from `${projectId}.${dataSetId}.participant_review`\n" +
+        "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+        "and domain = 'Condition'\n" +
+        "order by %s %s, data_id\n";
 
     private static final String CONDITIONS_DETAIL_SQL_TEMPLATE =
       "select co.condition_start_datetime as itemDate,\n" +
@@ -44,11 +43,6 @@ public class ConditionQueryBuilder implements ReviewQueryBuilder {
         "join `${projectId}.${dataSetId}.person` p on co.person_id = p.person_id\n" +
         "where co.condition_occurrence_id = @" + NAMED_DATAID_PARAM + "\n";
 
-    private static final String CONDITIONS_SQL_COUNT_TEMPLATE =
-            "select count(*) as count\n" +
-                    "from `${projectId}.${dataSetId}.condition_occurrence`\n" +
-                    "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
-
     @Override
     public String getQuery() {
         return this.CONDITIONS_SQL_TEMPLATE;
@@ -57,11 +51,6 @@ public class ConditionQueryBuilder implements ReviewQueryBuilder {
     @Override
     public String getDetailsQuery() {
         return this.CONDITIONS_DETAIL_SQL_TEMPLATE;
-    }
-
-    @Override
-    public String getCountQuery() {
-        return this.CONDITIONS_SQL_COUNT_TEMPLATE;
     }
 
     @Override

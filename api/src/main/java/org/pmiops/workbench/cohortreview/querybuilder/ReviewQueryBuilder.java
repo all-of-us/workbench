@@ -14,8 +14,6 @@ public interface ReviewQueryBuilder {
 
     String getDetailsQuery();
 
-    String getCountQuery();
-
     ParticipantData createParticipantData();
 
     PageRequest createPageRequest(PageFilterRequest request);

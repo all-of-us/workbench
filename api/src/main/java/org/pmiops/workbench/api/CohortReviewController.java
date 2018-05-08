@@ -410,10 +410,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             response.addItemsItem(convertRowToParticipantData(rm, row, queryBuilder.createParticipantData()));
         }
 
-        result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                reviewTabQueryBuilder.buildCountQuery(queryBuilder.getCountQuery(), participantId)));
-        rm = bigQueryService.getResultMapper(result);
-        response.count(bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
+        response.count(new Long(response.getItems().size()));
         response.setPageRequest(new org.pmiops.workbench.model.PageRequest()
                 .page(pageRequest.getPageNumber())
                 .pageSize(pageRequest.getPageSize())
