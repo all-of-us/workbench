@@ -30,7 +30,11 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.*;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.EmailException;
+import org.pmiops.workbench.exceptions.GatewayTimeoutException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
@@ -171,7 +175,7 @@ public class ProfileController implements ProfileApiDelegate {
       // For local development, make one billing project per account based on a hash of the account
       // email, and reuse it across database resets. (Assume we won't have any collisions;
       // if we discover that somebody starts using our namespace, change it up.)
-      suffix = user.getEmail().hashCode();
+      suffix = Math.abs(user.getEmail().hashCode());
     } else {
       // In other environments, create a suffix based on the user ID from the database. We will
       // add a suffix if that billing project is already taken. (If the database is reset, we
