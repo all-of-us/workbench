@@ -1,5 +1,9 @@
 .cohort-review-wrapper {
-  min-height: calc(100vh - 4rem);
+  /*
+   * 4rem is taken from the top header's css, 60px from the
+   * workspace nav bar component.
+   */
+  min-height: calc(100vh - calc(4rem + 60px));
   padding: 1rem;
   position: relative;
 }
