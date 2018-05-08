@@ -3,6 +3,8 @@ package org.pmiops.workbench.api;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -48,6 +50,7 @@ public class ClusterController implements ClusterApiDelegate {
   private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
   private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
+  private static final String DATA_URI_PREFIX = "data:application/json;base64,";
 
   private static final Logger log = Logger.getLogger(ClusterController.class.getName());
 
@@ -147,45 +150,43 @@ public class ClusterController implements ClusterApiDelegate {
     if (!projectName.equals(body.getWorkspaceNamespace())) {
       workspacePath = body.getWorkspaceNamespace() + ":" + body.getWorkspaceId();
     }
+    String apiDir = "workspaces/" + workspacePath;
+    String localDir = "~/" + apiDir;
 
-    // Materialize the JSON config files directly via the Jupyter server API.
-    // We perform this on every localize call because the Jupyter local
-    // directory can be deleted by the user, and config files may become
-    // outdated, e.g. as we add new properties to the .all_of_us_config.json.
-    // In most cases, aside from the first localize() call this initialization
-    // work will be a no-op.
-    // TODO: It is very inefficient to do 5 serial requests here. Rework this
-    // to utilize "mkdir -p"-like functionality, e.g. via starting with calling
-    // the /localize endpoint.
-    notebooksService.putRootWorkspacesDir(projectName, clusterName);
-    notebooksService.putWorkspaceDir(projectName, clusterName, workspacePath);
-    notebooksService.putFile(
-        projectName, clusterName, workspacePath, DELOCALIZE_CONFIG_FILENAME,
-        new JSONObject()
+    // Always localize config files; usually a no-op after the first call.
+    Map<String, String> localizeMap = new HashMap<>();
+    localizeMap.put(
+        localDir + "/" + DELOCALIZE_CONFIG_FILENAME,
+        jsonToDataUri(new JSONObject()
             .put("destination", gcsNotebooksDir)
-            .put("pattern", "\\.ipynb$")
-            .toString());
-    notebooksService.putFile(
-        projectName, clusterName, workspacePath, AOU_CONFIG_FILENAME,
-        aouConfigJson(fcWorkspace, cdrVersion).toString());
+            .put("pattern", "\\.ipynb$")));
+    localizeMap.put(
+        localDir + "/" + AOU_CONFIG_FILENAME,
+        aouConfigDataUri(fcWorkspace, cdrVersion));
 
     // Localize the requested notebooks, if any.
-    String apiDir = "workspaces/" + workspacePath;
-    if (body.getNotebookNames() != null && !body.getNotebookNames().isEmpty()) {
-      String localDir = "~/" + apiDir;
-      notebooksService.localize(projectName, clusterName, body.getNotebookNames()
+    if (body.getNotebookNames() != null) {
+      localizeMap.putAll(
+          body.getNotebookNames()
           .stream()
           .collect(Collectors.<String, String, String>toMap(
               name -> localDir + "/" + name,
               name -> gcsNotebooksDir + "/" + name)));
     }
+    notebooksService.localize(projectName, clusterName, localizeMap);
 
     ClusterLocalizeResponse resp = new ClusterLocalizeResponse();
+    // This is the Jupyer-server-root-relative path, the style used by the
+    // Jupyter REST API.
     resp.setClusterLocalDirectory(apiDir);
     return ResponseEntity.ok(resp);
   }
 
-  private JSONObject aouConfigJson(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+  private String jsonToDataUri(JSONObject json) {
+    return DATA_URI_PREFIX + Base64.getUrlEncoder().encodeToString(json.toString().getBytes());
+  }
+
+  private String aouConfigDataUri(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
       CdrVersion cdrVersion) {
     JSONObject config = new JSONObject();
 
@@ -195,6 +196,6 @@ public class ClusterController implements ClusterApiDelegate {
     config.put(API_HOST_KEY, this.apiHostName);
     config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
     config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
-    return config;
+    return jsonToDataUri(config);
   }
 }
