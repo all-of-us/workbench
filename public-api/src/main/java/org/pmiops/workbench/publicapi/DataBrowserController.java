@@ -70,10 +70,19 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             new Function<QuestionConcept, org.pmiops.workbench.model.QuestionConcept>() {
                 @Override
                 public org.pmiops.workbench.model.QuestionConcept apply(QuestionConcept concept) {
+                    org.pmiops.workbench.model.Analysis countAnalysis=null;
+                    org.pmiops.workbench.model.Analysis genderAnalysis=null;
+                    org.pmiops.workbench.model.Analysis ageAnalysis=null;
+                    if(concept.getCountAnalysis() != null){
+                        countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
+                    }
+                    if(concept.getGenderAnalysis() != null){
+                        genderAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderAnalysis());
+                    }
+                    if(concept.getAgeAnalysis() != null){
+                        ageAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getAgeAnalysis());
+                    }
 
-                    org.pmiops.workbench.model.Analysis countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
-                    org.pmiops.workbench.model.Analysis genderAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderAnalysis());
-                    org.pmiops.workbench.model.Analysis ageAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getAgeAnalysis());
 
                     return new org.pmiops.workbench.model.QuestionConcept()
                             .conceptId(concept.getConceptId())
@@ -192,11 +201,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // Get questions for survey
         List<QuestionConcept> questions = questionConceptDao.findSurveyQuestions(longSurveyConceptId);
 
+
         // Get survey definition
         QuestionConceptListResponse resp = new QuestionConceptListResponse();
         DbDomain survey = dbDomainDao.findByConceptId(longSurveyConceptId);
         resp.setSurvey(TO_CLIENT_DBDOMAIN.apply(survey));
-
         // Get all analyses for question list and put the analyses on the question objects
         if (!questions.isEmpty()) {
             // Put ids in array for query to get all results at once
