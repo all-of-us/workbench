@@ -29,10 +29,14 @@ export class SettingsComponent implements OnInit {
     this.clusterService.listClusters()
       .subscribe((resp) => {
         const cluster = resp.defaultCluster;
-        if (cluster.status !== ClusterStatus.CREATING) {
+        if (cluster.status === ClusterStatus.RUNNING ||
+            cluster.status === ClusterStatus.ERROR) {
           this.cluster = cluster;
           return;
         }
+        setTimeout(() => this.pollCluster(), 10000);
+      }, () => {
+        // Also retry on errors.
         setTimeout(() => this.pollCluster(), 10000);
       });
   }
