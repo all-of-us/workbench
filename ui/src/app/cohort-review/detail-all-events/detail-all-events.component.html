@@ -1,7 +1,4 @@
-<clr-datagrid
-  [clrDgLoading]="loading"
-  (clrDgRefresh)="update($event)"
-  class="datagrid-compact">
+<clr-datagrid [clrDgLoading]="loading" class="datagrid-compact">
 
   <clr-dg-placeholder>No {{ tabname }} Data</clr-dg-placeholder>
 
@@ -12,7 +9,7 @@
     {{ col.displayName }}
   </clr-dg-column>
 
-  <clr-dg-row *ngFor="let datum of data"
+  <clr-dg-row *clrDgItems="let datum of data"
     (click)="onClick(datum)"
     [style.cursor]="'pointer'">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
@@ -37,12 +34,8 @@
   </clr-dg-row>
 
   <clr-dg-footer>
-    {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
-    {{ totalCount }} Records
-    <clr-dg-pagination #pagination
-      [clrDgTotalItems]="totalCount"
-      [clrDgPageSize]="request.pageSize"
-      [clrDgPage]="request.page + 1">
+    {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ totalCount }} Records
+    <clr-dg-pagination #pagination [clrDgPageSize]="pageSize">
     </clr-dg-pagination>
   </clr-dg-footer>
 </clr-datagrid>
