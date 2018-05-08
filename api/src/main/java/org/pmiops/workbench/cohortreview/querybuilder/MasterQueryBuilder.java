@@ -18,6 +18,20 @@ import java.util.Optional;
 @Service
 public class MasterQueryBuilder implements ReviewQueryBuilder {
 
+  private static final String MASTER_SQL_TEMPLATE =
+    "select t.${tablePrimaryKey} as dataId, " +
+      "     t.${tableStartDateTime} as itemDate,\n" +
+      "     '${domain}' as domain,\n" +
+      "     c1.vocabulary_id as standardVocabulary,\n" +
+      "     c1.concept_name as standardName,\n" +
+      "     t.${tableSourceValue} as sourceValue,\n" +
+      "     c2.vocabulary_id as sourceVocabulary,\n" +
+      "     c2.concept_name as sourceName\n" +
+      "from `${projectId}.${dataSetId}.${tableName}` t\n" +
+      "left join `${projectId}.${dataSetId}.concept` c1 on t.${tableConceptId} = c1.concept_id\n" +
+      "left join `${projectId}.${dataSetId}.concept` c2 on t.${tableSourceConceptId} = c2.concept_id\n" +
+      "where t.person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
+
   private static final String MASTER1_SQL_TEMPLATE =
     "select data_id as dataId, " +
       "     item_date as itemDate,\n" +
@@ -42,7 +56,7 @@ public class MasterQueryBuilder implements ReviewQueryBuilder {
 
   @Override
   public ParticipantData createParticipantData() {
-    return new ParticipantMaster().dataType(DataType.PARTICIPANTMASTER);
+    return new Master().domainType(DomainType.MASTER);
   }
 
   @Override
@@ -58,5 +72,23 @@ public class MasterQueryBuilder implements ReviewQueryBuilder {
   @Override
   public PageFilterType getPageFilterType() {
     return PageFilterType.PARTICIPANTMASTERS;
+  }
+
+  private List<String> buildDomainSql() {
+    List<String> domainSqlList = new ArrayList<>();
+    for (DomainTableEnum domainTable : DomainTableEnum.values()) {
+      String domainSql =
+        this.MASTER_SQL_TEMPLATE
+          .replace("${tablePrimaryKey}", DomainTableEnum.getPrimaryKey(domainTable.getDomainId()))
+          .replace("${tableStartDateTime}", DomainTableEnum.getEntryDateTime(domainTable.getDomainId()))
+          .replace( "${tableStartDate}", DomainTableEnum.getEntryDate(domainTable.getDomainId()))
+          .replace("${domain}", domainTable.getDomainId())
+          .replace("${tableSourceValue}", DomainTableEnum.getSourceValue(domainTable.getDomainId()))
+          .replace("${tableName}", DomainTableEnum.getTableName(domainTable.getDomainId()))
+          .replace("${tableConceptId}", DomainTableEnum.getConceptId(domainTable.getDomainId()))
+          .replace("${tableSourceConceptId}", DomainTableEnum.getSourceConceptId(domainTable.getDomainId()));
+      domainSqlList.add(domainSql);
+    }
+    return domainSqlList;
   }
 }

@@ -21,8 +21,8 @@ public class ConditionQueryBuilder implements ReviewQueryBuilder {
         "       source_value as sourceValue,\n" +
         "       source_vocabulary as sourceVocabulary,\n" +
         "       source_name as sourceName,\n" +
-        "       age_at_event as age\n" +
-        "       signature as signature\n" +
+        "       age_at_event as age,\n" +
+        "       signature as signature,\n" +
         "       item_end_date as itemEndDate\n" +
         "from `${projectId}.${dataSetId}.participant_review`\n" +
         "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
@@ -55,7 +55,7 @@ public class ConditionQueryBuilder implements ReviewQueryBuilder {
 
     @Override
     public ParticipantData createParticipantData() {
-        return new ParticipantCondition().dataType(DataType.PARTICIPANTCONDITION);
+        return new Condition().domainType(DomainType.CONDITION);
     }
 
     @Override

@@ -53,7 +53,7 @@ public class ProcedureQueryBuilder implements ReviewQueryBuilder {
 
     @Override
     public ParticipantData createParticipantData() {
-        return new ParticipantProcedure().dataType(DataType.PARTICIPANTPROCEDURE);
+        return new Procedure().domainType(DomainType.PROCEDURE);
     }
 
     @Override
