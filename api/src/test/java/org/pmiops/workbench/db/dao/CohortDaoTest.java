@@ -2,14 +2,9 @@ package org.pmiops.workbench.db.dao;
 
 import static org.junit.Assert.*;
 
-import com.google.gson.Gson;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortDefinition;
-import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
