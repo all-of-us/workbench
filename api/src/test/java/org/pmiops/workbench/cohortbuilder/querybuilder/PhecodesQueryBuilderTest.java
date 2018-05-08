@@ -7,7 +7,6 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
