@@ -29,7 +29,7 @@
   color: white;
   border-top: none;
   border-bottom: none;
-  position: relative;
+  position: absolute;
   right: 0;
 }
 
