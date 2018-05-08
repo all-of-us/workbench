@@ -66,6 +66,7 @@ export class ErrorHandlingService {
   }
 
   // don't retry API calls unless the status code is 503.
+  // or if status code is 401. (since they may be early user initialization issue)
   public retryApi (observable: Observable<any>, toRun = 3): Observable<any> {
     let numberRuns = 0;
 
@@ -89,6 +90,8 @@ export class ErrorHandlingService {
               this.setUserDisabledError();
             }
             throw e;
+          case 401:
+            break;
           case 0:
             this.setNoServerResponse();
             throw e;

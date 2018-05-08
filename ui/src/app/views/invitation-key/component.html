@@ -1,6 +1,6 @@
 
 <div style="padding: 3rem 3rem 0 3rem;">
-  <div *ngIf="!invitationKeyVerifed" class="form-area">
+  <div *ngIf="!invitationKeyVerified" class="form-area">
     <div class="form-section">
       <h2>Enter your Invitation Key:</h2>
       <input type="text" class="input" [(ngModel)]="invitationKey" placeholder="Invitation Key">
@@ -26,7 +26,7 @@
     </div>
     -->
   </div>
-  <div *ngIf="invitationKeyVerifed">
+  <div *ngIf="invitationKeyVerified">
     <app-account-creation></app-account-creation>
   </div>
 </div>

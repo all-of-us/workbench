@@ -29,6 +29,8 @@
   color: white;
   border-top: none;
   border-bottom: none;
+  position: relative;
+  right: 0;
 }
 
 ::ng-deep #workspace-top-nav-bar .btn-group-overflow .btn.dropdown-toggle:hover {
@@ -44,6 +46,8 @@
   width: 2rem;
   border: none;
   height: 100%;
+  position: absolute;
+  right: 0;
 }
 
 ::ng-deep #workspace-top-nav-bar .btn-top.btn-overflow:hover {
@@ -58,6 +62,12 @@
   position: absolute !important;
   right: 0;
   height: 100%;
+  width: 5rem
+}
+
+::ng-deep #workspace-top-nav-bar .dropdown-menu {
+  right: 0;
+  width: 2rem;
 }
 
 .btn-group {

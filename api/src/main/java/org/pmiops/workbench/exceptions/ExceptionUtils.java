@@ -53,7 +53,7 @@ public class ExceptionUtils {
 
 
   public static RuntimeException convertFirecloudException(ApiException e) {
-    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling FireCloud", e);
+    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling FireCloud " + e.getResponseBody(), e);
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
@@ -62,7 +62,7 @@ public class ExceptionUtils {
 
   public static RuntimeException convertNotebookException(
       org.pmiops.workbench.notebooks.ApiException e) {
-    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.INFO, "Exception calling notebooks API", e);
+    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling notebooks API " + e.getResponseBody(), e);
     if (isSocketTimeoutException(e)) {
       throw new GatewayTimeoutException();
     }
@@ -73,6 +73,8 @@ public class ExceptionUtils {
 
     if (code == HttpServletResponse.SC_NOT_FOUND) {
       return new NotFoundException();
+    } else if (code == HttpServletResponse.SC_UNAUTHORIZED) {
+      return new UnauthorizedException();
     } else if (code == HttpServletResponse.SC_FORBIDDEN) {
       return new ForbiddenException();
     } else if (code == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {

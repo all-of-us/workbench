@@ -37,7 +37,12 @@ export class LoginComponent implements OnInit {
         if (this.activatedRoute.snapshot.params.from === undefined) {
           this.router.navigateByUrl('/');
         } else {
-          this.router.navigateByUrl(this.activatedRoute.snapshot.params.from);
+          this.router.navigateByUrl(this.activatedRoute.snapshot.params.from)
+            .catch(() => {
+              // "from" might be invalid, e.g. if we just changed users; just
+              // ignore failed navigates in this particular case.
+              this.router.navigateByUrl('/');
+            });
         }
       }
     });

@@ -300,10 +300,10 @@ export class WorkspaceEditComponent implements OnInit {
     return Object.keys(input);
   }
 
-  bucketAsThree(input: Array<string>): Array<Array<string>> {
+  bucketAsTwo(input: Array<string>): Array<Array<string>> {
     const output = [];
-    for (let i = 0; i < input.length; i += 3) {
-      output.push(input.slice(i, i + 3));
+    for (let i = 0; i < input.length; i += 2) {
+      output.push(input.slice(i, i + 2));
     }
     return output;
   }

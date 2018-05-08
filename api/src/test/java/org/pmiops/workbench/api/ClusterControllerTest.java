@@ -1,18 +1,20 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.never;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.util.Base64;
+import java.util.Map;
 import javax.inject.Provider;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -78,6 +80,9 @@ public class ClusterControllerTest {
     }
   }
 
+  @Captor
+  private ArgumentCaptor<Map<String, String>> mapCaptor;
+
   @Autowired
   NotebooksService notebookService;
   @Autowired
@@ -139,6 +144,18 @@ public class ClusterControllerTest {
         .thenReturn(fcResponse);
   }
 
+  private JSONObject dataUriToJson(String dataUri) {
+    String b64 = dataUri.substring(dataUri.indexOf(',') + 1);
+    byte[] raw = Base64.getUrlDecoder().decode(b64);
+    return new JSONObject(new String(raw));
+  }
+
+  @Test
+  public void testDeleteCluster() throws Exception {
+    clusterController.deleteCluster(WORKSPACE_NS, "cluster");
+    verify(notebookService).deleteCluster(WORKSPACE_NS, "cluster");
+  }
+
   @Test
   public void testLocalize() throws Exception {
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
@@ -148,16 +165,16 @@ public class ClusterControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
-    verify(notebookService).localize(
-        WORKSPACE_NS, "cluster",
-        ImmutableMap.of("~/workspaces/wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb"));
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
-  }
 
-  @Test
-  public void testDeleteCluster() throws Exception {
-    clusterController.deleteCluster(WORKSPACE_NS, "cluster");
-    verify(notebookService).deleteCluster(WORKSPACE_NS, "cluster");
+    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+    Map<String, String> localizeMap = mapCaptor.getValue();
+    assertThat(localizeMap).containsEntry(
+        "~/workspaces/wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
+    JSONObject delocJson = dataUriToJson(localizeMap.get("~/workspaces/wsid/.delocalize.json"));
+    assertThat(delocJson.getString("destination")).isEqualTo("gs://workspace-bucket/notebooks");
+    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/wsid/.all_of_us_config.json"));
+    assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
   }
 
   @Test
@@ -169,9 +186,10 @@ public class ClusterControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize("other-proj", "cluster", req).getBody();
-    verify(notebookService).localize(
-        "other-proj", "cluster",
-        ImmutableMap.of("~/workspaces/proj:wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb"));
+    verify(notebookService).localize(eq("other-proj"), eq("cluster"), mapCaptor.capture());
+
+    assertThat(mapCaptor.getValue()).containsEntry(
+        "~/workspaces/proj:wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj:wsid");
   }
 
@@ -183,6 +201,9 @@ public class ClusterControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
-    verify(notebookService, never()).localize(anyString(), anyString(), any());
+    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+
+    // Config files only.
+    assertThat(mapCaptor.getValue().size()).isEqualTo(2);
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
   }}

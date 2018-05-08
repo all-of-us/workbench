@@ -4,11 +4,9 @@
       <h2>Create a new Workspace</h2>
     </div>
     <div *ngSwitchCase="Mode.Edit">
-      <app-workspace-nav-bar></app-workspace-nav-bar>
       <h2>Edit workspace "{{workspace.name}}"</h2>
     </div>
     <div *ngSwitchCase="Mode.Clone">
-      <app-workspace-nav-bar></app-workspace-nav-bar>
       <h2>Clone workspace "{{oldWorkspaceName}}"</h2>
     </div>
   </ng-container>
@@ -44,8 +42,8 @@
             <div style="display: flex">
               <input type="text" class="input" name="disease-specification"
                   [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
-                  placeholder="Name of Disease">
-              <span style="vertical-align: bottom; padding-left: 1rem; width: 18rem">
+                  placeholder="Name of Disease" style="width: calc(50% - 2rem); margin-right: 2rem;">
+              <span style="vertical-align: bottom; padding-right: 2rem; width: 50%">
                 The primary purpose of the research is to learn more about a particular disease or disorder
                 (for example, type 2 diabetes), a trait (for example, blood pressure), or a set of related conditions
                 (for example, autoimmune diseases, psychiatric disorders).
@@ -189,9 +187,9 @@
             <div *ngFor="let categoryHeader of keys(underservedCategories)">
               <h4 class="underserved-header">{{categoryHeader}}</h4>
               <div class="underservedSection">
-                <div *ngFor="let sublist of bucketAsThree(keys(underservedCategories[categoryHeader]));">
+                <div *ngFor="let sublist of bucketAsTwo(keys(underservedCategories[categoryHeader]));">
                   <div class="row flex-items-xs-left">
-                    <div *ngFor="let item of sublist;" class="col-xs-4">
+                    <div *ngFor="let item of sublist;" class="col-xs-6">
                       <clr-checkbox
                           [clrChecked]="containsUnderserved(underservedCategories[categoryHeader][item])"
                           (click)="switchUnderservedStatus(underservedCategories[categoryHeader][item])"
