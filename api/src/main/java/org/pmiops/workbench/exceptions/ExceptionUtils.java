@@ -53,7 +53,7 @@ public class ExceptionUtils {
 
 
   public static RuntimeException convertFirecloudException(ApiException e) {
-    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling FireCloud" + e.getResponseBody(), e);
+    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling FireCloud " + e.getResponseBody(), e);
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
@@ -62,7 +62,7 @@ public class ExceptionUtils {
 
   public static RuntimeException convertNotebookException(
       org.pmiops.workbench.notebooks.ApiException e) {
-    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling notebooks API" + e.getResponseBody(), e);
+    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling notebooks API " + e.getResponseBody(), e);
     if (isSocketTimeoutException(e)) {
       throw new GatewayTimeoutException();
     }
