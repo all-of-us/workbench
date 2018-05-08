@@ -63,7 +63,7 @@ public class ExceptionUtils {
   public static RuntimeException convertNotebookException(
       org.pmiops.workbench.notebooks.ApiException e) {
     log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling notebooks API " + e.getResponseBody(), e);
-    if (isSocketTimeoutException(e)) {
+    if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
     throw codeToException(e.getCode());
