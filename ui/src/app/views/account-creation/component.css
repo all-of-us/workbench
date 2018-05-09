@@ -6,6 +6,7 @@
 
 .form-section {
   margin-top: 1rem;
+  min-width: 25rem;
 }
 
 .form-section:first {
