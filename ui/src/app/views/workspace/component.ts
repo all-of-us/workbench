@@ -234,24 +234,25 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private pollCluster(): Observable<Cluster> {
-    // Polls for cluster startup every 10s.
     return new Observable<Cluster>(observer => {
+      // Repoll every 10s if not ready.
+      const repoll = () => setTimeout(() => {
+        this.pollCluster().subscribe(c => {
+          observer.next(c);
+          observer.complete();
+        });
+      }, 10000);
       this.clusterService.listClusters()
         .subscribe((resp) => {
           const cluster = resp.defaultCluster;
           if (cluster.status !== ClusterStatus.RUNNING) {
-            setTimeout(() => {
-              this.pollCluster().subscribe(newCluster => {
-                this.cluster = newCluster;
-                observer.next(newCluster);
-                observer.complete();
-              });
-            }, 10000);
+            repoll();
           } else {
             observer.next(cluster);
             observer.complete();
           }
-        });
+          // Repoll on errors.
+        }, repoll);
     });
   }
 

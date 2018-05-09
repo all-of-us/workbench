@@ -30,7 +30,11 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.*;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.EmailException;
+import org.pmiops.workbench.exceptions.GatewayTimeoutException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
@@ -297,15 +301,6 @@ public class ProfileController implements ProfileApiDelegate {
         return userDao.save(user);
 
       case READY:
-        try {
-          this.notebooksService.createCluster(
-              user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME, user.getEmail());
-        } catch (ConflictException e) {
-          log.log(Level.INFO, String.format("Cluster %s/%s already exists",
-              user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
-        } catch (GatewayTimeoutException e) {
-          log.log(Level.WARNING, "Socket Timeout creating cluster.");
-        }
         break;
 
       default:
@@ -314,7 +309,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     // Grant the user BQ job access on the billing project so that they can run BQ queries from
-    // notebooks.
+    // notebooks. Granting of this role is idempotent.
     try {
       fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
           FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
@@ -325,6 +320,18 @@ public class ProfileController implements ProfileApiDelegate {
       return user;
     }
     log.log(Level.INFO, "free tier project initialized and BigQuery role granted");
+
+    try {
+      this.notebooksService.createCluster(
+          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME, user.getEmail());
+      log.log(Level.INFO, String.format("created cluster %s/%s",
+          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
+    } catch (ConflictException e) {
+      log.log(Level.INFO, String.format("Cluster %s/%s already exists",
+          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
+    } catch (GatewayTimeoutException e) {
+      log.log(Level.WARNING, "Socket Timeout creating cluster.");
+    }
     user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
     return userDao.save(user);
   }
