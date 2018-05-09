@@ -486,7 +486,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       try {
         fcWorkspaces = fireCloudService.getWorkspaces();
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
-        log.log(Level.INFO, "Firecloud workspace not found", e);
         if (e.getCode() != 401) {
           throw ExceptionUtils.convertFirecloudException(e);
         } else {
