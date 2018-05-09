@@ -63,7 +63,8 @@ export class AccountCreationComponent {
   }
 
   createAccount(): void {
-    if (this.usernameConflictError || this.contactEmailConflictError) {
+    if (this.usernameConflictError || this.contactEmailConflictError
+        || this.usernameInvalidError) {
       return;
     }
     this.containsLowerAndUpperError = false;
@@ -98,6 +99,14 @@ export class AccountCreationComponent {
     }, () => {
       this.creatingAccount = false;
     });
+  }
+
+  get usernameInvalidError(): boolean {
+    const username = this.profile.username;
+    return username.includes('&') || username.includes('=') ||
+        username.includes('<') || username.includes('>') ||
+        username.includes('+') || username.includes(',') ||
+        username.includes('..') || username.startsWith('.');
   }
 
   usernameChanged(): void {
