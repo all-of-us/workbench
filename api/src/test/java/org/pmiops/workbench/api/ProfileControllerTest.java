@@ -80,8 +80,6 @@ public class ProfileControllerTest {
   private static final String PASSWORD = "12345";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String BILLING_PROJECT_PREFIX = "all-of-us-free-";
-  private static final String BILLING_PROJECT_NAME =
-      BILLING_PROJECT_PREFIX + Math.abs(PRIMARY_EMAIL.hashCode());
 
   @Mock
   private Provider<User> userProvider;
@@ -252,7 +250,7 @@ public class ProfileControllerTest {
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
-    verify(fireCloudService).createAllOfUsBillingProject(BILLING_PROJECT_NAME);
+    verify(fireCloudService).createAllOfUsBillingProject(anyString());
     verify(fireCloudService).addUserToBillingProject(
         PRIMARY_EMAIL, profile.getFreeTierBillingProjectName());
   }
@@ -263,19 +261,20 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
     Profile profile = profileController.getMe().getBody();
+    String projectName = profile.getFreeTierBillingProjectName();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
 
     // Simulate FC "Ready".
     org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
         new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
     membership.setCreationStatus(CreationStatusEnum.READY);
-    membership.setProjectName(BILLING_PROJECT_NAME);
+    membership.setProjectName(projectName);
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.READY);
 
     verify(fireCloudService).grantGoogleRoleToUser(
-        BILLING_PROJECT_NAME, FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, PRIMARY_EMAIL);
+        projectName, FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, PRIMARY_EMAIL);
   }
 
   @Test
@@ -290,7 +289,7 @@ public class ProfileControllerTest {
     org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
         new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
     membership.setCreationStatus(CreationStatusEnum.ERROR);
-    membership.setProjectName(BILLING_PROJECT_NAME);
+    membership.setProjectName(profile.getFreeTierBillingProjectName());
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.ERROR);
@@ -310,7 +309,7 @@ public class ProfileControllerTest {
     org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
         new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
     membership.setCreationStatus(CreationStatusEnum.CREATING);
-    membership.setProjectName(BILLING_PROJECT_NAME);
+    membership.setProjectName(profile.getFreeTierBillingProjectName());
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
