@@ -199,11 +199,6 @@ export class WorkspaceEditComponent implements OnInit {
     }
   }
 
-
-  navigateBack(): void {
-    this.locationService.back();
-  }
-
   reloadConflictingWorkspace(): void {
     this.workspaceStorageService.reloadWorkspace(
       this.workspace.namespace,
@@ -238,8 +233,8 @@ export class WorkspaceEditComponent implements OnInit {
     }
     this.savingWorkspace = true;
     this.workspacesService.createWorkspace(this.workspace).subscribe(
-        () => {
-          this.navigateBack();
+        (workspace) => {
+          this.router.navigate(['workspace', workspace.namespace, workspace.id]);
         },
         (error) => {
           this.workspaceCreationError = true;
@@ -260,7 +255,7 @@ export class WorkspaceEditComponent implements OnInit {
           this.workspaceStorageService.reloadWorkspace(
             this.workspace.namespace,
             this.workspace.id).then(() => {
-              this.navigateBack();
+              this.locationService.back();
           });
         },
         (error) => {
