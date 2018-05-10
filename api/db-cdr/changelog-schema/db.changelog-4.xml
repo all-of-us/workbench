@@ -19,6 +19,12 @@
       (concept_code);
     </sql>
 
+    <sql dbms="mysql">
+      ALTER TABLE achilles_results
+      ADD FULLTEXT INDEX stratum_4_index
+      (stratum_4);
+    </sql>
+
   </changeSet>
 
 </databaseChangeLog>
