@@ -96,8 +96,8 @@ public class ExceptionUtils {
       } catch (IOException e) {
         numAttempts++;
         if (isGoogleServiceUnavailableException(e)) {
-          if (numAttempts > 1 && numAttempts < MAX_ATTEMPTS) {
-            log.log(Level.SEVERE,
+          if (numAttempts < MAX_ATTEMPTS) {
+            log.log(Level.WARNING,
                 String.format("Service unavailable, attempt %s; retrying...", numAttempts), e);
             try {
               // Sleep with some backoff.
