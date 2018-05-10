@@ -31,12 +31,27 @@
     */
 }
 
+
 .survey-results .search-input-big {
     margin-left: -.5rem;
     margin-bottom: 1rem;
 }
 
+
 .survey-results .box-sub-title {
     margin-left: .5rem;
+
+}
+
+
+/* Uggg . Why is this not overriding */
+.stack-view {
+    border: none !important;
+}
+
+.answers .stack-view .stack-block-label {
+    background-color: inherit !important;
+    color: #53A9D8 !important;
+    font-family: "Gotham HTF", open-sans, sans-serif;
 
 }

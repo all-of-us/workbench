@@ -16,37 +16,6 @@
     src: url('/assets/fonts/Gotham Medium.otf');
 }
 
-h1, h1 > *,
-h2, h2 > *,
-h3, h3 > * {
-  color: rgb(38, 34, 98);
-}
-
-h1 {
-  font-family: GothamBook;
-  font-size: 36px;
-}
-
-h2 {
-  font-family: GothamMedium;
-  font-size: 20px;
-}
-
-h3 {
-  font-family: GothamBook;
-  font-size: 16px;
-}
-
-body, input[text] {
-  color: #888;
-  font-family: Cambria, Georgia;
-}
-
-a {
-  color: #6fb4ff;
-  cursor: pointer;
-  cursor: hand;
-}
 
 body {
   background-color: #E0E0E1;
@@ -56,11 +25,6 @@ body {
     background-color: #E0E0E1;
 }
 
-textarea {
-  height: 10em;
-  resize: none;
-  padding: 0.1rem 0.2rem;
-}
 
 input[type=text], input[type=password] {
   border: 1px solid #9a9a9a;
@@ -89,26 +53,19 @@ input[type=text]:focus, input[type=password]:focus {
   color: red;
 }
 
-.validation-error {
-  background-color: #FFEEEE;
+
+
+
+/* Must override clarity styles here, globally as angular component styles don't apply to child components used
+ * in the template ie clarity components.
+ */
+
+.stack-view {
+    border: none !important;
 }
 
-/*
- * ngx-popper => default background is transparent.
- * That is usually unusable.  Also we'd rather it wrap
- * at some point than just grow infinitely wide
- */
-.ngxp__container {
-  background: #fff;
-  max-width: 12rem;
-  /* I dunno why THEY don't set these /whatever */
-  position: relative;
-  z-index: 999;
-}
-
-/**
- * Style overrides for noUiSlider
- */
-.noUi-connect {
-  background: rgb(92, 183, 225);
+.answers .stack-view .stack-block-label {
+    background-color: #FFFFFF !important;
+    color: #53A9D8 !important;
+    font-family: "Gotham HTF", open-sans, sans-serif;
 }

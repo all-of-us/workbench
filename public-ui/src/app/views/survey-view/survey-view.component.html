@@ -5,7 +5,7 @@
     <div class="col-xs-12">
       <div class="page-header">
         <div *ngIf="survey && survey.conceptId">
-          <div class="view-title"> {{survey.domainDisplay}} Survey Module </div>
+          <div class="view-title"> {{survey.domainDisplay}} Survey Module ({{survey.conceptId}}) </div>
           <div class="view-sub-title">{{survey.domainDesc}} </div>
         </div>
       </div>
@@ -61,14 +61,29 @@
         <div class="row question-card">
           <div class="col-md-6 col-xs-12 col-sm-12">
             <div class="box-title"> Question {{i + 1}}</div>
-            <div class="box-sub-title"> {{ q.conceptName}} </div>
+            <div class="box-sub-title"> {{ q.conceptName}} ({{q.conceptId}}) </div>
           </div>
-          <div class="col-md-6 col-xs-12 col-sm-12">
-            <div class="response-dist">
+          <div class="col-md-4 offset-md-2 col-xs-12 col-sm-12">
+            <div class="response-dist" style="height:200px">
               <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" ></app-chart>
             </div>
           </div>
+
+          <div class="row answers">
+            <div class="col-xs-12">
+              <clr-stack-view class="answers">
+                <clr-stack-block [clrSbExpanded]="false">
+                  <clr-stack-label>See Answers</clr-stack-label>
+                  <clr-stack-block>
+                    <clr-stack-label> <h6> Here is a stack block </h6></clr-stack-label>
+                  </clr-stack-block>
+                </clr-stack-block>
+              </clr-stack-view>
+            </div>
+          </div>
+
         </div>
+
       </div>
     </div>
 

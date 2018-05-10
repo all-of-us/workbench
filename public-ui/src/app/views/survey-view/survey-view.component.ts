@@ -26,7 +26,6 @@ export class SurveyViewComponent implements OnInit {
   surveyResult: QuestionConceptListResponse;
   resultsComplete = false;
 
-  countChartOptions = [];
   /* Have questions array for filtering */
   questions: QuestionConcept[] = [];
   searchText = '';
@@ -48,40 +47,37 @@ export class SurveyViewComponent implements OnInit {
           if (item.domainId.toLowerCase() === this.domainId.toLowerCase()) {
             this.survey = item;
             console.log('Survey again. Getting results: ' , this.survey);
-
+            this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
+              next: x => {
+                const questions = x.items;
+                this.surveyResult = x;
+                this.surveyResult.items = [];
+                // Todo ignore these on server side , anything that doesn't have a count
+                for (let i = 0;  i < questions.length ; i++ ) {
+                  const q = questions[i];
+                  if (q.countAnalysis != null) {
+                    this.surveyResult.items.push(q);
+                  }
+                }
+                // Copy all qustions to display initially
+                this.questions = this.surveyResult.items;
+                console.log(this.surveyResult);
+              },
+              error: err => console.error('Observer got an error: ' + err),
+              complete: () => { this.resultsComplete = true; }
+            });
           }
         }
       }
     );
 
-    this.api.getSurveyResults('1586134').subscribe({
-      next: x => {
-        const questions = x.items;
-        this.surveyResult = x;
-        this.surveyResult.items = [];
-        // Todo ignore these on server side , anything that doesn't have a count
-        for (let i = 0;  i < questions.length ; i++ ) {
-          const q = questions[i];
-          if (q.countAnalysis != null) {
-            this.surveyResult.items.push(q);
-            //this.countChartOptions.push(
-            //    this.hcChartOptions(q.countAnalysis));
 
-          }
-        }
-        // Copy all qustions to display initially
-        this.questions = this.surveyResult.items;
-        console.log(this.surveyResult);
-      },
-      error: err => console.error('Observer got an error: ' + err),
-      complete: () => { this.resultsComplete = true; }
-    });
   }
 
   public searchQuestion(q: QuestionConcept) {
-      if (q.conceptName.indexOf(this.searchText) >= 0 ) { return true; }
+      if (q.conceptName.toLowerCase().indexOf(this.searchText) >= 0 ) { return true; }
       const results = q.countAnalysis.results.filter(r =>
-          r.stratum4.indexOf(this.searchText) >= 0);
+          r.stratum4.toLowerCase().indexOf(this.searchText) >= 0);
       console.log('answer results filter ', results);
       if (results.length > 0) {
         return true;
@@ -97,7 +93,7 @@ export class SurveyViewComponent implements OnInit {
     }
     this.prevSearchText = this.searchText;
     if (this.searchText.length > 0) {
-        let filtered: QuestionConcept = [];
+        let filtered: QuestionConcept[] = [];
         filtered = this.questions.filter(this.searchQuestion, this);
         this.questions = filtered;
         console.log('Filtered to ' + this.searchText);
