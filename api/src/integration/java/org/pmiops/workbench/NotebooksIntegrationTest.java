@@ -5,7 +5,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
-import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.test.Providers;
 
@@ -24,14 +23,11 @@ public class NotebooksIntegrationTest {
   @Mock
   private ClusterApi clusterApi;
   @Mock
-  private JupyterApi jupyterApi;
-  @Mock
   private NotebooksApi notebooksApi;
 
   private final NotebooksServiceImpl notebooksService = new NotebooksServiceImpl(
       Providers.of(clusterApi),
       Providers.of(notebooksApi),
-      Providers.of(jupyterApi),
       Providers.of(createConfig()));
 
   @Test
