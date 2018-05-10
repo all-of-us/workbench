@@ -18,6 +18,31 @@
   flex-wrap: wrap;
 }
 
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  flex-flow: row wrap;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.spinner {
+  margin-top: 1rem;
+}
+
+.spinner-header {
+  color: #007CBB;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.spinner-text {
+  text-align: center;
+  /* This forces the flex layout to put the text on a new line. */
+  margin-left: calc(50% - 90px);
+  margin-right: calc(50% - 90px);
+}
+
 .card {
   width: 12rem;
   height: 9rem;

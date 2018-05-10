@@ -34,7 +34,10 @@
             + New Notebook
           </button>
           <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
-          <span *ngIf="clusterLoading" class="tooltip-content">Your account is still being set up, try again later</span>
+          <span *ngIf="cluster && clusterLoading" class="tooltip-content">
+            Your notebook server is still being initialized - this may take up
+            to 5 minutes. Please try again later.
+          </span>
         </span>
       </div>
     </div>
@@ -92,7 +95,15 @@
       </div>
     </clr-modal>
     <div *ngIf="tabOpen===Tabs.Notebooks">
-      <clr-datagrid [clrDgLoading]="notebooksLoading || clusterLoading">
+      <div *ngIf="notebooksLoading || clusterLoading" class="spinner-container">
+        <span class="spinner spinner-lg"></span>
+        <p *ngIf="clusterLongWait" class="spinner-text">
+          <span class="spinner-header">Initializing Notebook Server</span><br>
+          May take up to<br>
+          5 minutes
+        </p>
+      </div>
+      <clr-datagrid *ngIf="!notebooksLoading && !clusterLoading">
         <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
