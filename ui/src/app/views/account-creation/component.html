@@ -21,11 +21,12 @@
         <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
           <div>
             Usernames can contain only letters (a-z), numbers (0-9), dashes (-), underscores (_),
-            apostrophes ('), and one period (.) in a row (maximum of 64 characters).
+            apostrophes ('), and periods (.) (maximum of 64 characters).
           </div>
           <br>
           <div>
-            Usernames can begin or end with non-alphanumeric characters except (.).
+            Usernames cannot begin or end with a period (.) and may not contain more than one
+            period (.) in a row.
           </div>
         </clr-tooltip-content>
       </clr-tooltip>
