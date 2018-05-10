@@ -249,6 +249,7 @@ public class ProfileControllerTest {
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
+    assertThat(profile.getFreeTierBillingProjectName()).isNotEmpty();
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).createAllOfUsBillingProject(anyString());
     verify(fireCloudService).addUserToBillingProject(
@@ -369,9 +370,10 @@ public class ProfileControllerTest {
     Profile profile = cloudProfileController.getMe().getBody();
 
     // When a conflict occurs in dev, log the exception but continue.
+    String projectName = BILLING_PROJECT_PREFIX + user.getUserId();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
-    assertThat(profile.getFreeTierBillingProjectName()).endsWith("-2");
+    assertThat(profile.getFreeTierBillingProjectName()).isEqualTo(projectName + "-2");
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).addUserToBillingProject(
         PRIMARY_EMAIL, profile.getFreeTierBillingProjectName());
@@ -589,7 +591,6 @@ public class ProfileControllerTest {
     assertThat(profile.getDataAccessLevel()).isEqualTo(dataAccessLevel);
     assertThat(profile.getEnabledInFireCloud()).isEqualTo(enabledInFirecloud);
     assertThat(profile.getContactEmailFailure()).isEqualTo(contactEmailFailure);
-    assertThat(profile.getFreeTierBillingProjectName()).isNotEmpty();
     assertUser(primaryEmail, contactEmail, familyName, givenName, dataAccessLevel, firstSignInTime);
   }
 
@@ -603,7 +604,6 @@ public class ProfileControllerTest {
     assertThat(user.getGivenName()).isEqualTo(givenName);
     assertThat(user.getDataAccessLevel()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
-    assertThat(user.getFreeTierBillingProjectName()).isNotEmpty();
     assertThat(user.getDataAccessLevel()).isEqualTo(dataAccessLevel);
   }
 
