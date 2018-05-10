@@ -75,7 +75,7 @@ public class FireCloudServiceImplTest {
     when(profileApi.me()).thenThrow(new ApiException(409, "blah"));
     service.isRequesterEnabledInFirecloud();
   }
-  
+
   public void testIsRequesterEnabledInFirecloud_throwsUnauthorized() throws ApiException {
     when(profileApi.me()).thenThrow(new ApiException(401, "blah"));
     assertThat(service.isRequesterEnabledInFirecloud()).isFalse();
