@@ -106,7 +106,8 @@ export class AccountCreationComponent {
     return username.includes('&') || username.includes('=') ||
         username.includes('<') || username.includes('>') ||
         username.includes('+') || username.includes(',') ||
-        username.includes('..') || username.startsWith('.');
+        username.includes('..') || username.startsWith('.') ||
+        username.endsWith('.');
   }
 
   usernameChanged(): void {
