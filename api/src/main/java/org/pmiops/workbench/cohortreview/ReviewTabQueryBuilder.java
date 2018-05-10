@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortreview;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,11 @@ public class ReviewTabQueryBuilder {
         "order by %s %s, data_id\n" +
         "limit %d offset %d\n";
 
+    private static final String MASTER_SQL_WHERE =
+      "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+        "order by %s %s, data_id\n" +
+        "limit %d offset %d\n";
+
     private static final String DETAILS_WHERE =
       "where data_id = @" + NAMED_DATAID_PARAM + "\n";
 
@@ -48,7 +54,8 @@ public class ReviewTabQueryBuilder {
     public QueryJobConfiguration buildQuery(Long participantId,
                                             String domain,
                                             PageRequest pageRequest) {
-        String finalSql = SQL_TEMPLATE + SQL_WHERE;
+        String whereSql = DomainType.MASTER.toString().equals(domain) ? MASTER_SQL_WHERE : SQL_WHERE;
+        String finalSql = SQL_TEMPLATE + whereSql;
         finalSql = String.format(finalSql,
           pageRequest.getSortColumn(),
           pageRequest.getSortOrder().toString(),
