@@ -2,15 +2,15 @@ package org.pmiops.workbench.exceptions;
 
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.model.ErrorCode;
+import org.pmiops.workbench.model.ErrorResponse;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.http.HttpServletResponse;
-import org.pmiops.workbench.firecloud.ApiException;
-import org.pmiops.workbench.model.ErrorCode;
-import org.pmiops.workbench.model.ErrorResponse;
 
 /**
  * Utility methods related to exceptions.
@@ -18,8 +18,6 @@ import org.pmiops.workbench.model.ErrorResponse;
 public class ExceptionUtils {
 
   private static final Logger log = Logger.getLogger(ExceptionUtils.class.getName());
-
-  private static final int MAX_ATTEMPTS = 3;
 
   public static boolean isGoogleServiceUnavailableException(IOException e) {
     // We assume that any 500 range error for Google is something we should retry.
@@ -38,7 +36,7 @@ public class ExceptionUtils {
     return false;
   }
 
-  public static RuntimeException convertGoogleIOException(IOException e) {
+  public static WorkbenchException convertGoogleIOException(IOException e) {
     if (isGoogleServiceUnavailableException(e)) {
       throw new ServerUnavailableException(e);
     } else if (isGoogleConflictException(e)) {
@@ -52,7 +50,7 @@ public class ExceptionUtils {
   }
 
 
-  public static RuntimeException convertFirecloudException(ApiException e) {
+  public static WorkbenchException convertFirecloudException(ApiException e) {
     log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling FireCloud " + e.getResponseBody(), e);
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
@@ -60,7 +58,7 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
-  public static RuntimeException convertNotebookException(
+  public static WorkbenchException convertNotebookException(
       org.pmiops.workbench.notebooks.ApiException e) {
     log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling notebooks API " + e.getResponseBody(), e);
     if (isSocketTimeoutException(e.getCause())) {
@@ -83,33 +81,6 @@ public class ExceptionUtils {
       return new ConflictException();
     } else {
       return new ServerErrorException();
-    }
-  }
-
-  public static <T> T executeWithRetries(AbstractGoogleClientRequest<T> request)
-      throws IOException {
-    int numAttempts = 0;
-    // Retry on 503 exceptions.
-    while (true) {
-      try {
-        return request.execute();
-      } catch (IOException e) {
-        numAttempts++;
-        if (isGoogleServiceUnavailableException(e)) {
-          if (numAttempts < MAX_ATTEMPTS) {
-            log.log(Level.WARNING,
-                String.format("Service unavailable, attempt %s; retrying...", numAttempts), e);
-            try {
-              // Sleep with some backoff.
-              Thread.sleep(2000 * numAttempts );
-            } catch (InterruptedException e2) {
-              throw e;
-            }
-            continue;
-          }
-        }
-        throw e;
-      }
     }
   }
 

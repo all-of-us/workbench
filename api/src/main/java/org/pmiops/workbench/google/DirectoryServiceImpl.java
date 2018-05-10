@@ -1,7 +1,5 @@
 package org.pmiops.workbench.google;
 
-import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
@@ -9,15 +7,18 @@ import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
 import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserName;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import javax.inject.Provider;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
@@ -39,14 +40,16 @@ public class DirectoryServiceImpl implements DirectoryService {
   final Provider<GoogleCredential> googleCredentialProvider;
   final Provider<WorkbenchConfig> configProvider;
   final HttpTransport httpTransport;
+  final GoogleRetryHandler retryHandler;
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
       Provider<WorkbenchConfig> configProvider,
-      HttpTransport httpTransport) {
+      HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
+    this.retryHandler = retryHandler;
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
@@ -75,8 +78,11 @@ public class DirectoryServiceImpl implements DirectoryService {
   @Override
   public User getUser(String email) {
     try {
-      return ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().get(email));
+      return retryHandler.runAndThrowChecked((context) ->
+          getGoogleDirectoryService().users().get(email).execute());
     } catch (GoogleJsonResponseException e) {
+      // Handle the special case where we're looking for a not found user by returning
+      // null.
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         return null;
       }
@@ -99,11 +105,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
-    try {
-      ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users().insert(user));
-    } catch (IOException e) {
-      throw ExceptionUtils.convertGoogleIOException(e);
-    }
+    retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
   }
 
@@ -111,8 +113,8 @@ public class DirectoryServiceImpl implements DirectoryService {
   public void deleteUser(String username) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
-      ExceptionUtils.executeWithRetries(getGoogleDirectoryService().users()
-          .delete(username + "@" + gSuiteDomain));
+      retryHandler.runAndThrowChecked((context)-> getGoogleDirectoryService().users()
+          .delete(username + "@" + gSuiteDomain).execute());
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.

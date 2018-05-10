@@ -5,15 +5,12 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
@@ -29,7 +26,6 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.utils.Sleeper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +39,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
-  private final Sleeper sleeper;
+  private final FirecloudRetryHandler retryHandler;
 
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
@@ -52,7 +48,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String SAM_STATUS_NAME = "Sam";
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
-  private static final int MAX_ATTEMPTS = 3;
 
   @Autowired
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
@@ -60,13 +55,13 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<WorkspacesApi> workspacesApiProvider,
-      Sleeper sleeper) {
+      FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
-    this.sleeper = sleeper;
+    this.retryHandler = retryHandler;
   }
 
   private static boolean isServiceUnavailableException(Exception e) {
@@ -77,45 +72,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     return false;
   }
 
-  private <T> T callFirecloudWithRetries(Callable<T> callable) throws ApiException {
-    int numAttempts = 0;
-    // Retry on 503 exceptions.
-    while (true) {
-      try {
-        return callable.call();
-      } catch (Exception e) {
-        numAttempts++;
-        if (isServiceUnavailableException(e)) {
-          if (numAttempts < MAX_ATTEMPTS) {
-            log.log(Level.WARNING,
-                String.format("Firecloud unavailable, attempt %s; retrying...", numAttempts), e);
-            try {
-              // Sleep with some backoff.
-              sleeper.sleep(2000 * numAttempts );
-            } catch (InterruptedException e2) {
-              throw new ServerUnavailableException(e);
-            }
-            continue;
-          }
-          throw new ServerUnavailableException(e);
-        }
-        if (e instanceof ApiException) {
-          throw (ApiException) e;
-        }
-        log.log(Level.SEVERE, "Exception calling FireCloud", e);
-        throw new ServerErrorException(e);
-      }
-    }
-  }
-
-  private <T> T callFirecloudWithRetriesAndConvertExceptions(Callable<T> callable) {
-    try {
-      return callFirecloudWithRetries(callable);
-    } catch (ApiException e) {
-      ExceptionUtils.convertFirecloudException((ApiException) e);
-      return null;
-    }
-  }
 
   @Override
   public boolean getFirecloudStatus() {
@@ -145,7 +101,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public boolean isRequesterEnabledInFirecloud() throws ApiException {
     ProfileApi profileApi = profileApiProvider.get();
     try {
-      Me me = callFirecloudWithRetries(() -> profileApi.me());
+      Me me = retryHandler.runAndThrowChecked((context) -> profileApi.me());
       // Users can only use FireCloud if the Google and LDAP flags are enabled.
       return me.getEnabled() != null
           && isTrue(me.getEnabled().getGoogle()) && isTrue(me.getEnabled().getLdap());
@@ -160,7 +116,8 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public Me getMe() throws ApiException {
-    return callFirecloudWithRetriesAndConvertExceptions(() -> profileApiProvider.get().me());
+    ProfileApi profileApi = profileApiProvider.get();
+    return retryHandler.run((context) -> profileApi.me());
   }
 
   @Override
@@ -181,7 +138,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     profile.setPi("None");
     profile.setNonProfitStatus("None");
 
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       profileApi.setProfile(profile);
       return null;
     });
@@ -193,7 +150,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     CreateRawlsBillingProjectFullRequest request = new CreateRawlsBillingProjectFullRequest();
     request.setBillingAccount("billingAccounts/"+configProvider.get().firecloud.billingAccountId);
     request.setProjectName(projectName);
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       billingApi.createBillingProjectFull(request);
       return null;
     });
@@ -202,7 +159,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public void addUserToBillingProject(String email, String projectName) throws ApiException {
     BillingApi billingApi = billingApiProvider.get();
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       billingApi.addUserToBillingProject(projectName, USER_FC_ROLE, email);
       return null;
     });
@@ -222,7 +179,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       authDomain.add(registeredDomain);
       workspaceIngest.setAuthorizationDomain(authDomain);
     }
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       workspacesApi.createWorkspace(workspaceIngest);
       return null;
     });
@@ -231,7 +188,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public void grantGoogleRoleToUser(String projectName, String role, String email) throws ApiException {
     BillingApi billingApi = billingApiProvider.get();
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       billingApi.grantGoogleRoleToUser(projectName, role, email);
       return null;
     });
@@ -243,7 +200,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setNamespace(toProject);
     workspaceIngest.setName(toName);
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest);
       return null;
     });
@@ -252,7 +209,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException {
-    return callFirecloudWithRetriesAndConvertExceptions(() -> profileApiProvider.get().billing());
+    return retryHandler.run((context) -> profileApiProvider.get().billing());
   }
 
   private boolean isTrue(Boolean b) {
@@ -263,27 +220,27 @@ public class FireCloudServiceImpl implements FireCloudService {
   public WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     // TODO: set authorization domain here
-    return callFirecloudWithRetriesAndConvertExceptions(() ->
+    return retryHandler.run((context) ->
       workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates));
   }
 
   @Override
   public WorkspaceResponse getWorkspace(String projectName, String workspaceName) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    return callFirecloudWithRetriesAndConvertExceptions(() ->
+    return retryHandler.run((context) ->
       workspacesApi.getWorkspace(projectName, workspaceName));
   }
 
   @Override
   public List<WorkspaceResponse> getWorkspaces() throws ApiException {
-    return callFirecloudWithRetriesAndConvertExceptions(() ->
+    return retryHandler.run((context) ->
         workspacesApiProvider.get().listWorkspaces());
   }
 
   @Override
   public void deleteWorkspace(String projectName, String workspaceName) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       workspacesApi.deleteWorkspace(projectName, workspaceName);
       return null;
     });
@@ -292,14 +249,14 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public ManagedGroupWithMembers createGroup(String groupName) throws ApiException {
     GroupsApi groupsApi = groupsApiProvider.get();
-    return callFirecloudWithRetriesAndConvertExceptions(() ->
+    return retryHandler.run((context) ->
       groupsApi.createGroup(groupName));
   }
 
   @Override
   public void addUserToGroup(String email, String groupName) throws ApiException {
     GroupsApi groupsApi = groupsApiProvider.get();
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       groupsApi.addUserToGroup(groupName, "member", email);
       return null;
     });
@@ -308,7 +265,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public void removeUserFromGroup(String email, String groupName) throws ApiException {
     GroupsApi groupsApi = groupsApiProvider.get();
-    callFirecloudWithRetriesAndConvertExceptions(() -> {
+    retryHandler.run((context) -> {
       groupsApi.removeUserFromGroup(groupName, "member", email);
       return null;
     });
