@@ -10,6 +10,10 @@ export const LOAD_COUNT_RESULTS = 'LOAD_COUNT_RESULTS';
 export const CANCEL_COUNT_REQUEST = 'CANCEL_COUNT_REQUEST';
 export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
 
+export const BEGIN_PREVIEW_REQUEST = 'BEGIN_PREVIEW_REQUEST';
+export const LOAD_PREVIEW_RESULTS = 'LOAD_PREVIEW_RESULTS';
+export const PREVIEW_REQUEST_ERROR = 'PREVIEW_REQUEST_ERROR';
+
 export const BEGIN_CHARTS_REQUEST = 'BEGIN_CHARTS_REQUEST';
 export const LOAD_CHARTS_RESULTS = 'LOAD_CHARTS_RESULTS';
 export const CANCEL_CHARTS_REQUEST = 'CANCEL_CHARTS_REQUEST';
@@ -88,6 +92,20 @@ export interface ActionTypes {
     type: typeof COUNT_REQUEST_ERROR;
     entityType: string;
     entityId: string;
+    error?: any;
+  };
+
+  BEGIN_PREVIEW_REQUEST: {
+    type: typeof BEGIN_PREVIEW_REQUEST;
+    cdrVersionId: number;
+    request: SearchRequest;
+  };
+  LOAD_PREVIEW_RESULTS: {
+    type: typeof LOAD_PREVIEW_RESULTS;
+    count: number;
+  };
+  PREVIEW_REQUEST_ERROR: {
+    type: typeof PREVIEW_REQUEST_ERROR;
     error?: any;
   };
 
@@ -197,6 +215,10 @@ export type RootAction =
   | ActionTypes[typeof LOAD_COUNT_RESULTS]
   | ActionTypes[typeof CANCEL_COUNT_REQUEST]
   | ActionTypes[typeof COUNT_REQUEST_ERROR]
+
+  | ActionTypes[typeof BEGIN_PREVIEW_REQUEST]
+  | ActionTypes[typeof LOAD_PREVIEW_RESULTS]
+  | ActionTypes[typeof PREVIEW_REQUEST_ERROR]
 
   | ActionTypes[typeof BEGIN_CHARTS_REQUEST]
   | ActionTypes[typeof LOAD_CHARTS_RESULTS]
