@@ -71,4 +71,10 @@ public class DbDomainDaoTest {
                 .countValue(Long.valueOf(0));
     }
 
+    @Test
+    public void findDbDomainsThatMatch() throws Exception{
+        final List<DbDomain> list=dao.findDomainSearchResults(" ");
+        Assert.assertNotEquals(list,null);
+    }
+
 }
