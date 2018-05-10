@@ -25,8 +25,12 @@ export class SurveyViewComponent implements OnInit {
   survey: DbDomain;
   surveyResult: QuestionConceptListResponse;
   resultsComplete = false;
-  chartOptions;
-  countAnalysisId = 3110;
+
+  countChartOptions = [];
+  /* Have questions array for filtering */
+  questions: QuestionConcept[] = [];
+  searchText = '';
+  prevSearchText = '';
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
@@ -52,98 +56,52 @@ export class SurveyViewComponent implements OnInit {
 
     this.api.getSurveyResults('1586134').subscribe({
       next: x => {
-        this.surveyResult = x; console.log(this.surveyResult);
+        const questions = x.items;
+        this.surveyResult = x;
+        this.surveyResult.items = [];
+        // Todo ignore these on server side , anything that doesn't have a count
+        for (let i = 0;  i < questions.length ; i++ ) {
+          const q = questions[i];
+          if (q.countAnalysis != null) {
+            this.surveyResult.items.push(q);
+            //this.countChartOptions.push(
+            //    this.hcChartOptions(q.countAnalysis));
+
+          }
+        }
+        // Copy all qustions to display initially
+        this.questions = this.surveyResult.items;
+        console.log(this.surveyResult);
       },
       error: err => console.error('Observer got an error: ' + err),
       complete: () => { this.resultsComplete = true; }
     });
   }
 
-  public hcChartOptions(analysis: Analysis): any {
-    return {
-
-      chart: {
-        type: 'column',
-      },
-      credits: {
-        enabled: false
-      },
-
-      title: {
-        text: 'Response distribution'
-      },
-      subtitle: {
-      },
-      plotOptions: {
-        series: {
-          animation: {
-            duration: 350,
-          },
-          maxPointWidth: 45
-        },
-        pie: {
-          // size: 260,
-          dataLabels: {
-            enabled: true,
-            distance: -50,
-            format: '{point.name} <br> Count: {point.y}'
-          }
-        },
-        column: {
-          shadow: false,
-          colorByPoint: true,
-          groupPadding: 0,
-          dataLabels: {
-            enabled: true,
-            rotation: -90,
-            align: 'right',
-            y: 10, // y: value offsets dataLabels in pixels.
-
-            style: {
-              'fontWeight': 'thinner',
-              'fontSize': '15px',
-              'textOutline': '1.75px black',
-              'color': 'white'
-            }
-          }
-        }
-      },
-      yAxis: {
-      },
-      xAxis: {
-        categories: this.makeCountCategories(analysis),
-        type: 'category',
-        labels: {
-          style: {
-            whiteSpace: 'nowrap',
-          }
-        }
-      },
-      zAxis: {
-      },
-      legend: {
-        enabled: true // this.seriesLegend()
-      },
-      series: this.makeCountSeries(analysis),
-      colorByPoint: true
-    };
+  public searchQuestion(q: QuestionConcept) {
+      if (q.conceptName.indexOf(this.searchText) >= 0 ) { return true; }
+      const results = q.countAnalysis.results.filter(r =>
+          r.stratum4.indexOf(this.searchText) >= 0);
+      console.log('answer results filter ', results);
+      if (results.length > 0) {
+        return true;
+      }
+      // No hit
+      return false ;
   }
-
-  public makeCountSeries(analysis: Analysis) {
-    const chartSeries = [{ data: [] }];
-    for (const a  of analysis.results) {
-      chartSeries[0].data.push({name: a.stratum4, y: a.countValue});
+  public filterResults() {
+    /* Reset questions before filtering if length becomes less than prev or zero */
+    if (this.prevSearchText.length > this.searchText.length ||
+            this.searchText.length === 0) {
+        this.questions = this.surveyResult.items;
     }
-    chartSeries[0].data = chartSeries[0].data.sort((a, b) => a.name - b.name);
-
-    return chartSeries;
-  }
-
-  public makeCountCategories(analysis: Analysis) {
-    const cats = [];
-    for (const a  of analysis.results) {
-      cats.push(a.stratum4);
+    this.prevSearchText = this.searchText;
+    if (this.searchText.length > 0) {
+        let filtered: QuestionConcept = [];
+        filtered = this.questions.filter(this.searchQuestion, this);
+        this.questions = filtered;
+        console.log('Filtered to ' + this.searchText);
     }
-    return cats;
   }
+
 }

@@ -40,16 +40,24 @@
     </div>
   </div>
 
+  <div class="search-input-big">
+    <clr-icon shape="search" class="input-icon is-info"></clr-icon>
+    <input type="text" id="search-db" placeholder="Keyword Search" [(ngModel)]="searchText" (ngModelChange)="filterResults()">
+  </div>
+
+  <h6> Filtered by {{searchText}}</h6>
+
   <div class="survey-results" *ngIf="resultsComplete">
+
     <div class="survey-results-background"></div>
     <div class="container">
-
+    <!-- Search box is not working inside this with the survey background
       <div class="search-input-big">
         <clr-icon shape="search" class="input-icon is-info"></clr-icon>
         <input type="text" id="search-db" placeholder="Keyword Search">
-      </div>
+      </div> -->
       <div class="box-sub-title"> Click on each response to view branding logic and age and gender distributions</div>
-      <div class="row question-result" *ngFor="let q of surveyResult.items, let i = index">
+      <div class="row question-result" *ngFor="let q of questions, let i = index">
         <div class="row question-card">
           <div class="col-md-6 col-xs-12 col-sm-12">
             <div class="box-title"> Question {{i + 1}}</div>
@@ -57,7 +65,7 @@
           </div>
           <div class="col-md-6 col-xs-12 col-sm-12">
             <div class="response-dist">
-              <!--<app-chart *ngIf="countAnalysis" [analysis]="countAnalysis" [chartOptions]="hcChartOptions(countAnalysis)" ></app-chart>-->
+              <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" ></app-chart>
             </div>
           </div>
         </div>
