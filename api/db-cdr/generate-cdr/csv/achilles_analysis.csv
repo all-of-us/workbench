@@ -23,5 +23,5 @@
 3101,"Gender Stratification","concept_id","ppi_sex_at_birth_concept_id",NULL,NULL,NULL,"pie","counts"
 3102,"Age Stratification","concept_id","age_decile","null","null","","column","counts"
 3110,"Response Distribution","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","null","column","counts"
-3111,"Gender Distribution","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","counts"
-3112,"Age Distribution","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","counts"
+3111,"Gender","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","counts"
+3112,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","counts"
