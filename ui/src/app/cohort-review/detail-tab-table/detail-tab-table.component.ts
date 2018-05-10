@@ -50,7 +50,6 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
           <PageFilterRequest>{
             page: 0,
             pageSize: 10000,
-            includeTotal: true,
             sortOrder: SortOrder.Asc,
             sortColumn: this.columns[0].name,
             pageFilterType: this.filterType,

@@ -413,7 +413,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       response.addItemsItem(convertRowToParticipantData(rm, row, domain));
     }
 
-    if (((ReviewFilter) request).getIncludeTotal() && result.getTotalRows() > 10000) {
+    if (result.getTotalRows() == pageSizeParam) {
       result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
         reviewTabQueryBuilder.buildCountQuery(participantId, domain)));
       rm = bigQueryService.getResultMapper(result);

@@ -490,8 +490,6 @@ definitions:
             description: Column upon which to sort (default is 'itemDate')
           domain:
             type: string
-          includeTotal:
-            type: boolean
 
   ParticipantCohortStatusColumns:
     type: string
