@@ -17,6 +17,7 @@
           [tabname]="allEvents.name"
           [columns]="allEvents.columns"
           [filterType]="allEvents.filterType"
+          [domain]="allEvents.domain"
           [reverseEnum]="allEvents.reverseEnum"
           (onRowClick)="detailView($event)"
           >
@@ -51,6 +52,7 @@
         [tabname]="tab.name"
         [columns]="tab.columns"
         [filterType]="tab.filterType"
+        [domain]="tab.domain"
         [reverseEnum]="tab.reverseEnum"
         >
       </app-detail-tab-table>

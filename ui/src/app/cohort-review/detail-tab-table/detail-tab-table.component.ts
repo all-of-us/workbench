@@ -15,6 +15,7 @@ import {CohortReviewService, PageFilterRequest, SortOrder} from 'generated';
 export class DetailTabTableComponent implements OnInit, OnDestroy {
   @Input() tabname;
   @Input() columns;
+  @Input() domain;
   @Input() filterType;
   @Input() reverseEnum;
   loading = false;
@@ -48,11 +49,12 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
           participant.participantId,
           <PageFilterRequest>{
             page: 0,
-            pageSize: this.pageSize,
+            pageSize: 10000,
             includeTotal: true,
             sortOrder: SortOrder.Asc,
-            sortColumn: this.reverseEnum[this.columns[0].name],
+            sortColumn: this.columns[0].name,
             pageFilterType: this.filterType,
+            domain: this.domain,
           }
       ))
       .subscribe(resp => {

@@ -8,9 +8,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.cohortreview.ReviewQueryFactory;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
-import org.pmiops.workbench.cohortreview.querybuilder.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -286,23 +284,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                     Long cdrVersionId,
                                                                     Long dataId,
                                                                     String domain) {
-        CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+        validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
           cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
-        Map<String, QueryParameterValue> params = new HashMap<>();
-        params.put("dataId", QueryParameterValue.int64(dataId));
-        ReviewQueryBuilder queryBuilder = ReviewQueryFactory.getQueryBuilder(domain);
-        QueryJobConfiguration qjc =
-          QueryJobConfiguration
-          .newBuilder(queryBuilder.getDetailsQuery())
-          .setNamedParameters(params)
-          .setUseLegacySql(false)
-          .build();
-        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(qjc));
+        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+          reviewTabQueryBuilder.buildDetailsQuery(dataId)));
         Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
-        ParticipantData response = queryBuilder.createParticipantData();
-        convertRowToParticipantData(rm, result.getValues().iterator().next(), response);
+        ParticipantData response =
+          convertRowToParticipantData(rm, result.getValues().iterator().next(), domain);
 
         return ResponseEntity.ok(response);
     }
@@ -379,46 +369,67 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return ResponseEntity.ok(responseReview);
     }
 
-    @Override
-    public ResponseEntity<ParticipantDataListResponse> getParticipantData(String workspaceNamespace,
-                                                                                     String workspaceId,
-                                                                                     Long cohortId,
-                                                                                     Long cdrVersionId,
-                                                                                     Long participantId,
-                                                                                     PageFilterRequest request) {
-        CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
-                cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+  @Override
+  public ResponseEntity<ParticipantDataListResponse> getParticipantData(String workspaceNamespace,
+                                                                        String workspaceId,
+                                                                        Long cohortId,
+                                                                        Long cdrVersionId,
+                                                                        Long participantId,
+                                                                        PageFilterRequest request) {
+    CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+      cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
-        //this validates that the participant is in the requested review.
-        cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
+    //this validates that the participant is in the requested review.
+    cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
-        ReviewQueryBuilder queryBuilder = ReviewQueryFactory.getQueryBuilder(request.getPageFilterType());
-        PageRequest pageRequest = null;
-        try {
-            pageRequest = queryBuilder.createPageRequest(request);
-        } catch (ClassCastException cce) {
-            throw new BadRequestException("Invalid PageFilterType: " + request.getPageFilterType() +
-                    "Please provide a valid PageFilterType.");
-        }
-        QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-                reviewTabQueryBuilder.buildQuery(queryBuilder.getQuery(), pageRequest.getSortColumn(),
-                  participantId, pageRequest)));
-        Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
-        ParticipantDataListResponse response = new ParticipantDataListResponse();
-        for (List<FieldValue> row : result.iterateAll()) {
-            response.addItemsItem(convertRowToParticipantData(rm, row, queryBuilder.createParticipantData()));
-        }
-
-        response.count(new Long(response.getItems().size()));
-        response.setPageRequest(new org.pmiops.workbench.model.PageRequest()
-                .page(pageRequest.getPageNumber())
-                .pageSize(pageRequest.getPageSize())
-                .sortOrder(pageRequest.getSortOrder())
-                .sortColumn(pageRequest.getSortColumn()));
-
-        return ResponseEntity.ok(response);
+    boolean invalidDomain = true;
+    String domain = ((ReviewFilter) request).getDomain();
+    for (DomainType domainType : DomainType.values()) {
+      if (domainType.toString().equals(domain)) {
+        invalidDomain = false;
+      }
     }
+    if (invalidDomain) {
+      throw new BadRequestException("Invalid Domain: " + domain +
+        " Please provide a valid Domain.");
+    }
+    String sortColumn = Optional.ofNullable(((ReviewFilter) request).getSortColumn())
+      .orElse(ReviewColumns.ITEMDATE).toString();
+    int pageParam = Optional.ofNullable(request.getPage()).orElse(CohortReviewController.PAGE);
+    int pageSizeParam = Optional.ofNullable(request.getPageSize()).orElse(CohortReviewController.PAGE_SIZE);
+    SortOrder sortOrderParam = Optional.ofNullable(request.getSortOrder()).orElse(SortOrder.ASC);
+    org.pmiops.workbench.model.PageRequest pageRequest = new org.pmiops.workbench.model.PageRequest()
+      .page(pageParam)
+      .pageSize(pageSizeParam)
+      .sortOrder(sortOrderParam)
+      .sortColumn(sortColumn);
+
+    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+      reviewTabQueryBuilder.buildQuery(participantId, domain, pageRequest)));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    ParticipantDataListResponse response = new ParticipantDataListResponse();
+    for (List<FieldValue> row : result.iterateAll()) {
+      response.addItemsItem(convertRowToParticipantData(rm, row, domain));
+    }
+
+    if (((ReviewFilter) request).getIncludeTotal() && result.getTotalRows() > 10000) {
+      result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+        reviewTabQueryBuilder.buildCountQuery(participantId, domain)));
+      rm = bigQueryService.getResultMapper(result);
+      response.count(bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
+    } else {
+      response.count(result.getTotalRows());
+    }
+
+    response.setPageRequest(new org.pmiops.workbench.model.PageRequest()
+      .page(pageParam)
+      .pageSize(pageSizeParam)
+      .sortOrder(sortOrderParam)
+      .sortColumn(sortColumn));
+
+    return ResponseEntity.ok(response);
+  }
 
     @Override
     public ResponseEntity<ParticipantCohortAnnotation> updateParticipantCohortAnnotation(String workspaceNamespace,
@@ -580,33 +591,44 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     /**
      * Helper method to convert a collection of {@link FieldValue} to {@link ParticipantData}.
-     *
-     * @param rm
+     *  @param rm
      * @param row
-     * @param data
+     * @param domain
      */
     private ParticipantData convertRowToParticipantData(Map<String, Integer> rm,
                                                         List<FieldValue> row,
-                                                        ParticipantData data) {
-        if (data instanceof Drug) {
-            ((Drug) data).signature(bigQueryService.getString(row, rm.get("signature")));
-            ((Drug) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof Condition) {
-            ((Condition) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof Procedure) {
-            ((Procedure) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof Observation) {
-            ((Observation) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof Visit) {
-            ((Visit) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-            ((Visit) data).endDate(bigQueryService.getDateTime(row, rm.get("endDate")));
-        } else if (data instanceof Measurement) {
-            ((Measurement) data).age(bigQueryService.getLong(row, rm.get("age")).intValue());
-        } else if (data instanceof Master) {
-            ((Master) data).dataId(bigQueryService.getLong(row, rm.get("dataId")));
-            ((Master) data).domain(bigQueryService.getString(row, rm.get("domain")));
+                                                        String domain) {
+        ParticipantData participantData = null;
+        if (domain.equals(DomainType.DRUG.toString())) {
+            participantData = new Drug();
+            ((Drug) participantData).signature(bigQueryService.getString(row, rm.get("signature")));
+            ((Drug) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (domain.equals(DomainType.CONDITION.toString())) {
+            participantData = new Condition();
+            ((Condition) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (domain.equals(DomainType.PROCEDURE.toString())) {
+            participantData = new Procedure();
+            ((Procedure) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (domain.equals(DomainType.OBSERVATION.toString())) {
+            participantData = new Observation();
+            ((Observation) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (domain.equals(DomainType.VISIT.toString())) {
+            participantData = new Visit();
+            ((Visit) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+            try {
+                ((Visit) participantData).endDate(bigQueryService.getDateTime(row, rm.get("itemEndDate")));
+            } catch (BigQueryException e) {
+              //do nothing for now.
+            }
+        } else if (domain.equals(DomainType.MEASUREMENT.toString())) {
+            participantData = new Measurement();
+            ((Measurement) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+        } else if (domain.equals(DomainType.MASTER.toString())) {
+            participantData = new Master();
+            ((Master) participantData).dataId(bigQueryService.getLong(row, rm.get("dataId")));
+            ((Master) participantData).domain(bigQueryService.getString(row, rm.get("domain")));
         }
-        return data.itemDate(bigQueryService.getDateTime(row, rm.get("itemDate")))
+        return participantData.itemDate(bigQueryService.getDateTime(row, rm.get("itemDate")))
                 .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
                 .standardName(bigQueryService.getString(row, rm.get("standardName")))
                 .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
