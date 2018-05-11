@@ -3,6 +3,7 @@ package org.pmiops.workbench.firecloud;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.rmi.ServerError;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,6 +13,7 @@ import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.ServerUnavailableException;
@@ -93,8 +95,32 @@ public class FireCloudServiceImplTest {
     assertThat(service.isRequesterEnabledInFirecloud()).isTrue();
   }
 
+  @Test(expected = GatewayTimeoutException.class)
+  public void testIsRequesterEnabledInFirecloud_gatewayFail() throws ApiException {
+    Me me = new Me();
+    Enabled enabled = new Enabled();
+    enabled.setGoogle(true);
+    enabled.setLdap(true);
+    me.setEnabled(enabled);
+    when(profileApi.me()).thenThrow(new ApiException(504, "blah"));
+    service.isRequesterEnabledInFirecloud();
+  }
+
   @Test(expected = ServerUnavailableException.class)
   public void testIsRequesterEnabledInFirecloud_retryTwiceFail() throws ApiException {
+    Me me = new Me();
+    Enabled enabled = new Enabled();
+    enabled.setGoogle(true);
+    enabled.setLdap(true);
+    me.setEnabled(enabled);
+    when(profileApi.me()).thenThrow(new ApiException(503, "blah"))
+        .thenThrow(new ApiException(502, "foo"))
+        .thenThrow(new ApiException(503, "xxx"));
+    service.isRequesterEnabledInFirecloud();
+  }
+
+  @Test(expected = GatewayTimeoutException.class)
+  public void testIsRequesterEnabledInFirecloud_retryTwiceGatewayFail() throws ApiException {
     Me me = new Me();
     Enabled enabled = new Enabled();
     enabled.setGoogle(true);
