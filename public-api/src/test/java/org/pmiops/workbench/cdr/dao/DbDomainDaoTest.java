@@ -100,9 +100,6 @@ public class DbDomainDaoTest {
                 .conceptClassId("Sample Class")
                 .standardConcept("S")
                 .conceptCode("Sample concept Code")
-                .valid_start_date("1970-01-01")
-                .valid_end_date("2099-12-31")
-                .invalid_reason(null)
                 .count_value(2)
                 .prevalence(0.00);
     }
