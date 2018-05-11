@@ -58,7 +58,7 @@ public class DbDomainDaoTest {
         AchillesAnalysis achillesAnalysis2;
         AchillesAnalysis achillesAnalysis3;
 
-        dbDomain1 = createDbDomain("Domain1","Sample Domain");
+        dbDomain1 = createDbDomain("Domain1","Sample Domain",Long.valueOf(0L));
         dao.save(dbDomain1);
 
         dbDomain2=createDbDomain("Condition","domain_filter",Long.valueOf(19));
