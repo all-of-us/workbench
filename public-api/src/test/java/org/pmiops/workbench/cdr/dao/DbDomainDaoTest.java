@@ -45,6 +45,7 @@ public class DbDomainDaoTest {
 
         DbDomain dbDomain2;
         DbDomain dbDomain3;
+        DbDomain dbDomain4;
 
         Concept concept1;
         Concept concept2;
@@ -60,10 +61,13 @@ public class DbDomainDaoTest {
         dbDomain1 = createDbDomain("Domain1","Sample Domain");
         dao.save(dbDomain1);
 
-        dbDomain2=createDbDomain("Condition","domain_filter");
+        dbDomain2=createDbDomain("Condition","domain_filter",Long.valueOf(19));
         dao.save(dbDomain2);
 
-        dbDomain3=createDbDomain("Lifestyle","survey");
+        dbDomain3=createDbDomain("Lifestyle","survey",Long.valueOf("1585855"));
+        dao.save(dbDomain3);
+
+        dbDomain3=createDbDomain("TheBasics","survey",Long.valueOf("1586134"));
         dao.save(dbDomain3);
 
         concept1=createConcept(1L,"Condition","Sample hypertension");
@@ -119,14 +123,14 @@ public class DbDomainDaoTest {
         Assert.assertNotEquals(list,null);
     }
 
-    private DbDomain createDbDomain(String domainId, String dbType) {
+    private DbDomain createDbDomain(String domainId, String dbType,Long conceptId) {
         return new DbDomain()
                 .domainId(domainId)
                 .domainDisplay("Domain description for display")
                 .domainDesc("Domain description")
                 .dbType(dbType)
                 .domainRoute("Domain Route")
-                .conceptId(Long.valueOf(0))
+                .conceptId(conceptId)
                 .countValue(Long.valueOf(0));
     }
 
