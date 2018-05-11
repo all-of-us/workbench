@@ -175,7 +175,7 @@ public class ProfileController implements ProfileApiDelegate {
       // For local development, make one billing project per account based on a hash of the account
       // email, and reuse it across database resets. (Assume we won't have any collisions;
       // if we discover that somebody starts using our namespace, change it up.)
-      suffix = user.getEmail().hashCode();
+      suffix = Math.abs(user.getEmail().hashCode());
     } else {
       // In other environments, create a suffix based on the user ID from the database. We will
       // add a suffix if that billing project is already taken. (If the database is reset, we
