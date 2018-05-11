@@ -50,7 +50,7 @@ public class DbDomainDaoTest {
         Concept concept1;
         Concept concept2;
         Concept concept3;
-        Concept concept3;
+        Concept concept4;
 
         AchillesResult achillesResult1;
         AchillesResult achillesResult2;
@@ -72,10 +72,10 @@ public class DbDomainDaoTest {
         dbDomain4=createDbDomain("TheBasics","The Basics","The Basics module provides demographics and economic information for participants","survey","ppi",1586134L,567437L);
         dao.save(dbDomain3);
 
-        concept1=createConcept(4296023,"Failure","S","76797004","Clinical Finding","SNOMED","Condition",10L,0.0f);
-        concept2=createConcept(1585826,"Kidney failure","S","OrganTransplantDescription_Kidney","Clinical Finding","SNOMED","Condition",15L,0.0f);
-        concept3=createConcept(1000000,"What is the reason of your failure?","","Question","Question","PPI","Observation",2480L,0.57f);
-        concept4=createConcept(2000000,"Are you a fitness geek?","","Question","Question","PPI","Observation",2476L,0.51f);
+        concept1=createConcept(4296023L,"Failure","S","76797004","Clinical Finding","SNOMED","Condition",10L,0.0f);
+        concept2=createConcept(1585826L,"Kidney failure","S","OrganTransplantDescription_Kidney","Clinical Finding","SNOMED","Condition",15L,0.0f);
+        concept3=createConcept(1000000L,"What is the reason of your failure?","","Question","Question","PPI","Observation",2480L,0.57f);
+        concept4=createConcept(2000000L,"Are you a fitness geek?","","Question","Question","PPI","Observation",2476L,0.51f);
 
         conceptDao.save(concept1);
         conceptDao.save(concept2);
