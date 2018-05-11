@@ -1,7 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
 import java.net.SocketTimeoutException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.config.RetryConfig;
@@ -35,12 +34,13 @@ public class NotebooksRetryHandler extends RetryHandler<ApiException> {
     }
 
     @Override
-    protected void logNoRetry(Throwable t) {
+    protected void logNoRetry(Throwable t, int responseCode) {
       if (t instanceof ApiException) {
-        logger.log(Level.SEVERE, String.format("Exception calling Notebooks API with response: %s",
-            ((ApiException) t).getResponseBody()), t);
+        logger.log(getLogLevel(responseCode),
+            String.format("Exception calling Notebooks API with response: %s",
+                ((ApiException) t).getResponseBody()), t);
       } else {
-        super.logNoRetry(t);
+        super.logNoRetry(t, responseCode);
       }
     }
 

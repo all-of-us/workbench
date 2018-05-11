@@ -2,15 +2,13 @@ package org.pmiops.workbench.exceptions;
 
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.util.logging.Logger;
+import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -52,7 +50,6 @@ public class ExceptionUtils {
 
 
   public static WorkbenchException convertFirecloudException(ApiException e) {
-    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling FireCloud " + e.getResponseBody(), e);
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }
@@ -61,7 +58,6 @@ public class ExceptionUtils {
 
   public static WorkbenchException convertNotebookException(
       org.pmiops.workbench.notebooks.ApiException e) {
-    log.log(e.getCode() >= 500 ? Level.SEVERE : Level.WARNING, "Exception calling notebooks API " + e.getResponseBody(), e);
     if (isSocketTimeoutException(e.getCause())) {
       throw new GatewayTimeoutException();
     }

@@ -2,6 +2,7 @@ package org.pmiops.workbench.config;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +35,8 @@ public class RetryConfig {
         return true;
       }
       Throwable lastException = context.getLastThrowable();
-      if (canRetry(getResponseCode(lastException))) {
+      int responseCode = getResponseCode(lastException);
+      if (canRetry(responseCode)) {
         if (context.getRetryCount() < getMaxAttempts()) {
           logRetry(context.getRetryCount(), lastException);
           return true;
@@ -43,7 +45,7 @@ public class RetryConfig {
           return false;
         }
       } else {
-        logNoRetry(lastException);
+        logNoRetry(lastException, responseCode);
         return false;
       }
     }
@@ -62,8 +64,20 @@ public class RetryConfig {
           String.format("%s unavailable, giving up after %d attempts", serviceName, retryCount), t);
     }
 
-    protected void logNoRetry(Throwable t) {
-      logger.log(Level.SEVERE, String.format("Exception calling %s", serviceName), t);
+    protected Level getLogLevel(int responseCode) {
+      switch (responseCode) {
+        case HttpServletResponse.SC_NOT_FOUND:
+          return Level.INFO;
+        case HttpServletResponse.SC_UNAUTHORIZED:
+        case HttpServletResponse.SC_FORBIDDEN:
+          return Level.WARNING;
+        default:
+          return Level.SEVERE;
+      }
+    }
+
+    protected void logNoRetry(Throwable t, int responseCode) {
+      logger.log(getLogLevel(responseCode), String.format("Exception calling %s", serviceName), t);
     }
 
     protected abstract int getResponseCode(Throwable lastException);

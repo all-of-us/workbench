@@ -3,7 +3,6 @@ package org.pmiops.workbench.google;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.config.RetryConfig;
@@ -45,15 +44,15 @@ public class GoogleRetryHandler extends RetryHandler<IOException> {
     }
 
     @Override
-    protected void logNoRetry(Throwable t) {
+    protected void logNoRetry(Throwable t, int responseCode) {
       if (t instanceof GoogleJsonResponseException) {
-        logger.log(Level.SEVERE, String.format("Exception calling Google API with response: %s",
-            ((GoogleJsonResponseException) t).getDetails()), t);
+        logger.log(getLogLevel(responseCode),
+            String.format("Exception calling Google API with response: %s",
+                ((GoogleJsonResponseException) t).getDetails()), t);
       } else {
-        super.logNoRetry(t);
+        super.logNoRetry(t, responseCode);
       }
     }
-
   }
 
   @Autowired
