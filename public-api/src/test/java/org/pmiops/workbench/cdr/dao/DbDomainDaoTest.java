@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbDomain;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.AchillesResult;
+import org.pmiops.workbench.cdr.model.AchillesResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -33,6 +34,9 @@ public class DbDomainDaoTest {
     @Autowired
     private AchillesResultDao achillesResultDao;
 
+    @Autowired
+    private AchillesAnalysisDao achillesAnalysisDao;
+
     private DbDomain dbDomain1;
 
     @Before
@@ -49,6 +53,10 @@ public class DbDomainDaoTest {
         AchillesResult achillesResult2;
         AchillesResult achillesResult3;
 
+        AchillesAnalysis achillesAnalysis1;
+        AchillesAnalysis achillesAnalysis2;
+        AchillesAnalysis achillesAnalysis3;
+
         dbDomain1 = createDbDomain("Domain1","Sample Domain");
         dao.save(dbDomain1);
 
@@ -63,6 +71,14 @@ public class DbDomainDaoTest {
 
         conceptDao.save(concept1);
         conceptDao.save(concept2);
+
+        achillesAnalysis1=createAchillesAnalysis(Long.valueOf(3110),"Response distribution");
+        achillesAnalysis2=createAchillesAnalysis(Long.valueOf(3111),"Gender");
+        achillesAnalysis3=createAchillesAnalysis(Long.valueOf(3112),"Age");
+
+        achillesAnalysisDao.save(achillesAnalysis1);
+        achillesAnalysisDao.save(achillesAnalysis2);
+        achillesAnalysisDao.save(achillesAnalysis3);
 
         achillesResult1=createAchillesResult(1L,Long.valueOf(3110),"1586134");
         achillesResult2=createAchillesResult(2L,Long.valueOf(3111),"1585855");
@@ -137,6 +153,19 @@ public class DbDomainDaoTest {
                 .stratum4("hypertension")
                 .stratum5(null)
                 .countValue(2L);
+    }
+
+    private AchillesAnalysis createAchillesAnalysis(Long analysisId,String analysisName){
+        return new AchillesAnalysis()
+                .analysisId(analysisId)
+                .analysisName(analysisName)
+                .stratum1Name("stratum 1")
+                .stratum2Name("stratum 2")
+                .stratum3Name("stratum 3")
+                .stratum4Name("stratum 4")
+                .stratum5Name("stratum 5")
+                .chartType("column")
+                .dataType("counts");
     }
 
 
