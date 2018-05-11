@@ -110,17 +110,17 @@ public class DbDomainDaoTest {
     @Test
     public void findDbDomainsByDbType() throws Exception {
         /* Todo write more tests */
-        final List<DbDomain> list = dao.findByDbType("Sample Domain");
-        Assert.assertEquals(dbDomain1.getDomainId(),"Domain1");
-        Assert.assertEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
+        final List<DbDomain> list = dao.findByDbType("survey");
+        Assert.assertEquals(dbDomain1.getDomainId(),"Condition");
+        Assert.assertNotEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
     }
 
     @Test
     public void findDbDomainsByDbTypeAndConceptId() throws Exception {
         /* Todo write more tests */
-        final List<DbDomain> list = dao.findByDbTypeAndAndConceptIdNotNull("Sample Domain");
-        Assert.assertEquals(dbDomain1.getDomainId(),"Domain1");
-        Assert.assertEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
+        final List<DbDomain> list = dao.findByDbTypeAndAndConceptIdNotNull("survey");
+        Assert.assertEquals(dbDomain1.getDomainId(),"Condition");
+        Assert.assertNotEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
     }
 
     @Test
