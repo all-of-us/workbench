@@ -84,7 +84,7 @@ public class DbDomainDaoTest {
 
         achillesAnalysis1=createAchillesAnalysis(3110L,"Survey Question Answer Count","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string",null,"column","counts");
         achillesAnalysis2=createAchillesAnalysis(3111L,"Gender","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","charts");
-        achillesAnalysis2=createAchillesAnalysis(3112L,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","charts");
+        achillesAnalysis3=createAchillesAnalysis(3112L,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","charts");
 
         achillesAnalysisDao.save(achillesAnalysis1);
         achillesAnalysisDao.save(achillesAnalysis2);
