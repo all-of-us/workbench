@@ -31,13 +31,14 @@ public class DbDomainDaoTest {
 
     private DbDomain dbDomain1;
 
+    private Concept concept1;
+    private Concept concept2;
+    private Concept concept3;
 
     @Before
     public void setUp() {
 
-        private Concept concept1;
-        private Concept concept2;
-        private Concept concept3;
+
 
         dbDomain1 = createDbDomain("Domain1","Sample Domain");
         concept1 = createConcept("Sample Hypertension","Condition");
