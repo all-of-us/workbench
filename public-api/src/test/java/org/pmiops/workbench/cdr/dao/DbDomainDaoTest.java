@@ -38,27 +38,25 @@ public class DbDomainDaoTest {
     private AchillesAnalysisDao achillesAnalysisDao;
 
     private DbDomain dbDomain1;
+    private DbDomain dbDomain2;
+    private DbDomain dbDomain3;
+    private DbDomain dbDomain4;
+
+    private Concept concept1;
+    private Concept concept2;
+    private Concept concept3;
+    private Concept concept4;
+
+    private AchillesResult achillesResult1;
+    private AchillesResult achillesResult2;
+    private AchillesResult achillesResult3;
+
+    private AchillesAnalysis achillesAnalysis1;
+    private AchillesAnalysis achillesAnalysis2;
+    private AchillesAnalysis achillesAnalysis3;
 
     @Before
     public void setUp() {
-
-
-        DbDomain dbDomain2;
-        DbDomain dbDomain3;
-        DbDomain dbDomain4;
-
-        Concept concept1;
-        Concept concept2;
-        Concept concept3;
-        Concept concept4;
-
-        AchillesResult achillesResult1;
-        AchillesResult achillesResult2;
-        AchillesResult achillesResult3;
-
-        AchillesAnalysis achillesAnalysis1;
-        AchillesAnalysis achillesAnalysis2;
-        AchillesAnalysis achillesAnalysis3;
 
         dbDomain1 = createDbDomain("Condition","Diagnoses","Condition Domain","domain_filter","condition",19L,0L);
         dao.save(dbDomain1);
@@ -176,6 +174,27 @@ public class DbDomainDaoTest {
                 .stratum5Name(st5)
                 .chartType(chartType)
                 .dataType(dataType);
+    }
+
+    @After
+    public void flush(){
+        dao.delete(dbDomain1);
+        dao.delete(dbDomain2);
+        dao.delete(dbDomain3);
+        dao.delete(dbDomain4);
+
+        conceptDao.delete(concept1);
+        conceptDao.delete(concept2);
+        conceptDao.delete(concept3);
+        conceptDao.delete(concept4);
+
+        achillesAnalysisDao.delete(achillesAnalysis1);
+        achillesAnalysisDao.delete(achillesAnalysis2);
+        achillesAnalysisDao.delete(achillesAnalysis3);
+
+        achillesResultDao.delete(achillesResult1);
+        achillesResultDao.delete(achillesResult2);
+        achillesResultDao.delete(achillesResult3);
     }
 
 
