@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbDomain;
+import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.AchillesResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -25,7 +27,22 @@ public class DbDomainDaoTest {
     @Autowired
     private DbDomainDao dao;
 
+    @Autowired
+    private ConceptDao conceptDao;
+
+    @Autowired
+    private AchillesResultDao achillesResultDao;
+
     private DbDomain dbDomain1;
+    private DbDomain dbDomain2;
+    private DbDomain dbDomain3;
+
+    private Concept concept1;
+    private Concept concept2;
+
+    private AchillesResult achillesResult1;
+    private AchillesResult achillesResult2;
+    private AchillesResult achillesResult3;
 
     @Before
     public void setUp() {
@@ -33,6 +50,25 @@ public class DbDomainDaoTest {
         dbDomain1 = createDbDomain("Domain1","Sample Domain");
         dao.save(dbDomain1);
 
+        dbDomain2=createDbDomain("Condition","domain_filter");
+        dao.save(dbDomain2);
+
+        dbDomain3=createDbDomain("Lifestyle","survey");
+        dao.save(dbDomain3);
+
+        concept1=createConcept(1L,"Condition");
+        concept2=createConcept(2L,"Lifestyle");
+
+        conceptDao.save(concept1);
+        conceptDao.save(concept2);
+
+        achillesResult1=createAchillesResult(3110,"1586134");
+        achillesResult2=createAchillesResult(3111,"1585855");
+        achillesResult3=createAchillesResult(3112,"1585710");
+
+        achillesResultDao.save(achillesResult1);
+        achillesResultDao.save(achillesResult2);
+        achillesResultDao.save(achillesResult3);
     }
 
     @Test
@@ -74,6 +110,30 @@ public class DbDomainDaoTest {
                 .domainRoute("Domain Route")
                 .conceptId(Long.valueOf(0))
                 .countValue(Long.valueOf(0));
+    }
+
+    private Concept createConcept(Long conceptId,String domainId){
+        return new Concept()
+                .conceptId(conceptId)
+                .conceptName("Sample hypertension")
+                .standardConcept("S")
+                .conceptCode("Sample concept code")
+                .conceptClassId("Sample concept class Id")
+                .vocabularyId("Sample vocab")
+                .domainId(domainId)
+                .count(2L)
+                .prevalence(0.0f);
+    }
+
+    private AchillesResult createAchillesResult(Long analysisId,String stratum_1){
+        return new AchillesResult()
+                .analysisId(analysisId)
+                .stratum1(stratum_1)
+                .stratum2("0")
+                .stratum3("0")
+                .stratum4("hypertension")
+                .stratum5(null)
+                .countValue(2L);
     }
 
 
