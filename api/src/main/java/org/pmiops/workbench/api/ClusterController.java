@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,17 +9,17 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import javax.inject.Provider;
-
 import org.json.JSONObject;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -102,6 +101,10 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<ClusterListResponse> listClusters() {
+    if (userProvider.get().getFreeTierBillingProjectStatus() != BillingProjectStatus.READY) {
+      throw new FailedPreconditionException(
+          "User billing project is not yet initialized, cannot list/create clusters");
+    }
     String project = userProvider.get().getFreeTierBillingProjectName();
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
