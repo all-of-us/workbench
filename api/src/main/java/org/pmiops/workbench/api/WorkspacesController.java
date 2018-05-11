@@ -482,11 +482,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // much of this logic
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
     if (user != null) {
-      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces;
-      try {
-        fcWorkspaces = fireCloudService.getWorkspaces();
-      } catch (org.pmiops.workbench.firecloud.ApiException e) {
-        throw ExceptionUtils.convertFirecloudException(e);
+      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces = new ArrayList<org.pmiops.workbench.firecloud.model.WorkspaceResponse>();
+      //401 error here could be result of uninitialized user in FC
+      //OR expired token. So want to retry this operation a couple times before
+      //returning an empty list.
+      for (int i = 0; i < 4; i++) {
+        try {
+          fcWorkspaces = fireCloudService.getWorkspaces();
+        } catch (org.pmiops.workbench.firecloud.ApiException e) {
+          if (e.getCode() != 401) {
+            throw ExceptionUtils.convertFirecloudException(e);
+          }
+        }
       }
       for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
         org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace = null;
