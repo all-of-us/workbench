@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.net.SocketTimeoutException;
-import java.rmi.ServerError;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
