@@ -45,7 +45,6 @@ public class DbDomainDaoTest {
 
         DbDomain dbDomain2;
         DbDomain dbDomain3;
-        DbDomain dbDomain4;
 
         Concept concept1;
         Concept concept2;
