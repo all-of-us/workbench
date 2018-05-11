@@ -39,8 +39,7 @@
 .spinner-text {
   text-align: center;
   /* This forces the flex layout to put the text on a new line. */
-  margin-left: calc(50% - 90px);
-  margin-right: calc(50% - 90px);
+  width: 100%;
 }
 
 .card {
