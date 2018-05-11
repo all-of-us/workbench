@@ -96,10 +96,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cohortsLoading = true;
   cohortsError = false;
   notebookError = false;
-  notebooksLoading = false;
+  notebooksLoading = true;
   cohortList: Cohort[] = [];
   cluster: Cluster;
   clusterLoading = true;
+  clusterLongWait = false;
   clusterPulled = false;
   launchedNotebookName: string;
   private clusterLocalDirectory: string;
@@ -153,6 +154,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       .subscribe(
         fileList => {
           this.notebookList = fileList;
+          this.notebooksLoading = false;
         },
         error => {
           this.notebooksLoading = false;
@@ -213,7 +215,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.pollCluster().subscribe((c) => {
       this.initializeNotebookCookies(c).subscribe(() => {
         this.clusterLoading = false;
-        this.cluster = c;
       });
     });
   }
@@ -244,11 +245,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       }, 10000);
       this.clusterService.listClusters()
         .subscribe((resp) => {
-          const cluster = resp.defaultCluster;
-          if (cluster.status !== ClusterStatus.RUNNING) {
+          this.cluster = resp.defaultCluster;
+          if (this.cluster.status !== ClusterStatus.RUNNING) {
+            // Once cluster creation has started, it may take ~5 minutes.
+            this.clusterLongWait = true;
             repoll();
           } else {
-            observer.next(cluster);
+            this.clusterLongWait = false;
+            observer.next(this.cluster);
             observer.complete();
           }
           // Repoll on errors.
