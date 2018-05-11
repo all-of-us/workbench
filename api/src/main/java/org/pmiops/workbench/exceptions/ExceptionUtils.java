@@ -66,8 +66,7 @@ public class ExceptionUtils {
 
   public static boolean isServiceUnavailable(int code) {
     return code == HttpServletResponse.SC_SERVICE_UNAVAILABLE
-        || code == HttpServletResponse.SC_BAD_GATEWAY
-        || code == HttpServletResponse.SC_GATEWAY_TIMEOUT;
+        || code == HttpServletResponse.SC_BAD_GATEWAY;
   }
 
   private static RuntimeException codeToException(int code) {
@@ -80,6 +79,8 @@ public class ExceptionUtils {
       return new ForbiddenException();
     } else if (isServiceUnavailable(code)) {
       return new ServerUnavailableException();
+    } else if (code == HttpServletResponse.SC_GATEWAY_TIMEOUT) {
+      return new GatewayTimeoutException();
     } else if (code == HttpServletResponse.SC_CONFLICT) {
       return new ConflictException();
     } else {
