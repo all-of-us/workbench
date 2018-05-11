@@ -39,10 +39,12 @@
     </div>
     <div class="form-section">
       <input type="password" class="short-input" id="password" name="password" [(ngModel)]="password" placeholder="Password">
-      <div class="hint-section">
-        <!-- TODO (blrubenstein) Put info icon here -->
-        <div style="font-size: 8pt; line-height: 0.6rem;">Contains at least one lowercase and one uppercase letter</div>
-      </div>
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
+          Passwords must contain at least one lowercase and one uppercase letter
+        </clr-tooltip-content>
+      </clr-tooltip>
     </div>
     <div class="form-section">
       <input type="password" class="short-input" for="passwordAgain" name="passwordAgain" [(ngModel)]="passwordAgain" placeholder="Confirm Password">
