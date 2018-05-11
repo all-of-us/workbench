@@ -37,10 +37,10 @@ public class DirectoryServiceImpl implements DirectoryService {
       DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
-  final Provider<GoogleCredential> googleCredentialProvider;
-  final Provider<WorkbenchConfig> configProvider;
-  final HttpTransport httpTransport;
-  final GoogleRetryHandler retryHandler;
+  private final Provider<GoogleCredential> googleCredentialProvider;
+  private final Provider<WorkbenchConfig> configProvider;
+  private final HttpTransport httpTransport;
+  private final GoogleRetryHandler retryHandler;
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,

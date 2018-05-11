@@ -1,6 +1,5 @@
 package org.pmiops.workbench.utils;
 
-import java.util.logging.Logger;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.springframework.retry.RetryCallback;
@@ -10,8 +9,6 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 public abstract class RetryHandler<E extends Exception> {
-
-  private static final Logger logger = Logger.getLogger(RetryHandler.class.getName());
 
   private final RetryTemplate retryTemplate;
 

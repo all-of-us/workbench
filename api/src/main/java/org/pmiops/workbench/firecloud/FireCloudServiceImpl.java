@@ -64,15 +64,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
   }
 
-  private static boolean isServiceUnavailableException(Exception e) {
-    if (e instanceof ApiException) {
-      int code = ((ApiException) e).getCode();
-      return (code > 500 && code < 600);
-    }
-    return false;
-  }
-
-
   @Override
   public boolean getFirecloudStatus() {
     try {
