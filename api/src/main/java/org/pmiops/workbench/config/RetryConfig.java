@@ -70,6 +70,7 @@ public class RetryConfig {
           return Level.INFO;
         case HttpServletResponse.SC_UNAUTHORIZED:
         case HttpServletResponse.SC_FORBIDDEN:
+        case HttpServletResponse.SC_CONFLICT:
           return Level.WARNING;
         default:
           return Level.SEVERE;
