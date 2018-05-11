@@ -3,6 +3,7 @@ package org.pmiops.workbench.firecloud;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.net.SocketTimeoutException;
 import java.rmi.ServerError;
 import org.junit.Before;
 import org.junit.Rule;
@@ -103,6 +104,17 @@ public class FireCloudServiceImplTest {
     enabled.setLdap(true);
     me.setEnabled(enabled);
     when(profileApi.me()).thenThrow(new ApiException(504, "blah"));
+    service.isRequesterEnabledInFirecloud();
+  }
+
+  @Test(expected = GatewayTimeoutException.class)
+  public void testIsRequesterEnabledInFirecloud_socketTimeout() throws ApiException {
+    Me me = new Me();
+    Enabled enabled = new Enabled();
+    enabled.setGoogle(true);
+    enabled.setLdap(true);
+    me.setEnabled(enabled);
+    when(profileApi.me()).thenThrow(new ApiException(new SocketTimeoutException()));
     service.isRequesterEnabledInFirecloud();
   }
 
