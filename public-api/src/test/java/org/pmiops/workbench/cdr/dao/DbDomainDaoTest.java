@@ -60,10 +60,10 @@ public class DbDomainDaoTest {
         AchillesAnalysis achillesAnalysis2;
         AchillesAnalysis achillesAnalysis3;
 
-        dbDomain1 = createDbDomain("Condition","Diagnoses","Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient.","domain_filter","condition",19L,0L);
+        dbDomain1 = createDbDomain("Condition","Diagnoses","Condition Domain","domain_filter","condition",19L,0L);
         dao.save(dbDomain1);
 
-        dbDomain2=createDbDomain("Drug","Medications","Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.","domain_filter","drug",13L,0L);
+        dbDomain2=createDbDomain("Drug","Medications","Drug Domain","domain_filter","drug",13L,0L);
         dao.save(dbDomain2);
 
         dbDomain3=createDbDomain("Lifestyle","Lifestyle","The Lifestyle module provides information on smoking, alcohol and recreational drug use","survey","ppi",1585855L,568120L);
