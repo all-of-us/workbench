@@ -64,9 +64,9 @@ public class DbDomainDaoTest {
         conceptDao.save(concept1);
         conceptDao.save(concept2);
 
-        achillesResult1=createAchillesResult(Long.valueOf(3110),"1586134");
-        achillesResult2=createAchillesResult(Long.valueOf(3111),"1585855");
-        achillesResult3=createAchillesResult(Long.valueOf(3112),"1585710");
+        achillesResult1=createAchillesResult(1L,Long.valueOf(3110),"1586134");
+        achillesResult2=createAchillesResult(2L,Long.valueOf(3111),"1585855");
+        achillesResult3=createAchillesResult(3L,Long.valueOf(3112),"1585710");
 
         achillesResultDao.save(achillesResult1);
         achillesResultDao.save(achillesResult2);
@@ -127,8 +127,9 @@ public class DbDomainDaoTest {
                 .prevalence(0.0f);
     }
 
-    private AchillesResult createAchillesResult(Long analysisId,String stratum_1){
+    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum_1){
         return new AchillesResult()
+                .id(id)
                 .analysisId(analysisId)
                 .stratum1(stratum_1)
                 .stratum2("0")
