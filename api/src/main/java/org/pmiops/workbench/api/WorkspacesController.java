@@ -486,7 +486,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       try {
         fcWorkspaces = fireCloudService.getWorkspaces();
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
-        throw ExceptionUtils.convertFirecloudException(e);
+        if (e.getCode() != 401) {
+          throw ExceptionUtils.convertFirecloudException(e);
+        } else {
+          fcWorkspaces = new ArrayList<org.pmiops.workbench.firecloud.model.WorkspaceResponse>();
+        }
       }
       for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
         org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace = null;
