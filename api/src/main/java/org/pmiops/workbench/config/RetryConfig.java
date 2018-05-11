@@ -74,7 +74,6 @@ public class RetryConfig {
         default:
           return Level.SEVERE;
       }
-
     }
 
     protected void logNoRetry(Throwable t, int responseCode) {
