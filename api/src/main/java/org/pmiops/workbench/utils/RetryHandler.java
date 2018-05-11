@@ -1,17 +1,21 @@
 package org.pmiops.workbench.utils;
 
+import java.util.logging.Logger;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryException;
 import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 public abstract class RetryHandler<E extends Exception> {
 
+  private static final Logger logger = Logger.getLogger(RetryHandler.class.getName());
+
   private final RetryTemplate retryTemplate;
 
-  private static RetryTemplate retryTemplate(BackOffPolicy backOffPolicy,
-                                            RetryPolicy retryPolicy) {
+  private static RetryTemplate retryTemplate(BackOffPolicy backOffPolicy, RetryPolicy retryPolicy) {
     RetryTemplate retryTemplate = new RetryTemplate();
     retryTemplate.setBackOffPolicy(backOffPolicy);
     retryTemplate.setRetryPolicy(retryPolicy);
@@ -27,9 +31,12 @@ public abstract class RetryHandler<E extends Exception> {
     this.retryTemplate = retryTemplate;
   }
 
+  @SuppressWarnings("unchecked")
   public final <T> T run(RetryCallback<T, E> retryCallback) {
     try {
       return retryTemplate.execute(retryCallback);
+    } catch (RetryException retryException) {
+      throw new ServerErrorException(retryException.getCause());
     } catch (Exception exception) {
       throw convertException((E) exception);
     }

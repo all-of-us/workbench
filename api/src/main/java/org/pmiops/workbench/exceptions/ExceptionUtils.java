@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.springframework.http.HttpStatus;
 
 /**
  * Utility methods related to exceptions.
@@ -67,15 +68,21 @@ public class ExceptionUtils {
     throw codeToException(e.getCode());
   }
 
+  public static boolean isServiceUnavailable(int code) {
+    return code == HttpServletResponse.SC_SERVICE_UNAVAILABLE
+        || code == HttpServletResponse.SC_BAD_GATEWAY
+        || code == HttpServletResponse.SC_GATEWAY_TIMEOUT;
+  }
+
   private static RuntimeException codeToException(int code) {
 
-    if (code == HttpServletResponse.SC_NOT_FOUND) {
+    if (code == HttpStatus.NOT_FOUND.value()) {
       return new NotFoundException();
     } else if (code == HttpServletResponse.SC_UNAUTHORIZED) {
       return new UnauthorizedException();
     } else if (code == HttpServletResponse.SC_FORBIDDEN) {
       return new ForbiddenException();
-    } else if (code == HttpServletResponse.SC_SERVICE_UNAVAILABLE) {
+    } else if (isServiceUnavailable(code)) {
       return new ServerUnavailableException();
     } else if (code == HttpServletResponse.SC_CONFLICT) {
       return new ConflictException();

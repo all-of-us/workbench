@@ -1,5 +1,8 @@
 package org.pmiops.workbench.firecloud;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -7,7 +10,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.*;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.ServerUnavailableException;
+import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
@@ -16,9 +24,6 @@ import org.pmiops.workbench.firecloud.model.Enabled;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.when;
 
 public class FireCloudServiceImplTest {
 

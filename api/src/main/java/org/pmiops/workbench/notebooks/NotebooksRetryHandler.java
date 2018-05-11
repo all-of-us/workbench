@@ -1,5 +1,9 @@
 package org.pmiops.workbench.notebooks;
 
+import java.net.SocketTimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -8,13 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletResponse;
-import java.net.SocketTimeoutException;
-
 @Service
 public class NotebooksRetryHandler extends RetryHandler<ApiException> {
 
+  private static final Logger logger = Logger.getLogger(NotebooksRetryHandler.class.getName());
+
   private static class NotebookRetryPolicy extends RetryConfig.ResponseCodeRetryPolicy {
+
+    public NotebookRetryPolicy() {
+      super("Notebooks API");
+    }
+
     @Override
     protected int getResponseCode(Throwable lastException) {
       if (lastException instanceof ApiException) {
@@ -25,6 +33,17 @@ public class NotebooksRetryHandler extends RetryHandler<ApiException> {
       }
       return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     }
+
+    @Override
+    protected void logNoRetry(Throwable t) {
+      if (t instanceof ApiException) {
+        logger.log(Level.SEVERE, String.format("Exception calling Notebooks API with response: %s",
+            ((ApiException) t).getResponseBody()), t);
+      } else {
+        super.logNoRetry(t);
+      }
+    }
+
   }
 
   @Autowired

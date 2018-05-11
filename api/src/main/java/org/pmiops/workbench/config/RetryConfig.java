@@ -1,40 +1,67 @@
 package org.pmiops.workbench.config;
 
-import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.ApiException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
-import org.springframework.retry.RetryPolicy;
-import org.springframework.retry.backoff.*;
+import org.springframework.retry.backoff.BackOffPolicy;
+import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
+import org.springframework.retry.backoff.Sleeper;
+import org.springframework.retry.backoff.ThreadWaitSleeper;
 import org.springframework.retry.policy.SimpleRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
 
 @Configuration
 public class RetryConfig {
 
   public static abstract class ResponseCodeRetryPolicy
       extends SimpleRetryPolicy {
-    private int minRetryCode = 501;
-    private int maxRetryCode = 599;
 
-    public void setMinRetryCode(int minRetryCode) {
-      this.minRetryCode = minRetryCode;
-    }
+    private static final Logger logger = Logger.getLogger(ResponseCodeRetryPolicy.class.getName());
 
-    public void setMaxRetryCode(int maxRetryCode) {
-      this.maxRetryCode = maxRetryCode;
+    private final String serviceName;
+
+    public ResponseCodeRetryPolicy(String serviceName) {
+      this.serviceName = serviceName;
     }
 
     @Override
     public boolean canRetry(RetryContext context) {
-      if (!super.canRetry(context)) {
-        return false;
+      if (context.getLastThrowable() == null) {
+        return true;
       }
       Throwable lastException = context.getLastThrowable();
-      int code = getResponseCode(lastException);
-      return code >= minRetryCode && code <= maxRetryCode;
+      if (canRetry(getResponseCode(lastException))) {
+        if (context.getRetryCount() < getMaxAttempts()) {
+          logRetry(context.getRetryCount(), lastException);
+          return true;
+        } else {
+          logGivingUp(context.getRetryCount(), lastException);
+          return false;
+        }
+      } else {
+        logNoRetry(lastException);
+        return false;
+      }
+    }
+
+    protected boolean canRetry(int code) {
+      return ExceptionUtils.isServiceUnavailable(code);
+    }
+
+    protected void logRetry(int retryCount, Throwable t) {
+      logger.log(Level.WARNING,
+          String.format("%s unavailable, retrying after %d attempts", serviceName, retryCount), t);
+    }
+
+    protected void logGivingUp(int retryCount, Throwable t) {
+      logger.log(Level.WARNING,
+          String.format("%s unavailable, giving up after %d attempts", serviceName, retryCount), t);
+    }
+
+    protected void logNoRetry(Throwable t) {
+      logger.log(Level.SEVERE, String.format("Exception calling %s", serviceName), t);
     }
 
     protected abstract int getResponseCode(Throwable lastException);
@@ -47,8 +74,10 @@ public class RetryConfig {
 
   @Bean
   public BackOffPolicy backOffPolicy(Sleeper sleeper) {
-    // Defaults to 100ms initial interval, 30 second timeout, doubling each time, with some random multiplier.
+    // Defaults to 100ms initial interval, doubling each time, with some random multiplier.
     ExponentialRandomBackOffPolicy policy = new ExponentialRandomBackOffPolicy();
+    // Set max interval of 20 seconds.
+    policy.setMaxInterval(20000);
     policy.setSleeper(sleeper);
     return policy;
   }
