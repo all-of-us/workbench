@@ -100,7 +100,7 @@ public class DbDomainDaoTest {
                 .conceptClassId("Sample Class")
                 .standardConcept("S")
                 .conceptCode("Sample concept Code")
-                .countValue(2)
+                .count(Long.valueOf(2))
                 .prevalence(0.00);
     }
 
