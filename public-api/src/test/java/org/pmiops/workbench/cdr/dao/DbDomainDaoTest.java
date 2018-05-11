@@ -33,19 +33,20 @@ public class DbDomainDaoTest {
     @Autowired
     private AchillesResultDao achillesResultDao;
 
-    private DbDomain dbDomain1;
-    private DbDomain dbDomain2;
-    private DbDomain dbDomain3;
-
-    private Concept concept1;
-    private Concept concept2;
-
-    private AchillesResult achillesResult1;
-    private AchillesResult achillesResult2;
-    private AchillesResult achillesResult3;
 
     @Before
     public void setUp() {
+
+        DbDomain dbDomain1;
+        DbDomain dbDomain2;
+        DbDomain dbDomain3;
+
+        Concept concept1;
+        Concept concept2;
+
+        AchillesResult achillesResult1;
+        AchillesResult achillesResult2;
+        AchillesResult achillesResult3;
 
         dbDomain1 = createDbDomain("Domain1","Sample Domain");
         dao.save(dbDomain1);
