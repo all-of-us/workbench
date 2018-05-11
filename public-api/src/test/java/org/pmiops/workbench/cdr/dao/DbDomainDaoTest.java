@@ -66,8 +66,8 @@ public class DbDomainDaoTest {
         dbDomain3=createDbDomain("Lifestyle","survey");
         dao.save(dbDomain3);
 
-        concept1=createConcept(1L,"Condition");
-        concept2=createConcept(2L,"Lifestyle");
+        concept1=createConcept(1L,"Condition","Sample hypertension");
+        concept2=createConcept(2L,"Lifestyle","Do you have hypertension or any of the symptoms related to hypertension");
 
         conceptDao.save(concept1);
         conceptDao.save(concept2);
@@ -80,9 +80,9 @@ public class DbDomainDaoTest {
         achillesAnalysisDao.save(achillesAnalysis2);
         achillesAnalysisDao.save(achillesAnalysis3);
 
-        achillesResult1=createAchillesResult(1L,Long.valueOf(3110),"1586134");
-        achillesResult2=createAchillesResult(2L,Long.valueOf(3111),"1585855");
-        achillesResult3=createAchillesResult(3L,Long.valueOf(3112),"1585710");
+        achillesResult1=createAchillesResult(1L,Long.valueOf(3110),"1586134",1L);
+        achillesResult2=createAchillesResult(2L,Long.valueOf(3111),"1585855",2L);
+        achillesResult3=createAchillesResult(3L,Long.valueOf(3112),"1585710",1L);
 
         achillesResultDao.save(achillesResult1);
         achillesResultDao.save(achillesResult2);
@@ -130,10 +130,10 @@ public class DbDomainDaoTest {
                 .countValue(Long.valueOf(0));
     }
 
-    private Concept createConcept(Long conceptId,String domainId){
+    private Concept createConcept(Long conceptId,String domainId,String conceptName){
         return new Concept()
                 .conceptId(conceptId)
-                .conceptName("Sample hypertension")
+                .conceptName(conceptName)
                 .standardConcept("S")
                 .conceptCode("Sample concept code")
                 .conceptClassId("Sample concept class Id")
@@ -143,12 +143,12 @@ public class DbDomainDaoTest {
                 .prevalence(0.0f);
     }
 
-    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum_1){
+    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum_1,Long stratum_2){
         return new AchillesResult()
                 .id(id)
                 .analysisId(analysisId)
                 .stratum1(stratum_1)
-                .stratum2("0")
+                .stratum2(String.valueOf(stratum_2))
                 .stratum3("0")
                 .stratum4("hypertension")
                 .stratum5(null)
