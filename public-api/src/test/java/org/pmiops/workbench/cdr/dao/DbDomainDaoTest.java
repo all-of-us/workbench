@@ -27,7 +27,7 @@ public class DbDomainDaoTest {
     private DbDomainDao dao;
 
     @Autowired
-    private QuestionConceptDao conceptDao;
+    private ConceptDao conceptDao;
 
     private DbDomain dbDomain1;
 
@@ -36,9 +36,9 @@ public class DbDomainDaoTest {
     @Before
     public void setUp() {
 
-        QuestionConcept concept1;
-        QuestionConcept concept2;
-        QuestionConcept concept3;
+        Concept concept1;
+        Concept concept2;
+        Concept concept3;
 
         dbDomain1 = createDbDomain("Domain1","Sample Domain");
         concept1 = createConcept("Sample Hypertension","Condition");
