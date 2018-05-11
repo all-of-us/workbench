@@ -69,7 +69,7 @@ public class DbDomainDaoTest {
         dbDomain3=createDbDomain("Lifestyle","Lifestyle","The Lifestyle module provides information on smoking, alcohol and recreational drug use","survey","ppi",1585855L,568120L);
         dao.save(dbDomain3);
 
-        dbDomain4=createDbDomain("TheBasics","The Basics","The Basics module provides demographics and economic information for participants"."survey","ppi",1586134L,567437L);
+        dbDomain4=createDbDomain("TheBasics","The Basics","The Basics module provides demographics and economic information for participants","survey","ppi",1586134L,567437L);
         dao.save(dbDomain3);
 
         concept1=createConcept(4296023,"Failure","S","76797004","Clinical Finding","SNOMED","Condition",10L,0.0f);
