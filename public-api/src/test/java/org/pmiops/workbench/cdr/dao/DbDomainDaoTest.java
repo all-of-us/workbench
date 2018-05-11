@@ -36,9 +36,9 @@ public class DbDomainDaoTest {
     @Before
     public void setUp() {
 
-        Concept concept1;
-        Concept concept2;
-        Concept concept3;
+        QuestionConcept concept1;
+        QuestionConcept concept2;
+        QuestionConcept concept3;
 
         dbDomain1 = createDbDomain("Domain1","Sample Domain");
         concept1 = createConcept("Sample Hypertension","Condition");
@@ -99,7 +99,7 @@ public class DbDomainDaoTest {
                 .vocabularyId("Sample Vocabulary")
                 .conceptClassId("Sample Class")
                 .standardConcept("S")
-                .conceptCode(conceptCode)
+                .conceptCode("Sample concept Code")
                 .valid_start_date("1970-01-01")
                 .valid_end_date("2099-12-31")
                 .invalid_reason(null)
