@@ -31,7 +31,8 @@ public class DbDomainDaoTest {
 
     private DbDomain dbDomain1;
 
-
+    private long leftLimit=10000000;
+    private long rightLimit=100000000;
 
     @Before
     public void setUp() {
@@ -93,7 +94,7 @@ public class DbDomainDaoTest {
 
     private Concept createConcept(String conceptName,String domainId) {
         return new Concept()
-                .conceptId(Long.valueOf(0))
+                .conceptId(leftLimit + (long) (Math.random() * (rightLimit - leftLimit)))
                 .conceptName(conceptName)
                 .domainId(domainId)
                 .vocabularyId("Sample Vocabulary")
