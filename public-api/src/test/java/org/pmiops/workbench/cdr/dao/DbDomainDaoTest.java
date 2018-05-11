@@ -83,8 +83,8 @@ public class DbDomainDaoTest {
         conceptDao.save(concept4);
 
         achillesAnalysis1=createAchillesAnalysis(3110L,"Survey Question Answer Count","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string",null,"column","counts");
-        achillesAnalysis2=createAchillesAnalysis(3111L,"Gender","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","charts");
-        achillesAnalysis3=createAchillesAnalysis(3112L,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","charts");
+        achillesAnalysis2=createAchillesAnalysis(3111L,"Gender","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","counts");
+        achillesAnalysis3=createAchillesAnalysis(3112L,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","counts");
 
         achillesAnalysisDao.save(achillesAnalysis1);
         achillesAnalysisDao.save(achillesAnalysis2);
@@ -103,7 +103,7 @@ public class DbDomainDaoTest {
     public void findAllDbDomains() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findAll();
-        Assert.assertEquals(dbDomain1.getDomainId(),"Domain1");
+        Assert.assertEquals(dbDomain1.getDomainId(),"Condition");
         Assert.assertEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
     }
 
@@ -125,7 +125,7 @@ public class DbDomainDaoTest {
 
     @Test
     public void findDomainMatchResults() throws Exception{
-        final List<DbDomain> list=dao.findDomainSearchResults("hypertension");
+        final List<DbDomain> list=dao.findDomainSearchResults("failure");
         Assert.assertNotEquals(list,null);
     }
 
