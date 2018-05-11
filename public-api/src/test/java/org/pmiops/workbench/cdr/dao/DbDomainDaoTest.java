@@ -26,29 +26,14 @@ public class DbDomainDaoTest {
     @Autowired
     private DbDomainDao dao;
 
-    @Autowired
-    private ConceptDao conceptDao;
-
     private DbDomain dbDomain1;
-
-    private long leftLimit=10000000;
-    private long rightLimit=100000000;
 
     @Before
     public void setUp() {
 
-        Concept concept1;
-        Concept concept2;
-        Concept concept3;
-
         dbDomain1 = createDbDomain("Domain1","Sample Domain");
-        concept1 = createConcept("Sample Hypertension","Condition");
-        concept2 = createConcept("Sample Diabetes","Condition");
-        concept3 = createConcept("Cancer Treatment","Procedure");
         dao.save(dbDomain1);
-        conceptDao.save(concept1);
-        conceptDao.save(concept2);
-        conceptDao.save(concept3);
+
     }
 
     @Test
@@ -90,19 +75,6 @@ public class DbDomainDaoTest {
                 .domainRoute("Domain Route")
                 .conceptId(Long.valueOf(0))
                 .countValue(Long.valueOf(0));
-    }
-
-    private Concept createConcept(String conceptName,String domainId) {
-        return new Concept()
-                .conceptId(leftLimit + (long) (Math.random() * (rightLimit - leftLimit)))
-                .conceptName(conceptName)
-                .domainId(domainId)
-                .vocabularyId("Sample Vocabulary")
-                .conceptClassId("Sample Class")
-                .standardConcept("S")
-                .conceptCode("Sample concept Code")
-                .count(Long.valueOf(2))
-                .prevalence(0.0f);
     }
 
 
