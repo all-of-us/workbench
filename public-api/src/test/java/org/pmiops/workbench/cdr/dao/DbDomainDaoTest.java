@@ -33,11 +33,12 @@ public class DbDomainDaoTest {
     @Autowired
     private AchillesResultDao achillesResultDao;
 
+    private DbDomain dbDomain1;
 
     @Before
     public void setUp() {
 
-        DbDomain dbDomain1;
+
         DbDomain dbDomain2;
         DbDomain dbDomain3;
 
@@ -63,9 +64,9 @@ public class DbDomainDaoTest {
         conceptDao.save(concept1);
         conceptDao.save(concept2);
 
-        achillesResult1=createAchillesResult(3110,"1586134");
-        achillesResult2=createAchillesResult(3111,"1585855");
-        achillesResult3=createAchillesResult(3112,"1585710");
+        achillesResult1=createAchillesResult(Long.valueOf(3110),"1586134");
+        achillesResult2=createAchillesResult(Long.valueOf(3111),"1585855");
+        achillesResult3=createAchillesResult(Long.valueOf(3112),"1585710");
 
         achillesResultDao.save(achillesResult1);
         achillesResultDao.save(achillesResult2);
