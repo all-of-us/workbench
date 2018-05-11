@@ -28,6 +28,8 @@ public class RetryConfig {
 
     @Override
     public boolean canRetry(RetryContext context) {
+      // canRetry is (counter-intuitively) invoked before the first attempt;
+      // in that scenario, getLastThrowable() returns null and we should proceed.
       if (context.getLastThrowable() == null) {
         return true;
       }
