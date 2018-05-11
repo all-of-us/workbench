@@ -4,11 +4,13 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
+import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.test.Providers;
+import org.springframework.retry.backoff.NoBackOffPolicy;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -33,7 +35,8 @@ public class FireCloudIntegrationTest {
         Providers.of(profileApi),
         Providers.of(billingApi),
         Providers.of(groupsApi),
-        Providers.of(workspacesApi)
+        Providers.of(workspacesApi),
+        new FirecloudRetryHandler(new NoBackOffPolicy())
     );
 
     @Test
