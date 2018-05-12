@@ -3,6 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.Test;
+import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
 import org.pmiops.workbench.cdr.model.AchillesResult;
@@ -15,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
