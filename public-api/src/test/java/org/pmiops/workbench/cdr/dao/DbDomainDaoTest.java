@@ -123,7 +123,7 @@ public class DbDomainDaoTest {
 
     @Test
     public void findDomainMatchResults() throws Exception{
-        final List<DbDomain> list=dao.findDomainSearchResults("failure");
+        final List<DbDomain> list=dao.findDomainResults("failure");
         Assert.assertNotEquals(list,null);
     }
 
