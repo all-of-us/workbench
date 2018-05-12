@@ -74,6 +74,9 @@ export class SignedInComponent implements OnInit {
 
   signOut(): void {
     this.signInService.signOut();
+    // Force a hard browser reload here. We want to ensure that no local state
+    // is persisting across user sessions, as this can lead to subtle bugs.
+    window.location.assign('/login');
   }
 
   get reviewWorkspaceActive(): boolean {
