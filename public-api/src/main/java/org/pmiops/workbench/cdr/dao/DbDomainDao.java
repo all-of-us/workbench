@@ -30,12 +30,12 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
             "group by d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.concept_id order by db_type ASC")
     List<DbDomain> findDomainSearchResults(String keyword);
 
-
     @Query(nativeQuery=true,value= "select d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.domain_route,d.concept_id, count(distinct q.concept_id) as count_value from db_domain d join achilles_results r on d.concept_id = r.stratum_1\n" +
             "join concept q on r.stratum_2 = q.concept_id\n" +
             "where d.db_type = 'survey' and r.analysis_id = 3110\n" +
-            "and (match(q.concept_name) against(?1 in boolean mode) or\n" +
-            " match(r.stratum_4) against(?1 in boolean mode) )\n" +
+            "and q.concept_name like ?1 or \n"+
+            " r.stratum_4 like ?1 \n" +
             "group by d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.concept_id order by db_type ASC")
-    List<DbDomain> findDomainResults(String keyword);
+    List<DbDomain> findDomainResults(String reg);
+
 }

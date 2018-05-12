@@ -124,7 +124,8 @@ public class DbDomainDaoTest {
 
     @Test
     public void findDomainMatchResults() throws Exception{
-        final List<DbDomain> list=dao.findDomainResults("failure");
+        String reg="%failure%";
+        final List<DbDomain> list=dao.findDomainResults(reg);
         Assert.assertNotEquals(list,null);
     }
 
