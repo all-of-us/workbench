@@ -36,6 +36,11 @@ public class ReviewTabQueryBuilder {
         "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
         "and domain = @" + NAMED_DOMAIN_PARAM + "\n";
 
+    private static final String MASTER_COUNT_TEMPLATE =
+      "select count(*) as count\n" +
+        "from `${projectId}.${dataSetId}.participant_review`\n" +
+        "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
+
     private static final String SQL_WHERE =
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
         "and domain = @" + NAMED_DOMAIN_PARAM + "\n" +
@@ -74,11 +79,12 @@ public class ReviewTabQueryBuilder {
 
     public QueryJobConfiguration buildCountQuery(Long participantId,
                                                  String domain) {
+        String countSql = DomainType.MASTER.toString().equals(domain) ? MASTER_COUNT_TEMPLATE : COUNT_TEMPLATE;
         Map<String, QueryParameterValue> params = new HashMap<>();
         params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
         params.put(NAMED_DOMAIN_PARAM, QueryParameterValue.string(domain));
         return QueryJobConfiguration
-          .newBuilder(COUNT_TEMPLATE)
+          .newBuilder(countSql)
           .setNamedParameters(params)
           .setUseLegacySql(false)
           .build();

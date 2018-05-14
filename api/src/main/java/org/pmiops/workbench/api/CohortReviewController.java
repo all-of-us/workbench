@@ -610,33 +610,40 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                       String domain) {
     ParticipantData participantData = null;
     if (domain.equals(DomainType.DRUG.toString())) {
-      participantData = new Drug();
-      ((Drug) participantData).signature(bigQueryService.getString(row, rm.get("signature")));
-      ((Drug) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+      participantData = new Drug()
+        .signature(bigQueryService.getString(row, rm.get("signature")))
+        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .domainType(DomainType.DRUG);
     } else if (domain.equals(DomainType.CONDITION.toString())) {
-      participantData = new Condition();
-      ((Condition) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+      participantData = new Condition()
+        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .domainType(DomainType.CONDITION);
     } else if (domain.equals(DomainType.PROCEDURE.toString())) {
-      participantData = new Procedure();
-      ((Procedure) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+      participantData = new Procedure()
+        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .domainType(DomainType.PROCEDURE);;
     } else if (domain.equals(DomainType.OBSERVATION.toString())) {
-      participantData = new Observation();
-      ((Observation) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+      participantData = new Observation()
+        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .domainType(DomainType.OBSERVATION);;
     } else if (domain.equals(DomainType.VISIT.toString())) {
-      participantData = new Visit();
-      ((Visit) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
       try {
-        ((Visit) participantData).endDate(bigQueryService.getDateTime(row, rm.get("itemEndDate")));
+        participantData = new Visit()
+          .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+          .endDate(bigQueryService.getDateTime(row, rm.get("itemEndDate")))
+          .domainType(DomainType.VISIT);;
       } catch (BigQueryException e) {
         //do nothing for now.
       }
     } else if (domain.equals(DomainType.MEASUREMENT.toString())) {
-      participantData = new Measurement();
-      ((Measurement) participantData).age(bigQueryService.getLong(row, rm.get("age")).intValue());
+      participantData = new Measurement()
+        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .domainType(DomainType.MEASUREMENT);;
     } else if (domain.equals(DomainType.MASTER.toString())) {
-      participantData = new Master();
-      ((Master) participantData).dataId(bigQueryService.getLong(row, rm.get("dataId")));
-      ((Master) participantData).domain(bigQueryService.getString(row, rm.get("domain")));
+      participantData = new Master()
+        .dataId(bigQueryService.getLong(row, rm.get("dataId")))
+        .domain(bigQueryService.getString(row, rm.get("domain")))
+        .domainType(DomainType.MASTER);;
     }
     return participantData.itemDate(bigQueryService.getDateTime(row, rm.get("itemDate")))
       .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))

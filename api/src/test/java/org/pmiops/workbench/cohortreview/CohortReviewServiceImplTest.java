@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -25,6 +24,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
+import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
@@ -250,7 +250,10 @@ public class CohortReviewServiceImplTest {
     @Test
     public void findParticipantCohortStatuses() throws Exception {
         long cohortReviewId = 1;
-        PageRequest pageRequest = new PageRequest(0, 1, ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+        PageRequest pageRequest = new PageRequest()
+          .page(0)
+          .pageSize(1)
+          .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
 
         when(participantCohortStatusDao.findAll(cohortReviewId, Collections.<Filter>emptyList(), pageRequest)).thenReturn(new ArrayList<>());
 
