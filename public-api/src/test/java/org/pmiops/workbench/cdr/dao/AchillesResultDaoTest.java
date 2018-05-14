@@ -29,42 +29,30 @@ public class AchillesResultDaoTest {
     private AchillesAnalysisDao achillesAnalysisDao;
 
     private AchillesAnalysis achillesAnalysis1;
-    private AchillesAnalysis achillesAnalysis2;
-    private AchillesAnalysis achillesAnalysis3;
 
     private AchillesResult achillesResult1;
-    private AchillesResult achillesResult2;
-    private AchillesResult achillesResult3;
-   //private AchillesResult achillesResult4;
 
     @Before
     public void setUp() {
 
 
-        achillesAnalysis1=createAnalysis(3110L,"Survey Question Answer Count","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string",null,"column","counts");
-        achillesAnalysis2=createAnalysis(3111L,"Gender","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","counts");
-        achillesAnalysis3=createAnalysis(3112L,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","counts");
+        achillesAnalysis1=createAnalysis(5000L,"Sample Analysis",null,null,null,null,null,"column","counts");
+
 
         achillesAnalysisDao.save(achillesAnalysis1);
-        achillesAnalysisDao.save(achillesAnalysis2);
-        achillesAnalysisDao.save(achillesAnalysis3);
 
-        achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L);
-        achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L);
-        achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L);
-        //achillesResult4=createAchillesResult(2346L,1L,null,null,null,null,null,94000L);
+
+        achillesResult1=createAchillesResult(2397L,5000L,null,null,null,null,null,260L);
 
 
         achillesResultDao.save(achillesResult1);
-        achillesResultDao.save(achillesResult2);
-        achillesResultDao.save(achillesResult3);
-        //achillesResultDao.save(achillesResult4);
+
 
     }
 
     @Test
     public void findAchillesResultByAnalysisId() throws Exception{
-        final AchillesResult achillesResult=achillesResultDao.findAchillesResultByAnalysisId(1L);
+        final AchillesResult achillesResult=achillesResultDao.findAchillesResultByAnalysisId(5000L);
         Assert.assertNotEquals(achillesResult,null);
     }
 
@@ -98,13 +86,8 @@ public class AchillesResultDaoTest {
     @After
     public void flush(){
         achillesAnalysisDao.delete(achillesAnalysis1);
-        achillesAnalysisDao.delete(achillesAnalysis2);
-        achillesAnalysisDao.delete(achillesAnalysis3);
 
         achillesResultDao.delete(achillesResult1);
-        achillesResultDao.delete(achillesResult2);
-        achillesResultDao.delete(achillesResult3);
-       // achillesResultDao.delete(achillesResult4);
     }
 
 }
