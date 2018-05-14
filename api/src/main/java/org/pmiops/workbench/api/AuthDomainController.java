@@ -4,10 +4,6 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.AuthDomainRequest;
 import org.pmiops.workbench.model.Authority;
@@ -39,15 +35,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.MANAGE_GROUP})
   @Override
   public ResponseEntity<EmptyResponse> createAuthDomain(String groupName) {
-    try {
-      fireCloudService.createGroup(groupName);
-    } catch (ApiException e) {
-      if (e.getCode() == 409) {
-        throw new ConflictException(e.getResponseBody());
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
-    }
+    fireCloudService.createGroup(groupName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -56,11 +44,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
     DataAccessLevel previousAccess = user.getDataAccessLevel();
-    try {
-      fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
-    } catch (ApiException e) {
-      ExceptionUtils.convertFirecloudException(e);
-    }
+    fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
     // TODO(calbach): Teardown any active clusters here.
     user.setDataAccessLevel(DataAccessLevel.REVOKED);
     user.setDisabled(true);
@@ -79,11 +63,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   public ResponseEntity<Void> addUserToAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
     DataAccessLevel previousAccess = user.getDataAccessLevel();
-    try {
-      fireCloudService.addUserToGroup(request.getEmail(), groupName);
-    } catch (ApiException e) {
-      ExceptionUtils.convertFirecloudException(e);
-    }
+    fireCloudService.addUserToGroup(request.getEmail(), groupName);
     // TODO(blrubenstein): Parameterize this.
     user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     user.setDisabled(false);
