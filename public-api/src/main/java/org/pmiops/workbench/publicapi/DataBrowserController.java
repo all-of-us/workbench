@@ -209,7 +209,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // Get questions for survey
         List<QuestionConcept> questions = questionConceptDao.findSurveyQuestions(longSurveyConceptId);
 
-
         // Get survey definition
         QuestionConceptListResponse resp = new QuestionConceptListResponse();
         DbDomain survey = dbDomainDao.findByConceptId(longSurveyConceptId);
