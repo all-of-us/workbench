@@ -53,7 +53,8 @@ public class AchillesResultDaoTest {
         achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L);
         achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L);
         achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L);
-        achillesResult4=createAchillesResult(2346L,3112L,"1586134","2000000","","Prefer not to answer",null,890L);
+        achillesResult4=createAchillesResult(2346L,1L,null,null,null,null,null,94000L);
+
 
         achillesResultDao.save(achillesResult1);
         achillesResultDao.save(achillesResult2);
@@ -63,8 +64,8 @@ public class AchillesResultDaoTest {
 
     @Test
     public void findAchillesResultByAnalysisId() throws Exception{
-        final List<AchillesResult> list=achillesResultDao.findAchillesResultByAnalysisId(3112L);
-        Assert.assertNotEquals(list,null);
+        final AchillesResult achillesResult=achillesResultDao.findAchillesResultByAnalysisId(1L);
+        Assert.assertNotEquals(achillesResult,null);
     }
 
 
