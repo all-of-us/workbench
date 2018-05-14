@@ -16,7 +16,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -26,10 +25,10 @@ import java.util.Arrays;
 public class AchillesResultDaoTest {
 
     @Autowired
-    AchillesResultDao achillesResultDao;
+    private AchillesResultDao achillesResultDao;
 
     @Autowired
-    AchillesAnalysisDao achillesAnalysisDao;
+    private AchillesAnalysisDao achillesAnalysisDao;
 
     private AchillesAnalysis achillesAnalysis1;
     private AchillesAnalysis achillesAnalysis2;

@@ -1,9 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.After;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.QuestionConcept;
 import org.pmiopd.workbench.cdr.model.ConceptRelationship;

@@ -122,13 +122,15 @@ public class DbDomainDaoTest {
         Assert.assertNotEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
     }
 
+    /*
     @Test
     public void findDomainMatchResults() throws Exception{
         /* Test does not recognize native match function but the native query works
         final List<DbDomain> list=dao.findDomainSearchResults("failure");
         Assert.assertNotEquals(list,null);
-        * */
+
     }
+    */
 
     private DbDomain createDbDomain(String domainId, String domainDisp, String domainDesc,String dbType,String domainRoute,Long conceptId,Long count) {
         return new DbDomain()
