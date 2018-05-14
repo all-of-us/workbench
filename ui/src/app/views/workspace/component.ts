@@ -98,6 +98,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   notebookError = false;
   notebooksLoading = true;
   cohortList: Cohort[] = [];
+  private pollClusterTimer: NodeJS.Timer;
   cluster: Cluster;
   clusterLoading = true;
   clusterLongWait = false;
@@ -164,6 +165,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('message', this.notebookAuthListener);
+    if (this.pollClusterTimer) {
+      clearTimeout(this.pollClusterTimer);
+    }
   }
 
   openNotebook(notebook: any): void {
@@ -236,13 +240,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   private pollCluster(): Observable<Cluster> {
     return new Observable<Cluster>(observer => {
-      // Repoll every 10s if not ready.
-      const repoll = () => setTimeout(() => {
-        this.pollCluster().subscribe(c => {
-          observer.next(c);
-          observer.complete();
-        });
-      }, 10000);
+      // Repoll every 15s if not ready.
+      const repoll = () => {
+        this.pollClusterTimer = setTimeout(() => {
+          this.pollCluster().subscribe(c => {
+            observer.next(c);
+            observer.complete();
+          });
+        }, 15000);
+      };
       this.clusterService.listClusters()
         .subscribe((resp) => {
           this.cluster = resp.defaultCluster;
