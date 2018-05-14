@@ -35,10 +35,11 @@ public class AchillesResultDaoTest {
     private AchillesResult achillesResult1;
     private AchillesResult achillesResult2;
     private AchillesResult achillesResult3;
-    private AchillesResult achillesResult4;
+   //private AchillesResult achillesResult4;
 
     @Before
     public void setUp() {
+
 
         achillesAnalysis1=createAnalysis(3110L,"Survey Question Answer Count","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string",null,"column","counts");
         achillesAnalysis2=createAnalysis(3111L,"Gender","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","counts");
@@ -57,7 +58,8 @@ public class AchillesResultDaoTest {
         achillesResultDao.save(achillesResult1);
         achillesResultDao.save(achillesResult2);
         achillesResultDao.save(achillesResult3);
-        achillesResultDao.save(achillesResult4);
+        //achillesResultDao.save(achillesResult4);
+
     }
 
     @Test
@@ -102,7 +104,7 @@ public class AchillesResultDaoTest {
         achillesResultDao.delete(achillesResult1);
         achillesResultDao.delete(achillesResult2);
         achillesResultDao.delete(achillesResult3);
-        achillesResultDao.delete(achillesResult4);
+       // achillesResultDao.delete(achillesResult4);
     }
 
 }
