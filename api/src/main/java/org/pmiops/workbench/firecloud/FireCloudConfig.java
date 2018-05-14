@@ -3,9 +3,6 @@ package org.pmiops.workbench.firecloud;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.logging.Logger;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -18,6 +15,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 @org.springframework.context.annotation.Configuration
 public class FireCloudConfig {

@@ -39,6 +39,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
+  private final FirecloudRetryHandler retryHandler;
 
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
@@ -53,12 +54,14 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
-      Provider<WorkspacesApi> workspacesApiProvider) {
+      Provider<WorkspacesApi> workspacesApiProvider,
+      FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
+    this.retryHandler = retryHandler;
   }
 
   @Override
@@ -89,7 +92,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public boolean isRequesterEnabledInFirecloud() throws ApiException {
     ProfileApi profileApi = profileApiProvider.get();
     try {
-      Me me = profileApi.me();
+      Me me = retryHandler.runAndThrowChecked((context) -> profileApi.me());
       // Users can only use FireCloud if the Google and LDAP flags are enabled.
       return me.getEnabled() != null
           && isTrue(me.getEnabled().getGoogle()) && isTrue(me.getEnabled().getLdap());
@@ -97,13 +100,15 @@ public class FireCloudServiceImpl implements FireCloudService {
       if (e.getCode() == NOT_FOUND.value() || e.getCode() == UNAUTHORIZED.value()) {
         return false;
       }
-      throw e;
+      ExceptionUtils.convertFirecloudException(e);
+      return false;
     }
   }
 
   @Override
   public Me getMe() throws ApiException {
-    return profileApiProvider.get().me();
+    ProfileApi profileApi = profileApiProvider.get();
+    return retryHandler.run((context) -> profileApi.me());
   }
 
   @Override
@@ -124,7 +129,10 @@ public class FireCloudServiceImpl implements FireCloudService {
     profile.setPi("None");
     profile.setNonProfitStatus("None");
 
-    profileApi.setProfile(profile);
+    retryHandler.run((context) -> {
+      profileApi.setProfile(profile);
+      return null;
+    });
   }
 
   @Override
@@ -133,13 +141,19 @@ public class FireCloudServiceImpl implements FireCloudService {
     CreateRawlsBillingProjectFullRequest request = new CreateRawlsBillingProjectFullRequest();
     request.setBillingAccount("billingAccounts/"+configProvider.get().firecloud.billingAccountId);
     request.setProjectName(projectName);
-    billingApi.createBillingProjectFull(request);
+    retryHandler.run((context) -> {
+      billingApi.createBillingProjectFull(request);
+      return null;
+    });
   }
 
   @Override
   public void addUserToBillingProject(String email, String projectName) throws ApiException {
     BillingApi billingApi = billingApiProvider.get();
-    billingApi.addUserToBillingProject(projectName, USER_FC_ROLE, email);
+    retryHandler.run((context) -> {
+      billingApi.addUserToBillingProject(projectName, USER_FC_ROLE, email);
+      return null;
+    });
   }
 
   @Override
@@ -156,13 +170,19 @@ public class FireCloudServiceImpl implements FireCloudService {
       authDomain.add(registeredDomain);
       workspaceIngest.setAuthorizationDomain(authDomain);
     }
-    workspacesApi.createWorkspace(workspaceIngest);
+    retryHandler.run((context) -> {
+      workspacesApi.createWorkspace(workspaceIngest);
+      return null;
+    });
   }
 
   @Override
   public void grantGoogleRoleToUser(String projectName, String role, String email) throws ApiException {
     BillingApi billingApi = billingApiProvider.get();
-    billingApi.grantGoogleRoleToUser(projectName, role, email);
+    retryHandler.run((context) -> {
+      billingApi.grantGoogleRoleToUser(projectName, role, email);
+      return null;
+    });
   }
 
   @Override
@@ -171,25 +191,16 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setNamespace(toProject);
     workspaceIngest.setName(toName);
-    try {
+    retryHandler.run((context) -> {
       workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest);
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Error cloning FC workspace %s/%s: %s",
-              fromProject,
-              fromName,
-              e.getResponseBody()),
-          e);
-      ExceptionUtils.convertFirecloudException(e);
-    }
+      return null;
+    });
   }
 
 
   @Override
   public List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException {
-    return profileApiProvider.get().billing();
+    return retryHandler.run((context) -> profileApiProvider.get().billing());
   }
 
   private boolean isTrue(Boolean b) {
@@ -200,41 +211,54 @@ public class FireCloudServiceImpl implements FireCloudService {
   public WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     // TODO: set authorization domain here
-    return workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates);
+    return retryHandler.run((context) ->
+      workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates));
   }
 
   @Override
   public WorkspaceResponse getWorkspace(String projectName, String workspaceName) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    return workspacesApi.getWorkspace(projectName, workspaceName);
+    return retryHandler.run((context) ->
+      workspacesApi.getWorkspace(projectName, workspaceName));
   }
 
   @Override
   public List<WorkspaceResponse> getWorkspaces() throws ApiException {
-    return workspacesApiProvider.get().listWorkspaces();
+    return retryHandler.run((context) ->
+        workspacesApiProvider.get().listWorkspaces());
   }
 
   @Override
   public void deleteWorkspace(String projectName, String workspaceName) throws ApiException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    workspacesApi.deleteWorkspace(projectName, workspaceName);
+    retryHandler.run((context) -> {
+      workspacesApi.deleteWorkspace(projectName, workspaceName);
+      return null;
+    });
   }
 
   @Override
   public ManagedGroupWithMembers createGroup(String groupName) throws ApiException {
     GroupsApi groupsApi = groupsApiProvider.get();
-    return groupsApi.createGroup(groupName);
+    return retryHandler.run((context) ->
+      groupsApi.createGroup(groupName));
   }
 
   @Override
   public void addUserToGroup(String email, String groupName) throws ApiException {
     GroupsApi groupsApi = groupsApiProvider.get();
-    groupsApi.addUserToGroup(groupName, "member", email);
+    retryHandler.run((context) -> {
+      groupsApi.addUserToGroup(groupName, "member", email);
+      return null;
+    });
   }
 
   @Override
   public void removeUserFromGroup(String email, String groupName) throws ApiException {
     GroupsApi groupsApi = groupsApiProvider.get();
-    groupsApi.removeUserFromGroup(groupName, "member", email);
+    retryHandler.run((context) -> {
+      groupsApi.removeUserFromGroup(groupName, "member", email);
+      return null;
+    });
   }
 }

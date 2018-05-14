@@ -20,19 +20,24 @@ import {
 })
 export class WorkspaceListComponent implements OnInit, OnDestroy {
 
-  billingProjectInitialized = false;
+  // TODO: Consider moving profile load to be in a resolver - currently we have
+  // a degenerate third undefined state for this boolean where we don't yet know
+  // whether billing has been initialized.
+  billingProjectInitialized: boolean;
   billingProjectQuery: NodeJS.Timer;
   errorText: string;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;
   firstSignIn: Date;
+
   constructor(
       private profileStorageService: ProfileStorageService,
       private route: ActivatedRoute,
       private router: Router,
       private workspacesService: WorkspacesService,
   ) {}
+
   ngOnInit(): void {
     this.workspacesLoading = true;
     this.profileStorageService.profile$.subscribe((profile) => {
@@ -41,27 +46,34 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
       }
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
+        // Only once we know the billing project status do we request/display
+        // workspaces for two reasons:
+        // - If the FC user is not yet initialized, getWorkspaces() may fail
+        //   with a 401.
+        // - While the billing project is being initialized, we want to keep the
+        //   big spinner on the page to provide obvious messaging to the user
+        //   about the expected wait time.
+        this.workspacesService.getWorkspaces()
+            .subscribe(
+              workspacesReceived => {
+                workspacesReceived.items.sort(function(a, b) {
+                  return a.workspace.name.localeCompare(b.workspace.name);
+                });
+                this.workspaceList = workspacesReceived.items;
+                this.workspacesLoading = false;
+              },
+              error => {
+                const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
+                this.errorText = (response.message) ? response.message : '';
+              });
       } else {
+        this.billingProjectInitialized = false;
         this.billingProjectQuery = setTimeout(() => {
           this.profileStorageService.reload();
         }, 10000);
       }
     });
     this.profileStorageService.reload();
-
-    this.workspacesService.getWorkspaces()
-        .subscribe(
-            workspacesReceived => {
-              workspacesReceived.items.sort(function(a, b) {
-                return a.workspace.name.localeCompare(b.workspace.name);
-              });
-              this.workspaceList = workspacesReceived.items;
-              this.workspacesLoading = false;
-            },
-            error => {
-              const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
-              this.errorText = (response.message) ? response.message : '';
-            });
   }
 
   ngOnDestroy(): void {
