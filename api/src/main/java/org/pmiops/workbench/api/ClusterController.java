@@ -125,9 +125,14 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterLocalizeResponse> localize(
       String projectName, String clusterName, ClusterLocalizeRequest body) {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        fireCloudService.getWorkspace(body.getWorkspaceNamespace(), body.getWorkspaceId())
-            .getWorkspace();
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+    try {
+      fcWorkspace = fireCloudService.getWorkspace(body.getWorkspaceNamespace(),
+          body.getWorkspaceId()).getWorkspace();
+    } catch (NotFoundException e) {
+      throw new NotFoundException(String.format("workspace %s/%s not found or not accessible",
+          body.getWorkspaceNamespace(), body.getWorkspaceId()));
+    }
     CdrVersion cdrVersion =
         workspaceService.getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId()).getCdrVersion();
 
