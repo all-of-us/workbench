@@ -26,10 +26,14 @@ export class SurveyViewComponent implements OnInit {
   surveyResult: QuestionConceptListResponse;
   resultsComplete = false;
 
+
   /* Have questions array for filtering */
   questions: QuestionConcept[] = [];
   searchText = '';
   prevSearchText = '';
+
+  /* Show answers toggle */
+  showAnswer = {};
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
@@ -97,6 +101,15 @@ export class SurveyViewComponent implements OnInit {
         filtered = this.questions.filter(this.searchQuestion, this);
         this.questions = filtered;
         console.log('Filtered to ' + this.searchText);
+    }
+  }
+
+  public toggleAnswer(qid) {
+    if (! this.showAnswer[qid] ) {
+      this.showAnswer[qid] = true;
+    }
+    else {
+      this.showAnswer[qid] = false;
     }
   }
 

@@ -38,20 +38,9 @@
 }
 
 
-.survey-results .box-sub-title {
+.survey-results .box-sub-title,
+.row.answers {
     margin-left: .5rem;
-
 }
 
 
-/* Uggg . Why is this not overriding */
-.stack-view {
-    border: none !important;
-}
-
-.answers .stack-view .stack-block-label {
-    background-color: inherit !important;
-    color: #53A9D8 !important;
-    font-family: "Gotham HTF", open-sans, sans-serif;
-
-}

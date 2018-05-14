@@ -56,31 +56,50 @@
         <clr-icon shape="search" class="input-icon is-info"></clr-icon>
         <input type="text" id="search-db" placeholder="Keyword Search">
       </div> -->
-      <div class="box-sub-title"> Click on each response to view branding logic and age and gender distributions</div>
+      <div class="box-sub-title"> Click on each response to view age and gender distributions</div>
       <div class="row question-result" *ngFor="let q of questions, let i = index">
-        <div class="row question-card">
-          <div class="col-md-6 col-xs-12 col-sm-12">
-            <div class="box-title"> Question {{i + 1}}</div>
-            <div class="box-sub-title"> {{ q.conceptName}} ({{q.conceptId}}) </div>
-          </div>
-          <div class="col-md-4 offset-md-2 col-xs-12 col-sm-12">
-            <div class="response-dist" style="height:200px">
-              <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" ></app-chart>
+
+        <div class=" question-card">
+
+          <div class="row question">
+
+            <div class="col-md-6 col-xs-12 col-sm-12">
+              <div class="box-title"> Question {{i + 1}}</div>
+              <div class="box-sub-title"> {{ q.conceptName}} ({{q.conceptId}}) </div>
             </div>
+
+            <div class="col-md-4 offset-md-2 col-xs-12 col-sm-12">
+              <div class="response-dist" style="height:200px">
+                <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" ></app-chart>
+              </div>
+            </div>
+
           </div>
 
-          <div class="row answers">
-            <div class="col-xs-12">
-              <clr-stack-view class="answers">
-                <clr-stack-block [clrSbExpanded]="false">
-                  <clr-stack-label>See Answers</clr-stack-label>
-                  <clr-stack-block>
-                    <clr-stack-label> <h6> Here is a stack block </h6></clr-stack-label>
-                  </clr-stack-block>
-                </clr-stack-block>
-              </clr-stack-view>
-            </div>
+          <div class="row ">
+              <div class="col-xs-12">
+                <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
+              </div>
           </div>
+
+          <div class="row answers" [hidden]="!showAnswer[q.conceptId]">
+
+            <div class="col-sm-6 col-xs-12">
+              <div *ngFor="let a of q.countAnalysis.results"  >
+                <div class="answer-text">
+                  <label> {{a.stratum4}} </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-xs-12 answer-charts">
+              <div class="answer-card card">
+                Select charts go here
+              </div>
+            </div>
+
+          </div> <!-- end collapsible answers -->
+
 
         </div>
 
