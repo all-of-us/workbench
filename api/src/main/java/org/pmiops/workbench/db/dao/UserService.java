@@ -9,8 +9,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -88,12 +86,8 @@ public class UserService {
           && user.getEthicsTrainingCompletionTime() != null
           && user.getTermsOfServiceCompletionTime() != null
           && user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
-        try {
-          this.fireCloudService.addUserToGroup(user.getEmail(),
-              configProvider.get().firecloud.registeredDomainName);
-        } catch (ApiException e) {
-          ExceptionUtils.convertFirecloudException(e);
-        }
+        this.fireCloudService.addUserToGroup(user.getEmail(),
+            configProvider.get().firecloud.registeredDomainName);
         user.setDataAccessLevel(DataAccessLevel.REGISTERED);
       }
     }

@@ -9,8 +9,6 @@ import org.pmiops.workbench.google.GoogleRetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-
 @Service
 public class UserInfoService {
 
@@ -28,7 +26,7 @@ public class UserInfoService {
     this.retryHandler = retryHandler;
   }
 
-  public Userinfoplus getUserInfo(String token) throws IOException {
+  public Userinfoplus getUserInfo(String token) {
     GoogleCredential credential = new GoogleCredential().setAccessToken(token);
     Oauth2 oauth2 = new Oauth2.Builder(httpTransport, jsonFactory, credential)
         .setApplicationName(APPLICATION_NAME).build();

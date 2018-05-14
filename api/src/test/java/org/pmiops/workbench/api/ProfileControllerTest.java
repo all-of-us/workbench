@@ -33,9 +33,9 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -61,7 +61,6 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -345,7 +344,7 @@ public class ProfileControllerTest {
     Profile profile = profileController.getMe().getBody();
 
     String projectName = profile.getFreeTierBillingProjectName();
-    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+    doThrow(new ConflictException())
         .when(fireCloudService).createAllOfUsBillingProject(projectName);
 
     // When a conflict occurs in dev, log the exception but continue.
@@ -361,7 +360,7 @@ public class ProfileControllerTest {
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
-    ApiException conflict = new ApiException(HttpStatus.CONFLICT.value(), "conflict");
+    ConflictException conflict = new ConflictException();
     doThrow(conflict)
         .doThrow(conflict)
         .doNothing()
@@ -384,7 +383,7 @@ public class ProfileControllerTest {
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
-    doThrow(new ApiException(HttpStatus.CONFLICT.value(), "conflict"))
+    doThrow(new ConflictException())
         .when(fireCloudService).createAllOfUsBillingProject(anyString());
 
     try {

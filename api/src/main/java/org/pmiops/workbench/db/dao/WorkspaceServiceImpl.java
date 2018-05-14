@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -20,8 +19,6 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.ServerUnavailableException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -176,29 +173,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
       updateACLRequestList.add(currentUpdate);
     }
-    try {
-      WorkspaceACLUpdateResponseList fireCloudResponse = fireCloudService.updateWorkspaceACL(
-          workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
-      if (fireCloudResponse.getUsersNotFound().size() != 0) {
-        String usersNotFound = "";
-        for (int i = 0; i < fireCloudResponse.getUsersNotFound().size(); i++) {
-          if (i > 0) {
-            usersNotFound += ", ";
-          }
-          usersNotFound += fireCloudResponse.getUsersNotFound().get(i).getEmail();
+    WorkspaceACLUpdateResponseList fireCloudResponse = fireCloudService.updateWorkspaceACL(
+        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
+    if (fireCloudResponse.getUsersNotFound().size() != 0) {
+      String usersNotFound = "";
+      for (int i = 0; i < fireCloudResponse.getUsersNotFound().size(); i++) {
+        if (i > 0) {
+          usersNotFound += ", ";
         }
-        throw new BadRequestException(usersNotFound);
+        usersNotFound += fireCloudResponse.getUsersNotFound().get(i).getEmail();
       }
-    } catch(ApiException e) {
-      if (e.getCode() == 400) {
-        throw new BadRequestException(e.getResponseBody());
-      } else if (e.getCode() == 404) {
-        throw new NotFoundException("Workspace not found.");
-      } else if (e.getCode() == 500) {
-        throw new ServerErrorException(e);
-      } else {
-        throw new ServerUnavailableException(e);
-      }
+      throw new BadRequestException(usersNotFound);
     }
     return this.saveWithLastModified(workspace);
   }
@@ -224,18 +209,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
-    String userAccess;
-    try {
-      userAccess = fireCloudService.getWorkspace(
+    String userAccess = fireCloudService.getWorkspace(
           workspaceNamespace, workspaceId).getAccessLevel();
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      if (e.getCode() == 404) {
-        throw new NotFoundException(String.format("Workspace %s/%s not found",
-            workspaceNamespace, workspaceId));
-      } else {
-        throw new ServerErrorException(e.getResponseBody());
-      }
-    }
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     }
