@@ -76,7 +76,7 @@ export class SignInService {
     } else {
       const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
       if (authResponse !== null) {
-        return gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true).access_token;
+        return authResponse.access_token;
       } else {
         return null;
       }
