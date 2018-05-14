@@ -14,18 +14,36 @@
       </div>
     </div>
     <div class="form-section">
-      <input type="text" class="short-input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" placeholder="Create Account">
-      <h5 style="display: inline-block;">@{{gsuiteDomain}}</h5>
+      <input type="text" class="short-input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" placeholder="New Username">
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
+          <div>
+            Usernames can contain only letters (a-z), numbers (0-9), dashes (-), underscores (_),
+            apostrophes ('), and periods (.) (maximum of 64 characters).
+          </div>
+          <br>
+          <div>
+            Usernames cannot begin or end with a period (.) and may not contain more than one
+            period (.) in a row.
+          </div>
+        </clr-tooltip-content>
+      </clr-tooltip>
       <div *ngIf="usernameConflictError" class="error">
         Username is already taken.
+      </div>
+      <div *ngIf="usernameInvalidError" class="error">
+        Username is not a valid username.
       </div>
     </div>
     <div class="form-section">
       <input type="password" class="short-input" id="password" name="password" [(ngModel)]="password" placeholder="Password">
-      <div class="hint-section">
-        <!-- TODO (blrubenstein) Put info icon here -->
-        <div style="font-size: 8pt; line-height: 0.6rem;">Contains at least one lowercase and one uppercase letter</div>
-      </div>
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
+          Passwords must contain at least one lowercase and one uppercase letter
+        </clr-tooltip-content>
+      </clr-tooltip>
     </div>
     <div class="form-section">
       <input type="password" class="short-input" for="passwordAgain" name="passwordAgain" [(ngModel)]="passwordAgain" placeholder="Confirm Password">
