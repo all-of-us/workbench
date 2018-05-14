@@ -155,4 +155,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   showValueB(modName) {
     return this.form.get([modName, 'operator']).value === 'BETWEEN';
   }
+
+  requestPreview() {
+    this.actions.requestPreview();
+  }
 }
