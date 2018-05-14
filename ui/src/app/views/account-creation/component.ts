@@ -103,11 +103,11 @@ export class AccountCreationComponent {
 
   get usernameInvalidError(): boolean {
     const username = this.profile.username;
-    return username.includes('&') || username.includes('=') ||
-        username.includes('<') || username.includes('>') ||
-        username.includes('+') || username.includes(',') ||
-        username.includes('..') || username.startsWith('.') ||
-        username.endsWith('.');
+    if (isBlank(username)) {
+      return false;
+    }
+    // Include alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
+    return !(new RegExp(/^[\w-\']{1}([.]{0,1}[\w-\']+)*$/).test(username));
   }
 
   usernameChanged(): void {
