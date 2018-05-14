@@ -63,7 +63,8 @@ export class AccountCreationComponent {
   }
 
   createAccount(): void {
-    if (this.usernameConflictError || this.contactEmailConflictError) {
+    if (this.usernameConflictError || this.contactEmailConflictError
+        || this.usernameInvalidError) {
       return;
     }
     this.containsLowerAndUpperError = false;
@@ -98,6 +99,15 @@ export class AccountCreationComponent {
     }, () => {
       this.creatingAccount = false;
     });
+  }
+
+  get usernameInvalidError(): boolean {
+    const username = this.profile.username;
+    if (isBlank(username)) {
+      return false;
+    }
+    // Include alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
+    return !(new RegExp(/^[\w-']([.]{0,1}[\w-']+)*$/).test(username));
   }
 
   usernameChanged(): void {
