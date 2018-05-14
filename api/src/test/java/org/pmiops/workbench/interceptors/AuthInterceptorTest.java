@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpMethods;
-import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.UserInfo;
@@ -120,20 +119,16 @@ public class AuthInterceptorTest {
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
-  @Test
+  @Test(expected = NotFoundException.class)
   public void preHandleGet_userInfoError() throws Exception {
     when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
     when(request.getMethod()).thenReturn(HttpMethods.GET);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer foo");
-    when(userInfoService.getUserInfo("foo")).thenThrow(
-        new HttpResponseException.Builder(404, null,
-            new com.google.api.client.http.HttpHeaders())
-        .build());
-    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    when(userInfoService.getUserInfo("foo")).thenThrow(new NotFoundException());
+    interceptor.preHandle(request, response, handler);
   }
 
-  @Test
+  @Test(expected = NotFoundException.class)
   public void preHandleGet_firecloudLookupFails() throws Exception {
     when(handler.getMethod()).thenReturn(getProfileApiMethod("getBillingProjects"));
     when(request.getMethod()).thenReturn(HttpMethods.GET);
@@ -141,10 +136,8 @@ public class AuthInterceptorTest {
     Userinfoplus userInfo = new Userinfoplus();
     userInfo.setEmail("bob@bad-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
-    when(fireCloudService.getMe()).thenThrow(
-        new ApiException(HttpServletResponse.SC_NOT_FOUND, "blah"));
-    assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-    verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+    when(fireCloudService.getMe()).thenThrow(new NotFoundException());
+    interceptor.preHandle(request, response, handler);
   }
 
   @Test

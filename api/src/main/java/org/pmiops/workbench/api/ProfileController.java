@@ -33,8 +33,10 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
@@ -147,28 +149,16 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<List<BillingProjectMembership>> getBillingProjects() {
-    try {
-      List<org.pmiops.workbench.firecloud.model.BillingProjectMembership> memberships =
-          fireCloudService.getBillingProjectMemberships();
-      return ResponseEntity.ok(memberships.stream().map(TO_CLIENT_BILLING_PROJECT_MEMBERSHIP)
-          .collect(Collectors.toList()));
-    } catch (ApiException e) {
-      log.log(Level.SEVERE, String.format("Error fetching billing project memberships: %s",
-          e.getResponseBody()), e);
-      throw new ServerErrorException("Error fetching billing project memberships", e);
-    }
+    List<org.pmiops.workbench.firecloud.model.BillingProjectMembership> memberships =
+        fireCloudService.getBillingProjectMemberships();
+    return ResponseEntity.ok(memberships.stream().map(TO_CLIENT_BILLING_PROJECT_MEMBERSHIP)
+        .collect(Collectors.toList()));
   }
 
   private String createFirecloudUserAndBillingProject(User user) {
-    try {
-      // If the user is already registered, their profile will get updated.
-      fireCloudService.registerUser(user.getContactEmail(),
-          user.getGivenName(), user.getFamilyName());
-    } catch (ApiException e) {
-      log.log(Level.SEVERE, String.format("Error registering user: %s", e.getResponseBody()), e);
-      // We don't expect this to happen.
-      throw new ServerErrorException("Error registering user", e);
-    }
+    // If the user is already registered, their profile will get updated.
+    fireCloudService.registerUser(user.getContactEmail(),
+        user.getGivenName(), user.getFamilyName());
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     long suffix;
     if (workbenchEnvironment.isDevelopment()) {
@@ -191,26 +181,18 @@ public class ProfileController implements ProfileApiDelegate {
       try {
         fireCloudService.createAllOfUsBillingProject(billingProjectName);
         break;
-      } catch (ApiException e) {
-        if (e.getCode() == HttpStatus.CONFLICT.value()) {
-          if (workbenchEnvironment.isDevelopment()) {
-            // In local development, just re-use existing projects for the account. (We don't
-            // want to create a new billing project every time the database is reset.)
-            log.log(Level.WARNING, String.format("Project with name '%s' already exists; using it.",
-                billingProjectName));
-            break;
-          } else {
-            numAttempts++;
-            // In cloud environments, keep trying billing project names until we find one
-            // that hasn't been used before, or we hit MAX_BILLING_PROJECT_CREATION_ATTEMPTS.
-            billingProjectName = billingProjectNamePrefix + "-" + numAttempts;
-          }
+      } catch (ConflictException e) {
+        if (workbenchEnvironment.isDevelopment()) {
+          // In local development, just re-use existing projects for the account. (We don't
+          // want to create a new billing project every time the database is reset.)
+          log.log(Level.WARNING, String.format("Project with name '%s' already exists; using it.",
+              billingProjectName));
+          break;
         } else {
-          log.log(
-              Level.SEVERE,
-              String.format("Error creating billing project: %s", e.getResponseBody()),
-              e);
-          throw new ServerErrorException("Error creating billing project", e);
+          numAttempts++;
+          // In cloud environments, keep trying billing project names until we find one
+          // that hasn't been used before, or we hit MAX_BILLING_PROJECT_CREATION_ATTEMPTS.
+          billingProjectName = billingProjectNamePrefix + "-" + numAttempts;
         }
       }
     }
@@ -222,22 +204,13 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       // If the user is already a member of the billing project, this will have no effect.
       fireCloudService.addUserToBillingProject(user.getEmail(), billingProjectName);
-    } catch (ApiException e) {
-
-      if (e.getCode() == HttpStatus.FORBIDDEN.value()) {
-        // AofU is not the owner of the billing project. This should only happen in local
-        // environments (and hopefully never, given the prefix we're using.) If it happens,
-        // we may need to pick a different prefix.
-        log.log(Level.SEVERE, String.format("Unable to add user to billing project %s: %s; " +
-            "consider changing billing project prefix", billingProjectName,
-            e.getResponseBody()), e);
-        throw new ServerErrorException("Unable to add user to billing project", e);
-      } else {
-        log.log(Level.SEVERE,
-            String.format("Error adding user to billing project: %s", e.getResponseBody()),
-            e);
-        throw new ServerErrorException("Error adding user to billing project", e);
-      }
+    } catch (ForbiddenException e) {
+      // AofU is not the owner of the billing project. This should only happen in local
+      // environments (and hopefully never, given the prefix we're using.) If it happens,
+      // we may need to pick a different prefix.
+      log.log(Level.SEVERE, String.format("Unable to add user to billing project %s; " +
+          "consider changing billing project prefix", billingProjectName), e);
+      throw new ServerErrorException("Unable to add user to billing project", e);
     }
     return billingProjectName;
   }
@@ -284,7 +257,7 @@ public class ProfileController implements ProfileApiDelegate {
           // Should be at most one matching billing project; though we're not asserting this.
           .findFirst()
           .orElse(BillingProjectStatus.NONE);
-    } catch (ApiException e) {
+    } catch (WorkbenchException e) {
       log.log(Level.WARNING, "failed to retrieve billing projects, continuing", e);
       return user;
     }
@@ -313,7 +286,7 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       fireCloudService.grantGoogleRoleToUser(user.getFreeTierBillingProjectName(),
           FireCloudService.BIGQUERY_JOB_USER_GOOGLE_ROLE, user.getEmail());
-    } catch (ApiException e) {
+    } catch (WorkbenchException e) {
       log.log(Level.WARNING,
           "granting BigQuery role on created free tier billing project failed", e);
       // Allow the user to continue, as most workbench functionality will still be usable.
