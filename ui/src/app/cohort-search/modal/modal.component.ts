@@ -33,7 +33,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   open = false;
   noSelection = true;
   title = '';
-  mode = 'tree'; // default to criteria tree
+  mode: 'tree' | 'modifiers' = 'tree'; // default to criteria tree
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -82,18 +82,14 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   get hasNextPage() {
-    if (this.ctype === 'demo' || this.mode === 'summary') {
-      return false;
+    if (this.ctype !== 'demo' && this.mode === 'tree') {
+      return true;
     }
-    return true;
+    return false;
   }
 
   nextPage() {
-    if (this.mode === 'tree') {
-      this.mode = 'modifiers';
-    } else {
-      this.mode = 'summary';
-    }
+    this.mode = 'modifiers';
   }
 
   /* Used to bootstrap the criteria tree */
