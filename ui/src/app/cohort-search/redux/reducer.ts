@@ -24,6 +24,10 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
 
+  BEGIN_PREVIEW_REQUEST,
+  LOAD_PREVIEW_RESULTS,
+  PREVIEW_REQUEST_ERROR,
+
   BEGIN_CHARTS_REQUEST,
   LOAD_CHARTS_RESULTS,
   CANCEL_CHARTS_REQUEST,
@@ -78,10 +82,26 @@ export const rootReducer: Reducer<CohortSearchState> =
             fromJS({error: action.error})
           );
 
+      case BEGIN_PREVIEW_REQUEST:
+        return state
+          .deleteIn(['wizard', 'preview', 'error'])
+          .setIn(['wizard', 'preview', 'requesting'], true);
+
+      case LOAD_PREVIEW_RESULTS:
+        return state
+          .setIn(['wizard', 'preview', 'count'], action.count)
+          .setIn(['wizard', 'preview', 'requesting'], false);
+
+      case PREVIEW_REQUEST_ERROR:
+        return state
+          .setIn(['wizard', 'preview', 'error'], action.error)
+          .setIn(['wizard', 'preview', 'requesting'], false);
+
       case BEGIN_CHARTS_REQUEST:
         return state
             .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
             .set('initShowChart', true);
+
       case BEGIN_COUNT_REQUEST:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
