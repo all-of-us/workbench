@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {
   Cluster,
@@ -14,7 +14,8 @@ import {
               './component.css'],
   templateUrl: './component.html',
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
+  private pollClusterTimer: NodeJS.Timer;
   cluster: Cluster;
   resetClusterModal = false;
   resetClusterPending = false;
@@ -25,7 +26,16 @@ export class SettingsComponent implements OnInit {
     this.pollCluster();
   }
 
+  ngOnDestroy(): void {
+    if (this.pollClusterTimer) {
+      clearTimeout(this.pollClusterTimer);
+    }
+  }
+
   private pollCluster(): void {
+    const repoll = () => {
+      this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
+    };
     this.clusterService.listClusters()
       .subscribe((resp) => {
         const cluster = resp.defaultCluster;
@@ -34,10 +44,10 @@ export class SettingsComponent implements OnInit {
           this.cluster = cluster;
           return;
         }
-        setTimeout(() => this.pollCluster(), 10000);
+        repoll();
       }, () => {
         // Also retry on errors.
-        setTimeout(() => this.pollCluster(), 10000);
+        repoll();
       });
   }
 
