@@ -107,7 +107,7 @@ export class AccountCreationComponent {
       return false;
     }
     // Include alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
-    return !(new RegExp(/^[\w-\']{1}([.]{0,1}[\w-\']+)*$/).test(username));
+    return !(new RegExp(/^[\w-']([.]{0,1}[\w-']+)*$/).test(username));
   }
 
   usernameChanged(): void {
