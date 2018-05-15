@@ -36,6 +36,7 @@ export class ErrorReporterService extends ErrorHandler {
       return;
     }
 
+
     // We want to avoid sending XHR errors to stackdriver because they should
     // already be being logged by the API with the stacktrace and information
     // we care about.
