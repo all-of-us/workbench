@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,13 +49,6 @@ public class ClusterController implements ClusterApiDelegate {
 
   private static final Logger log = Logger.getLogger(ClusterController.class.getName());
 
-  private static final Map<org.pmiops.workbench.notebooks.model.ClusterStatus, ClusterStatus> fcToWorkbenchStatusMap =
-      new ImmutableMap.Builder<org.pmiops.workbench.notebooks.model.ClusterStatus, ClusterStatus>()
-      .put(org.pmiops.workbench.notebooks.model.ClusterStatus.CREATING, ClusterStatus.CREATING)
-      .put(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING, ClusterStatus.RUNNING)
-      .put(org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR, ClusterStatus.ERROR)
-      .build();
-
   private static final Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster> TO_ALL_OF_US_CLUSTER =
     new Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster>() {
       @Override
@@ -64,9 +56,16 @@ public class ClusterController implements ClusterApiDelegate {
         Cluster allOfUsCluster = new Cluster();
         allOfUsCluster.setClusterName(firecloudCluster.getClusterName());
         allOfUsCluster.setClusterNamespace(firecloudCluster.getGoogleProject());
-        if (fcToWorkbenchStatusMap.containsKey(firecloudCluster.getStatus())) {
-          allOfUsCluster.setStatus(fcToWorkbenchStatusMap.get(firecloudCluster.getStatus()));
+        ClusterStatus status = ClusterStatus.UNKNOWN;
+        if (firecloudCluster.getStatus() != null) {
+          ClusterStatus converted = ClusterStatus.fromValue(firecloudCluster.getStatus().toString());
+          if (converted != null) {
+            status = converted;
+          } else {
+            log.warning("unknown Leonardo status: " + firecloudCluster.getStatus());
+          }
         }
+        allOfUsCluster.setStatus(status);
         allOfUsCluster.setCreatedDate(firecloudCluster.getCreatedDate());
         return allOfUsCluster;
       }
