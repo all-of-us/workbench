@@ -35,6 +35,13 @@ export class ErrorReporterService extends ErrorHandler {
     if (!this.stackdriverReporter) {
       return;
     }
+
+    if (error.rejection) {
+      if (error.rejection.status) {
+        return;
+      }
+    }
+
     this.stackdriverReporter.report(error, (e) => {
       // Note: this does not detect non-200 responses from Stackdriver:
       // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/32
