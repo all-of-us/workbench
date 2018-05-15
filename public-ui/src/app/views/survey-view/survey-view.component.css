@@ -43,4 +43,10 @@
     margin-left: .5rem;
 }
 
+.answer-active, .answer-card {
+    background-color: #D9E4EA;
+}
+.answer-card {
+    height: 100%;
+}
 

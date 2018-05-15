@@ -85,15 +85,17 @@
           <div class="row answers" [hidden]="!showAnswer[q.conceptId]">
 
             <div class="col-sm-6 col-xs-12">
+
+
               <div *ngFor="let a of q.countAnalysis.results"  >
-                <div class="answer-text">
+                <div class="answer-text" (click)="showAnswerGraphs(q, a)" [class.answer-active]="a.id == selectedAnswer">
                   <label> {{a.stratum4}} </label>
                 </div>
               </div>
             </div>
 
             <div class="col-sm-6 col-xs-12 answer-charts">
-              <div class="answer-card card">
+              <div class="answer-card">
                 Select charts go here
               </div>
             </div>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
@@ -25,6 +26,7 @@ export class SurveyViewComponent implements OnInit {
   survey: DbDomain;
   surveyResult: QuestionConceptListResponse;
   resultsComplete = false;
+  selectedAnswer: number;
 
 
   /* Have questions array for filtering */
@@ -107,10 +109,18 @@ export class SurveyViewComponent implements OnInit {
   public toggleAnswer(qid) {
     if (! this.showAnswer[qid] ) {
       this.showAnswer[qid] = true;
-    }
-    else {
+    } else {
       this.showAnswer[qid] = false;
     }
+  }
+
+  public showAnswerGraphs(q: QuestionConcept, a: AchillesResult) {
+    console.log('In show answer graphs', a);
+    this.selectedAnswer = a.id; // These have unique id
+  }
+  public answerSelected(a: AchillesResult) {
+    console.log("answer selected called");
+    return this.selectedAnswer === a.id;
   }
 
 }
