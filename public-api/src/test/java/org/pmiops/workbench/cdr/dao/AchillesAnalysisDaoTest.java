@@ -1,9 +1,12 @@
 package org.pmiops.workbench.cdr.dao;
 
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
+import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
+import org.pmiops.workbench.cdr.model.AchillesResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -13,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -23,47 +27,90 @@ public class AchillesAnalysisDaoTest {
 
     @Autowired
     AchillesAnalysisDao dao;
-    private AchillesAnalysis obj1;
-    private AchillesAnalysis obj2;
-    private AchillesAnalysis obj3;
-    private AchillesAnalysis obj4;
-    private AchillesAnalysis obj5;
+
+    @Autowired
+    AchillesResultDao achillesResultDao;
+
+    private AchillesAnalysis achillesAnalysis1;
+    private AchillesAnalysis achillesAnalysis2;
+    private AchillesAnalysis achillesAnalysis3;
+
+    private AchillesResult achillesResult1;
+    private AchillesResult achillesResult2;
+    private AchillesResult achillesResult3;
+    private AchillesResult achillesResult4;
 
     @Before
     public void setUp() {
 
-        obj1 = createAnalysis(1, "Analysis 1");
-        obj2 = createAnalysis(2, "Analysis 2");
-        obj3 = createAnalysis(3, "Analysis 3");
-        obj4 = createAnalysis(4, "Analysis 4");
-        obj5 = createAnalysis(5, "Analysis 5");
+        achillesAnalysis1=createAnalysis(3110L,"Survey Question Answer Count","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string",null,"column","counts");
+        achillesAnalysis2=createAnalysis(3111L,"Gender","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","counts");
+        achillesAnalysis3=createAnalysis(3112L,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","counts");
 
-        dao.save(obj1);
-        dao.save(obj2);
-        dao.save(obj3);
-        dao.save(obj4);
-        dao.save(obj5);
+        dao.save(achillesAnalysis1);
+        dao.save(achillesAnalysis2);
+        dao.save(achillesAnalysis3);
+
+        achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L);
+        achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L);
+        achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L);
+        achillesResult4=createAchillesResult(2346L,3112L,"1586134","2000000","","Prefer not to answer",null,890L);
+
+        achillesResultDao.save(achillesResult1);
+        achillesResultDao.save(achillesResult2);
+        achillesResultDao.save(achillesResult3);
+        achillesResultDao.save(achillesResult4);
     }
 
     @Test
     public void findAllAnalyses() throws Exception {
         /* Todo write more tests */
         final List<AchillesAnalysis> list = dao.findAll();
-        assert(obj1.getAnalysisId() == 1);
-        assert(list.get(0).getAnalysisId() == obj1.getAnalysisId());
+        Assert.assertEquals(list.get(0).getAnalysisId(),achillesAnalysis1.getAnalysisId());
     }
 
-    private AchillesAnalysis createAnalysis(int aid, String name) {
+    @Test
+    public void findSurveyAnalysisResults() throws Exception{
+        List<String> qids=Arrays.asList("1000000","2000000");
+        final List<AchillesAnalysis> list=dao.findSurveyAnalysisResults("1586134",qids);
+        Assert.assertNotEquals(list,null);
+    }
+
+    private AchillesAnalysis createAnalysis(Long analysisId,String analysisName,String stratum1Name,String stratum2Name,String stratum3Name,String stratum4Name,String stratum5Name,String chartType,String dataType) {
         return new AchillesAnalysis()
-                .analysisId((long)aid)
-                .analysisName(name)
-                .stratum1Name("stratum1 name")
-                .stratum2Name("stratum 2 name")
-                .stratum3Name("stratum 3 name")
-                .stratum4Name("stratum 4 name")
-                .stratum5Name("stratum 5 name")
-                .chartType("column")
-                .dataType("count");
+            .analysisId(analysisId)
+            .analysisName(analysisName)
+            .stratum1Name(stratum1Name)
+            .stratum2Name(stratum2Name)
+            .stratum3Name(stratum3Name)
+            .stratum4Name(stratum4Name)
+            .stratum5Name(stratum5Name)
+            .chartType(chartType)
+            .dataType(dataType);
+    }
+
+    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum1,String stratum2,String stratum3,String stratum4,String stratum5,Long count){
+        return new AchillesResult()
+                .id(id)
+                .analysisId(analysisId)
+                .stratum1(stratum1)
+                .stratum2(stratum2)
+                .stratum3(stratum3)
+                .stratum4(stratum4)
+                .stratum5(stratum5)
+                .countValue(count);
+    }
+
+    @After
+    public void flush(){
+        dao.delete(achillesAnalysis1);
+        dao.delete(achillesAnalysis2);
+        dao.delete(achillesAnalysis3);
+
+        achillesResultDao.delete(achillesResult1);
+        achillesResultDao.delete(achillesResult2);
+        achillesResultDao.delete(achillesResult3);
+        achillesResultDao.delete(achillesResult4);
     }
 
 }
