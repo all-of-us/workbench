@@ -36,10 +36,13 @@ export class ErrorReporterService extends ErrorHandler {
       return;
     }
 
-    if (error.rejection) {
-      if (error.rejection.status) {
-        return;
-      }
+    // Async errors are a promise with a rejection attached, rather than a direct error
+    // object due to the way that angular zones handle errors (I believe). This means
+    // that async errors will come with a rejection object, rather than being themselves
+    // the error body. Here we want to parse to see if the error has a status code, so
+    // it will be an async error, and thus we need to check status.
+    if (error.rejection && error.rejection.status) {
+      return;
     }
 
     this.stackdriverReporter.report(error, (e) => {
