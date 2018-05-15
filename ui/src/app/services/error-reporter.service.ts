@@ -36,12 +36,14 @@ export class ErrorReporterService extends ErrorHandler {
       return;
     }
 
-    // Async errors are a promise with a rejection attached, rather than a direct error
-    // object due to the way that angular zones handle errors (I believe). This means
-    // that async errors will come with a rejection object, rather than being themselves
-    // the error body. Here we want to parse to see if the error has a status code, so
-    // it will be an async error, and thus we need to check status.
-    if (error.rejection && error.rejection.status) {
+    // xhrError is set to true by the interceptor. The rejection piece handles
+    // return values from promises that error out.
+    if (error.rejection && error.rejection.xhrError) {
+      return;
+    }
+    // The check on xhrError explicitly handles error values that are returned from direct
+    // api errors, rather than promises.
+    if (error.xhrError) {
       return;
     }
 
