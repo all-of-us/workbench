@@ -53,6 +53,8 @@ export class CohortSearchActions {
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
+  @dispatch() _requestPreview = ActionFuncs.requestPreview;
+
   @dispatch() requestCharts = ActionFuncs.requestCharts;
   @dispatch() cancelChartsRequest = ActionFuncs.cancelChartsRequest;
   @dispatch() setChartData = ActionFuncs.loadChartsRequestResults;
@@ -195,6 +197,26 @@ export class CohortSearchActions {
       return;
     }
     this.requestCriteria(this.cdrVersionId, kind, parentId);
+  }
+
+  requestPreview(): void {
+    const params = activeParameterList(this.state)
+      .valueSeq()
+      .map(this.mapParameter)
+      .toJS();
+    const item = activeItem(this.state);
+    this._requestPreview(this.cdrVersionId, <SearchRequest>{
+      includes: [],
+      excludes: [],
+      [activeRole(this.state)]: [{
+        items: [<SearchGroupItem>{
+          id: item.get('paramId'),
+          type: item.get('type', '').toUpperCase(),
+          searchParameters: params,
+          modifiers: item.get('modifiers', List()).toJS(),
+        }]
+      }]
+    });
   }
 
   requestItemCount(role: keyof SearchRequest, itemId: string): void {

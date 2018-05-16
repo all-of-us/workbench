@@ -17,3 +17,20 @@
     </div>
   </section>
 </form>
+
+<div class="count-preview">
+  <button type="button"
+    class="btn"
+    (click)="requestPreview()"
+    [clrLoading]="preview.get('requesting', false)"
+    >
+    Calculate
+  </button>
+  Number Participants:
+  <span *ngIf="!preview.get('requesting')">
+    {{ preview.get('count', 0) }}
+  </span>
+  <span *ngIf="preview.get('requesting')" class="spinner spinner-inline">
+    Loading...
+  </span>
+</div>

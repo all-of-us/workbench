@@ -81,6 +81,9 @@ export const activeItem = (state) =>
 export const focusedCriterion = (state) =>
   state.getIn(['wizard', 'focused'], Map());
 
+export const previewStatus = (state) =>
+  state.getIn(['wizard', 'preview'], Map());
+
 /**
  * Criteria
  */

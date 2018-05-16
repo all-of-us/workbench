@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.test.Providers;
+import org.springframework.retry.backoff.NoBackOffPolicy;
 
 public class DirectoryServiceImplIntegrationTest {
   private DirectoryServiceImpl service;
@@ -23,7 +24,8 @@ public class DirectoryServiceImplIntegrationTest {
   @Before
   public void setup() {
     service = new DirectoryServiceImpl(
-        Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport);
+        Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport,
+        new GoogleRetryHandler(new NoBackOffPolicy()));
   }
 
   @Test

@@ -10,6 +10,10 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
 
+  BEGIN_PREVIEW_REQUEST,
+  LOAD_PREVIEW_RESULTS,
+  PREVIEW_REQUEST_ERROR,
+
   BEGIN_CHARTS_REQUEST,
   LOAD_CHARTS_RESULTS,
   CANCEL_CHARTS_REQUEST,
@@ -84,9 +88,19 @@ export const countRequestError =
   ): ActionTypes[typeof COUNT_REQUEST_ERROR] =>
   ({type: COUNT_REQUEST_ERROR, entityType, entityId, error});
 
-/**
- * Count loading mgmt
- */
+export const requestPreview =
+  (cdrVersionId: number, request: SearchRequest
+  ): ActionTypes[typeof BEGIN_PREVIEW_REQUEST] =>
+  ({type: BEGIN_PREVIEW_REQUEST, cdrVersionId, request});
+
+export const loadPreviewRequestResults =
+  (count: number): ActionTypes[typeof LOAD_PREVIEW_RESULTS] =>
+  ({type: LOAD_PREVIEW_RESULTS, count});
+
+export const previewRequestError =
+  (error?: any): ActionTypes[typeof PREVIEW_REQUEST_ERROR] =>
+  ({type: PREVIEW_REQUEST_ERROR, error});
+
 export const requestCharts =
   (cdrVersionId: number, entityType: string, entityId: string, request: SearchRequest
   ): ActionTypes[typeof BEGIN_CHARTS_REQUEST] =>

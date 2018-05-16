@@ -1,13 +1,14 @@
 import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {fromJS, List} from 'immutable';
+import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
   activeModifierList,
   CohortSearchActions,
   CohortSearchState,
+  previewStatus,
 } from '../redux';
 
 @Component({
@@ -17,8 +18,10 @@ import {
 })
 export class ModifierPageComponent implements OnInit, OnDestroy {
   @select(activeModifierList) modifiers$;
+  @select(previewStatus) preview$;
 
   existing = List();
+  preview = Map();
   subscription: Subscription;
 
   readonly modifiers = [{
@@ -84,6 +87,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
+    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
     // This reseeds the form with existing data if we're editing an existing group
     this.subscription.add(this.modifiers$.first().subscribe(mods => {
@@ -150,5 +154,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
 
   showValueB(modName) {
     return this.form.get([modName, 'operator']).value === 'BETWEEN';
+  }
+
+  requestPreview() {
+    this.actions.requestPreview();
   }
 }

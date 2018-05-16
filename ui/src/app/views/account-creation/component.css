@@ -6,6 +6,7 @@
 
 .form-section {
   margin-top: 1rem;
+  min-width: 25rem;
 }
 
 .form-section:first {
@@ -31,4 +32,16 @@
   width: 8rem;
   vertical-align: middle;
   color: black;
+}
+
+.is-solid.info-icon {
+  color: #302C71;
+  height: 22px;
+  width: 22px;
+}
+
+.domain {
+  font-size: 16px;
+  font-weight: 300;
+  color: #302C71;
 }

@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {Subscription} from 'rxjs/Subscription';
 
 import {
   BillingProjectStatus,
@@ -20,52 +21,73 @@ import {
 })
 export class WorkspaceListComponent implements OnInit, OnDestroy {
 
-  billingProjectInitialized = false;
+  // TODO: Consider moving profile load to be in a resolver - currently we have
+  // a degenerate third undefined state for this boolean where we don't yet know
+  // whether billing has been initialized.
+  billingProjectInitialized: boolean;
   billingProjectQuery: NodeJS.Timer;
   errorText: string;
   workspaceList: WorkspaceResponse[] = [];
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;
   firstSignIn: Date;
+  private profileSubscription: Subscription;
+
   constructor(
       private profileStorageService: ProfileStorageService,
       private route: ActivatedRoute,
       private router: Router,
       private workspacesService: WorkspacesService,
   ) {}
+
   ngOnInit(): void {
     this.workspacesLoading = true;
-    this.profileStorageService.profile$.subscribe((profile) => {
-      if (this.firstSignIn === undefined) {
-        this.firstSignIn = new Date(profile.firstSignInTime);
-      }
-      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-        this.billingProjectInitialized = true;
-      } else {
-        this.billingProjectQuery = setTimeout(() => {
-          this.profileStorageService.reload();
-        }, 10000);
-      }
-    });
-    this.profileStorageService.reload();
-
-    this.workspacesService.getWorkspaces()
-        .subscribe(
-            workspacesReceived => {
-              workspacesReceived.items.sort(function(a, b) {
-                return a.workspace.name.localeCompare(b.workspace.name);
+    this.profileSubscription = this.profileStorageService.profile$.subscribe(
+      (profile) => {
+        if (this.firstSignIn === undefined) {
+          this.firstSignIn = new Date(profile.firstSignInTime);
+        }
+        if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
+          this.billingProjectInitialized = true;
+          // Only once we know the billing project status do we request/display
+          // workspaces for two reasons:
+          // - If the FC user is not yet initialized, getWorkspaces() may fail
+          //   with a 401.
+          // - While the billing project is being initialized, we want to keep the
+          //   big spinner on the page to provide obvious messaging to the user
+          //   about the expected wait time.
+          this.workspacesService.getWorkspaces()
+            .subscribe(
+              workspacesReceived => {
+                workspacesReceived.items.sort(function(a, b) {
+                  return a.workspace.name.localeCompare(b.workspace.name);
+                });
+                this.workspaceList = workspacesReceived.items;
+                this.workspacesLoading = false;
+              },
+              error => {
+                const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
+                this.errorText = (response.message) ? response.message : '';
               });
-              this.workspaceList = workspacesReceived.items;
-              this.workspacesLoading = false;
-            },
-            error => {
-              const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
-              this.errorText = (response.message) ? response.message : '';
-            });
+          // This may execute synchronously, no guarantee this has been assigned above yet.
+          if (this.profileSubscription) {
+            this.profileSubscription.unsubscribe();
+          }
+        } else {
+          this.billingProjectInitialized = false;
+          this.billingProjectQuery = setTimeout(() => {
+            this.profileStorageService.reload();
+          }, 10000);
+        }
+      });
+    this.profileStorageService.reload();
   }
 
   ngOnDestroy(): void {
-    clearTimeout(this.billingProjectQuery);
+    if (this.billingProjectQuery) {
+      clearTimeout(this.billingProjectQuery);
+    }
+    this.profileSubscription.unsubscribe();
   }
 
   addWorkspace(): void {

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
-import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
@@ -24,7 +23,6 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.ErrorCode;
@@ -109,16 +107,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     }
 
     String token = authorizationHeader.substring("Bearer".length()).trim();
-    Userinfoplus userInfo;
-    try {
-      userInfo = userInfoService.getUserInfo(token);
-    } catch (HttpResponseException e) {
-      log.log(Level.WARNING,
-          "{0} response getting user info for bearer token {1}: {2}",
-          new Object[] { e.getStatusCode(), token, e.getStatusMessage() });
-      response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-      return false;
-    }
+    Userinfoplus userInfo = userInfoService.getUserInfo(token);
 
     // TODO: check Google group membership to ensure user is in registered user group
 
@@ -144,17 +133,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // corresponds to in FireCloud.
       SecurityContextHolder.getContext().setAuthentication(
           new UserAuthentication(null, userInfo, token, UserType.SERVICE_ACCOUNT));
-      try {
-        // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
-        // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
-        // the user it was created for.
-        userEmail = fireCloudService.getMe().getUserInfo().getUserEmail();
-      } catch (ApiException e) {
-        log.log(Level.INFO, "FireCloud lookup for {0} failed, can't access the workbench: {1}",
-            new Object[]{userInfo.getEmail(), e.getMessage()});
-        response.sendError(e.getCode());
-        return false;
-      }
+      // If the email isn't in our GSuite domain, try FireCloud; we could be dealing with a
+      // pet service account. In both AofU and FireCloud, the pet SA is treated as if it were
+      // the user it was created for.
+      userEmail = fireCloudService.getMe().getUserInfo().getUserEmail();
       if (!userEmail.endsWith(gsuiteDomainSuffix)) {
         log.log(Level.INFO, "User {0} isn't in domain {1}, can't access the workbench",
             new Object[] { userEmail, gsuiteDomainSuffix });
