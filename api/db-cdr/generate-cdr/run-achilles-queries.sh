@@ -162,7 +162,6 @@ select 0, 3101 as analysis_id,
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 on p1.person_id = co1.person_id
-group by co1.condition_concept_id, p1.gender_concept_id"
 
 # (400 age ) 3102 Number of persons with at least one condition occurrence, by condition_concept_id by age decile
 # Age Deciles : They will be 18 - 29, 30 - 39, 40 - 49, 50 - 59, 60 - 69, 70 - 79, 80-89, 90+
@@ -412,33 +411,6 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 where co1.observation_concept_id > 0 and (extract(year from co1.observation_date) - p1.year_of_birth) >= 18 and (extract(year from co1.observation_date) - p1.year_of_birth) < 30
 group by co1.observation_concept_id, stratum_2"
-
-# PPI Observation (3000)
-echo "Querying PPI observation "
-# Get ones with value source concept id, ie survey answer is
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0 as id, 3000 as analysis_id, CAST(o.observation_source_concept_id as string) as stratum_1,
-cast(o.value_source_concept_id as string) as stratum_2, count(*) as count_value
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
-on o.observation_source_concept_id = c.concept_id
-where o.observation_source_concept_id > 0 and o.value_source_concept_id > 0 and c.vocabulary_id = 'PPI'
-and c.concept_class_id = 'Question'
-group by observation_source_concept_id, o.value_source_concept_id"
-
-
-# Get PPI ones with value as number.
-# Todo ,we exclude zip concept 1585966. We can allow this some time
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0 as id, 3000 as analysis_id, cast(c.concept_id as string) as stratum_1, cast(value_as_number as string) as stratum_2, count(*)
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept\`
-c on o.observation_source_concept_id = c.concept_id
-where c.vocabulary_id = 'PPI' and c.concept_class_id = 'Question' and value_as_number > 0
-and c.concept_id != 1585966
-group by c.concept_id, value_as_number"
 
 
 # 1800 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id
