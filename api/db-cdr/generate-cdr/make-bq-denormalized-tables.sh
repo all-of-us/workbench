@@ -37,7 +37,7 @@ then
 fi
 
 # Check that bq_dataset exists and exit if not
-datasets=`bq --project=$BQ_PROJECT ls`
+datasets=$(bq --project=$BQ_PROJECT ls)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
