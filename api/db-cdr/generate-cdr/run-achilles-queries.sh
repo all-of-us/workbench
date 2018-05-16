@@ -123,18 +123,16 @@ echo "Getting visit source count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, count_value,source_count_value)
-select 0, 3000 as analysis_id,
-	CAST(vo1.visit_source_concept_id AS STRING) as stratum_1,0 as count_value
+(select 0, 3000 as analysis_id,
+	CAST(vo1.visit_source_concept_id AS STRING) as stratum_1,0 as count_value,
 	COUNT(distinct vo1.PERSON_ID) as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1
-group by vo1.visit_source_concept_id
-on duplicate key update stratum_1=values(stratum_1)"
+from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1 left join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on vo1.visit_source_concept_id <> ar.stratum_1
+group by vo1.visit_source_concept_id)"
 
 #200 updating source count value
 echo "Updating visit source count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-ar2 on ar1.stratum_1=ar2.stratum_1
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar1
 set ar1.source_count_value=
 (select COUNT(distinct vo1.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1 where vo1.visit_source_concept_id=ar1.stratum_1)
 where ar1.source_count_value=0"
