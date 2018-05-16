@@ -10,7 +10,7 @@ export class ClusterServiceStub {
     this.cluster = {
       clusterName: 'Cluster Name',
       clusterNamespace: 'Namespace',
-      status: ClusterStatus.RUNNING,
+      status: ClusterStatus.Running,
       createdDate: '08/08/2018'
     };
   }

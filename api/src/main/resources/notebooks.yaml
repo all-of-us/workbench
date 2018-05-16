@@ -661,7 +661,7 @@ definitions:
         type: string
         description: Google's operation ID for the cluster
       status:
-        $ref: '#/definitions/ClusterStatus'
+        $ref: "#/definitions/ClusterStatus"
       hostIp:
         type: string
         description: The IP address of the cluster master node
