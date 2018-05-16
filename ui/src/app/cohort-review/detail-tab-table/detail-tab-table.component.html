@@ -13,7 +13,7 @@
     <clr-dg-cell *ngFor="let col of columns" class="cell">
       <ng-container [ngSwitch]="col.name">
         <span *ngSwitchCase="'itemDate'">
-          {{ datum.itemDate | date:'yyyy-MM-dd HH:mm:ss' }}
+          {{ datum.itemDate }}
         </span>
         <span *ngSwitchCase="'endDate'">
           {{ datum.endDate | date:'yyyy-MM-dd HH:mm:ss' }}

@@ -4,6 +4,19 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -13,26 +26,34 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
-import org.pmiops.workbench.exceptions.*;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.CloneWorkspaceRequest;
+import org.pmiops.workbench.model.CloneWorkspaceResponse;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
+import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UnderservedPopulationEnum;
+import org.pmiops.workbench.model.UpdateWorkspaceRequest;
+import org.pmiops.workbench.model.UserRole;
+import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceListResponse;
+import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -318,14 +339,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private org.pmiops.workbench.firecloud.model.Workspace
       attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
-    try {
-      fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
-          workspaceId.getWorkspaceName());
-      return fireCloudService.getWorkspace(workspaceId.getWorkspaceNamespace(),
-          workspaceId.getWorkspaceName()).getWorkspace();
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw ExceptionUtils.convertFirecloudException(e);
-    }
+    fireCloudService.createWorkspace(workspaceId.getWorkspaceNamespace(),
+        workspaceId.getWorkspaceName());
+    return fireCloudService.getWorkspace(workspaceId.getWorkspaceNamespace(),
+        workspaceId.getWorkspaceName()).getWorkspace();
   }
 
   @Override
@@ -413,12 +430,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     //details on how these tables relate to each other.
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
-    try {
-      // This automatically handles access control to the workspace.
-      fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw ExceptionUtils.convertFirecloudException(e);
-    }
+    // This automatically handles access control to the workspace.
+    fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
     workspaceService.getDao().delete(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -452,14 +465,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     WorkspaceResponse response = new WorkspaceResponse();
 
-    try {
-      // This enforces access controls.
-      fcResponse = fireCloudService.getWorkspace(
-          workspaceNamespace, workspaceId);
-      fcWorkspace = fcResponse.getWorkspace();
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw ExceptionUtils.convertFirecloudException(e);
-    }
+    // This enforces access controls.
+    fcResponse = fireCloudService.getWorkspace(
+        workspaceNamespace, workspaceId);
+    fcWorkspace = fcResponse.getWorkspace();
 
     if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
       // We don't expose PROJECT_OWNER in our API; just use OWNER.
@@ -482,12 +491,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // much of this logic
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
     if (user != null) {
-      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces;
-      try {
-        fcWorkspaces = fireCloudService.getWorkspaces();
-      } catch (org.pmiops.workbench.firecloud.ApiException e) {
-        throw ExceptionUtils.convertFirecloudException(e);
-      }
+      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
+          fireCloudService.getWorkspaces();
       for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
         org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace = null;
         org.pmiops.workbench.db.model.Workspace dbWorkspace;
@@ -533,14 +538,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
         workspaceId, WorkspaceAccessLevel.WRITER);
     Workspace workspace = request.getWorkspace();
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
-
-    try {
-      fcWorkspace = fireCloudService.getWorkspace(
-          workspaceNamespace, workspaceId).getWorkspace();
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw ExceptionUtils.convertFirecloudException(e);
-    }
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
     }
@@ -588,20 +587,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     // Retrieving the workspace is done first, which acts as an access check.
-    String fromBucket = null;
-    try {
-      fromBucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+    String fromBucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
           .getWorkspace()
           .getBucketName();
-    } catch (ApiException e) {
-      if (e.getCode() == 404) {
-        log.log(Level.INFO, "Firecloud workspace not found", e);
-        throw new NotFoundException(String.format(
-            "workspace %s/%s not found or not accessible", workspaceNamespace, workspaceId));
-      }
-      log.log(Level.SEVERE, "Firecloud server error", e);
-      throw new ServerErrorException();
-    }
+
     org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
         workspaceNamespace, workspaceId);
     if (fromWorkspace == null) {
@@ -614,15 +603,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fireCloudService.cloneWorkspace(workspaceNamespace, workspaceId,
         fcWorkspaceId.getWorkspaceNamespace(), fcWorkspaceId.getWorkspaceName());
 
-    org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace = null;
-    try {
-      toFcWorkspace = fireCloudService.getWorkspace(
-          fcWorkspaceId.getWorkspaceNamespace(), fcWorkspaceId.getWorkspaceName())
-          .getWorkspace();
-    } catch (ApiException e) {
-      log.log(Level.SEVERE, "Firecloud error retrieving newly cloned workspace", e);
-      throw new ServerErrorException();
-    }
+    org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace =
+        fireCloudService.getWorkspace(fcWorkspaceId.getWorkspaceNamespace(),
+            fcWorkspaceId.getWorkspaceName()).getWorkspace();
 
     // In the future, we may want to allow callers to specify whether notebooks
     // should be cloned at all (by default, yes), else they are currently stuck

@@ -24,12 +24,12 @@ public interface FireCloudService {
   /**
    * @return true if the user making the current request is enabled in FireCloud, false otherwise.
    */
-  boolean isRequesterEnabledInFirecloud() throws ApiException;
+  boolean isRequesterEnabledInFirecloud();
 
   /**
    * @return the FireCloud profile for the requesting user.
    */
-  Me getMe() throws ApiException;
+  Me getMe();
 
   /**
    * Registers the user in Firecloud.
@@ -37,43 +37,44 @@ public interface FireCloudService {
    * @param firstName the user's first name
    * @param lastName the user's last name
    */
-  void registerUser(String contactEmail, String firstName, String lastName) throws ApiException;
+  void registerUser(String contactEmail, String firstName, String lastName);
 
   /**
    * Creates a billing project owned by AllOfUs.
    */
-  void createAllOfUsBillingProject(String projectName) throws ApiException;
+  void createAllOfUsBillingProject(String projectName);
 
   /**
    * Adds the specified user to the specified billing project.
    */
-  void addUserToBillingProject(String email, String projectName) throws ApiException;
+  void addUserToBillingProject(String email, String projectName);
 
   /**
    * Creates a new FC workspace.
    */
-  void createWorkspace(String projectName, String workspaceName) throws ApiException;
+  void createWorkspace(String projectName, String workspaceName);
 
-  void grantGoogleRoleToUser(String projectName, String role, String email) throws ApiException;
+  void grantGoogleRoleToUser(String projectName, String role, String email);
 
   void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
 
   /**
    * Retrieves all billing project memberships for the user from FireCloud.
    */
-  List<BillingProjectMembership> getBillingProjectMemberships() throws ApiException;
+  List<BillingProjectMembership> getBillingProjectMemberships();
 
-  WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates) throws ApiException;
+  WorkspaceACLUpdateResponseList updateWorkspaceACL(String projectName, String workspaceName,
+      List<WorkspaceACLUpdate> aclUpdates);
 
-  WorkspaceResponse getWorkspace(String projectName, String workspaceName) throws ApiException;
+  WorkspaceResponse getWorkspace(String projectName, String workspaceName);
 
-  List<WorkspaceResponse> getWorkspaces() throws ApiException;
+  List<WorkspaceResponse> getWorkspaces();
 
-  void deleteWorkspace(String projectName, String workspaceName) throws ApiException;
+  void deleteWorkspace(String projectName, String workspaceName);
 
-  ManagedGroupWithMembers createGroup(String groupName) throws ApiException;
+  ManagedGroupWithMembers createGroup(String groupName);
 
-  void addUserToGroup(String email, String groupName) throws ApiException;
+  void addUserToGroup(String email, String groupName);
 
-  void removeUserFromGroup(String email, String groupName) throws ApiException;
+  void removeUserFromGroup(String email, String groupName);
 }

@@ -64,6 +64,25 @@ paths:
           schema:
             $ref: "#/definitions/AchillesResult"
 
+  /v1/databrowser/domain-search:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+      description: Gets the domain filters with the count of matched concepts
+      operationId: "getDomainSearchResults"
+      parameters:
+        - in: query
+          name: searchWord
+          type: string
+          required: true
+          description: search key word
+      responses:
+        200:
+          description: A collection of domains
+          schema:
+            $ref: "#/definitions/DbDomainListResponse"
+
 
   /v1/databrowser/db-domains:
     get:

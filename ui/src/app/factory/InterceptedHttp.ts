@@ -21,6 +21,7 @@ export class InterceptedHttp extends Http {
   request(url: string | Request, options?: RequestOptionsArgs): Observable<Response> {
     return this.errorHandlingService.retryApi(
         super.request(url, options)).catch((e) => {
+          e.xhrError = true;
           if ((e.status === 500 || e.status === 503) &&
               this.shouldPingStatus) {
             this.shouldCheckStatus.next(true);

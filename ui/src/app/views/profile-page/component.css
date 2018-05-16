@@ -2,6 +2,12 @@ h2 {
   display: inline-block;
 }
 
+h3.profile-header {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
 .field-label {
   font-size: 0.55rem;
 }
@@ -95,6 +101,10 @@ textarea {
   height: 1rem;
   width: 1rem;
   color: #D0021B;
+}
+
+.card {
+  margin-top: 0.5rem;
 }
 
 button.btn.btn-primary {

@@ -14,6 +14,8 @@ import {
   BEGIN_CHARTS_REQUEST,
   CANCEL_CHARTS_REQUEST,
 
+  BEGIN_PREVIEW_REQUEST,
+
   RootAction,
   ActionTypes,
 } from './actions/types';
@@ -27,6 +29,9 @@ import {
 
   loadChartsRequestResults,
   chartsRequestError,
+
+  loadPreviewRequestResults,
+  previewRequestError,
 } from './actions/creators';
 
 import {CohortSearchState} from './store';
@@ -38,6 +43,7 @@ type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
+type PreviewRequestAction = ActionTypes[typeof BEGIN_PREVIEW_REQUEST];
 const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
 
 /**
@@ -47,6 +53,8 @@ const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
  * stream of dispatched actions (exposed as an Observable) and attach handlers
  * to certain of them; this allows us to dispatch actions asynchronously.  This is
  * the interface between the application state and the backend API.
+ *
+ * TODO: clean up these funcs using the new lettable operators
  */
 @Injectable()
 export class CohortSearchEpics {
@@ -78,6 +86,16 @@ export class CohortSearchEpics {
           .filter(compare({entityType, entityId}))
           .first())
         .catch(e => Observable.of(countRequestError(entityType, entityId, e)))
+    )
+  )
+
+  previewCount: CSEpic = (action$) => (
+    action$.ofType(BEGIN_PREVIEW_REQUEST).switchMap(
+      ({cdrVersionId, request}: PreviewRequestAction) =>
+      this.service.countParticipants(cdrVersionId, request)
+        .map(response => typeof response === 'number' ? response : 0)
+        .map(count => loadPreviewRequestResults(count))
+        .catch(e => Observable.of(previewRequestError(e)))
     )
   )
 
