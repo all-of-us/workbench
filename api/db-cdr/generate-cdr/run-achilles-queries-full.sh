@@ -61,6 +61,7 @@ select 0, 2 as analysis_id,  cast (gender_concept_id as STRING) as stratum_1, CO
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
 group by GENDER_CONCEPT_ID"
 
+
 # Age count
 # 3	Number of persons by year of birth
 echo "Getting age count"
@@ -71,13 +72,14 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
 group by YEAR_OF_BIRTH"
 
 
-#  4	Number of persons by race
+#  4 Number of persons by race
 echo "Getting race count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` (id, analysis_id, stratum_1, count_value)
 select 0, 4 as analysis_id,  CAST(RACE_CONCEPT_ID AS STRING) as stratum_1, COUNT(distinct person_id) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
 group by RACE_CONCEPT_ID"
+
 
 # 5	Number of persons by ethnicity
 echo "Getting ethnicity count"
@@ -86,6 +88,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select 0, 5 as analysis_id,  CAST(ETHNICITY_CONCEPT_ID AS STRING) as stratum_1, COUNT(distinct person_id) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
 group by ETHNICITY_CONCEPT_ID"
+
 
 # 10	Number of all persons by year of birth and by gender
 echo "Getting year of birth , gender count"
@@ -98,6 +101,17 @@ select 0, 10 as analysis_id,  CAST(year_of_birth AS STRING) as stratum_1,
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
 group by YEAR_OF_BIRTH, gender_concept_id"
 
+# 10 b Number of all persons by year of birth and by gender
+echo "Getting year of birth , gender count"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 10 as analysis_id,  CAST(year_of_birth AS STRING) as stratum_1,
+  CAST(gender_source_concept_id AS STRING) as stratum_2,
+  COUNT(distinct person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
+group by YEAR_OF_BIRTH, gender_source_concept_id"
+
 # 12	Number of persons by race and ethnicity
 echo "Getting race, ethnicity count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -107,37 +121,37 @@ select 0, 12 as analysis_id, CAST(RACE_CONCEPT_ID AS STRING) as stratum_1, CAST(
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
 group by RACE_CONCEPT_ID,ETHNICITY_CONCEPT_ID"
 
+# 12 b Number of persons by race and ethnicity
+echo "Getting race, ethnicity source count"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 12 as analysis_id, CAST(RACE_SOURCE_CONCEPT_ID AS STRING) as stratum_1, CAST(ETHNICITY_SOURCE_CONCEPT_ID AS STRING) as stratum_2, COUNT(distinct person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
+group by RACE_SOURCE_CONCEPT_ID,ETHNICITY_SOURCE_CONCEPT_ID"
+
 # 200	(3000 ) Number of persons with at least one visit occurrence, by visit_concept_id
 echo "Getting visit count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, count_value,source_count_value)
+(id, analysis_id, stratum_1, count_value)
 select 0, 3000 as analysis_id,
 	CAST(vo1.visit_concept_id AS STRING) as stratum_1,
-	COUNT(distinct vo1.PERSON_ID) as count_value,0 as source_count_value
+	COUNT(distinct vo1.PERSON_ID) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1
 group by vo1.visit_concept_id"
 
-# 200	(3000 ) Number of persons with at least one visit occurrence, by visit_concept_id setting source count
+# 200	b (3000 ) Number of persons with at least one visit occurrence, by visit_concept_id
 echo "Getting visit source count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, count_value,source_count_value)
+(id, analysis_id, stratum_1, source_count_value)
 select 0, 3000 as analysis_id,
-	CAST(vo1.visit_source_concept_id AS STRING) as stratum_1,0 as count_value
+	CAST(vo1.visit_source_concept_id AS STRING) as stratum_1,
 	COUNT(distinct vo1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1
-group by vo1.visit_source_concept_id
-on duplicate key update stratum_1=values(stratum_1)"
+group by vo1.visit_source_concept_id"
 
-#200 updating source count value
-echo "Updating visit source count"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-ar2 on ar1.stratum_1=ar2.stratum_1
-set ar1.source_count_value=
-(select COUNT(distinct vo1.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1 where vo1.visit_source_concept_id=ar1.stratum_1)
-where ar1.source_count_value=0"
 
 
 # 400 (3000)	Number of persons with at least one condition occurrence, by condition_concept_id
@@ -151,6 +165,17 @@ select 0, 3000 as analysis_id,
 from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 group by co1.condition_CONCEPT_ID"
 
+# 400 b (3000) 	Number of persons with at least one condition occurrence, by condition_source_concept_id
+echo "Querying condition_occurrence ..."
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, source_count_value)
+select 0, 3000 as analysis_id,
+	CAST(co1.condition_SOURCE_CONCEPT_ID AS STRING) as stratum_1,
+	COUNT(distinct co1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
+group by co1.condition_SOURCE_CONCEPT_ID"
+
 # Condition gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -163,6 +188,19 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 on p1.person_id = co1.person_id
 group by co1.condition_concept_id, p1.gender_concept_id"
+
+# Condition gender source
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3101 as analysis_id,
+	CAST(co1.condition_source_concept_id AS STRING) as stratum_1,
+	CAST(p1.gender_source_concept_id AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
+on p1.person_id = co1.person_id
+group by co1.condition_source_concept_id, p1.gender_source_concept_id"
 
 # (400 age ) 3102 Number of persons with at least one condition occurrence, by condition_concept_id by age decile
 # Age Deciles : They will be 18 - 29, 30 - 39, 40 - 49, 50 - 59, 60 - 69, 70 - 79, 80-89, 90+
@@ -184,6 +222,20 @@ on p1.person_id = co1.person_id
 where floor((extract(year from condition_start_date) - p1.year_of_birth)/10) >=3
 group by co1.condition_concept_id, stratum_2"
 
+# Get the 30-39, 40 - 49 , ... groups (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+ (id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.condition_source_concept_id AS STRING) as stratum_1,
+	CAST(floor((extract(year from condition_start_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
+  count(distinct p1.person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
+on p1.person_id = co1.person_id
+where floor((extract(year from condition_start_date) - p1.year_of_birth)/10) >=3
+group by co1.condition_source_concept_id, stratum_2"
+
 #Get conditions by age decile id 3102 for the 18-29 group labeled as 2
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -197,6 +249,20 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 where (extract(year from condition_start_date) - p1.year_of_birth) > 18 and (extract(year from condition_start_date) - p1.year_of_birth) < 30
 group by co1.condition_concept_id, stratum_2"
+
+#Get conditions by age decile id 3102 for the 18-29 group labeled as 2 (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.condition_source_concept_id AS STRING) as stratum_1,
+	'2' as stratum_2,
+  count(distinct p1.person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
+on p1.person_id = co1.person_id
+where (extract(year from condition_start_date) - p1.year_of_birth) > 18 and (extract(year from condition_start_date) - p1.year_of_birth) < 30
+group by co1.condition_source_concept_id, stratum_2"
 
 # No death data now per Kayla. Later when we have more data
 # 500	(3000) Number of persons with death, by cause_concept_id
@@ -263,6 +329,17 @@ select 0, 3000 as analysis_id,
 from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po1
 group by po1.procedure_CONCEPT_ID"
 
+# 600	Number of persons with at least one procedure occurrence, by procedure_source_concept_id
+echo "Querying procedure_occurrence"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, source_count_value)
+select 0, 3000 as analysis_id,
+	CAST(po1.procedure_source_CONCEPT_ID AS STRING) as stratum_1,
+	COUNT(distinct po1.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po1
+group by po1.procedure_source_CONCEPT_ID"
+
 #  600 Gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -276,6 +353,20 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 group by co1.procedure_concept_id,
 	p1.gender_concept_id"
+
+#  600 Gender
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3101 as analysis_id,
+	CAST(co1.procedure_source_CONCEPT_ID AS STRING) as stratum_1,
+	CAST(p1.gender_source_concept_id AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
+on p1.person_id = co1.person_id
+group by co1.procedure_source_concept_id,
+	p1.gender_source_concept_id"
 
 
 # 600 age
@@ -292,6 +383,20 @@ on p1.person_id = co1.person_id
 where floor((extract(year from co1.procedure_date) - p1.year_of_birth)/10) >=3
 group by co1.procedure_concept_id, stratum_2"
 
+# 600 age (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.procedure_source_concept_id AS STRING) as stratum_1,
+	CAST(floor((extract(year from co1.procedure_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
+on p1.person_id = co1.person_id
+where floor((extract(year from co1.procedure_date) - p1.year_of_birth)/10) >=3
+group by co1.procedure_source_concept_id, stratum_2"
+
 # 600 age 18 to 29
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -307,6 +412,21 @@ where (extract(year from co1.procedure_date) - p1.year_of_birth) >= 18 and
 (extract(year from co1.procedure_date) - p1.year_of_birth) < 30
 group by co1.procedure_concept_id, stratum_2"
 
+# 600 age 18 to 29 (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.procedure_source_concept_id AS STRING) as stratum_1,
+	'2' as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
+on p1.person_id = co1.person_id
+where (extract(year from co1.procedure_date) - p1.year_of_birth) >= 18 and
+(extract(year from co1.procedure_date) - p1.year_of_birth) < 30
+group by co1.procedure_source_concept_id, stratum_2"
+
 # Drugs
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -316,6 +436,16 @@ select 0, 3000 as analysis_id,
 	COUNT(distinct de1.PERSON_ID) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de1
 group by de1.drug_CONCEPT_ID"
+
+# Drugs (Source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, source_count_value)
+select 0, 3000 as analysis_id,
+	CAST(de1.drug_source_CONCEPT_ID AS STRING) as stratum_1,
+	COUNT(distinct de1.PERSON_ID) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de1
+group by de1.drug_source_CONCEPT_ID"
 
 # Drug gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -331,6 +461,20 @@ on p1.person_id = co1.person_id
 group by co1.drug_concept_id,
 	p1.gender_concept_id"
 
+# Drug gender (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3101 as analysis_id,
+	CAST(co1.drug_source_concept_id AS STRING) as stratum_1,
+	CAST(p1.gender_source_concept_id AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
+on p1.person_id = co1.person_id
+group by co1.drug_source_concept_id,
+	p1.gender_source_concept_id"
+
 # Drug age
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -344,6 +488,20 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 where floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) >=3
 group by co1.drug_concept_id, stratum_2"
+
+# Drug age (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.drug_source_concept_id AS STRING) as stratum_1,
+	CAST(floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
+on p1.person_id = co1.person_id
+where floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) >=3
+group by co1.drug_source_concept_id, stratum_2"
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -359,6 +517,20 @@ where (extract(year from co1.drug_exposure_start_date) - p1.year_of_birth) >= 18
 (extract(year from co1.drug_exposure_start_date) - p1.year_of_birth) < 30
 group by co1.drug_concept_id, stratum_2"
 
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.drug_source_concept_id AS STRING) as stratum_1,
+	'2' as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
+on p1.person_id = co1.person_id
+where (extract(year from co1.drug_exposure_start_date) - p1.year_of_birth) >= 18 and
+(extract(year from co1.drug_exposure_start_date) - p1.year_of_birth) < 30
+group by co1.drug_source_concept_id, stratum_2"
+
 # 800	(3000) Number of persons with at least one observation occurrence, by observation_concept_id
 echo "Querying observation"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -370,6 +542,18 @@ select 0, 3000 as analysis_id,
 from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
 where co1.observation_concept_id > 0
 group by co1.observation_CONCEPT_ID"
+
+# 800	b (3000) Number of persons with at least one observation occurrence, by observation_concept_id (Source)
+echo "Querying observation"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, source_count_value)
+select 0, 3000 as analysis_id,
+	CAST(co1.observation_source_CONCEPT_ID AS STRING) as stratum_1,
+	COUNT(distinct co1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
+where co1.observation_source_concept_id > 0
+group by co1.observation_source_CONCEPT_ID"
 
 # Observation 3101 concept by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -385,6 +569,20 @@ on p1.person_id = co1.person_id
 where co1.observation_concept_id > 0
 group by co1.observation_concept_id, p1.gender_concept_id"
 
+# Observation 3101 concept by gender (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3101 as analysis_id,
+	CAST(co1.observation_source_concept_id AS STRING) as stratum_1,
+	CAST(p1.gender_source_concept_id AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
+on p1.person_id = co1.person_id
+where co1.observation_source_concept_id > 0
+group by co1.observation_source_concept_id, p1.gender_source_concept_id"
+
 # Observation (3102)	Number of persons with   concept id by  age decile  30+ yr old deciles
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -398,6 +596,20 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 where co1.observation_concept_id > 0 and floor((extract(year from co1.observation_date) - p1.year_of_birth)/10) >=3
 group by co1.observation_concept_id, stratum_2"
+
+# Observation (3102)	Number of persons with   concept id by  age decile  30+ yr old deciles (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.observation_source_concept_id AS STRING) as stratum_1,
+	CAST(floor((extract(year from co1.observation_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
+on p1.person_id = co1.person_id
+where co1.observation_source_concept_id > 0 and floor((extract(year from co1.observation_date) - p1.year_of_birth)/10) >=3
+group by co1.observation_source_concept_id, stratum_2"
 
 # Observation (3102)	Number of persons with concept id by  age decile  18-29 yr old decile 2
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -413,32 +625,19 @@ on p1.person_id = co1.person_id
 where co1.observation_concept_id > 0 and (extract(year from co1.observation_date) - p1.year_of_birth) >= 18 and (extract(year from co1.observation_date) - p1.year_of_birth) < 30
 group by co1.observation_concept_id, stratum_2"
 
-# PPI Observation (3000)
-echo "Querying PPI observation "
-# Get ones with value source concept id, ie survey answer is
+# Observation (3102)	Number of persons with concept id by  age decile  18-29 yr old decile 2 (source)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0 as id, 3000 as analysis_id, CAST(o.observation_source_concept_id as string) as stratum_1,
-cast(o.value_source_concept_id as string) as stratum_2, count(*) as count_value
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
-on o.observation_source_concept_id = c.concept_id
-where o.observation_source_concept_id > 0 and o.value_source_concept_id > 0 and c.vocabulary_id = 'PPI'
-and c.concept_class_id = 'Question'
-group by observation_source_concept_id, o.value_source_concept_id"
-
-
-# Get PPI ones with value as number.
-# Todo ,we exclude zip concept 1585966. We can allow this some time
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, count_value)
-SELECT 0 as id, 3000 as analysis_id, cast(c.concept_id as string) as stratum_1, cast(value_as_number as string) as stratum_2, count(*)
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept\`
-c on o.observation_source_concept_id = c.concept_id
-where c.vocabulary_id = 'PPI' and c.concept_class_id = 'Question' and value_as_number > 0
-and c.concept_id != 1585966
-group by c.concept_id, value_as_number"
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.observation_source_concept_id AS STRING) as stratum_1,
+	'2' as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
+on p1.person_id = co1.person_id
+where co1.observation_source_concept_id > 0 and (extract(year from co1.observation_date) - p1.year_of_birth) >= 18 and (extract(year from co1.observation_date) - p1.year_of_birth) < 30
+group by co1.observation_source_concept_id, stratum_2"
 
 
 # 1800 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id
@@ -449,6 +648,15 @@ select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as st
   from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
  where co1.measurement_concept_id > 0
  group by  co1.measurement_concept_id"
+
+# 1800 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, source_count_value)
+select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1, COUNT(distinct co1.person_id) as source_count_value
+  from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+ where co1.measurement_source_concept_id > 0
+ group by  co1.measurement_source_concept_id"
 
 # Measurement concept by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -464,6 +672,20 @@ on p1.person_id = co1.person_id
 where co1.measurement_concept_id > 0
 group by co1.measurement_concept_id, p1.gender_concept_id"
 
+# Measurement concept by gender (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3101 as analysis_id,
+	CAST(co1.measurement_source_concept_id AS STRING) as stratum_1,
+	CAST(p1.gender_source_concept_id AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+on p1.person_id = co1.person_id
+where co1.measurement_source_concept_id > 0
+group by co1.measurement_source_concept_id, p1.gender_source_concept_id"
+
 # Measurement by age deciles
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -478,6 +700,20 @@ on p1.person_id = co1.person_id
 where co1.measurement_concept_id > 0 and floor((extract(year from co1.measurement_date) - p1.year_of_birth)/10) >=3
 group by co1.measurement_concept_id, stratum_2"
 
+# Measurement by age deciles (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.measurement_source_concept_id AS STRING) as stratum_1,
+	CAST(floor((extract(year from co1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+on p1.person_id = co1.person_id
+where co1.measurement_source_concept_id > 0 and floor((extract(year from co1.measurement_date) - p1.year_of_birth)/10) >=3
+group by co1.measurement_source_concept_id, stratum_2"
+
 # Measurement  18-29 yr old decile 2
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -491,6 +727,20 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 where co1.measurement_concept_id > 0 and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30
 group by co1.measurement_concept_id, stratum_2"
+
+# Measurement  18-29 yr old decile 2 (source)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, source_count_value)
+select 0, 3102 as analysis_id,
+	CAST(co1.measurement_source_concept_id AS STRING) as stratum_1,
+	'2' as stratum_2,
+	COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+on p1.person_id = co1.person_id
+where co1.measurement_source_concept_id > 0 and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30
+group by co1.measurement_source_concept_id, stratum_2"
 
 
 # Measurement Distributions
