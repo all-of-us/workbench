@@ -1427,8 +1427,17 @@ definitions:
 
   ClusterStatus:
     type: string
-    description: The status for a Firecloud notebook cluster.
-    enum: [CREATING, RUNNING, ERROR]
+    enum: &CLUSTERSTATUS
+      - Creating
+      - Running
+      - Updating
+      - Error
+      - Stopping
+      - Stopped
+      - Starting
+      - Deleting
+      - Deleted
+      - Unknown
 
   Cluster:
     description: A Firecloud notebook cluster.
