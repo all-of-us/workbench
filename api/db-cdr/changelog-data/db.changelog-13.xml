@@ -18,7 +18,6 @@
       <column name="stratum_3" type="STRING"/>
       <column name="stratum_4" type="STRING"/>
       <column name="stratum_5" type="STRING"/>
-      <column name="count_value" type="NUMERIC"/>
     </loadData>
 
     <loadData tableName="achilles_results" file="csv/achilles_results2.csv" encoding="UTF-8" quotchar='"'>
