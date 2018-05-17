@@ -7,11 +7,9 @@ IFS=$'\n\t'
 
 
 # get options
-# --project=all-of-us-workbench-test *required
 
 # --cdr=cdr_version ... *optional
 USAGE="./generate-clousql-cdr/make-bq-denormalized-tables.sh --bq-project <PROJECT> --bq-dataset <DATASET>"
-USAGE="$USAGE --cdr-version=YYYYMMDD"
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
