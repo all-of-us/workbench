@@ -39,8 +39,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.clusterService.listClusters()
       .subscribe((resp) => {
         const cluster = resp.defaultCluster;
-        if (cluster.status === ClusterStatus.RUNNING ||
-            cluster.status === ClusterStatus.ERROR) {
+        if (cluster.status === ClusterStatus.Running ||
+            cluster.status === ClusterStatus.Error) {
           this.cluster = cluster;
           return;
         }

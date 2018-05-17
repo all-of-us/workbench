@@ -87,7 +87,6 @@ paths:
           name: _labels
           description: |
             Optional label key-value pairs to filter results by. Example: key1=val1,key2=val2.
-
             Note: this string format is a workaround because Swagger doesn't support free-form
             query string parameters. The recommended way to use this endpoint is to specify the
             labels as top-level query string parameters. For instance: GET /api/clusters?key1=val1&key2=val2.
@@ -188,6 +187,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/ErrorReport'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorReport'
         '500':
           description: Internal Error
           schema:
@@ -219,6 +222,77 @@ paths:
           description: Cluster deletion request accepted
         '404':
           description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  '/api/cluster/{googleProject}/{clusterName}/stop':
+    post:
+      summary: Stops a Dataproc cluster
+      description: |
+        Stops the instances of a Dataproc cluster, but retains any data persisted on disk. The
+        cluster may be restarted with the /start endpoint.
+      operationId: stopCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Cluster stop request accepted
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '409':
+          description: Cluster cannot be stopped
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  '/api/cluster/{googleProject}/{clusterName}/start':
+    post:
+      summary: Starts a Dataproc cluster
+      description: |
+        Starts the instances of a stopped Dataproc cluster.
+      operationId: startCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Cluster start request accepted
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '409':
+          description: Cluster cannot be started
           schema:
             $ref: '#/definitions/ErrorReport'
         '500':
@@ -261,6 +335,10 @@ paths:
           description: Cluster not ready
           schema:
             $ref: '#/definitions/ErrorReport'
+        '422':
+          description: Cluster is stopped
+          schema:
+            $ref: '#/definitions/ErrorReport'
         '500':
           description: Internal Error
           schema:
@@ -269,8 +347,10 @@ paths:
     post:
       summary: Localize files to/from a Jupyter notebook server
       description: |
-        Sends a command to a Jupyter notebook server to localize files between the server and GCS.
-        This operation will happen asynchronously; output, including any errors, will appear in `localization.log` in the working directory of the Jupyter notebook server.
+        Sends a command to a Jupyter notebook server to localize files to/from the server. Supports GCS paths and [Data URIs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
+        Output, including any errors, will appear in `localization.log` in the working directory of the Jupyter notebook server.
+        By default this operation will happen synchronously and the response status will reflect any errors encountered in the copy.
+        However, if the `async` parameter is specfied then the localization will happen asynchronously to the request, and the API will always return 200.
       operationId: proxyLocalize
       tags:
         - notebooks
@@ -285,10 +365,22 @@ paths:
           description: clusterName
           required: true
           type: string
+        - in: query
+          name: async
+          description: |
+            If true, the copy will happen asynchronously to the request and the API will always return 200.
+            If false (the default), the copy will happen synchronously and the response will reflect any errors encountered during the copy.
+          required: false
+          type: boolean
+          default: false
         - in: body
           description: |
-            JSON object. Keys represent destinations, values represent sources.
-            Paths will be quoted, intermediate local directories made, and then sent to [gsutil cp](https://cloud.google.com/storage/docs/gsutil/commands/cp).
+            JSON object. Keys represent destinations, values represent sources. The following rules apply:
+            * If either the source or destination is a GCS path, it will be sent to [gsutil cp](https://cloud.google.com/storage/docs/gsutil/commands/cp). Therefore
+              this can be used to localize a file _from_ a bucket _to_ the notebook server; or delocalize a file _from_ the notebook server _to_ a bucket.
+            * If the source is a Data URI, then the destination file will be created with the decoded data URI contents. This mode can only be used to localize
+              files to the notebook server.
+            In both cases all paths will be quoted & sanitized, and intermediate local directories will be made.
             Note that duplicate keys will lead to unexpected behaviour, so specify the destination filename explicitly if you want to localize multiple files to the same directory.
           name: filesToLocalize
           required: true
@@ -296,9 +388,10 @@ paths:
             type: object
             description: ''
             example:
-              "/local/file/system/file.txt" : "gs://somebucket/file.txt"
-              "/localize/entire/directory" : "gs://somebucket/*"
-              "gs://upload/to/this/bucketdir" : "/this/local/file.txt"
+              "~/file.txt" : "gs://somebucket/file.txt"
+              "~/directory" : "gs://somebucket/*"
+              "gs://upload/to/this/bucketdir" : "~/file.txt"
+              "~/data.txt" : "data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D"
       responses:
         '200':
           description: Proxy connection successful
@@ -314,6 +407,10 @@ paths:
             $ref: '#/definitions/ErrorReport'
         '420':
           description: Cluster not ready
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '422':
+          description: Cluster is stopped
           schema:
             $ref: '#/definitions/ErrorReport'
         '500':
@@ -461,9 +558,24 @@ definitions:
       - Running
       - Updating
       - Error
+      - Stopping
+      - Stopped
+      - Starting
       - Deleting
       - Deleted
       - Unknown
+
+  InstanceStatus:
+    type: string
+    enum: &INSTANCESTATUS
+      - Provisioning
+      - Staging
+      - Running
+      - Stopping
+      - Stopped
+      - Suspending
+      - Suspended
+      - Terminated
 
   ErrorReport:
     description: ''
@@ -562,6 +674,58 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
+      errors:
+        type: array
+        description: The list of errors that were encountered on cluster create. Each error consists of the error message, code and timestamp
+        items:
+          $ref: "#/definitions/ClusterError"
+      instances:
+        description: Array of instances belonging to this cluster
+        type: array
+        items:
+          $ref: '#/definitions/Instance'
+
+  InstanceKey:
+    description: ''
+    required:
+      - project
+      - zone
+      - name
+    properties:
+      project:
+        type: string
+        description: The Google Project the instance belongs to
+      zone:
+        type: string
+        description: The Google zone the instance belongs to
+      name:
+        type: string
+        description: The name of the instance
+
+  Instance:
+    description: ''
+    required:
+      - key
+      - googleId
+      - status
+    properties:
+      key:
+        description: Unique identifier of (project, zone, name) for this instance
+        $ref: '#/definitions/InstanceKey'
+      googleId:
+        type: string
+        description: Google's unique id for this instance
+      status:
+        $ref: "#/definitions/InstanceStatus"
+      ip:
+        type: string
+        description: The public IP address of the instance, if any
+      dataprocRole:
+        type: string
+        description: The dataproc role (master, worker, preemptible worker) of this instance, if any
+      createdDate:
+        type: string
+        description: The date and time the instance was created, in ISO-8601 format
 
   ClusterRequest:
     description: ''
@@ -569,6 +733,9 @@ definitions:
       labels:
         type: object
         description: The labels to be placed on the cluster. Of type Map[String,String]
+      userJupyterExtensionConfig:
+        $ref: "#/definitions/UserJupyterExtensionConfig"
+        description: Jupyter extensions to be installed in the notebook
       jupyterExtensionUri:
         type: string
         description: |
@@ -583,6 +750,26 @@ definitions:
       machineConfig:
         description: The machine configurations for the master and worker nodes
         $ref: '#/definitions/MachineConfig'
+      stopAfterCreation:
+        description: |
+          If true, Leo will immediately stop the cluster once it's created, with the end result being a
+          a cluster in Stopped state. Otherwise, the end result will be a cluster in Running state.
+          Defaults to false.
+        type: boolean
+        default: false
+
+  ClusterError:
+    description: 'Errors encountered on cluster create'
+    properties:
+      errorMessage:
+        type: string
+        description: Error message
+      errorCode:
+        type: integer
+        description: Error code
+      timestamp:
+        type: string
+        description: timestamp for error in ISO 8601 format
 
   MachineConfig:
     description: 'The configuration for a single Dataproc cluster'
@@ -622,7 +809,24 @@ definitions:
         description: |
           Optional, the number of preemptible workers. If unspecified, the default number is 0. Ignored if numberOfWorkers is 0.
           For more information, see https://cloud.google.com/compute/docs/instances/preemptible
-
+  UserJupyterExtensionConfig:
+    description: 'Specification of Jupyter Extensions to be installed on the cluster'
+    properties:
+      nbExtensions:
+        type: object
+        description: |
+          Optional, map of extension name and nbExtension. The nbExtension can either be a tar.gz file on google storage or a python package.
+          Example, {"ext1":"gs://bucket/extension.tar.gz", "pipExt":"python-package"}
+      serverExtensions:
+        type: object
+        description: |
+          Optional, map of extension name and server extension. The serverExtensions can either be a tar.gz file on google storage or a python package.
+          Example, {"ext1":"gs://bucket/extension.tar.gz", "pipExt":"python-package"}
+      combinedExtensions:
+        type: object
+        description: |
+          Optional, map of extension name and notebook plus server extension. The extension can either be a tar.gz file on google storage or a python package.
+          Example, {"ext1":"gs://bucket/extension.tar.gz", "pipExt":"python-package"}
   SubsystemStatus:
     description: status of a subsystem Leonardo depends on
     type: object
