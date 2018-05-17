@@ -19,7 +19,10 @@ export class HomepageComponent implements OnInit, OnDestroy {
   AouLogo = '/assets/images/all-of-us-logo.svg';
   tipHeadline = 'Welcome Back to All of Us!';
   tipSubtitle = 'Thanks for returning.';
-  tipDetail = 'You can use the buttons below to view your workspaces, or create a new one. Please do not hesitate to use the "Report a Bug" button below (or found at any time via the Profile menu) if you experience any difficulties.';
+  tipDetail = 'You can use the buttons below to view your workspaces, ' +
+    'or create a new one. Please do not hesitate to use the "Report a Bug" ' +
+    'button below (or found at any time via the Profile menu) ' +
+    'if you experience any difficulties.';
   tipButton = 'Report a Bug';
   profile: Profile;
   view: any[] = [180, 180];
@@ -71,7 +74,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
       if (profile.firstSignInTime === null) {
         this.tipHeadline = 'Welcome to All of Us';
         this.tipSubtitle = 'This is your first visit with us!';
-        this.tipDetail = 'We are setting up your account. When this process is completed you will be able to use the "Create a Workspace" button below to create a new Workspace.';
+        this.tipDetail = 'We are setting up your account. When this process is ' +
+          'completed you will be able to use the "Create a Workspace" button ' +
+          'below to create a new Workspace.';
         this.tipButton = '';
       }
     });
@@ -129,12 +134,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
    listWorkspaces(): void {
     this.router.navigate(['workspaces']);
    }
-
-   bugReport(): void {
-    this.router.navigate([''])
-   }
-
-
 
   get twoFactorBannerEnabled() {
     if (this.firstSignIn == null) {
