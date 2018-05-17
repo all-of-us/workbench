@@ -4,6 +4,7 @@ import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
@@ -23,6 +24,8 @@ import {SearchGroupSelectComponent} from './search-group-select/search-group-sel
 import {SearchGroupComponent} from './search-group/search-group.component';
 import {SelectionInfoComponent} from './selection-info/selection-info.component';
 import {TreeComponent} from './tree/tree.component';
+
+import {CohortCommonModule} from '../cohort-common/module';
 
 /* Other Objects */
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
@@ -44,8 +47,11 @@ const routes: Routes = [{
     // 3rd Party
     ClarityModule,
     NgReduxModule,
+    NgxChartsModule,
     NgxPopperModule,
     NouisliderModule,
+    // Ours
+    CohortCommonModule,
   ],
   declarations: [
     CohortSearchComponent,
