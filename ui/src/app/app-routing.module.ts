@@ -9,6 +9,7 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
+import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
@@ -44,8 +45,12 @@ const routes: Routes = [
     canActivateChild: [SignInGuard],
     runGuardsAndResolvers: 'always',
     children: [
-      {
-        path: '',
+        {
+          path: '',
+          component: HomepageComponent,
+          data: {title: 'Homepage'},
+        }, {
+        path: 'workspaces',
         data: { breadcrumb: 'Workspaces' },
         children: [
           {

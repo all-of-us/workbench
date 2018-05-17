@@ -1,0 +1,192 @@
+.background-image {
+    background-image: url('/assets/images/homepage.png');
+    background-repeat: no-repeat;
+    z-index: -1;
+    background-size: cover;
+    right: 0rem;
+    top: 3.3rem;
+    width: 100%;
+    position: absolute;
+    /*height: calc(100vh - 3.3rem);*/
+    height: 41rem;
+}
+
+.rectangle {
+    opacity: .47;
+    background-color: #000000;
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.28);
+    margin-top: 5rem;
+    margin-left: 3rem;
+    margin-right: auto;
+    width: 80%;
+    height: 11rem;
+    position: absolute;
+}
+
+.tip-title {
+    margin-top: 5rem;
+    margin-left: 3rem;
+    color: #FFFFFF;
+    padding-top: 1rem;
+    padding-left: 2rem;
+    z-index: 1;
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 2.2rem;
+    position: absolute;
+}
+
+.tip-subtitle {
+    padding-top: 4.2rem;
+    padding-left: 2.1rem;
+    font-size: 1rem;
+    line-height: 1.2rem;
+}
+
+.tip-description {
+    padding-top: 5.75rem;
+    font-size: .75rem;
+    line-height: 1rem;
+    font-weight: lighter;
+    width: 30rem;
+}
+
+.learn-more-button {
+    height: 1.875rem;
+    width: 6.5rem;
+    border-radius: .3125rem;
+    background-color: #60AEE0;
+    position: absolute;
+    z-index: 1;
+    color: #FFFFFF;
+    margin-top: 13.5rem;
+    margin-left: 5rem;
+    padding-top: .5rem;
+    padding-left: .7rem;
+    font-weight: 500;
+    font-size: .75rem;
+}
+
+.profile-box {
+    height: 11rem;
+    background-color: #FFFFFF;
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.28);
+    margin-top: 5rem;
+    position: relative;
+    margin-right: 5rem;
+    margin-left: auto;
+    width: 20%;
+    z-index: 1;
+}
+
+.profile-title {
+    width: 100%;
+    color: rgba(0, 0, 0, 0.87);
+    line-height: 1rem;
+    font-size: .75rem;
+    font-weight: 300;
+    padding-top: 1.2rem;
+    padding-left: 1.2rem;
+    padding-right: .2rem;
+}
+
+.profile-tips {
+    line-height: .75rem;
+    font-size: .5rem;
+    font-weight: 100;
+    padding-top: 0.2rem;
+    margin-left: 1.2rem;
+    padding-left: 0;
+}
+
+.profile-update-button {
+    height: 1.3rem;
+    width: 5rem;
+    color: #FFFFFF;
+    text-align: center;
+    background-color: #302C71;
+    margin-left: 1.4rem;
+    border-radius: .3125rem;
+    margin-top: 1rem;
+    padding-top: .1rem;
+    font-size: .6rem;
+    position: absolute;
+}
+
+.percentText {
+    position: absolute;
+    top: 4rem;
+    color: #81BBED;
+    font-size: 30px;
+    width: 8.4rem;
+    text-align: center;
+    line-height: 36px;
+}
+
+.card-area {
+    display: flex;
+    justify-content: space-between;
+    z-index: 1;
+    margin-top: 25rem;
+}
+.card {
+    width: 45%;
+    height: 10rem;
+    margin-bottom: .8rem;
+    margin-right: 2rem;
+    margin-left: 2rem;
+    padding-left: 1.2rem;
+    padding-top: 1rem;
+}
+
+.card *.title {
+    color: #262262;
+    font-size: .8rem;
+    font-weight: 500;
+}
+
+.card *.description {
+    font-size: .6rem;
+    font-weight: 200;
+    padding-top: .5rem;
+    width: 66%;
+}
+
+.card *.button {
+    height: 2rem;
+    width: 8rem;
+    background-color: #302C71;
+    border-radius: .3125rem;
+    color: #FFFFFF;
+    padding-left: .5rem;
+    padding-top: .2rem;
+    margin-top: 1rem;
+    align-content: center
+}
+
+.bottom-banner {
+    margin-bottom: 0;
+    margin-left: -1rem;
+    border-top-color: #5DAEE1;
+    border-style: solid;
+    border-top-width: .3rem;
+    width: 100%;
+    display: flex;
+    background-color: #483F4B;
+    height: 5rem;
+    position: absolute;
+}
+
+.logo {
+    margin-left: 4rem;
+    margin-top: 1rem;
+    width: 12%;
+    height: 90%
+}
+
+.bottom-links {
+    color: #9B9B9B;
+    font-size: 1rem;
+    margin-left: 1.5rem;
+    margin-top: 2rem;
+}

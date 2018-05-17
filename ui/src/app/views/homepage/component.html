@@ -1,0 +1,69 @@
+<div class="background-image"></div>
+<div class="rectangle"></div>
+<div class="tip-title">Tip/demo/tutorial</div>
+<div class="tip-title tip-subtitle">Lorem ipsum dolor sit amet</div>
+<div class="tip-title tip-description">Consectetur adipiscing elit. Aenean euismod bibendum laoreet. Gravida dolor sit amet lacus accumsan et viverra justo commodo.</div>
+<div class="learn-more-button">Learn more</div>
+<div class="profile-box">
+    <div style="float: left; width: 50%">
+        <div class="profile-title">
+            Complete your profile
+        </div>
+        <div class="profile-title profile-tips">
+            You can quickly:
+            <li>Add your institution</li>
+            <li>Add your role</li>
+            <li>Update something else</li>
+        </div>
+        <button class="profile-update-button" (click)="navigateToProfile()">Update</button>
+    </div>
+    <div style="float:right; width:50%; margin-top: 1.2rem">
+        <ngx-charts-pie-chart
+                [view]="view"
+                [scheme]="colorScheme"
+                [results]="spinnerValues"
+                [doughnut]="true"
+                [tooltipDisabled]="true">
+        </ngx-charts-pie-chart>
+        <div class="percentText">
+            {{completedTasksAsPercentage}}%
+        </div>
+    </div>
+</div>
+<div class="card-area">
+    <div class="card">
+        <div class="title">Create your own workspace</div>
+        <div class="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Aenean euismod bibendum laoreet. Proin gravida dolor sit
+            amet lacus accumsan et viverra justo commodo. </div>
+        <button class="button tooltip" (click)="addWorkspace()" [disabled]="!billingProjectInitialized">
+            Create Workspace
+            <span *ngIf="!billingProjectInitialized" class="tooltip-content">
+                Your billing project is currently being created, please wait.
+            </span>
+        </button>
+    </div>
+    <div class="card">
+        <div class="title">View your workspaces</div>
+        <div class="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            Aenean euismod bibendum laoreet. Proin gravida dolor sit
+            amet lacus accumsan et viverra justo commodo. </div>
+        <button class="button tooltip" (click)="listWorkspaces()" [disabled]="!FCAccountInitialized">
+            Go to Workspaces
+            <span *ngIf="!FCAccountInitialized" class="tooltip-content">
+                Your account is being initialized, please wait.
+            </span>
+        </button>
+    </div>
+</div>
+<div class="bottom-banner">
+    <div class="logo">
+        <img [src]="AouLogo">
+    </div>
+    <div class="bottom-links">
+        Privacy Policy
+    </div>
+    <div class="bottom-links">
+        Terms of Service
+    </div>
+</div>
