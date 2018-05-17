@@ -252,7 +252,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.clusterService.listClusters()
         .subscribe((resp) => {
           this.cluster = resp.defaultCluster;
-          if (this.cluster.status !== ClusterStatus.RUNNING) {
+          if (this.cluster.status !== ClusterStatus.Running) {
             // Once cluster creation has started, it may take ~5 minutes.
             this.clusterLongWait = true;
             repoll();

@@ -86,6 +86,16 @@ PUBLIC_DATASET=public$CDR_VERSION
 startDate=`date`
 echo `date` " Starting generate-cdr-counts $startDate"
 
+## Make BigQuery denormalized tables
+echo "Making BigQuery denormalized tables"
+if ./generate-cdr/make-bq-denormalized-tables.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
+then
+    echo "BigQuery denormalized tables generated"
+else
+    echo "FAILED To generate BigQuery denormalized tables for cdr $CDR_VERSION"
+    exit 1
+fi
+
 ## Make BigQuery cdr
 echo "Making BigQuery cdr dataset"
 if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT \
