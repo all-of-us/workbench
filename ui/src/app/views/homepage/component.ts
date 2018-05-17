@@ -1,10 +1,11 @@
-import {Component, OnDestroy, OnInit, Input} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
-  BlockscoreIdVerificationStatus,
   BillingProjectStatus,
+  BlockscoreIdVerificationStatus,
   Profile,
   ProfileService
 } from 'generated';
@@ -16,6 +17,10 @@ import {
 
 export class HomepageComponent implements OnInit, OnDestroy {
   AouLogo = '/assets/images/all-of-us-logo.svg';
+  tipHeadline = 'Welcome Back to All of Us!';
+  tipSubtitle = 'Thanks for returning.';
+  tipDetail = 'You can use the buttons below to view your workspaces, or create a new one. Please do not hesitate to use the "Report a Bug" button below (or found at any time via the Profile menu) if you experience any difficulties.';
+  tipButton = 'Report a Bug';
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -38,6 +43,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
   constructor(
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
@@ -56,11 +63,17 @@ export class HomepageComponent implements OnInit, OnDestroy {
           this.profileStorageService.reload();
         }, 10000);
       }
-      if(profile != null) {
+      if (profile != null) {
         this.FCAccountInitialized = true;
       }
       this.profile = profile;
       this.reloadSpinner();
+      if (profile.firstSignInTime === null) {
+        this.tipHeadline = 'Welcome to All of Us';
+        this.tipSubtitle = 'This is your first visit with us!';
+        this.tipDetail = 'We are setting up your account. When this process is completed you will be able to use the "Create a Workspace" button below to create a new Workspace.';
+        this.tipButton = '';
+      }
     });
     this.profileStorageService.reload();
   }
@@ -110,12 +123,15 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.router.navigate(['workspace/build'], {relativeTo : this.route});
   }
    navigateToProfile(): void {
-    console.log("Click!");
     this.router.navigate(['profile']);
    }
 
    listWorkspaces(): void {
     this.router.navigate(['workspaces']);
+   }
+
+   bugReport(): void {
+    this.router.navigate([''])
    }
 
 
