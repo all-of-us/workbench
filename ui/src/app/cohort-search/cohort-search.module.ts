@@ -4,13 +4,11 @@ import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
-import {ComboChartComponent} from './combo-chart/combo-chart.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {ModalComponent} from './modal/modal.component';
@@ -46,13 +44,11 @@ const routes: Routes = [{
     // 3rd Party
     ClarityModule,
     NgReduxModule,
-    NgxChartsModule,
     NgxPopperModule,
     NouisliderModule,
   ],
   declarations: [
     CohortSearchComponent,
-    ComboChartComponent,
     DemographicsComponent,
     GenderChartComponent,
     ModalComponent,
@@ -67,10 +63,6 @@ const routes: Routes = [{
     SearchGroupSelectComponent,
     SelectionInfoComponent,
     TreeComponent,
-  ],
-  exports: [
-    // TODO: Remove this once no longer needed by CohortReviewModule.
-    ComboChartComponent
   ],
   providers: [
     CohortSearchActions,
