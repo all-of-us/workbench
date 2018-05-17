@@ -93,8 +93,9 @@ export class AccountCreationComponent {
   get showPasswordsDoNotMatchError() {
     // We do not want to show errors if nothing is typed yet. This is caught by the required
     // fields case.
-    if (this.password.length === 0 || this.passwordAgain.length === 0) {
-      return false;
+    if (this.password === undefined || this.passwordAgain === undefined
+      || this.password.length === 0 || this.passwordAgain.length === 0) {
+        return false;
     }
     return !(this.password === this.passwordAgain);
   }
@@ -102,7 +103,7 @@ export class AccountCreationComponent {
   get showPasswordLengthError() {
     // We do not want to show errors if nothing is typed yet. This is caught by the required
     // fields case.
-    if (this.password.length === 0) {
+    if (this.password === undefined || this.password.length === 0) {
       return false;
     }
     return (this.password.length < 8 || this.password.length > 100);
@@ -111,7 +112,7 @@ export class AccountCreationComponent {
   get containsLowerAndUpperError() {
     // We do not want to show errors if nothing is typed yet. This is caught by the required
     // fields case.
-    if (this.password.length === 0) {
+    if (this.password === undefined || this.password.length === 0) {
       return false;
     }
     return !(this.hasLowerCase(this.password) && this.hasUpperCase(this.password));
