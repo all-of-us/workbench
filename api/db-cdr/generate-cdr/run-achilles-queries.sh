@@ -386,24 +386,23 @@ group by co1.drug_source_concept_id,p1.gender_concept_id"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, count_value,source_count_value)
-select 0, 3102 as analysis_id,
-	CAST(co1.drug_concept_id AS STRING) as stratum_1,
+select 0, 3102 as analysis_id,CAST(co1.drug_concept_id AS STRING) as stratum_1,
 	CAST(floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
-	COUNT(distinct p1.PERSON_ID) as count_value,(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co2 on p2.person_id = co2.person_id where co2.drug_source_concept_id=co1.drug_concept_id) as source_count_value
+	COUNT(distinct p1.PERSON_ID) as count_value,
+	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co2 on p2.person_id = co2.person_id where co2.drug_source_concept_id=co1.drug_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
 on p1.person_id = co1.person_id
 where floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) >=3
 group by co1.drug_concept_id, stratum_2
 union all
-select 0, 3102 as analysis_id,CAST(co1.drug_source_concept_id AS STRING) as stratum_1,CAST(floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
+select 0, 3102 as analysis_id,CAST(co1.drug_source_concept_id AS STRING) as stratum_1,
+CAST(floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
 0 as count_value,COUNT(distinct p1.PERSON_ID) as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
-\`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
 on p1.person_id = co1.person_id
 where floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) >=3 and co1.drug_concept_id != co1.drug_source_concept_id
-group by co1.drug_source_concept_id, stratum_2
-"
+group by co1.drug_source_concept_id, stratum_2"
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -419,14 +418,15 @@ on p1.person_id = co1.person_id
 where (extract(year from co1.drug_exposure_start_date) - p1.year_of_birth) >= 18 and
 (extract(year from co1.drug_exposure_start_date) - p1.year_of_birth) < 30
 group by co1.drug_concept_id, stratum_2
-select 0, 3102 as analysis_id,CAST(co1.drug_source_concept_id AS STRING) as stratum_1,'2' as stratum_2,0 as count_value,COUNT(distinct p1.PERSON_ID) as source_count_value
+union all
+select 0, 3102 as analysis_id,CAST(co1.drug_source_concept_id AS STRING) as stratum_1,'2' as stratum_2,
+0 as count_value,COUNT(distinct p1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
 on p1.person_id = co1.person_id
 where (extract(year from co1.drug_exposure_start_date) - p1.year_of_birth) >= 18 and
 (extract(year from co1.drug_exposure_start_date) - p1.year_of_birth) < 30 and co1.drug_concept_id != drug_source_concept_id
-group by co1.drug_source_concept_id, stratum_2
-"
+group by co1.drug_source_concept_id, stratum_2"
 
 # 800	(3000) Number of persons with at least one observation occurrence, by observation_concept_id
 echo "Querying observation"
@@ -464,7 +464,7 @@ group by co1.observation_concept_id, p1.gender_concept_id
 union all
 select 0, 3101 as analysis_id,
 	CAST(co1.observation_source_concept_id AS STRING) as stratum_1,
-	CAST(p1.gender_concept_id AS STRING) as stratum_2,0 as count_value
+	CAST(p1.gender_concept_id AS STRING) as stratum_2,0 as count_value,
 	COUNT(distinct p1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
@@ -637,30 +637,36 @@ group by co1.measurement_source_concept_id, stratum_2
 # group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 #
 
+#Set the survey participant count
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
-set count_value=
-(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
-WHERE o.observation_source_concept_id in
-(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1586134))
-where concept_id=1586134"
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
+set c1.count_value=count_val from
+(select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd
+on cr.concept_id_2=dbd.concept_id
+where dbd.db_type='survey' and dbd.concept_id is not null
+group by cr.concept_id_2)
+where c1.concept_id=survey_concept_id"
 
+#Set the survey participant count in db_domain
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
-set count_value=
-(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
-WHERE o.observation_source_concept_id in
-(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1585855))
-where concept_id=1585855"
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd
+set dbd.count_value=(select count_value from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c where c.concept_id=dbd.concept_id)
+where dbd.db_type='survey' and dbd.concept_id is not null
+"
 
+#Set the questions count
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
-set count_value=
-(SELECT count(distinct o.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o
-WHERE o.observation_source_concept_id in
-(SELECT cr.concept_id_1 from \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr where cr.concept_id_2=1585710))
-where concept_id=1585710"
-
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
+set c1.count_value=count_val from
+(select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id,cr.concept_id_1 as question_id
+from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+on ob.observation_source_concept_id=cr.concept_id_1 join `all-of-us-workbench-test.public20180502.db_domain` dbd on cr.concept_id_2 = dbd.concept_id
+where dbd.db_type='survey' and cr.relationship_id = 'Has Module'
+group by survey_concept_id,cr.concept_id_1)
+where c1.concept_id=question_id
+"
 
 # Set the survey answer count for all the survey questions that belong to each module
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
