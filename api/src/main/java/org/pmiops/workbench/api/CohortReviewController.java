@@ -296,7 +296,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      reviewTabQueryBuilder.buildDetailsQuery(dataId)));
+      reviewTabQueryBuilder.buildDetailsQuery(dataId, domain)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     ParticipantData response =
@@ -406,7 +406,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         " Please provide a valid Domain.");
     }
     String sortColumn = Optional.ofNullable(((ReviewFilter) request).getSortColumn())
-      .orElse(ReviewColumns.ITEMDATE).toString();
+      .orElse(ReviewColumns.STARTDATE).toString();
     int pageParam = Optional.ofNullable(request.getPage()).orElse(CohortReviewController.PAGE);
     int pageSizeParam = Optional.ofNullable(request.getPageSize()).orElse(CohortReviewController.PAGE_SIZE);
     SortOrder sortOrderParam = Optional.ofNullable(request.getSortOrder()).orElse(SortOrder.ASC);
@@ -612,32 +612,32 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     if (domain.equals(DomainType.DRUG.toString())) {
       participantData = new Drug()
         .signature(bigQueryService.getString(row, rm.get("signature")))
-        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.DRUG);
     } else if (domain.equals(DomainType.CONDITION.toString())) {
       participantData = new Condition()
-        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.CONDITION);
     } else if (domain.equals(DomainType.PROCEDURE.toString())) {
       participantData = new Procedure()
-        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.PROCEDURE);;
     } else if (domain.equals(DomainType.OBSERVATION.toString())) {
       participantData = new Observation()
-        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.OBSERVATION);;
     } else if (domain.equals(DomainType.VISIT.toString())) {
       try {
         participantData = new Visit()
-          .age(bigQueryService.getLong(row, rm.get("age")).intValue())
-          .endDate(bigQueryService.getDateTime(row, rm.get("itemEndDate")))
+          .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+          .endDate(bigQueryService.getDateTime(row, rm.get("endDate")))
           .domainType(DomainType.VISIT);;
       } catch (BigQueryException e) {
         //do nothing for now.
       }
     } else if (domain.equals(DomainType.MEASUREMENT.toString())) {
       participantData = new Measurement()
-        .age(bigQueryService.getLong(row, rm.get("age")).intValue())
+        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.MEASUREMENT);;
     } else if (domain.equals(DomainType.MASTER.toString())) {
       participantData = new Master()
@@ -645,7 +645,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .domain(bigQueryService.getString(row, rm.get("domain")))
         .domainType(DomainType.MASTER);;
     }
-    return participantData.itemDate(bigQueryService.getDateTime(row, rm.get("itemDate")))
+    return participantData.itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
       .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
       .standardName(bigQueryService.getString(row, rm.get("standardName")))
       .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
