@@ -135,7 +135,14 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
   @Override
   public List<String> getTableNames() {
     return Arrays.asList(
-      "participant_review"
+      "person_all_events",
+      "person_condition",
+      "person_procedure",
+      "person_observation",
+      "person_measurement",
+      "person_drug",
+      "person_visit",
+      "person_device"
     );
   }
 
@@ -359,7 +366,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -401,7 +408,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -444,7 +451,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -486,7 +493,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -530,7 +537,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -572,7 +579,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -616,7 +623,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -658,7 +665,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -702,7 +709,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
@@ -746,7 +753,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 

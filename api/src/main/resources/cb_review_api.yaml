@@ -497,7 +497,7 @@ definitions:
 
   ReviewColumns:
     type: string
-    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+    enum: [startDate, endDate, domain, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, ageAtEvent, signature]
 
   PageFilterType:
     type: string

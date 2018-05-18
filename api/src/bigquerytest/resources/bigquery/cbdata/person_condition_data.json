@@ -1,0 +1,28 @@
+[
+  {
+    "person_id":102246,
+    "data_id":12751440,
+    "start_datetime":"2008-07-22 05:00:00 UTC",
+    "standard_vocabulary":"SNOMED",
+    "standard_name":"SNOMED",
+    "standard_code":"002",
+    "source_value":"0020",
+    "source_vocabulary":"ICD9CM",
+    "source_name":"Typhoid and paratyphoid fevers",
+    "source_code":"004",
+    "age_at_event":28
+  },
+  {
+    "person_id":102246,
+    "data_id":12751441,
+    "start_datetime":"2008-08-01 05:00:00 UTC",
+    "standard_vocabulary":"SNOMED",
+    "standard_name":"SNOMED",
+    "standard_code":"002",
+    "source_value":"0021",
+    "source_vocabulary":"ICD9CM",
+    "source_name":"Typhoid and paratyphoid fevers",
+    "source_code":"004",
+    "age_at_event":28
+  }
+]
