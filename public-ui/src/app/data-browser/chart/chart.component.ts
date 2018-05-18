@@ -3,6 +3,37 @@ import * as highcharts from 'highcharts';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
 
+/* CONSTANTS */
+const COUNT_ANALYSIS_ID = 3000;
+const GENDER_ANALYSIS_ID = 3101;
+const AGE_ANALYSIS_ID = 3102;
+const SURVEY_COUNT_ANALYSIS_ID = 3110;
+const SURVEY_GENDER_ANALYSIS_ID = 3111;
+const SURVEY_AGE_ANALYSIS_ID = 3112;
+const GENDER_COLORS = {
+  '8507': '#8DC892',
+  '8532': '#6CAEE3'
+}
+const AGE_COLORS = {
+  '1': '#252660',
+  '2': '#4259A5',
+  '3': '#6CAEE3',
+  '4': '#80C4EC',
+  '5': '#F8C75B',
+  '6': '#8DC892',
+  '7': '#F48673',
+  '8': '#BF85F6',
+  '9': '#BAE78A',
+  '10': '#8299A5',
+  '11': '#000000',
+  '12': '#DDDDDD'
+}
+const CHART_TITLE_STYLE = {
+  "color": "#302C71", "font-family": "Gotham HTF",	"font-size": "14px", "font-weight": "300"
+};
+const DATA_LABEL_STYLE = {
+  "color": "#FFFFFF", "font-family": "Gotham HTF",	"font-size": "14px", "font-weight": "300", "textOutline":"none"
+};
 
 @Component({
   selector: 'app-chart',
@@ -32,36 +63,24 @@ export class ChartComponent implements OnChanges {
     console.log('On changes');
     if (this.analysis && this.analysis.results.length) {
         // HC automatically redraws when changing chart options
-      this.chartOptions = this.hcChartOptions(this.analysis);
+      this.chartOptions = this.hcChartOptions();
     }
   }
 
   public chartClick(e) {
     console.log('Chart clicked ', e);
   }
-  public getChartType() {
-    if (this.analysis.chartType) {
-      return this.analysis.chartType;
-    }
-    if (this.analysis.analysisId === 3000 || this.analysis.analysisId === 3110 || this.analysis.analysisId === 3102 || this.analysis.analysisId === 3112) {
-      return 'column';
-    }
-    if (this.analysis.analysisId === 3101 || this.analysis.analysisId === 3111) {
-      return 'pie';
-    }
-  }
+
+
   public hcChartOptions(): any {
-      const seriesData = this.makeSeriesData();
+      const options = this.makeChartOptions();
       return {
-          chart: {
-              type: this.getChartType(),
-          },
+          chart: options.chart,
           credits: {
+
               enabled: false
           },
-          title: {
-              text: this.analysis.analysisName
-          },
+          title: options.title,
           subtitle: {
           },
           tooltip: {
@@ -76,17 +95,21 @@ export class ChartComponent implements OnChanges {
                   minPointLength: 3
               },
               pie: {
-                  // size: 260,
+                  borderColor: null,
+                  slicedOffset: 4,
                   dataLabels: {
                       enabled: true,
-                      distance: -50,
-                      format: '{point.name} <br> Count: {point.y}'
+                      style: DATA_LABEL_STYLE,
+                      distance: -25,
+                      format: '{point.name} {point.percentage:.0f}%'
                   }
               },
               column: {
                   shadow: false,
+                  borderColor: null,
                   colorByPoint: true,
                   groupPadding: 0,
+                  pointWidth: options.column ? options.column.pointWidth : null ,
                   dataLabels: {
                       enabled: false,
                     /*
@@ -105,7 +128,7 @@ export class ChartComponent implements OnChanges {
           yAxis: {
           },
           xAxis: {
-              categories: seriesData.categories,
+              categories: options.categories,
               type: 'category',
               labels: {
                   style: {
@@ -118,8 +141,7 @@ export class ChartComponent implements OnChanges {
           legend: {
               enabled: false // this.seriesLegend()
           },
-          series: [ seriesData.series ],
-          //colorByPoint: true
+          series: [ options.series ],
       };
   }
 
@@ -138,19 +160,22 @@ export class ChartComponent implements OnChanges {
     return results;
   }
 
-  public makeSeriesData() {
-    if (this.analysis.analysisId === 3000 || this.analysis.analysisId === 3110) {
-      return this.makeCountSeriesData();
+  public makeChartOptions() {
+    if (this.analysis.analysisId === COUNT_ANALYSIS_ID ||
+        this.analysis.analysisId === SURVEY_COUNT_ANALYSIS_ID) {
+      return this.makeCountChartOptions();
     }
-    if (this.analysis.analysisId === 3101 || this.analysis.analysisId === 3111) {
-      return this.makeGenderSeriesData();
+    if (this.analysis.analysisId === GENDER_ANALYSIS_ID ||
+        this.analysis.analysisId === SURVEY_GENDER_ANALYSIS_ID) {
+      return this.makeGenderChartOptions();
     }
-    if (this.analysis.analysisId === 3102 || this.analysis.analysisId === 3112) {
-      return this.makeAgeSeriesData();
+    if (this.analysis.analysisId === AGE_ANALYSIS_ID ||
+      this.analysis.analysisId === SURVEY_AGE_ANALYSIS_ID) {
+      return this.makeAgeChartOptions();
     }
   }
 
-  public makeCountSeriesData() {
+  public makeCountChartOptions() {
       let data = [];
       let cats = [];
       for (const a  of this.analysis.results) {
@@ -172,16 +197,20 @@ export class ChartComponent implements OnChanges {
         return 0;
       });
       const series = { name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'] };
-      return {series: series, categories: cats};
+      return {
+        chart: {type: 'column', backgroundColor: '#FFFFFF'},
+        title: { text: null },
+        series: series,
+        categories: cats };
 
   }
 
-  public makeGenderSeriesData() {
+  public makeGenderChartOptions() {
     const results = this.getSelectedResults(this.selectedResult);
     let data = [];
     let cats = [];
     for (const a  of results) {
-      data.push({name: a.stratum5Name, y: a.countValue});
+      data.push({name: a.stratum5Name, y: a.countValue, color: GENDER_COLORS[a.stratum5], sliced: true});
       cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
@@ -198,27 +227,33 @@ export class ChartComponent implements OnChanges {
       if (a < b) { return -1; }
       return 0;
     });
-    const series = { name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3', '#000000'] };
-    return {series: series, categories: cats};
+    const series = { name: this.analysis.analysisName, colorByPoint: true, data: data };
+    return {
+      chart: {type: 'pie', backgroundColor: '#D9E4EA'},
+      title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
+      series: series,
+      categories: cats,
+
+    };
 
   }
 
-  public makeAgeSeriesData() {
+  public makeAgeChartOptions() {
     const results = this.getSelectedResults(this.selectedResult);
 
     // Age results have two stratum-- 1 is concept, 2 is age decile
     let data = [];
     let cats = [];
     for (const a  of results) {
-      data.push({name: a.stratum5Name, y: a.countValue});
+      data.push({name: a.stratum5Name, y: a.countValue, color: AGE_COLORS[a.stratum5]});
       cats.push(a.stratum5Name);
     }
 
     data = data.sort((a, b) => {
-      if (a > b) {
+      if (a.name > b.name) {
         return 1;
       }
-      if (a < b) {
+      if (a.name < b.name) {
         return -1;
       }
       return 0; }
@@ -228,8 +263,14 @@ export class ChartComponent implements OnChanges {
       if (a < b) { return -1; }
       return 0;
     });
-    const series = { name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#262262', '#8bc990', '#6cace4', '#f58771', '#f8c954', '#216fb4', '#000000'] };
-    return {series: series, categories: cats};
+    const series = { name: this.analysis.analysisName, colorByPoint: true, data: data};
+    return {
+      chart: {type: 'column', backgroundColor: '#D9E4EA'},
+      title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
+      series: series,
+      categories: cats,
+      column : {pointWidth: 20}
+    };
   }
 
 }

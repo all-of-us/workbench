@@ -60,3 +60,9 @@
     padding-left: 0px;
 }
 
+.chart-wrapper {
+    height: 200px;
+}
+.chart-wrapper.age {
+    height: 240px;
+}

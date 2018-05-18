@@ -21,7 +21,7 @@
               Number Completed
         </div>
         <div class="card-block card-stat">
-          {{survey.numParticipants | number }}
+          {{survey.countValue | number }}
         </div>
 
       </div>
@@ -94,10 +94,10 @@
 
             <div class="col-sm-6 col-xs-12 answer-charts">
               <div class="" *ngIf="q.selectedAnswer" >
-                <div style="height:200px">
+                <div class="chart-wrapper">
                   <app-chart [analysis]="q.genderAnalysis" [selectedResult]="q.selectedAnswer"></app-chart>
                 </div>
-                <div style="height:200px">
+                <div class="chart-wrapper age">
                   <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer"></app-chart>
                 </div>
 
