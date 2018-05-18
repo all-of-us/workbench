@@ -146,7 +146,6 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
-    CohortResolver,
     SignInGuard,
     WorkspaceResolver,
   ]
