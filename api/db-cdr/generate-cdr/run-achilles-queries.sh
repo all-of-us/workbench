@@ -352,12 +352,11 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 (id, analysis_id, stratum_1, count_value,source_count_value)
 select 0, 3000 as analysis_id,
 	CAST(de1.drug_CONCEPT_ID AS STRING) as stratum_1,
-	COUNT(distinct de1.PERSON_ID) as count_value,
-	(select COUNT(distinct de2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de2 where de2.drug_source_concept_id=de1.drug_concept_id) as source_count_value
+	COUNT(distinct de1.PERSON_ID) as count_value,(select COUNT(distinct de2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de2 where de2.drug_source_concept_id=de1.drug_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de1
 group by de1.drug_CONCEPT_ID
 union all
-select 0, 3000 as analysis_id,CAST(de1.drug_source_CONCEPT_ID AS STRING) as stratum_1,0 as count_value",
+select 0, 3000 as analysis_id,CAST(de1.drug_source_CONCEPT_ID AS STRING) as stratum_1,0 as count_value,
 COUNT(distinct de1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de1 where de1.drug_concept_id != de1.drug_source_concept_id
 group by de1.drug_source_CONCEPT_ID"
 
