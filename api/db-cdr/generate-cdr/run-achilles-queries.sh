@@ -553,10 +553,10 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 on p1.person_id = co1.person_id
 where co1.measurement_concept_id > 0
 group by co1.measurement_concept_id, p1.gender_concept_id
+union all
 select 0, 3101 as analysis_id,
 	CAST(co1.measurement_source_concept_id AS STRING) as stratum_1,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,0 as count_value,
-	COUNT(distinct p1.PERSON_ID) as source_count_value
 	COUNT(distinct p1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
