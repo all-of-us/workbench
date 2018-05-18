@@ -268,7 +268,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 (id, analysis_id, stratum_1, count_value,source_count_value)
 select 0, 3000 as analysis_id,
 	CAST(po1.procedure_CONCEPT_ID AS STRING) as stratum_1,
-	COUNT(distinct po1.PERSON_ID) as count_value,(select COUNT(distinct po2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po2 where po2.procedure_source_CONCEPT_ID=po1.procedure_concept_id) as source_count_value
+	COUNT(distinct po1.PERSON_ID) as count_value,
+	(select COUNT(distinct po2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po2 where po2.procedure_source_CONCEPT_ID=po1.procedure_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po1
 group by po1.procedure_CONCEPT_ID
 union all
@@ -283,8 +284,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select 0, 3101 as analysis_id,
 	CAST(co1.procedure_CONCEPT_ID AS STRING) as stratum_1,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,
-	COUNT(distinct p1.PERSON_ID) as count_value,(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2
-	on on p1.person_id = co1.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id) as source_count_value
+	COUNT(distinct p1.PERSON_ID) as count_value,
+	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2
+	on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
 on p1.person_id = co1.person_id
@@ -292,7 +294,7 @@ group by co1.procedure_concept_id,
 	p1.gender_concept_id
 union all
 select 0, 3101 as analysis_id,CAST(co1.procedure_source_CONCEPT_ID AS STRING) as stratum_1,CAST(p1.gender_concept_id AS STRING) as stratum_2,0 as count_value,
-COUNT(distinct p1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1 on on p1.person_id = co1.person_id
+COUNT(distinct p1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1 on p1.person_id = co1.person_id
 where co1.procedure_concept_id != co1.procedure_source_concept_id
 group by co1.procedure_source_concept_id,p1.gender_concept_id"
 
@@ -304,7 +306,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select 0, 3102 as analysis_id,
 	CAST(co1.procedure_concept_id AS STRING) as stratum_1,
 	CAST(floor((extract(year from co1.procedure_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
-	COUNT(distinct p1.PERSON_ID) as count_value,(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2 on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id) as source_count_value
+	COUNT(distinct p1.PERSON_ID) as count_value,
+	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2 on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
 on p1.person_id = co1.person_id
@@ -312,7 +315,8 @@ where floor((extract(year from co1.procedure_date) - p1.year_of_birth)/10) >=3
 group by co1.procedure_concept_id, stratum_2
 union all
 select 0, 3102 as analysis_id,CAST(co1.procedure_source_concept_id AS STRING) as stratum_1,CAST(floor((extract(year from co1.procedure_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,
-0 as count_value,COUNT(distinct p1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
+0 as count_value,
+COUNT(distinct p1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
 on p1.person_id = co1.person_id
 where floor((extract(year from co1.procedure_date) - p1.year_of_birth)/10) >=3 and co1.procedure_concept_id != co1.procedure_source_concept_id
 group by co1.procedure_source_concept_id, stratum_2
@@ -373,8 +377,10 @@ group by co1.drug_concept_id,
 	p1.gender_concept_id
 union all
 select 0, 3101 as analysis_id,CAST(co1.drug_source_concept_id AS STRING) as stratum_1,CAST(p1.gender_concept_id AS STRING) as stratum_2,
-0 as count_value,COUNT(distinct p1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
-on p1.person_id = co1.person_id group by co1.drug_source_concept_id,p1.gender_concept_id where co1.drug_concept_id != co1.drug_source_concept_id
+0 as count_value,COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
+on p1.person_id = co1.person_id
+where co1.drug_concept_id != co1.drug_source_concept_id
 group by co1.drug_source_concept_id,p1.gender_concept_id"
 
 # Drug age
