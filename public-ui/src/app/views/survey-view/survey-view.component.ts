@@ -20,17 +20,16 @@ import {ChartComponent} from '../../data-browser/chart/chart.component';
 export class SurveyViewComponent implements OnInit {
 
   domainId: string;
-  title = 'Hello Survey';
-  subTitle = 'Domain Desc here ';
+  title ;
+  subTitle;
   surveys: DbDomain[] = [];
   survey: DbDomain;
   surveyResult: QuestionConceptListResponse;
   resultsComplete = false;
-  selectedAnswer: number;
 
 
-  /* Have questions array for filtering */
-  questions: QuestionConcept[] = [];
+  /* Have questions array for filtering and keep track of what answers the pick  */
+  questions: any = [];
   searchText = '';
   prevSearchText = '';
 
@@ -57,14 +56,14 @@ export class SurveyViewComponent implements OnInit {
               next: x => {
                 const questions = x.items;
                 this.surveyResult = x;
-                this.surveyResult.items = [];
+                this.surveyResult.items = questions ;
                 // Todo ignore these on server side , anything that doesn't have a count
-                for (let i = 0;  i < questions.length ; i++ ) {
+                /*for (let i = 0;  i < questions.length ; i++ ) {
                   const q = questions[i];
                   if (q.countAnalysis != null) {
                     this.surveyResult.items.push(q);
                   }
-                }
+                }*/
                 // Copy all qustions to display initially
                 this.questions = this.surveyResult.items;
                 console.log(this.surveyResult);
@@ -114,13 +113,11 @@ export class SurveyViewComponent implements OnInit {
     }
   }
 
-  public showAnswerGraphs(q: QuestionConcept, a: AchillesResult) {
+  public showAnswerGraphs(q, a: AchillesResult) {
     console.log('In show answer graphs', a);
-    this.selectedAnswer = a.id; // These have unique id
-  }
-  public answerSelected(a: AchillesResult) {
-    console.log("answer selected called");
-    return this.selectedAnswer === a.id;
+    q.selectedAnswer = a;
+
+    console.log('Selected answer for q ' , q );
   }
 
 }

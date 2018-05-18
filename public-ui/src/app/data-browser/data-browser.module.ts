@@ -11,7 +11,10 @@ import {ChartModule} from 'angular2-highcharts';
 import {HighchartsStatic} from 'angular2-highcharts/dist/HighchartsService';
 import * as highcharts from 'highcharts';
 import 'highcharts/highcharts-more';
+import {AgeChartComponent} from './age-chart/age-chart.component';
 import {ChartComponent} from './chart/chart.component';
+import {GenderChartComponent} from './gender-chart/gender-chart.component';
+
 
 import {LocalStorageModule} from 'angular-2-local-storage';
 // moved to app.module.ts import { overriddenPublicUrlKey } from '../views/app/component';
@@ -40,10 +43,15 @@ const DataBrowserServiceFactory = (http: Http) => {
     LocalStorageModule
   ],
   exports: [
-    ChartComponent
+    ChartComponent,
+    GenderChartComponent,
+    AgeChartComponent
   ],
   declarations: [
     ChartComponent,
+    GenderChartComponent,
+    AgeChartComponent
+
   ],
   providers: [
       {

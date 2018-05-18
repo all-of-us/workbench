@@ -50,3 +50,13 @@
     height: 100%;
 }
 
+/* remove space between list and charts */
+.answer-list {
+    margin-right: 0px;
+    padding-right: 0px;
+}
+.answer-charts {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
