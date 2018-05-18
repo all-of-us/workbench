@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
   selector: 'app-db-header',
@@ -6,7 +6,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./db-header.component.css']
 })
 export class DbHeaderComponent implements OnInit {
-  logo = "/assets/images/all-of-us-logo.png";
+  @Input() noMenu: boolean = false;
+  logo = "/assets/db-images/All_Of_Us_Logo.svg";
+  dbLogo = '/assets/db-images/Data_Browser_Logo.svg';
   constructor() { }
 
   ngOnInit() {

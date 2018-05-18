@@ -23,6 +23,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 import { DbHeaderComponent } from './views/db-header/db-header.component';
+import { DbHomeComponent } from './views/db-home/db-home.component';
 import { SurveyViewComponent } from './views/survey-view/survey-view.component';
 import { SurveysComponent } from './views/surveys/surveys.component';
 
@@ -33,6 +34,9 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 
 import {DataBrowserService} from 'publicGenerated';
 import { overriddenPublicUrlKey } from './views/app/component';
+import { QuickSearchComponent } from './views/quick-search/quick-search.component';
+
+
 function getPublicBasePath() {
   return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
 }
@@ -61,6 +65,8 @@ const DataBrowserServiceFactory = (http: Http) => {
     SurveysComponent,
     DbHeaderComponent,
     SurveyViewComponent,
+    DbHomeComponent,
+    QuickSearchComponent,
   ],
   providers: [
     {

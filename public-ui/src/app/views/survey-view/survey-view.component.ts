@@ -43,6 +43,7 @@ export class SurveyViewComponent implements OnInit {
   }
 
 
+  function
   ngOnInit() {
     this.api.getSurveyList().subscribe(
       result => {
@@ -57,13 +58,15 @@ export class SurveyViewComponent implements OnInit {
                 const questions = x.items;
                 this.surveyResult = x;
                 this.surveyResult.items = questions ;
-                // Todo ignore these on server side , anything that doesn't have a count
-                /*for (let i = 0;  i < questions.length ; i++ ) {
-                  const q = questions[i];
-                  if (q.countAnalysis != null) {
-                    this.surveyResult.items.push(q);
-                  }
-                }*/
+                // Temp until answer order is fixed on server side , sort abc
+                for (let q of questions ) {
+                  q.countAnalysis.results.sort((a1, a2) => {
+                    if (a1.stratum4 > a2.stratum4) { return 1;}
+                    if (a1.stratum4 < a2.stratum4) { return -1; }
+                    return 0;
+                  });
+                }
+
                 // Copy all qustions to display initially
                 this.questions = this.surveyResult.items;
                 console.log(this.surveyResult);

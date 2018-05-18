@@ -3,8 +3,8 @@
     <a routerLink="/" class="nav-link logo"><img [src]="logo"></a>
   </div>
 
-  <div class="header-nav menu" [clr-nav-level]="2">
-    <a class="title nav-link nav-text" routerLink="/"> <span class="title-data"> DATA </span> &nbsp; <span class="title-browser"> BROWSER </span></a>
+  <div *ngIf="! noMenu" class="header-nav menu" [clr-nav-level]="2">
+    <a class="title nav-link nav-text" routerLink="/"> <img [src]="dbLogo"></a>
     <a class="nav-link nav-text" #home routerLinkActive="active" routerLink="/quick-search">Quick Guided Search</a>
     <a class="nav-link nav-text" routerLinkActive="active" routerLink="/surveys">Survey Instruments</a>
     <a class="nav-link nav-text" routerLinkActive="active" routerLink="/advanced-ehr">Advanced Electronic Health Record</a>

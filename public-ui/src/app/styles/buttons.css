@@ -19,6 +19,10 @@ button.btn.btn-primary {
   height: 44px;
 }
 
+button.btn.btn-primary.search {
+  width: 129px;
+}
+
 button.btn.btn-primary:hover {
   background-color: #4356A7;
   color: #fff;

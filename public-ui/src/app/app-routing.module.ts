@@ -1,6 +1,8 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {DbHomeComponent} from './views/db-home/db-home.component';
+import {QuickSearchComponent} from './views/quick-search/quick-search.component';
 import {SurveyViewComponent} from './views/survey-view/survey-view.component';
 import {SurveysComponent} from './views/surveys/surveys.component';
 
@@ -9,12 +11,17 @@ declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
-    path: 'surveys',
-    component: SurveysComponent,
-    data: {title: 'Browse Survey Instruments'}
+    path: '',
+    component: DbHomeComponent,
+    data: {title: 'Data Browser Home'}
   },
   {
-    path: '',
+    path: 'quick-search',
+    component: QuickSearchComponent,
+    data: {title: 'Quick Search'}
+  },
+  {
+    path: 'surveys',
     component: SurveysComponent,
     data: {title: 'Browse Survey Instruments'}
   },

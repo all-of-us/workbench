@@ -1,10 +1,14 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergeMap';
+
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
   Event as RouterEvent,
-  NavigationEnd,
+  NavigationEnd, NavigationStart,
   Router,
 } from '@angular/router';
 
@@ -27,7 +31,7 @@ export class AppComponent implements OnInit {
   overriddenUrl: string = null;
   private baseTitle: string;
   private overriddenPublicUrl: string = null;
-
+  public noHeaderMenu = false;
 
   constructor(
     /* Ours */
@@ -56,6 +60,7 @@ export class AppComponent implements OnInit {
       }
       window.location.reload();
     };
+    console.log('activatedRoute ', this.activatedRoute);
     console.log('To override the API URLs, try:\n' +
       'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
       'setPublicApiUrl(\'https://host.example.com:5678\')');
@@ -68,8 +73,15 @@ export class AppComponent implements OnInit {
       this.titleService.setTitle(this.baseTitle);
     }
 
-    this.router.events.subscribe((event: RouterEvent) => {
-      this.setTitleFromRoute(event);
+    this.router.events
+      .filter((event) => event instanceof NavigationEnd)
+      .subscribe((event: RouterEvent) => {
+        // Set the db header no menu if we are on home page
+        // Not sure why an instance of RouteConfigLoadStart comes in here when we filter
+        if (event instanceof NavigationEnd && event.url === '/') {
+          this.noHeaderMenu = true;
+        }
+        this.setTitleFromRoute(event);
     });
   }
 
@@ -77,16 +89,13 @@ export class AppComponent implements OnInit {
    * Uses the title service to set the page title after nagivation events
    */
   private setTitleFromRoute(event: RouterEvent): void {
-    if (event instanceof NavigationEnd) {
-
-      let currentRoute = this.activatedRoute;
-      while (currentRoute.firstChild) {
-        currentRoute = currentRoute.firstChild;
-      }
-      if (currentRoute.outlet === 'primary') {
-        currentRoute.data.subscribe(value =>
-            this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
-      }
+    let currentRoute = this.activatedRoute;
+    while (currentRoute.firstChild) {
+      currentRoute = currentRoute.firstChild;
+    }
+    if (currentRoute.outlet === 'primary') {
+      currentRoute.data.subscribe(value =>
+          this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
     }
   }
 

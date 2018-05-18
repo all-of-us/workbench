@@ -5,8 +5,8 @@
     <div class="col-xs-12">
       <div class="page-header">
         <div *ngIf="survey && survey.conceptId">
-          <div class="view-title"> {{survey.domainDisplay}} Survey Module ({{survey.conceptId}}) </div>
-          <div class="view-sub-title">{{survey.domainDesc}} </div>
+          <h1 class="view-title"> {{survey.domainDisplay}} Survey Module ({{survey.conceptId}}) </h1>
+          <p class="view-sub-title">{{survey.domainDesc}} </p>
         </div>
       </div>
     </div>
@@ -63,12 +63,12 @@
 
           <div class="row question">
 
-            <div class="col-md-6 col-xs-12 col-sm-12">
+            <div class="col-md-7 col-xs-12 col-sm-12">
               <div class="box-title"> Question {{i + 1}}</div>
               <div class="box-sub-title"> {{ q.conceptName}} ({{q.conceptId}}) </div>
             </div>
 
-            <div class="col-md-4 offset-md-2 col-xs-12 col-sm-12">
+            <div class="col-md-5 col-xs-12 col-sm-12">
               <div class="response-dist" style="height:200px">
                 <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" ></app-chart>
               </div>
@@ -84,7 +84,7 @@
 
           <div class="row answers" [hidden]="!showAnswer[q.conceptId]">
 
-            <div class="col-sm-6 col-xs-12 answer-list">
+            <div class="col-sm-7 col-xs-12 answer-list">
               <div *ngFor="let a of q.countAnalysis.results"  >
                 <div class="answer-text" (click)="showAnswerGraphs(q, a)" [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
                   <label> {{a.stratum4}} </label>
@@ -92,7 +92,7 @@
               </div>
             </div>
 
-            <div class="col-sm-6 col-xs-12 answer-charts">
+            <div class="col-sm-5 col-xs-12 answer-charts">
               <div class="" *ngIf="q.selectedAnswer" >
                 <div class="chart-wrapper">
                   <app-chart [analysis]="q.genderAnalysis" [selectedResult]="q.selectedAnswer"></app-chart>

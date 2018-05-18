@@ -13,7 +13,7 @@ const SURVEY_AGE_ANALYSIS_ID = 3112;
 const GENDER_COLORS = {
   '8507': '#8DC892',
   '8532': '#6CAEE3'
-}
+};
 const AGE_COLORS = {
   '1': '#252660',
   '2': '#4259A5',
@@ -27,12 +27,12 @@ const AGE_COLORS = {
   '10': '#8299A5',
   '11': '#000000',
   '12': '#DDDDDD'
-}
+};
 const CHART_TITLE_STYLE = {
-  "color": "#302C71", "font-family": "Gotham HTF",	"font-size": "14px", "font-weight": "300"
+  'color': '#302C71', 'font-family': 'Gotham HTF',	'font-size': '14px', 'font-weight': '300'
 };
 const DATA_LABEL_STYLE = {
-  "color": "#FFFFFF", "font-family": "Gotham HTF",	"font-size": "14px", "font-weight": "300", "textOutline":"none"
+  'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px', 'font-weight': '300', 'textOutline': 'none'
 };
 
 @Component({
@@ -84,14 +84,14 @@ export class ChartComponent implements OnChanges {
           subtitle: {
           },
           tooltip: {
-            pointFormat: '<b>{point.y}</b>'
+            pointFormat: '<b>{point.y} </b><br>{series.name}'
           },
           plotOptions: {
               series: {
                   animation: {
                       duration: 100,
                   },
-                  pointWidth: 10,
+                  pointWidth: options.pointWidth,
                   minPointLength: 3
               },
               pie: {
@@ -100,7 +100,7 @@ export class ChartComponent implements OnChanges {
                   dataLabels: {
                       enabled: true,
                       style: DATA_LABEL_STYLE,
-                      distance: -25,
+                      distance: -30,
                       format: '{point.name} {point.percentage:.0f}%'
                   }
               },
@@ -109,7 +109,6 @@ export class ChartComponent implements OnChanges {
                   borderColor: null,
                   colorByPoint: true,
                   groupPadding: 0,
-                  pointWidth: options.column ? options.column.pointWidth : null ,
                   dataLabels: {
                       enabled: false,
                     /*
@@ -196,12 +195,19 @@ export class ChartComponent implements OnChanges {
         if (a < b) { return -1; }
         return 0;
       });
-      const series = { name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'] };
+
+      // Override tooltip and colors and such
+      const series = {
+        name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
+        tooltip: {pointFormat: '<b>{point.y} </b>'}
+      };
       return {
         chart: {type: 'column', backgroundColor: '#FFFFFF'},
         title: { text: null },
         series: series,
-        categories: cats };
+        categories: cats,
+        pointWidth: 10
+      };
 
   }
 
@@ -227,13 +233,14 @@ export class ChartComponent implements OnChanges {
       if (a < b) { return -1; }
       return 0;
     });
-    const series = { name: this.analysis.analysisName, colorByPoint: true, data: data };
+    const seriesName = this.selectedResult.stratum4;
+    const series = { name: seriesName, colorByPoint: true, data: data };
     return {
       chart: {type: 'pie', backgroundColor: '#D9E4EA'},
       title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
       series: series,
       categories: cats,
-
+      pointWidth: 10
     };
 
   }
@@ -263,13 +270,16 @@ export class ChartComponent implements OnChanges {
       if (a < b) { return -1; }
       return 0;
     });
-    const series = { name: this.analysis.analysisName, colorByPoint: true, data: data};
+
+    // Series name for answers is the answer selected which is in stratum4
+    const seriesName = this.selectedResult.stratum4;
+    const series = { name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'column', backgroundColor: '#D9E4EA'},
       title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
       series: series,
       categories: cats,
-      column : {pointWidth: 20}
+      pointWidth: 20,
     };
   }
 
