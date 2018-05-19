@@ -1,3 +1,81 @@
-<p>
-  quick-search works!
-</p>
+<div class="row">
+
+  <div class="col-xs-12 col-sm-12 col-md-9">
+
+    <div class="page-header">
+      <h2> {{title}} </h2>
+      <p class="view-sub-title">{{subTitle}} </p>
+    </div>
+
+    <div class="white-card-box" >
+      <div class="row search">
+        <div class="col-xs-12 lex-xs-middle search-input-full ">
+          <div class="search-wrapper">
+            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+            <input type="text" id="search-db" placeholder="Keyword Search" [(ngModel)]="searchText">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6 col-xs-12">
+
+          <section class="form-block">
+            <div class="form-group filters">
+              <label>Electronic Health Records</label>
+              <clr-checkbox *ngFor="let d of ehrDomains"
+                      name="{{d.domainDisplay}}"
+                      id="{{d.domainId}}"
+                      [(ngModel)]="d.checked">
+                {{d.domainDisplay}}
+              </clr-checkbox>
+            </div>
+          </section>
+
+        </div>
+        <div class="col-sm-6 col-xs-12">
+
+          <section class="form-block">
+            <div class="form-group filters">
+              <label>Self-reported information in surveys</label>
+              <clr-checkbox
+                            name="surveys"
+                            id="surveys"
+                            [(ngModel)]="surveysChecked">
+                Surveys
+              </clr-checkbox>
+            </div>
+          </section>
+
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="col-xs">
+          <button class="btn btn-primary search" (click)="searchDomains()">Search</button>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="box-heading"> Search Results </h4>
+
+    <div class="white-card-box" >
+      <div class="row flex-items-xs-middle">
+        <div class="col-sm-3 col-xs-12">
+          <div *ngFor="let r of searchResults">
+            <h6> {{r.domainDisplay}} {{r.countValue}}</h6>
+          </div>
+        </div>
+        <div class="col-sm-3  col-xs-12 button-col">
+          <button class="btn btn-primary search" [routerLink]="['surveys']">Search</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-xs-12 col-sm-12 col-md-3">
+    <img [src]="pageImage" />
+  </div>
+
+</div>

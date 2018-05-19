@@ -43,7 +43,7 @@ export class SurveyViewComponent implements OnInit {
   }
 
 
-  function
+  function;
   ngOnInit() {
     this.api.getSurveyList().subscribe(
       result => {
@@ -59,9 +59,9 @@ export class SurveyViewComponent implements OnInit {
                 this.surveyResult = x;
                 this.surveyResult.items = questions ;
                 // Temp until answer order is fixed on server side , sort abc
-                for (let q of questions ) {
+                for (const q of questions ) {
                   q.countAnalysis.results.sort((a1, a2) => {
-                    if (a1.stratum4 > a2.stratum4) { return 1;}
+                    if (a1.stratum4 > a2.stratum4) { return 1; }
                     if (a1.stratum4 < a2.stratum4) { return -1; }
                     return 0;
                   });
@@ -94,7 +94,8 @@ export class SurveyViewComponent implements OnInit {
       return false ;
   }
   public filterResults() {
-    /* Reset questions before filtering if length becomes less than prev or zero */
+    /* Reset questions before filtering if length becomes less than prev or zero
+      so backspacing works */
     if (this.prevSearchText.length > this.searchText.length ||
             this.searchText.length === 0) {
         this.questions = this.surveyResult.items;

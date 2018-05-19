@@ -112,3 +112,19 @@ p {
 .button-col {
     text-align: right;
 }
+
+.label {
+    color: #302C71;
+    font-family: "Gotham HTF";
+    font-size: 14px;
+}
+
+.row.search {
+    /*opacity: 0.32;*/
+    border-radius: 4px;
+    background-color: rgba(38,34,98,0.27);
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+    padding-top:.5rem;
+    padding-bottom:.5rem;
+    margin-bottom: 1rem;
+}
