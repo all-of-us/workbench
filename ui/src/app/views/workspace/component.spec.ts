@@ -11,6 +11,7 @@ import {IconsModule} from 'app/icons/icons.module';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {WorkspaceShareService} from 'app/services/workspace-share.service';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -109,6 +110,7 @@ describe('WorkspaceComponent', () => {
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
+        { provide: WorkspaceShareService, useClass: WorkspaceShareService },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         {
           provide: ServerConfigService,
