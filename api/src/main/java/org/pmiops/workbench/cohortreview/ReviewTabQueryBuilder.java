@@ -49,12 +49,12 @@ public class ReviewTabQueryBuilder {
 
 
     public QueryJobConfiguration buildQuery(Long participantId,
-                                            String domain,
+                                            DomainType domain,
                                             PageRequest pageRequest) {
-        String tableName = DomainType.MASTER.toString().equals(domain)
-          ? MASTER_TABLE : TABLE_PREFIX + domain.toLowerCase();
-        String extraColumns = EXTRA_COLUMNS.get(domain) == null
-          ? "" : EXTRA_COLUMNS.get(domain);
+        String tableName = DomainType.MASTER.equals(domain)
+          ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+        String extraColumns = EXTRA_COLUMNS.get(domain.toString()) == null
+          ? "" : EXTRA_COLUMNS.get(domain.toString());
         String finalSql = String.format(SQL_TEMPLATE + WHERE_TEMPLATE,
           extraColumns,
           tableName,
@@ -73,9 +73,9 @@ public class ReviewTabQueryBuilder {
     }
 
     public QueryJobConfiguration buildCountQuery(Long participantId,
-                                                 String domain) {
-        String tableName = DomainType.MASTER.toString().equals(domain)
-          ? MASTER_TABLE : TABLE_PREFIX + domain.toLowerCase();
+                                                 DomainType domain) {
+        String tableName = DomainType.MASTER.equals(domain)
+          ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
         String finalSql = String.format(COUNT_TEMPLATE, tableName);
         Map<String, QueryParameterValue> params = new HashMap<>();
         params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
@@ -86,11 +86,12 @@ public class ReviewTabQueryBuilder {
           .build();
     }
 
-    public QueryJobConfiguration buildDetailsQuery(Long dataId, String domain) {
-        String tableName = DomainType.MASTER.toString().equals(domain)
-          ? MASTER_TABLE : TABLE_PREFIX + domain.toLowerCase();
-        String extraColumns = EXTRA_COLUMNS.get(domain) == null
-          ? "" : EXTRA_COLUMNS.get(domain);
+    public QueryJobConfiguration buildDetailsQuery(Long dataId, DomainType domain) {
+        String domainString = domain.toString();
+        String tableName = DomainType.MASTER.equals(domain)
+          ? MASTER_TABLE : TABLE_PREFIX + domainString.toLowerCase();
+        String extraColumns = EXTRA_COLUMNS.get(domainString) == null
+          ? "" : EXTRA_COLUMNS.get(domainString);
         String finalSql = String.format(SQL_TEMPLATE + DETAILS_WHERE, extraColumns, tableName);
         Map<String, QueryParameterValue> params = new HashMap<>();
         params.put(NAMED_DATAID_PARAM, QueryParameterValue.int64(dataId));
