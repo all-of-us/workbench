@@ -652,7 +652,6 @@ group by co1.measurement_source_concept_id, stratum_2
 # group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 #
 
-
 # Set the survey answer count for all the survey questions that belong to each module
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
