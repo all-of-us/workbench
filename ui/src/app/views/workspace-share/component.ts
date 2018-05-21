@@ -5,6 +5,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {WorkspaceShareService} from 'app/services/workspace-share.service';
 
 import {
   ShareWorkspaceResponse,
@@ -47,6 +48,7 @@ export class WorkspaceShareComponent implements OnInit {
       private route: ActivatedRoute,
       public profileStorageService: ProfileStorageService,
       private workspacesService: WorkspacesService,
+      private workspaceShareService: WorkspaceShareService,
       private serverConfigService: ServerConfigService
   ) {
     serverConfigService.getConfig().subscribe((config) => {
@@ -185,7 +187,7 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   open(): void {
-    this.sharing = true;
+    this.workspaceShareService.shareModalOpen = true;
   }
 
   get hasPermission(): boolean {

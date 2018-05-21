@@ -130,7 +130,7 @@
     <div>
       <h6 class="collaborator-text">Collaborators:</h6>
       <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
-        <button class="btn btn-secondary btn-short" [disabled]="!ownerPermission" (click)="navBar.share()">Share</button>
+        <button class="btn btn-secondary btn-short" [disabled]="!ownerPermission" (click)="workspaceShareService.shareModalOpen = true">Share</button>
         <span *ngIf="!ownerPermission" class="tooltip-content">
           Owner access is required to share the workspace.
         </span>
