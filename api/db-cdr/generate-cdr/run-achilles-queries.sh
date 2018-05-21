@@ -652,36 +652,6 @@ group by co1.measurement_source_concept_id, stratum_2
 # group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 #
 
-#Set the survey participant count
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
-set c1.count_value=count_val from
-(select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd
-on cr.concept_id_2=dbd.concept_id
-where dbd.db_type='survey' and dbd.concept_id is not null
-group by cr.concept_id_2)
-where c1.concept_id=survey_concept_id"
-
-#Set the survey participant count in db_domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd
-set dbd.count_value=(select count_value from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c where c.concept_id=dbd.concept_id)
-where dbd.db_type='survey' and dbd.concept_id is not null
-"
-
-#Set the questions count
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
-set c1.count_value=count_val from
-(select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id,cr.concept_id_1 as question_id
-from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
-where dbd.db_type='survey' and cr.relationship_id = 'Has Module'
-group by survey_concept_id,cr.concept_id_1)
-where c1.concept_id=question_id
-"
 
 # Set the survey answer count for all the survey questions that belong to each module
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
