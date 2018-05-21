@@ -46,6 +46,17 @@ const testRoutes: Routes = [
         }
       },
       {
+        path: 'workspaceChild',
+        component: Component,
+        data: {
+          title: 'workspaceChild',
+          breadcrumb: 'Param: Workspace Name',
+          workspace: {
+            name: 'Workspace Name'
+          }
+        }
+      },
+      {
         path: 'child3',
         component: Component,
         data: {title: 'child3'}
@@ -111,6 +122,13 @@ describe('BreadcrumbComponent', () => {
     router.navigate(['params', 'P1']);
     tick();
     expect(testComponent.breadcrumbs.pop().label).toBe('P1', 'Breadcrumb label should be "P1"');
+  }));
+
+  it('should lookup name when there is a workspace name param', fakeAsync(() => {
+    router.navigate(['workspaceChild']);
+    tick();
+    expect(testComponent.breadcrumbs.pop().label).toBe('Workspace Name',
+      'Breadcrumb label should be "Workspace Name"');
   }));
 
 });
