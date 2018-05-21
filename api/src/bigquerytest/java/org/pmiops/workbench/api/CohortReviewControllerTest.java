@@ -370,7 +370,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Condition");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.CONDITION);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
@@ -412,7 +412,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Condition");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.CONDITION);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
@@ -455,7 +455,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Procedure");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PROCEDURE);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
@@ -497,7 +497,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Procedure");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PROCEDURE);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
@@ -541,7 +541,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Observation");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.OBSERVATION);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
@@ -583,7 +583,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Observation");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.OBSERVATION);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
@@ -627,7 +627,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Drug");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.DRUG);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
@@ -669,7 +669,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Drug");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.DRUG);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
@@ -713,7 +713,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Master");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.MASTER);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
@@ -757,7 +757,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain("Master");
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.MASTER);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
