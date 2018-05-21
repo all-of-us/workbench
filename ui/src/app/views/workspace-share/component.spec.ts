@@ -9,6 +9,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {WorkspaceShareService} from 'app/services/workspace-share.service';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
@@ -92,6 +93,7 @@ describe('WorkspaceShareComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
+        { provide: WorkspaceShareService, useClass: WorkspaceShareService },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
@@ -101,6 +103,7 @@ describe('WorkspaceShareComponent', () => {
       ]}).compileComponents().then(() => {
         workspaceSharePage = new WorkspaceSharePage(TestBed);
         workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
+        TestBed.get(WorkspaceShareService).shareModalOpen = true;
     });
       tick();
   }));

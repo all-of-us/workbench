@@ -3,6 +3,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 
+import {WorkspaceShareService} from 'app/services/workspace-share.service';
+
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -32,7 +34,8 @@ export class WorkspaceNavBarComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private workspacesService: WorkspacesService
+    private workspacesService: WorkspacesService,
+    private workspaceShareService: WorkspaceShareService,
   ) {}
 
   ngOnInit(): void {
@@ -54,7 +57,7 @@ export class WorkspaceNavBarComponent implements OnInit {
   }
 
   share(): void {
-    this.shareModal.open();
+    this.workspaceShareService.shareModalOpen = true;
   }
 
   get writePermission(): boolean {
