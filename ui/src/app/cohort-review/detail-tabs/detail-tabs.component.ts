@@ -3,6 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 
 import {
     CohortReviewService,
+    DomainType,
     PageFilterType,
     ReviewColumns,
 } from 'generated';
@@ -69,7 +70,7 @@ export class DetailTabsComponent {
 
   readonly allEvents = {
     name: 'All Events',
-    domain: 'Master',
+    domain: DomainType.Master,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, domain, standardVocabulary, standardName, sourceVocabulary, sourceValue,
@@ -86,7 +87,7 @@ export class DetailTabsComponent {
 
   readonly tabs = [{
     name: 'Conditions',
-    domain: 'Condition',
+    domain: DomainType.Condition,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue, ageAtEvent,
@@ -101,7 +102,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Procedures',
-    domain: 'Procedure',
+    domain: DomainType.Procedure,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue, ageAtEvent,
@@ -116,7 +117,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Drugs',
-    domain: 'Drug',
+    domain: DomainType.Drug,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue,
@@ -133,7 +134,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Observations',
-    domain: 'Observation',
+    domain: DomainType.Observation,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue, ageAtEvent,
@@ -149,7 +150,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Visits',
-    domain: 'Visit',
+    domain: DomainType.Visit,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, endDate, standardVocabulary, standardName, sourceVocabulary,
@@ -167,7 +168,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Devices',
-    domain: 'Device',
+    domain: DomainType.Device,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardVocabulary, standardName, sourceVocabulary,
@@ -184,7 +185,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Measurements',
-    domain: 'Measurement',
+    domain: DomainType.Measurement,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardVocabulary, standardName, sourceVocabulary,

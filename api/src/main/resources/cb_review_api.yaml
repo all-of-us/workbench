@@ -489,7 +489,8 @@ definitions:
             $ref: "#/definitions/ReviewColumns"
             description: Column upon which to sort (default is 'itemDate')
           domain:
-            type: string
+            $ref: "#/definitions/DomainType"
+            description: Different domain types in omop
 
   ParticipantCohortStatusColumns:
     type: string

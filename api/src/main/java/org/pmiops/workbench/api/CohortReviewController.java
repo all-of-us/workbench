@@ -9,6 +9,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
+import org.pmiops.workbench.cohortreview.util.ParticipantDataFactory;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -296,11 +297,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      reviewTabQueryBuilder.buildDetailsQuery(dataId, domain)));
+      reviewTabQueryBuilder.buildDetailsQuery(dataId, DomainType.fromValue(domain))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     ParticipantData response =
-      convertRowToParticipantData(rm, result.getValues().iterator().next(), domain);
+      convertRowToParticipantData(rm, result.getValues().iterator().next(), DomainType.fromValue(domain));
 
     return ResponseEntity.ok(response);
   }
@@ -395,9 +396,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
     boolean invalidDomain = true;
-    String domain = ((ReviewFilter) request).getDomain();
+    DomainType domain = ((ReviewFilter) request).getDomain();
     for (DomainType domainType : DomainType.values()) {
-      if (domainType.toString().equals(domain)) {
+      if (domainType.equals(domain)) {
         invalidDomain = false;
       }
     }
@@ -607,26 +608,26 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    */
   private ParticipantData convertRowToParticipantData(Map<String, Integer> rm,
                                                       List<FieldValue> row,
-                                                      String domain) {
+                                                      DomainType domain) {
     ParticipantData participantData = null;
-    if (domain.equals(DomainType.DRUG.toString())) {
+    if (domain.equals(DomainType.DRUG)) {
       participantData = new Drug()
         .signature(bigQueryService.getString(row, rm.get("signature")))
         .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.DRUG);
-    } else if (domain.equals(DomainType.CONDITION.toString())) {
+    } else if (domain.equals(DomainType.CONDITION)) {
       participantData = new Condition()
         .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.CONDITION);
-    } else if (domain.equals(DomainType.PROCEDURE.toString())) {
+    } else if (domain.equals(DomainType.PROCEDURE)) {
       participantData = new Procedure()
         .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.PROCEDURE);;
-    } else if (domain.equals(DomainType.OBSERVATION.toString())) {
+    } else if (domain.equals(DomainType.OBSERVATION)) {
       participantData = new Observation()
         .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.OBSERVATION);;
-    } else if (domain.equals(DomainType.VISIT.toString())) {
+    } else if (domain.equals(DomainType.VISIT)) {
       try {
         participantData = new Visit()
           .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
@@ -635,11 +636,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       } catch (BigQueryException e) {
         //do nothing for now.
       }
-    } else if (domain.equals(DomainType.MEASUREMENT.toString())) {
+    } else if (domain.equals(DomainType.MEASUREMENT)) {
       participantData = new Measurement()
         .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.MEASUREMENT);;
-    } else if (domain.equals(DomainType.MASTER.toString())) {
+    } else if (domain.equals(DomainType.MASTER)) {
       participantData = new Master()
         .dataId(bigQueryService.getLong(row, rm.get("dataId")))
         .domain(bigQueryService.getString(row, rm.get("domain")))
