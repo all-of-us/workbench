@@ -113,11 +113,23 @@ p {
     text-align: right;
 }
 
-.label {
+label {
     color: #302C71;
-    font-family: "Gotham HTF";
+    font-family: "Gotham HTF", open-sans, sans-serif;
     font-size: 14px;
+    font-weight: bold;
+    line-height: 18px;
 }
+
+.sub-label {
+    margin-top: -.25rem;
+}
+.sub-label label {
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 14px;
+}
+
 
 .row.search {
     /*opacity: 0.32;*/
@@ -134,3 +146,4 @@ p {
     height: 240px;
     width: 240px;
 }
+

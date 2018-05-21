@@ -1,11 +1,11 @@
-button {
+button, a.btn {
   font-size: 12px;
   font-weight: 500;
   font-family: "Gotham HTF",open-sans,sans-serif;;
   line-height:14px;
 }
 
-button.btn.btn-primary {
+.btn.btn-primary {
   background-color: #302C71;;
   border: none;
   padding: 0rem 0.77rem;
@@ -19,7 +19,7 @@ button.btn.btn-primary {
   height: 44px;
 }
 
-button.btn.btn-primary.search {
+.btn.btn-primary.search {
   width: 129px;
 }
 

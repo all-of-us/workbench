@@ -5,6 +5,7 @@ import {DbHomeComponent} from './views/db-home/db-home.component';
 import {QuickSearchComponent} from './views/quick-search/quick-search.component';
 import {SurveyViewComponent} from './views/survey-view/survey-view.component';
 import {SurveysComponent} from './views/surveys/surveys.component';
+import {EhrViewComponent} from "./views/ehr-view/ehr-view.component";
 
 declare let gtag: Function;
 declare let ga_tracking_id: string;
@@ -30,6 +31,12 @@ const routes: Routes = [
     component: SurveyViewComponent,
     data: {title: 'View Survey Questions and Answers'}
   },
+  {
+    path: 'ehr/:id',
+    component: EhrViewComponent,
+    data: {title: 'View Full Results'}
+  },
+
 ];
 
 @NgModule({

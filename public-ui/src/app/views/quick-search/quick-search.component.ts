@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
+
+
 
 @Component({
   selector: 'app-quick-search',
@@ -22,7 +25,8 @@ export class QuickSearchComponent implements OnInit {
   totalParticipants;
 
 
-  constructor(private api: DataBrowserService) {
+  constructor(private api: DataBrowserService,
+              private router: Router) {
   }
 
   ngOnInit() {
@@ -36,13 +40,23 @@ export class QuickSearchComponent implements OnInit {
               console.log(this.ehrDomains); }
       );
 
-      this.api.getParticipantCount().subscribe(result => this.totalParticipants = result);
+      this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
   }
 
   public searchDomains() {
       console.log("Search called ", this.surveysChecked);
       console.log(this.ehrDomains.filter(d => d.checked ));
       this.api.getDomainSearchResults(this.searchText).subscribe(data => this.searchResults = data.items);
+  }
+
+  public viewResults(r) {
+    console.log("Viewing results ", r);
+    if (r.dbType === 'survey') {
+      this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
+    }
+    else {
+      this.router.navigateByUrl('/ehr/' + r.domainId.toLowerCase());
+    }
   }
 
 }

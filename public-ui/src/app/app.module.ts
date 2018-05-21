@@ -35,6 +35,7 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 import {DataBrowserService} from 'publicGenerated';
 import { overriddenPublicUrlKey } from './views/app/component';
 import { QuickSearchComponent } from './views/quick-search/quick-search.component';
+import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
 
 
 function getPublicBasePath() {
@@ -67,6 +68,7 @@ const DataBrowserServiceFactory = (http: Http) => {
     SurveyViewComponent,
     DbHomeComponent,
     QuickSearchComponent,
+    EhrViewComponent,
   ],
   providers: [
     {

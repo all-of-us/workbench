@@ -23,13 +23,19 @@
     line-height: 14px;
 }
 
+
+
 .card-text {
     color: rgba(0,0,0,0.87);
-    font-size: 10px;
     font-weight: 300;
-    line-height: 16px;
+    font-size: 14px;
+    line-height: 18px;
 }
 
+.card-text smaller {
+    font-size: 10px;
+    line-height: 16px;
+}
 /* Stat card with big number in it */
 .card.stats-card {
     min-width: 336px;
@@ -47,9 +53,13 @@
     color: #302C71;
     font-weight :300;
 }
-
-.stats-card .card-stat {
+.card-stat {
     font-size:55px;
     color: rgba(0,0,0,0.87);
+    font-family: "Gotham HTF", open-sans, sans-serif;
+    font-weight: 300;
+    line-height: 55px;
 }
+
+
 
