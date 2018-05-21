@@ -184,7 +184,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set c.source_count_value = r.source_count_value,c.count_value=r.count_value
 from  (select cast(r.stratum_1 as int64) as concept_id , sum(r.count_value) as count_value , sum(r.source_count_value) as source_count_value
 from \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.achilles_results\` r
-where r.analysis_id = 3000 and r.stratum_1 > "0" group by r.stratum_1) as r
+where r.analysis_id = 3000 and CAST(r.stratum_1 as int64) > "0" group by r.stratum_1) as r
 where r.concept_id = c.concept_id"
 
 #Concept prevalence (based on count value and not on source count value)
