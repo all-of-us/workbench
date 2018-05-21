@@ -115,6 +115,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       buildModifierQuery(modifier, modifierQueryParts, groupByModifier, queryParams);
     }
     String finalSql = params.getModifiers().isEmpty() ? OUTER_SQL_TEMPLATE : MODIFIER_SQL_TEMPLATE;
+    if (!groupByModifier.isEmpty()) {
+      finalSql = finalSql + groupByModifier.get(0);
+    }
     finalSql = finalSql.replace("${innerSqlTemplate}", String.join(UNION_TEMPLATE, queryParts));
     if (!modifierQueryParts.isEmpty()) {
       String modifierSql = finalSql + WHERE + String.join(AND, modifierQueryParts);

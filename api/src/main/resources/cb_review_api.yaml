@@ -481,110 +481,28 @@ definitions:
             $ref: "#/definitions/ParticipantCohortStatusColumns"
             description: Column upon which to sort (default is 'participantId')
 
-  ParticipantConditions:
+  ReviewFilter:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
           sortColumn:
-            $ref: "#/definitions/ParticipantConditionsColumns"
+            $ref: "#/definitions/ReviewColumns"
             description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantProcedures:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantProceduresColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantObservations:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantObservationsColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantDrugs:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantDrugsColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantMasters:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantMasterColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantDevices:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantDevicesColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantVisits:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantVisitsColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantMeasurements:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantMeasurementsColumns"
-            description: Column upon which to sort (default is 'itemDate')
+          domain:
+            $ref: "#/definitions/DomainType"
+            description: Different domain types in omop
 
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
 
-  ParticipantConditionsColumns:
+  ReviewColumns:
     type: string
-    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantProceduresColumns:
-    type: string
-    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantObservationsColumns:
-    type: string
-    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantDrugsColumns:
-    type: string
-    enum: [itemDate, standardVocabulary, standardName, signature, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantMasterColumns:
-    type: string
-    enum: [dataId, itemDate, domain, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName]
-
-  ParticipantDevicesColumns:
-    type: string
-    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantVisitsColumns:
-    type: string
-    enum: [itemDate, endDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantMeasurementsColumns:
-    type: string
-    enum: [itemDate, endDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+    enum: [startDate, endDate, domain, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, ageAtEvent, signature]
 
   PageFilterType:
     type: string
-    enum: [ParticipantCohortStatuses, ParticipantConditions, ParticipantProcedures, ParticipantObservations,
-    ParticipantDrugs, ParticipantMasters, ParticipantDevices, ParticipantVisits, ParticipantMeasurements]
+    enum: [ParticipantCohortStatuses, ReviewFilter]
 
   DomainType:
     type: string

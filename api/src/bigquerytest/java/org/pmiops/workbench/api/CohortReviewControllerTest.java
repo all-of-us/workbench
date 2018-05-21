@@ -10,7 +10,6 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ReviewQueryFactory;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -49,7 +48,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class, ReviewQueryFactory.class})
+@Import({TestJpaConfig.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortreview.*")
 public class CohortReviewControllerTest extends BigQueryBaseTest {
 
@@ -136,15 +135,14 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
   @Override
   public List<String> getTableNames() {
     return Arrays.asList(
-      "condition_occurrence",
-      "procedure_occurrence",
-      "observation",
-      "drug_exposure",
-      "person",
-      "concept",
-      "visit_occurrence",
-      "device_exposure",
-      "measurement"
+      "person_all_events",
+      "person_condition",
+      "person_procedure",
+      "person_observation",
+      "person_measurement",
+      "person_drug",
+      "person_visit",
+      "person_device"
     );
   }
 
@@ -173,79 +171,87 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     Period drugAge1 = Period.between(personBirthDate, drugDate1);
     Period drugAge2 = Period.between(personBirthDate, drugDate2);
 
-    expectedMaster1 = new ParticipantMaster()
-      .dataId(12751439L)
+    expectedMaster1 = new Master()
+      .dataId(12751440L)
+      .domain("Condition")
       .itemDate("2008-07-22 05:00:00 UTC")
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
       .sourceValue("0020")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
-      .dataType(DataType.PARTICIPANTMASTER);
-    expectedMaster2 = new ParticipantMaster()
-      .dataId(12751440L)
+      .domainType(DomainType.MASTER);
+    expectedMaster2 = new Master()
+      .dataId(12751441L)
+      .domain("Condition")
       .itemDate("2008-08-01 05:00:00 UTC")
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
       .sourceValue("0021")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
-      .dataType(DataType.PARTICIPANTMASTER);
-    expectedMaster3 = new ParticipantMaster()
-      .dataId(9L)
+      .domainType(DomainType.MASTER);
+    expectedMaster3 = new Master()
+      .dataId(12751446L)
+      .domain("Observation")
+      .itemDate("2009-12-03 05:00:00 UTC")
+      .standardVocabulary("ICD10CM")
+      .standardName("name")
+      .sourceValue("sourceValue")
+      .sourceVocabulary("ICD10CM")
+      .sourceName("name")
+      .domainType(DomainType.MASTER);
+    expectedMaster4 = new Master()
+      .dataId(12751447L)
+      .domain("Observation")
+      .itemDate("2009-12-04 05:00:00 UTC")
+      .standardVocabulary("ICD10CM")
+      .standardName("name")
+      .sourceValue("sourceValue")
+      .sourceVocabulary("ICD10CM")
+      .sourceName("name")
+      .domainType(DomainType.MASTER);
+    expectedMaster5 = new Master()
+      .dataId(12751444L)
+      .domain("Procedure")
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
       .standardName("name")
       .sourceValue("val")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTMASTER);
-    expectedMaster4 = new ParticipantMaster()
-      .dataId(10L)
+      .domainType(DomainType.MASTER);
+    expectedMaster6 = new Master()
+      .dataId(12751445L)
+      .domain("Procedure")
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardVocabulary("CPT4")
       .standardName("name")
       .sourceValue("val")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTMASTER);
-    expectedMaster5 = new ParticipantMaster()
-      .dataId(6L)
-      .itemDate("2009-12-03 05:00:00 UTC")
-      .standardVocabulary("ICD10CM")
-      .standardName("name")
-      .sourceValue("6")
-      .sourceVocabulary("ICD10CM")
-      .sourceName("name")
-      .dataType(DataType.PARTICIPANTMASTER);
-    expectedMaster6 = new ParticipantMaster()
-      .dataId(7L)
-      .itemDate("2009-12-04 05:00:00 UTC")
-      .standardVocabulary("ICD10CM")
-      .standardName("name")
-      .sourceValue("7")
-      .sourceVocabulary("ICD10CM")
-      .sourceName("name")
-      .dataType(DataType.PARTICIPANTMASTER);
-    expectedMaster7 = new ParticipantMaster()
-      .dataId(12L)
+      .domainType(DomainType.MASTER);
+    expectedMaster7 = new Master()
+      .dataId(12751442L)
+      .domain("Drug")
       .itemDate("2001-12-03 05:00:00 UTC")
       .standardVocabulary("CPT4")
       .standardName("name")
       .sourceValue("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTMASTER);
-    expectedMaster8 = new ParticipantMaster()
-      .dataId(13L)
+      .domainType(DomainType.MASTER);
+    expectedMaster8 = new Master()
+      .dataId(12751443L)
+      .domain("Drug")
       .itemDate("2001-12-04 05:00:00 UTC")
       .standardVocabulary("CPT4")
       .standardName("name")
       .sourceValue("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTMASTER);
-    expectedCondition1 = new ParticipantCondition()
+      .domainType(DomainType.MASTER);
+    expectedCondition1 = new Condition()
       .age(conditionAge1.getYears())
       .itemDate("2008-07-22 05:00:00 UTC")
       .standardVocabulary("SNOMED")
@@ -253,8 +259,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceValue("0020")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
-      .dataType(DataType.PARTICIPANTCONDITION);
-    expectedCondition2 = new ParticipantCondition()
+      .domainType(DomainType.CONDITION);
+    expectedCondition2 = new Condition()
       .age(conditionAge2.getYears())
       .itemDate("2008-08-01 05:00:00 UTC")
       .standardVocabulary("SNOMED")
@@ -262,8 +268,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceValue("0021")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
-      .dataType(DataType.PARTICIPANTCONDITION);
-    expectedProcedure1 = new ParticipantProcedure()
+      .domainType(DomainType.CONDITION);
+    expectedProcedure1 = new Procedure()
       .age(procedureAge1.getYears())
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
@@ -271,8 +277,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceValue("val")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTPROCEDURE);
-    expectedProcedure2 = new ParticipantProcedure()
+      .domainType(DomainType.PROCEDURE);
+    expectedProcedure2 = new Procedure()
       .age(procedureAge2.getYears())
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardVocabulary("CPT4")
@@ -280,8 +286,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceValue("val")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTPROCEDURE);
-    expectedObservation1 = new ParticipantObservation()
+      .domainType(DomainType.PROCEDURE);
+    expectedObservation1 = new Observation()
       .age(observationAge1.getYears())
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
@@ -289,8 +295,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceValue("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTOBSERVATION);
-    expectedObservation2 = new ParticipantObservation()
+      .domainType(DomainType.OBSERVATION);
+    expectedObservation2 = new Observation()
       .age(observationAge2.getYears())
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
@@ -298,8 +304,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceValue("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTOBSERVATION);
-    expectedDrug1 = new ParticipantDrug()
+      .domainType(DomainType.OBSERVATION);
+    expectedDrug1 = new Drug()
       .age(drugAge1.getYears())
       .signature("signature")
       .itemDate("2001-12-03 05:00:00 UTC")
@@ -308,8 +314,8 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceValue("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTDRUG);
-    expectedDrug2 = new ParticipantDrug()
+      .domainType(DomainType.DRUG);
+    expectedDrug2 = new Drug()
       .age(drugAge2.getYears())
       .signature("signature")
       .itemDate("2001-12-04 05:00:00 UTC")
@@ -318,7 +324,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceValue("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .dataType(DataType.PARTICIPANTDRUG);
+      .domainType(DomainType.DRUG);
 
     cdrVersion = new CdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
@@ -360,12 +366,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantConditions testFilter = new ParticipantConditions();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONS);
+    ReviewFilter testFilter = new ReviewFilter().domain("Condition");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
     ParticipantDataListResponse response = controller
@@ -402,12 +408,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantConditions testFilter = new ParticipantConditions();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTCONDITIONS);
+    ReviewFilter testFilter = new ReviewFilter().domain("Condition");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
 
@@ -445,12 +451,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantProcedures testFilter = new ParticipantProcedures();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTPROCEDURES);
+    ReviewFilter testFilter = new ReviewFilter().domain("Procedure");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
     ParticipantDataListResponse response = controller
@@ -487,12 +493,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantProcedures testFilter = new ParticipantProcedures();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTPROCEDURES);
+    ReviewFilter testFilter = new ReviewFilter().domain("Procedure");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
 
@@ -531,12 +537,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantObservations testFilter = new ParticipantObservations();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTOBSERVATIONS);
+    ReviewFilter testFilter = new ReviewFilter().domain("Observation");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
     ParticipantDataListResponse response = controller
@@ -573,12 +579,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantObservations testFilter = new ParticipantObservations();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTOBSERVATIONS);
+    ReviewFilter testFilter = new ReviewFilter().domain("Observation");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
 
@@ -617,12 +623,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantDrugs testFilter = new ParticipantDrugs();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTDRUGS);
+    ReviewFilter testFilter = new ReviewFilter().domain("Drug");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
     ParticipantDataListResponse response = controller
@@ -659,12 +665,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantDrugs testFilter = new ParticipantDrugs();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTDRUGS);
+    ReviewFilter testFilter = new ReviewFilter().domain("Drug");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
 
@@ -703,12 +709,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(1)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantMasters testFilter = new ParticipantMasters();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTMASTERS);
+    ReviewFilter testFilter = new ReviewFilter().domain("Master");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
 
@@ -747,12 +753,12 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .page(0)
       .pageSize(25)
       .sortOrder(SortOrder.ASC)
-      .sortColumn("itemDate");
+      .sortColumn("startDate");
 
     stubMockFirecloudGetWorkspace();
 
-    ParticipantMasters testFilter = new ParticipantMasters();
-    testFilter.pageFilterType(PageFilterType.PARTICIPANTMASTERS);
+    ReviewFilter testFilter = new ReviewFilter().domain("Master");
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
     ParticipantDataListResponse response = controller
@@ -807,19 +813,19 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     int i = 0;
     for (ParticipantData actualData : data) {
       ParticipantData expected = expectedData.get(i++);
-      if (expected instanceof ParticipantDrug) {
-        assertThat(((ParticipantDrug) actualData).getAge()).isEqualTo(((ParticipantDrug) expected).getAge());
-        assertThat(((ParticipantDrug) actualData).getSignature()).isEqualTo(((ParticipantDrug) expected).getSignature());
-      } else if (expected instanceof ParticipantObservation) {
-        assertThat(((ParticipantObservation) actualData).getAge()).isEqualTo(((ParticipantObservation) expected).getAge());
-      } else if (expected instanceof ParticipantCondition) {
-        assertThat(((ParticipantCondition) actualData).getAge()).isEqualTo(((ParticipantCondition) expected).getAge());
-      } else if (expected instanceof ParticipantProcedure) {
-        assertThat(((ParticipantProcedure) actualData).getAge()).isEqualTo(((ParticipantProcedure) expected).getAge());
-      } else if (expected instanceof ParticipantMaster) {
-        assertThat(((ParticipantMaster) actualData).getDataId()).isEqualTo(((ParticipantMaster) expected).getDataId());
+      if (expected instanceof Drug) {
+        assertThat(((Drug) actualData).getAge()).isEqualTo(((Drug) expected).getAge());
+        assertThat(((Drug) actualData).getSignature()).isEqualTo(((Drug) expected).getSignature());
+      } else if (expected instanceof Observation) {
+        assertThat(((Observation) actualData).getAge()).isEqualTo(((Observation) expected).getAge());
+      } else if (expected instanceof Condition) {
+        assertThat(((Condition) actualData).getAge()).isEqualTo(((Condition) expected).getAge());
+      } else if (expected instanceof Procedure) {
+        assertThat(((Procedure) actualData).getAge()).isEqualTo(((Procedure) expected).getAge());
+      } else if (expected instanceof Master) {
+        assertThat(((Master) actualData).getDataId()).isEqualTo(((Master) expected).getDataId());
       }
-      assertThat(actualData.getDataType()).isEqualTo(expected.getDataType());
+      assertThat(actualData.getDomainType()).isEqualTo(expected.getDomainType());
       assertThat(actualData.getItemDate()).isEqualTo(expected.getItemDate());
       assertThat(actualData.getSourceName()).isEqualTo(expected.getSourceName());
       assertThat(actualData.getSourceValue()).isEqualTo(expected.getSourceValue());
