@@ -122,7 +122,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
-    private workspaceShareService: WorkspaceShareService,
+    public workspaceShareService: WorkspaceShareService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
