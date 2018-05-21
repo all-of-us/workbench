@@ -103,8 +103,7 @@ describe('WorkspaceShareComponent', () => {
       ]}).compileComponents().then(() => {
         workspaceSharePage = new WorkspaceSharePage(TestBed);
         workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
-        workspaceSharePage.fixture.componentRef
-          .instance.workspaceShareService.shareModalOpen = true;
+        TestBed.get(WorkspaceShareService).shareModalOpen = true;
     });
       tick();
   }));
