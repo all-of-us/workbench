@@ -9,11 +9,11 @@ import {ReviewStateService} from '../review-state.service';
 import {
   CohortReview,
   CohortReviewService,
+  PageFilterType,
   ParticipantCohortStatus,
   ParticipantCohortStatusColumns,
   SortOrder
 } from 'generated';
-import {PageFilterType} from '../../../generated/model/pageFilterType';
 
 
 @Component({

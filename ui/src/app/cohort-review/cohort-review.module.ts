@@ -38,6 +38,8 @@ import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
 
+// This is a temporary measure until we have specs and APIs for overview specific charts
+import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
 /* tslint:enable:max-line-length */
 
 
@@ -84,6 +86,7 @@ import {WorkspacesService} from 'generated';
 
     DetailTabsComponent,
     DetailTabTableComponent,
+    DetailAllEventsComponent,
   ],
   providers: [ReviewStateService]
 })

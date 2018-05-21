@@ -241,33 +241,6 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantDataListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/master:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
-      - $ref: '#/parameters/participantId'
-    post:
-      tags:
-        - cohortReview
-      description:  >
-            Returns a collection of all domain data for the specified params for a participant. This endpoint
-            does pagination based on page, limit, order and column.
-      operationId: "getMasterParticipantData"
-      parameters:
-        - in: body
-          name: request
-          required: true
-          description: request body for getting list of participant data.
-          schema:
-            $ref: "#/definitions/PageFilterRequest"
-      responses:
-        200:
-          description: A collection of ParticipantConditions.
-          schema:
-            $ref: "#/definitions/MasterParticipantDataListResponse"
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/detail/{dataId}/{domain}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -508,77 +481,32 @@ definitions:
             $ref: "#/definitions/ParticipantCohortStatusColumns"
             description: Column upon which to sort (default is 'participantId')
 
-  ParticipantConditions:
+  ReviewFilter:
     allOf:
       - $ref: '#/definitions/PageFilterRequest'
       - properties: # extra properties
           sortColumn:
-            $ref: "#/definitions/ParticipantConditionsColumns"
+            $ref: "#/definitions/ReviewColumns"
             description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantProcedures:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantProceduresColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantObservations:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantObservationsColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantDrugs:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantDrugsColumns"
-            description: Column upon which to sort (default is 'itemDate')
-
-  ParticipantMaster:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantMasterColumns"
-            description: Column upon which to sort (default is 'itemDate')
+          domain:
+            $ref: "#/definitions/DomainType"
+            description: Different domain types in omop
 
   ParticipantCohortStatusColumns:
     type: string
     enum: [participantId, status, gender, birthDate, race, ethnicity]
 
-  ParticipantConditionsColumns:
+  ReviewColumns:
     type: string
-    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantProceduresColumns:
-    type: string
-    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantObservationsColumns:
-    type: string
-    enum: [itemDate, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantDrugsColumns:
-    type: string
-    enum: [itemDate, standardVocabulary, standardName, signature, sourceValue, sourceVocabulary, sourceName, age]
-
-  ParticipantMasterColumns:
-    type: string
-    enum: [itemDate, domain, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, age]
+    enum: [startDate, endDate, domain, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, ageAtEvent, signature]
 
   PageFilterType:
     type: string
-    enum: [ParticipantCohortStatuses, ParticipantConditions, ParticipantProcedures, ParticipantObservations, ParticipantDrugs]
+    enum: [ParticipantCohortStatuses, ReviewFilter]
 
-  DataType:
+  DomainType:
     type: string
-    enum: [ParticipantCondition, ParticipantProcedure, ParticipantObservation, ParticipantDrug]
+    enum: [Condition, Procedure, Observation, Drug, Master, Device, Visit, Measurement]
 
   SortOrder:
     type: string
@@ -657,51 +585,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/CohortSummary"
-
-  MasterParticipantDataListResponse:
-    type: object
-    required:
-      - items
-    properties:
-      items:
-        type: "array"
-        items:
-          $ref: "#/definitions/MasterParticipantData"
-
-  MasterParticipantData:
-    type: object
-    required:
-      - dataId
-      - itemDate
-      - domain
-      - standardVocabulary
-      - standardName
-      - sourceValue
-      - sourceVocabulary
-      - sourceName
-    properties:
-      dataId:
-        type: integer
-        format: int64
-        description: Primary key of this data
-      itemDate:
-        type: string
-        description: The date of the condition occurrence
-      standardVocabulary:
-        type: string
-        description: The standard vocabulary of this condition
-      standardName:
-        type: string
-        description: The standard name of this condition
-      sourceValue:
-        type: string
-        description: The source value of this condition
-      sourceVocabulary:
-        type: string
-        description: The source vocabulary of this condition
-      sourceName:
-        type: string
-        description: The source name of this condition.
 
   ParticipantCohortAnnotation:
     type: object
@@ -838,7 +721,7 @@ definitions:
         description: the count for this criteria type in the cohort
 
   ParticipantData:
-    discriminator: dataType
+    discriminator: domainType
     required:
       - itemDate
       - standardVocabulary
@@ -846,52 +729,102 @@ definitions:
       - sourceValue
       - sourceVocabulary
       - sourceName
-      - age
-      - dataType # required for inheritance to work
+      - domainType # required for inheritance to work
     properties:
       itemDate:
         type: string
-        description: The date of the condition occurrence
+        description: The date of the data
       standardVocabulary:
         type: string
-        description: The standard vocabulary of this condition
+        description: The standard vocabulary of this data
       standardName:
         type: string
-        description: The standard name of this condition
+        description: The standard name of this data
       sourceValue:
         type: string
-        description: The source value of this condition
+        description: The source value of this data
       sourceVocabulary:
         type: string
-        description: The source vocabulary of this condition
+        description: The source vocabulary of this data
       sourceName:
         type: string
-        description: The source name of this condition.
-      age:
-        type: integer
-        description: The age of event for the participant.
-      dataType:
-        $ref: "#/definitions/DataType"
+        description: The source name of this data.
+      domainType:
+        $ref: "#/definitions/DomainType"
 
-  ParticipantCondition:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-
-  ParticipantProcedure:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-
-  ParticipantObservation:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-
-  ParticipantDrug:
+  Condition:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
+
+  Procedure:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
+
+  Observation:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
+
+  Drug:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
           signature:
             type: string
             description: signature of drug
+
+  Master:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          dataId:
+            type: integer
+            format: int64
+            description: Primary key of this data
+          domain:
+            type: string
+            description: the domain of this data.
+
+  Device:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
+
+  Visit:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
+          endDate:
+            type: string
+            description: The end date of the visit occurrence
+
+  Measurement:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          age:
+            type: integer
+            description: The age of event for the participant
 
   AnnotationType:
     type: string

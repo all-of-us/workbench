@@ -1,8 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
-import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.PageRequest;
 
 import java.util.List;
 

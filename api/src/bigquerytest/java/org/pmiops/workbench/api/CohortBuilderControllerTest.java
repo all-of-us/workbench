@@ -336,6 +336,18 @@ public class CohortBuilderControllerTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsICD9ConditionOccurrenceChildOccurrences() throws Exception {
+    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+    Modifier modifier2 = new Modifier()
+      .name(ModifierType.NUM_OF_OCCURRENCES)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("1"));
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+      Arrays.asList(icd9), Arrays.asList(modifier2));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsICD9ConditionOccurrenceParent() throws Exception {
     SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
     SearchRequest searchRequest = createSearchRequests(icd9ConditionParent.getType(), Arrays.asList(icd9), new ArrayList<>());

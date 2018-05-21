@@ -1,11 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
-import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -126,7 +125,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
         String sqlStatement = SELECT_SQL_TEMPLATE
                 + buildFilteringSql(filtersList, parameters)
                 + String.format(ORDERBY_SQL_TEMPLATE, sortColumn)
-                + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPageNumber() * pageRequest.getPageSize(), pageRequest.getPageSize());
+                + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPage() * pageRequest.getPageSize(), pageRequest.getPageSize());
 
         return namedParameterJdbcTemplate.query(sqlStatement,
                 parameters,

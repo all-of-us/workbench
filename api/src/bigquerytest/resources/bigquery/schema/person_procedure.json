@@ -1,0 +1,57 @@
+[
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "data_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "timestamp",
+    "name": "start_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "standard_vocabulary",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "standard_name",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "standard_code",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "source_vocabulary",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "source_name",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "source_code",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "age_at_event",
+    "mode": "nullable"
+  }
+]

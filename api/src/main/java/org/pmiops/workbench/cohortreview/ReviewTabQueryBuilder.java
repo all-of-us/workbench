@@ -2,10 +2,9 @@ package org.pmiops.workbench.cohortreview;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.cohortreview.querybuilder.ReviewQueryBuilder;
-import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.cdm.ParticipantConditionDbInfo;
-import org.pmiops.workbench.model.ParticipantConditionsColumns;
+import com.google.common.collect.ImmutableMap;
+import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,28 +13,92 @@ import java.util.Map;
 @Service
 public class ReviewTabQueryBuilder {
 
-    public QueryJobConfiguration buildQuery(String query, Long participantId, PageRequest pageRequest) {
-        ParticipantConditionsColumns sortColumn = ParticipantConditionsColumns.fromValue(pageRequest.getSortColumn());
-        String finalSql = String.format(query,
-                ParticipantConditionDbInfo.fromName(sortColumn).getDbName(),
-                pageRequest.getSortOrder().toString(),
-                pageRequest.getPageSize(),
-                pageRequest.getPageNumber() * pageRequest.getPageSize());
+    private static final ImmutableMap<String, String> EXTRA_COLUMNS =
+      ImmutableMap.of("Master", ", domain, end_datetime as endDate, signature",
+        "Drug", ", signature", "Visit", ", end_datetime as endDate");
 
-        return buildQuery(finalSql, participantId);
-    }
+    private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
+    private static final String NAMED_DATAID_PARAM = "dataId";
+    private static final String TABLE_PREFIX = "person_";
+    private static final String MASTER_TABLE = "person_all_events";
 
-    public QueryJobConfiguration buildCountQuery(String query, Long participantId) {
-        return buildQuery(query, participantId);
-    }
+    private static final String SQL_TEMPLATE =
+      "select data_id as dataId,\n" +
+        "     start_datetime as startDate,\n" +
+        "     standard_vocabulary as standardVocabulary,\n" +
+        "     standard_name as standardName,\n" +
+        "     source_value as sourceValue,\n" +
+        "     source_vocabulary as sourceVocabulary,\n" +
+        "     source_name as sourceName,\n" +
+        "     age_at_event as ageAtEvent\n" +
+        "     %s\n" +
+        "from `${projectId}.${dataSetId}.%s`\n";
 
-    private QueryJobConfiguration buildQuery(String query, Long participantId) {
+    private static final String WHERE_TEMPLATE =
+        "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+        "order by %s %s, data_id\n" +
+        "limit %d offset %d\n";;
+
+    private static final String COUNT_TEMPLATE =
+      "select count(*) as count\n" +
+        "from `${projectId}.${dataSetId}.%s`\n" +
+        "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
+
+    private static final String DETAILS_WHERE =
+      "where data_id = @" + NAMED_DATAID_PARAM + "\n";
+
+
+    public QueryJobConfiguration buildQuery(Long participantId,
+                                            DomainType domain,
+                                            PageRequest pageRequest) {
+        String tableName = DomainType.MASTER.equals(domain)
+          ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+        String extraColumns = EXTRA_COLUMNS.get(domain.toString()) == null
+          ? "" : EXTRA_COLUMNS.get(domain.toString());
+        String finalSql = String.format(SQL_TEMPLATE + WHERE_TEMPLATE,
+          extraColumns,
+          tableName,
+          pageRequest.getSortColumn(),
+          pageRequest.getSortOrder().toString(),
+          pageRequest.getPageSize(),
+          pageRequest.getPage() * pageRequest.getPageSize());
+
         Map<String, QueryParameterValue> params = new HashMap<>();
-        params.put(ReviewQueryBuilder.NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
+        params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
         return QueryJobConfiguration
-                .newBuilder(query)
-                .setNamedParameters(params)
-                .setUseLegacySql(false)
-                .build();
+          .newBuilder(finalSql)
+          .setNamedParameters(params)
+          .setUseLegacySql(false)
+          .build();
+    }
+
+    public QueryJobConfiguration buildCountQuery(Long participantId,
+                                                 DomainType domain) {
+        String tableName = DomainType.MASTER.equals(domain)
+          ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+        String finalSql = String.format(COUNT_TEMPLATE, tableName);
+        Map<String, QueryParameterValue> params = new HashMap<>();
+        params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
+        return QueryJobConfiguration
+          .newBuilder(finalSql)
+          .setNamedParameters(params)
+          .setUseLegacySql(false)
+          .build();
+    }
+
+    public QueryJobConfiguration buildDetailsQuery(Long dataId, DomainType domain) {
+        String domainString = domain.toString();
+        String tableName = DomainType.MASTER.equals(domain)
+          ? MASTER_TABLE : TABLE_PREFIX + domainString.toLowerCase();
+        String extraColumns = EXTRA_COLUMNS.get(domainString) == null
+          ? "" : EXTRA_COLUMNS.get(domainString);
+        String finalSql = String.format(SQL_TEMPLATE + DETAILS_WHERE, extraColumns, tableName);
+        Map<String, QueryParameterValue> params = new HashMap<>();
+        params.put(NAMED_DATAID_PARAM, QueryParameterValue.int64(dataId));
+        return QueryJobConfiguration
+          .newBuilder(finalSql)
+          .setNamedParameters(params)
+          .setUseLegacySql(false)
+          .build();
     }
 }

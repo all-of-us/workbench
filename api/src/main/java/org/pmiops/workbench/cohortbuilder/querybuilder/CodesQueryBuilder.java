@@ -6,6 +6,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
+import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.utils.OperatorUtils;
@@ -121,6 +122,10 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         modifierSql = modifierSql + groupByModifier.get(0);
       }
       finalSql = OUTER_SQL_TEMPLATE.replace("${innerSqlTemplate}", modifierSql);
+    } else {
+      if (!groupByModifier.isEmpty()) {
+        finalSql = finalSql + groupByModifier.get(0);
+      }
     }
 
     return QueryJobConfiguration
