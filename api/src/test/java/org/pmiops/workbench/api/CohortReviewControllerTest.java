@@ -14,7 +14,6 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
@@ -490,7 +489,7 @@ public class CohortReviewControllerTest {
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
         when(cohortReviewService.findAll(key.getCohortReviewId(),
                 Collections.<Filter>emptyList(),
-                new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn.toString()))).thenReturn(participants);
+                new PageRequest().page(pageParam).pageSize(pageSizeParam).sortOrder(sortOrder).sortColumn(sortColumn.toString()))).thenReturn(participants);
         when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
             WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
@@ -514,7 +513,7 @@ public class CohortReviewControllerTest {
         verify(cohortReviewService, times(1))
                 .findAll(key.getCohortReviewId(),
                         Collections.<Filter>emptyList(),
-                        new PageRequest(pageParam, pageSizeParam, sortOrder, sortColumn.toString()));
+                        new PageRequest().page(pageParam).pageSize(pageSizeParam).sortOrder(sortOrder).sortColumn(sortColumn.toString()));
         verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
         verifyNoMoreMockInteractions();
     }

@@ -1,0 +1,87 @@
+[
+  {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "visit_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "visit_start_date",
+    "mode": "required"
+  },
+  {
+    "type": "timestamp",
+    "name": "visit_start_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "date",
+    "name": "visit_end_date",
+    "mode": "required"
+  },
+  {
+    "type": "timestamp",
+    "name": "visit_end_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_type_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "provider_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "care_site_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "visit_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "admitting_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "admitting_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "discharge_to_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "discharge_to_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "preceding_visit_occurrence_id",
+    "mode": "nullable"
+  }
+]

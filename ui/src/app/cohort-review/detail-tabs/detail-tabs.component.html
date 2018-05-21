@@ -6,6 +6,43 @@
     </clr-tab-content>
   </clr-tab>
 
+  <!-- All Events: the "combined tabs" view -->
+  <clr-tab>
+    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab">
+      {{ allEvents.name | titlecase }}
+    </button>
+    <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
+      <div class="all-events-container">
+        <app-detail-all-events
+          [tabname]="allEvents.name"
+          [columns]="allEvents.columns"
+          [filterType]="allEvents.filterType"
+          [domain]="allEvents.domain"
+          [reverseEnum]="allEvents.reverseEnum"
+          (onRowClick)="detailView($event)"
+          >
+        </app-detail-all-events>
+        <div class="details">
+          <h4>Details</h4>
+          <div *ngIf="detailsLoading" class="spinner">Loading...</div>
+          <div *ngIf="!detailsLoading && !details">No data</div>
+          <div *ngIf="!detailsLoading && details">
+            <div><b>Start Date:</b> <small>{{ details.itemDate | date:'yyyy-MM-dd HH:mm:ss' }}</small></div>
+            <div *ngIf="details.dataType == 'ParticipantVisit'"><b>End Date:</b> <small>{{ details.endDate | date:'yyyy-MM-dd HH:mm:ss' }}</small></div>
+            <div><b>Standard Vocabulary:</b> <small>{{ details.standardVocabulary }}</small></div>
+            <div><b>Standard Name:</b> <small>{{ details.standardName }}</small></div>
+            <div><b>Source Value:</b> <small>{{ details.sourceValue }}</small></div>
+            <div *ngIf="details.dataType == 'ParticipantDrug'"><b>Signature:</b> <small>{{ details.signature }}</small></div>
+            <div><b>Source Vocabulary:</b> <small>{{ details.sourceVocabulary }}</small></div>
+            <div><b>Source Name:</b> <small>{{ details.sourceName }}</small></div>
+            <div><b>Age At Event:</b> <small>{{ details.age }}</small></div>
+          </div>
+        </div>
+      </div>
+    </clr-tab-content>
+  </clr-tab>
+
+  <!-- Individual Tab Views -->
   <clr-tab *ngFor="let tab of tabs">
     <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab">
       {{ tab.name | titlecase }}
@@ -15,6 +52,7 @@
         [tabname]="tab.name"
         [columns]="tab.columns"
         [filterType]="tab.filterType"
+        [domain]="tab.domain"
         [reverseEnum]="tab.reverseEnum"
         >
       </app-detail-tab-table>
@@ -24,37 +62,11 @@
   <!-- Stubs: when the endpoint for each of these is available, make it a data
        entry and put it in the above for loop.  OR if it is too custom, make it
        a new component. -->
-  <clr-tab>
-    <button clrTabLink id="detail-measurements-tab">Measurements</button>
-    <clr-tab-content id="detail-measurements-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-visits-tab">Visits</button>
-    <clr-tab-content id="detail-visits-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-physical-measurements-tab">Physical Measurements</button>
-    <clr-tab-content id="detail-physical-measurements-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-ppi-tab">PPI</button>
-    <clr-tab-content id="detail-ppi-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
-
-  <clr-tab>
-    <button clrTabLink id="detail-device-tab">Device</button>
-    <clr-tab-content id="detail-device-content" *clrIfActive>
+  <clr-tab *ngFor="let stub of stubs">
+    <button clrTabLink id="detail-{{ stub }}-tab">
+      {{ stub.replace('-', ' ') | titlecase }}
+    </button>
+    <clr-tab-content id="detail-{{ stub }}-content" *clrIfActive>
       <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
