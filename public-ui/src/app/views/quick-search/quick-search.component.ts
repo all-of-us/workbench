@@ -19,6 +19,7 @@ export class QuickSearchComponent implements OnInit {
   surveysChecked = false;
   searchResults = [];
   searchText;
+  totalParticipants;
 
 
   constructor(private api: DataBrowserService) {
@@ -34,6 +35,8 @@ export class QuickSearchComponent implements OnInit {
               }
               console.log(this.ehrDomains); }
       );
+
+      this.api.getParticipantCount().subscribe(result => this.totalParticipants = result);
   }
 
   public searchDomains() {

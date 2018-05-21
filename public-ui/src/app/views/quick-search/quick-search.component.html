@@ -46,10 +46,9 @@
               </clr-checkbox>
             </div>
           </section>
-
         </div>
-
       </div>
+
       <div class="row">
         <div class="col-xs">
           <button class="btn btn-primary search" (click)="searchDomains()">Search</button>
@@ -59,17 +58,30 @@
 
     <h4 class="box-heading"> Search Results </h4>
 
-    <div class="white-card-box" >
-      <div class="row flex-items-xs-middle">
-        <div class="col-sm-3 col-xs-12">
-          <div *ngFor="let r of searchResults">
-            <h6> {{r.domainDisplay}} {{r.countValue}}</h6>
+    <div class="row" >
+
+
+          <div class="col-sm-3 col-xs-12 white-card-box search-result" *ngFor="let r of searchResults">
+              <a routerLink="/survey/{{r.domainId.toLowerCase()}}" class="card clickable">
+                <div class="card-header">
+                  {{r.domainDisplay}}
+                </div>
+                <div class="card-block">
+                  <div class="card-title">
+                    {{r.countValue}}
+                  </div>
+                  <div class="card-text">
+                    There are {{r.countValue}} {{r.domainDisplay.toLowerCase()}} out of {{totalParticipants}}.
+                  </div>
+                </div>
+                <div>
+                  <button class="btn btn-primary search" [routerLink]="['surveys']">Search</button>
+                </div>
+              </a>
           </div>
-        </div>
-        <div class="col-sm-3  col-xs-12 button-col">
-          <button class="btn btn-primary search" [routerLink]="['surveys']">Search</button>
-        </div>
-      </div>
+
+
+
     </div>
 
   </div>
