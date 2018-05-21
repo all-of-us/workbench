@@ -61,7 +61,7 @@ const routes: Routes = [
             component: WorkspaceNavBarComponent,
             data: {
               title: 'View Workspace Details',
-              breadcrumb: ':wsid'
+              breadcrumb: 'Param: Workspace Name'
             },
             runGuardsAndResolvers: 'always',
             resolve: {
