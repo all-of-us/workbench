@@ -130,7 +130,7 @@
     <div>
       <h6 class="collaborator-text">Collaborators:</h6>
       <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
-        <button class="btn btn-secondary btn-short" [disabled]="!ownerPermission" (click)="navBar.share()">Share</button>
+        <button class="btn btn-secondary btn-short" [disabled]="!ownerPermission" (click)="share()">Share</button>
         <span *ngIf="!ownerPermission" class="tooltip-content">
           Owner access is required to share the workspace.
         </span>
@@ -178,7 +178,7 @@
     <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}">Google Bucket</a>
   </div>
 </div>
-
+<app-workspace-share></app-workspace-share>
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not fetch notebooks from workspace.</div>
