@@ -61,7 +61,7 @@ const routes: Routes = [
             component: WorkspaceNavBarComponent,
             data: {
               title: 'View Workspace Details',
-              breadcrumb: ':wsid'
+              breadcrumb: 'Param: Workspace Name'
             },
             runGuardsAndResolvers: 'always',
             resolve: {
@@ -146,7 +146,6 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
-    CohortResolver,
     SignInGuard,
     WorkspaceResolver,
   ]

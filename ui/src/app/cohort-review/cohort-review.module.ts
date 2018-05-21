@@ -32,13 +32,12 @@ import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 
+import {CohortCommonModule} from '../cohort-common/module';
 import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 
 import {WorkspacesService} from 'generated';
 
-// This is a temporary measure until we have specs and APIs for overview specific charts
-import {CohortSearchModule} from '../cohort-search/cohort-search.module';
 /* tslint:enable:max-line-length */
 
 
@@ -54,8 +53,7 @@ import {CohortSearchModule} from '../cohort-search/cohort-search.module';
     NgxChartsModule,
     NgxPopperModule,
     // Ours
-    // TODO: Remove this once the dependency on ComboChartComponent is broken.
-    CohortSearchModule,
+    CohortCommonModule,
   ],
   declarations: [
     /* Scaffolding and Pages */

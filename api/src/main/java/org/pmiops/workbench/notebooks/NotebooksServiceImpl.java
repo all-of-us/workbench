@@ -1,5 +1,11 @@
 package org.pmiops.workbench.notebooks;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
@@ -8,13 +14,6 @@ import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.inject.Provider;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
@@ -82,7 +81,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public void localize(String googleProject, String clusterName, Map<String, String> fileList) {
     NotebooksApi notebooksApi = notebooksApiProvider.get();
     retryHandler.run((context) -> {
-      notebooksApi.proxyLocalize(googleProject, clusterName, fileList);
+      notebooksApi.proxyLocalize(googleProject, clusterName, fileList, /* async */ false);
       return null;
     });
   }

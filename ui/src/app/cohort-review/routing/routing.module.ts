@@ -70,7 +70,6 @@ const routes: Routes = [{
   exports: [RouterModule],
   providers: [
     AnnotationDefinitionsResolver,
-    CohortResolver,
     DemographicConceptMapsResolver,
     ParticipantResolver,
     ParticipantAnnotationsResolver,
