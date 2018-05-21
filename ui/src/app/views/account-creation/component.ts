@@ -21,7 +21,6 @@ function isBlank(s: string) {
 })
 export class AccountCreationComponent {
   contactEmailConflictError = false;
-  containsLowerAndUpperError: boolean;
   profile: Profile = {
     username: '',
     enabledInFireCloud: false,
@@ -33,8 +32,6 @@ export class AccountCreationComponent {
   password: string;
   passwordAgain: string;
   showAllFieldsRequiredError: boolean;
-  showPasswordsDoNotMatchError: boolean;
-  showPasswordLengthError: boolean;
   creatingAccount: boolean;
   accountCreated: boolean;
   usernameConflictError = false;
@@ -67,25 +64,17 @@ export class AccountCreationComponent {
         || this.usernameInvalidError) {
       return;
     }
-    this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
-    this.showPasswordsDoNotMatchError = false;
-    this.showPasswordLengthError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
          this.profile.username, this.profile.contactEmail, this.password, this.passwordAgain];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
       return;
-    } else if (!(this.password === this.passwordAgain)) {
-      this.showPasswordsDoNotMatchError = true;
-      return;
-    } else if (this.password.length < 8 || this.password.length > 100) {
-      this.showPasswordLengthError = true;
-      return;
-    } else if (!(this.hasLowerCase(this.password) && this.hasUpperCase(this.password))) {
-      this.containsLowerAndUpperError = true;
-      return;
+    } else if (this.showPasswordsDoNotMatchError
+      || this.showPasswordLengthError
+      || this.containsLowerAndUpperError) {
+        return;
     }
 
     const request: CreateAccountRequest = {
@@ -99,6 +88,34 @@ export class AccountCreationComponent {
     }, () => {
       this.creatingAccount = false;
     });
+  }
+
+  get showPasswordsDoNotMatchError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (this.password === undefined || this.passwordAgain === undefined
+      || this.password.length === 0 || this.passwordAgain.length === 0) {
+        return false;
+    }
+    return !(this.password === this.passwordAgain);
+  }
+
+  get showPasswordLengthError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (this.password === undefined || this.password.length === 0) {
+      return false;
+    }
+    return (this.password.length < 8 || this.password.length > 100);
+  }
+
+  get containsLowerAndUpperError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (this.password === undefined || this.password.length === 0) {
+      return false;
+    }
+    return !(this.hasLowerCase(this.password) && this.hasUpperCase(this.password));
   }
 
   get usernameInvalidError(): boolean {
