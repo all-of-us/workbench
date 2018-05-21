@@ -108,8 +108,13 @@ set count_value =
         then ${BIN_SIZE}
     else
         cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
-    end
-where count_value > 0"
+    end,
+    source_count_value =
+    case when source_count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end"
 
 # concept bin size :
 Aggregate bin size will be set at 20. Counts lower than 20 will be displayed as 20; Counts higher than 20 will be rounded up to the closest multiple of 20. Eg: A count of 1245 will be displayed as 1260 .
