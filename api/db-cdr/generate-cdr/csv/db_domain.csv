@@ -13,4 +13,4 @@
 "Procedure","Procedures","Procedure","domain_filter","procedures",10,0
 "RxNorm","RXNORM","RxNorm is the standard vocabulary for recording medication and drug exposures","standard","rxnorm",44819104,0
 "SNOMED","SNOMED","SNOMED is the Standardized vocabulary for conditions and procedures. All source vocabularies are ultimately mapped to the SNOMED vocabulary.","standard","snomed",44819097,0
-"TheBasics","The Basics","The Basics module provides demographics and economic information for participants","survey","PPI",1586134,567437
+"The-Basics","The Basics","The Basics module provides demographics and economic information for participants","survey","PPI",1586134,567437
