@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {forwardRef, Inject, Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
@@ -7,7 +7,7 @@ import {Cohort, CohortsService, Workspace} from 'generated';
 @Injectable()
 export class CohortResolver implements Resolve<Cohort> {
 
-  constructor(private api: CohortsService) {}
+  constructor(@Inject(forwardRef(() => CohortsService)) private api: CohortsService) {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<Cohort> {
     const ns: Workspace['namespace'] = route.params.ns;
