@@ -153,23 +153,6 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    LocalDate personBirthDate = LocalDate.of(1980, Month.FEBRUARY, 17);
-    LocalDate conditionDate1 = LocalDate.of(2008, Month.JULY, 22);
-    LocalDate conditionDate2 = LocalDate.of(2008, Month.AUGUST, 1);
-    LocalDate procedureDate1 = LocalDate.of(2009, Month.DECEMBER, 2);
-    LocalDate procedureDate2 = LocalDate.of(2009, Month.DECEMBER, 3);
-    LocalDate observationDate1 = LocalDate.of(2009, Month.DECEMBER, 3);
-    LocalDate observationDate2 = LocalDate.of(2009, Month.DECEMBER, 4);
-    LocalDate drugDate1 = LocalDate.of(2001, Month.DECEMBER, 3);
-    LocalDate drugDate2 = LocalDate.of(2001, Month.DECEMBER, 4);
-    Period conditionAge1 = Period.between(personBirthDate, conditionDate1);
-    Period conditionAge2 = Period.between(personBirthDate, conditionDate2);
-    Period procedureAge1 = Period.between(personBirthDate, procedureDate1);
-    Period procedureAge2 = Period.between(personBirthDate, procedureDate2);
-    Period observationAge1 = Period.between(personBirthDate, observationDate1);
-    Period observationAge2 = Period.between(personBirthDate, observationDate2);
-    Period drugAge1 = Period.between(personBirthDate, drugDate1);
-    Period drugAge2 = Period.between(personBirthDate, drugDate2);
 
     expectedMaster1 = new Master()
       .dataId(12751440L)
@@ -252,7 +235,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceName("name")
       .domainType(DomainType.MASTER);
     expectedCondition1 = new Condition()
-      .age(conditionAge1.getYears())
+      .age(28)
       .itemDate("2008-07-22 05:00:00 UTC")
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
@@ -261,7 +244,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceName("Typhoid and paratyphoid fevers")
       .domainType(DomainType.CONDITION);
     expectedCondition2 = new Condition()
-      .age(conditionAge2.getYears())
+      .age(28)
       .itemDate("2008-08-01 05:00:00 UTC")
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
@@ -270,7 +253,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceName("Typhoid and paratyphoid fevers")
       .domainType(DomainType.CONDITION);
     expectedProcedure1 = new Procedure()
-      .age(procedureAge1.getYears())
+      .age(29)
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
       .standardName("name")
@@ -279,7 +262,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceName("name")
       .domainType(DomainType.PROCEDURE);
     expectedProcedure2 = new Procedure()
-      .age(procedureAge2.getYears())
+      .age(29)
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardVocabulary("CPT4")
       .standardName("name")
@@ -288,7 +271,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceName("name")
       .domainType(DomainType.PROCEDURE);
     expectedObservation1 = new Observation()
-      .age(observationAge1.getYears())
+      .age(29)
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
       .standardName("name")
@@ -297,7 +280,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceName("name")
       .domainType(DomainType.OBSERVATION);
     expectedObservation2 = new Observation()
-      .age(observationAge2.getYears())
+      .age(29)
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
       .standardName("name")
@@ -306,7 +289,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceName("name")
       .domainType(DomainType.OBSERVATION);
     expectedDrug1 = new Drug()
-      .age(drugAge1.getYears())
+      .age(21)
       .signature("signature")
       .itemDate("2001-12-03 05:00:00 UTC")
       .standardVocabulary("CPT4")
@@ -316,7 +299,7 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
       .sourceName("name")
       .domainType(DomainType.DRUG);
     expectedDrug2 = new Drug()
-      .age(drugAge2.getYears())
+      .age(21)
       .signature("signature")
       .itemDate("2001-12-04 05:00:00 UTC")
       .standardVocabulary("CPT4")
