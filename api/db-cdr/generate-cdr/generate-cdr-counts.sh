@@ -86,7 +86,10 @@ PUBLIC_DATASET=public$CDR_VERSION
 startDate=`date`
 echo `date` " Starting generate-cdr-counts $startDate"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1b880efa9c17bade31e921e5cf2741baa2817ed4
 
 ## Make BigQuery cdr
 echo "Making BigQuery cdr dataset"
