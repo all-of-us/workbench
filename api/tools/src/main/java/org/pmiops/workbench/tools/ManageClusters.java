@@ -21,6 +21,7 @@ import org.pmiops.workbench.notebooks.ApiClient;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
+import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -67,8 +68,16 @@ public class ManageClusters {
   private static String formatTabular(Cluster c) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(c.getLabels()).getAsJsonObject();
+    String creator = "unknown";
+    if (labels.has("created-by")) {
+      creator = labels.get("created-by").getAsString();
+    }
+    ClusterStatus status = ClusterStatus.UNKNOWN;
+    if (c.getStatus() != null) {
+      status = c.getStatus();
+    }
     return String.format("%-30.30s %-50.50s %-10s %-15s",
-        clusterId(c), labels.get("created-by").getAsString(), c.getStatus(), c.getCreatedDate());
+        clusterId(c), creator, status, c.getCreatedDate());
   }
 
   private static void listClusters() throws IOException, ApiException {
