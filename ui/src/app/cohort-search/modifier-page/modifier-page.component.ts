@@ -46,10 +46,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     modType: 'EVENT_DATE',
     operators: [{
       name: 'Is On or Before',
-      value: 'GREATER_THAN_OR_EQUAL_TO',
+      value: 'LESS_THAN_OR_EQUAL_TO',
     }, {
       name: 'Is On or After',
-      value: 'LESS_THAN_OR_EQUAL_TO',
+      value: 'GREATER_THAN_OR_EQUAL_TO',
     }, {
       name: 'Is Between',
       value: 'BETWEEN',
@@ -94,7 +94,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       mods.forEach(mod => {
         const meta = this.modifiers.find(_mod => mod.get('name') === _mod.modType);
         if (meta) {
-          this.form.get(meta.name).setValue({
+          this.form.get(meta.name).patchValue({
             operator: mod.get('operator'),
             valueA: mod.getIn(['operands', 0]),
             valueB: mod.getIn(['operands', 1]),
