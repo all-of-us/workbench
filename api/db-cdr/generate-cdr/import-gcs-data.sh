@@ -37,15 +37,20 @@ REMOTE_DATA_LOC=https://storage.googleapis.com/$BUCKET
 echo "Importing data files from $REMOTE_DATA_LOC"
 
 # Add tables names of files to import here
-TABLES=(achilles_analysis achilles_results achilles_results_concept db_domain domain vocabulary criteria concept concept_relationship concept_ancestor)
-
+TABLES=(concept)
 # Make a dir for the csvs
 local_fpath=/tmp/$CDR_DB_NAME
 rm -rf $local_fpath
 mkdir -p $local_fpath
 
 # Download data
-gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/*.csv $local_fpath
+gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/concept000000000000.csv $local_fpath
+gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/concept000000000001.csv $local_fpath
+gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/concept000000000002.csv $local_fpath
+gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/concept000000000003.csv $local_fpath
+
+
+
 
 # Drop indexes before importing
 echo "Dropping indexes on big tables to speed up inserts"

@@ -58,6 +58,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .vocabularyId(concept.getVocabularyId())
                             .domainId(concept.getDomainId())
                             .countValue(concept.getCountValue())
+                            .sourceCountValue(concept.getSourceCountValue())
                             .prevalence(concept.getPrevalence());
                 }
             };
@@ -169,7 +170,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .stratum4(o.getStratum4())
                             .stratum5(o.getStratum5())
                             .stratum5Name(o.getStratum5Name())
-                            .countValue(o.getCountValue());
+                            .countValue(o.getCountValue())
+                            .sourceCountValue(o.getSourceCountValue());
                 }
             };
 

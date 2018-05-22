@@ -257,6 +257,10 @@ definitions:
         description: est count in the cdr
         type: integer
         format: int64
+      sourceCountValue:
+        description: est source count in the cdr
+        type: integer
+        format: int64
       prevalence:
         description: prevalence among participants percent count divided num participants
         type: number
@@ -362,6 +366,10 @@ definitions:
         type: string
       countValue:
         description: count
+        type: integer
+        format: int64
+      sourceCountValue:
+        description: source count
         type: integer
         format: int64
 
