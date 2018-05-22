@@ -44,13 +44,7 @@ rm -rf $local_fpath
 mkdir -p $local_fpath
 
 # Download data
-gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/concept000000000000.csv $local_fpath
-gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/concept000000000001.csv $local_fpath
-gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/concept000000000002.csv $local_fpath
-gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/concept000000000003.csv $local_fpath
-
-
-
+gsutil -m cp gs://$BUCKET/$CDR_DB_NAME/*.csv $local_fpath
 
 # Drop indexes before importing
 echo "Dropping indexes on big tables to speed up inserts"
