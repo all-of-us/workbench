@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 public enum ParticipantCohortStatusDbInfo {
     PARTICIPANT_ID(ParticipantCohortStatusColumns.PARTICIPANTID, "participant_id", ParticipantCohortStatusDbInfo::buildLongSql),
     STATUS(ParticipantCohortStatusColumns.STATUS, "status", ParticipantCohortStatusDbInfo::buildLongSql),
-    GENDER(ParticipantCohortStatusColumns.GENDER, "gender.concept_name", ParticipantCohortStatusDbInfo::buildStringSql),
+    GENDER(ParticipantCohortStatusColumns.GENDER, "gender_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
     BIRTH_DATE(ParticipantCohortStatusColumns.BIRTHDATE, "birth_date", ParticipantCohortStatusDbInfo::buildDateSql),
-    RACE(ParticipantCohortStatusColumns.RACE, "race.concept_name", ParticipantCohortStatusDbInfo::buildStringSql),
-    ETHNICITY(ParticipantCohortStatusColumns.ETHNICITY, "ethnicity.concept_name", ParticipantCohortStatusDbInfo::buildStringSql);
+    RACE(ParticipantCohortStatusColumns.RACE, "race_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
+    ETHNICITY(ParticipantCohortStatusColumns.ETHNICITY, "ethnicity_concept_id", ParticipantCohortStatusDbInfo::buildLongSql);
 
     private final ParticipantCohortStatusColumns name;
     private final String dbName;

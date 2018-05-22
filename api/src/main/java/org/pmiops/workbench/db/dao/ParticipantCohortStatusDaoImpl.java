@@ -24,20 +24,15 @@ import java.util.logging.Logger;
 
 public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDaoCustom {
 
-    public static final String SELECT_SQL_TEMPLATE = "select cohort_review_id as cohortReviewId,\n" +
+    public static final String SELECT_SQL_TEMPLATE =
+      "select cohort_review_id as cohortReviewId,\n" +
             "participant_id as participantId,\n" +
             "status,\n" +
             "gender_concept_id as genderConceptId,\n" +
-            "gender.concept_name as gender,\n" +
             "birth_date as birthDate,\n" +
             "race_concept_id as raceConceptId,\n" +
-            "race.concept_name as race,\n" +
-            "ethnicity_concept_id as ethnicityConceptId,\n" +
-            "ethnicity.concept_name as ethnicity\n" +
-            "from participant_cohort_status pcs\n" +
-            "left join concept gender on (gender.concept_id = pcs.gender_concept_id and gender.vocabulary_id = 'Gender')\n" +
-            "left join concept race on (race.concept_id = pcs.race_concept_id and race.vocabulary_id = 'Race')\n" +
-            "left join concept ethnicity on (ethnicity.concept_id = pcs.ethnicity_concept_id and ethnicity.vocabulary_id = 'Ethnicity')\n";
+            "ethnicity_concept_id as ethnicityConceptId\n" +
+            "from participant_cohort_status pcs\n";
 
     private static final String WHERE_CLAUSE_TEMPLATE = "where cohort_review_id = :cohortReviewId\n";
 

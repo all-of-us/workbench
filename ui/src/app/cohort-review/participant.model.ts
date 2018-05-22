@@ -1,5 +1,4 @@
 import {CohortStatus, ParticipantCohortStatus} from 'generated';
-import * as moment from 'moment';
 
 export class Participant implements ParticipantCohortStatus {
 
@@ -15,16 +14,7 @@ export class Participant implements ParticipantCohortStatus {
     return Participant.formatStatusForText(this.status);
   }
 
-  /* Birthdate is a Unix timestamp; we also provide a moment.js object here */
   birthDate: ParticipantCohortStatus['birthDate'];
-  private _dob: any; /* Moment.js object */
-
-  get dob() {
-    if (!this._dob) {
-      this._dob = moment(this.birthDate);
-    }
-    return this._dob;
-  }
 
   /* Demographic information */
   gender: ParticipantCohortStatus['gender'];

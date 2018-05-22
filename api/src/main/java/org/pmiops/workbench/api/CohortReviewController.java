@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.*;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -42,6 +44,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public static final Integer PAGE = 0;
   public static final Integer PAGE_SIZE = 25;
   public static final Integer MAX_REVIEW_SIZE = 10000;
+  public static final List<String> GENDER_RACE_ETHNICITY_TYPES =
+    ImmutableList.of(GenderRaceEthnicityType.ETHNICITY.name(),
+      GenderRaceEthnicityType.GENDER.name(), GenderRaceEthnicityType.RACE.name());
 
   private CohortReviewService cohortReviewService;
   private BigQueryService bigQueryService;
@@ -61,7 +66,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return new org.pmiops.workbench.model.ParticipantCohortStatus()
           .participantId(participant.getParticipantKey().getParticipantId())
           .status(participant.getStatus())
-          .birthDate(participant.getBirthDate().getTime())
+          .birthDate(participant.getBirthDate().toString())
           .ethnicityConceptId(participant.getEthnicityConceptId())
           .ethnicity(participant.getEthnicity())
           .genderConceptId(participant.getGenderConceptId())
@@ -362,8 +367,19 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     PageRequest pageRequest = createPageRequest(request);
 
     List<Filter> filters = request.getFilters() == null ? Collections.<Filter>emptyList() : request.getFilters().getItems();
+    List<Filter> convertedFilters = filters.stream()
+      .map(f -> {
+        return GENDER_RACE_ETHNICITY_TYPES.contains(f.getProperty().name()) ?
+          new Filter()
+            .property(f.getProperty())
+            .operator(f.getOperator())
+            .values(getGenderRaceEthnicityConceptIds(f.getProperty().name(), f.getValues()))
+          : f;
+      })
+      .collect(Collectors.toList());
     List<ParticipantCohortStatus> participantCohortStatuses =
-      cohortReviewService.findAll(cohortReview.getCohortReviewId(), filters, pageRequest);
+      cohortReviewService.findAll(cohortReview.getCohortReviewId(), convertedFilters, pageRequest);
+    lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
     org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
     responseReview.setParticipantCohortStatuses(
@@ -574,6 +590,21 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       pcs.setGender(concepts.get(GenderRaceEthnicityType.GENDER.name()).get(pcs.getGenderConceptId()));
       pcs.setEthnicity(concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).get(pcs.getEthnicityConceptId()));
     });
+  }
+
+  /**
+   * Helper method that generates a list of concept ids per demo
+   * @param property
+   * @param demoValues
+   * @return
+   */
+  private List<String> getGenderRaceEthnicityConceptIds(String property, List<String> demoValues) {
+    Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
+    Map<Long, String> possibleConceptIds = concepts.get(property);
+    return possibleConceptIds.entrySet().stream()
+      .filter(entry -> demoValues.contains(entry.getValue()))
+      .map(entry -> entry.getKey().toString())
+      .collect(Collectors.toList());
   }
 
   private PageRequest createPageRequest(PageFilterRequest request) {
