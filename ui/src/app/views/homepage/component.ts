@@ -16,7 +16,7 @@ import {
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
-  AouLogo = '/assets/images/all-of-us-logo.svg';
+  AouLogoFooter = '/assets/images/all-of-us-logo-footer.svg';
   tipHeadline = 'Welcome Back to All of Us!';
   tipSubtitle = 'Thanks for returning.';
   tipDetail = 'You can use the buttons below to view your workspaces, ' +

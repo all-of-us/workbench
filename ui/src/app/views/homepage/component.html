@@ -1,40 +1,43 @@
-<div class="background-image"></div>
-<div class="rectangle"></div>
-<div class="tip-title">{{tipHeadline}}</div>
-<div class="tip-title tip-subtitle">{{tipSubtitle}}</div>
-<div class="tip-title tip-description">{{tipDetail}}</div>
-<div *ngIf="tipButton" class="learn-more-button" (click)="bugReportComponent.reportBug();">{{tipButton}}</div>
-<div class="profile-box">
-    <div style="float: left; width: 50%">
-        <div class="profile-title">
-            Complete your profile
+<div class="front-page">
+    <div class="background-image">
+    <div class="rectangle"></div>
+    <div class="invisible_rectangle">
+        <div class="tip-title">{{tipHeadline}}</div>
+        <div class="tip-title tip-subtitle">{{tipSubtitle}}</div>
+        <div class="tip-title tip-description">{{tipDetail}}</div>
+        <div *ngIf="tipButton" class="learn-more-button" (click)="bugReportComponent.reportBug();">{{tipButton}}</div>
+        <div class="profile-box">
+            <div style="float: left; width: 50%">
+                <div class="profile-title">
+                    Complete your profile
+                </div>
+                <div class="profile-title profile-tips">
+                    You can quickly:
+                    <li>Add your institution</li>
+                    <li>Add your role</li>
+                    <li>Update something else</li>
+                </div>
+                <button class="profile-update-button" (click)="navigateToProfile()">Update</button>
+            </div>
+            <div class="pie-chart-box">
+                <ngx-charts-pie-chart
+                        [scheme]="colorScheme"
+                        [results]="spinnerValues"
+                        [doughnut]="true"
+                        [tooltipDisabled]="true">
+                </ngx-charts-pie-chart>
+                <div class="percent-text">
+                    {{completedTasksAsPercentage}}%
+                </div>
+            </div>
         </div>
-        <div class="profile-title profile-tips">
-            You can quickly:
-            <li>Add your institution</li>
-            <li>Add your role</li>
-            <li>Update something else</li>
-        </div>
-        <button class="profile-update-button" (click)="navigateToProfile()">Update</button>
     </div>
-    <div style="float:right; width:50%; margin-top: 1.2rem">
-        <ngx-charts-pie-chart
-                [view]="view"
-                [scheme]="colorScheme"
-                [results]="spinnerValues"
-                [doughnut]="true"
-                [tooltipDisabled]="true">
-        </ngx-charts-pie-chart>
-        <div class="percentText">
-            {{completedTasksAsPercentage}}%
-        </div>
     </div>
-</div>
 <div class="card-area">
     <div class="card">
         <div class="title">Create your own workspace</div>
         <div class="description">Here you can create and name a workspace.
-        Within a workspace you can create notebooks and build cohorts.</div>
+            Within a workspace you can create notebooks and build cohorts.</div>
         <button class="button tooltip" (click)="addWorkspace()" [disabled]="!billingProjectInitialized">
             Create Workspace
             <span *ngIf="!billingProjectInitialized" class="tooltip-content">
@@ -45,7 +48,7 @@
     <div class="card">
         <div class="title">View your workspaces</div>
         <div class="description">Here you can view all workspaces you have created, or that have been
-        shared with you.</div>
+            shared with you.</div>
         <button class="button tooltip" (click)="listWorkspaces()" [disabled]="!FCAccountInitialized">
             Go to Workspaces
             <span *ngIf="!FCAccountInitialized" class="tooltip-content">
@@ -56,7 +59,7 @@
 </div>
 <div class="bottom-banner">
     <div class="logo">
-        <img [src]="AouLogo">
+        <img [src]="AouLogoFooter">
     </div>
     <div class="bottom-links">
         Privacy Policy
@@ -66,3 +69,4 @@
     </div>
 </div>
 <app-bug-report></app-bug-report>
+</div>
