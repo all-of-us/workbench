@@ -16,8 +16,8 @@ function isBlank(s: string) {
 @Component({
   selector: 'app-account-creation',
   templateUrl: './component.html',
-  styleUrls: ['./component.css',
-              '../../styles/template.css']
+  styleUrls: ['../../styles/template.css',
+              './component.css']
 })
 export class AccountCreationComponent {
   contactEmailConflictError = false;
@@ -36,6 +36,9 @@ export class AccountCreationComponent {
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
+  usernameOffFocus: boolean;
+  passwordOffFocus: boolean;
+  passwordAgainOffFocus: boolean;
   usernameCheckTimeout: NodeJS.Timer;
   contactEmailCheckTimeout: NodeJS.Timer;
 
@@ -160,6 +163,61 @@ export class AccountCreationComponent {
 
   hasUpperCase(str: string): boolean {
     return (/[A-Z]/.test(str));
+  }
+
+  leaveFocusUsername(): void {
+    this.usernameOffFocus = true;
+  }
+
+  enterFocusUsername(): void {
+    this.usernameOffFocus = false;
+  }
+
+  get usernameValidationError(): boolean {
+    return this.usernameOffFocus && (this.usernameConflictError || this.usernameInvalidError);
+  }
+
+  get usernameValidationSuccess(): boolean {
+    return this.usernameOffFocus
+      && this.profile.username.trim().length >= 1
+      && !this.usernameConflictError
+      && !this.usernameInvalidError;
+  }
+
+  leaveFocusPassword(): void {
+    this.passwordOffFocus = true;
+  }
+
+  enterFocusPassword(): void {
+    this.passwordOffFocus = false;
+  }
+
+  get passwordValidationError(): boolean {
+    return this.passwordOffFocus &&
+      (this.showPasswordLengthError ||
+      this.containsLowerAndUpperError);
+  }
+
+  get passwordValidationSuccess(): boolean {
+    return this.passwordOffFocus &&
+      !this.showPasswordLengthError &&
+      !this.containsLowerAndUpperError;
+  }
+
+  leaveFocusPasswordAgain(): void {
+    this.passwordAgainOffFocus = true;
+  }
+
+  enterFocusPasswordAgain(): void {
+    this.passwordAgainOffFocus = false;
+  }
+
+  get passwordAgainValidationError(): boolean {
+    return this.passwordAgainOffFocus && this.showPasswordsDoNotMatchError;
+  }
+
+  get passwordAgainValidationSuccess(): boolean {
+    return this.passwordAgainOffFocus && !this.showPasswordsDoNotMatchError;
   }
 
 }
