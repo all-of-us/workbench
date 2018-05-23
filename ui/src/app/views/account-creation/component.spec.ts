@@ -26,10 +26,31 @@ import {LoginComponent} from '../login/component';
 import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
 import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
+class AccountCreationPage {
+  fixture: ComponentFixture<AccountCreationComponent>;
+  component: AccountCreationComponent;
+  passwordField: DebugElement;
+  passwordAgainField: DebugElement;
+  usernameField: DebugElement;
+
+  constructor(testBed: typeof TestBed) {
+    this.fixture = testBed.createComponent(AccountCreationComponent);
+    this.component = this.fixture.componentInstance;
+    this.readPageData();
+  }
+
+  readPageData() {
+    updateAndTick(this.fixture);
+    this.passwordField = this.fixture.debugElement.query(By.css('#password');
+    this.passwordAgainField = this.fixture.debugElement.query(By.css('#passwordAgain');
+    this.usernameField = this.fixture.debugElement.query(By.css('#username');
+  }
+}
+
 
 describe('AccountCreationComponent', () => {
   let profileServiceStub: ProfileServiceStub;
-  let fixture: ComponentFixture<AccountCreationComponent>;
+  let page: AccountCreationPage;
   beforeEach(fakeAsync(() => {
     profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
@@ -57,138 +78,149 @@ describe('AccountCreationComponent', () => {
           })
         }]
     }).compileComponents().then(() => {
-      fixture = TestBed.createComponent(AccountCreationComponent);
+      page = new AccountCreationPage(TestBed);
       tick();
     });
-    tick();
   }));
 
   it('handles selecting password', fakeAsync(() => {
-    updateAndTick(fixture);
-    expect(fixture.componentInstance.passwordOffFocus).toBeUndefined();
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'focus');
-    expect(fixture.componentInstance.passwordOffFocus).toBe(false);
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'blur');
-    expect(fixture.componentInstance.passwordOffFocus).toBe(true);
+    page.readPageData();
+    expect(page.component.passwordOffFocus).toBeTruthy();
+    simulateEvent(page.fixture, page.passwordField, 'focus');
+    expect(page.component.passwordOffFocus).toBe(false);
+    simulateEvent(page.fixture, page.passwordField, 'blur');
+    expect(page.component.passwordOffFocus).toBe(true);
   }));
 
-  it('handles each password failure case', fakeAsync(() => {
-    updateAndTick(fixture);
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'focus');
-    simulateInput(fixture, fixture.debugElement.query(By.css('#password')), 'password');
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'blur');
-    expect(fixture.componentInstance.containsLowerAndUpperError).toBeTruthy();
-    expect(fixture.componentInstance.isPasswordValidationError).toBeTruthy();
-    simulateInput(fixture, fixture.debugElement.query(By.css('#password')), 'Passwor');
-    expect(fixture.componentInstance.showPasswordLengthError).toBeTruthy();
-    expect(fixture.componentInstance.isPasswordValidationError).toBeTruthy();
-    simulateInput(fixture, fixture.debugElement.query(By.css('#password')),
+  it('handles password length requirements', fakeAsync(() => {
+    page.readPageData();
+    simulateEvent(page.fixture, page.passwordField, 'focus');
+    simulateInput(page.fixture, page.passwordField, 'Passwor');
+    simulateEvent(page.fixture, page.passwordField, 'blur');
+    expect(page.fixture.debugElement.query(By.css('#password-length-error'))).toBeTruthy();
+    expect(page.passwordField.classes.unsuccessfulInput).toBeTruthy();
+    simulateInput(page.fixture, page.passwordField,
       'ThisissuchalongpasswordThisissuchalongpasswordThisissuchalongpasswordThisissuchalongpass \
        ThisissuchalongpasswordThisissuchalongpasswordThisissuchalongpasswordThisissuchalongpass \
        ThisissuchalongpasswordThisissuchalongpasswordThisissuchalongpasswordThisissuchalongpass');
-    expect(fixture.componentInstance.showPasswordLengthError).toBeTruthy();
-    expect(fixture.componentInstance.isPasswordValidationError).toBeTruthy();
-    simulateInput(fixture, fixture.debugElement.query(By.css('#password')), 'Password');
-    expect(fixture.componentInstance.showPasswordLengthError).toBeFalsy();
-    expect(fixture.componentInstance.containsLowerAndUpperError).toBeFalsy();
-    expect(fixture.componentInstance.isPasswordValidationError).toBeFalsy();
+    expect(page.fixture.debugElement.query(By.css('#password-length-error'))).toBeTruthy();
+    expect(page.passwordField.classes.unsuccessfulInput).toBeTruthy();
+    simulateInput(page.fixture, page.passwordField, 'Password');
+    expect(page.fixture.debugElement.query(By.css('#password-length-error'))).toBeNull();
+    expect(page.passwordField.classes.successfulInput).toBeTruthy();
   }));
 
+  it('handles password casing requirements', fakeAsync(() => {
+    page.readPageData();
+    simulateEvent(page.fixture, page.passwordField, 'focus');
+    simulateInput(page.fixture, page.passwordField, 'password');
+    simulateEvent(page.fixture, page.passwordField, 'blur');
+    expect(page.fixture.debugElement.query(By.css('#password-case-error'))).toBeTruthy();
+    expect(page.passwordField.classes.unsuccessfulInput).toBeTruthy();
+    expect(page.component.passwordIsNotValid).toBeTruthy();
+    simulateInput(page.fixture, page.passwordField, 'Password');
+    expect(page.fixture.debugElement.query(By.css('#password-case-error'))).toBeNull();
+    expect(page.passwordField.classes.successfulInput).toBeTruthy();
+  }));
+
+
+
+
   it('only shows password errors when off focus', fakeAsync(() => {
-    updateAndTick(fixture);
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'focus');
-    simulateInput(fixture, fixture.debugElement.query(By.css('#password')), 'password');
-    expect(fixture.componentInstance.showPasswordValidationError).toBeFalsy();
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'blur');
-    expect(fixture.componentInstance.showPasswordValidationError).toBeTruthy();
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'focus');
-    expect(fixture.componentInstance.showPasswordValidationError).toBeFalsy();
+    page.readPageData();
+    simulateEvent(page.fixture, page.passwordField, 'focus');
+    simulateInput(page.fixture, page.passwordField, 'password');
+    expect(page.passwordField.classes.unsuccessfulInput).toBeFalsy();
+    simulateEvent(page.fixture, page.passwordField, 'blur');
+    expect(page.passwordField.classes.unsuccessfulInput).toBeTruthy();
+    simulateEvent(page.fixture, page.passwordField, 'focus');
+    expect(page.passwordField.classes.unsuccessfulInput).toBeFalsy();
   }));
 
 
   it('handles selecting password again', fakeAsync(() => {
-    updateAndTick(fixture);
-    expect(fixture.componentInstance.passwordAgainOffFocus).toBeUndefined();
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'focus');
-    expect(fixture.componentInstance.passwordAgainOffFocus).toBe(false);
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'blur');
-    expect(fixture.componentInstance.passwordAgainOffFocus).toBe(true);
+    page.readPageData();
+    expect(page.component.passwordAgainOffFocus).toBeTruthy();
+    simulateEvent(page.fixture, page.passwordAgainField, 'focus');
+    expect(page.component.passwordAgainOffFocus).toBe(false);
+    simulateEvent(page.fixture, page.passwordAgainField, 'blur');
+    expect(page.component.passwordAgainOffFocus).toBe(true);
   }));
 
   it('handles each password again failure case', fakeAsync(() => {
-    updateAndTick(fixture);
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'focus');
-    simulateInput(fixture, fixture.debugElement.query(By.css('#password')), 'Password');
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'blur');
+    page.readPageData();
+    simulateEvent(page.fixture, page.passwordField, 'focus');
+    simulateInput(page.fixture, page.passwordField, 'Password');
+    simulateEvent(page.fixture, page.passwordField, 'blur');
 
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'focus');
-    expect(fixture.componentInstance.isPasswordAgainValidationError).toBeFalsy();
-    expect(fixture.componentInstance.showPasswordsDoNotMatchError).toBeFalsy();
-    simulateInput(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'Passwor');
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'blur');
-    expect(fixture.componentInstance.isPasswordAgainValidationError).toBeTruthy();
-    expect(fixture.componentInstance.showPasswordsDoNotMatchError).toBeTruthy();
-    simulateInput(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'Password');
-    expect(fixture.componentInstance.isPasswordAgainValidationError).toBeFalsy();
-    expect(fixture.componentInstance.showPasswordsDoNotMatchError).toBeFalsy();
+    simulateEvent(page.fixture, page.passwordAgainField, 'focus');
+    expect(page.fixture.debugElement.query(By.css('#password-match-error'))).toBeFalsy();
+    simulateInput(page.fixture, page.passwordAgainField, 'Passwor');
+    simulateEvent(page.fixture, page.passwordAgainField, 'blur');
+    expect(page.fixture.debugElement.query(By.css('#password-match-error'))).toBeTruthy();
+    expect(page.passwordAgainField.classes.unsuccessfulInput).toBeTruthy();
+    simulateInput(page.fixture, page.passwordAgainField, 'Password');
+    expect(page.fixture.debugElement.query(By.css('#password-match-error'))).toBeFalsy();
+    expect(page.passwordAgainField.classes.successfulInput).toBeTruthy();
+
   }));
 
   it('only shows password again errors when off focus', fakeAsync(() => {
-    updateAndTick(fixture);
-    updateAndTick(fixture);
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'focus');
-    simulateInput(fixture, fixture.debugElement.query(By.css('#password')), 'Password');
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#password')), 'blur');
+    page.readPageData();
+    simulateEvent(page.fixture, page.passwordField, 'focus');
+    simulateInput(page.fixture, page.passwordField, 'Password');
+    simulateEvent(page.fixture, page.passwordField, 'blur');
 
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'focus');
-    simulateInput(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'Passwor');
-    expect(fixture.componentInstance.showPasswordAgainValidationError).toBeFalsy();
+    simulateEvent(page.fixture, page.passwordAgainField, 'focus');
+    simulateInput(page.fixture, page.passwordAgainField, 'Passwor');
+    expect(page.fixture.debugElement.query(By.css('#password-match-error'))).toBeFalsy();
 
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'blur');
-    expect(fixture.componentInstance.showPasswordAgainValidationError).toBeTruthy();
+    simulateEvent(page.fixture, page.passwordAgainField, 'blur');
+    expect(page.fixture.debugElement.query(By.css('#password-match-error'))).toBeTruthy();
 
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#passwordAgain')), 'focus');
-    expect(fixture.componentInstance.showPasswordAgainValidationError).toBeFalsy();
+    simulateEvent(page.fixture, page.passwordAgainField, 'focus');
+    expect(page.fixture.debugElement.query(By.css('#password-match-error'))).toBeFalsy();
   }));
 
   it('handles selecting username', fakeAsync(() => {
-    updateAndTick(fixture);
-    expect(fixture.componentInstance.usernameOffFocus).toBeUndefined();
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#username')), 'focus');
-    expect(fixture.componentInstance.usernameOffFocus).toBe(false);
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#username')), 'blur');
-    expect(fixture.componentInstance.usernameOffFocus).toBe(true);
+    page.readPageData();
+    expect(page.component.usernameOffFocus).toBeTruthy();
+    simulateEvent(page.fixture, page.usernameField, 'focus');
+    expect(page.component.usernameOffFocus).toBeFalsy();
+    simulateEvent(page.fixture, page.usernameField, 'blur');
+    expect(page.component.usernameOffFocus).toBeTruthy();
   }));
 
-  it('handles each username failure case', fakeAsync(() => {
-    updateAndTick(fixture);
+  it('handles each username invalidity', fakeAsync(() => {
+    page.readPageData();
     // Begin with a period
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#username')), 'focus');
-    simulateInput(fixture, fixture.debugElement.query(By.css('#username')), '.username');
+    simulateEvent(page.fixture, page.usernameField, 'focus');
+    simulateInput(page.fixture, page.usernameField, '.username');
     tick(300);
     tick();
-    simulateEvent(fixture, fixture.debugElement.query(By.css('#username')), 'blur');
-    expect(fixture.componentInstance.usernameInvalidError).toBeTruthy();
-    expect(fixture.componentInstance.isUsernameValidationError).toBeTruthy();
+    simulateEvent(page.fixture, page.usernameField, 'blur');
+    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
+    expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // End with a period
-    simulateInput(fixture, fixture.debugElement.query(By.css('#username')), 'username.');
+    simulateInput(page.fixture, page.usernameField, 'username.');
     tick(300);
     tick();
-    expect(fixture.componentInstance.usernameInvalidError).toBeTruthy();
-    expect(fixture.componentInstance.isUsernameValidationError).toBeTruthy();
+    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
+    expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // Contains special characters
-    simulateInput(fixture, fixture.debugElement.query(By.css('#username')), 'user@name');
+    simulateInput(page.fixture, page.usernameField, 'user@name');
     tick(300);
     tick();
-    expect(fixture.componentInstance.usernameInvalidError).toBeTruthy();
-    expect(fixture.componentInstance.isUsernameValidationError).toBeTruthy();
+    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
+    expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
 
-    simulateInput(fixture, fixture.debugElement.query(By.css('#username')), 'blah');
+    simulateInput(page.fixture, page.usernameField, 'blah');
     tick(300);
     tick();
-    expect(fixture.componentInstance.isUsernameValidationError).toBeFalsy();
+    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeFalsy();
+    expect(page.usernameField.classes.unsuccessfulInput).toBeFalsy();
   }));
 });

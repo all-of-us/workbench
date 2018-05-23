@@ -36,9 +36,9 @@ export class AccountCreationComponent {
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
-  usernameOffFocus: boolean;
-  passwordOffFocus: boolean;
-  passwordAgainOffFocus: boolean;
+  usernameOffFocus = true;
+  passwordOffFocus = true;
+  passwordAgainOffFocus = true;
   usernameCheckTimeout: NodeJS.Timer;
   contactEmailCheckTimeout: NodeJS.Timer;
 
@@ -75,8 +75,8 @@ export class AccountCreationComponent {
       this.showAllFieldsRequiredError = true;
       return;
     } else if (this.isUsernameValidationError
-      || this.isPasswordValidationError
-      || this.isPasswordAgainValidationError) {
+      || this.passwordIsNotValid
+      || this.passwordAgainIsNotValid) {
         return;
     }
 
@@ -201,23 +201,22 @@ export class AccountCreationComponent {
     this.passwordOffFocus = false;
   }
 
-  get isPasswordValidationError(): boolean {
-    return (this.showPasswordLengthError ||
-    this.containsLowerAndUpperError);
+  get passwordIsNotValid(): boolean {
+    return (this.showPasswordLengthError || this.containsLowerAndUpperError);
   }
 
   get showPasswordValidationError(): boolean {
     if (isBlank(this.password) || !this.passwordOffFocus) {
       return false;
     }
-    return this.isPasswordValidationError;
+    return this.passwordIsNotValid;
   }
 
   get showPasswordValidationSuccess(): boolean {
     if (isBlank(this.password) || !this.passwordOffFocus) {
       return false;
     }
-    return !this.isPasswordValidationError;
+    return !this.passwordIsNotValid;
   }
 
   leaveFocusPasswordAgain(): void {
@@ -228,22 +227,22 @@ export class AccountCreationComponent {
     this.passwordAgainOffFocus = false;
   }
 
-  get isPasswordAgainValidationError(): boolean {
-    return this.showPasswordsDoNotMatchError;
+  get passwordAgainIsNotValid(): boolean {
+    return !(this.password === this.passwordAgain);
   }
 
   get showPasswordAgainValidationError(): boolean {
     if (isBlank(this.passwordAgain) || !this.passwordAgainOffFocus) {
       return false;
     }
-    return this.isPasswordAgainValidationError;
+    return this.passwordAgainIsNotValid;
   }
 
   get showPasswordAgainValidationSuccess(): boolean {
     if (isBlank(this.passwordAgain) || !this.passwordAgainOffFocus) {
       return false;
     }
-    return !this.isPasswordAgainValidationError;
+    return !this.passwordAgainIsNotValid;
   }
 
 }

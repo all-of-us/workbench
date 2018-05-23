@@ -36,10 +36,10 @@
           </div>
         </clr-tooltip-content>
       </clr-tooltip>
-      <div *ngIf="usernameConflictError && usernameOffFocus" class="error">
+      <div *ngIf="usernameConflictError && usernameOffFocus" class="error" id="username-taken-error">
         Username is already taken.
       </div>
-      <div *ngIf="usernameInvalidError && usernameOffFocus" class="error">
+      <div *ngIf="usernameInvalidError && usernameOffFocus" class="error" id="username-invalid-error">
         Username is not a valid username.
       </div>
     </div>
@@ -57,10 +57,10 @@
           Passwords must contain at least one lowercase and one uppercase letter
         </clr-tooltip-content>
       </clr-tooltip>
-      <div *ngIf="showPasswordLengthError && passwordOffFocus" class="error">
+      <div *ngIf="showPasswordLengthError && passwordOffFocus" class="error" id="password-length-error">
         Password must be between 8 and 100 characters long.
       </div>
-      <div *ngIf="containsLowerAndUpperError && passwordOffFocus" class="error">
+      <div *ngIf="containsLowerAndUpperError && passwordOffFocus" class="error" id="password-case-error">
         Password must contain one lowercase and one uppercase letter.
       </div>
     </div>
@@ -74,7 +74,7 @@
         <clr-icon shape="success-standard" class="success-standard is-solid" *ngIf="showPasswordAgainValidationSuccess"></clr-icon>
       </div>
     </div>
-    <div *ngIf="showPasswordsDoNotMatchError && passwordAgainOffFocus" class="error">
+    <div *ngIf="showPasswordsDoNotMatchError && passwordAgainOffFocus" class="error" id="password-match-error">
       Passwords do not match.
     </div>
     <div class="form-section">
