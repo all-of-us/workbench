@@ -89,9 +89,9 @@ public class DbDomainDaoTest {
         achillesAnalysisDao.save(achillesAnalysis2);
         achillesAnalysisDao.save(achillesAnalysis3);
 
-        achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L,0L);
-        achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L,0L);
-        achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L,0L);
+        achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L);
+        achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L);
+        achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L);
 
         achillesResultDao.save(achillesResult1);
         achillesResultDao.save(achillesResult2);
@@ -143,7 +143,7 @@ public class DbDomainDaoTest {
                 .countValue(count);
     }
 
-    private Concept createConcept(Long conceptId,String conceptName,String standardConcept,String conceptCode,String conceptClassId,String vocabularyId,String domainId,Long count,float prevalence,Long sourceCountValue){
+    private Concept createConcept(Long conceptId,String conceptName,String standardConcept,String conceptCode,String conceptClassId,String vocabularyId,String domainId,Long count,float prevalence){
         return new Concept()
                 .conceptId(conceptId)
                 .conceptName(conceptName)
@@ -154,7 +154,7 @@ public class DbDomainDaoTest {
                 .domainId(domainId)
                 .count(count)
                 .prevalence(prevalence)
-                .sourceCountValue(sourceCountValue);
+                .sourceCountValue(0L);
     }
 
     private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum_1,String stratum_2,String stratum_3,String stratum_4,String stratum_5,Long count,Long sourceCountValue){
