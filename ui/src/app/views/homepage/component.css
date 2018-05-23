@@ -41,23 +41,23 @@
     color: #FFFFFF;
     padding-top: 1rem;
     padding-left: 2rem;
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 300;
-    line-height: 2.2rem;
+    line-height: 2rem;
     position: absolute;
 }
 
 .tip-subtitle {
-    padding-top: 4.2rem;
+    padding-top: 3.7rem;
     padding-left: 2.1rem;
-    font-size: 1rem;
-    line-height: 1.2rem;
+    font-size: .9rem;
+    line-height: 1rem;
 }
 
 .tip-description {
-    padding-top: 5.75rem;
-    font-size: .75rem;
-    line-height: 1rem;
+    padding-top: 5rem;
+    font-size: .7rem;
+    line-height: .9rem;
     font-weight: lighter;
     text-align: left;
     width: 55%;
@@ -126,6 +126,7 @@
     margin-top: 1rem;
     padding-top: .1rem;
     font-size: .6rem;
+    border-style: none;
     position: absolute;
 }
 
@@ -191,6 +192,7 @@
     position: absolute;
     text-align: center;
     vertical-align: middle;
+    border-style: none;
 }
 
 .bottom-banner {
