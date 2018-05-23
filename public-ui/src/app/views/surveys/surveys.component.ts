@@ -32,7 +32,7 @@ export class SurveysComponent implements OnInit {
 
   public viewResults(r) {
     console.log("Viewing results ", r);
-    localStorage.setItem("dbDomain", r);
+    localStorage.setItem("dbDomain", JSON.stringify(r));
     localStorage.setItem("searchText", this.searchText);
     this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
   }

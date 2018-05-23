@@ -47,10 +47,17 @@ export class SurveyViewComponent implements OnInit {
   ngOnInit() {
 
     // Get the survey from local storage the user clicked on on a previous page
-    this.survey = localStorage.getItem('dbDomain');
-    this.searchText = localStorage.getItem('searchText');
+    const obj = localStorage.getItem('dbDomain');
+    if (obj) {
+      this.survey = JSON.parse(obj);
+    }
+    this.searchText = localStorage.getItem('searchText');)
+    if (!this.searchText) {
+      this.searchText = '';
+    }
+
     this.prevSearchText = this.searchText;
-    console.log("Survey : " , this.survey);
+    console.log('Survey : ' , this.survey, this.searchText);
     this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
       next: x => {
         const questions = x.items;

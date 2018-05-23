@@ -37,21 +37,17 @@ export class QuickSearchComponent implements OnInit {
               for (const d of this.ehrDomains ) {
                   d.checked = false;
               }
-              console.log(this.ehrDomains); }
-      );
+          });
 
       this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
   }
 
   public searchDomains() {
-      console.log("Search called ", this.surveysChecked);
-      console.log(this.ehrDomains.filter(d => d.checked ));
       this.api.getDomainSearchResults(this.searchText).subscribe(data => this.searchResults = data.items);
   }
 
   public viewResults(r) {
-    console.log("Viewing results ", r);
-    localStorage.setItem("dbDomain", r);
+    localStorage.setItem("dbDomain", JSON.stringify(r));
     localStorage.setItem("searchText", this.searchText);
 
     if (r.dbType === 'survey') {
