@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.common.collect.ImmutableList;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
@@ -23,6 +24,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDaoCustom {
+
+    public static final List<String> NON_GENDER_RACE_ETHNICITY_TYPES =
+      ImmutableList.of(ParticipantCohortStatusColumns.STATUS.name(),
+        ParticipantCohortStatusColumns.PARTICIPANTID.name(),
+        ParticipantCohortStatusColumns.BIRTHDATE.name());
 
     public static final String SELECT_SQL_TEMPLATE =
       "select cohort_review_id as cohortReviewId,\n" +
@@ -107,12 +113,14 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     @Override
     public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
-        ParticipantCohortStatusColumns sortColumnEnum = ParticipantCohortStatusColumns.fromValue(pageRequest.getSortColumn());
-        String sortColumn = ParticipantCohortStatusDbInfo.fromName(sortColumnEnum).getDbName();
+        String sortColumn = pageRequest.getSortColumn();
+        if (NON_GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
+            sortColumn = ParticipantCohortStatusDbInfo.fromName(sortColumn).getDbName();
 
-        sortColumn = (sortColumn.equals(ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName()))
-                ? ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
-                sortColumn + " " + pageRequest.getSortOrder().name() + ", " + ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName();
+            sortColumn = (sortColumn.equals(ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName()))
+              ? ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
+              sortColumn + " " + pageRequest.getSortOrder().name() + ", " + ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName();
+        }
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("cohortReviewId", cohortReviewId);
@@ -132,7 +140,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
         sqlParts.add(WHERE_CLAUSE_TEMPLATE);
         for (Filter filter : filtersList) {
-            String sql = ParticipantCohortStatusDbInfo.fromName(filter.getProperty()).getFunction().apply(filter, parameters);
+            String sql = ParticipantCohortStatusDbInfo.fromName(filter.getProperty().name()).getFunction().apply(filter, parameters);
             sqlParts.add(sql);
         }
 

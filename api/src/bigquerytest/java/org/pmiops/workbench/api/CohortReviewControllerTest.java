@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -120,9 +119,9 @@ public class CohortReviewControllerTest extends BigQueryBaseTest {
     @Bean
     public GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
       Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
-      concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
-      concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+      concepts.put(ParticipantCohortStatusColumns.RACE.name(), new HashMap<>());
+      concepts.put(ParticipantCohortStatusColumns.GENDER.name(), new HashMap<>());
+      concepts.put(ParticipantCohortStatusColumns.ETHNICITY.name(), new HashMap<>());
       return new GenderRaceEthnicityConcept(concepts);
     }
 

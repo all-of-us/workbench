@@ -16,24 +16,24 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public enum ParticipantCohortStatusDbInfo {
-    PARTICIPANT_ID(ParticipantCohortStatusColumns.PARTICIPANTID, "participant_id", ParticipantCohortStatusDbInfo::buildLongSql),
-    STATUS(ParticipantCohortStatusColumns.STATUS, "status", ParticipantCohortStatusDbInfo::buildLongSql),
-    GENDER(ParticipantCohortStatusColumns.GENDER, "gender_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
-    BIRTH_DATE(ParticipantCohortStatusColumns.BIRTHDATE, "birth_date", ParticipantCohortStatusDbInfo::buildDateSql),
-    RACE(ParticipantCohortStatusColumns.RACE, "race_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
-    ETHNICITY(ParticipantCohortStatusColumns.ETHNICITY, "ethnicity_concept_id", ParticipantCohortStatusDbInfo::buildLongSql);
+    PARTICIPANT_ID(ParticipantCohortStatusColumns.PARTICIPANTID.name(), "participant_id", ParticipantCohortStatusDbInfo::buildLongSql),
+    STATUS(ParticipantCohortStatusColumns.STATUS.name(), "status", ParticipantCohortStatusDbInfo::buildLongSql),
+    GENDER(ParticipantCohortStatusColumns.GENDER.name(), "gender_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
+    BIRTH_DATE(ParticipantCohortStatusColumns.BIRTHDATE.name(), "birth_date", ParticipantCohortStatusDbInfo::buildDateSql),
+    RACE(ParticipantCohortStatusColumns.RACE.name(), "race_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
+    ETHNICITY(ParticipantCohortStatusColumns.ETHNICITY.name(), "ethnicity_concept_id", ParticipantCohortStatusDbInfo::buildLongSql);
 
-    private final ParticipantCohortStatusColumns name;
+    private final String name;
     private final String dbName;
     private final BiFunction<Filter, MapSqlParameterSource, String> function;
 
-    private ParticipantCohortStatusDbInfo(ParticipantCohortStatusColumns name, String dbName, BiFunction<Filter, MapSqlParameterSource, String> function) {
+    private ParticipantCohortStatusDbInfo(String name, String dbName, BiFunction<Filter, MapSqlParameterSource, String> function) {
         this.name = name;
         this.dbName = dbName;
         this.function = function;
     }
 
-    public ParticipantCohortStatusColumns getName() {
+    public String getName() {
         return this.name;
     }
 
@@ -43,7 +43,7 @@ public enum ParticipantCohortStatusDbInfo {
 
     public BiFunction<Filter, MapSqlParameterSource, String> getFunction() { return function; }
 
-    public static ParticipantCohortStatusDbInfo fromName(ParticipantCohortStatusColumns name) {
+    public static ParticipantCohortStatusDbInfo fromName(String name) {
         for (ParticipantCohortStatusDbInfo column : values()) {
             if (column.name.equals(name)) {
                 return column;
@@ -58,12 +58,12 @@ public enum ParticipantCohortStatusDbInfo {
             if (filter.getOperator().equals(Operator.IN)) {
                 parameters.addValue(filter.getProperty().toString(), filter.getValues()
                         .stream()
-                        .map(v -> filter.getProperty().equals(STATUS.getName()) ? new Long(CohortStatus.valueOf(v).ordinal()) : new Long(v))
+                        .map(v -> filter.getProperty().name().equals(STATUS.getName()) ? new Long(CohortStatus.valueOf(v).ordinal()) : new Long(v))
                         .collect(Collectors.toList()));
             } else  {
                 String wildcard = (filter.getOperator().equals(Operator.LIKE) ? "%" : "");
                 parameters.addValue(filter.getProperty().toString(),
-                        filter.getProperty().equals(STATUS.getName()) ?
+                        filter.getProperty().name().equals(STATUS.getName()) ?
                                 new Long(CohortStatus.valueOf(filter.getValues().get(0)).ordinal()) + wildcard :
                                 new Long(filter.getValues().get(0)) + wildcard);
             }
@@ -108,21 +108,21 @@ public enum ParticipantCohortStatusDbInfo {
 
     private static String buildSqlString(Filter filter) {
         if (filter.getOperator().equals(Operator.IN)) {
-            return fromName(filter.getProperty()).getDbName() +
+            return fromName(filter.getProperty().name()).getDbName() +
                 " " + OperatorUtils.getSqlOperator(filter.getOperator()) +
                 " (:" + filter.getProperty().toString() + ")\n";
         }
-        return fromName(filter.getProperty()).getDbName() +
+        return fromName(filter.getProperty().name()).getDbName() +
                 " " + OperatorUtils.getSqlOperator(filter.getOperator())  +
                 " :" + filter.getProperty().toString() + "\n";
     }
 
     private static void validateFilterSize(Filter filter) {
         if (filter.getValues().isEmpty()) {
-            throw new BadRequestException("Invalid request: property: " + filter.getProperty() + " values: is empty.");
+            throw new BadRequestException("Invalid request: property: " + filter.getProperty().name() + " values: is empty.");
         }
         if (!filter.getOperator().equals(Operator.IN) && filter.getValues().size() > 1) {
-            throw new BadRequestException("Invalid request: property: " + filter.getProperty()
+            throw new BadRequestException("Invalid request: property: " + filter.getProperty().name()
                     + " using operartor: " + filter.getOperator().name() + " must have a single value.");
         }
     }

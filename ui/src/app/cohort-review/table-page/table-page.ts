@@ -37,12 +37,12 @@ export class TablePage implements OnInit, OnDestroy {
 
   readonly ColumnEnum = Columns;
   readonly ReverseColumnEnum = {
-    participantId: Columns.ParticipantId,
-    gender: Columns.Gender,
-    race: Columns.Race,
-    ethnicity: Columns.Ethnicity,
-    birthDate: Columns.BirthDate,
-    status: Columns.Status
+    participantId: Columns.PARTICIPANTID,
+    gender: Columns.GENDER,
+    race: Columns.RACE,
+    ethnicity: Columns.ETHNICITY,
+    birthDate: Columns.BIRTHDATE,
+    status: Columns.STATUS
   };
 
   participants: Participant[];
@@ -89,7 +89,7 @@ export class TablePage implements OnInit, OnDestroy {
     const query = <Request>{
       page: Math.floor(state.page.from / state.page.size),
       pageSize: state.page.size,
-      sortColumn: Columns.ParticipantId,
+      sortColumn: Columns.PARTICIPANTID,
       sortOrder: SortOrder.Asc,
       filters: {items: []},
       pageFilterType: PageFilterType.ParticipantCohortStatuses,

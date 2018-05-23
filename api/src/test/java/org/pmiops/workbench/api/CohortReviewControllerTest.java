@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
@@ -25,7 +24,6 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.*;
-import org.springframework.http.ResponseEntity;
 
 import javax.inject.Provider;
 import java.sql.Date;
@@ -33,7 +31,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -210,20 +207,6 @@ public class CohortReviewControllerTest {
     }
 
     @Test
-    public void getParticipants() throws Exception {
-        int page = 1;
-        int pageSize = 22;
-
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, pageSize, SortOrder.DESC, ParticipantCohortStatusColumns.STATUS);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page, pageSize, SortOrder.DESC,ParticipantCohortStatusColumns.PARTICIPANTID);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null,null,null, ParticipantCohortStatusColumns.STATUS);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null,null, SortOrder.DESC,null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, pageSize,null,null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, page,null,null,null);
-        assertFindByCohortIdAndCdrVersionId(namespace, name, cohortId, cdrVersionId, null, null,null,null);
-    }
-
-    @Test
     public void createParticipantCohortAnnotation() throws Exception {
         assertCreateParticipantCohortAnnotation(createParticipantCohortAnnotation(Boolean.TRUE, null, null, null, null), AnnotationType.BOOLEAN);
         assertCreateParticipantCohortAnnotation(createParticipantCohortAnnotation(null, "test", null, null, null), AnnotationType.STRING);
@@ -374,9 +357,9 @@ public class CohortReviewControllerTest {
         ethnicityMap.put(6L, "Not Hispanic or Latino");
 
         Map<String, Map<Long, String>> concepts = new HashMap<>();
-        concepts.put(GenderRaceEthnicityType.RACE.name(), raceMap);
-        concepts.put(GenderRaceEthnicityType.GENDER.name(), genderMap);
-        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), ethnicityMap);
+        concepts.put(ParticipantCohortStatusColumns.RACE.name(), raceMap);
+        concepts.put(ParticipantCohortStatusColumns.GENDER.name(), genderMap);
+        concepts.put(ParticipantCohortStatusColumns.ETHNICITY.name(), ethnicityMap);
         return concepts;
     }
 
@@ -418,104 +401,6 @@ public class CohortReviewControllerTest {
         workspace.setWorkspaceNamespace(namespace);
         workspace.setFirecloudName(name);
         return workspace;
-    }
-
-    private void assertFindByCohortIdAndCdrVersionId(String namespace,
-                                                     String name,
-                                                     long cohortId,
-                                                     long cdrVersionId,
-                                                     Integer page,
-                                                     Integer pageSize,
-                                                     SortOrder sortOrder,
-                                                     ParticipantCohortStatusColumns sortColumn) {
-        Integer pageParam = page == null ? 0 : page;
-        Integer pageSizeParam = pageSize == null ? 25 : pageSize;
-        sortColumn = (sortColumn == null || sortColumn.name().equals(sortColumn.PARTICIPANTID)) ? ParticipantCohortStatusColumns.PARTICIPANTID : sortColumn;
-        sortOrder = sortOrder == null ? SortOrder.ASC : sortOrder;
-
-        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortId).participantId(participantId);
-        final Date dob = new Date(System.currentTimeMillis());
-        ParticipantCohortStatus dbParticipant = new ParticipantCohortStatus()
-                .participantKey(key)
-                .status(CohortStatus.INCLUDED)
-                .birthDate(dob)
-                .ethnicityConceptId(1L)
-                .genderConceptId(1L)
-                .raceConceptId(1L);
-
-        org.pmiops.workbench.model.ParticipantCohortStatus respParticipant =
-                new org.pmiops.workbench.model.ParticipantCohortStatus()
-                        .participantId(1L)
-                        .status(CohortStatus.INCLUDED)
-                        .birthDate(dob.getTime())
-                        .ethnicityConceptId(1L)
-                        .genderConceptId(1L)
-                        .raceConceptId(1L);
-
-        org.pmiops.workbench.model.CohortReview respCohortReview =
-                new org.pmiops.workbench.model.CohortReview()
-                .cohortReviewId(1L)
-                        .cohortId(cohortId)
-                        .cdrVersionId(cdrVersionId)
-                        .matchedParticipantCount(1000L)
-                        .reviewedCount(0L)
-                        .reviewSize(200L)
-                        .page(pageParam)
-                        .pageSize(pageSizeParam)
-                        .sortOrder(sortOrder.toString())
-                        .sortColumn(sortColumn.toString())
-                .participantCohortStatuses(Arrays.asList(respParticipant));
-
-        List<ParticipantCohortStatus> participants = new ArrayList<ParticipantCohortStatus>();
-        participants.add(dbParticipant);
-
-        CohortReview cohortReviewAfter = new CohortReview();
-        cohortReviewAfter.setCohortReviewId(1L);
-        cohortReviewAfter.setCohortId(cohortId);
-        cohortReviewAfter.setCdrVersionId(cdrVersionId);
-        cohortReviewAfter.setMatchedParticipantCount(1000);
-        cohortReviewAfter.setReviewSize(200);
-        cohortReviewAfter.setCreationTime(new Timestamp(System.currentTimeMillis()));
-
-        Cohort cohort = new Cohort();
-        cohort.setWorkspaceId(1);
-
-        Map<String, Map<Long, String>> concepts = new HashMap<>();
-        concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
-        concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
-        concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
-        GenderRaceEthnicityConcept greConcept = new GenderRaceEthnicityConcept(concepts);
-
-        when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(cohortReviewAfter);
-        when(cohortReviewService.findAll(key.getCohortReviewId(),
-                Collections.<Filter>emptyList(),
-                new PageRequest().page(pageParam).pageSize(pageSizeParam).sortOrder(sortOrder).sortColumn(sortColumn.toString()))).thenReturn(participants);
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId,
-            WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
-        when(cohortReviewService.findCohort(cohortId)).thenReturn(cohort);
-
-        ParticipantCohortStatuses request = new ParticipantCohortStatuses();
-        request.page(page);
-        request.pageSize(pageSize);
-        request.sortOrder(sortOrder);
-        request.sortColumn(sortColumn);
-        request.pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES);
-
-        ResponseEntity<org.pmiops.workbench.model.CohortReview> response =
-                reviewController.getParticipantCohortStatuses(
-                        namespace, name, cohortId, cdrVersionId, request);
-
-        org.pmiops.workbench.model.CohortReview actualCohortReview = response.getBody();
-        respCohortReview.setCreationTime(actualCohortReview.getCreationTime());
-        assertEquals(respCohortReview, response.getBody());
-        verify(cohortReviewService, atLeast(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
-        verify(cohortReviewService, atLeast(1)).findCohortReview(cohortId, cdrVersionId);
-        verify(cohortReviewService, times(1))
-                .findAll(key.getCohortReviewId(),
-                        Collections.<Filter>emptyList(),
-                        new PageRequest().page(pageParam).pageSize(pageSizeParam).sortOrder(sortOrder).sortColumn(sortColumn.toString()));
-        verify(cohortReviewService, atLeast(1)).findCohort(cohortId);
-        verifyNoMoreMockInteractions();
     }
 
     private void verifyNoMoreMockInteractions() {
