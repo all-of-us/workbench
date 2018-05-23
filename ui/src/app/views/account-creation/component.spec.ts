@@ -41,9 +41,9 @@ class AccountCreationPage {
 
   readPageData() {
     updateAndTick(this.fixture);
-    this.passwordField = this.fixture.debugElement.query(By.css('#password');
-    this.passwordAgainField = this.fixture.debugElement.query(By.css('#passwordAgain');
-    this.usernameField = this.fixture.debugElement.query(By.css('#username');
+    this.passwordField = this.fixture.debugElement.query(By.css('#password'));
+    this.passwordAgainField = this.fixture.debugElement.query(By.css('#passwordAgain'));
+    this.usernameField = this.fixture.debugElement.query(By.css('#username'));
   }
 }
 
