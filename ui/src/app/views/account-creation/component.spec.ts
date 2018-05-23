@@ -123,9 +123,6 @@ describe('AccountCreationComponent', () => {
     expect(page.passwordField.classes.successfulInput).toBeTruthy();
   }));
 
-
-
-
   it('only shows password errors when off focus', fakeAsync(() => {
     page.readPageData();
     simulateEvent(page.fixture, page.passwordField, 'focus');
@@ -136,7 +133,6 @@ describe('AccountCreationComponent', () => {
     simulateEvent(page.fixture, page.passwordField, 'focus');
     expect(page.passwordField.classes.unsuccessfulInput).toBeFalsy();
   }));
-
 
   it('handles selecting password again', fakeAsync(() => {
     page.readPageData();
