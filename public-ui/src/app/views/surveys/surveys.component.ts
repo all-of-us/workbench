@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import { Router } from '@angular/router';
 import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
 
@@ -14,8 +15,11 @@ export class SurveysComponent implements OnInit {
     'related to your area of interest.';
   pageImage = '/assets/images/create-account-male-standing.png';
   surveys = [];
+  searchText = '';
+
   constructor(
-    private api: DataBrowserService
+    private api: DataBrowserService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -25,5 +29,13 @@ export class SurveysComponent implements OnInit {
         console.log(this.surveys); }
         );
   }
+
+  public viewResults(r) {
+    console.log("Viewing results ", r);
+    localStorage.setItem("dbDomain", r);
+    localStorage.setItem("searchText", this.searchText);
+    this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
+  }
+
 
 }

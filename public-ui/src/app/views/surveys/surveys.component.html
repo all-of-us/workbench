@@ -6,9 +6,13 @@
       <p class="view-sub-title">{{subTitle}} </p>
     </div>
     <div class="white-box" >
-      <div class="search-input-big">
-        <clr-icon shape="search" class="input-icon is-info"></clr-icon>
-        <input type="text" id="search-db" placeholder="Keyword Search">
+      <div class="row search">
+        <div class="col-xs-12 lex-xs-middle search-input-full ">
+          <div class="search-wrapper">
+            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+            <input type="text" id="search-db" placeholder="Keyword Search" [(ngModel)]="searchText">
+          </div>
+        </div>
       </div>
 
       <div class="box-header">
@@ -20,7 +24,7 @@
 
         <!-- Show a card for each survey -->
         <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 survey-cards" *ngFor="let survey of surveys; let i = index" >
-          <a routerLink="/survey/{{survey.domainId.toLowerCase()}}" class="card clickable">
+          <a (click)="viewResults(survey)" class="card clickable">
             <div class="card-header">
               {{survey.domainDisplay}}
             </div>

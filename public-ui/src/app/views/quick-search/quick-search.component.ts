@@ -51,6 +51,9 @@ export class QuickSearchComponent implements OnInit {
 
   public viewResults(r) {
     console.log("Viewing results ", r);
+    localStorage.setItem("dbDomain", r);
+    localStorage.setItem("searchText", this.searchText);
+
     if (r.dbType === 'survey') {
       this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
     }

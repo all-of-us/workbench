@@ -1,3 +1,52 @@
-<p>
-  ehr-view works! {{domainId}}
-</p>
+<div class="row">
+
+  <div class="col-xs-12">
+
+    <div class="page-header">
+      <h2>  {{title}} </h2>
+      <p class="view-sub-title">{{subTitle}} </p>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-4 col-sm-4 col-xs-12">
+    <div class="white-card-box">
+      <h5 class="box-title">
+        Participants
+      </h5>
+      <div class="card-stat">
+        {{searchResult.countValue | number}}
+      </div>
+      <p class="card-text bigger">
+        More Excited
+      </p>
+
+      <div>
+        <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8 col-sm-8 col-xs-12">
+    <div class="white-card-box">
+      <h5 class="box-title">
+        Big Box
+      </h5>
+      <div class="card-stat">
+        Card Stat
+      </div>
+      <p class="card-text bigger">
+        Bigger Card text
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<div class="row result-list">
+  <div class="col-xs-12">
+    <h4> Result list goes here </h4>
+  </div>l
+</div>
+

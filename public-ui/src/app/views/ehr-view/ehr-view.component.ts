@@ -19,7 +19,8 @@ export class EhrViewComponent implements OnInit {
   domainId: string;
   title ;
   subTitle;
-  domain: DbDomain;
+  dbDomain;
+  searchText;
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
@@ -28,6 +29,12 @@ export class EhrViewComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Get search result from localStorage
+      this.searchText = localStorage.getItem('searchText');
+      this.dbDomain = localStorage.getItem('dbDomain');
+      this.subTitle = "Keyword: " + this.searchText;
+      this.title = "View Full Results: " + this.dbDomain.domainDisplay;
+
   }
 
 }

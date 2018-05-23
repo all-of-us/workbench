@@ -23,7 +23,7 @@ export class SurveyViewComponent implements OnInit {
   title ;
   subTitle;
   surveys: DbDomain[] = [];
-  survey: DbDomain;
+  survey;
   surveyResult: QuestionConceptListResponse;
   resultsComplete = false;
 
@@ -45,40 +45,38 @@ export class SurveyViewComponent implements OnInit {
 
   function;
   ngOnInit() {
+
+    // Get the survey from local storage the user clicked on on a previous page
+    this.survey = localStorage.getItem('dbDomain');
+    this.searchText = localStorage.getItem('searchText');
+    this.prevSearchText = this.searchText;
+    console.log("Survey : " , this.survey);
+    this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
+      next: x => {
+        const questions = x.items;
+        this.surveyResult = x;
+        this.surveyResult.items = questions ;
+        // Temp until answer order is fixed on server side , sort abc
+        for (const q of questions ) {
+          q.countAnalysis.results.sort((a1, a2) => {
+            if (a1.stratum4 > a2.stratum4) { return 1; }
+            if (a1.stratum4 < a2.stratum4) { return -1; }
+            return 0;
+          });
+        }
+
+        // Copy all qustions to display initially
+        this.questions = this.surveyResult.items;
+        console.log(this.surveyResult);
+      },
+      error: err => console.error('Observer got an error: ' + err),
+      complete: () => { this.resultsComplete = true; }
+    });
+
     this.api.getSurveyList().subscribe(
       result => {
         this.surveys = result.items;
-        console.log('Survey view: ' ,  this.surveys);
-        for (const item of this.surveys) {
-          if (item.domainId.toLowerCase() === this.domainId.toLowerCase()) {
-            this.survey = item;
-            console.log('Survey again. Getting results: ' , this.survey);
-            this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
-              next: x => {
-                const questions = x.items;
-                this.surveyResult = x;
-                this.surveyResult.items = questions ;
-                // Temp until answer order is fixed on server side , sort abc
-                for (const q of questions ) {
-                  q.countAnalysis.results.sort((a1, a2) => {
-                    if (a1.stratum4 > a2.stratum4) { return 1; }
-                    if (a1.stratum4 < a2.stratum4) { return -1; }
-                    return 0;
-                  });
-                }
-
-                // Copy all qustions to display initially
-                this.questions = this.surveyResult.items;
-                console.log(this.surveyResult);
-              },
-              error: err => console.error('Observer got an error: ' + err),
-              complete: () => { this.resultsComplete = true; }
-            });
-          }
-        }
-      }
-    );
-
+      });
 
   }
 
@@ -93,6 +91,7 @@ export class SurveyViewComponent implements OnInit {
       // No hit
       return false ;
   }
+
   public filterResults() {
     /* Reset questions before filtering if length becomes less than prev or zero
       so backspacing works */
@@ -120,7 +119,6 @@ export class SurveyViewComponent implements OnInit {
   public showAnswerGraphs(q, a: AchillesResult) {
     console.log('In show answer graphs', a);
     q.selectedAnswer = a;
-
     console.log('Selected answer for q ' , q );
   }
 

@@ -9,7 +9,7 @@
 
     <div class="white-card-box" >
       <div class="row search">
-        <div class="col-xs-12 lex-xs-middle search-input-full ">
+        <div class="col-xs-12 flex-xs-middle search-input-full ">
           <div class="search-wrapper">
             <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
             <input type="text" id="search-db" placeholder="Keyword Search" [(ngModel)]="searchText">
@@ -74,8 +74,12 @@
                 <div class="card-stat">
                   {{r.countValue | number}}
                 </div>
-                <p class="card-text bigger">
-                  There are {{r.countValue}} {{r.domainDisplay.toLowerCase()}} out of {{totalParticipants}}.
+                <p *ngIf="r.dbType === 'domain_filter'" class="card-text bigger">
+                  There are {{r.countValue}} {{r.domainDisplay.toLowerCase()}} out of {{totalParticipants | number}}
+                  total participants.
+                </p>
+                <p *ngIf="r.dbType === 'survey'" class="card-text bigger">
+                  There are {{r.countValue}} survey questions on this survey related to your search.
                 </p>
 
                 <div>
