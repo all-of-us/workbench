@@ -99,7 +99,7 @@ export class AccountCreationComponent {
     if (isBlank(this.password) || isBlank(this.passwordAgain)) {
         return false;
     }
-    return !(this.password === this.passwordAgain);
+    return this.password !== this.passwordAgain;
   }
 
   get showPasswordLengthError() {
@@ -228,7 +228,7 @@ export class AccountCreationComponent {
   }
 
   get passwordAgainIsNotValid(): boolean {
-    return !(this.password === this.passwordAgain);
+    return this.password !== this.passwordAgain;
   }
 
   get showPasswordAgainValidationError(): boolean {
