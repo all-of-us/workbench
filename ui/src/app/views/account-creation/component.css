@@ -1,6 +1,7 @@
 .error {
-  background-color: #ffeeee;
   padding: 0 0.5rem;
+  font-weight: 500;
+  color: #2F2E7E;
   margin-top: 0.2rem;
 }
 
@@ -15,10 +16,6 @@
 
 .long-input {
   width: 16rem;
-}
-
-.short-input {
-  width: 12rem;
 }
 
 .short-button {
