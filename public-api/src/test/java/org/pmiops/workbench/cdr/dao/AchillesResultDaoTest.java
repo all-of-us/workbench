@@ -42,7 +42,7 @@ public class AchillesResultDaoTest {
         achillesAnalysisDao.save(achillesAnalysis1);
 
 
-        achillesResult1=createAchillesResult(2397L,5000L,null,null,null,null,null,260L);
+        achillesResult1=createAchillesResult(2397L,5000L,null,null,null,null,null,260L, 0L);
 
 
         achillesResultDao.save(achillesResult1);
@@ -71,7 +71,7 @@ public class AchillesResultDaoTest {
             .dataType(dataType);
     }
 
-    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum1,String stratum2,String stratum3,String stratum4,String stratum5,Long count){
+    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum1,String stratum2,String stratum3,String stratum4,String stratum5,Long count,Long sourceCountValue){
         return new AchillesResult()
                 .id(id)
                 .analysisId(analysisId)
@@ -80,7 +80,8 @@ public class AchillesResultDaoTest {
                 .stratum3(stratum3)
                 .stratum4(stratum4)
                 .stratum5(stratum5)
-                .countValue(count);
+                .countValue(count)
+                .sourceCountValue(sourceCountValue);
     }
 
     @After

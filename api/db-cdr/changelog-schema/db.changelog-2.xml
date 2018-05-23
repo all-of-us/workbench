@@ -200,6 +200,7 @@
       <column name="count_value" type="BIGINT">
         <constraints nullable="true"/>
       </column>
+
     </createTable>
 
     <createIndex
