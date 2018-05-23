@@ -18,6 +18,7 @@ public class AchillesResult  {
     private String stratum4;
     private String stratum5;
     private Long countValue;
+    private Long sourceCountValue;
     private String stratum5Name;
 
     @Id
@@ -141,6 +142,18 @@ public class AchillesResult  {
         return this;
     }
 
+    @Column(name="source_count_value")
+    public Long getSourceCountValue() {
+        return sourceCountValue;
+    }
+    public void setSourceCountValue(Long sourceCountValue) {
+        this.sourceCountValue = sourceCountValue;
+    }
+    public AchillesResult sourceCountValue(Long val) {
+        this.sourceCountValue = val;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "AchillesResult{" +
@@ -153,6 +166,7 @@ public class AchillesResult  {
                 ", stratum4='" + stratum4 + '\'' +
                 ", stratum5='" + stratum5 + '\'' +
                 ", countValue=" + countValue +
+                ", sourceCountValue=" + sourceCountValue +
                 ", stratum5Name='" + stratum5Name + '\'' +
                 '}';
     }
@@ -173,6 +187,6 @@ public class AchillesResult  {
 
     @Override
     public int hashCode() {
-        return Objects.hash(analysisId, analysis, stratum1, stratum2, stratum3, stratum4, stratum5, countValue);
+        return Objects.hash(analysisId, analysis, stratum1, stratum2, stratum3, stratum4, stratum5, countValue, sourceCountValue);
     }
 }
