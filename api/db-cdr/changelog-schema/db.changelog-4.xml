@@ -14,7 +14,7 @@
     </sql>
 
     <sql dbms="mysql">
-      ALTER TABLE concept
+      ALTER TABLE conceptƒ
       ADD FULLTEXT INDEX concept_code_index
       (concept_code);
     </sql>
