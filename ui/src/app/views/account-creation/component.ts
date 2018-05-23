@@ -74,9 +74,9 @@ export class AccountCreationComponent {
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
       return;
-    } else if (this.showPasswordsDoNotMatchError
-      || this.showPasswordLengthError
-      || this.containsLowerAndUpperError) {
+    } else if (this.isUsernameValidationError
+      || this.isPasswordValidationError
+      || this.isPasswordAgainValidationError) {
         return;
     }
 
@@ -96,8 +96,7 @@ export class AccountCreationComponent {
   get showPasswordsDoNotMatchError() {
     // We do not want to show errors if nothing is typed yet. This is caught by the required
     // fields case.
-    if (this.password === undefined || this.passwordAgain === undefined
-      || this.password.length === 0 || this.passwordAgain.length === 0) {
+    if (isBlank(this.password) || isBlank(this.passwordAgain)) {
         return false;
     }
     return !(this.password === this.passwordAgain);
@@ -106,7 +105,7 @@ export class AccountCreationComponent {
   get showPasswordLengthError() {
     // We do not want to show errors if nothing is typed yet. This is caught by the required
     // fields case.
-    if (this.password === undefined || this.password.length === 0) {
+    if (isBlank(this.password)) {
       return false;
     }
     return (this.password.length < 8 || this.password.length > 100);
@@ -115,7 +114,7 @@ export class AccountCreationComponent {
   get containsLowerAndUpperError() {
     // We do not want to show errors if nothing is typed yet. This is caught by the required
     // fields case.
-    if (this.password === undefined || this.password.length === 0) {
+    if (isBlank(this.password)) {
       return false;
     }
     return !(this.hasLowerCase(this.password) && this.hasUpperCase(this.password));
@@ -125,6 +124,9 @@ export class AccountCreationComponent {
     const username = this.profile.username;
     if (isBlank(username)) {
       return false;
+    }
+    if (username.trim().length > 64) {
+      return true;
     }
     // Include alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
     return !(new RegExp(/^[\w-']([.]{0,1}[\w-']+)*$/).test(username));
@@ -173,15 +175,22 @@ export class AccountCreationComponent {
     this.usernameOffFocus = false;
   }
 
-  get usernameValidationError(): boolean {
-    return this.usernameOffFocus && (this.usernameConflictError || this.usernameInvalidError);
+  get isUsernameValidationError(): boolean {
+    return this.usernameConflictError || this.usernameInvalidError;
   }
 
-  get usernameValidationSuccess(): boolean {
-    return this.usernameOffFocus
-      && this.profile.username.trim().length >= 1
-      && !this.usernameConflictError
-      && !this.usernameInvalidError;
+  get showUsernameValidationError(): boolean {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+      return false;
+    }
+    return this.isUsernameValidationError;
+  }
+
+  get showUsernameValidationSuccess(): boolean {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+      return false;
+    }
+    return !this.isUsernameValidationError;
   }
 
   leaveFocusPassword(): void {
@@ -192,16 +201,23 @@ export class AccountCreationComponent {
     this.passwordOffFocus = false;
   }
 
-  get passwordValidationError(): boolean {
-    return this.passwordOffFocus &&
-      (this.showPasswordLengthError ||
-      this.containsLowerAndUpperError);
+  get isPasswordValidationError(): boolean {
+    return (this.showPasswordLengthError ||
+    this.containsLowerAndUpperError);
   }
 
-  get passwordValidationSuccess(): boolean {
-    return this.passwordOffFocus &&
-      !this.showPasswordLengthError &&
-      !this.containsLowerAndUpperError;
+  get showPasswordValidationError(): boolean {
+    if (isBlank(this.password) || !this.passwordOffFocus) {
+      return false;
+    }
+    return this.isPasswordValidationError
+  }
+
+  get showPasswordValidationSuccess(): boolean {
+    if (isBlank(this.password) || !this.passwordOffFocus) {
+      return false;
+    }
+    return !this.isPasswordValidationError
   }
 
   leaveFocusPasswordAgain(): void {
@@ -212,12 +228,22 @@ export class AccountCreationComponent {
     this.passwordAgainOffFocus = false;
   }
 
-  get passwordAgainValidationError(): boolean {
-    return this.passwordAgainOffFocus && this.showPasswordsDoNotMatchError;
+  get isPasswordAgainValidationError(): boolean {
+    return this.showPasswordsDoNotMatchError
   }
 
-  get passwordAgainValidationSuccess(): boolean {
-    return this.passwordAgainOffFocus && !this.showPasswordsDoNotMatchError;
+  get showPasswordAgainValidationError(): boolean {
+    if (isBlank(this.passwordAgain) || !this.passwordAgainOffFocus) {
+      return false;
+    }
+    return this.isPasswordAgainValidationError;
+  }
+
+  get showPasswordAgainValidationSuccess(): boolean {
+    if (isBlank(this.passwordAgain) || !this.passwordAgainOffFocus) {
+      return false;
+    }
+    return !this.isPasswordAgainValidationError;
   }
 
 }
