@@ -210,14 +210,14 @@ export class AccountCreationComponent {
     if (isBlank(this.password) || !this.passwordOffFocus) {
       return false;
     }
-    return this.isPasswordValidationError
+    return this.isPasswordValidationError;
   }
 
   get showPasswordValidationSuccess(): boolean {
     if (isBlank(this.password) || !this.passwordOffFocus) {
       return false;
     }
-    return !this.isPasswordValidationError
+    return !this.isPasswordValidationError;
   }
 
   leaveFocusPasswordAgain(): void {
@@ -229,7 +229,7 @@ export class AccountCreationComponent {
   }
 
   get isPasswordAgainValidationError(): boolean {
-    return this.showPasswordsDoNotMatchError
+    return this.showPasswordsDoNotMatchError;
   }
 
   get showPasswordAgainValidationError(): boolean {

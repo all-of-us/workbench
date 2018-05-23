@@ -5,7 +5,7 @@ import {InvitationVerificationRequest} from '../../generated/model/invitationVer
 
 export class ProfileStubVariables {
   static PROFILE_STUB = {
-    username: 'testers!@#$%^&*()><script>alert("hello");</script>',
+    username: 'testers',
     contactEmail: 'tester@mactesterson.edu🀓⚚><script>alert("hello");</script>',
     enabledInFireCloud: true,
     freeTierBillingProjectName: 'all-of-us-free-abcdefg',
@@ -52,6 +52,14 @@ export class ProfileServiceStub {
     } else {
       const err = new Error('Invalid invitation code');
       return new Observable(observer => { observer.error(err); });
+    }
+  }
+
+  isUsernameTaken(username: string): Observable<boolean> {
+    if (username === ProfileStubVariables.PROFILE_STUB.username) {
+      return new Observable(observer => { observer.next(true); });
+    } else {
+      return new Observable(observer => { observer.next(false); });
     }
   }
 }

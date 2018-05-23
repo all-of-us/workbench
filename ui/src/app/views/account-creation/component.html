@@ -65,7 +65,7 @@
       </div>
     </div>
     <div class="form-section">
-      <input type="password" class="short-input" for="passwordAgain" name="passwordAgain"
+      <input type="password" class="short-input" id="passwordAgain" for="passwordAgain" name="passwordAgain"
              (blur)="leaveFocusPasswordAgain()" (focus)="enterFocusPasswordAgain()"
              [(ngModel)]="passwordAgain" placeholder="Confirm Password"
              [ngClass]="{'successfulInput': showPasswordAgainValidationSuccess, 'unsuccessfulInput': showPasswordAgainValidationError}">
