@@ -245,8 +245,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public ResponseEntity<ConceptListResponse> getConceptsSearch(
             String conceptName,
             String standard_concept,
-            String concept_code,
-            String vocabulary_id,
             String domain_id) {
 
         String std_concept="S";
