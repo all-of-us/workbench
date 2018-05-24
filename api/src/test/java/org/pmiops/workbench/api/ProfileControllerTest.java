@@ -131,7 +131,6 @@ public class ProfileControllerTest {
     profile.setUsername(USERNAME);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
-    createAccountRequest.setPassword(PASSWORD);
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
