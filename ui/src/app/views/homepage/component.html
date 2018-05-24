@@ -39,7 +39,7 @@
         <div class="description">Here you can create and name a workspace.
             Within a workspace you can create notebooks and build cohorts.</div>
         <button class="button tooltip" (click)="addWorkspace()" [disabled]="!billingProjectInitialized">
-            Create Workspace
+            CREATE WORKSPACE
             <span *ngIf="!billingProjectInitialized" class="tooltip-content">
                 Your billing project is currently being created, please wait.
             </span>
@@ -50,7 +50,7 @@
         <div class="description">Here you can view all workspaces you have created, or that have been
             shared with you.</div>
         <button class="button tooltip" (click)="listWorkspaces()" [disabled]="!FCAccountInitialized">
-            Go to Workspaces
+            GO TO WORKSPACES
             <span *ngIf="!FCAccountInitialized" class="tooltip-content">
                 Your account is being initialized, please wait.
             </span>
