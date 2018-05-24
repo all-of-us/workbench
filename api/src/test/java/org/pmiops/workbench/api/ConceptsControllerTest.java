@@ -265,11 +265,11 @@ public class ConceptsControllerTest {
             null, 1000), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testSearchConceptsOneThousandOneResults() throws Exception {
     saveConcepts();
-    conceptsController.searchConcepts("ns", "name", "con", null, null,
-       null, 1001);
+    assertResults(conceptsController.searchConcepts("ns", "name", "con", null, null,
+       null, 1001), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
   }
 
   private static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {

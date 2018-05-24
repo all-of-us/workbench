@@ -55,10 +55,12 @@ public class ConceptsController implements ConceptsApiDelegate {
     CdrVersionContext.setCdrVersion(cdrVersion);
     if (maxResults == null) {
       maxResults = DEFAULT_MAX_RESULTS;
-    } else if (maxResults < 1 || maxResults > MAX_MAX_RESULTS) {
+    } else if (maxResults < 1) {
       throw new BadRequestException("Invalid value for maxResults: " + maxResults);
+    } else if (maxResults > MAX_MAX_RESULTS) {
+      maxResults = MAX_MAX_RESULTS;
     }
-    if (Strings.isNullOrEmpty(query.trim())) {
+    if (query.trim().isEmpty()) {
       throw new BadRequestException("Query must be non-whitespace");
     }
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
