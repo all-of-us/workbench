@@ -59,7 +59,17 @@ public class ConceptDaoTest {
     }
 
     private Concept createConcept(Long conceptId, String name, String vocabularyId) {
-        return new Concept().conceptId(conceptId).conceptName(name).vocabularyId(vocabularyId);
+        return new Concept()
+          .conceptId(conceptId)
+          .conceptName(name)
+          .vocabularyId(vocabularyId)
+          .conceptClassId(vocabularyId)
+          .conceptCode("02")
+          .count(2)
+          .domainId(vocabularyId)
+          .sourceCountValue(21L)
+          .standardConcept("S")
+          .prevalence(0.00F);
     }
 
 }
