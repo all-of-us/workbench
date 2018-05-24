@@ -18,6 +18,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConceptService {
 
+  public enum StandardConceptFilter {
+    ALL_CONCEPTS,
+    STANDARD_CONCEPTS,
+    NON_STANDARD_CONCEPTS
+  }
+
   @PersistenceContext
   private EntityManager entityManager;
 
@@ -31,7 +37,7 @@ public class ConceptService {
   public static final String STANDARD_CONCEPT_CODE = "S";
 
   public Slice<Concept> searchConcepts(String query,
-      Boolean standardConcept, String vocabularyId, String domainId,
+      StandardConceptFilter standardConceptFilter, String vocabularyId, List<String> domainIds,
       int limit) {
     Specification<Concept> conceptSpecification =
         (root, criteriaQuery, criteriaBuilder) -> {
@@ -54,26 +60,23 @@ public class ConceptService {
             predicates.add(criteriaBuilder.or(queryPredicates.toArray(new Predicate[0])));
 
             // Optionally filter on standard concept, vocabulary ID, domain ID
-            if (standardConcept != null) {
-              if (standardConcept) {
+            if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
                 predicates.add(criteriaBuilder.equal(root.get("standardConcept"),
                     criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-              } else {
-                List<Predicate> standardConceptPredicates = new ArrayList<>();
-                standardConceptPredicates.add(criteriaBuilder.isNull(root.get("standardConcept")));
-                standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
-                    criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-                predicates.add(criteriaBuilder.or(
-                    standardConceptPredicates.toArray(new Predicate[0])));
-              }
+            } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
+              List<Predicate> standardConceptPredicates = new ArrayList<>();
+              standardConceptPredicates.add(criteriaBuilder.isNull(root.get("standardConcept")));
+              standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
+                  criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+              predicates.add(criteriaBuilder.or(
+                  standardConceptPredicates.toArray(new Predicate[0])));
             }
             if (vocabularyId != null) {
               predicates.add(criteriaBuilder.equal(root.get("vocabularyId"),
                   criteriaBuilder.literal(vocabularyId)));
             }
-            if (domainId != null) {
-              predicates.add(criteriaBuilder.equal(root.get("domainId"),
-                  criteriaBuilder.literal(domainId)));
+            if (domainIds != null) {
+              predicates.add(root.get("domainId").in(domainIds));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };

@@ -75,13 +75,13 @@ paths:
             $ref: "#/definitions/MaterializeCohortResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concepts:
-      get:
+      post:
         tags:
           - concepts
 
         description: >
           Searches for concepts in concept table by name, and optionally filter on
-          domain ID, vocabulary ID, or standard concept status. Uses the CDR version affiliated
+          domain, vocabulary ID, or standard concept status. Uses the CDR version affiliated
           with the workspace specified in the path.
 
         operationId: "searchConcepts"
@@ -96,34 +96,40 @@ paths:
             description: The ID of the workspace for which concepts are being looked up.
             required: true
             type: string
-          - in: query
+          - in: body
             name: query
-            type: string
+            schema:
+              type: string
             required: true
             description: >
               A query string that can be used to match a subset of the name (case-insensitively),
               the entire code value (case-insensitively), or the concept ID.
-          - in: query
-            name: standard_concept
-            type: boolean
+          - in: body
+            name: standard_concept_filter
+            schema:
+              $ref: "#/definitions/StandardConceptFilter"
             description: >
-              True if only standard concepts should be returned, false if only non-standard
-              concepts should be returned; defaults to both standard and non-standard concepts
-              are returned.
-          - in: query
+              STANDARD_CONCEPTS if only standard concepts should be returned,
+              NON_STANDARD_CONCEPTS if only non-standard
+              concepts should be returned; defaults to ALL_CONCEPTS, meaning both
+              standard and non-standard concepts will be returned.
+          - in: body
             name: vocabulary_id
-            type: string
+            schema:
+              type: string
             description: The vocabulary ID for the concepts returned (e.g. SNOMED, RxNorm)
-          - in: query
-            name: domain_id
-            type: string
+          - in: body
+            name: domain
+            schema:
+              $ref: "#/definitions/Domain"
             description: >
-             The domain ID for the concepts returned (e.g. Observation, Drug). TODO: consider
-             changing this to be an enum which is mapped to underlying domain ID value(s).
-          - in: query
+             The domain for the concepts returned (e.g. OBSERVATION, DRUG). Note that this may map
+             to multiple domain ID values in OMOP.
+          - in: body
             name: max_results
-            type: integer
-            format: int32
+            schema:
+              type: integer
+              format: int32
             description: The maximum number of results returned. Defaults to 20.
 
         responses:
@@ -369,6 +375,16 @@ definitions:
   Operator:
     type: string
     enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN, BETWEEN]
+
+  StandardConceptFilter:
+    type: string
+    description: filter on whether standard, non-standard, or all concepts should be returned\
+    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS]
+
+  Domain:
+    type: string
+    description: filter on the domain in which concepts should be returned
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, RACE, GENDER, ETHNICITY]
 
   Concept:
     description: A concept describing a type of entity (e.g. measurement, observation, procedure.)

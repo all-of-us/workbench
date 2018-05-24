@@ -23,6 +23,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -53,7 +55,7 @@ public class ConceptsControllerTest {
       .conceptCode("conceptA")
       .conceptClassId("classId")
       .vocabularyId("V1")
-      .domainId("D1")
+      .domainId("Condition")
       .countValue(123L)
       .prevalence(0.2F);
 
@@ -63,7 +65,7 @@ public class ConceptsControllerTest {
       .conceptCode("conceptB")
       .conceptClassId("classId2")
       .vocabularyId("V2")
-      .domainId("D2")
+      .domainId("Measurement")
       .countValue(456L)
       .prevalence(0.3F);
 
@@ -189,7 +191,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsStandardConcept() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", true, null,
+        conceptsController.searchConcepts("ns", "name", "con", StandardConceptFilter.STANDARD_CONCEPTS, null,
             null, null), CLIENT_CONCEPT_1);
   }
 
@@ -197,7 +199,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsNotStandardConcept() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", false, null,
+        conceptsController.searchConcepts("ns", "name", "con", StandardConceptFilter.NON_STANDARD_CONCEPTS, null,
             null, null), CLIENT_CONCEPT_2);
   }
 
@@ -222,7 +224,7 @@ public class ConceptsControllerTest {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts("ns", "name", "con", null, null,
-            "D", null));
+            Domain.OBSERVATION, null));
   }
 
   @Test
@@ -230,23 +232,23 @@ public class ConceptsControllerTest {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts("ns", "name", "con", null, null,
-            "D1", null), CLIENT_CONCEPT_1);
+            Domain.CONDITION, null), CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsMultipleMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", true, "V1",
-            "D1", null), CLIENT_CONCEPT_1);
+        conceptsController.searchConcepts("ns", "name", "con", StandardConceptFilter.STANDARD_CONCEPTS, "V1",
+            Domain.CONDITION, null), CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsMultipleNoMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", false, "V1",
-            "D1", null));
+        conceptsController.searchConcepts("ns", "name", "con", StandardConceptFilter.NON_STANDARD_CONCEPTS, "V1",
+            Domain.CONDITION, null));
   }
 
   @Test
