@@ -26,6 +26,8 @@ import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 public class DirectoryServiceImpl implements DirectoryService {
 
   static final String APPLICATION_NAME = "All of Us Researcher Workbench";
+  private static final String ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  private static SecureRandom rnd = new SecureRandom();
 
   // This list must exactly match the scopes allowed via the GSuite Domain Admin page here:
   // https://admin.google.com/AdminHome?chromeless=1#OGX:ManageOauthClients
@@ -43,6 +45,8 @@ public class DirectoryServiceImpl implements DirectoryService {
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+
+
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
@@ -113,7 +117,6 @@ public class DirectoryServiceImpl implements DirectoryService {
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
   }
-
   @Override
   public void deleteUser(String username) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
@@ -131,13 +134,10 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
   }
 
-  static final String allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
-  static SecureRandom rnd = new SecureRandom();
-
-  String randomString(){
+  private String randomString(){
     StringBuilder sb = new StringBuilder(18);
     for (int i = 0; i < 18; i++)
-      sb.append(allowed.charAt(rnd.nextInt(allowed.length())));
+      sb.append(ALLOWED.charAt(rnd.nextInt(allowed.length())));
     return sb.toString();
   }
 }
