@@ -137,7 +137,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   private String randomString(){
     StringBuilder sb = new StringBuilder(18);
     for (int i = 0; i < 18; i++)
-      sb.append(ALLOWED.charAt(rnd.nextInt(allowed.length())));
+      sb.append(ALLOWED.charAt(rnd.nextInt(ALLOWED.length())));
     return sb.toString();
   }
 }
