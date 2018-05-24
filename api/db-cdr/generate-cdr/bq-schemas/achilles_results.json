@@ -38,5 +38,10 @@
         "mode": "NULLABLE", 
         "name": "count_value", 
         "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "source_count_value",
+        "type": "INTEGER"
       }
 ]

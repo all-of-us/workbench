@@ -8,9 +8,9 @@
 "ICD9CM","ICD9CM","International Classification of Diseases, Ninth Revision, Clinical Modification, Volume 1 and 2 (NCHS)","source","icd9cm",5046,0
 "Lifestyle","Lifestyle","The Lifestyle module provides information on smoking, alcohol and recreational drug use","survey","PPI",1585855,568120
 "Measurement","Labs","Measurement","domain_filter","measurment",21,0
-"Overall Health","Overall Health","The Overall Health module provides a general picture of current health","survey","PPI",1585710,567857
+"Overall-Health","Overall Health","The Overall Health module provides a general picture of current health","survey","PPI",1585710,567857
 "Per Med His","Personal Medical History","The Personal Medical History module provides information on personal health history","survey","PPI",,0
 "Procedure","Procedures","Procedure","domain_filter","procedures",10,0
 "RxNorm","RXNORM","RxNorm is the standard vocabulary for recording medication and drug exposures","standard","rxnorm",44819104,0
 "SNOMED","SNOMED","SNOMED is the Standardized vocabulary for conditions and procedures. All source vocabularies are ultimately mapped to the SNOMED vocabulary.","standard","snomed",44819097,0
-"TheBasics","The Basics","The Basics module provides demographics and economic information for participants","survey","PPI",1586134,567437
+"The-Basics","The Basics","The Basics module provides demographics and economic information for participants","survey","PPI",1586134,567437

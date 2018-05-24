@@ -51,10 +51,10 @@ public class AchillesAnalysisDaoTest {
         dao.save(achillesAnalysis2);
         dao.save(achillesAnalysis3);
 
-        achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L);
-        achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L);
-        achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L);
-        achillesResult4=createAchillesResult(2346L,3112L,"1586134","2000000","","Prefer not to answer",null,890L);
+        achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L,0L);
+        achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L,0L);
+        achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L,0L);
+        achillesResult4=createAchillesResult(2346L,3112L,"1586134","2000000","","Prefer not to answer",null,890L,0L);
 
         achillesResultDao.save(achillesResult1);
         achillesResultDao.save(achillesResult2);
@@ -89,7 +89,7 @@ public class AchillesAnalysisDaoTest {
             .dataType(dataType);
     }
 
-    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum1,String stratum2,String stratum3,String stratum4,String stratum5,Long count){
+    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum1,String stratum2,String stratum3,String stratum4,String stratum5,Long count, Long sourceCountValue){
         return new AchillesResult()
                 .id(id)
                 .analysisId(analysisId)
@@ -98,7 +98,8 @@ public class AchillesAnalysisDaoTest {
                 .stratum3(stratum3)
                 .stratum4(stratum4)
                 .stratum5(stratum5)
-                .countValue(count);
+                .countValue(count)
+                .sourceCountValue(sourceCountValue);
     }
 
     @After

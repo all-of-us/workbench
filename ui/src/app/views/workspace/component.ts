@@ -6,7 +6,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   Cluster,
@@ -78,8 +78,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   // Keep in sync with api/src/main/resources/notebooks.yaml.
   private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
 
-  @ViewChild(WorkspaceNavBarComponent)
-  navBar: WorkspaceNavBarComponent;
+  @ViewChild(WorkspaceShareComponent)
+  shareModal: WorkspaceShareComponent;
+
+
   Tabs = Tabs;
 
   cohortNameFilter = new CohortNameFilter();
@@ -387,5 +389,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   get ownerPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
+  }
+
+  share(): void {
+    this.shareModal.open();
   }
 }
