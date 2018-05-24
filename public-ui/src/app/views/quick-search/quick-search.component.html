@@ -75,11 +75,11 @@
                   {{r.countValue | number}}
                 </div>
                 <p *ngIf="r.dbType === 'domain_filter'" class="card-text bigger">
-                  There are {{r.countValue}} {{r.domainDisplay.toLowerCase()}} out of {{totalParticipants | number}}
+                  There are {{r.countValue | number}} {{r.domainDisplay.toLowerCase()}} out of {{totalParticipants | number}}
                   total participants.
                 </p>
                 <p *ngIf="r.dbType === 'survey'" class="card-text bigger">
-                  There are {{r.countValue}} survey questions on this survey related to your search.
+                  There are {{r.countValue }} survey questions on this survey related to your search.
                 </p>
 
                 <div>

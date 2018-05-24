@@ -3,52 +3,53 @@
   <div class="col-xs-12">
 
     <div class="page-header">
-      <h2>  {{title}} </h2>
-      <p class="view-sub-title">{{subTitle}} </p>
+      <h2 class="title">  {{title}} </h2>
+      <h4 class="view-sub-title">{{subTitle}} </h4>
     </div>
   </div>
 </div>
 
 <div class="row">
   <div class="col-md-4 col-sm-4 col-xs-12">
-    <div class="white-card-box top-stat">
-      <h5 class="box-title">
-        Participants
-      </h5>
-      <div class="card-stat">
-        {{dbDomain.countValue | number}}
-      </div>
-      <p class="card-text bigger">
-        There are {{dbDomain.countValue}} {{dbDomain.domainDisplay.toLowerCase()}} out of {{totalParticipants | number}}
-        total participants with relevant diagnoses.
-      </p>
+    <div class="white-card-box top-stat one-row">
+      <div class="row ">
+        <div class="col-xs-12">
+          <h5 class="box-title">
+            Participants
+          </h5>
+          <div class="card-stat">
+            {{dbDomain.countValue | number}}
+          </div>
+          <p class="card-text bigger">
+            There are {{dbDomain.countValue | number}} {{dbDomain.domainDisplay.toLowerCase()}} out of {{totalParticipants | number}}
+            total participants with relevant diagnoses.
+          </p>
 
-      <div class="card-text bottom">
-        <clr-icon shape="info-standard"></clr-icon> Why a range of particpants?
+          <div class="card-text bottom">
+            <clr-icon shape="info-standard"></clr-icon> Why a range of particpants?
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="col-md-8 col-sm-8 col-xs-12">
-    <div class="white-card-box top-stat">
-      <div class="row">
+  <div class="col-md col-sm col-xs-12">
+    <div class="white-card-box top-stat one-row">
+      <div class="row ">
         <div class="col-md-6 col-xs-12">
           <h5 class="box-title">
             Diagnoses
           </h5>
           <div class="card-stat">
-            Card Stat
+            {{searchResults.length}}
           </div>
-          <p class="card-text bigger">
-            <clr-icon shape="help-info"></clr-icon> What is SNOMED?
-          </p>
+
+          <div class="card-text bottom">
+            <clr-icon class="" shape="info-standard"></clr-icon> What is SNOMED?
+          </div>
         </div>
-        <div class="col-md-6 col-xs-12">
-          <h5 class="box-title">
-            Chart here
-          </h5>
-
-
+        <div class="col-md-6 col-xs-12 chart-wrapper flex-xs-middle">
+            <app-chart [concepts]="searchResults" [pointWidth]="10"> </app-chart>
         </div>
       </div>
 

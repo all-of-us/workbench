@@ -12,6 +12,7 @@ input[type=url]:not([readonly]) {
   border-bottom: solid 1px;
   background-color: inherit;
   width: 80%;
+  background: none;
 }
 
 .search-input-big {

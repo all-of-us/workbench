@@ -4,12 +4,12 @@ import { Observable } from 'rxjs/Rx';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {Analysis} from '../../../publicGenerated/model/analysis';
+import {Concept} from '../../../publicGenerated/model/concept';
 import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 import {ChartComponent} from '../../data-browser/chart/chart.component';
-import {Concept} from '../../../publicGenerated/model/concept';
 
 @Component({
   selector: 'app-ehr-view',
@@ -49,7 +49,7 @@ export class EhrViewComponent implements OnInit {
     }
 
     // Run search filter to domain
-    let domainId = this.dbDomain.domainId;
+    const domainId = this.dbDomain.domainId;
     this.api.getConceptsSearch(this.searchText).subscribe(results =>  {
 
       this.searchResults = results.items.filter(r => r.domainId === this.dbDomain.domainId);

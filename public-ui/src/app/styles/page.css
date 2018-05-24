@@ -17,7 +17,7 @@ h3 {
 }
 
 h4 {
-    font-size: 22px;
+    font-size: 24px;
 }
 
 h5 {
@@ -148,3 +148,18 @@ label {
     width: 240px;
 }
 
+/* stat box at tops of pages */
+.white-card-box.top-stat {
+    /* Height for this row fixed */
+    height: 9rem;
+}
+
+/* A white card box that is divided in columns needs the row to be 100% of of the height of the box */
+.one-row > .row {
+    height: 100%;
+}
+
+.row .chart-wrapper {
+    height:100%;
+    margin-top:.5rem;
+}

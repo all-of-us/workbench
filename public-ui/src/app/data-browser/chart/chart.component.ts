@@ -2,6 +2,7 @@ import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import * as highcharts from 'highcharts';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
+import {Concept} from '../../../publicGenerated/model/concept';
 
 /* CONSTANTS */
 const COUNT_ANALYSIS_ID = 3000;
@@ -42,7 +43,9 @@ const DATA_LABEL_STYLE = {
 })
 export class ChartComponent implements OnChanges {
   @Input() analysis: Analysis;
+  @Input() concepts: Concept[] = []; // Can put in analysis or concepts to chart. Concepts are used if we have them.
   @Input() selectedResult: any; // For ppi question answers analysis , we select an answer from the results we want to graph
+  @Input() pointWidth = 10; // Optional width of bar or point or box plot , passed directly to highcharts
   chartOptions: any;
   chartInstance: any;
   chartType = 'column';
@@ -61,10 +64,12 @@ export class ChartComponent implements OnChanges {
   // If analysis object results changed , update the chart
   ngOnChanges() {
     console.log('On changes');
-    if (this.analysis && this.analysis.results.length) {
+    if ((this.analysis && this.analysis.results.length) ||
+      (this.concepts && this.concepts.length)) {
         // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
     }
+
   }
 
   public chartClick(e) {
@@ -91,7 +96,7 @@ export class ChartComponent implements OnChanges {
                   animation: {
                       duration: 100,
                   },
-                  pointWidth: options.pointWidth,
+                  pointWidth: options.pointWidth ? options.pointWidth : null,
                   minPointLength: 3
               },
               pie: {
@@ -160,6 +165,9 @@ export class ChartComponent implements OnChanges {
   }
 
   public makeChartOptions() {
+    if (this.concepts.length > 0) {
+      return this.makeConceptChartOptions();
+    }
     if (this.analysis.analysisId === COUNT_ANALYSIS_ID ||
         this.analysis.analysisId === SURVEY_COUNT_ANALYSIS_ID) {
       return this.makeCountChartOptions();
@@ -206,11 +214,47 @@ export class ChartComponent implements OnChanges {
         title: { text: null },
         series: series,
         categories: cats,
-        pointWidth: 10
+        pointWidth: this.pointWidth
       };
 
   }
+  public makeConceptChartOptions() {
+    let data = [];
+    let cats = [];
+    for (const a  of this.concepts) {
+      data.push({name: a.conceptName, y: a.countValue});
+      cats.push(a.conceptName);
+    }
+    data = data.sort((a, b) => {
+      if (a.name > b.name) {
+        return 1;
+      }
+      if (a.name < b.name) {
+        return -1;
+      }
+      return 0; }
+    );
+    cats = cats.sort((a, b) => {
+      if (a > b) { return 1; }
+      if (a < b) { return -1; }
+      return 0;
+    });
 
+
+    // Override tooltip and colors and such
+    const series = {
+      name: this.concepts[0].domainId, colorByPoint: true, data: data, colors: ['#6CAEE3'],
+      tooltip: {pointFormat: '<b>{point.y} </b>'}
+    };
+    return {
+      chart: {type: 'column', backgroundColor: '#ECF1F4'},
+      title: { text: null },
+      series: series,
+      categories: cats,
+      pointWidth: this.pointWidth
+    };
+
+  }
   public makeGenderChartOptions() {
     const results = this.getSelectedResults(this.selectedResult);
     let data = [];
@@ -240,7 +284,7 @@ export class ChartComponent implements OnChanges {
       title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
       series: series,
       categories: cats,
-      pointWidth: 10
+      pointWidth: null
     };
 
   }
@@ -279,7 +323,7 @@ export class ChartComponent implements OnChanges {
       title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
       series: series,
       categories: cats,
-      pointWidth: 20,
+      pointWidth: this.pointWidth,
     };
   }
 
