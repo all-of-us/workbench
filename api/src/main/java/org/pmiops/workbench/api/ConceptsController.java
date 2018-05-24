@@ -3,10 +3,15 @@ package org.pmiops.workbench.api;
 import com.google.common.base.Strings;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +24,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   private static final int MAX_MAX_RESULTS = 1000;
 
   private final ConceptService conceptService;
+  private final WorkspaceService workspaceService;
 
   private static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->  new Concept()
@@ -33,13 +39,20 @@ public class ConceptsController implements ConceptsApiDelegate {
             .vocabularyId(concept.getVocabularyId());
 
   @Autowired
-  public ConceptsController(ConceptService conceptService) {
+  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService) {
     this.conceptService = conceptService;
+    this.workspaceService = workspaceService;
   }
 
   @Override
-  public ResponseEntity<ConceptListResponse> searchConcepts(String query,
+  public ResponseEntity<ConceptListResponse> searchConcepts(String workspaceNamespace,
+      String workspaceId, String query,
       Boolean standardConcept, String vocabularyId, String domainId, Integer maxResults) {
+    workspaceService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    CdrVersion cdrVersion = workspace.getCdrVersion();
+    CdrVersionContext.setCdrVersion(cdrVersion);
     if (maxResults == null) {
       maxResults = DEFAULT_MAX_RESULTS;
     } else if (maxResults < 1 || maxResults > MAX_MAX_RESULTS) {

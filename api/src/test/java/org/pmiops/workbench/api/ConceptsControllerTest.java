@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.util.Arrays;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -10,13 +12,24 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -59,8 +72,31 @@ public class ConceptsControllerTest {
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
       makeConcept(CLIENT_CONCEPT_2);
 
+  @TestConfiguration
+  @Import({
+      WorkspaceServiceImpl.class
+  })
+  @MockBean({
+      FireCloudService.class,
+      CohortService.class,
+      Clock.class
+  })
+  static class Configuration {
+  }
+
+
   @Autowired
   private ConceptDao conceptDao;
+  @Autowired
+  private WorkspaceService workspaceService;
+  @Autowired
+  private WorkspaceDao workspaceDao;
+  @Autowired
+  private CdrVersionDao cdrVersionDao;
+  @Autowired
+  FireCloudService fireCloudService;
+
+
   @PersistenceContext
   private EntityManager entityManager;
 
@@ -72,20 +108,40 @@ public class ConceptsControllerTest {
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
     ConceptService conceptService = new ConceptService(entityManager);
-    conceptsController = new ConceptsController(conceptService);
+    conceptsController = new ConceptsController(conceptService, workspaceService);
+
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setName("1");
+    //set the db name to be empty since test cases currently
+    //run in the workbench schema only.
+    cdrVersion.setCdrDbName("");
+    cdrVersion = cdrVersionDao.save(cdrVersion);
+
+    Workspace workspace = new Workspace();
+    workspace.setWorkspaceId(1L);
+    workspace.setName("name");
+    workspace.setFirecloudName("name");
+    workspace.setWorkspaceNamespace("ns");
+    workspace.setCdrVersion(cdrVersion);
+    workspaceDao.save(workspace);
+    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
+    when(fireCloudService.getWorkspace("ns", "name"))
+        .thenReturn(fcResponse);
   }
 
   @Test(expected = BadRequestException.class)
   public void testSearchConceptsBlankQuery() throws Exception {
     assertResults(
-        conceptsController.searchConcepts(" ", null, null,
+        conceptsController.searchConcepts("ns", "name", " ", null, null,
             null, null));
   }
 
   @Test
   public void testSearchNoConcepts() throws Exception {
     assertResults(
-        conceptsController.searchConcepts("a", null, null,
+        conceptsController.searchConcepts("ns", "name", "a", null, null,
           null, null));
   }
 
@@ -93,7 +149,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsNameNoMatches() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("x", null, null,
+        conceptsController.searchConcepts("ns", "name", "x", null, null,
             null, null));
   }
 
@@ -101,7 +157,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsNameOneMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("a", null, null,
+        conceptsController.searchConcepts("ns", "name", "a", null, null,
             null, null), CLIENT_CONCEPT_1);
   }
 
@@ -109,7 +165,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsNameTwoMatches() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", null, null,
+        conceptsController.searchConcepts("ns", "name", "con", null, null,
             null, null), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
   }
 
@@ -117,7 +173,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsCodeMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("conceptb", null, null,
+        conceptsController.searchConcepts("ns", "name", "conceptb", null, null,
             null, null), CLIENT_CONCEPT_2);
   }
 
@@ -125,7 +181,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsConceptIdMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("456", null, null,
+        conceptsController.searchConcepts("ns", "name", "456", null, null,
             null, null), CLIENT_CONCEPT_2);
   }
 
@@ -133,7 +189,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsStandardConcept() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", true, null,
+        conceptsController.searchConcepts("ns", "name", "con", true, null,
             null, null), CLIENT_CONCEPT_1);
   }
 
@@ -141,7 +197,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsNotStandardConcept() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", false, null,
+        conceptsController.searchConcepts("ns", "name", "con", false, null,
             null, null), CLIENT_CONCEPT_2);
   }
 
@@ -149,7 +205,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsVocabularyIdNoMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", null, "V",
+        conceptsController.searchConcepts("ns", "name", "con", null, "V",
             null, null));
   }
 
@@ -157,7 +213,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsVocabularyIdMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", null, "V2",
+        conceptsController.searchConcepts("ns", "name", "con", null, "V2",
             null, null), CLIENT_CONCEPT_2);
   }
 
@@ -165,7 +221,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsDomainIdNoMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", null, null,
+        conceptsController.searchConcepts("ns", "name", "con", null, null,
             "D", null));
   }
 
@@ -173,7 +229,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsDomainIdMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", null, null,
+        conceptsController.searchConcepts("ns", "name", "con", null, null,
             "D1", null), CLIENT_CONCEPT_1);
   }
 
@@ -181,7 +237,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsMultipleMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", true, "V1",
+        conceptsController.searchConcepts("ns", "name", "con", true, "V1",
             "D1", null), CLIENT_CONCEPT_1);
   }
 
@@ -189,7 +245,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsMultipleNoMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", false, "V1",
+        conceptsController.searchConcepts("ns", "name", "con", false, "V1",
             "D1", null));
   }
 
@@ -197,7 +253,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsOneResult() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", null, null,
+        conceptsController.searchConcepts("ns", "name", "con", null, null,
             null, 1), CLIENT_CONCEPT_2);
   }
 
@@ -205,14 +261,14 @@ public class ConceptsControllerTest {
   public void testSearchConceptsOneThousandResults() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("con", null, null,
+        conceptsController.searchConcepts("ns", "name", "con", null, null,
             null, 1000), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
   }
 
   @Test(expected = BadRequestException.class)
   public void testSearchConceptsOneThousandOneResults() throws Exception {
     saveConcepts();
-    conceptsController.searchConcepts("con", null, null,
+    conceptsController.searchConcepts("ns", "name", "con", null, null,
        null, 1001);
   }
 
@@ -245,7 +301,6 @@ public class ConceptsControllerTest {
     concept.setPrevalence(dbConcept.getPrevalence());
     return concept;
   }
-
 
   private void saveConcepts() {
     conceptDao.save(CONCEPT_1);

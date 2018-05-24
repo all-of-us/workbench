@@ -3,6 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import org.pmiops.workbench.cdr.model.Concept;
@@ -17,8 +18,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConceptService {
 
-  private final EntityManager entityManager;
+  @PersistenceContext
+  private EntityManager entityManager;
 
+  public ConceptService() {}
+
+  // Used for tests
   public ConceptService(EntityManager entityManager) {
     this.entityManager = entityManager;
   }

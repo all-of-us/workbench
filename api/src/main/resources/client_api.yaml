@@ -86,6 +86,16 @@ paths:
 
         operationId: "searchConcepts"
         parameters:
+          - in: path
+            name: workspaceNamespace
+            description: The namespace of the workspace for which concepts are being looked up.
+            required: true
+            type: string
+          - in: path
+            name: workspaceId
+            description: The ID of the workspace for which concepts are being looked up.
+            required: true
+            type: string
           - in: query
             name: query
             type: string
