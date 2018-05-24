@@ -288,22 +288,7 @@ public class ConceptsControllerTest {
     result.setPrevalence(concept.getPrevalence());
     return result;
   }
-
-  private static Concept makeClientConcept(org.pmiops.workbench.cdr.model.Concept dbConcept) {
-    Concept concept = new Concept();
-    concept.setConceptId(dbConcept.getConceptId());
-    concept.setConceptName(dbConcept.getConceptName());
-    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(
-        dbConcept.getStandardConcept()));
-    concept.setConceptCode(dbConcept.getConceptCode());
-    concept.setConceptClassId(dbConcept.getConceptClassId());
-    concept.setVocabularyId(dbConcept.getVocabularyId());
-    concept.setDomainId(dbConcept.getDomainId());
-    concept.setCountValue(dbConcept.getCountValue());
-    concept.setPrevalence(dbConcept.getPrevalence());
-    return concept;
-  }
-
+  
   private void saveConcepts() {
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
