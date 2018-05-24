@@ -8,10 +8,7 @@
       <input type="text" class="long-input" id="familyName" name="familyName" [(ngModel)]="profile.familyName" placeholder="Family Name">
     </div>
     <div class="form-section">
-      <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" (ngModelChange)="contactEmailChanged()" placeholder="Email Address">
-      <div *ngIf="contactEmailConflictError" class="error">
-        Contact Email is already in use.
-      </div>
+      <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" placeholder="Email Address">
     </div>
     <div class="form-section">
       <input type="text" class="short-input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" placeholder="New Username">
@@ -36,18 +33,6 @@
         Username is not a valid username.
       </div>
     </div>
-    <div class="form-section">
-      <input type="password" class="short-input" id="password" name="password" [(ngModel)]="password" placeholder="Password">
-      <clr-tooltip>
-        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-        <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
-          Passwords must contain at least one lowercase and one uppercase letter
-        </clr-tooltip-content>
-      </clr-tooltip>
-    </div>
-    <div class="form-section">
-      <input type="password" class="short-input" for="passwordAgain" name="passwordAgain" [(ngModel)]="passwordAgain" placeholder="Confirm Password">
-    </div>
 
     <div class="form-section">
       <button type="submit"
@@ -59,15 +44,6 @@
     </div>
     <div *ngIf="showAllFieldsRequiredError" class="error">
       All fields are required.
-    </div>
-    <div *ngIf="showPasswordsDoNotMatchError" class="error">
-      Passwords do not match.
-    </div>
-    <div *ngIf="showPasswordLengthError" class="error">
-      Password must be between 8 and 100 characters long.
-    </div>
-    <div *ngIf="containsLowerAndUpperError" class="error">
-      Password must contain one lowercase and one uppercase letter.
     </div>
   </div>
 </form>

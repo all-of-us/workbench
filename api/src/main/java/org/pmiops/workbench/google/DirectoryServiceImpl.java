@@ -6,15 +6,18 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
 import com.google.api.services.admin.directory.model.User;
+import com.google.api.services.admin.directory.model.UserEmail;
 import com.google.api.services.admin.directory.model.UserName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.inject.Provider;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 
@@ -99,12 +102,15 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   @Override
-  public User createUser(String givenName, String familyName, String username, String password) {
+  public User createUser(String givenName, String familyName, String username, String contactEmail) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+    String password = randomString();
     User user = new User()
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
-      .setName(new UserName().setGivenName(givenName).setFamilyName(familyName));
+      .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
+      .setEmails(new UserEmail().setAddress(contactEmail).setCustomType("Contact"))
+      .setChangePasswordAtNextLogin(true);
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
   }
@@ -124,5 +130,15 @@ public class DirectoryServiceImpl implements DirectoryService {
     } catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
+  }
+
+  static final String allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  static SecureRandom rnd = new SecureRandom();
+
+  String randomString(){
+    StringBuilder sb = new StringBuilder(18);
+    for (int i = 0; i < 18; i++)
+      sb.append(allowed.charAt(rnd.nextInt(allowed.length())));
+    return sb.toString();
   }
 }

@@ -30,11 +30,7 @@ export class AccountCreationComponent {
     familyName: '',
     contactEmail: ''
   };
-  password: string;
-  passwordAgain: string;
   showAllFieldsRequiredError: boolean;
-  showPasswordsDoNotMatchError: boolean;
-  showPasswordLengthError: boolean;
   creatingAccount: boolean;
   accountCreated: boolean;
   usernameConflictError = false;
@@ -63,33 +59,21 @@ export class AccountCreationComponent {
   }
 
   createAccount(): void {
-    if (this.usernameConflictError || this.contactEmailConflictError
-        || this.usernameInvalidError) {
+    if (this.usernameConflictError || this.usernameInvalidError) {
       return;
     }
     this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
-    this.showPasswordsDoNotMatchError = false;
-    this.showPasswordLengthError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
-         this.profile.username, this.profile.contactEmail, this.password, this.passwordAgain];
+         this.profile.username, this.profile.contactEmail];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
-      return;
-    } else if (!(this.password === this.passwordAgain)) {
-      this.showPasswordsDoNotMatchError = true;
-      return;
-    } else if (this.password.length < 8 || this.password.length > 100) {
-      this.showPasswordLengthError = true;
-      return;
-    } else if (!(this.hasLowerCase(this.password) && this.hasUpperCase(this.password))) {
-      this.containsLowerAndUpperError = true;
       return;
     }
 
     const request: CreateAccountRequest = {
-      profile: this.profile, password: this.password,
+      profile: this.profile,
       invitationKey: this.invitationKeyService.invitationKey
     };
     this.creatingAccount = true;
@@ -122,27 +106,6 @@ export class AccountCreationComponent {
         this.usernameConflictError = response.isTaken;
       });
     }, 300);
-  }
-
-  contactEmailChanged(): void {
-    if (!this.profile.contactEmail) {
-      return;
-    }
-    this.contactEmailConflictError = false;
-    clearTimeout(this.contactEmailCheckTimeout);
-    this.contactEmailCheckTimeout = setTimeout(() => {
-      this.profileService.isContactEmailTaken(this.profile.contactEmail).subscribe((response) => {
-        this.contactEmailConflictError = response.isTaken;
-      });
-    }, 300);
-  }
-
-  hasLowerCase(str: string): boolean {
-    return (/[a-z]/.test(str));
-  }
-
-  hasUpperCase(str: string): boolean {
-    return (/[A-Z]/.test(str));
   }
 
 }

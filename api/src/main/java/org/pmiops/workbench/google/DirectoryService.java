@@ -8,6 +8,6 @@ import com.google.api.services.admin.directory.model.User;
 public interface DirectoryService {
   public boolean isUsernameTaken(String username);
   public User getUser(String email);
-  public User createUser(String givenName, String familyName, String username, String password);
+  public User createUser(String givenName, String familyName, String username, String contactEmail);
   public void deleteUser(String username);
 }
