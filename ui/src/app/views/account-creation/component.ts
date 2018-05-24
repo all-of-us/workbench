@@ -16,12 +16,11 @@ function isBlank(s: string) {
 @Component({
   selector: 'app-account-creation',
   templateUrl: './component.html',
-  styleUrls: ['./component.css',
-              '../../styles/template.css']
+  styleUrls: ['../../styles/template.css',
+              './component.css']
 })
 export class AccountCreationComponent {
   contactEmailConflictError = false;
-  containsLowerAndUpperError: boolean;
   profile: Profile = {
     username: '',
     enabledInFireCloud: false,
@@ -33,12 +32,13 @@ export class AccountCreationComponent {
   password: string;
   passwordAgain: string;
   showAllFieldsRequiredError: boolean;
-  showPasswordsDoNotMatchError: boolean;
-  showPasswordLengthError: boolean;
   creatingAccount: boolean;
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
+  usernameOffFocus = true;
+  passwordOffFocus = true;
+  passwordAgainOffFocus = true;
   usernameCheckTimeout: NodeJS.Timer;
   contactEmailCheckTimeout: NodeJS.Timer;
 
@@ -67,25 +67,17 @@ export class AccountCreationComponent {
         || this.usernameInvalidError) {
       return;
     }
-    this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
-    this.showPasswordsDoNotMatchError = false;
-    this.showPasswordLengthError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
          this.profile.username, this.profile.contactEmail, this.password, this.passwordAgain];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
       return;
-    } else if (!(this.password === this.passwordAgain)) {
-      this.showPasswordsDoNotMatchError = true;
-      return;
-    } else if (this.password.length < 8 || this.password.length > 100) {
-      this.showPasswordLengthError = true;
-      return;
-    } else if (!(this.hasLowerCase(this.password) && this.hasUpperCase(this.password))) {
-      this.containsLowerAndUpperError = true;
-      return;
+    } else if (this.isUsernameValidationError
+      || this.passwordIsNotValid
+      || this.passwordAgainIsNotValid) {
+        return;
     }
 
     const request: CreateAccountRequest = {
@@ -101,10 +93,40 @@ export class AccountCreationComponent {
     });
   }
 
+  get showPasswordsDoNotMatchError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (isBlank(this.password) || isBlank(this.passwordAgain)) {
+        return false;
+    }
+    return this.password !== this.passwordAgain;
+  }
+
+  get showPasswordLengthError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (isBlank(this.password)) {
+      return false;
+    }
+    return (this.password.length < 8 || this.password.length > 100);
+  }
+
+  get containsLowerAndUpperError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (isBlank(this.password)) {
+      return false;
+    }
+    return !(this.hasLowerCase(this.password) && this.hasUpperCase(this.password));
+  }
+
   get usernameInvalidError(): boolean {
     const username = this.profile.username;
     if (isBlank(username)) {
       return false;
+    }
+    if (username.trim().length > 64) {
+      return true;
     }
     // Include alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
     return !(new RegExp(/^[\w-']([.]{0,1}[\w-']+)*$/).test(username));
@@ -143,6 +165,84 @@ export class AccountCreationComponent {
 
   hasUpperCase(str: string): boolean {
     return (/[A-Z]/.test(str));
+  }
+
+  leaveFocusUsername(): void {
+    this.usernameOffFocus = true;
+  }
+
+  enterFocusUsername(): void {
+    this.usernameOffFocus = false;
+  }
+
+  get isUsernameValidationError(): boolean {
+    return this.usernameConflictError || this.usernameInvalidError;
+  }
+
+  get showUsernameValidationError(): boolean {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+      return false;
+    }
+    return this.isUsernameValidationError;
+  }
+
+  get showUsernameValidationSuccess(): boolean {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+      return false;
+    }
+    return !this.isUsernameValidationError;
+  }
+
+  leaveFocusPassword(): void {
+    this.passwordOffFocus = true;
+  }
+
+  enterFocusPassword(): void {
+    this.passwordOffFocus = false;
+  }
+
+  get passwordIsNotValid(): boolean {
+    return (this.showPasswordLengthError || this.containsLowerAndUpperError);
+  }
+
+  get showPasswordValidationError(): boolean {
+    if (isBlank(this.password) || !this.passwordOffFocus) {
+      return false;
+    }
+    return this.passwordIsNotValid;
+  }
+
+  get showPasswordValidationSuccess(): boolean {
+    if (isBlank(this.password) || !this.passwordOffFocus) {
+      return false;
+    }
+    return !this.passwordIsNotValid;
+  }
+
+  leaveFocusPasswordAgain(): void {
+    this.passwordAgainOffFocus = true;
+  }
+
+  enterFocusPasswordAgain(): void {
+    this.passwordAgainOffFocus = false;
+  }
+
+  get passwordAgainIsNotValid(): boolean {
+    return this.password !== this.passwordAgain;
+  }
+
+  get showPasswordAgainValidationError(): boolean {
+    if (isBlank(this.passwordAgain) || !this.passwordAgainOffFocus) {
+      return false;
+    }
+    return this.passwordAgainIsNotValid;
+  }
+
+  get showPasswordAgainValidationSuccess(): boolean {
+    if (isBlank(this.passwordAgain) || !this.passwordAgainOffFocus) {
+      return false;
+    }
+    return !this.passwordAgainIsNotValid;
   }
 
 }

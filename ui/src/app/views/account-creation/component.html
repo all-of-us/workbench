@@ -14,7 +14,14 @@
       </div>
     </div>
     <div class="form-section">
-      <input type="text" class="short-input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" placeholder="New Username">
+      <input type="text" class="long-input" id="username" name="username"
+             [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" (blur)="leaveFocusUsername()"
+             (focus)="enterFocusUsername()" placeholder="New Username"
+             [ngClass]="{'successfulInput': showUsernameValidationSuccess, 'unsuccessfulInput': showUsernameValidationError}">
+      <div class="icon-area">
+        <clr-icon shape="warning-standard" class="warning-standard is-solid" *ngIf="showUsernameValidationError"></clr-icon>
+        <clr-icon shape="success-standard" class="success-standard is-solid" *ngIf="showUsernameValidationSuccess"></clr-icon>
+      </div>
       <clr-tooltip>
         <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
         <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
@@ -29,26 +36,47 @@
           </div>
         </clr-tooltip-content>
       </clr-tooltip>
-      <div *ngIf="usernameConflictError" class="error">
+      <div *ngIf="usernameConflictError && usernameOffFocus" class="error" id="username-taken-error">
         Username is already taken.
       </div>
-      <div *ngIf="usernameInvalidError" class="error">
+      <div *ngIf="usernameInvalidError && usernameOffFocus" class="error" id="username-invalid-error">
         Username is not a valid username.
       </div>
     </div>
     <div class="form-section">
-      <input type="password" class="short-input" id="password" name="password" [(ngModel)]="password" placeholder="Password">
+      <input type="password" class="long-input" id="password" name="password" [(ngModel)]="password" placeholder="Password"
+             (blur)="leaveFocusPassword()" (focus)="enterFocusPassword()"
+             [ngClass]="{'successfulInput': showPasswordValidationSuccess, 'unsuccessfulInput': showPasswordValidationError}">
+      <div class="icon-area">
+        <clr-icon shape="warning-standard" class="warning-standard is-solid" *ngIf="showPasswordValidationError"></clr-icon>
+        <clr-icon shape="success-standard" class="success-standard is-solid" *ngIf="showPasswordValidationSuccess"></clr-icon>
+      </div>
       <clr-tooltip>
         <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
         <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
           Passwords must contain at least one lowercase and one uppercase letter
         </clr-tooltip-content>
       </clr-tooltip>
+      <div *ngIf="showPasswordLengthError && passwordOffFocus" class="error" id="password-length-error">
+        Password must be between 8 and 100 characters long.
+      </div>
+      <div *ngIf="containsLowerAndUpperError && passwordOffFocus" class="error" id="password-case-error">
+        Password must contain one lowercase and one uppercase letter.
+      </div>
     </div>
     <div class="form-section">
-      <input type="password" class="short-input" for="passwordAgain" name="passwordAgain" [(ngModel)]="passwordAgain" placeholder="Confirm Password">
+      <input type="password" class="long-input" id="passwordAgain" for="passwordAgain" name="passwordAgain"
+             (blur)="leaveFocusPasswordAgain()" (focus)="enterFocusPasswordAgain()"
+             [(ngModel)]="passwordAgain" placeholder="Confirm Password"
+             [ngClass]="{'successfulInput': showPasswordAgainValidationSuccess, 'unsuccessfulInput': showPasswordAgainValidationError}">
+      <div class="icon-area">
+        <clr-icon shape="warning-standard" class="warning-standard is-solid" *ngIf="showPasswordAgainValidationError"></clr-icon>
+        <clr-icon shape="success-standard" class="success-standard is-solid" *ngIf="showPasswordAgainValidationSuccess"></clr-icon>
+      </div>
     </div>
-
+    <div *ngIf="showPasswordsDoNotMatchError && passwordAgainOffFocus" class="error" id="password-match-error">
+      Passwords do not match.
+    </div>
     <div class="form-section">
       <button type="submit"
           class="btn btn-primary short-button"
@@ -59,15 +87,6 @@
     </div>
     <div *ngIf="showAllFieldsRequiredError" class="error">
       All fields are required.
-    </div>
-    <div *ngIf="showPasswordsDoNotMatchError" class="error">
-      Passwords do not match.
-    </div>
-    <div *ngIf="showPasswordLengthError" class="error">
-      Password must be between 8 and 100 characters long.
-    </div>
-    <div *ngIf="containsLowerAndUpperError" class="error">
-      Password must contain one lowercase and one uppercase letter.
     </div>
   </div>
 </form>
