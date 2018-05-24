@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Strings;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.ConceptService;
@@ -47,6 +48,9 @@ public class ConceptsController implements ConceptsApiDelegate {
       maxResults = DEFAULT_MAX_RESULTS;
     } else if (maxResults < 1 || maxResults > MAX_MAX_RESULTS) {
       throw new BadRequestException("Invalid value for maxResults: " + maxResults);
+    }
+    if (Strings.isNullOrEmpty(query.trim())) {
+      throw new BadRequestException("Query must be non-whitespace");
     }
     Slice<Concept> concepts = conceptService.searchConcepts(query, standardConcept,
         vocabularyId, domainId, maxResults);
