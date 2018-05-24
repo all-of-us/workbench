@@ -12,16 +12,34 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
             "from concept c " +
             "where (match(c.concept_name) against(:conceptName in boolean mode) or " +
             "match(c.concept_code) against(:conceptName in boolean mode)) and " +
-            "c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') " +
+            "c.domain_id=:domain_id and c.standard_concept=:standard_concept " +
             "order by c.count_value desc limit 10;",
             nativeQuery = true)
-    List<Concept> findConceptLikeName(@Param("conceptName") String conceptName);
+    List<Concept> findConceptLikeNameAndDomainId(@Param("conceptName") String conceptName,@Param("domain_id") String domain_id,@Param("standard_concept") String standard_concept);
+
+    @Query(value = "select c.* " +
+            "from concept c " +
+            "where (match(c.concept_name) against(:conceptName in boolean mode) or " +
+            "match(c.concept_code) against(:conceptName in boolean mode)) and " +
+            "c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
+            "c.standard_concept=:standard_concept " +
+            "order by c.count_value desc limit 10;",
+            nativeQuery = true)
+    List<Concept> findConceptLikeName(@Param("conceptName") String conceptName,@Param("standard_concept") String standard_concept);
 
     @Query(value = "select c.* from concept c " +
-            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') " +
+            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
+            "c.standard_concept=:standard_concept " +
             "order by c.count_value desc limit 10;",
     nativeQuery = true)
-    List<Concept> findConceptsOrderedByCount();
+    List<Concept> findAllConceptsOrderedByCount(@Param("standard_concept") String standard_concept);
+
+    @Query(value = "select c.* from concept c " +
+            "where c.domain_id=:domain_id and " +
+            "c.standard_concept=:standard_concept " +
+            "order by c.count_value desc limit 10;",
+          nativeQuery = true)
+    List<Concept> findConceptsByDomainIdOrderedByCount(@Param("domain_id") String domain_id,@Param("standard_concept") String standard_concept);
 
     @Query(value = "select c.* from concept c " +
             "join concept_relationship rel on " +

@@ -244,20 +244,24 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<ConceptListResponse> getConceptsSearch(
             String conceptName,
-            String standardConcept,
+            String standard_concept,
             String concept_code,
             String vocabulary_id,
             String domain_id) {
 
-
+        standard_concept="S";
         List<Concept> conceptList;
 
         // If Concept name do search on name
 
-        if (conceptName != null) {
-            conceptList = conceptDao.findConceptLikeName(conceptName);
-        } else {
-            conceptList = conceptDao.findConceptsOrderedByCount();
+        if (conceptName != null && domain_id != null) {
+            conceptList = conceptDao.findConceptLikeNameAndDomainId(conceptName,domain_id,standard_concept);
+        } else if(conceptName != null && domain_id == null){
+            conceptList = conceptDao.findConceptLikeName(conceptName,standard_concept);
+        }else if(conceptName==null && domain_id != null){
+            conceptList = conceptDao.findConceptsByDomainIdOrderedByCount(domain_id,standard_concept);
+        }else{
+            conceptList=conceptDao.findAllConceptsOrderedByCount(standard_concept);
         }
 
         ConceptListResponse resp = new ConceptListResponse();
