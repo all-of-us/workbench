@@ -74,6 +74,57 @@ paths:
           schema:
             $ref: "#/definitions/MaterializeCohortResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concepts:
+      get:
+        security: []
+        tags:
+          - concepts
+
+        description: >
+          Searches for concepts in concept table by name, and optionally filter on
+          domain ID, vocabulary ID, or standard concept status. Uses the CDR version affiliated
+          with the workspace specified in the path.
+
+        operationId: "searchConcepts"
+        parameters:
+          - in: query
+            name: query
+            type: string
+            required: true
+            description: >
+              A query string that can be used to match a subset of the name (case-insensitively),
+              the entire code value (case-insensitively), or the concept ID.
+          - in: query
+            name: standard_concept
+            type: boolean
+            required: false
+            description: >
+              True if only standard concepts should be returned, false if any concepts
+              can be returned.
+          - in: query
+            name: vocabulary_id
+            type: string
+            required: false
+            description: The vocabulary ID for the concepts returned (e.g. SNOMED, RxNorm)
+          - in: query
+            name: domain_id
+            type: string
+            required: false
+            description: >
+             The domain ID for the concepts returned (e.g. Observation, Drug). TODO: consider
+             changing this to be an enum which is mapped to underlying domain ID value(s).
+          - in: query
+            name: max_results
+            type: integer
+            format: int32
+            description: The maximum number of results returned. Defaults to 20.
+
+        responses:
+          200:
+            description: A collection of concepts
+            schema:
+              $ref: "#/definitions/ConceptListResponse"
+
 definitions:
 
   MaterializeCohortRequest:
@@ -311,3 +362,58 @@ definitions:
   Operator:
     type: string
     enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN, BETWEEN]
+
+  Concept:
+    type: object
+    required:
+      - conceptId
+      - conceptName
+      - domainId
+      - vocabularyId
+      - conceptCode
+      - conceptClassId
+      - standardConcept
+      - countValue
+      - prevalence
+
+    properties:
+      conceptId:
+        description: ID of the concept
+        type: integer
+        format: int64
+      conceptName:
+        description: Name of the concept
+        type: string
+      domainId:
+        description: Domain ID of the concept (e.g. Observation)
+        type: string
+      vocabularyId:
+        description: Vocabulary ID of the concept (e.g. SNOMED)
+        type: string
+      conceptCode:
+        description: Code for the concept in its vocabulary (e.g. G8107)
+        type: string
+      conceptClassId:
+        description: Class of the concept (e.g. Ingredient)
+        type: string
+      standardConcept:
+        description: True if this is a standard concept, false otherwise
+        type: boolean
+      countValue:
+        description: Count of participants matching this concept in the CDR
+        type: integer
+        format: int64
+      prevalence:
+        description: Prevalence among participants in the CDR (a percentage of the total)
+        type: number
+        format: float
+
+  ConceptListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Concept"
