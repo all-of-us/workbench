@@ -23,6 +23,7 @@ public class Concept {
     private String vocabularyId;
     private String domainId;
     private long countValue;
+    private Long sourceCountValue;
     private float prevalence;
 
     @Id
@@ -138,6 +139,20 @@ public class Concept {
         return this;
     }
 
+    @Column(name= "source_count_value")
+    public Long getSourceCountValue() {
+        return sourceCountValue;
+    }
+
+    public void setSourceCountValue(Long count) {
+        this.sourceCountValue = count;
+    }
+
+    public Concept sourceCountValue(Long count) {
+        this.sourceCountValue = count;
+        return this;
+    }
+
     @Column(name = "prevalence")
     public float getPrevalence() {
         return prevalence;
@@ -166,12 +181,13 @@ public class Concept {
                 Objects.equals(conceptCode, concept.conceptCode) &&
                 Objects.equals(conceptClassId, concept.conceptClassId) &&
                 Objects.equals(vocabularyId, concept.vocabularyId) &&
+                Objects.equals(sourceCountValue,concept.sourceCountValue) &&
                 Objects.equals(domainId, concept.domainId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(conceptId, conceptName, standardConcept, conceptCode, conceptClassId, vocabularyId, domainId, countValue, prevalence);
+        return Objects.hash(conceptId, conceptName, standardConcept, conceptCode, conceptClassId, vocabularyId, domainId, countValue, sourceCountValue,prevalence);
     }
 
     @Override
