@@ -59,6 +59,24 @@ def ensure_docker(cmd_name, args)
   end
 end
 
+# exec against a live local API server - used for script access to a local API
+# server or database.
+def ensure_docker_api(cmd_name, args)
+  if Workbench::in_docker?
+    return
+  end
+  Process.wait spawn(*(%W{docker-compose exec api ./project.rb #{cmd_name}} + args))
+  unless $?.exited? and $?.success?
+    Common.new.error "command against docker-compose service 'api' failed, " +
+                     "please verify your local API server is running (dev-up " +
+                     "or run-api)"
+  end
+  if $?.exited?
+    exit $?.exitstatus
+  end
+  exit 1
+end
+
 def read_db_vars(gcc)
   Workbench::assert_in_docker
   vars = Workbench::read_vars(Common.new.capture_stdout(%W{
@@ -839,8 +857,7 @@ Common.register_command({
   :fn => lambda { |*args| update_user_registered_status("update_user_registered_status", args) }
 })
 
-def set_authority(cmd_name, *args)
-  ensure_docker cmd_name, args
+def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false
   op.opts.dry_run = false
@@ -848,37 +865,65 @@ def set_authority(cmd_name, *args)
        "--email [EMAIL,...]",
        lambda {|opts, v| opts.email = v},
        "Comma-separated list of user accounts to change. Required.")
-   op.add_option(
-       "--authority [AUTHORITY,...]",
-       lambda {|opts, v| opts.authority = v},
-       "Comma-separated list of user authorities to add or remove for the users. ")
-   op.add_option(
-       "--remove",
-       lambda {|opts, v| opts.remove = "true"},
-       "Remove authorities (rather than adding them.)")
-   op.add_option(
-       "--dry_run",
-       lambda {|opts, v| opts.dry_run = "true"},
-       "Make no changes.")
-   op.add_validator lambda {|opts| raise ArgumentError unless opts.email and opts.authority}
-   gcc = GcloudContextV2.new(op)
-   op.parse.validate
-   gcc.validate
+  op.add_option(
+      "--authority [AUTHORITY,...]",
+      lambda {|opts, v| opts.authority = v},
+      "Comma-separated list of user authorities to add or remove for the users. ")
+  op.add_option(
+      "--remove",
+      lambda {|opts, v| opts.remove = "true"},
+      "Remove authorities (rather than adding them.)")
+  op.add_option(
+      "--dry_run",
+      lambda {|opts, v| opts.dry_run = "true"},
+      "Make no changes.")
+  op.add_validator lambda {|opts| raise ArgumentError unless opts.email and opts.authority}
+  return op
+end
 
-   with_cloud_proxy_and_db(gcc) do |ctx|
-     Dir.chdir("tools") do
-       common = Common.new
-       common.run_inline %W{
-         gradle --info setAuthority
-        -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
-     end
-   end
+def set_authority(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = authority_options(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  with_cloud_proxy_and_db(gcc) do |ctx|
+    Dir.chdir("tools") do
+      common = Common.new
+      common.run_inline %W{
+        gradle --info setAuthority
+       -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+    end
+  end
 end
 
 Common.register_command({
   :invocation => "set-authority",
   :description => "Set user authorities (permissions). See set-authority --help.",
   :fn => lambda { |*args| set_authority("set-authority", *args) }
+})
+
+def set_authority_local(cmd_name, *args)
+  ensure_docker_api(cmd_name, args)
+
+  op = authority_options(cmd_name, args)
+  op.parse.validate
+
+  Dir.chdir("tools") do
+    common = Common.new
+    common.run_inline %W{
+        gradle --info setAuthority
+       -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "set-authority-local",
+  :description => "Set user authorities on a local server (permissions); "\
+                  "requires a local server is running (dev-up or run-api). "\
+                  "See set-authority-local --help.",
+  :fn => lambda { |*args| set_authority_local("set-authority-local", *args) }
 })
 
 def delete_clusters(cmd_name, *args)
