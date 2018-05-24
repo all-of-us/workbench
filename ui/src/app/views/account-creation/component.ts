@@ -20,7 +20,6 @@ function isBlank(s: string) {
               './component.css']
 })
 export class AccountCreationComponent {
-  contactEmailConflictError = false;
   profile: Profile = {
     username: '',
     enabledInFireCloud: false,
@@ -35,10 +34,7 @@ export class AccountCreationComponent {
   usernameConflictError = false;
   gsuiteDomain: string;
   usernameOffFocus = true;
-  passwordOffFocus = true;
-  passwordAgainOffFocus = true;
   usernameCheckTimeout: NodeJS.Timer;
-  contactEmailCheckTimeout: NodeJS.Timer;
 
   // TODO: Injecting the parent component is a bad separation of concerns, as
   // well as injecting LoginComponent. Should look at refactoring these
@@ -84,33 +80,6 @@ export class AccountCreationComponent {
     }, () => {
       this.creatingAccount = false;
     });
-  }
-
-  get showPasswordsDoNotMatchError() {
-    // We do not want to show errors if nothing is typed yet. This is caught by the required
-    // fields case.
-    if (isBlank(this.password) || isBlank(this.passwordAgain)) {
-        return false;
-    }
-    return this.password !== this.passwordAgain;
-  }
-
-  get showPasswordLengthError() {
-    // We do not want to show errors if nothing is typed yet. This is caught by the required
-    // fields case.
-    if (isBlank(this.password)) {
-      return false;
-    }
-    return (this.password.length < 8 || this.password.length > 100);
-  }
-
-  get containsLowerAndUpperError() {
-    // We do not want to show errors if nothing is typed yet. This is caught by the required
-    // fields case.
-    if (isBlank(this.password)) {
-      return false;
-    }
-    return !(this.hasLowerCase(this.password) && this.hasUpperCase(this.password));
   }
 
   get usernameInvalidError(): boolean {
