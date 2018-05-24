@@ -40,17 +40,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
 
     List<Concept> findByConceptName(String conceptName);
 
-    @Query(value = "select c.concept_id, " +
-            "c.concept_name, " +
-            "c.domain_id, " +
-            "c.vocabulary_id, " +
-            "c.concept_class_id, " +
-            "c.standard_concept, " +
-            "c.concept_code, " +
-            "c.count_value, " +
-            "c.source_count_value, " +
-            "c.prevalence " +
-            "from concept c " +
+    @Query(value = "select c.* from concept c " +
             "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
             nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
