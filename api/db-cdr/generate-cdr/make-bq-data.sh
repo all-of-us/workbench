@@ -178,17 +178,55 @@ from \`$BQ_PROJECT.$BQ_DATASET.concept\` c"
 q="select count_value from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` a where a.analysis_id = 1"
 person_count=`bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9'`
 
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"Update  \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\`
-set count_value = (select sum(count_value) from \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.achilles_results\` r
-    where cast(concept_id as string) = r.stratum_1 and r.analysis_id = 3000),
-    prevalence = round(count_value/$person_count, 2)
-where concept_id > 0"
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"Update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c
+set c.source_count_value = r.source_count_value,c.count_value=r.count_value
+from  (select cast(r.stratum_1 as int64) as concept_id , sum(r.count_value) as count_value , sum(r.source_count_value) as source_count_value
+from \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.achilles_results\` r
+where r.analysis_id = 3000 and CAST(r.stratum_1 as int64) > "0" group by r.stratum_1) as r
+where r.concept_id = c.concept_id"
+
+#Concept prevalence (based on count value and not on source count value)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "Update  \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\`
-set prevalence = round(count_value/$person_count, 2)
-where count_value > 0"
+set prevalence =
+case when count_value > 0 then round(count_value/$person_count, 2)
+     when source_count_value > 0 then round(source_count_value/$person_count, 2)
+     else 0.00 end
+where count_value > 0 or source_count_value > 0"
+
+##########################################
+# concept survey participant count update#
+##########################################
+
+#Set the survey participant count
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
+set c1.count_value=count_val from
+(select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd
+on cr.concept_id_2=dbd.concept_id
+where dbd.db_type='survey' and dbd.concept_id is not null
+group by cr.concept_id_2)
+where c1.concept_id=survey_concept_id"
+
+
+################################
+# concept question count update#
+################################
+#Set the questions count
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
+set c1.count_value=count_val from
+(select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id,cr.concept_id_1 as question_id
+from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
+where dbd.db_type='survey' and cr.relationship_id = 'Has Module'
+group by survey_concept_id,cr.concept_id_1)
+where c1.concept_id=question_id
+"
 
 ########################
 # concept_relationship #
@@ -216,3 +254,4 @@ a.count_value AS count_value
 FROM \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` a
 left join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1 on a.stratum_1 = cast(c1.concept_id as STRING)
 left join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c2  on a.stratum_2 = cast(c2.concept_id as STRING)"
+

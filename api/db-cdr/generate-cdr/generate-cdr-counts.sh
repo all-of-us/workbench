@@ -96,6 +96,7 @@ else
     exit 1
 fi
 
+
 ## Make BigQuery cdr
 echo "Making BigQuery cdr dataset"
 if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT \

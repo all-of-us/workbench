@@ -24,9 +24,9 @@
       <column name="valid_end_date" type="DATE"/>
       <column name="invalid_reason" type="STRING"/>
       <column name="count_value" type="NUMERIC"/>
+      <column name="source_count_value" type="NUMERIC" />
       <column name="prevalence" type="NUMERIC"/>
     </loadData>
   </changeSet>
 </databaseChangeLog>
-
 

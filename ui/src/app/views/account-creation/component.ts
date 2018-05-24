@@ -16,12 +16,11 @@ function isBlank(s: string) {
 @Component({
   selector: 'app-account-creation',
   templateUrl: './component.html',
-  styleUrls: ['./component.css',
-              '../../styles/template.css']
+  styleUrls: ['../../styles/template.css',
+              './component.css']
 })
 export class AccountCreationComponent {
   contactEmailConflictError = false;
-  containsLowerAndUpperError: boolean;
   profile: Profile = {
     username: '',
     enabledInFireCloud: false,
@@ -35,6 +34,9 @@ export class AccountCreationComponent {
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
+  usernameOffFocus = true;
+  passwordOffFocus = true;
+  passwordAgainOffFocus = true;
   usernameCheckTimeout: NodeJS.Timer;
   contactEmailCheckTimeout: NodeJS.Timer;
 
@@ -62,7 +64,6 @@ export class AccountCreationComponent {
     if (this.usernameConflictError || this.usernameInvalidError) {
       return;
     }
-    this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
@@ -85,10 +86,40 @@ export class AccountCreationComponent {
     });
   }
 
+  get showPasswordsDoNotMatchError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (isBlank(this.password) || isBlank(this.passwordAgain)) {
+        return false;
+    }
+    return this.password !== this.passwordAgain;
+  }
+
+  get showPasswordLengthError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (isBlank(this.password)) {
+      return false;
+    }
+    return (this.password.length < 8 || this.password.length > 100);
+  }
+
+  get containsLowerAndUpperError() {
+    // We do not want to show errors if nothing is typed yet. This is caught by the required
+    // fields case.
+    if (isBlank(this.password)) {
+      return false;
+    }
+    return !(this.hasLowerCase(this.password) && this.hasUpperCase(this.password));
+  }
+
   get usernameInvalidError(): boolean {
     const username = this.profile.username;
     if (isBlank(username)) {
       return false;
+    }
+    if (username.trim().length > 64) {
+      return true;
     }
     // Include alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
     return !(new RegExp(/^[\w-']([.]{0,1}[\w-']+)*$/).test(username));
@@ -107,5 +138,4 @@ export class AccountCreationComponent {
       });
     }, 300);
   }
-
 }

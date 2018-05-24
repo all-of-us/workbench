@@ -108,21 +108,18 @@ set count_value =
         then ${BIN_SIZE}
     else
         cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
-    end
-where count_value > 0"
-
-# achilles_results_concept
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results_concept\`
-set count_value =
-    case when count_value < ${BIN_SIZE}
+    end,
+    source_count_value =
+    case when source_count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
-where count_value > 0"
+where count_value >= 0"
 
-# concept
+# concept bin size :
+#Aggregate bin size will be set at 20. Counts lower than 20 will be displayed as 20; Counts higher than 20 will be rounded up to the closest multiple of 20. Eg: A count of 1245 will be displayed as 1260 .
+
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
 set count_value =
@@ -131,13 +128,25 @@ set count_value =
     else
         cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
-    prevalence =
-    case when count_value < ${BIN_SIZE}
-        then ROUND(${BIN_SIZE} / ${person_count},2)
+    source_count_value =
+    case when source_count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
     else
-        ROUND(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+        cast(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end,
+    prevalence =
+    case when count_value  > 0 and count_value < ${BIN_SIZE}
+            then ROUND(${BIN_SIZE} / ${person_count},2)
+        when count_value  > 0 and count_value >= ${BIN_SIZE}
+            then ROUND(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+        when source_count_value  > 0 and source_count_value < ${BIN_SIZE}
+            then ROUND(${BIN_SIZE} / ${person_count},2)
+        when source_count_value  > 0 and source_count_value >= ${BIN_SIZE}
+            then ROUND(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+        else
+            0.00
     end
-where count_value > 0"
+where count_value >= 0"
 
 # criteria
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \

@@ -53,6 +53,7 @@ cat create_db.sql | envsubst > $CREATE_DB_FILE
 # Drop and create new cdr database
 if [ "${DROP_IF_EXISTS}" == "Y" ]
 then
+    echo "Dropping database $CDR_DB_NAME"
   mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} -e "drop database if exists $CDR_DB_NAME"
 fi
 echo "Creating database ..."

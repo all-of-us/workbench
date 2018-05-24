@@ -71,7 +71,7 @@ public class DbDomainDaoTest {
         dbDomain4=createDbDomain("TheBasics","The Basics","The Basics module provides demographics and economic information for participants","survey","ppi",1586134L,567437L);
         dao.save(dbDomain4);
 
-        concept1=createConcept(4296023L,"Failure","S","76797004","Clinical Finding","SNOMED","Condition",10L,0.0f);
+        concept1=createConcept(4296023L,"Failure","S","76797004","Clinical Finding","SNOMED","Condition",10L, 0.0f);
         concept2=createConcept(1585826L,"Kidney failure","S","OrganTransplantDescription_Kidney","Clinical Finding","SNOMED","Condition",15L,0.0f);
         concept3=createConcept(1000000L,"What is the reason of your failure?","","Question","Question","PPI","Observation",2480L,0.57f);
         concept4=createConcept(2000000L,"Are you a fitness geek?","","Question","Question","PPI","Observation",2476L,0.51f);
@@ -89,9 +89,9 @@ public class DbDomainDaoTest {
         achillesAnalysisDao.save(achillesAnalysis2);
         achillesAnalysisDao.save(achillesAnalysis3);
 
-        achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L);
-        achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L);
-        achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L);
+        achillesResult1=createAchillesResult(2397L,3110L,"1586134","1000000","","Smoking",null,260L,0L);
+        achillesResult2=createAchillesResult(2380L,3111L,"1585855","2000000","","Drinking is the cause of failure",null,2345L,0L);
+        achillesResult3=createAchillesResult(2345L,3112L,"1586134","1000000","","Donot know",null,789L,0L);
 
         achillesResultDao.save(achillesResult1);
         achillesResultDao.save(achillesResult2);
@@ -153,10 +153,11 @@ public class DbDomainDaoTest {
                 .vocabularyId(vocabularyId)
                 .domainId(domainId)
                 .count(count)
-                .prevalence(prevalence);
+                .prevalence(prevalence)
+                .sourceCountValue(0L);
     }
 
-    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum_1,String stratum_2,String stratum_3,String stratum_4,String stratum_5,Long count){
+    private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum_1,String stratum_2,String stratum_3,String stratum_4,String stratum_5,Long count,Long sourceCountValue){
         return new AchillesResult()
                 .id(id)
                 .analysisId(analysisId)
@@ -165,7 +166,8 @@ public class DbDomainDaoTest {
                 .stratum3(stratum_3)
                 .stratum4(stratum_4)
                 .stratum5(stratum_5)
-                .countValue(count);
+                .countValue(count)
+                .sourceCountValue(sourceCountValue);
     }
 
     private AchillesAnalysis createAchillesAnalysis(Long analysisId,String analysisName,String st1,String st2,String st3,String st4,String st5,String chartType,String dataType){

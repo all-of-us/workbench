@@ -11,7 +11,14 @@
       <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" placeholder="Email Address">
     </div>
     <div class="form-section">
-      <input type="text" class="short-input" id="username" name="username" [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" placeholder="New Username">
+      <input type="text" class="long-input" id="username" name="username"
+             [(ngModel)]="profile.username" (ngModelChange)="usernameChanged()" (blur)="leaveFocusUsername()"
+             (focus)="enterFocusUsername()" placeholder="New Username"
+             [ngClass]="{'successfulInput': showUsernameValidationSuccess, 'unsuccessfulInput': showUsernameValidationError}">
+      <div class="icon-area">
+        <clr-icon shape="warning-standard" class="warning-standard is-solid" *ngIf="showUsernameValidationError"></clr-icon>
+        <clr-icon shape="success-standard" class="success-standard is-solid" *ngIf="showUsernameValidationSuccess"></clr-icon>
+      </div>
       <clr-tooltip>
         <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
         <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
@@ -26,14 +33,13 @@
           </div>
         </clr-tooltip-content>
       </clr-tooltip>
-      <div *ngIf="usernameConflictError" class="error">
+      <div *ngIf="usernameConflictError && usernameOffFocus" class="error" id="username-taken-error">
         Username is already taken.
       </div>
-      <div *ngIf="usernameInvalidError" class="error">
+      <div *ngIf="usernameInvalidError && usernameOffFocus" class="error" id="username-invalid-error">
         Username is not a valid username.
       </div>
     </div>
-
     <div class="form-section">
       <button type="submit"
           class="btn btn-primary short-button"
