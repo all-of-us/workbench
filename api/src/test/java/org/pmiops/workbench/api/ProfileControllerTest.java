@@ -76,7 +76,6 @@ public class ProfileControllerTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String INVITATION_KEY = "secretpassword";
-  private static final String PASSWORD = "12345";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String BILLING_PROJECT_PREFIX = "all-of-us-free-";
 
@@ -234,7 +233,7 @@ public class ProfileControllerTest {
   public void testCreateAccount_directoryServiceFail() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
 
-    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
+    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenThrow(new ServerErrorException());
     profileController.createAccount(createAccountRequest);
   }
