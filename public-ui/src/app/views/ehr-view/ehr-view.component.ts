@@ -9,6 +9,7 @@ import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListR
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 import {ChartComponent} from '../../data-browser/chart/chart.component';
+import {Concept} from '../../../publicGenerated/model/concept';
 
 @Component({
   selector: 'app-ehr-view',
@@ -21,6 +22,8 @@ export class EhrViewComponent implements OnInit {
   subTitle;
   dbDomain;
   searchText;
+  searchResults ;
+  domainResults;
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
@@ -44,6 +47,15 @@ export class EhrViewComponent implements OnInit {
       this.title   = 'Keyword: ' + this.searchText;
       this.title = 'View Full Results: ' + 'Error - no result domain selected';
     }
+
+    // Run search filter to domain
+    let domainId = this.dbDomain.domainId;
+    this.api.getConceptsSearch(this.searchText).subscribe(results =>  {
+
+      this.searchResults = results.items.filter(r => r.domainId === this.dbDomain.domainId);
+
+    } );
+
   }
 
 }

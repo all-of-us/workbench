@@ -32,7 +32,7 @@
     line-height: 18px;
 }
 
-.card-text smaller {
+.card-text.smaller {
     font-size: 10px;
     line-height: 16px;
 }
@@ -63,6 +63,11 @@
 
 .search-result p.card-text {
     height: 3rem;
+}
+
+.card-text.bottom {
+    position: absolute;
+    bottom: 20px;
 }
 
 

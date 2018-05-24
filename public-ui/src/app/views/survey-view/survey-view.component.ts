@@ -51,7 +51,7 @@ export class SurveyViewComponent implements OnInit {
     if (obj) {
       this.survey = JSON.parse(obj);
     }
-    this.searchText = localStorage.getItem('searchText');)
+    this.searchText = localStorage.getItem('searchText');
     if (!this.searchText) {
       this.searchText = '';
     }
