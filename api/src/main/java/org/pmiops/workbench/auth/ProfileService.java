@@ -45,7 +45,7 @@ public class ProfileService {
     this.userDao = userDao;
   }
 
-  public Profile getProfile(User user) throws ApiException {
+  public Profile getProfile(User user, boolean checkEmailVerification) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
     User userWithAuthorities = userDao.findUserWithAuthorities(user.getUserId());
     if (userWithAuthorities != null) {
@@ -99,7 +99,10 @@ public class ProfileService {
         .collect(Collectors.toList()));
     EmailVerificationStatus userEmailVerificationStatus = user.getEmailVerificationStatus();
     // if verification is pending or unverified, need to query MailChimp and update DB accordingly
-    if (!userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
+    // Note: This is pretty slow, we shouldn't be calling it on every Profile lookup. Leave it
+    // for now as we're in the process of switching off Mailchimp (related: RW-705).
+    if (checkEmailVerification &&
+        !userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
       if (userEmailVerificationStatus.equals(EmailVerificationStatus.UNVERIFIED) && user.getContactEmail() != null) {
         try {
           mailChimpService.addUserContactEmail(user.getContactEmail());
