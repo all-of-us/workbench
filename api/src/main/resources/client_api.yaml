@@ -76,7 +76,6 @@ paths:
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concepts:
       get:
-        security: []
         tags:
           - concepts
 
@@ -97,19 +96,17 @@ paths:
           - in: query
             name: standard_concept
             type: boolean
-            required: false
             description: >
-              True if only standard concepts should be returned, false if any concepts
-              can be returned.
+              True if only standard concepts should be returned, false if only non-standard
+              concepts should be returned; defaults to both standard and non-standard concepts
+              are returned.
           - in: query
             name: vocabulary_id
             type: string
-            required: false
             description: The vocabulary ID for the concepts returned (e.g. SNOMED, RxNorm)
           - in: query
             name: domain_id
             type: string
-            required: false
             description: >
              The domain ID for the concepts returned (e.g. Observation, Drug). TODO: consider
              changing this to be an enum which is mapped to underlying domain ID value(s).
@@ -364,6 +361,7 @@ definitions:
     enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN, BETWEEN]
 
   Concept:
+    description: A concept describing a type of entity (e.g. measurement, observation, procedure.)
     type: object
     required:
       - conceptId

@@ -33,17 +33,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ConceptsControllerTest {
 
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
-      makeConcept(123L, "a concept", "S",
-          "conceptA", "classId", "V1",
-          "D1", 123L, 0.2F);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
-      makeConcept(456L, "b concept", null,
-          "conceptB", "classId2", "V2",
-          "D2", 456L, 0.3F);
+  private static final Concept CLIENT_CONCEPT_1 = new Concept()
+      .conceptId(123L)
+      .conceptName("a concept")
+      .standardConcept(true)
+      .conceptCode("conceptA")
+      .conceptClassId("classId")
+      .vocabularyId("V1")
+      .domainId("D1")
+      .countValue(123L)
+      .prevalence(0.2F);
 
-  private static final Concept CLIENT_CONCEPT_1 = makeClientConcept(CONCEPT_1);
-  private static final Concept CLIENT_CONCEPT_2 = makeClientConcept(CONCEPT_2);
+  private static final Concept CLIENT_CONCEPT_2 = new Concept()
+      .conceptId(456L)
+      .conceptName("b concept")
+      .conceptCode("conceptB")
+      .conceptClassId("classId2")
+      .vocabularyId("V2")
+      .domainId("D2")
+      .countValue(456L)
+      .prevalence(0.3F);
+
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
+      makeConcept(CLIENT_CONCEPT_1);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
+      makeConcept(CLIENT_CONCEPT_2);
 
   @Autowired
   private ConceptDao conceptDao;
@@ -202,20 +216,18 @@ public class ConceptsControllerTest {
        null, 1001);
   }
 
-  private static org.pmiops.workbench.cdr.model.Concept makeConcept(
-      long conceptId, String conceptName, String standardConcept, String conceptCode,
-      String conceptClassId, String vocabularyId, String domainId, long countValue,
-      float prevalence) {
+  private static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
     org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
-    result.setConceptId(conceptId);
-    result.setConceptName(conceptName);
-    result.setStandardConcept(standardConcept);
-    result.setConceptCode(conceptCode);
-    result.setConceptClassId(conceptClassId);
-    result.setVocabularyId(vocabularyId);
-    result.setDomainId(domainId);
-    result.setCountValue(countValue);
-    result.setPrevalence(prevalence);
+    result.setConceptId(concept.getConceptId());
+    result.setConceptName(concept.getConceptName());
+    result.setStandardConcept(concept.getStandardConcept() == null ? null :
+        (concept.getStandardConcept() ? "S" : "C"));
+    result.setConceptCode(concept.getConceptCode());
+    result.setConceptClassId(concept.getConceptClassId());
+    result.setVocabularyId(concept.getVocabularyId());
+    result.setDomainId(concept.getDomainId());
+    result.setCountValue(concept.getCountValue());
+    result.setPrevalence(concept.getPrevalence());
     return result;
   }
 
