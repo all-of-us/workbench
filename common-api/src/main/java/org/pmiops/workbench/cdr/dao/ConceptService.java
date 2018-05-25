@@ -24,7 +24,7 @@ public class ConceptService {
     NON_STANDARD_CONCEPTS
   }
 
-  @PersistenceContext(unitName = "cdr")
+  @PersistenceContext(name = "cdr")
   private EntityManager entityManager;
 
   public ConceptService() {}
