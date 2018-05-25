@@ -310,12 +310,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
-    try {
-      return ResponseEntity.ok(profileService.getProfile(user));
-    } catch (ApiException e) {
-      log.log(Level.INFO, "Error calling FireCloud", e);
-      return ResponseEntity.status(e.getCode()).build();
-    }
+    return ResponseEntity.ok(profileService.getProfile(user, /* checkEmailVerification */ true));
   }
 
   @Override
@@ -524,15 +519,9 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<Profile>();
-    try {
-      for (User user : userService.getNonVerifiedUsers()) {
-        responseList.add(profileService.getProfile(user));
-      }
-    } catch (ApiException e) {
-      log.log(Level.INFO, "Error calling FireCloud", e);
-      return ResponseEntity.status(e.getCode()).build();
+    for (User user : userService.getNonVerifiedUsers()) {
+      responseList.add(profileService.getProfile(user, /* checkEmailVerification */ false));
     }
-
     response.setProfileList(responseList);
     return ResponseEntity.ok(response);
   }

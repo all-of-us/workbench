@@ -2,7 +2,9 @@ package org.pmiops.workbench.api;
 
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.TestCase.fail;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -12,11 +14,14 @@ import static org.mockito.Mockito.when;
 
 import com.blockscore.models.Person;
 import com.google.common.collect.ImmutableList;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +53,7 @@ import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ErrorResponse;
+import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
@@ -238,6 +244,34 @@ public class ProfileControllerTest {
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
         .thenThrow(new ServerErrorException());
     profileController.createAccount(createAccountRequest);
+  }
+
+  @Test
+  public void testGetIdVerificationsForReview() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    IdVerificationListResponse response = profileController.getIdVerificationsForReview().getBody();
+    assertThat(response.getProfileList().size()).isEqualTo(1);
+
+    IdVerificationReviewRequest request =
+        new IdVerificationReviewRequest().newStatus(BlockscoreIdVerificationStatus.VERIFIED);
+    profileController.reviewIdVerification(user.getUserId(), request);
+    response = profileController.getIdVerificationsForReview().getBody();
+    assertThat(response.getProfileList()).isEmpty();
+  }
+
+  @Test
+  public void testGetIdVerificationsForReview_noMailChimpCalls() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+    userDao.save(user);
+
+    profileController.getIdVerificationsForReview();
+    verify(mailChimpService, never()).addUserContactEmail(any());
+    verify(mailChimpService, never()).getMember(any());
   }
 
   @Test
