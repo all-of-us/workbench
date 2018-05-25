@@ -100,7 +100,6 @@ public class ConceptsControllerTest {
   @Autowired
   FireCloudService fireCloudService;
 
-
   @PersistenceContext
   private EntityManager entityManager;
 
