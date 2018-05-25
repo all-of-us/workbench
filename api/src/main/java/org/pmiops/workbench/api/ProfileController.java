@@ -347,7 +347,8 @@ public class ProfileController implements ProfileApiDelegate {
     verifyInvitationKey(request.getInvitationKey());
     com.google.api.services.admin.directory.model.User googleUser =
         directoryService.createUser(request.getProfile().getGivenName(),
-            request.getProfile().getFamilyName(), request.getProfile().getUsername(), request.getProfile().getContactEmail());
+            request.getProfile().getFamilyName(), request.getProfile().getUsername(),
+            request.getProfile().getContactEmail());
 
     // Create a user that has no data access or FC user associated.
     // We create this account before they sign in so we can keep track of which users we have

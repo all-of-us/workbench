@@ -46,8 +46,6 @@ public class DirectoryServiceImpl implements DirectoryService {
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
 
-
-
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
       Provider<WorkbenchConfig> configProvider,

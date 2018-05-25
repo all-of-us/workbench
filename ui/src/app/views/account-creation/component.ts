@@ -67,6 +67,8 @@ export class AccountCreationComponent {
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
       return;
+    } else if (this.isUsernameValidationError) {
+      return;
     }
 
     const request: CreateAccountRequest = {
@@ -106,5 +108,31 @@ export class AccountCreationComponent {
         this.usernameConflictError = response.isTaken;
       });
     }, 300);
+  }
+
+  leaveFocusUsername(): void {
+    this.usernameOffFocus = true;
+  }
+
+  enterFocusUsername(): void {
+    this.usernameOffFocus = false;
+  }
+
+  get isUsernameValidationError(): boolean {
+    return this.usernameConflictError || this.usernameInvalidError;
+  }
+
+  get showUsernameValidationError(): boolean {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+      return false;
+    }
+    return this.isUsernameValidationError;
+  }
+
+  get showUsernameValidationSuccess(): boolean {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+      return false;
+    }
+    return !this.isUsernameValidationError;
   }
 }
