@@ -2,12 +2,11 @@ package org.pmiops.workbench.cdr.dao;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import org.pmiops.workbench.cdr.model.Concept;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -25,11 +24,14 @@ public class ConceptService {
     NON_STANDARD_CONCEPTS
   }
 
-  private final EntityManagerFactory entityManagerFactory;
+  @PersistenceContext(unitName = "cdr")
+  private EntityManager entityManager;
 
-  @Autowired
-  public ConceptService(@Qualifier("cdrEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
-    this.entityManagerFactory = entityManagerFactory;
+  public ConceptService() {}
+
+  // Used for tests
+  public ConceptService(EntityManager entityManager) {
+    this.entityManager = entityManager;
   }
 
   public static final String STANDARD_CONCEPT_CODE = "S";
@@ -82,7 +84,7 @@ public class ConceptService {
     Pageable pageable = new PageRequest(0, limit,
         new Sort(Direction.DESC, "countValue"));
     NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
-        entityManagerFactory.createEntityManager());
+        entityManager);
     return conceptDao.findAll(conceptSpecification, pageable);
   }
 }
