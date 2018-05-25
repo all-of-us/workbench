@@ -74,64 +74,23 @@ paths:
           schema:
             $ref: "#/definitions/MaterializeCohortResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concepts:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/searchConcepts:
       post:
         tags:
           - concepts
-
         description: >
           Searches for concepts in concept table by name, and optionally filter on
-          domain, vocabulary ID, or standard concept status. Uses the CDR version affiliated
+          domain, vocabulary IDs, or standard concept status. Uses the CDR version affiliated
           with the workspace specified in the path.
-
         operationId: "searchConcepts"
         parameters:
-          - in: path
-            name: workspaceNamespace
-            description: The namespace of the workspace for which concepts are being looked up.
-            required: true
-            type: string
-          - in: path
-            name: workspaceId
-            description: The ID of the workspace for which concepts are being looked up.
-            required: true
-            type: string
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
           - in: body
-            name: query
+            name: request
+            description: concept search request
             schema:
-              type: string
-            required: true
-            description: >
-              A query string that can be used to match a subset of the name (case-insensitively),
-              the entire code value (case-insensitively), or the concept ID.
-          - in: body
-            name: standard_concept_filter
-            schema:
-              $ref: "#/definitions/StandardConceptFilter"
-            description: >
-              STANDARD_CONCEPTS if only standard concepts should be returned,
-              NON_STANDARD_CONCEPTS if only non-standard
-              concepts should be returned; defaults to ALL_CONCEPTS, meaning both
-              standard and non-standard concepts will be returned.
-          - in: body
-            name: vocabulary_id
-            schema:
-              type: string
-            description: The vocabulary ID for the concepts returned (e.g. SNOMED, RxNorm)
-          - in: body
-            name: domain
-            schema:
-              $ref: "#/definitions/Domain"
-            description: >
-             The domain for the concepts returned (e.g. OBSERVATION, DRUG). Note that this may map
-             to multiple domain ID values in OMOP.
-          - in: body
-            name: max_results
-            schema:
-              type: integer
-              format: int32
-            description: The maximum number of results returned. Defaults to 20.
-
+              $ref: "#/definitions/SearchConceptsRequest"
         responses:
           200:
             description: A collection of concepts
@@ -431,6 +390,38 @@ definitions:
         description: Prevalence among participants in the CDR (a percentage of the total)
         type: number
         format: float
+
+  SearchConceptsRequest:
+    type: object
+    required:
+      - query
+    properties:
+      query:
+        type: string
+        description: >
+          A query string that can be used to match a subset of the name (case-insensitively),
+          the entire code value (case-insensitively), or the concept ID.
+      standardConceptFilter:
+        description: >
+          STANDARD_CONCEPTS if only standard concepts should be returned,
+          NON_STANDARD_CONCEPTS if only non-standard
+          concepts should be returned; defaults to ALL_CONCEPTS, meaning both
+          standard and non-standard concepts will be returned.
+        $ref: "#/definitions/StandardConceptFilter"
+      vocabularyIds:
+        type: array
+        items:
+          type: string
+        description: The vocabulary ID for the concepts returned (e.g. SNOMED, RxNorm)
+      domain:
+        description: >
+          The domain for the concepts returned (e.g. OBSERVATION, DRUG). Note that this may map
+          to multiple domain ID values in OMOP.
+        $ref: "#/definitions/Domain"
+      maxResults:
+        type: integer
+        format: int32
+        description: The maximum number of results returned. Defaults to 20.
 
   ConceptListResponse:
     type: object

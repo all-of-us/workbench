@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.Arrays;
 import javax.persistence.EntityManager;
@@ -24,6 +25,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,142 +138,155 @@ public class ConceptsControllerTest {
   @Test(expected = BadRequestException.class)
   public void testSearchConceptsBlankQuery() throws Exception {
     assertResults(
-        conceptsController.searchConcepts("ns", "name", " ", null, null,
-            null, null));
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query(" ")));
   }
 
   @Test
   public void testSearchNoConcepts() throws Exception {
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "a", null, null,
-          null, null));
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("a")));
   }
 
   @Test
   public void testSearchConceptsNameNoMatches() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "x", null, null,
-            null, null));
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("x")));
   }
 
   @Test
   public void testSearchConceptsNameOneMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "a", null, null,
-            null, null), CLIENT_CONCEPT_1);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("a")), CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsNameTwoMatches() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", null, null,
-            null, null), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con")), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsCodeMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "conceptb", null, null,
-            null, null), CLIENT_CONCEPT_2);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptb")), CLIENT_CONCEPT_2);
   }
 
   @Test
   public void testSearchConceptsConceptIdMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "456", null, null,
-            null, null), CLIENT_CONCEPT_2);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("456")), CLIENT_CONCEPT_2);
   }
 
   @Test
   public void testSearchConceptsStandardConcept() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", StandardConceptFilter.STANDARD_CONCEPTS, null,
-            null, null), CLIENT_CONCEPT_1);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con")
+                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)), CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsNotStandardConcept() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", StandardConceptFilter.NON_STANDARD_CONCEPTS, null,
-            null, null), CLIENT_CONCEPT_2);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con")
+                .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS)),
+        CLIENT_CONCEPT_2);
   }
 
   @Test
   public void testSearchConceptsVocabularyIdNoMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", null, "V",
-            null, null));
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").vocabularyIds(ImmutableList.of("x", "v"))));
   }
 
   @Test
   public void testSearchConceptsVocabularyIdMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", null, "V2",
-            null, null), CLIENT_CONCEPT_2);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").vocabularyIds(ImmutableList.of("V3", "V2"))),
+        CLIENT_CONCEPT_2);
   }
 
   @Test
   public void testSearchConceptsDomainIdNoMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", null, null,
-            Domain.OBSERVATION, null));
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").domain(Domain.OBSERVATION)));
   }
 
   @Test
   public void testSearchConceptsDomainIdMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", null, null,
-            Domain.CONDITION, null), CLIENT_CONCEPT_1);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").domain(Domain.CONDITION)), CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsMultipleMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", StandardConceptFilter.STANDARD_CONCEPTS, "V1",
-            Domain.CONDITION, null), CLIENT_CONCEPT_1);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con")
+                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)
+                .vocabularyIds(ImmutableList.of("V1"))
+                .domain(Domain.CONDITION)), CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsMultipleNoMatch() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", StandardConceptFilter.NON_STANDARD_CONCEPTS, "V1",
-            Domain.CONDITION, null));
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con")
+                .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS)
+                .vocabularyIds(ImmutableList.of("V1"))
+                .domain(Domain.CONDITION)));
   }
 
   @Test
   public void testSearchConceptsOneResult() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", null, null,
-            null, 1), CLIENT_CONCEPT_2);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").maxResults(1)), CLIENT_CONCEPT_2);
   }
 
   @Test
   public void testSearchConceptsOneThousandResults() throws Exception {
     saveConcepts();
     assertResults(
-        conceptsController.searchConcepts("ns", "name", "con", null, null,
-            null, 1000), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").maxResults(1000)),
+        CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsOneThousandOneResults() throws Exception {
     saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns", "name", "con", null, null,
-       null, 1001), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
+    assertResults(
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").maxResults(1001)), CLIENT_CONCEPT_2,
+        CLIENT_CONCEPT_1);
   }
 
   private static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
@@ -288,7 +303,7 @@ public class ConceptsControllerTest {
     result.setPrevalence(concept.getPrevalence());
     return result;
   }
-  
+
   private void saveConcepts() {
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);

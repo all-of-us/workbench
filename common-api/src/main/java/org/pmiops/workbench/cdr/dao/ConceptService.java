@@ -37,8 +37,8 @@ public class ConceptService {
   public static final String STANDARD_CONCEPT_CODE = "S";
 
   public Slice<Concept> searchConcepts(String query,
-      StandardConceptFilter standardConceptFilter, String vocabularyId, List<String> domainIds,
-      int limit) {
+      StandardConceptFilter standardConceptFilter, List<String> vocabularyIds,
+      List<String> domainIds, int limit) {
     Specification<Concept> conceptSpecification =
         (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -71,9 +71,8 @@ public class ConceptService {
               predicates.add(criteriaBuilder.or(
                   standardConceptPredicates.toArray(new Predicate[0])));
             }
-            if (vocabularyId != null) {
-              predicates.add(criteriaBuilder.equal(root.get("vocabularyId"),
-                  criteriaBuilder.literal(vocabularyId)));
+            if (vocabularyIds != null) {
+              predicates.add(root.get("vocabularyId").in(vocabularyIds));
             }
             if (domainIds != null) {
               predicates.add(root.get("domainId").in(domainIds));

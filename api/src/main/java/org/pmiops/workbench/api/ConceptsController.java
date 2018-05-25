@@ -13,6 +13,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConceptsController implements ConceptsApiDelegate {
 
+  // TODO: consider putting this in CDM config, fetching it from there
   private static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
       ImmutableMultimap.<Domain, String>builder()
           .put(Domain.CONDITION, "Condition")
@@ -69,14 +71,13 @@ public class ConceptsController implements ConceptsApiDelegate {
 
   @Override
   public ResponseEntity<ConceptListResponse> searchConcepts(String workspaceNamespace,
-      String workspaceId, String query,
-      StandardConceptFilter standardConceptFilter, String vocabularyId,
-      Domain domain, Integer maxResults) {
+      String workspaceId, SearchConceptsRequest request) {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     CdrVersion cdrVersion = workspace.getCdrVersion();
     CdrVersionContext.setCdrVersion(cdrVersion);
+    Integer maxResults = request.getMaxResults();
     if (maxResults == null) {
       maxResults = DEFAULT_MAX_RESULTS;
     } else if (maxResults < 1) {
@@ -84,22 +85,24 @@ public class ConceptsController implements ConceptsApiDelegate {
     } else if (maxResults > MAX_MAX_RESULTS) {
       maxResults = MAX_MAX_RESULTS;
     }
+    StandardConceptFilter standardConceptFilter = request.getStandardConceptFilter();
     if (standardConceptFilter == null) {
       standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
     }
     List<String> domainIds = null;
-    if (domain != null) {
-      domainIds = DOMAIN_MAP.get(domain).asList();
+    if (request.getDomain() != null) {
+      domainIds = DOMAIN_MAP.get(request.getDomain()).asList();
     }
     ConceptService.StandardConceptFilter convertedConceptFilter =
         ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
-    if (query.trim().isEmpty()) {
+    if (request.getQuery().trim().isEmpty()) {
       throw new BadRequestException("Query must be non-whitespace");
     }
 
+    // TODO: move Swagger codegen to common-api, pass request with modified values into service
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
-        conceptService.searchConcepts(query, convertedConceptFilter, vocabularyId, domainIds,
-            maxResults);
+        conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
+            request.getVocabularyIds(), domainIds, maxResults);
     ConceptListResponse response = new ConceptListResponse();
     response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
         .collect(Collectors.toList()));
