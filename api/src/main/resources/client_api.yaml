@@ -74,6 +74,29 @@ paths:
           schema:
             $ref: "#/definitions/MaterializeCohortResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/searchConcepts:
+      post:
+        tags:
+          - concepts
+        description: >
+          Searches for concepts in concept table by name, and optionally filter on
+          domain, vocabulary IDs, or standard concept status. Uses the CDR version affiliated
+          with the workspace specified in the path.
+        operationId: "searchConcepts"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+          - in: body
+            name: request
+            description: concept search request
+            schema:
+              $ref: "#/definitions/SearchConceptsRequest"
+        responses:
+          200:
+            description: A collection of concepts
+            schema:
+              $ref: "#/definitions/ConceptListResponse"
+
 definitions:
 
   MaterializeCohortRequest:
@@ -311,3 +334,101 @@ definitions:
   Operator:
     type: string
     enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN, BETWEEN]
+
+  StandardConceptFilter:
+    type: string
+    description: filter on whether standard, non-standard, or all concepts should be returned\
+    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS]
+
+  Domain:
+    type: string
+    description: filter on the domain in which concepts should be returned
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, RACE, GENDER, ETHNICITY]
+
+  Concept:
+    description: A concept describing a type of entity (e.g. measurement, observation, procedure.)
+    type: object
+    required:
+      - conceptId
+      - conceptName
+      - domainId
+      - vocabularyId
+      - conceptCode
+      - conceptClassId
+      - standardConcept
+      - countValue
+      - prevalence
+
+    properties:
+      conceptId:
+        description: ID of the concept
+        type: integer
+        format: int64
+      conceptName:
+        description: Name of the concept
+        type: string
+      domainId:
+        description: Domain ID of the concept (e.g. Observation)
+        type: string
+      vocabularyId:
+        description: Vocabulary ID of the concept (e.g. SNOMED)
+        type: string
+      conceptCode:
+        description: Code for the concept in its vocabulary (e.g. G8107)
+        type: string
+      conceptClassId:
+        description: Class of the concept (e.g. Ingredient)
+        type: string
+      standardConcept:
+        description: True if this is a standard concept, false otherwise
+        type: boolean
+      countValue:
+        description: Count of participants matching this concept in the CDR
+        type: integer
+        format: int64
+      prevalence:
+        description: Prevalence among participants in the CDR (a percentage of the total)
+        type: number
+        format: float
+
+  SearchConceptsRequest:
+    type: object
+    required:
+      - query
+    properties:
+      query:
+        type: string
+        description: >
+          A query string that can be used to match a subset of the name (case-insensitively),
+          the entire code value (case-insensitively), or the concept ID.
+      standardConceptFilter:
+        description: >
+          STANDARD_CONCEPTS if only standard concepts should be returned,
+          NON_STANDARD_CONCEPTS if only non-standard
+          concepts should be returned; defaults to ALL_CONCEPTS, meaning both
+          standard and non-standard concepts will be returned.
+        $ref: "#/definitions/StandardConceptFilter"
+      vocabularyIds:
+        type: array
+        items:
+          type: string
+        description: The vocabulary ID for the concepts returned (e.g. SNOMED, RxNorm)
+      domain:
+        description: >
+          The domain for the concepts returned (e.g. OBSERVATION, DRUG). Note that this may map
+          to multiple domain ID values in OMOP.
+        $ref: "#/definitions/Domain"
+      maxResults:
+        type: integer
+        format: int32
+        description: The maximum number of results returned. Defaults to 20.
+
+  ConceptListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Concept"
