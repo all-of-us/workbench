@@ -6,8 +6,7 @@ import static org.mockito.Mockito.when;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.Arrays;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.persistence.EntityManagerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,10 +98,8 @@ public class ConceptsControllerTest {
   private CdrVersionDao cdrVersionDao;
   @Autowired
   FireCloudService fireCloudService;
-
-
-  @PersistenceContext
-  private EntityManager entityManager;
+  @Autowired
+  private EntityManagerFactory entityManagerFactory;
 
   private ConceptsController conceptsController;
 
@@ -111,7 +108,7 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(entityManager);
+    ConceptService conceptService = new ConceptService(entityManagerFactory);
     conceptsController = new ConceptsController(conceptService, workspaceService);
 
     CdrVersion cdrVersion = new CdrVersion();
