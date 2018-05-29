@@ -97,7 +97,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   get twoFactorBannerEnabled() {
-    if (this.firstSignIn === null) {
+    if (this.firstSignIn === undefined) {
       return false;
     }
 
