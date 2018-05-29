@@ -88,7 +88,7 @@
     box-shadow: 0 1px 4px 0 rgba(0,0,0,0.28);
     float: right;
     position: relative;
-    width: 24%;
+    width: 15rem;
     z-index: 1;
     text-align: left;
 }
@@ -201,10 +201,12 @@
 
 .bottom-banner {
     margin-bottom: 0;
-    margin-left: -1rem;
     border-top-color: #5DAEE1;
     border-style: solid;
     border-top-width: .3rem;
+    border-bottom-width: 0;
+    border-right-width: 0;
+    border-left-width: 0;
     width: 100%;
     display: flex;
     background-color: #483F4B;
@@ -215,13 +217,13 @@
 .logo {
     margin-left: 4rem;
     margin-top: 1rem;
-    width: 12%;
+    width: 7rem;
     height: 90%
 }
 
 .bottom-links {
     color: #9B9B9B;
-    font-size: .7rem;
+    font-size: .6rem;
     margin-left: 1.5rem;
     margin-top: 2rem;
 }
