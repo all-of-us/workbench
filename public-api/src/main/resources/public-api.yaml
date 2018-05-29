@@ -149,16 +149,6 @@ paths:
           required: false
           description: standard concept filter
         - in: query
-          name: concept_code
-          type: string
-          required: false
-          description: concept code  filter
-        - in: query
-          name: vocabulary_id
-          type: string
-          required: false
-          description: vocabulary id filter
-        - in: query
           name: domain_id
           type: string
           required: false
