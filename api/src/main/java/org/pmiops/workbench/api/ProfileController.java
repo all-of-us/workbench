@@ -222,6 +222,15 @@ public class ProfileController implements ProfileApiDelegate {
       // Service accounts don't need further initialization.
       return user;
     }
+
+
+    if (user != null &&
+        (user.getTwoFactorEnabled() == null ||
+            !(user.getTwoFactorEnabled()))) {
+      user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
+      userDao.save(user);
+    }
+
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
       // TODO(calbach): After the next DB wipe, switch this null check to
@@ -239,15 +248,6 @@ public class ProfileController implements ProfileApiDelegate {
         log.log(Level.WARNING, "version conflict for user update", e);
         throw new ConflictException("Failed due to concurrent modification");
       }
-    }
-    log.log(Level.WARNING, "User tfa: ", user.getTwoFactorEnabled());
-    log.log(Level.WARNING, "User: ", userAuthentication.toString());
-    if (user != null &&
-        (user.getTwoFactorEnabled() != null ||
-            !(user.getTwoFactorEnabled()))) {
-//      user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
-      log.log(Level.WARNING, "Correctly traversed inside");
-
     }
 
     // Free tier billing project setup is complete; nothing to do.

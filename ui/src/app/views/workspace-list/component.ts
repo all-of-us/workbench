@@ -31,6 +31,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   workspacesLoading = false;
   workspaceAccessLevel = WorkspaceAccessLevel;
   firstSignIn: Date;
+  twoFactorEnabled: boolean;
   private profileSubscription: Subscription;
 
   constructor(
@@ -44,6 +45,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.workspacesLoading = true;
     this.profileSubscription = this.profileStorageService.profile$.subscribe(
       (profile) => {
+        this.twoFactorEnabled = profile.twoFactorEnabled;
         if (this.firstSignIn === undefined) {
           this.firstSignIn = new Date(profile.firstSignInTime);
         }
@@ -95,9 +97,14 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   get twoFactorBannerEnabled() {
-    if (this.firstSignIn == null) {
+    if (this.firstSignIn === null) {
       return false;
     }
+
+    if (this.twoFactorEnabled === true) {
+      return false;
+    }
+
     // Don't show the banner after 1 week as their account would
     // have been disabled had they not enabled 2-factor auth.
     if (new Date().getTime() - this.firstSignIn.getTime() > 1 * 7 * 24 * 60 * 60 * 1000) {
