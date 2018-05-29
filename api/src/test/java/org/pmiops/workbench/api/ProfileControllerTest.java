@@ -154,6 +154,7 @@ public class ProfileControllerTest {
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), cloudEnvironment);
+    when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
   @Test(expected = BadRequestException.class)
