@@ -1326,6 +1326,8 @@ definitions:
           $ref: "#/definitions/InstitutionalAffiliation"
       requestedIdVerification:
         type: boolean
+      twoFactorEnabled:
+        type: boolean
 
 
   InstitutionalAffiliation:

@@ -67,6 +67,7 @@ public class ProfileService {
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
     profile.setRequestedIdVerification(user.getRequestedIdVerification());
+    profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
     if (user.getBlockscoreVerificationIsValid() == null) {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.UNVERIFIED);
     } else if (user.getBlockscoreVerificationIsValid() == false) {

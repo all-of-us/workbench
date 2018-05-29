@@ -240,6 +240,15 @@ public class ProfileController implements ProfileApiDelegate {
         throw new ConflictException("Failed due to concurrent modification");
       }
     }
+    log.log(Level.WARNING, "User tfa: ", user.getTwoFactorEnabled());
+    log.log(Level.WARNING, "User: ", userAuthentication.toString());
+    if (user != null &&
+        (user.getTwoFactorEnabled() != null ||
+            !(user.getTwoFactorEnabled()))) {
+//      user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
+      log.log(Level.WARNING, "Correctly traversed inside");
+
+    }
 
     // Free tier billing project setup is complete; nothing to do.
     if (BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
