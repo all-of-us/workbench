@@ -1,11 +1,5 @@
 package org.pmiops.workbench.cdr.dao;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,19 +9,27 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class ConceptService {
-
+  
   public enum StandardConceptFilter {
     ALL_CONCEPTS,
     STANDARD_CONCEPTS,
     NON_STANDARD_CONCEPTS
   }
 
-  @PersistenceContext(name = "cdr")
+  @PersistenceContext(unitName = "cdr")
   private EntityManager entityManager;
 
-  public ConceptService() {}
+  public ConceptService() {
+  }
 
   // Used for tests
   public ConceptService(EntityManager entityManager) {
