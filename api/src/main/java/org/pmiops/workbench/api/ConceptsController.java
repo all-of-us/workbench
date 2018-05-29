@@ -55,6 +55,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       (concept) ->  new Concept()
             .conceptClassId(concept.getConceptClassId())
             .conceptCode(concept.getConceptCode())
+            .conceptName(concept.getConceptName())
             .conceptId(concept.getConceptId())
             .countValue(concept.getCountValue())
             .domainId(concept.getDomainId())
