@@ -163,3 +163,33 @@ label {
     height:100%;
     margin-top:.5rem;
 }
+
+.db-page-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
+/* Used to expand clarity data grid row to show charts because you can't change the clarity expansion icon or position */
+.expandable-grid-row {
+    width: 100%;
+    border: 1px solid #CCCCCC;
+    border-radius: 3px 3px 0 0;
+}
+
+.expanded-grid-row, .row-expansion {
+    background-color: #ECF1F4;
+
+}
+.expanded-grid-row {
+
+}
+.row-expansion {
+    width: 100%;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.white-card-box .expandable-grid-row {
+    margin-left: .10rem;
+}

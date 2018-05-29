@@ -149,16 +149,6 @@ paths:
           required: false
           description: standard concept filter
         - in: query
-          name: concept_code
-          type: string
-          required: false
-          description: concept code  filter
-        - in: query
-          name: vocabulary_id
-          type: string
-          required: false
-          description: vocabulary id filter
-        - in: query
           name: domain_id
           type: string
           required: false
@@ -255,6 +245,10 @@ definitions:
         type: string
       countValue:
         description: est count in the cdr
+        type: integer
+        format: int64
+      sourceCountValue:
+        description: est source count in the cdr
         type: integer
         format: int64
       prevalence:
@@ -362,6 +356,10 @@ definitions:
         type: string
       countValue:
         description: count
+        type: integer
+        format: int64
+      sourceCountValue:
+        description: source count
         type: integer
         format: int64
 

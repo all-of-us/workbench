@@ -1,3 +1,5 @@
+
+
 <div class="row">
 
   <div class="col-xs-12">
@@ -35,12 +37,12 @@
 
   <div class="col-md col-sm col-xs-12">
     <div class="white-card-box top-stat one-row">
-      <div class="row ">
+      <div class="row " *ngIf="searchResults.length > 0">
         <div class="col-md-6 col-xs-12">
           <h5 class="box-title">
-            Diagnoses
+            {{dbDomain.domainDisplay}}
           </h5>
-          <div class="card-stat">
+          <div class="card-stat" >
             {{searchResults.length}}
           </div>
 
@@ -57,11 +59,35 @@
   </div>
 </div>
 
+<div class="db-page-spinner" *ngIf="loading" >
+  <span  class="spinner">
+    Loading...
+  </span>
+</div>
 
 <div class="row result-list">
   <div class="col-xs-12">
     <div class="white-card-box">
-      <div *ngFor="let r of searchResults"> {{r.conceptId}} -- {{r.conceptName}}</div>
+      <div class=" results-grid" *ngIf="searchResults.length > 0" >
+        <div class="row expandable-grid-row" *ngFor="let r of searchResults, let i = index" [ngClass]="{'expanded-grid-row': r.expanded}" >
+          <div class="col-md-4"> {{i}}. {{r.conceptName}}</div>
+          <div class="col-md-3"> {{r.countValue | number }} partipants</div>
+          <div class="col-md-4"> {{r.vocabularyId}} {{r.conceptCode}}</div>
+          <div class="col-md-1 flex-xs-middle"> <button class="icon-btn" (click)="r.expanded = !r.expanded"> <clr-icon shape="bar-chart" style="height: 24px; color: #2691D0;"></clr-icon> </button> </div>
+          <div class="col-xs-12 row-expansion" *ngIf="r.expanded">
+          <div class="row" >
+
+              <div class="col-md-6 col-xs-12">
+                <app-chart [concepts]="searchResults" [pointWidth]="10"> </app-chart>
+              </div>
+              <div class="col-md-6 col-xs-12">
+                <app-chart [concepts]="searchResults" [pointWidth]="10"> </app-chart>
+              </div>
+          </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -22,8 +22,9 @@ export class EhrViewComponent implements OnInit {
   subTitle;
   dbDomain;
   searchText;
-  searchResults ;
-  domainResults;
+  searchResults = [];
+  loading = true;
+
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
@@ -50,10 +51,10 @@ export class EhrViewComponent implements OnInit {
 
     // Run search filter to domain
     const domainId = this.dbDomain.domainId;
-    this.api.getConceptsSearch(this.searchText).subscribe(results =>  {
-
-      this.searchResults = results.items.filter(r => r.domainId === this.dbDomain.domainId);
-
+    this.api.getConceptsSearch(this.searchText, domainId).subscribe(results =>  {
+      this.searchResults = results.items;
+      console.log(this.searchResults);
+      this.loading = false;
     } );
 
   }

@@ -73,3 +73,9 @@ button.btn.btn-link {
   color: #4a4a4a;
   font-size: 14px;
 }
+
+button.icon-btn {
+  background-color: inherit;
+  border: none;
+  height:1.25rem;
+}
