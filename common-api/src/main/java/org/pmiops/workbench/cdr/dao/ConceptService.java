@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 public class ConceptService {
-  
+
   public enum StandardConceptFilter {
     ALL_CONCEPTS,
     STANDARD_CONCEPTS,

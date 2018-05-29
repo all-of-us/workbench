@@ -46,7 +46,7 @@ public class PublicCdrDbConfig {
     return builder
         .dataSource(dataSource)
         .packages("org.pmiops.workbench.cdr")
-        .persistenceUnit("workbench")
+        .persistenceUnit("cdr")
         .build();
   }
 
