@@ -79,7 +79,8 @@
     margin-top: 9rem;
     margin-left: 2rem;
     font-weight: 300;
-    font-size: .75rem;
+    font-size: .65rem;
+    cursor: pointer;
 }
 
 .profile-box {
@@ -128,6 +129,7 @@
     font-size: .6rem;
     border-style: none;
     position: absolute;
+    cursor: pointer;
 }
 
 .pie-chart-box {
@@ -197,6 +199,7 @@
     text-align: center;
     vertical-align: middle;
     border-style: none;
+    cursor: pointer;
 }
 
 .bottom-banner {

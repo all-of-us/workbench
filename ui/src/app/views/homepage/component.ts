@@ -23,7 +23,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     'or create a new one. Please do not hesitate to use the "Report a Bug" ' +
     'button below (or found at any time via the Profile menu) ' +
     'if you experience any difficulties.';
-  tipButton = 'Report a Bug';
+  tipButton = 'REPORT A BUG';
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
