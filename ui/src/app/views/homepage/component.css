@@ -215,15 +215,19 @@
 }
 
 .logo {
-    margin-left: 4rem;
-    margin-top: 1rem;
+    top: 1rem;
+    left: 3.25rem;
+    height: 3.5rem;
     width: 7rem;
-    height: 90%
+    position: relative
 }
 
 .bottom-links {
     color: #9B9B9B;
     font-size: .6rem;
+    height: 1rem;
+    left: 2.5rem;
+    top: 2rem;
     margin-left: 1.5rem;
-    margin-top: 2rem;
+    position: relative;
 }
