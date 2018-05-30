@@ -83,6 +83,9 @@
     cursor: pointer;
 }
 
+.learn-more-button:hover {
+    background-color: #80C3ED;
+}
 .profile-box {
     height: 11rem;
     background-color: #FFFFFF;
@@ -130,6 +133,10 @@
     border-style: none;
     position: absolute;
     cursor: pointer;
+}
+
+.profile-update-button:hover {
+    background-color: #4356a7;
 }
 
 .pie-chart-box {
@@ -200,6 +207,10 @@
     vertical-align: middle;
     border-style: none;
     cursor: pointer;
+}
+
+.card *.button:hover {
+    background: #4356a7;
 }
 
 .bottom-banner {
