@@ -16,7 +16,11 @@ public interface AchillesAnalysisDao extends CrudRepository<AchillesAnalysis, Lo
     @Query(value = "select distinct a from AchillesAnalysis a left join FETCH a.results as r " +
             "where r.stratum1 in (?1) and a.analysisId in (3101,3102) order by a.analysisId"
     )
+<<<<<<< HEAD
     List<AchillesAnalysis> findConceptAnalysisResults(String concept_ids);
+=======
+    List<AchillesAnalysis> findConceptAnalysisResults(List<String> stratum1s);
+>>>>>>> 90affba120c094746e44330302b551dda0aebac4
 
 }
 

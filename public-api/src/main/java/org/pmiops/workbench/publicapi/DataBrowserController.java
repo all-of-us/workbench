@@ -4,8 +4,11 @@ package org.pmiops.workbench.publicapi;
 import org.pmiops.workbench.cdr.dao.*;
 import org.pmiops.workbench.cdr.model.*;
 import org.pmiops.workbench.model.ConceptListResponse;
+<<<<<<< HEAD
 import org.pmiops.workbench.model.ConceptAnalysis;
 import org.pmiops.workbench.model.ConceptAnalysisListResponse;
+=======
+>>>>>>> 90affba120c094746e44330302b551dda0aebac4
 import org.pmiops.workbench.model.AnalysisListResponse;
 import org.pmiops.workbench.model.DbDomainListResponse;
 import org.springframework.data.jpa.domain.Specification;
@@ -292,6 +295,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
+<<<<<<< HEAD
     public ResponseEntity<QuestionConceptListResponse> getConceptAnalysisResults(List<String> conceptIds){
 
         List<AchillesAnalysis> analysisList=achillesAnalysisDao.findConceptAnalysisResults(conceptIds);
@@ -303,6 +307,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(resp);
         */
         return null;
+=======
+    public ResponseEntity<AnalysisListResponse> getConceptAnalysisResults(List<String> conceptIds){
+        List<AchillesAnalysis> analysisList=achillesAnalysisDao.findConceptAnalysisResults(conceptIds);
+        AnalysisListResponse resp=new AnalysisListResponse();
+        resp.setItems(analysisList.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+>>>>>>> 90affba120c094746e44330302b551dda0aebac4
     }
 
     /**
