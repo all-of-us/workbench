@@ -110,7 +110,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
-      .setEmails(new UserEmail().setAddress(contactEmail).setCustomType("Contact"))
+      .setEmails(new UserEmail().setType("custom").setAddress(contactEmail).setCustomType("contact"))
       .setChangePasswordAtNextLogin(true);
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
