@@ -14,7 +14,7 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
 
     List<DbDomain> findByDbTypeAndAndConceptIdNotNull(String db_type);
 
-    @Query(nativeQuery=true,value="select d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.domain_route,d.concept_id, sum(c.count_value) as count_value from db_domain d\n" +
+    @Query(nativeQuery=true,value="select d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.domain_route,d.concept_id, count(distinct c.concept_id) as count_value from db_domain d\n" +
             "join concept c on d.domain_id = c.domain_id\n" +
             "where d.db_type = 'domain_filter' and c.count_value > 0 and c.standard_concept = 'S'\n" +
             "and  (match(c.concept_name) against(?1 in boolean mode) )\n" +
