@@ -516,3 +516,52 @@ definitions:
         items:
           $ref: "#/definitions/DbDomain"
 
+  ConceptAnalysis:
+    type: object
+    required:
+      - conceptId
+      - conceptName
+      - domainId
+      - conceptCode
+      - standardConcept
+
+    properties:
+      conceptId:
+        description: id of the concept
+        type: integer
+        format: int64
+      conceptName:
+        description: name of concept
+        type: string
+      domainId:
+        description: domain of concept
+        type: string
+      conceptCode:
+        description: original vocab code of concept
+        type: string
+      countValue:
+        description: est count in the cdr
+        type: integer
+        format: int64
+      prevalence:
+        description: prevalence among participants percent count divided num participants
+        type: number
+        format: float
+      genderAnalysis:
+        description: gender analysis
+        $ref: "#/definitions/Analysis"
+      ageAnalysis:
+        description: age analysis
+        $ref: "#/definitions/Analysis"
+
+  ConceptAnalysisListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      concept:
+        $ref: "#/definitions/DbDomain"
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/ConceptAnalysis"

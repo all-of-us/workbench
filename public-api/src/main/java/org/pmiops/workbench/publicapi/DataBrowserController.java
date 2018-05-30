@@ -4,6 +4,8 @@ package org.pmiops.workbench.publicapi;
 import org.pmiops.workbench.cdr.dao.*;
 import org.pmiops.workbench.cdr.model.*;
 import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.ConceptAnalysis;
+import org.pmiops.workbench.model.ConceptAnalysisListResponse;
 import org.pmiops.workbench.model.AnalysisListResponse;
 import org.pmiops.workbench.model.DbDomainListResponse;
 import org.springframework.data.jpa.domain.Specification;
@@ -290,11 +292,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
-    public ResponseEntity<AnalysisListResponse> getConceptAnalysisResults(List<String> conceptIds){
+    public ResponseEntity<QuestionConceptListResponse> getConceptAnalysisResults(List<String> conceptIds){
+
         List<AchillesAnalysis> analysisList=achillesAnalysisDao.findConceptAnalysisResults(conceptIds);
-        AnalysisListResponse resp=new AnalysisListResponse();
+        QuestionConcept.mapAnalysesToQuestions(conceptIds,analysisList);
+        QuestionConceptListResponse resp=new QuestionConceptListResponse();
         resp.setItems(analysisList.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
+        */
     }
 
     /**
