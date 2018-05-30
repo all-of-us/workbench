@@ -79,18 +79,24 @@ end
 
 def read_db_vars(gcc)
   Workbench::assert_in_docker
+  vars_path = "gs://#{gcc.project}-credentials/vars.env"
   vars = Workbench::read_vars(Common.new.capture_stdout(%W{
-    gsutil cat gs://#{gcc.project}-credentials/vars.env
+    gsutil cat #{vars_path}
   }))
   if vars.empty?
-    Common.new.error "Failed to read gs://#{gcc.project}-credentials/vars.env"
+    Common.new.error "Failed to read #{vars_path}"
     exit 1
   end
   # Note: CDR project and target project may be the same.
   cdr_project = get_cdr_sql_project(gcc.project)
+  cdr_vars_path = "gs://#{cdr_project}-credentials/vars.env"
   cdr_vars = Workbench::read_vars(Common.new.capture_stdout(%W{
-    gsutil cat gs://#{cdr_project}-credentials/vars.env
+    gsutil cat #{cdr_vars_path}
   }))
+  if cdr_vars.empty?
+    Common.new.error "Failed to read #{cdr_vars_path}"
+    exit 1
+  end
   return vars.merge({
     'CDR_DB_CONNECTION_STRING' => cdr_vars['DB_CONNECTION_STRING'],
     'CDR_DB_USER' => cdr_vars['WORKBENCH_DB_USER'],
