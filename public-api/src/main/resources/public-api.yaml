@@ -69,7 +69,7 @@ paths:
         200:
           description: A collection of analysis for concept
           schema:
-            $ref: "#/definitions/AnalysisListResponse"
+            $ref: "#/definitions/ConceptAnalysisListResponse"
 
 
   /v1/databrowser/participant-count:
@@ -520,38 +520,17 @@ definitions:
     type: object
     required:
       - conceptId
-      - conceptName
-      - domainId
-      - conceptCode
-      - standardConcept
-
     properties:
       conceptId:
-        description: id of the concept
-        type: integer
-        format: int64
-      conceptName:
-        description: name of concept
+        description: concept id
         type: string
-      domainId:
-        description: domain of concept
-        type: string
-      conceptCode:
-        description: original vocab code of concept
-        type: string
-      countValue:
-        description: est count in the cdr
-        type: integer
-        format: int64
-      prevalence:
-        description: prevalence among participants percent count divided num participants
-        type: number
-        format: float
       genderAnalysis:
         description: gender analysis
+        type: object
         $ref: "#/definitions/Analysis"
       ageAnalysis:
         description: age analysis
+        type: object
         $ref: "#/definitions/Analysis"
 
   ConceptAnalysisListResponse:
@@ -559,8 +538,6 @@ definitions:
     required:
       - items
     properties:
-      concept:
-        $ref: "#/definitions/DbDomain"
       items:
         type: array
         items:
