@@ -298,8 +298,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     public ResponseEntity<QuestionConceptListResponse> getConceptAnalysisResults(List<String> conceptIds){
 
         List<AchillesAnalysis> analysisList=achillesAnalysisDao.findConceptAnalysisResults(conceptIds);
@@ -311,18 +310,12 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(resp);
         */
         return null;
-=======
-=======
->>>>>>> 90affba120c094746e44330302b551dda0aebac4
+
     public ResponseEntity<AnalysisListResponse> getConceptAnalysisResults(List<String> conceptIds){
         List<AchillesAnalysis> analysisList=achillesAnalysisDao.findConceptAnalysisResults(conceptIds);
         AnalysisListResponse resp=new AnalysisListResponse();
         resp.setItems(analysisList.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
-<<<<<<< HEAD
->>>>>>> 90affba120c094746e44330302b551dda0aebac4
-=======
->>>>>>> 90affba120c094746e44330302b551dda0aebac4
     }
 
     /**

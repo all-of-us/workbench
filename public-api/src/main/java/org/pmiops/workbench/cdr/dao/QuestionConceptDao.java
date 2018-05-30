@@ -19,8 +19,4 @@ public interface QuestionConceptDao extends CrudRepository<QuestionConcept, Long
     @Query(nativeQuery=true,value="select c.concept_id,c.concept_name.c.domain_id,c.vocabulary_id,c.concept_code,c.count_value,c.prevalence from \n" +
         "concept where concept_id in (?1)")
     List<QuestionConcept> findConceptAnalysis(List<String> concept_ids);
-=======
->>>>>>> 90affba120c094746e44330302b551dda0aebac4
-=======
->>>>>>> 90affba120c094746e44330302b551dda0aebac4
 }
