@@ -248,7 +248,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 standardConceptPredicates.toArray(new Predicate[0])));
                     }
 
-
+                    if(domainIds != null){
+                        predicates.add(root.get("domainId").in(domainIds));
+                    }
 
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
@@ -258,15 +260,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
 
-        /*
-        PublicConceptSpecification publicConceptSpecification=new PublicConceptSpecification();
-        Specification<Concept> spec=publicConceptSpecification.getConceptSpecification(keyword,domainIds,conceptFilter);
-        //List<Concept> concepts=publicConceptSearchDao.findAll(spec);
-        List<Concept> concepts=publicConceptSearchDao.findAll(spec);
-        ConceptListResponse resp=new ConceptListResponse();
-        resp.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-        */
     }
 
     @Override
