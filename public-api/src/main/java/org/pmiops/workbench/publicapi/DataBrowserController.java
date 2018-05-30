@@ -4,11 +4,20 @@ package org.pmiops.workbench.publicapi;
 import org.pmiops.workbench.cdr.dao.*;
 import org.pmiops.workbench.cdr.model.*;
 import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.AnalysisListResponse;
 import org.pmiops.workbench.model.DbDomainListResponse;
+import org.springframework.data.jpa.domain.Specification;
 import org.pmiops.workbench.model.QuestionConceptListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Slice;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import org.springframework.data.jpa.domain.Specification;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +38,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private AchillesResultDao achillesResultDao;
     @Autowired
     private DbDomainDao dbDomainDao;
+    @Autowired
+    private ConceptSearchDao conceptSearchDao;
 
     public static final long PARTICIPANT_COUNT_ANALYSIS_ID = 1;
     public static final long COUNT_ANALYSIS_ID = 3000;
@@ -201,6 +212,64 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
+    public ResponseEntity<ConceptListResponse> getAdvancedConceptsSearch(String keyword,List<String> domainIds,String conceptFilter){
+
+        Specification<Concept> conceptSpecification =
+                (root, criteriaQuery, criteriaBuilder) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+                    List<Predicate> queryPredicates = new ArrayList<>();
+
+                    Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
+                            root.get("conceptName"), criteriaBuilder.literal(keyword));
+                    queryPredicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+
+                    queryPredicates.add(criteriaBuilder.equal(root.get("conceptCode"),
+                            criteriaBuilder.literal(keyword)));
+
+                    try {
+                        long conceptId = Long.parseLong(keyword);
+                        queryPredicates.add(criteriaBuilder.equal(root.get("conceptId"),
+                                criteriaBuilder.literal(conceptId)));
+                    } catch (NumberFormatException e) {
+                        // Not a long, don't try to match it to a concept ID.
+                    }
+
+                    predicates.add(criteriaBuilder.or(queryPredicates.toArray(new Predicate[0])));
+
+                    if(conceptFilter.equals("S")){
+                        predicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                                criteriaBuilder.literal("S")));
+                    }else{
+                        List<Predicate> standardConceptPredicates = new ArrayList<>();
+                        standardConceptPredicates.add(criteriaBuilder.isNull(root.get("standardConcept")));
+                        standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
+                                criteriaBuilder.literal("S")));
+                        predicates.add(criteriaBuilder.or(
+                                standardConceptPredicates.toArray(new Predicate[0])));
+                    }
+
+
+
+                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                };
+
+        List<Concept> conceptList=conceptSearchDao.findAll(conceptSpecification);
+        ConceptListResponse resp=new ConceptListResponse();
+        resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+
+        /*
+        PublicConceptSpecification publicConceptSpecification=new PublicConceptSpecification();
+        Specification<Concept> spec=publicConceptSpecification.getConceptSpecification(keyword,domainIds,conceptFilter);
+        //List<Concept> concepts=publicConceptSearchDao.findAll(spec);
+        List<Concept> concepts=publicConceptSearchDao.findAll(spec);
+        ConceptListResponse resp=new ConceptListResponse();
+        resp.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+        */
+    }
+
+    @Override
     public ResponseEntity<QuestionConceptListResponse> getSurveyResults(String surveyConceptId) {
         /* Set up the age and gender names */
         // Too slow and concept names wrong so we hardcode list
@@ -228,6 +297,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }
 
         resp.setItems(questions.stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
+    @Override
+    public ResponseEntity<AnalysisListResponse> getConceptAnalysisResults(List<String> conceptIds){
+        List<AchillesAnalysis> analysisList=achillesAnalysisDao.findConceptAnalysisResults(conceptIds);
+        AnalysisListResponse resp=new AnalysisListResponse();
+        resp.setItems(analysisList.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
     }
 
