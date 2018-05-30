@@ -56,7 +56,6 @@ public class User {
       new ArrayList<InstitutionalAffiliation>();
   private String aboutYou;
   private String areaOfResearch;
-
   private Boolean twoFactorEnabled = false;
 
   @Id
@@ -291,7 +290,6 @@ public class User {
 
   @Column(name = "two_factor_enabled")
   public Boolean getTwoFactorEnabled() {
-
     return twoFactorEnabled;
   }
 

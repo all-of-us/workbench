@@ -224,9 +224,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
 
-    if (user != null &&
-        (user.getTwoFactorEnabled() == null ||
-            !(user.getTwoFactorEnabled()))) {
+    if (!user.getTwoFactorEnabled()) {
       user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
       userDao.save(user);
     }
