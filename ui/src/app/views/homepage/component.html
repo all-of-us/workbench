@@ -1,0 +1,72 @@
+<div class="front-page">
+    <div class="background-image">
+    <div class="rectangle"></div>
+    <div class="invisible_rectangle">
+        <div class="tip-title">{{tipHeadline}}</div>
+        <div class="tip-title tip-subtitle">{{tipSubtitle}}</div>
+        <div class="tip-title tip-description">{{tipDetail}}</div>
+        <div *ngIf="tipButton" class="learn-more-button" (click)="bugReportComponent.reportBug();">{{tipButton}}</div>
+        <div class="profile-box">
+            <div style="float: left; width: 50%">
+                <div class="profile-title">
+                    COMPLETE YOUR PROFILE
+                </div>
+                <div class="profile-title profile-tips">
+                    You can quickly:
+                    <li>Add your institution</li>
+                    <li>Add your role</li>
+                    <li>Update something else</li>
+                </div>
+                <button class="profile-update-button" (click)="navigateToProfile()">UPDATE</button>
+            </div>
+            <div class="pie-chart-box">
+                <ngx-charts-pie-chart
+                        [scheme]="colorScheme"
+                        [results]="spinnerValues"
+                        [doughnut]="true"
+                        [tooltipDisabled]="true">
+                </ngx-charts-pie-chart>
+                <div class="percent-text">
+                    {{completedTasksAsPercentage}}%
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+<div class="card-area">
+    <div class="card">
+        <div class="title">Create your own workspace</div>
+        <div class="description">Here you can create and name a workspace.
+            Within a workspace you can create notebooks and build cohorts.</div>
+        <button class="button tooltip" (click)="addWorkspace()" [disabled]="!billingProjectInitialized">
+            CREATE WORKSPACE
+            <span *ngIf="!billingProjectInitialized" class="tooltip-content">
+                Your billing project is currently being created, please wait.
+            </span>
+        </button>
+    </div>
+    <div class="card">
+        <div class="title">View your workspaces</div>
+        <div class="description">Here you can view all workspaces you have created, or that have been
+            shared with you.</div>
+        <button class="button tooltip" (click)="listWorkspaces()" [disabled]="!FCAccountInitialized">
+            GO TO WORKSPACES
+            <span *ngIf="!FCAccountInitialized" class="tooltip-content">
+                Your account is being initialized, please wait.
+            </span>
+        </button>
+    </div>
+</div>
+<div class="bottom-banner">
+    <div class="logo">
+        <img [src]="AouLogoFooter">
+    </div>
+    <div class="bottom-links">
+        Privacy Policy
+    </div>
+    <div class="bottom-links">
+        Terms of Service
+    </div>
+</div>
+<app-bug-report></app-bug-report>
+</div>
