@@ -6,9 +6,9 @@
 
 <div class="row" >
   <div class="col-md-6 col-xs-12" *ngIf="genderAnalysis"  >
-    <app-chart [analysis]="genderAnalysis" [selectedResult]="selectedResult" [pointWidth]="10" > </app-chart>
+    <app-chart [analysis]="genderAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
   </div>
   <div class="col-md-6 col-xs-12" *ngIf="ageAnalysis" >
-    <app-chart [analysis]="ageAnalysis" [selectedResult]="selectedResult" [pointWidth]="10"> </app-chart>
+    <app-chart [analysis]="ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
   </div>
 </div>

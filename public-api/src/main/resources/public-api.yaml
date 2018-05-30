@@ -49,6 +49,29 @@ paths:
           schema:
             $ref: "#/definitions/QuestionConceptListResponse"
 
+  /v1/databrowser/concept-analysis-results:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets analysis results for concept
+      operationId: "getConceptAnalysisResults"
+      parameters:
+        - in: query
+          name: concept-ids
+          type: array
+          items:
+            type: string
+          required: true
+          description: concept id
+      responses:
+        200:
+          description: A collection of analysis for concept
+          schema:
+            $ref: "#/definitions/ConceptAnalysisListResponse"
+
+
   /v1/databrowser/participant-count:
     get:
       security: []
@@ -159,7 +182,37 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
+  /v1/databrowser/advanced-search-concepts:
+    get:
+      security: []
+      tags:
+        - dataBrowser
 
+      description: Searches for concepts in concept table with search string and filters
+      operationId: "getAdvancedConceptsSearch"
+      parameters:
+        - in: query
+          name: keyword
+          type: string
+          required: true
+          description: keyword to search
+        - in: query
+          name: domain-ids
+          type: array
+          items:
+            type: string
+          required: true
+          description: domain ids
+        - in: query
+          name: concept_filter
+          type: string
+          required: true
+          description: concept filter
+      responses:
+        200:
+          description: A collection of concepts
+          schema:
+            $ref: "#/definitions/ConceptListResponse"
 
   /v1/databrowser/child-concepts:
     get:
@@ -462,3 +515,31 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/DbDomain"
+
+  ConceptAnalysis:
+    type: object
+    required:
+      - conceptId
+    properties:
+      conceptId:
+        description: concept id
+        type: string
+      genderAnalysis:
+        description: gender analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      ageAnalysis:
+        description: age analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+
+  ConceptAnalysisListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/ConceptAnalysis"
+

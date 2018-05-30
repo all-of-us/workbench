@@ -8,6 +8,7 @@ import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.servi
 })
 export class ConceptChartsComponent implements OnInit {
   @Input() concept: Concept;
+  @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
   results;
   loading = false;
   ageAnalysis = null;
@@ -18,11 +19,11 @@ export class ConceptChartsComponent implements OnInit {
   ngOnInit() {
     // Get chart results for concept
     this.loading = true;
-    this.api.getSurveyResults('1585855').subscribe(results =>  {
+    const conceptIdStr = '' + this.concept.conceptId.toString();
+    this.api.getConceptAnalysisResults([conceptIdStr]).subscribe(results =>  {
       this.results = results.items;
       console.log(this.results);
       this.ageAnalysis = this.results[0].ageAnalysis;
-      this.selectedResult = this.results.countAnalysis.results[0]
       this.genderAnalysis = this.results[0].genderAnalysis;
 
       this.loading = false;

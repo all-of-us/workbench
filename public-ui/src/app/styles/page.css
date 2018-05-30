@@ -170,20 +170,30 @@ label {
     left: 50%;
 }
 
-/* Used to expand clarity data grid row to show charts because you can't change the clarity expansion icon or position */
-.expandable-grid-row {
+/* Used to expand clarity data grid row to show charts because you can't change the clarity expansion icon or position
+
+ */
+.expandable-grid-row  {
     width: 100%;
     border: 1px solid #CCCCCC;
     border-radius: 3px 3px 0 0;
+    height: 2rem;
+
 }
 
+/* This is a column in our grid */
+.expandable-grid-row > div {
+
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 16px;
+
+}
 .expanded-grid-row, .row-expansion {
     background-color: #ECF1F4;
 
 }
-.expanded-grid-row {
 
-}
 .row-expansion {
     width: 100%;
     text-align: center;
@@ -192,4 +202,8 @@ label {
 
 .white-card-box .expandable-grid-row {
     margin-left: .10rem;
+}
+
+.results-grid {
+    margin: .75rem;
 }

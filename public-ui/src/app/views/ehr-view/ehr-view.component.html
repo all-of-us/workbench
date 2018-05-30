@@ -38,7 +38,7 @@
   <div class="col-md col-sm col-xs-12">
     <div class="white-card-box top-stat one-row">
       <div class="row " *ngIf="searchResults.length > 0">
-        <div class="col-md-6 col-xs-12">
+        <div class="col-md-4 col-xs-12">
           <h5 class="box-title">
             {{dbDomain.domainDisplay}}
           </h5>
@@ -50,8 +50,8 @@
             <clr-icon class="" shape="info-standard"></clr-icon> What is SNOMED?
           </div>
         </div>
-        <div class="col-md-6 col-xs-12 chart-wrapper flex-xs-middle">
-            <app-chart [concepts]="searchResults" [pointWidth]="10"> </app-chart>
+        <div class="col-md-8 col-xs-12 chart-wrapper flex-xs-middle">
+            <app-chart [concepts]="searchResults" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
         </div>
       </div>
 
@@ -68,18 +68,19 @@
 <div class="row result-list">
   <div class="col-xs-12">
     <div class="white-card-box">
-      <div class=" results-grid" *ngIf="searchResults.length > 0" >
+      <div class="results-grid" *ngIf="searchResults.length > 0" >
         <div class="row expandable-grid-row" *ngFor="let r of searchResults, let i = index" [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-4"> {{i}}. {{r.conceptName}}</div>
-          <div class="col-md-3"> {{r.countValue | number }} partipants</div>
-          <div class="col-md-4"> {{r.vocabularyId}} {{r.conceptCode}}</div>
+          <div class="col-md-4 flex-xs-middle"> {{i+1}}. {{r.conceptName}}</div>
+          <div class="col-md-3 flex-xs-middle"> {{r.countValue | number }} partipants</div>
+          <div class="col-md-4 flex-xs-middle"> {{r.vocabularyId}} {{r.conceptCode}}</div>
           <div class="col-md-1 flex-xs-middle"> <button class="icon-btn" (click)="r.expanded = !r.expanded"> <clr-icon shape="bar-chart" style="height: 24px; color: #2691D0;"></clr-icon> </button> </div>
-          <div class="col-xs-12 row-expansion" *ngIf="r.expanded">
-            <app-concept-charts [concept]="r"></app-concept-charts>
+          <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded">
+            <app-concept-charts [concept]="r" [backgroundColor]="'#ECF1F4'"></app-concept-charts>
           </div>
 
         </div>
       </div>
+      <div class="row"> <div class="col-md-4 col-xs-12"> <button class="btn btn-primary" [routerLink]="['/quick-search']"> Start New Quick Search </button></div></div>
     </div>
   </div>
 </div>

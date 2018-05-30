@@ -43,9 +43,10 @@ const DATA_LABEL_STYLE = {
 })
 export class ChartComponent implements OnChanges {
   @Input() analysis: Analysis;
-  @Input() concepts: Concept[] = []; // Can put in analysis or concepts to chart. Concepts are used if we have them.
-  @Input() selectedResult: any; // For ppi question answers analysis , we select an answer from the results we want to graph
-  @Input() pointWidth = 10; // Optional width of bar or point or box plot , passed directly to highcharts
+  @Input() concepts: Concept[] = []; // Can put in analysis or concepts to chart. Don't put both
+  @Input() selectedResult: any; // For ppi question answers analysis , we select an answer from the results
+  @Input() pointWidth = 10;   // Optional width of bar or point or box plot
+  @Input() backgroundColor = '#FFFFFF'; // Optional background color
   chartOptions: any;
   chartInstance: any;
   chartType = 'column';
@@ -63,6 +64,7 @@ export class ChartComponent implements OnChanges {
 
   // If analysis object results changed , update the chart
   ngOnChanges() {
+    console.log("Analysis", this.analysis);
     if ((this.analysis && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {
         // HC automatically redraws when changing chart options
@@ -208,7 +210,7 @@ export class ChartComponent implements OnChanges {
         tooltip: {pointFormat: '<b>{point.y} </b>'}
       };
       return {
-        chart: {type: 'column', backgroundColor: '#FFFFFF'},
+        chart: {type: 'column', backgroundColor: this.backgroundColor},
         title: { text: null },
         series: series,
         categories: cats,
@@ -245,7 +247,7 @@ export class ChartComponent implements OnChanges {
       tooltip: {pointFormat: '<b>{point.y} </b>'}
     };
     return {
-      chart: {type: 'column', backgroundColor: '#ECF1F4'},
+      chart: {type: 'column', backgroundColor: this.backgroundColor }, // '#ECF1F4'
       title: { text: null },
       series: series,
       categories: cats,
@@ -254,11 +256,25 @@ export class ChartComponent implements OnChanges {
 
   }
   public makeGenderChartOptions() {
-    const results = this.getSelectedResults(this.selectedResult);
+    // For ppi we need to filter the results to the particular answer that the user selected
+    // because we only show the breakdown for one answer on this chart
+    let results = [];
+    let seriesName = '';
+    console.log(this.analysis, GENDER_ANALYSIS_ID);
+    if (this.analysis.analysisId === GENDER_ANALYSIS_ID) {
+      results = this.analysis.results;
+      seriesName = this.analysis.analysisName;
+    } else {
+      results = this.getSelectedResults(this.selectedResult);
+      // Series name for answers is the answer selected which is in stratum4
+      seriesName = this.selectedResult.stratum4;
+    }
     let data = [];
     let cats = [];
     for (const a  of results) {
-      data.push({name: a.stratum5Name, y: a.countValue, color: GENDER_COLORS[a.stratum5], sliced: true});
+      // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
+      const color = a.analysisId === GENDER_ANALYSIS_ID ? GENDER_COLORS[a.stratum2] : GENDER_COLORS[a.stratum5];
+      data.push({name: a.stratum5Name, y: a.countValue, color: color, sliced: true});
       cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
@@ -275,10 +291,9 @@ export class ChartComponent implements OnChanges {
       if (a < b) { return -1; }
       return 0;
     });
-    const seriesName = this.selectedResult.stratum4;
     const series = { name: seriesName, colorByPoint: true, data: data };
     return {
-      chart: {type: 'pie', backgroundColor: '#D9E4EA'},
+      chart: {type: 'pie', backgroundColor: this.backgroundColor}, // '#D9E4EA'
       title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
       series: series,
       categories: cats,
@@ -288,13 +303,23 @@ export class ChartComponent implements OnChanges {
   }
 
   public makeAgeChartOptions() {
-    const results = this.getSelectedResults(this.selectedResult);
-
+    let results = [];
+    let seriesName = '';
+    if (this.analysis.analysisId === AGE_ANALYSIS_ID) {
+      results = this.analysis.results;
+      seriesName = this.analysis.analysisName;
+    } else {
+      results = this.getSelectedResults(this.selectedResult);
+      // Series name for answers is the answer selected which is in stratum4
+      seriesName = this.selectedResult.stratum4;
+    }
     // Age results have two stratum-- 1 is concept, 2 is age decile
     let data = [];
     let cats = [];
     for (const a  of results) {
-      data.push({name: a.stratum5Name, y: a.countValue, color: AGE_COLORS[a.stratum5]});
+      // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
+      const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] : AGE_COLORS[a.stratum5];
+      data.push({name: a.stratum5Name, y: a.countValue, color: color});
       cats.push(a.stratum5Name);
     }
 
@@ -313,8 +338,7 @@ export class ChartComponent implements OnChanges {
       return 0;
     });
 
-    // Series name for answers is the answer selected which is in stratum4
-    const seriesName = this.selectedResult.stratum4;
+
     const series = { name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'column', backgroundColor: '#D9E4EA'},
