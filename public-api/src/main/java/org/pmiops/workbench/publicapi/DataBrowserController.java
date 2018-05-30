@@ -296,10 +296,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         List<AchillesAnalysis> analysisList=achillesAnalysisDao.findConceptAnalysisResults(conceptIds);
         QuestionConcept.mapAnalysesToQuestions(conceptIds,analysisList);
+        System.out.println()
+        /*
         QuestionConceptListResponse resp=new QuestionConceptListResponse();
         resp.setItems(analysisList.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
         */
+        return null;
     }
 
     /**
