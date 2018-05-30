@@ -11,10 +11,6 @@ import org.pmiops.workbench.model.QuestionConceptListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Slice;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
@@ -236,7 +232,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                     predicates.add(criteriaBuilder.or(queryPredicates.toArray(new Predicate[0])));
 
-                    if(conceptFilter.equals("S")){
+                    if("S".equals(conceptFilter)){
                         predicates.add(criteriaBuilder.equal(root.get("standardConcept"),
                                 criteriaBuilder.literal("S")));
                     }else{
