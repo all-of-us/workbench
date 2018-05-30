@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import * as highcharts from 'highcharts';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
@@ -63,13 +63,11 @@ export class ChartComponent implements OnChanges {
 
   // If analysis object results changed , update the chart
   ngOnChanges() {
-    console.log('On changes');
     if ((this.analysis && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {
         // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
     }
-
   }
 
   public chartClick(e) {

@@ -1,0 +1,14 @@
+<div class="db-page-spinner" *ngIf="loading" >
+  <span  class="spinner">
+    Loading...
+  </span>
+</div>
+
+<div class="row" >
+  <div class="col-md-6 col-xs-12" *ngIf="genderAnalysis"  >
+    <app-chart [analysis]="genderAnalysis" [selectedResult]="selectedResult" [pointWidth]="10" > </app-chart>
+  </div>
+  <div class="col-md-6 col-xs-12" *ngIf="ageAnalysis" >
+    <app-chart [analysis]="ageAnalysis" [selectedResult]="selectedResult" [pointWidth]="10"> </app-chart>
+  </div>
+</div>
