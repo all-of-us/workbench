@@ -1,0 +1,40 @@
+"domain_id","domain_name",domain_concept_id
+"Condition","Condition",19
+"Condition/Device","Condition/Device",235
+"Condition/Drug","Condition/Drug",53
+"Condition/Meas","Condition/Measurement",47
+"Condition/Obs","Condition/Observation",48
+"Condition/Procedure","Condition/Procedure",49
+"Currency","Currency",34
+"Device","Device",17
+"Device/Drug","Device/Drug",50
+"Device/Obs","Device/Observation",45
+"Device/Procedure","Device/Procedure",41
+"Drug","Drug",13
+"Drug/Measurement","Drug/Measurement",51
+"Drug/Obs","Drug/Observation",52
+"Drug/Procedure","Drug/Procedure",54
+"Ethnicity","Ethnicity",4
+"Gender","Gender",2
+"Meas Value","Measurement Value",24
+"Meas Value Operator","Measurement Value Operator",23
+"Meas/Procedure","Measurement/Procedure",43
+"Measurement","Measurement",21
+"Measurement/Obs","Measurement/Observation",44
+"Metadata","Metadata",7
+"Modifier","Modifier",12
+"Obs/Procedure","Observation/Procedure",42
+"Observation","Observation",27
+"Place of Service","Place of Service",32
+"Procedure","Procedure",10
+"Provider Specialty","Provider Specialty",33
+"Race","Race",3
+"Relationship","Relationship",31
+"Revenue Code","Revenue Code",35
+"Route","Route Of Administration",15
+"Spec Anatomic Site","Specimen Anatomic Site",38
+"Spec Disease Status","Specimen Disease Status",39
+"Specimen","Specimen",36
+"Type Concept","Type Concept",58
+"Unit","Unit",16
+"Visit","Visit",8

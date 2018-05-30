@@ -1,0 +1,36 @@
+[
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_id", 
+        "type": "STRING"
+      }, 
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_display",
+        "type": "STRING"
+      }, 
+      {
+        "mode": "REQUIRED", 
+        "name": "domain_desc",
+        "type": "STRING"
+      },
+      {
+        "name": "db_type",
+        "type": "STRING"
+      },
+      {
+      "name": "domain_route",
+      "type": "STRING"
+      },
+      {
+        "mode":"NULLABLE",
+        "name": "concept_id",
+        "type": "INTEGER"
+      },
+      {
+        "mode":"NULLABLE",
+        "name": "count_value",
+        "type": "INTEGER"
+      }
+]
+

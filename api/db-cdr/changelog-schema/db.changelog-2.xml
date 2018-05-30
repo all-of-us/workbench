@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="biopete" id="changelog-2">
+    <validCheckSum>ANY</validCheckSum>
+    <createTable tableName="concept">
+      <column name="concept_id" type="INTEGER">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="vocabulary_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_class_id" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="standard_concept" type="VARCHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_code" type="VARCHAR(50)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_start_date" type="DATE">
+        <constraints nullable="true"/>
+      </column>
+      <column name="valid_end_date" type="DATE">
+        <constraints nullable="true"/>
+      </column>
+      <column name="invalid_reason" type="VARCHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="count_value" defaultValue="0" type="bigint(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="prevalence" defaultValue="0" type="decimal(3,2)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <createIndex
+            indexName="idx_concept_name"
+            tableName="concept"
+            unique="false">
+      <column name="concept_name" type="varchar(255)"/>
+    </createIndex>
+    <createIndex
+            indexName="idx_concept_code"
+            tableName="concept"
+            unique="false">
+      <column name="concept_code" type="varchar(50)"/>
+    </createIndex>
+    <createIndex
+            indexName="idx_domain_id"
+            tableName="concept"
+            unique="false">
+      <column name="domain_id" type="varchar(20)"/>
+    </createIndex>
+
+    <createIndex
+            indexName="idx_vocabulary_id"
+            tableName="concept"
+            unique="false">
+      <column name="vocabulary_id" type="varchar(20)"/>
+    </createIndex>
+    <createIndex
+            indexName="idx_standard_concept"
+            tableName="concept"
+            unique="false">
+      <column name="standard_concept" type="varchar(1)"/>
+    </createIndex>
+
+    <createTable tableName="concept_relationship">
+      <column name="concept_id_1" type="INTEGER">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="concept_id_2" type="INTEGER">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="relationship_id" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="valid_start_date" type="DATE">
+        <constraints nullable="false"/>
+      </column>
+      <column name="valid_end_date" type="DATE">
+        <constraints nullable="false"/>
+      </column>
+      <column name="invalid_reason" type="VARCHAR(1)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex tableName="concept_relationship" indexName="idx_concept_1">
+      <column name="concept_id_1" type="bigint"></column>
+    </createIndex>
+
+    <createIndex tableName="concept_relationship" indexName="idx_concept_2">
+      <column name="concept_id_2" type="bigint"></column>
+    </createIndex>
+
+    <createIndex tableName="concept_relationship" indexName="idx_relationship_id">
+      <column name="relationship_id" type="varchar(20)"></column>
+    </createIndex>
+
+    <addPrimaryKey
+            columnNames="concept_id_1, concept_id_2, relationship_id"
+            constraintName="pk_concept_rel"
+            tableName="concept_relationship"/>
+
+    <createTable tableName="vocabulary">
+      <column name="vocabulary_id"  type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="vocabulary_name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="vocabulary_reference" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="vocabulary_version" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="vocabulary_concept_id" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="domain">
+      <column name="domain_id"  type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="domain_name" type="VARCHAR(255)">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="domain_concept_id" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="achilles_analysis">
+      <column name="analysis_id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="analysis_name" type="varchar(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="stratum_1_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_2_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_3_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_4_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_5_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="chart_type" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="data_type" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="achilles_results">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="true"/>
+      </column>
+      <column name="analysis_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_1" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_2" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_3" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_4" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_5" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="count_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+
+    </createTable>
+
+    <createIndex
+            indexName="idx_count_value"
+            tableName="achilles_results"
+            unique="false">
+      <column name="count_value" type="bigint(20)"/>
+    </createIndex>
+
+    <createIndex
+            indexName="idx_results_analysis_id"
+            tableName="achilles_results"
+            unique="false">
+      <column name="analysis_id"/>
+      <column name="stratum_1"/>
+    </createIndex>
+
+    <createIndex
+            indexName="idx_strat2_results_analysis_id"
+            tableName="achilles_results"
+            unique="false">
+      <column name="stratum_2"/>
+    </createIndex>
+
+
+    <createTable tableName="achilles_results_concept">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="analysis_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="stratum_1" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_1_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_2" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_2_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_3" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_3_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_4" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_4_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_5" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="stratum_5_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="count_value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex
+            indexName="idx_analysis_id"
+            tableName="achilles_results_concept"
+            unique="false">
+      <column name="analysis_id" type="varchar(255)"/>
+    </createIndex>
+    <createIndex
+            indexName="idx_analysis_id_stratum_1"
+            tableName="achilles_results_concept"
+            unique="false">
+      <column name="analysis_id" type="bigint(20)"/>
+      <column name="stratum_1" type="varchar(255)"/>
+    </createIndex>
+
+    <createIndex
+            indexName="idx_analysis_id_stratum_1_2"
+            tableName="achilles_results_concept"
+            unique="false">
+      <column name="analysis_id" type="bigint(20)"/>
+      <column name="stratum_1" type="varchar(255)"/>
+      <column name="stratum_2" type="varchar(255)"/>
+    </createIndex>
+
+    <createTable tableName="db_domain">
+      <column name="domain_id" type="varchar(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="domain_display" type="VARCHAR(30)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain_desc" type="VARCHAR(4000)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain_parent" type="varchar(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="domain_route" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+  </changeSet>
+</databaseChangeLog>

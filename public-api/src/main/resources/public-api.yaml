@@ -517,6 +517,7 @@ definitions:
           $ref: "#/definitions/DbDomain"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   ConceptAnalysis:
     type: object
     required:
@@ -566,5 +567,7 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/ConceptAnalysis"
+=======
+>>>>>>> 90affba120c094746e44330302b551dda0aebac4
 =======
 >>>>>>> 90affba120c094746e44330302b551dda0aebac4

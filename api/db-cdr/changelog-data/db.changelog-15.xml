@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="biopete" id="changelog-15" runAlways="true" context="local or cloud">
+
+    <validCheckSum>ANY</validCheckSum>
+
+
+    <delete tableName="concept_relationship"/>
+
+    <loadData tableName="concept_relationship" file="csv/concept_relationship.csv" encoding="UTF-8" quotchar='"'>
+      <column name="concept_id_1" type="NUMERIC"/>
+      <column name="concept_id_2" type="NUMERIC"/>
+      <column name="relationship_id" type="STRING"/>
+      <column name="vocabulary_id" type="STRING"/>
+      <column name="valid_start_date" type="DATE"/>
+      <column name="valid_end_date" type="DATE"/>
+      <column name="invalid_reason" type="STRING"/>
+    </loadData>
+  </changeSet>
+</databaseChangeLog>
+
+
