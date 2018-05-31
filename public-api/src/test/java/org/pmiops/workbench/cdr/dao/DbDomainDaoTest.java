@@ -122,6 +122,13 @@ public class DbDomainDaoTest {
         Assert.assertNotEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
     }
 
+    @Test
+    public void findDomainTotals() throws Exception{
+        final List<DbDomain> list=dao.findDomainTotals();
+        Assert.assertEquals(list.get(0).getCountValue(),25L);
+        Assert.assertNotEquals(list,null);
+    }
+
     /*
     @Test
     public void findDomainMatchResults() throws Exception{
