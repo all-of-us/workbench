@@ -224,6 +224,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
+    public ResponseEntity<DbDomainListResponse> getDomainTotals(){
+        List<DbDomain> domains=dbDomainDao.findDomainTotals();
+        DbDomainListResponse resp=new DbDomainListResponse();
+        resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
+    @Override
     public ResponseEntity<ConceptListResponse> getAdvancedConceptsSearch(String keyword,List<String> domainIds,String conceptFilter){
 
         Specification<Concept> conceptSpecification =
