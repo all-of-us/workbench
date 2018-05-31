@@ -49,7 +49,7 @@ export class WorkspaceNavBarComponent implements OnInit {
     this.deleting = true;
     this.workspacesService.deleteWorkspace(
       this.workspace.namespace, this.workspace.id).subscribe(() => {
-        this.router.navigate(['/']);
+        this.router.navigate(['/workspaces']);
     });
   }
 

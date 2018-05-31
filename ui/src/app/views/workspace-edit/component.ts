@@ -239,7 +239,7 @@ export class WorkspaceEditComponent implements OnInit {
     this.savingWorkspace = true;
     this.workspacesService.createWorkspace(this.workspace).subscribe(
         (workspace) => {
-          this.router.navigate(['workspace', workspace.namespace, workspace.id]);
+          this.router.navigate(['workspaces', workspace.namespace, workspace.id]);
         },
         (error) => {
           this.workspaceCreationError = true;
@@ -283,7 +283,7 @@ export class WorkspaceEditComponent implements OnInit {
         workspace: this.workspace,
       }).subscribe(
         (r: CloneWorkspaceResponse) => {
-          this.router.navigate(['/workspace', r.workspace.namespace, r.workspace.id]);
+          this.router.navigate(['/workspaces', r.workspace.namespace, r.workspace.id]);
         },
         () => {
           // Only expected errors are transient, so allow the user to try again.
