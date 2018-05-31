@@ -1,4 +1,4 @@
-import {Component,ViewChildren} from '@angular/core';
+import {Component, ViewChildren} from '@angular/core';
 
 import {LoginComponent} from '../login/component';
 
