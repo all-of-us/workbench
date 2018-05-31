@@ -51,7 +51,7 @@ const routes: Routes = [
           data: {title: 'Homepage'},
         }, {
         path: 'workspaces',
-        data: { breadcrumb: 'Workspaces' },
+        data: { breadcrumb: 'Workspaces'},
         children: [
           {
             path: '',
@@ -62,7 +62,7 @@ const routes: Routes = [
             /* TODO The children under ./views need refactoring to use the data
              * provided by the route rather than double-requesting it.
              */
-            path: 'workspace/:ns/:wsid',
+            path: ':ns/:wsid',
             component: WorkspaceNavBarComponent,
             data: {
               title: 'View Workspace Details',
