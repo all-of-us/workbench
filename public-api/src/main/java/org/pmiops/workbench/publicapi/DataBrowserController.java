@@ -254,6 +254,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
         }
         ConceptService.StandardConceptFilter convertedConceptFilter=ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
+
         Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
                 conceptService.searchConcepts(keyword, convertedConceptFilter,
                         vocabularyIds, domainIds, maxResults);
