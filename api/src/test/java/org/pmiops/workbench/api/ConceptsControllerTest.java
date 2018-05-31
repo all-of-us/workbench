@@ -142,6 +142,13 @@ public class ConceptsControllerTest {
   }
 
   @Test
+  public void testSearchConceptsMultipleWordQuery(){
+    assertResults(
+            conceptsController.searchConcepts("ns", "name",
+                    new SearchConceptsRequest().query("a con")),CLIENT_CONCEPT_1);
+  }
+
+  @Test
   public void testSearchNoConcepts() throws Exception {
     assertResults(
         conceptsController.searchConcepts("ns", "name",

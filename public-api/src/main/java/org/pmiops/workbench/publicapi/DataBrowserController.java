@@ -242,20 +242,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<ConceptListResponse> getAdvancedConceptSearch(String keyword,String conceptFilter,List<String> vocabularyIds,List<String> domainIds){
-        String[] keywords=keyword.split("\\s*(=>|,|\\s)\\s*");
-        boolean flag=false;
-        for(String key:keywords){
-            if(key.length() < 3){
-                flag=true;
-                break;
-            }
-        }
-        if(flag){
-            keyword="\""+keyword+"\"";
-        }else{
-            keyword=String.join(" +",keywords);
-            keyword="+"+keyword;
-        }
+
         Integer maxResults=25;
         StandardConceptFilter standardConceptFilter;
         if(conceptFilter == null){

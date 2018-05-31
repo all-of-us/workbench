@@ -41,6 +41,30 @@ public class ConceptService {
   public Slice<Concept> searchConcepts(String query,
       StandardConceptFilter standardConceptFilter, List<String> vocabularyIds,
       List<String> domainIds, int limit) {
+
+      //String[] keywords=query.split("\\s*(=>|,|\\s)\\s*");
+      String[] keywords=query.split("[,+\\s+]");
+      for(int i=0;i<keywords.length;i++){
+          String key=keywords[i];
+          if(key.length() < 3){
+              key="\""+key+"\"";
+              keywords[i]=key;
+          }
+      }
+
+      String query2=new String();
+      for(String key:keywords){
+          if(query2.length()==0){
+              query2="+"+key;
+          }else if(key.contains("\"")){
+              query2=query2+key;
+          }else{
+              query2=query2+"+"+key;
+          }
+      }
+
+      final String keyword=query2;
+
     Specification<Concept> conceptSpecification =
         (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -48,12 +72,12 @@ public class ConceptService {
             // Check that the concept name, code, or ID matches the query string.
             List<Predicate> queryPredicates = new ArrayList<>();
             Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
-                root.get("conceptName"), criteriaBuilder.literal(query));
+                root.get("conceptName"), criteriaBuilder.literal(keyword));
             queryPredicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
             queryPredicates.add(criteriaBuilder.equal(root.get("conceptCode"),
-                criteriaBuilder.literal(query)));
+                criteriaBuilder.literal(keyword)));
             try {
-              long conceptId = Long.parseLong(query);
+              long conceptId = Long.parseLong(keyword);
               queryPredicates.add(criteriaBuilder.equal(root.get("conceptId"),
                   criteriaBuilder.literal(conceptId)));
             } catch (NumberFormatException e) {
