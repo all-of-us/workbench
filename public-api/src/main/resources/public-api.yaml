@@ -104,6 +104,19 @@ paths:
           description: A collection of domains
           schema:
             $ref: "#/definitions/DbDomainListResponse"
+  /v1/databrowser/domain-totals:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+      description: Gets the domain filters with the count of matched concepts
+      operationId: "getDomainTotals"
+      parameters: []
+      responses:
+        200:
+          description: A collection of domains
+          schema:
+            $ref: "#/definitions/DbDomainListResponse"
 
   /v1/databrowser/advanced-concept-search:
     get:
