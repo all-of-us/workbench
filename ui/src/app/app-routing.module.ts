@@ -51,7 +51,7 @@ const routes: Routes = [
           data: {title: 'Homepage'},
         }, {
         path: 'workspaces',
-        data: { breadcrumb: 'Workspaces'},
+        data: {breadcrumb: 'Workspaces'},
         children: [
           {
             path: '',
