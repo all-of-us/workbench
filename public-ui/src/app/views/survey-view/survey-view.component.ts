@@ -56,8 +56,6 @@ export class SurveyViewComponent implements OnInit {
       this.searchText = '';
     }
 
-    this.prevSearchText = this.searchText;
-    console.log('Survey : ' , this.survey, this.searchText);
     this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
       next: x => {
         const questions = x.items;
@@ -72,9 +70,9 @@ export class SurveyViewComponent implements OnInit {
           });
         }
 
-        // Copy all qustions to display initially
+        // Copy all qustions to display initially and filter on any search text passed in.
         this.questions = this.surveyResult.items;
-        console.log(this.surveyResult);
+        this.filterResults();
       },
       error: err => console.error('Observer got an error: ' + err),
       complete: () => { this.resultsComplete = true; }
@@ -88,7 +86,7 @@ export class SurveyViewComponent implements OnInit {
   }
 
   public searchQuestion(q: QuestionConcept) {
-      if (q.conceptName.toLowerCase().indexOf(this.searchText) >= 0 ) { return true; }
+      if (q.conceptName.toLowerCase().indexOf(this.searchText.toLowerCase()) >= 0 ) { return true; }
       const results = q.countAnalysis.results.filter(r =>
           r.stratum4.toLowerCase().indexOf(this.searchText) >= 0);
       console.log('answer results filter ', results);

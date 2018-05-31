@@ -77,5 +77,8 @@ button.btn.btn-link {
 button.icon-btn {
   background-color: inherit;
   border: none;
-  height:1.25rem;
+  height:1.5rem;
+}
+button.icon-btn:focus {
+  outline: none;
 }

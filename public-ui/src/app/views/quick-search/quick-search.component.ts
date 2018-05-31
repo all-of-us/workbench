@@ -21,8 +21,13 @@ export class QuickSearchComponent implements OnInit {
   ehrDomains = [];
   surveysChecked = false;
   searchResults = [];
-  searchText;
+  domainResults = [];
+  surveyResults = [];
+  searchText = '';
+  prevSearchText = ''
   totalParticipants;
+  domains = [];
+  loading = false;
 
 
   constructor(private api: DataBrowserService,
@@ -30,30 +35,54 @@ export class QuickSearchComponent implements OnInit {
   }
 
   ngOnInit() {
-      this.api.getDomainFilters().subscribe(
-          result => {
-              this.ehrDomains = result.items;
-              /* Add checked = false to our domain list for ui */
-              for (const d of this.ehrDomains ) {
-                  d.checked = false;
-              }
-          });
+    this.api.getDomainFilters().subscribe(
+      result => {
+        this.ehrDomains = result.items;
+        /* Add checked = false to our domain list for ui */
+        for (const d of this.ehrDomains) {
+          d.checked = false;
+        }
+      });
 
-      this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
+    this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
+
+    // Initialize results to all totals
+    this.api.getDomainTotals().subscribe(data => {
+      this.domains = data.items;
+      this.searchResults = this.domains;
+      this.domainResults = this.domains.filter(d => d.dbType === 'domain_filter');
+      this.surveyResults = this.domains.filter(d => d.dbType === 'survey');
+
+    });
   }
 
   public searchDomains() {
-      this.api.getDomainSearchResults(this.searchText).subscribe(data => this.searchResults = data.items);
+    // If they clear the search text reset
+    const minSearchLength = 3;
+    if (this.searchText.length < minSearchLength) {
+      this.domainResults = this.domains.filter(d => d.dbType === 'domain_filter');
+      this.surveyResults = this.domains.filter(d => d.dbType === 'survey');
+    }
+
+    this.prevSearchText = this.searchText;
+    if (this.searchText.length >= minSearchLength) {
+      this.loading = true;
+      this.api.getDomainSearchResults(this.searchText).subscribe(data => {
+        this.searchResults = data.items;
+        this.domainResults = data.items.filter(d => d.dbType === 'domain_filter');
+        this.surveyResults = data.items.filter(s => s.dbType === 'survey');
+        this.loading = false;
+      });
+    }
   }
 
   public viewResults(r) {
-    localStorage.setItem("dbDomain", JSON.stringify(r));
-    localStorage.setItem("searchText", this.searchText);
+    localStorage.setItem('dbDomain', JSON.stringify(r));
+    localStorage.setItem('seeaext', this.searchText);
 
     if (r.dbType === 'survey') {
       this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
-    }
-    else {
+    } else {
       this.router.navigateByUrl('/ehr/' + r.domainId.toLowerCase());
     }
   }

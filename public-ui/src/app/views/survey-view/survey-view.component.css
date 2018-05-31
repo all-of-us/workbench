@@ -1,8 +1,12 @@
 
 
 .survey-results {
+    padding: .5rem;
     position: relative;
     margin-top: 1rem;
+    background: linear-gradient(180deg, #EDEDED 0%, rgba(255,255,255,0) 100%);
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+    border-radius: 4px;
 
 }
 .survey-results-background {
@@ -32,9 +36,11 @@
 }
 
 
-.survey-results .search-input-big {
-    margin-left: -.5rem;
+.survey-results .row.search {
+    margin-left: .1rem;
+    margin-right: .1rem;
     margin-bottom: 1rem;
+    background-color: #DEDEE3;
 }
 
 
@@ -60,9 +66,11 @@
     padding-left: 0px;
 }
 
-.chart-wrapper {
+.answer-charts .chart-wrapper {
     height: 240px;
+    margin-top:0;
 }
-.chart-wrapper.age {
+.answer-charts .chart-wrapper.age {
     height: 240px;
+    margin-top: 0;
 }

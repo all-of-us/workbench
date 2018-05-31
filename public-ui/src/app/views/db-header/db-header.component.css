@@ -66,3 +66,13 @@ clr-header .header-nav .nav-link.title {
     height: 29px
 }
 */
+
+.db-logo {
+    height: 1rem; /* 24px */
+    width: 7rem;
+    margin-right: 2rem;
+}
+
+.header .header-nav .nav-link.active, header .header-nav .nav-link.active {
+    background-color: inherit;
+}

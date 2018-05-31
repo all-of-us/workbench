@@ -28,7 +28,7 @@ h6 {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Gotham HTF", open-sans, sans-serif;
+    font-family: "Gotham HTF", open-sans, sans-serif !important;
     color: #302C71;
 }
 p {
@@ -146,6 +146,10 @@ label {
 .white-card-box.search-result {
     height: 240px;
     width: 240px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    padding-top: .5rem;
 }
 
 /* stat box at tops of pages */
@@ -177,7 +181,7 @@ label {
     width: 100%;
     border: 1px solid #CCCCCC;
     border-radius: 3px 3px 0 0;
-    height: 2rem;
+    min-height: 2rem;
 
 }
 
@@ -206,4 +210,20 @@ label {
 
 .results-grid {
     margin: .75rem;
+}
+
+.info-text, .card-text.info-text  {
+    color: #302C71;
+
+}
+
+span.keyword {
+    font-style: italic;
+    font-weight: bolder;
+
+}
+
+
+.inline-search-button {
+    text-align: right;
 }

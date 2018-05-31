@@ -71,7 +71,6 @@ paths:
           schema:
             $ref: "#/definitions/ConceptAnalysisListResponse"
 
-
   /v1/databrowser/participant-count:
     get:
       security: []
@@ -105,7 +104,57 @@ paths:
           description: A collection of domains
           schema:
             $ref: "#/definitions/DbDomainListResponse"
+  /v1/databrowser/domain-totals:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+      description: Gets the domain filters with the count of matched concepts
+      operationId: "getDomainTotals"
+      parameters: []
+      responses:
+        200:
+          description: A collection of domains
+          schema:
+            $ref: "#/definitions/DbDomainListResponse"
 
+  /v1/databrowser/advanced-concept-search:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+      description: Gets list of matched concepts
+      operationId: "getAdvancedConceptSearch"
+      parameters:
+        - in: query
+          name: keyword
+          type: string
+          required: true
+          description: search word
+        - in: query
+          name: conceptFilter
+          type: string
+          required: false
+          description: concept filter to filter standard concepts
+        - in: query
+          name: vocabularyIds
+          type: array
+          items:
+            type: string
+          required: false
+          description: vocabulary ids
+        - in: query
+          name: domainIds
+          type: array
+          items:
+            type: string
+          required: false
+          description: domain ids
+      responses:
+        200:
+          description: A collection of matched concepts
+          schema:
+            $ref: "#/definitions/ConceptListResponse"
 
   /v1/databrowser/db-domains:
     get:
@@ -182,37 +231,7 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
-  /v1/databrowser/advanced-search-concepts:
-    get:
-      security: []
-      tags:
-        - dataBrowser
 
-      description: Searches for concepts in concept table with search string and filters
-      operationId: "getAdvancedConceptsSearch"
-      parameters:
-        - in: query
-          name: keyword
-          type: string
-          required: true
-          description: keyword to search
-        - in: query
-          name: domain-ids
-          type: array
-          items:
-            type: string
-          required: true
-          description: domain ids
-        - in: query
-          name: concept_filter
-          type: string
-          required: true
-          description: concept filter
-      responses:
-        200:
-          description: A collection of concepts
-          schema:
-            $ref: "#/definitions/ConceptListResponse"
 
   /v1/databrowser/child-concepts:
     get:
@@ -536,10 +555,14 @@ definitions:
   ConceptAnalysisListResponse:
     type: object
     required:
-      - items
+       - items
     properties:
       items:
         type: array
         items:
           $ref: "#/definitions/ConceptAnalysis"
 
+  StandardConceptFilter:
+    type: string
+    description: filter on whether standard, non-standard, or all concepts should be returned\
+    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS]

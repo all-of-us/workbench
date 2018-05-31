@@ -51,7 +51,7 @@ export class EhrViewComponent implements OnInit {
 
     // Run search filter to domain
     const domainId = this.dbDomain.domainId;
-    this.api.getConceptsSearch(this.searchText, domainId).subscribe(results =>  {
+    this.api.getConceptsSearch(this.searchText, 'S', domainId).subscribe(results =>  {
       this.searchResults = results.items;
       console.log(this.searchResults);
       this.loading = false;

@@ -20,15 +20,16 @@
             Participants
           </h5>
           <div class="card-stat">
-            {{dbDomain.countValue | number}}
+            5K - 12K
           </div>
           <p class="card-text bigger">
-            There are {{dbDomain.countValue | number}} {{dbDomain.domainDisplay.toLowerCase()}} out of {{totalParticipants | number}}
-            total participants with relevant diagnoses.
+            out of {{totalParticipants | number}}
+            total participants with one or more {{dbDomain.domainDisplay.toLowerCase()}} relevant to
+            <span class="keyword" > {{searchText}} </span>.
           </p>
 
-          <div class="card-text bottom">
-            <clr-icon shape="info-standard"></clr-icon> Why a range of particpants?
+          <div class="card-text bottom info-text">
+            <clr-icon shape="info-standard" class="is-solid"></clr-icon> Why a range of particpants?
           </div>
         </div>
       </div>
@@ -46,8 +47,8 @@
             {{searchResults.length}}
           </div>
 
-          <div class="card-text bottom">
-            <clr-icon class="" shape="info-standard"></clr-icon> What is SNOMED?
+          <div class="card-text bottom info-text">
+            <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon> What is SNOMED?
           </div>
         </div>
         <div class="col-md-8 col-xs-12 chart-wrapper flex-xs-middle">

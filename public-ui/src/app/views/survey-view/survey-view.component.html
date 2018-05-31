@@ -40,23 +40,24 @@
     </div>
   </div>
 
-  <div class="search-input-big">
-    <clr-icon shape="search" class="input-icon is-info"></clr-icon>
-    <input type="text" id="search-db" placeholder="Keyword Search" [(ngModel)]="searchText" (ngModelChange)="filterResults()">
-  </div>
-
   <h6> Filtered by {{searchText}}</h6>
 
   <div class="survey-results" *ngIf="resultsComplete">
 
-    <div class="survey-results-background"></div>
-    <div class="container">
     <!-- Search box is not working inside this with the survey background
       <div class="search-input-big">
         <clr-icon shape="search" class="input-icon is-info"></clr-icon>
         <input type="text" id="search-db" placeholder="Keyword Search">
       </div> -->
-      <div class="box-sub-title"> Click on each response to view age and gender distributions</div>
+      <div class="row search">
+        <div class="col-xs-12 flex-xs-middle search-input-full ">
+          <div class="search-wrapper">
+            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+            <input type="text" id="search-db" placeholder="Keyword Search" [(ngModel)]="searchText" (ngModelChange)="filterResults()">
+          </div>
+        </div>
+      </div>
+      <div class="row box-sub-title"> Click on each response to view age and gender distributions</div>
       <div class="row question-result" *ngFor="let q of questions, let i = index">
 
         <div class=" question-card">
@@ -95,10 +96,10 @@
             <div class="col-sm-5 col-xs-12 answer-charts">
               <div class="" *ngIf="q.selectedAnswer" >
                 <div class="chart-wrapper">
-                  <app-chart [analysis]="q.genderAnalysis" [selectedResult]="q.selectedAnswer"></app-chart>
+                  <app-chart [analysis]="q.genderAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
                 </div>
                 <div class="chart-wrapper age">
-                  <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer"></app-chart>
+                  <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
                 </div>
 
               </div>
@@ -109,7 +110,6 @@
 
         </div>
 
-      </div>
     </div>
 
   </div>
