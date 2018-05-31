@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component,ViewChildren} from '@angular/core';
 
 import {LoginComponent} from '../login/component';
 
@@ -22,6 +22,7 @@ export class InvitationKeyComponent {
   invitationKeyInvalid: boolean;
   invitationKeyRequestEmail: string;
   requestSent: boolean;
+  @ViewChildren('invitationInput') invitationInput;
 
   constructor(
       private profileService: ProfileService,
@@ -44,6 +45,7 @@ export class InvitationKeyComponent {
     if (isBlank(this.invitationKey)) {
       this.invitationKeyReq = true;
       this.invitationKeyInvalid = false;
+      this.invitationInput.first.nativeElement.focus();
       return;
     }
     this.invitationKeyReq = false;
@@ -57,5 +59,6 @@ export class InvitationKeyComponent {
     }, () => {
       this.invitationKeyInvalid = true;
     });
+    this.invitationInput.first.nativeElement.focus();
   }
 }
