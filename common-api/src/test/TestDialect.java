@@ -1,5 +1,3 @@
-package org.pmiops.workbench.test;
-
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.type.StandardBasicTypes;

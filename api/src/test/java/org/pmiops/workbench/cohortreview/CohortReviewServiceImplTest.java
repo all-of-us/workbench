@@ -100,7 +100,7 @@ public class CohortReviewServiceImplTest {
     @Test
     public void validateMatchingWorkspaceNotFound() throws Exception {
         String workspaceNamespace = "test-workspace";
-        String workspaceName = "test";
+        String workspaceName = "";
         long workspaceId = 1;
         long badWorkspaceId = 99;
 
@@ -126,7 +126,7 @@ public class CohortReviewServiceImplTest {
     @Test
     public void validateMatchingWorkspace() throws Exception {
         String workspaceNamespace = "test-workspace";
-        String workspaceName = "test";
+        String workspaceName = "";
         long workspaceId = 1;
 
         Workspace workspace = new Workspace();

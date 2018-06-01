@@ -79,7 +79,7 @@ public class CohortReviewControllerTest {
     @Before
     public void onSetUp() {
         namespace = "aou-test";
-        name = "test";
+        name = "";
         cohortId = 1;
         cdrVersionId = 1;
         workspaceId = 1;
@@ -226,7 +226,7 @@ public class CohortReviewControllerTest {
     @Test
     public void createParticipantCohortAnnotation() throws Exception {
         assertCreateParticipantCohortAnnotation(createParticipantCohortAnnotation(Boolean.TRUE, null, null, null, null), AnnotationType.BOOLEAN);
-        assertCreateParticipantCohortAnnotation(createParticipantCohortAnnotation(null, "test", null, null, null), AnnotationType.STRING);
+        assertCreateParticipantCohortAnnotation(createParticipantCohortAnnotation(null, "", null, null, null), AnnotationType.STRING);
         assertCreateParticipantCohortAnnotation(createParticipantCohortAnnotation(null, null, 1, null, null), AnnotationType.INTEGER);
         assertCreateParticipantCohortAnnotation(createParticipantCohortAnnotation(null, null, null, "1999-02-01", null), AnnotationType.DATE);
         assertCreateParticipantCohortAnnotation(createParticipantCohortAnnotation(null, null, null, null, "stest"), AnnotationType.ENUM);

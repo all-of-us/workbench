@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
 public class CohortReviewControllerTest extends BigQueryBaseTest {
 
   private static final String NAMESPACE = "aou-test";
-  private static final String NAME = "test";
+  private static final String NAME = "";
   private static final Long PARTICIPANT_ID = 102246L;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private ParticipantData expectedCondition1;

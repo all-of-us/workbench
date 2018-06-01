@@ -69,7 +69,7 @@ public class ParticipantCohortAnnotationDaoTest {
                 .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId1)
                 .cohortReviewId(cohortReviewId)
                 .participantId(participantId)
-                .annotationValueEnum("test");
+                .annotationValueEnum("");
         pca1.setCohortAnnotationEnumValue(enumValue1);
         annotationId = participantCohortAnnotationDao.save(pca).getAnnotationId();
         participantCohortAnnotationDao.save(pca1);
@@ -142,7 +142,7 @@ public class ParticipantCohortAnnotationDaoTest {
                 .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId1)
                 .cohortReviewId(cohortReviewId)
                 .participantId(participantId)
-                .annotationValueEnum("test");
+                .annotationValueEnum("");
         List<ParticipantCohortAnnotation> annotations =
                 participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(cohortReviewId, participantId);
         assertEquals(2, annotations.size());

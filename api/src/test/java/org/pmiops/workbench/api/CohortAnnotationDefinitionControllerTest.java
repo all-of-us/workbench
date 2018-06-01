@@ -42,7 +42,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void createCohortAnnotationDefinition_BadCohortId() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
@@ -68,7 +68,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void createCohortAnnotationDefinition_BadWorkspace() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long badWorkspaceId = 0;
@@ -103,7 +103,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void createCohortAnnotationDefinition_NameConflict() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -161,7 +161,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void createCohortAnnotationDefinition() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -219,7 +219,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void updateCohortAnnotationDefinition_BadCohortId() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long annotationDefinitionId = 1;
 
@@ -251,7 +251,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void updateCohortAnnotationDefinition_BadWorkspace() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long annotationDefinitionId = 1;
         long workspaceId = 1;
@@ -293,7 +293,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void updateCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -335,7 +335,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void updateCohortAnnotationDefinition_NameConflict() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -387,7 +387,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void updateCohortAnnotationDefinition() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -445,7 +445,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void deleteCohortAnnotationDefinition_BadCohortId() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long annotationDefinitionId = 1;
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
@@ -473,7 +473,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void deleteCohortAnnotationDefinition_BadWorkspace() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long annotationDefinitionId = 1;
         long workspaceId = 1;
@@ -511,7 +511,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void deleteCohortAnnotationDefinition_BadAnnotationDefinitionId() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -550,7 +550,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void deleteCohortAnnotationDefinition() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -595,7 +595,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void getCohortAnnotationDefinition_NotFoundCohort() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long annotationDefinitionId = 1;
 
@@ -624,7 +624,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void getCohortAnnotationDefinition_NotFoundWorkspace() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long annotationDefinitionId = 1;
         long workspaceId = 1;
@@ -662,7 +662,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void getCohortAnnotationDefinition_NotFoundAnnotationDefinition() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -701,7 +701,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void getCohortAnnotationDefinition() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long annotationDefinitionId = 1;
@@ -750,7 +750,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void getCohortAnnotationDefinitions_NotFoundCohort() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
 
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
@@ -777,7 +777,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void getCohortAnnotationDefinitions_NotFoundWorkspace() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
         long badWorkspaceId = 0;
@@ -813,7 +813,7 @@ public class CohortAnnotationDefinitionControllerTest {
     @Test
     public void getCohortAnnotationDefinitions() throws Exception {
         String namespace = "aou-test";
-        String name = "test";
+        String name = "";
         long cohortId = 1;
         long workspaceId = 1;
 

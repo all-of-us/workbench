@@ -510,7 +510,7 @@ public class ProfileControllerTest {
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
-    first.setRole("test");
+    first.setRole("");
     first.setInstitution("Institution");
     InstitutionalAffiliation second = new InstitutionalAffiliation();
     second.setRole("zeta");
@@ -537,7 +537,7 @@ public class ProfileControllerTest {
     first.setRole("zeta");
     first.setInstitution("Zeta");
     InstitutionalAffiliation second = new InstitutionalAffiliation();
-    second.setRole("test");
+    second.setRole("");
     second.setInstitution("Institution");
     affiliations.add(first);
     affiliations.add(second);
@@ -558,7 +558,7 @@ public class ProfileControllerTest {
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
-    first.setRole("test");
+    first.setRole("");
     first.setInstitution("Institution");
     InstitutionalAffiliation second = new InstitutionalAffiliation();
     second.setRole("zeta");
@@ -584,7 +584,7 @@ public class ProfileControllerTest {
     Profile profile = profileController.getMe().getBody();
     ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
     InstitutionalAffiliation first = new InstitutionalAffiliation();
-    first.setRole("test");
+    first.setRole("");
     first.setInstitution("Institution");
     InstitutionalAffiliation second = new InstitutionalAffiliation();
     second.setRole("zeta");
