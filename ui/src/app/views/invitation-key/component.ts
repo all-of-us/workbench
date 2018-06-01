@@ -59,6 +59,5 @@ export class InvitationKeyComponent {
       this.invitationKeyInvalid = true;
       this.invitationInput.first.nativeElement.focus();
     });
-
   }
 }
