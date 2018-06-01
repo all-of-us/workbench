@@ -125,7 +125,7 @@ public class DbDomainDaoTest {
     @Test
     public void findDomainTotals() throws Exception{
         final List<DbDomain> list=dao.findDomainTotals();
-        Assert.assertEquals((Long)list.get(0).getCountValue(),Long.valueOf(25));
+        Assert.assertEquals((Long)list.get(0).getCountValue(),Long.valueOf(0));
         Assert.assertNotEquals(list,null);
     }
 
