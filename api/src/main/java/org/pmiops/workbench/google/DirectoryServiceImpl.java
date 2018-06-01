@@ -9,16 +9,25 @@ import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserEmail;
 import com.google.api.services.admin.directory.model.UserName;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Provider;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
@@ -113,6 +122,10 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setEmails(new UserEmail().setType("custom").setAddress(contactEmail).setCustomType("contact"))
       .setChangePasswordAtNextLogin(true);
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
+    //This is a temporary solution until Mandrill is implemented.
+    //This way if one merge happens and the other is delayed for any reason,
+    //we won't break in a major way.
+    sendPasswordEmail(contactEmail, password, user);
     return user;
   }
   @Override
@@ -137,5 +150,23 @@ public class DirectoryServiceImpl implements DirectoryService {
     for (int i = 0; i < 18; i++)
       sb.append(ALLOWED.charAt(rnd.nextInt(ALLOWED.length())));
     return sb.toString();
+  }
+
+  private void sendPasswordEmail(String contactEmail, String password, User user) {
+    WorkbenchConfig workbenchConfig = configProvider.get();
+    Properties props = new Properties();
+    Session session = Session.getDefaultInstance(props, null);
+    String messageBody = "The password for your new account is: " + password;
+    try {
+      Message msg = new MimeMessage(session);
+      msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
+      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
+        contactEmail, user.getName().getFullName()));
+      msg.setSubject("Your new All of Us Account");
+      msg.setText(messageBody);
+      Transport.send(msg);
+    } catch (MessagingException | UnsupportedEncodingException e) {
+      throw new EmailException("Error sending password email", e);
+    }
   }
 }
