@@ -127,11 +127,15 @@ public class AchillesAnalysisDaoTest {
         dao.delete(achillesAnalysis1);
         dao.delete(achillesAnalysis2);
         dao.delete(achillesAnalysis3);
+        dao.delete(achillesAnalysis4);
+        dao.delete(achillesAnalysis5);
 
         achillesResultDao.delete(achillesResult1);
         achillesResultDao.delete(achillesResult2);
         achillesResultDao.delete(achillesResult3);
         achillesResultDao.delete(achillesResult4);
+        achillesResultDao.delete(achillesResult5);
+        achillesResultDao.delete(achillesResult6);
     }
 
 }

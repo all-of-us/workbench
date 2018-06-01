@@ -14,9 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.jpa.domain.Specification;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
 import org.springframework.data.domain.Slice;
 
 import java.util.ArrayList;
@@ -229,9 +226,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             }
         }
 
-        String query2=new String();
+        String query2;
         for(String key:keywords){
-            if(query2.length()==0){
+            if(query2==null){
                 query2="+"+key;
             }else if(key.contains("\"")){
                 query2=query2+key;
@@ -264,7 +261,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }
         ConceptService.StandardConceptFilter convertedConceptFilter=ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
-        Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
+        Slice<Concept> concepts =
                 conceptService.searchConcepts(keyword, convertedConceptFilter,
                         vocabularyIds, domainIds, maxResults);
         ConceptListResponse response = new ConceptListResponse();
