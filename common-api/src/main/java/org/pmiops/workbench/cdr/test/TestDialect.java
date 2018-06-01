@@ -1,4 +1,4 @@
-package org.pmiops.workbench.test;
+package org.pmiops.workbench.cdr.test;
 
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
