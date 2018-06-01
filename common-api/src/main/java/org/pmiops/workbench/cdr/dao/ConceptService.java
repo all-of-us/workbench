@@ -75,9 +75,9 @@ public class ConceptService {
                 root.get("conceptName"), criteriaBuilder.literal(keyword));
             queryPredicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
             queryPredicates.add(criteriaBuilder.equal(root.get("conceptCode"),
-                criteriaBuilder.literal(keyword)));
+                criteriaBuilder.literal(query)));
             try {
-              long conceptId = Long.parseLong(keyword);
+              long conceptId = Long.parseLong(query);
               queryPredicates.add(criteriaBuilder.equal(root.get("conceptId"),
                   criteriaBuilder.literal(conceptId)));
             } catch (NumberFormatException e) {
