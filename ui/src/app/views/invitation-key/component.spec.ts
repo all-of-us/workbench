@@ -87,7 +87,7 @@ describe('InvitationKeyComponent', () => {
     expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeFalsy();
-    const invitationInput =invitationKeyPage.fixture.debugElement.query(
+    const invitationInput = invitationKeyPage.fixture.debugElement.query(
         By.css('input'));
     expect(invitationInput.nativeElement.autofocus).toBeTruthy();
   }));
@@ -107,7 +107,7 @@ describe('InvitationKeyComponent', () => {
   it('should throw an error with invalid invitation code', fakeAsync(() => {
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
     app.invitationKey = 'invalid';
-    spyOn(app.invitationInput.first.nativeElement,"focus");
+    spyOn(app.invitationInput.first.nativeElement, 'focus');
     updateAndTick(invitationKeyPage.fixture);
     simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
     expect(app.invitationKeyVerified).toBeFalsy();
