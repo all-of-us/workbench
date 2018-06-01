@@ -28,6 +28,8 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
@@ -146,17 +148,19 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private String randomString(){
-    StringBuilder sb = new StringBuilder(18);
-    for (int i = 0; i < 18; i++)
-      sb.append(ALLOWED.charAt(rnd.nextInt(ALLOWED.length())));
-    return sb.toString();
+    String random = IntStream.range(0, 17).boxed().
+      map(x -> ALLOWED.charAt(rnd.nextInt(ALLOWED.length()))).
+      map(Object::toString).
+      collect(Collectors.joining(""));
+    return random;
   }
 
   private void sendPasswordEmail(String contactEmail, String password, User user) {
     WorkbenchConfig workbenchConfig = configProvider.get();
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
-    String messageBody = "The password for your new account is: " + password;
+    String messageBody = "Your new account is: " + user.getPrimaryEmail() +
+      "\nThe password for your new account is: " + password;
     try {
       Message msg = new MimeMessage(session);
       msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
