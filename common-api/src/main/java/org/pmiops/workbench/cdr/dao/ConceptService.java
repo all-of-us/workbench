@@ -36,34 +36,38 @@ public class ConceptService {
     this.entityManager = entityManager;
   }
 
+  public static String modifyMultipleMatchKeyword(String query){
+      // This function modifies the keyword to match all the words if multiple words are present(by adding + before each word to indicate match that matching each word is essential)
+      String[] keywords = query.split("[,+\\s+]");
+      for(int i = 0;i < keywords.length;i++){
+          String key = keywords[i];
+          if(key.length() < 3){
+              key = "\""+key+"\"";
+              keywords[i] = key;
+          }
+      }
+
+      String query2= "";
+      for(String key: keywords){
+          if(query2.isEmpty()){
+              query2 = "+"+key;
+          }else if(key.contains("\"")){
+              query2 = query2+key;
+          }else{
+              query2 = query2+ "+"+ key;
+          }
+      }
+      return query2;
+  }
+
   public static final String STANDARD_CONCEPT_CODE = "S";
 
   public Slice<Concept> searchConcepts(String query,
       StandardConceptFilter standardConceptFilter, List<String> vocabularyIds,
       List<String> domainIds, int limit) {
 
-      //String[] keywords=query.split("\\s*(=>|,|\\s)\\s*");
-      String[] keywords=query.split("[,+\\s+]");
-      for(int i=0;i<keywords.length;i++){
-          String key=keywords[i];
-          if(key.length() < 3){
-              key="\""+key+"\"";
-              keywords[i]=key;
-          }
-      }
 
-      String query2="";
-      for(String key:keywords){
-          if(query2.isEmpty()){
-              query2="+"+key;
-          }else if(key.contains("\"")){
-              query2=query2+key;
-          }else{
-              query2=query2+"+"+key;
-          }
-      }
-
-      final String keyword=query2;
+      final String keyword = modifyMultipleMatchKeyword(query);
 
     Specification<Concept> conceptSpecification =
         (root, criteriaQuery, criteriaBuilder) -> {
