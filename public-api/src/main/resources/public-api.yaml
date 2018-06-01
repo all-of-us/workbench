@@ -566,3 +566,9 @@ definitions:
     type: string
     description: filter on whether standard, non-standard, or all concepts should be returned\
     enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS]
+
+  SearchConceptRequest:
+    type: object
+    required:
+      -
+    properties:
