@@ -148,11 +148,10 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private String randomString(){
-    String random = IntStream.range(0, 17).boxed().
+    return IntStream.range(0, 17).boxed().
       map(x -> ALLOWED.charAt(rnd.nextInt(ALLOWED.length()))).
       map(Object::toString).
       collect(Collectors.joining(""));
-    return random;
   }
 
   private void sendPasswordEmail(String contactEmail, String password, User user) {
