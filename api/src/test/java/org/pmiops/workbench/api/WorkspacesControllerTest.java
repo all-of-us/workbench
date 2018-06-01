@@ -851,7 +851,7 @@ public class WorkspacesControllerTest {
     fcWorkspace.setBucketName("bucket2");
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     String f1 = "notebooks/f1.ipynb";
-    String f2 = "notebooks/f2.ipynb";
+    String f2 = "notebooks/f2 with spaces.ipynb";
     String f3 = "notebooks/f3.vcf";
     // Note: mockBlob cannot be inlined into thenReturn() due to Mockito nuances.
     List<Blob> blobs = ImmutableList.of(
