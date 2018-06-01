@@ -10,11 +10,14 @@ import org.pmiops.workbench.model.DbDomainListResponse;
 import org.pmiops.workbench.model.QuestionConceptListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Slice;
 
+import com.google.common.collect.ImmutableMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -36,6 +39,27 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private DbDomainDao dbDomainDao;
     @Autowired
     private ConceptService conceptService;
+
+    // TODO: consider putting this in CDM config, fetching it from there
+    private static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
+            ImmutableMultimap.<Domain, String>builder()
+                    .put(Domain.CONDITION, "Condition")
+                    .put(Domain.CONDITION, "Condition/Meas")
+                    .put(Domain.CONDITION, "Condition/Device")
+                    .put(Domain.CONDITION, "Condition/Procedure")
+                    .put(Domain.DEVICE, "Device")
+                    .put(Domain.DEVICE, "Condition/Device")
+                    .put(Domain.DRUG, "Drug")
+                    .put(Domain.ETHNICITY, "Ethnicity")
+                    .put(Domain.GENDER, "Gender")
+                    .put(Domain.MEASUREMENT, "Measurement")
+                    .put(Domain.MEASUREMENT, "Meas/Procedure")
+                    .put(Domain.OBSERVATION, "Observation")
+                    .put(Domain.PROCEDURE, "Procedure")
+                    .put(Domain.PROCEDURE, "Meas/Procedure")
+                    .put(Domain.PROCEDURE, "Condition/Procedure")
+                    .put(Domain.RACE, "Race")
+                    .build();
 
     public static final long PARTICIPANT_COUNT_ANALYSIS_ID = 1;
     public static final long COUNT_ANALYSIS_ID = 3000;
@@ -225,22 +249,30 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ConceptListResponse> getAdvancedConceptSearch(String keyword,String conceptFilter,List<String> vocabularyIds,List<String> domainIds){
+    public ResponseEntity<ConceptListResponse> getAdvancedConceptSearch(SearchConceptsRequest searchConceptsRequest){
 
-        Integer maxResults=25;
-        StandardConceptFilter standardConceptFilter;
-        if(conceptFilter == null){
+        Integer maxResults=searchConceptsRequest.getMaxResults();
+        if(maxResults == null){
+            maxResults=25;
+        }
+        StandardConceptFilter standardConceptFilter=searchConceptsRequest.getStandardConceptFilter();
+        if(standardConceptFilter == null){
             standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
-        }else if("S".equals(conceptFilter)){
+        }else if("S".equals(standardConceptFilter)){
             standardConceptFilter = StandardConceptFilter.STANDARD_CONCEPTS;
         }else{
             standardConceptFilter = StandardConceptFilter.NON_STANDARD_CONCEPTS;
         }
         ConceptService.StandardConceptFilter convertedConceptFilter=ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
+        List<String> domainIds = null;
+        if (searchConceptsRequest.getDomain() != null) {
+            domainIds = DOMAIN_MAP.get(searchConceptsRequest.getDomain()).asList();
+        }
+
         Slice<Concept> concepts =
-                conceptService.searchConcepts(keyword, convertedConceptFilter,
-                        vocabularyIds, domainIds, maxResults);
+            conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
+                        searchConceptsRequest.getVocabularyIds(), domainIds, maxResults);
         ConceptListResponse response = new ConceptListResponse();
         response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);

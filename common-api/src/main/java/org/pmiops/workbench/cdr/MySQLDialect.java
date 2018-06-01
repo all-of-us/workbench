@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cdr.test;
+package org.pmiops.workbench.cdr;
 
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.type.StandardBasicTypes;
