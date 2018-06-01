@@ -7,7 +7,6 @@ import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.ConceptAnalysisListResponse;
 import org.pmiops.workbench.model.ConceptAnalysis;
 import org.pmiops.workbench.model.DbDomainListResponse;
-import org.springframework.data.jpa.domain.Specification;
 import org.pmiops.workbench.model.QuestionConceptListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -226,9 +225,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             }
         }
 
-        String query2=new String();
+        String query2="";
         for(String key:keywords){
-            if(query2==null){
+            if(query2.isEmpty()){
                 query2="+"+key;
             }else if(key.contains("\"")){
                 query2=query2+key;

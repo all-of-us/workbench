@@ -52,9 +52,9 @@ public class ConceptService {
           }
       }
 
-      String query2=new String();
+      String query2="";
       for(String key:keywords){
-          if(query2==null){
+          if(query2.isEmpty()){
               query2="+"+key;
           }else if(key.contains("\"")){
               query2=query2+key;
