@@ -50,7 +50,6 @@ export class InvitationKeyComponent {
     }
     this.invitationKeyReq = false;
     this.invitationKeyInvalid = false;
-
     const request: InvitationVerificationRequest = {
       invitationKey: this.invitationKey
     };
@@ -58,7 +57,8 @@ export class InvitationKeyComponent {
       this.invitationKeyVerified = true;
     }, () => {
       this.invitationKeyInvalid = true;
+      this.invitationInput.first.nativeElement.focus();
     });
-    this.invitationInput.first.nativeElement.focus();
+
   }
 }
