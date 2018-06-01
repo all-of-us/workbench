@@ -52,7 +52,7 @@ public class ConceptService {
           }
       }
 
-      String query2;
+      String query2=new String();
       for(String key:keywords){
           if(query2==null){
               query2="+"+key;
