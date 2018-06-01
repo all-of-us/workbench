@@ -4,9 +4,9 @@ import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.type.StandardBasicTypes;
 
-public class TestSQLDialect extends MySQLDialect {
+public class TestSqlDialect extends MySQLDialect {
 
-    public TestSQLDialect() {
+    public TestSqlDialect() {
         super();
         // For in-memory tests, use LIKE for full text searches.
         // For some weird reason, we need to have this function use DOUBLE; see
