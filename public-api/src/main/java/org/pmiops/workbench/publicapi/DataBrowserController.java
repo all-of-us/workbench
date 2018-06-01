@@ -233,10 +233,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
         }else if("S".equals(conceptFilter)){
             standardConceptFilter = StandardConceptFilter.STANDARD_CONCEPTS;
-        }else if("C".equals(conceptFilter)){
-            standardConceptFilter = StandardConceptFilter.NON_STANDARD_CONCEPTS;
         }else{
-            standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
+            standardConceptFilter = StandardConceptFilter.NON_STANDARD_CONCEPTS;
         }
         ConceptService.StandardConceptFilter convertedConceptFilter=ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
