@@ -219,20 +219,28 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDomainSearchResults(String keyword){
-        String[] keywords=keyword.split("\\s*(=>|,|\\s)\\s*");
-        boolean flag=false;
-        for(String key:keywords){
+
+        String[] keywords=keyword.split("[,+\\s+]");
+        for(int i=0;i<keywords.length;i++){
+            String key=keywords[i];
             if(key.length() < 3){
-                flag=true;
-                break;
+                key="\""+key+"\"";
+                keywords[i]=key;
             }
         }
-        if(flag){
-            keyword="\""+keyword+"\"";
-        }else{
-            keyword=String.join(" +",keywords);
-            keyword="+"+keyword;
+
+        String query2=new String();
+        for(String key:keywords){
+            if(query2.length()==0){
+                query2="+"+key;
+            }else if(key.contains("\"")){
+                query2=query2+key;
+            }else{
+                query2=query2+"+"+key;
+            }
         }
+
+        keyword=query2;
 
         List<DbDomain> domains=dbDomainDao.findDomainSearchResults(keyword);
         DbDomainListResponse resp=new DbDomainListResponse();
