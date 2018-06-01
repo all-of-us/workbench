@@ -78,7 +78,7 @@ public class AchillesAnalysisDaoTest {
     public void findAllAnalyses() throws Exception {
         /* Todo write more tests */
         final List<AchillesAnalysis> list = dao.findAll();
-        Assert.assertNotEquals(list,null));
+        Assert.assertNotEquals(list,null);
     }
 
     @Test
