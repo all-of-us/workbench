@@ -8,10 +8,7 @@
       <input type="text" class="long-input" id="familyName" name="familyName" [(ngModel)]="profile.familyName" placeholder="Family Name">
     </div>
     <div class="form-section">
-      <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" (ngModelChange)="contactEmailChanged()" placeholder="Email Address">
-      <div *ngIf="contactEmailConflictError" class="error">
-        Contact Email is already in use.
-      </div>
+      <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" placeholder="Contact Email Address">
     </div>
     <div class="form-section">
       <input type="text" class="long-input" id="username" name="username"
@@ -42,40 +39,6 @@
       <div *ngIf="usernameInvalidError && usernameOffFocus" class="error" id="username-invalid-error">
         Username is not a valid username.
       </div>
-    </div>
-    <div class="form-section">
-      <input type="password" class="long-input" id="password" name="password" [(ngModel)]="password" placeholder="Password"
-             (blur)="leaveFocusPassword()" (focus)="enterFocusPassword()"
-             [ngClass]="{'successfulInput': showPasswordValidationSuccess, 'unsuccessfulInput': showPasswordValidationError}">
-      <div class="icon-area">
-        <clr-icon shape="warning-standard" class="warning-standard is-solid" *ngIf="showPasswordValidationError"></clr-icon>
-        <clr-icon shape="success-standard" class="success-standard is-solid" *ngIf="showPasswordValidationSuccess"></clr-icon>
-      </div>
-      <clr-tooltip>
-        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-        <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
-          Passwords must contain at least one lowercase and one uppercase letter
-        </clr-tooltip-content>
-      </clr-tooltip>
-      <div *ngIf="showPasswordLengthError && passwordOffFocus" class="error" id="password-length-error">
-        Password must be between 8 and 100 characters long.
-      </div>
-      <div *ngIf="containsLowerAndUpperError && passwordOffFocus" class="error" id="password-case-error">
-        Password must contain one lowercase and one uppercase letter.
-      </div>
-    </div>
-    <div class="form-section">
-      <input type="password" class="long-input" id="passwordAgain" for="passwordAgain" name="passwordAgain"
-             (blur)="leaveFocusPasswordAgain()" (focus)="enterFocusPasswordAgain()"
-             [(ngModel)]="passwordAgain" placeholder="Confirm Password"
-             [ngClass]="{'successfulInput': showPasswordAgainValidationSuccess, 'unsuccessfulInput': showPasswordAgainValidationError}">
-      <div class="icon-area">
-        <clr-icon shape="warning-standard" class="warning-standard is-solid" *ngIf="showPasswordAgainValidationError"></clr-icon>
-        <clr-icon shape="success-standard" class="success-standard is-solid" *ngIf="showPasswordAgainValidationSuccess"></clr-icon>
-      </div>
-    </div>
-    <div *ngIf="showPasswordsDoNotMatchError && passwordAgainOffFocus" class="error" id="password-match-error">
-      Passwords do not match.
     </div>
     <div class="form-section">
       <button type="submit"

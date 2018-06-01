@@ -1,5 +1,5 @@
 <clr-button-group id="workspace-top-nav-bar" class="btn-group" [clrMenuPosition]="'bottom-right'">
-  <clr-button class="btn btn-primary btn-top" [routerLink]="['/workspace', wsNamespace, wsId]" routerLinkActive="active"
+  <clr-button class="btn btn-primary btn-top" [routerLink]="['/workspaces', wsNamespace, wsId]" routerLinkActive="active"
           [routerLinkActiveOptions]="{exact: true}">
     Dashboard
   </clr-button>
@@ -16,7 +16,7 @@
   </span>
 
   <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-    <clr-button [clrInMenu]="true" class="btn" [disabled]="!writePermission" [routerLink]="['/workspace', wsNamespace, wsId, 'edit']"
+    <clr-button [clrInMenu]="true" class="btn" [disabled]="!writePermission" [routerLink]="['/workspaces', wsNamespace, wsId, 'edit']"
             routerLinkActive="active">
       Edit
     </clr-button>
@@ -28,7 +28,7 @@
       Owner access is required to share the workspace.
     </span>
   </span>
-  <clr-button [clrInMenu]="true" class="btn" [routerLink]="['/workspace', wsNamespace, wsId, 'clone']" routerLinkActive="active">
+  <clr-button [clrInMenu]="true" class="btn" [routerLink]="['/workspaces', wsNamespace, wsId, 'clone']" routerLinkActive="active">
     Clone
   </clr-button>
   <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">

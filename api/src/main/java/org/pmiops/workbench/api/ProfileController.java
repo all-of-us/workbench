@@ -342,15 +342,11 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-    if (userService.getContactEmailTaken(request.getProfile().getContactEmail())) {
-      throw new ConflictException("That contact email is already taken.");
-    }
-
     verifyInvitationKey(request.getInvitationKey());
     com.google.api.services.admin.directory.model.User googleUser =
         directoryService.createUser(request.getProfile().getGivenName(),
             request.getProfile().getFamilyName(), request.getProfile().getUsername(),
-            request.getPassword());
+            request.getProfile().getContactEmail());
 
     // Create a user that has no data access or FC user associated.
     // We create this account before they sign in so we can keep track of which users we have
