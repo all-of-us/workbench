@@ -42,12 +42,11 @@ public class DirectoryServiceImplIntegrationTest {
   @Test
   public void testCreateAndDeleteTestUser() {
     String userName = String.format("integration.test.%d", Clock.systemUTC().millis());
-    DirectoryServiceImpl serviceSpy = Mockito.spy(service);
-    Mockito.doNothing().when(serviceSpy).sendPasswordEmail(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-    serviceSpy.createUser("Integration", "Test", userName, "notasecret");
-    assertThat(serviceSpy.isUsernameTaken(userName)).isTrue();
-    serviceSpy.deleteUser(userName);
-    assertThat(serviceSpy.isUsernameTaken(userName)).isFalse();
+    Mockito.doNothing().when(service).sendPasswordEmail(Mockito.anyString(), Mockito.anyString(), Mockito.any());
+    service.createUser("Integration", "Test", userName, "notasecret");
+    assertThat(service.isUsernameTaken(userName)).isTrue();
+    service.deleteUser(userName);
+    assertThat(service.isUsernameTaken(userName)).isFalse();
   }
 
   private static GoogleCredential getGoogleCredential() {
