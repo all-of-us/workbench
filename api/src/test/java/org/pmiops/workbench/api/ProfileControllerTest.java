@@ -7,10 +7,7 @@ import static junit.framework.TestCase.fail;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.blockscore.models.Person;
 import com.google.common.collect.ImmutableList;
@@ -45,6 +42,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -109,6 +108,8 @@ public class ProfileControllerTest {
   private Person person;
   @Mock
   private Provider<WorkbenchConfig> configProvider;
+  @Mock
+  private Provider<MailService> mailServiceProvider;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -148,10 +149,12 @@ public class ProfileControllerTest {
     ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment);
+        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment,
+        mailServiceProvider);
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), cloudEnvironment);
+        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config),
+        cloudEnvironment, mailServiceProvider);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 

@@ -1,31 +1,40 @@
 package org.pmiops.workbench.google;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.apache.ApacheHttpTransport;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mail.MailServiceImpl;
+import org.pmiops.workbench.test.Providers;
+import org.springframework.retry.backoff.NoBackOffPolicy;
+
+import javax.mail.MessagingException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Clock;
-import org.junit.Before;
-import org.junit.Test;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.test.Providers;
-import org.springframework.retry.backoff.NoBackOffPolicy;
-import org.mockito.Mockito;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class DirectoryServiceImplIntegrationTest {
   private DirectoryServiceImpl service;
   private final GoogleCredential googleCredential = getGoogleCredential();
   private final WorkbenchConfig workbenchConfig = createConfig();
   private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
+  private final MailService mailService = mock(MailServiceImpl.class);
 
 
   @Before
   public void setup() {
     service = new DirectoryServiceImpl(
-        Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport,
+        Providers.of(googleCredential),
+        Providers.of(workbenchConfig),
+        Providers.of(mailService),
+        httpTransport,
         new GoogleRetryHandler(new NoBackOffPolicy()));
   }
 
@@ -40,9 +49,9 @@ public class DirectoryServiceImplIntegrationTest {
   }
 
   @Test
-  public void testCreateAndDeleteTestUser() {
+  public void testCreateAndDeleteTestUser() throws MessagingException {
     String userName = String.format("integration.test.%d", Clock.systemUTC().millis());
-    Mockito.doNothing().when(service).sendPasswordEmail(Mockito.anyString(), Mockito.anyString(), Mockito.any());
+    Mockito.doNothing().when(mailService).send(Mockito.any());
     service.createUser("Integration", "Test", userName, "notasecret");
     assertThat(service.isUsernameTaken(userName)).isTrue();
     service.deleteUser(userName);
@@ -62,6 +71,8 @@ public class DirectoryServiceImplIntegrationTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.googleDirectoryService = new WorkbenchConfig.GoogleDirectoryServiceConfig();
     config.googleDirectoryService.gSuiteDomain = "fake-research-aou.org";
+    config.admin = new WorkbenchConfig.AdminConfig();
+    config.admin.verifiedSendingAddress = "test@" + config.googleDirectoryService.gSuiteDomain;
     return config;
   }
 }
