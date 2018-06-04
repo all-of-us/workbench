@@ -482,6 +482,73 @@ paths:
   # "workspaces/..." fragment into a single "path" var, as is used in Jupyter's
   # own Swagger definition. Note: this does not initialize any parent
   # directories. The Leo proxy localize API can be used for this purpose.
+  /notebooks/{googleProject}/{clusterName}/api/contents/{fileName}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: fileName
+        description: fileName
+        required: true
+        type: string
+    get:
+      summary: Get contents of file or directory
+      description: "A client can optionally specify a type and/or format argument via URL parameter. When given, the Contents service shall return a model in the requested type and/or format. If the request cannot be satisfied, e.g. type=text is requested, but the file is binary, then the request shall fail with 400 and have a JSON response containing a 'reason' field, with the value 'bad format' or 'bad type', depending on what was requested."
+      tags:
+        - jupyter
+      operationId: getRootContents
+      parameters:
+        - name: type
+          in: query
+          description: File type ('file', 'directory')
+          type: string
+          enum:
+            - file
+            - directory
+        - name: format
+          in: query
+          description: "How file content should be returned ('text', 'base64')"
+          type: string
+          enum:
+            - text
+            - base64
+        - name: content
+          in: query
+          description: "Return content (0 for no content, 1 for return content)"
+          type: integer
+      responses:
+        404:
+          description: No item found
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+        200:
+          description: Contents of file or directory
+          headers:
+            Last-Modified:
+              description: Last modified date for file
+              type: string
+              format: dateTime
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        500:
+          description: Model key error
   /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}/{fileName}:
     parameters:
       - in: path
