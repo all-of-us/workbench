@@ -1,7 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
 
-import com.ecwid.maleorang.MailchimpException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.model.ErrorResponse;
@@ -33,11 +32,7 @@ public class ExceptionAdvice {
     if (relevantError.getClass().getAnnotation(ResponseStatus.class) != null) {
       statusCode = relevantError.getClass().getAnnotation(ResponseStatus.class).value().value();
     }
-    if (relevantError instanceof MailchimpException) {
-      MailchimpException mailchimpException = (MailchimpException) relevantError;
-      statusCode = mailchimpException.code;
-      errorResponse.setMessage(mailchimpException.description);
-    } else if (relevantError instanceof WorkbenchException) {
+    if (relevantError instanceof WorkbenchException) {
       WorkbenchException workbenchException = (WorkbenchException) relevantError;
       if (workbenchException.getErrorResponse() != null && workbenchException.getErrorResponse().getErrorCode() != null) {
         errorResponse.setErrorCode(workbenchException.getErrorResponse().getErrorCode());

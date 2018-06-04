@@ -6,12 +6,8 @@ import java.util.stream.Collectors;
 
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +30,12 @@ public class ProfileService {
       };
 
   private final FireCloudService fireCloudService;
-  private final MailChimpService mailChimpService;
   private final UserDao userDao;
 
   @Autowired
-  public ProfileService(FireCloudService fireCloudService, MailChimpService mailChimpService,
+  public ProfileService(FireCloudService fireCloudService,
       UserDao userDao) {
     this.fireCloudService = fireCloudService;
-    this.mailChimpService = mailChimpService;
     this.userDao = userDao;
   }
 
@@ -98,27 +92,6 @@ public class ProfileService {
     profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
         .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
         .collect(Collectors.toList()));
-    EmailVerificationStatus userEmailVerificationStatus = user.getEmailVerificationStatus();
-    // if verification is pending or unverified, need to query MailChimp and update DB accordingly
-    // Note: This is pretty slow, we shouldn't be calling it on every Profile lookup. Leave it
-    // for now as we're in the process of switching off Mailchimp (related: RW-705).
-    if (checkEmailVerification &&
-        !userEmailVerificationStatus.equals(EmailVerificationStatus.SUBSCRIBED)) {
-      if (userEmailVerificationStatus.equals(EmailVerificationStatus.UNVERIFIED) && user.getContactEmail() != null) {
-        try {
-          mailChimpService.addUserContactEmail(user.getContactEmail());
-          userEmailVerificationStatus = EmailVerificationStatus.PENDING;
-        } catch (WorkbenchException e) {
-          if (e.getErrorResponse().getStatusCode() == 400) {
-            profile.setContactEmailFailure(true);
-          }
-        }
-      } else if (userEmailVerificationStatus.equals(EmailVerificationStatus.PENDING)) {
-        userEmailVerificationStatus = EmailVerificationStatus.fromValue(mailChimpService.getMember(user.getContactEmail()));
-      }
-      user.setEmailVerificationStatus(userEmailVerificationStatus);
-      userDao.save(user);
-    }
     profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
     return profile;
   }
