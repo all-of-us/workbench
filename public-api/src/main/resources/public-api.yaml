@@ -235,6 +235,27 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
+  /v1/databrowser/child-concepts-with-source-count:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Get children of the given concept
+      operationId: "getChildConceptsWithSourceCountGTZero"
+      parameters:
+        - in: query
+          name: concept_id
+          type: integer
+          format: int64
+          required: true
+          description: concept id to get maps to concepts
+      responses:
+        200:
+          description: a collection of concepts
+          schema:
+            $ref: "#/definitions/ConceptListResponse"
+
   /v1/databrowser/parent-concepts:
       get:
         security: []

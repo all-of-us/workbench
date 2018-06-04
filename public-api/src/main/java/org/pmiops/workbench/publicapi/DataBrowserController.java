@@ -414,6 +414,20 @@ public class DataBrowserController implements DataBrowserApiDelegate {
      * @return
      */
     @Override
+    public ResponseEntity<ConceptListResponse> getChildConceptsWithSourceCountGTZero(Long conceptId) {
+        List<Concept> conceptList = conceptDao.findConceptsMapsToChildrenWithValidSourceCount(conceptId);
+        ConceptListResponse resp = new ConceptListResponse();
+        resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        return ResponseEntity.ok(resp);
+    }
+
+    /**
+     * This method gets concepts with maps to relationship in concept relationship table
+     *
+     * @param conceptId
+     * @return
+     */
+    @Override
     public ResponseEntity<ConceptListResponse> getParentConcepts(Long conceptId) {
         List<Concept> conceptList = conceptDao.findConceptsMapsToParents(conceptId);
         ConceptListResponse resp = new ConceptListResponse();
