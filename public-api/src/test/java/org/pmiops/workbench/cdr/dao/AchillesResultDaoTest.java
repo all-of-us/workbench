@@ -60,15 +60,15 @@ public class AchillesResultDaoTest {
 
     private AchillesAnalysis createAnalysis(Long analysisId,String analysisName,String stratum1Name,String stratum2Name,String stratum3Name,String stratum4Name,String stratum5Name,String chartType,String dataType) {
         return new AchillesAnalysis()
-            .analysisId(analysisId)
-            .analysisName(analysisName)
-            .stratum1Name(stratum1Name)
-            .stratum2Name(stratum2Name)
-            .stratum3Name(stratum3Name)
-            .stratum4Name(stratum4Name)
-            .stratum5Name(stratum5Name)
-            .chartType(chartType)
-            .dataType(dataType);
+                .analysisId(analysisId)
+                .analysisName(analysisName)
+                .stratum1Name(stratum1Name)
+                .stratum2Name(stratum2Name)
+                .stratum3Name(stratum3Name)
+                .stratum4Name(stratum4Name)
+                .stratum5Name(stratum5Name)
+                .chartType(chartType)
+                .dataType(dataType);
     }
 
     private AchillesResult createAchillesResult(Long id,Long analysisId,String stratum1,String stratum2,String stratum3,String stratum4,String stratum5,Long count,Long sourceCountValue){

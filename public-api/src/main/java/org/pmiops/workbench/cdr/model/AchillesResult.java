@@ -19,7 +19,7 @@ public class AchillesResult  {
     private String stratum5;
     private Long countValue;
     private Long sourceCountValue;
-    private String stratum5Name;
+    private String analysisStratumName;
 
     @Id
     public Long getId() {
@@ -119,14 +119,14 @@ public class AchillesResult  {
     }
 
     @Transient
-    public String getStratum5Name() {
-        return stratum5Name;
+    public String getAnalysisStratumName() {
+        return analysisStratumName;
     }
-    public void setStratum5Name(String stratum5Name) {
-        this.stratum5Name = stratum5Name;
+    public void setAnalysisStratumName(String analysisStratumName) {
+        this.analysisStratumName = analysisStratumName;
     }
-    public AchillesResult stratum5Name(String val) {
-        this.stratum5Name = val;
+    public AchillesResult analysisStratumName(String val) {
+        this.analysisStratumName = val;
         return this;
     }
 
@@ -167,7 +167,7 @@ public class AchillesResult  {
                 ", stratum5='" + stratum5 + '\'' +
                 ", countValue=" + countValue +
                 ", sourceCountValue=" + sourceCountValue +
-                ", stratum5Name='" + stratum5Name + '\'' +
+                ", analysisStratumName='" + analysisStratumName + '\'' +
                 '}';
     }
 
