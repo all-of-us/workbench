@@ -13,7 +13,7 @@ const participant = new Participant({
   gender: 'gender',
   race: 'race',
   ethnicity: 'ethnicity',
-  birthDate: 519714000,
+  birthDate: '12-31-1969',
 });
 
 

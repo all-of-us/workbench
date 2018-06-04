@@ -1,6 +1,8 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,6 +64,28 @@ public class CohortReviewControllerTest {
   private CohortReview cohortReview;
   private ParticipantCohortStatus participantCohortStatus1;
   private ParticipantCohortStatus participantCohortStatus2;
+  private Workspace workspace;
+
+  @Autowired
+  private CdrVersionDao cdrVersionDao;
+
+  @Autowired
+  private WorkspaceDao workspaceDao;
+
+  @Autowired
+  private CohortDao cohortDao;
+
+  @Autowired
+  private CohortReviewDao cohortReviewDao;
+
+  @Autowired
+  private ParticipantCohortStatusDao participantCohortStatusDao;
+
+  @Autowired
+  private WorkspaceService workspaceService;
+
+  @Autowired
+  private CohortReviewController cohortReviewController;
 
   private enum TestDemo {
     ASIAN("Asian", 8515),
@@ -103,45 +127,19 @@ public class CohortReviewControllerTest {
   static class Configuration {
 
     @Bean
-    GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
+    public GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
       Map<String, Map<Long, String>> concepts = new HashMap<>();
       concepts.put(ParticipantCohortStatusColumns.RACE.name(),
-        new HashMap<Long, String>() {{
-          put(TestDemo.ASIAN.getConceptId(), TestDemo.ASIAN.getName());
-          put(TestDemo.WHITE.getConceptId(), TestDemo.WHITE.getName()); }});
+        ImmutableMap.of(TestDemo.ASIAN.getConceptId(), TestDemo.ASIAN.getName(),
+          TestDemo.WHITE.getConceptId(), TestDemo.WHITE.getName()));
       concepts.put(ParticipantCohortStatusColumns.GENDER.name(),
-        new HashMap<Long, String>() {{
-          put(TestDemo.MALE.getConceptId(), TestDemo.MALE.getName());
-          put(TestDemo.FEMALE.getConceptId(), TestDemo.FEMALE.getName()); }});
+        ImmutableMap.of(TestDemo.MALE.getConceptId(), TestDemo.MALE.getName(),
+          TestDemo.FEMALE.getConceptId(), TestDemo.FEMALE.getName()));
       concepts.put(ParticipantCohortStatusColumns.ETHNICITY.name(),
-        new HashMap<Long, String>() {{
-          put(TestDemo.NOT_HISPANIC.getConceptId(), TestDemo.NOT_HISPANIC.getName()); }});
+        ImmutableMap.of(TestDemo.NOT_HISPANIC.getConceptId(), TestDemo.NOT_HISPANIC.getName()));
       return new GenderRaceEthnicityConcept(concepts);
     }
   }
-
-  private Workspace workspace;
-
-  @Autowired
-  private CdrVersionDao cdrVersionDao;
-
-  @Autowired
-  private WorkspaceDao workspaceDao;
-
-  @Autowired
-  private CohortDao cohortDao;
-
-  @Autowired
-  private CohortReviewDao cohortReviewDao;
-
-  @Autowired
-  private ParticipantCohortStatusDao participantCohortStatusDao;
-
-  @Autowired
-  private WorkspaceService workspaceService;
-
-  @Autowired
-  private CohortReviewController cohortReviewController;
 
   @Before
   public void setUp() {
