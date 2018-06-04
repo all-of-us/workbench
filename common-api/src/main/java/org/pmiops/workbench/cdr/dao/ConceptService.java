@@ -36,11 +36,39 @@ public class ConceptService {
     this.entityManager = entityManager;
   }
 
+  public static String modifyMultipleMatchKeyword(String query){
+      // This function modifies the keyword to match all the words if multiple words are present(by adding + before each word to indicate match that matching each word is essential)
+      String[] keywords = query.split("[,+\\s+]");
+      for(int i = 0;i < keywords.length;i++){
+          String key = keywords[i];
+          if(key.length() < 3){
+              key = "\""+key+"\"";
+              keywords[i] = key;
+          }
+      }
+
+      String query2= "";
+      for(String key: keywords){
+          if(query2.isEmpty()){
+              query2 = "+"+key;
+          }else if(key.contains("\"")){
+              query2 = query2+key;
+          }else{
+              query2 = query2+ "+"+ key;
+          }
+      }
+      return query2;
+  }
+
   public static final String STANDARD_CONCEPT_CODE = "S";
 
   public Slice<Concept> searchConcepts(String query,
       StandardConceptFilter standardConceptFilter, List<String> vocabularyIds,
       List<String> domainIds, int limit) {
+
+
+      final String keyword = modifyMultipleMatchKeyword(query);
+
     Specification<Concept> conceptSpecification =
         (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -48,7 +76,7 @@ public class ConceptService {
             // Check that the concept name, code, or ID matches the query string.
             List<Predicate> queryPredicates = new ArrayList<>();
             Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
-                root.get("conceptName"), criteriaBuilder.literal(query));
+                root.get("conceptName"), criteriaBuilder.literal(keyword));
             queryPredicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
             queryPredicates.add(criteriaBuilder.equal(root.get("conceptCode"),
                 criteriaBuilder.literal(query)));

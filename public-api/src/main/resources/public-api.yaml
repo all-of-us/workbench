@@ -49,6 +49,28 @@ paths:
           schema:
             $ref: "#/definitions/QuestionConceptListResponse"
 
+  /v1/databrowser/concept-analysis-results:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets analysis results for concept
+      operationId: "getConceptAnalysisResults"
+      parameters:
+        - in: query
+          name: concept-ids
+          type: array
+          items:
+            type: string
+          required: true
+          description: concept id
+      responses:
+        200:
+          description: A collection of analysis for concept
+          schema:
+            $ref: "#/definitions/ConceptAnalysisListResponse"
+
   /v1/databrowser/participant-count:
     get:
       security: []
@@ -82,7 +104,38 @@ paths:
           description: A collection of domains
           schema:
             $ref: "#/definitions/DbDomainListResponse"
+  /v1/databrowser/domain-totals:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+      description: Gets the domain filters with the count of matched concepts
+      operationId: "getDomainTotals"
+      parameters: []
+      responses:
+        200:
+          description: A collection of domains
+          schema:
+            $ref: "#/definitions/DbDomainListResponse"
 
+  /v1/databrowser/advanced-concept-search:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+      description: Gets list of matched concepts
+      operationId: "getAdvancedConceptSearch"
+      parameters:
+        - in: body
+          name: request
+          description: search concept request
+          schema:
+            $ref: "#/definitions/SearchConceptsRequest"
+      responses:
+        200:
+          description: A collection of matched concepts
+          schema:
+            $ref: "#/definitions/ConceptListResponse"
 
   /v1/databrowser/db-domains:
     get:
@@ -169,6 +222,27 @@ paths:
 
       description: Get children of the given concept
       operationId: "getChildConcepts"
+      parameters:
+        - in: query
+          name: concept_id
+          type: integer
+          format: int64
+          required: true
+          description: concept id to get maps to concepts
+      responses:
+        200:
+          description: a collection of concepts
+          schema:
+            $ref: "#/definitions/ConceptListResponse"
+
+  /v1/databrowser/child-concepts-with-source-count:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Get children of the given concept
+      operationId: "getChildConceptsWithSourceCountGTZero"
       parameters:
         - in: query
           name: concept_id
@@ -462,3 +536,71 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/DbDomain"
+
+  ConceptAnalysis:
+    type: object
+    required:
+      - conceptId
+    properties:
+      conceptId:
+        description: concept id
+        type: string
+      genderAnalysis:
+        description: gender analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      ageAnalysis:
+        description: age analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+
+  ConceptAnalysisListResponse:
+    type: object
+    required:
+       - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/ConceptAnalysis"
+
+  StandardConceptFilter:
+    type: string
+    description: filter on whether standard, non-standard, or all concepts should be returned\
+    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS]
+  Domain:
+    type: string
+    description: filter on the domain in which concepts should be returned
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, RACE, GENDER, ETHNICITY]
+
+  SearchConceptsRequest:
+    type: object
+    required:
+      - query
+    properties:
+      query:
+        type: string
+        description: >
+            A query string that can be used to match a subset of the name (case-insensitively),
+            the entire code value (case-insensitively), or the concept ID.
+      standardConceptFilter:
+        description: >
+            STANDARD_CONCEPTS if only standard concepts should be returned,
+            NON_STANDARD_CONCEPTS if only non-standard
+            concepts should be returned; defaults to ALL_CONCEPTS, meaning both
+            standard and non-standard concepts will be returned.
+        $ref: "#/definitions/StandardConceptFilter"
+      vocabularyIds:
+        type: array
+        items:
+          type: string
+        description: The vocabulary ID for the concepts returned (e.g. SNOMED, RxNorm)
+      domain:
+        description: >
+            The domain for the concepts returned (e.g. OBSERVATION, DRUG). Note that this may map
+            to multiple domain ID values in OMOP.
+        $ref: "#/definitions/Domain"
+      maxResults:
+        type: integer
+        format: int32
+        description: The maximum number of results returned. Defaults to 25.

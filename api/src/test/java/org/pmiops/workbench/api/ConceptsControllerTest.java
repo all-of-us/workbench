@@ -71,10 +71,22 @@ public class ConceptsControllerTest {
       .countValue(456L)
       .prevalence(0.3F);
 
+  private static final Concept CLIENT_CONCEPT_3 = new Concept()
+          .conceptId(789L)
+          .conceptName("multi word concept")
+          .conceptCode("conceptC")
+          .conceptClassId("classId3")
+          .vocabularyId("V3")
+          .domainId("Condition")
+          .countValue(789L)
+          .prevalence(0.4F);
+
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
       makeConcept(CLIENT_CONCEPT_2);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
+          makeConcept(CLIENT_CONCEPT_3);
 
   @TestConfiguration
   @Import({
@@ -139,6 +151,14 @@ public class ConceptsControllerTest {
     assertResults(
         conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query(" ")));
+  }
+
+  @Test
+  public void testSearchConceptsMultipleWordQuery(){
+    saveConcepts();
+    assertResults(
+            conceptsController.searchConcepts("ns", "name",
+                    new SearchConceptsRequest().query("multi word")));
   }
 
   @Test
@@ -306,6 +326,7 @@ public class ConceptsControllerTest {
   private void saveConcepts() {
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
+    conceptDao.save(CONCEPT_3);
   }
 
   private void assertResults(ResponseEntity<ConceptListResponse> response,

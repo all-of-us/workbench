@@ -49,6 +49,13 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
             nativeQuery = true)
     List<Concept> findConceptsMapsToChildren(@Param("conceptId") long conceptId);
 
+    @Query(value="select c.* from concept c "+
+            "join concept_relationship rel on " +
+            "rel.concept_id_1 = c.concept_id and rel.concept_id_2 = :conceptId and " +
+            "rel.relationship_id = 'maps to' where c.concept_id != :conceptId and c.source_count_value > 0 order " +
+            "by c.count_value desc",nativeQuery=true)
+    List<Concept> findConceptsMapsToChildrenWithValidSourceCount(@Param("conceptId") long conceptId);
+
     @Query(value = "select c.* from concept c " +
             "join concept_relationship rel on rel.concept_id_2 = c.concept_id " +
             "and rel.concept_id_1 = :conceptId and rel.relationship_id = 'maps to' " +
