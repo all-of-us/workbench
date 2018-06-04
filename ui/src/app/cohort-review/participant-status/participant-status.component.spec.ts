@@ -28,13 +28,15 @@ class ApiSpy {
   updateParticipantCohortStatus = jasmine
     .createSpy('updateParticipantCohortStatus')
     .and
-    .returnValue(Observable.of({participantId: 1, status: CohortStatus.INCLUDED, birthDate: 1}));
+    .returnValue(Observable.of({participantId: 1,
+        status: CohortStatus.INCLUDED,
+        birthDate: '12-31-1969'}));
 }
 
 const participant: Participant = new Participant({
   participantId: 1,
   status: CohortStatus.NOTREVIEWED,
-  birthDate: 1
+  birthDate: '12-31-1969'
 });
 
 describe('ParticipantStatusComponent', () => {
