@@ -154,7 +154,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       collect(Collectors.joining(""));
   }
 
-  private void sendPasswordEmail(String contactEmail, String password, User user) {
+  protected void sendPasswordEmail(String contactEmail, String password, User user) {
     WorkbenchConfig workbenchConfig = configProvider.get();
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
