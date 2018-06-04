@@ -54,7 +54,7 @@ export class CohortEditComponent {
   }
 
   backToWorkspace(): void {
-    this.router.navigate(['workspace', this.workspace.namespace, this.workspace.id]);
+    this.router.navigate(['workspaces', this.workspace.namespace, this.workspace.id]);
   }
 
   get canSave(): boolean {
