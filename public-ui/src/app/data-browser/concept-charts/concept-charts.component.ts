@@ -34,13 +34,18 @@ export class ConceptChartsComponent implements OnInit {
 
   toggleSourceConcepts() {
     // Get source concepts for first time if we don't have them
-    if (!this.sourceConcepts) {
+    if (this.sourceConcepts === null) {
       this.getSourceConcepts();
     }
-    this.showSources = !this.showSources;
+    this.showSources = true;
   }
   getSourceConcepts() {
-    this.api.getChildConceptsWithHttpInfo(this.concept.conceptId);
+    console.log("getting sources");
+    this.api.getChildConcepts(this.concept.conceptId).subscribe(
+      results => {
+        console.log(results, "source concepts ");
+        this.sourceConcepts = results.items;
+      });
 
   }
 }

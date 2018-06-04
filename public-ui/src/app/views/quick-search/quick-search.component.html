@@ -17,53 +17,8 @@
         </div>
 
       </div>
-
-     <!-- Filters none now
-      <div class="row">
-        <div class="col-sm-6 col-xs-12">
-
-          <section class="form-block">
-            <div class="form-group filters">
-              <div>
-                <label>Electronic Health Records</label>
-              </div>
-              <div class="sub-label">
-                <label> (check all that apply)</label>
-              </div>
-              <clr-checkbox *ngFor="let d of ehrDomains"
-                      name="{{d.domainDisplay}}"
-                      id="{{d.domainId}}"
-                      [(ngModel)]="d.checked">
-                {{d.domainDisplay}}
-              </clr-checkbox>
-            </div>
-          </section>
-
-        </div>
-        <div class="col-sm-6 col-xs-12">
-
-          <section class="form-block">
-            <div class="form-group filters">
-              <label>Self-reported information in surveys</label>
-              <clr-checkbox
-                            name="surveys"
-                            id="surveys"
-                            [(ngModel)]="surveysChecked">
-                Surveys
-              </clr-checkbox>
-            </div>
-          </section>
-        </div>
-      </div>
-
-
-      <div class="row">
-        <div class="col-xs">
-          <button class="btn btn-primary search" (click)="searchDomains()">Search</button>
-        </div>
-      </div>
-      -->
     </div>
+
     <div class="db-page-spinner" *ngIf="loading" >
       <span  class="spinner spinner-inline">
         Loading...
@@ -72,7 +27,7 @@
 
     <h5 class="box-heading"> EHR Domains: </h5>
     <div class="row" >
-      <div class="col-md-3 col-sm-4 col-xs-12" *ngFor="let r of domainResults">
+      <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
           <div class="white-card-box search-result">
             <h5 class="box-title">
               {{r.domainDisplay}}
@@ -93,7 +48,7 @@
 
     <h5 class="box-heading"> Surveys:  </h5>
     <div class="row" >
-      <div class="col-md-3 col-sm-4 col-xs-12" *ngFor="let r of surveyResults">
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
         <div class="white-card-box search-result">
           <h5 class="box-title">
             {{r.domainDisplay}}

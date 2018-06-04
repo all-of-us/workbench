@@ -64,7 +64,6 @@ export class ChartComponent implements OnChanges {
 
   // If analysis object results changed , update the chart
   ngOnChanges() {
-    console.log("Analysis", this.analysis);
     if ((this.analysis && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {
         // HC automatically redraws when changing chart options
@@ -153,14 +152,12 @@ export class ChartComponent implements OnChanges {
    * for each question come in the analyses results
   */
   public getSelectedResults (selectedResult: any) {
-    console.log('Selected result' , this.selectedResult);
     const results = [];
     for (const r of this.analysis.results) {
       if (r.stratum4 === selectedResult.stratum4) {
         results.push(r);
       }
     }
-
     return results;
   }
 
@@ -260,7 +257,6 @@ export class ChartComponent implements OnChanges {
     // because we only show the breakdown for one answer on this chart
     let results = [];
     let seriesName = '';
-    console.log(this.analysis, GENDER_ANALYSIS_ID);
     if (this.analysis.analysisId === GENDER_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;

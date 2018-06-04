@@ -50,13 +50,16 @@ export class EhrViewComponent implements OnInit {
     }
 
     // Run search filter to domain
-    const domainId = this.dbDomain.domainId;
-    this.api.getConceptsSearch(this.searchText, 'S', domainId).subscribe(results =>  {
+    this.searchDomain();
+
+  }
+
+  searchDomain() {
+    this.api.getConceptsSearch(this.searchText, 'S', this.dbDomain.domainId).subscribe(results =>  {
       this.searchResults = results.items;
       console.log(this.searchResults);
       this.loading = false;
     } );
-
   }
 
 }

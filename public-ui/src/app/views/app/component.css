@@ -1,7 +1,7 @@
 .content-container{
-    margin-top: 1em;
     padding-left: 3rem;
     padding-right: 3rem;
+    margin-top: -1.5rem;
 }
 
 @media (max-width: 978px) {

@@ -1,15 +1,24 @@
 
 
 <div class="row">
-
   <div class="col-xs-12">
-
-    <div class="page-header">
-      <h2 class="title">  {{title}} </h2>
-      <h4 class="view-sub-title">{{subTitle}} </h4>
+    <h2 class="title">  {{title}} </h2>
+  </div>
+  <div class="col-md-6 col-sm-12 col-xs-12">
+    <div class="white-card-box" >
+      <div class="row search  flex-items-xs-between">
+        <div class="col-xs-12 flex-xs-middle search-input-full">
+          <div class="search-wrapper ">
+            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+            <input type="text" id="search-db" placeholder="Keyword Search" [(ngModel)]="searchText" (ngModelChange)="searchDomain()">
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+
 
 <div class="row">
   <div class="col-md-4 col-sm-4 col-xs-12">
@@ -71,7 +80,7 @@
     <div class="white-card-box">
       <div class="results-grid" *ngIf="searchResults.length > 0" >
         <div class="row expandable-grid-row" *ngFor="let r of searchResults, let i = index" [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-4 flex-xs-middle"> {{i+1}}. {{r.conceptName}}</div>
+          <div class="col-md-4 flex-xs-middle"> {{i+1}}. {{r.conceptName}} ({{r.conceptId}})</div>
           <div class="col-md-3 flex-xs-middle"> {{r.countValue | number }} partipants</div>
           <div class="col-md-4 flex-xs-middle"> {{r.vocabularyId}} {{r.conceptCode}}</div>
           <div class="col-md-1 flex-xs-middle"> <button class="icon-btn" (click)="r.expanded = !r.expanded"> <clr-icon shape="bar-chart" style="height: 24px; color: #2691D0;"></clr-icon> </button> </div>

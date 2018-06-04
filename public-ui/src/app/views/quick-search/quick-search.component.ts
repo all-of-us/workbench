@@ -24,7 +24,7 @@ export class QuickSearchComponent implements OnInit {
   domainResults = [];
   surveyResults = [];
   searchText = '';
-  prevSearchText = ''
+  prevSearchText = '';
   totalParticipants;
   domains = [];
   loading = false;
@@ -65,6 +65,8 @@ export class QuickSearchComponent implements OnInit {
     }
 
     this.prevSearchText = this.searchText;
+    localStorage.setItem('searchText', this.searchText);
+
     if (this.searchText.length >= minSearchLength) {
       this.loading = true;
       this.api.getDomainSearchResults(this.searchText).subscribe(data => {
@@ -78,7 +80,7 @@ export class QuickSearchComponent implements OnInit {
 
   public viewResults(r) {
     localStorage.setItem('dbDomain', JSON.stringify(r));
-    localStorage.setItem('seeaext', this.searchText);
+    localStorage.setItem('searchText', this.searchText);
 
     if (r.dbType === 'survey') {
       this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
