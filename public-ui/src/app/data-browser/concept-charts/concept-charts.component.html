@@ -4,11 +4,17 @@
   </span>
 </div>
 
-<div class="row" >
-  <div class="col-md-6 col-xs-12" *ngIf="genderAnalysis"  >
+<div class="row concept-charts"  >
+  <div class="col-md col-xs-12" *ngIf="genderAnalysis"  >
     <app-chart [analysis]="genderAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
   </div>
-  <div class="col-md-6 col-xs-12" *ngIf="ageAnalysis" >
+  <div class="col-md col-xs-12" *ngIf="ageAnalysis" >
     <app-chart [analysis]="ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
+  </div>
+  <div class="col-md col-xs-12" *ngIf="!showSources" >
+    <button class="btn primary" click="toggleSourceConcepts()"> Show Sources </button>
+  </div>
+  <div class="col-md col-xs-12" *ngIf="showSources && sourceConcepts && sourceConcepts.length > 0" >
+    <app-chart [concepts]="sourceConcepts" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
   </div>
 </div>

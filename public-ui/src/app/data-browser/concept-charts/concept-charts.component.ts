@@ -13,6 +13,8 @@ export class ConceptChartsComponent implements OnInit {
   loading = false;
   ageAnalysis = null;
   genderAnalysis = null;
+  sourceConcepts = null;
+  showSources = false;
   selectedResult;
   constructor(private api: DataBrowserService) { }
 
@@ -30,4 +32,15 @@ export class ConceptChartsComponent implements OnInit {
     } );
   }
 
+  toggleSourceConcepts() {
+    // Get source concepts for first time if we don't have them
+    if (!this.sourceConcepts) {
+      this.getSourceConcepts();
+    }
+    this.showSources = !this.showSources;
+  }
+  getSourceConcepts() {
+    this.api.getChildConceptsWithHttpInfo(this.concept.conceptId);
+
+  }
 }

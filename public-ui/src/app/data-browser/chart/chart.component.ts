@@ -341,7 +341,7 @@ export class ChartComponent implements OnChanges {
 
     const series = { name: seriesName, colorByPoint: true, data: data};
     return {
-      chart: {type: 'column', backgroundColor: '#D9E4EA'},
+      chart: {type: 'column', backgroundColor: this.backgroundColor},
       title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
       series: series,
       categories: cats,
