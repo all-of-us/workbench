@@ -15,8 +15,6 @@ import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.mockito.Mockito;
 
-import javax.mail.Transport;
-
 public class DirectoryServiceImplIntegrationTest {
   private DirectoryServiceImpl service;
   private final GoogleCredential googleCredential = getGoogleCredential();
