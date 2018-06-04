@@ -1,7 +1,13 @@
 package org.pmiops.workbench.google;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.apache.ApacheHttpTransport;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.time.Clock;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -12,21 +18,13 @@ import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
 import javax.mail.MessagingException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.time.Clock;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
 
 public class DirectoryServiceImplIntegrationTest {
   private DirectoryServiceImpl service;
   private final GoogleCredential googleCredential = getGoogleCredential();
   private final WorkbenchConfig workbenchConfig = createConfig();
   private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
-  private final MailService mailService = mock(MailServiceImpl.class);
-
+  private final MailService mailService = Mockito.mock(MailServiceImpl.class);
 
   @Before
   public void setup() {

@@ -7,7 +7,10 @@ import static junit.framework.TestCase.fail;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.blockscore.models.Person;
 import com.google.common.collect.ImmutableList;
@@ -43,7 +46,6 @@ import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationSta
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
