@@ -1209,13 +1209,9 @@ definitions:
 
   CreateAccountRequest:
     type: object
-    required:
-      - password
     properties:
       profile:
         $ref: '#/definitions/Profile'
-      password:
-        type: string
       invitationKey:
         type: string
 
@@ -1325,6 +1321,8 @@ definitions:
         items:
           $ref: "#/definitions/InstitutionalAffiliation"
       requestedIdVerification:
+        type: boolean
+      twoFactorEnabled:
         type: boolean
 
 

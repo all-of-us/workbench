@@ -9,6 +9,7 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
+import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
@@ -44,9 +45,13 @@ const routes: Routes = [
     canActivateChild: [SignInGuard],
     runGuardsAndResolvers: 'always',
     children: [
-      {
-        path: '',
-        data: { breadcrumb: 'Workspaces' },
+        {
+          path: '',
+          component: HomepageComponent,
+          data: {title: 'Homepage'},
+        }, {
+        path: 'workspaces',
+        data: {breadcrumb: 'Workspaces'},
         children: [
           {
             path: '',
@@ -57,7 +62,7 @@ const routes: Routes = [
             /* TODO The children under ./views need refactoring to use the data
              * provided by the route rather than double-requesting it.
              */
-            path: 'workspace/:ns/:wsid',
+            path: ':ns/:wsid',
             component: WorkspaceNavBarComponent,
             data: {
               title: 'View Workspace Details',

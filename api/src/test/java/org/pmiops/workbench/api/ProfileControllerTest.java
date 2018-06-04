@@ -2,7 +2,9 @@ package org.pmiops.workbench.api;
 
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.TestCase.fail;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -12,11 +14,14 @@ import static org.mockito.Mockito.when;
 
 import com.blockscore.models.Person;
 import com.google.common.collect.ImmutableList;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +53,7 @@ import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ErrorResponse;
+import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
@@ -76,7 +82,6 @@ public class ProfileControllerTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String CONTACT_EMAIL = "bob@example.com";
   private static final String INVITATION_KEY = "secretpassword";
-  private static final String PASSWORD = "12345";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String BILLING_PROJECT_PREFIX = "all-of-us-free-";
 
@@ -131,7 +136,6 @@ public class ProfileControllerTest {
     profile.setUsername(USERNAME);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
-    createAccountRequest.setPassword(PASSWORD);
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
@@ -148,6 +152,7 @@ public class ProfileControllerTest {
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), cloudEnvironment);
+    when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
   @Test(expected = BadRequestException.class)
@@ -235,9 +240,37 @@ public class ProfileControllerTest {
   public void testCreateAccount_directoryServiceFail() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
 
-    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
+    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenThrow(new ServerErrorException());
     profileController.createAccount(createAccountRequest);
+  }
+
+  @Test
+  public void testGetIdVerificationsForReview() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    IdVerificationListResponse response = profileController.getIdVerificationsForReview().getBody();
+    assertThat(response.getProfileList().size()).isEqualTo(1);
+
+    IdVerificationReviewRequest request =
+        new IdVerificationReviewRequest().newStatus(BlockscoreIdVerificationStatus.VERIFIED);
+    profileController.reviewIdVerification(user.getUserId(), request);
+    response = profileController.getIdVerificationsForReview().getBody();
+    assertThat(response.getProfileList()).isEmpty();
+  }
+
+  @Test
+  public void testGetIdVerificationsForReview_noMailChimpCalls() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
+    userDao.save(user);
+
+    profileController.getIdVerificationsForReview();
+    verify(mailChimpService, never()).addUserContactEmail(any());
+    verify(mailChimpService, never()).getMember(any());
   }
 
   @Test
@@ -567,7 +600,7 @@ public class ProfileControllerTest {
 
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
-    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, PASSWORD))
+    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
     Profile result = profileController.createAccount(createAccountRequest).getBody();

@@ -56,6 +56,7 @@ public class User {
       new ArrayList<InstitutionalAffiliation>();
   private String aboutYou;
   private String areaOfResearch;
+  private Boolean twoFactorEnabled = false;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -285,5 +286,14 @@ public class User {
 
   public void setRequestedIdVerification(Boolean requestedIdVerification) {
     this.requestedIdVerification = requestedIdVerification;
+  }
+
+  @Column(name = "two_factor_enabled")
+  public Boolean getTwoFactorEnabled() {
+    return twoFactorEnabled;
+  }
+
+  public void setTwoFactorEnabled(Boolean twoFactorEnabled) {
+    this.twoFactorEnabled = twoFactorEnabled;
   }
 }

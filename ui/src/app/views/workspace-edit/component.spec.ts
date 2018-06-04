@@ -119,7 +119,7 @@ describe('WorkspaceEditComponent', () => {
     expect(workspacesService.workspaces.length).toBe(1);
     expect(workspacesService.workspaces[0].name).toBe('created');
     expect(TestBed.get(Router).navigate)
-      .toHaveBeenCalledWith(['workspace', 'foo', 'created']);
+      .toHaveBeenCalledWith(['workspaces', 'foo', 'created']);
   }));
 
   it('should support cloning a workspace', inject(

@@ -16,12 +16,10 @@ function isBlank(s: string) {
 @Component({
   selector: 'app-account-creation',
   templateUrl: './component.html',
-  styleUrls: ['./component.css',
-              '../../styles/template.css']
+  styleUrls: ['../../styles/template.css',
+              './component.css']
 })
 export class AccountCreationComponent {
-  contactEmailConflictError = false;
-  containsLowerAndUpperError: boolean;
   profile: Profile = {
     username: '',
     enabledInFireCloud: false,
@@ -30,17 +28,13 @@ export class AccountCreationComponent {
     familyName: '',
     contactEmail: ''
   };
-  password: string;
-  passwordAgain: string;
   showAllFieldsRequiredError: boolean;
-  showPasswordsDoNotMatchError: boolean;
-  showPasswordLengthError: boolean;
   creatingAccount: boolean;
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
+  usernameOffFocus = true;
   usernameCheckTimeout: NodeJS.Timer;
-  contactEmailCheckTimeout: NodeJS.Timer;
 
   // TODO: Injecting the parent component is a bad separation of concerns, as
   // well as injecting LoginComponent. Should look at refactoring these
@@ -63,33 +57,22 @@ export class AccountCreationComponent {
   }
 
   createAccount(): void {
-    if (this.usernameConflictError || this.contactEmailConflictError
-        || this.usernameInvalidError) {
+    if (this.usernameConflictError || this.usernameInvalidError) {
       return;
     }
-    this.containsLowerAndUpperError = false;
     this.showAllFieldsRequiredError = false;
-    this.showPasswordsDoNotMatchError = false;
-    this.showPasswordLengthError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
-         this.profile.username, this.profile.contactEmail, this.password, this.passwordAgain];
+         this.profile.username, this.profile.contactEmail];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
       return;
-    } else if (!(this.password === this.passwordAgain)) {
-      this.showPasswordsDoNotMatchError = true;
-      return;
-    } else if (this.password.length < 8 || this.password.length > 100) {
-      this.showPasswordLengthError = true;
-      return;
-    } else if (!(this.hasLowerCase(this.password) && this.hasUpperCase(this.password))) {
-      this.containsLowerAndUpperError = true;
+    } else if (this.isUsernameValidationError) {
       return;
     }
 
     const request: CreateAccountRequest = {
-      profile: this.profile, password: this.password,
+      profile: this.profile,
       invitationKey: this.invitationKeyService.invitationKey
     };
     this.creatingAccount = true;
@@ -105,6 +88,9 @@ export class AccountCreationComponent {
     const username = this.profile.username;
     if (isBlank(username)) {
       return false;
+    }
+    if (username.trim().length > 64) {
+      return true;
     }
     // Include alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
     return !(new RegExp(/^[\w-']([.]{0,1}[\w-']+)*$/).test(username));
@@ -124,25 +110,29 @@ export class AccountCreationComponent {
     }, 300);
   }
 
-  contactEmailChanged(): void {
-    if (!this.profile.contactEmail) {
-      return;
+  leaveFocusUsername(): void {
+    this.usernameOffFocus = true;
+  }
+
+  enterFocusUsername(): void {
+    this.usernameOffFocus = false;
+  }
+
+  get isUsernameValidationError(): boolean {
+    return this.usernameConflictError || this.usernameInvalidError;
+  }
+
+  get showUsernameValidationError(): boolean {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+      return false;
     }
-    this.contactEmailConflictError = false;
-    clearTimeout(this.contactEmailCheckTimeout);
-    this.contactEmailCheckTimeout = setTimeout(() => {
-      this.profileService.isContactEmailTaken(this.profile.contactEmail).subscribe((response) => {
-        this.contactEmailConflictError = response.isTaken;
-      });
-    }, 300);
+    return this.isUsernameValidationError;
   }
 
-  hasLowerCase(str: string): boolean {
-    return (/[a-z]/.test(str));
+  get showUsernameValidationSuccess(): boolean {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+      return false;
+    }
+    return !this.isUsernameValidationError;
   }
-
-  hasUpperCase(str: string): boolean {
-    return (/[A-Z]/.test(str));
-  }
-
 }

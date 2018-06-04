@@ -87,26 +87,33 @@ describe('InvitationKeyComponent', () => {
     expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeFalsy();
+    const invitationInput = invitationKeyPage.fixture.debugElement.query(
+        By.css('input'));
+    expect(invitationInput.nativeElement.autofocus).toBeTruthy();
   }));
 
 
   it('should not accept blank invitation code', fakeAsync(() => {
-    simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
+    simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
     updateAndTick(invitationKeyPage.fixture);
     expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeTruthy();
     expect(app.invitationKeyInvalid).toBeFalsy();
+    const focusedElement = document.activeElement;
+    expect(focusedElement.id).toBe(app.invitationInput.first.nativeElement.id);
   }));
 
   it('should throw an error with invalid invitation code', fakeAsync(() => {
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
     app.invitationKey = 'invalid';
+    spyOn(app.invitationInput.first.nativeElement, 'focus');
     updateAndTick(invitationKeyPage.fixture);
     simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
     expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeTruthy();
+    expect(app.invitationInput.first.nativeElement.focus).toHaveBeenCalledTimes(1);
   }));
 
   it('should continue to next page on entering correct invitation code', fakeAsync(() => {
@@ -124,7 +131,6 @@ describe('InvitationKeyComponent', () => {
     fixture.debugElement.componentInstance.invitationKey = 'dummy';
     updateAndTick(fixture);
     simulateClick(fixture, invitationKeyPage.nextButton);
-
     const createDebugEl = fixture.debugElement.query(
       By.css('app-account-creation'));
     const createComponent = createDebugEl.componentInstance;
@@ -136,7 +142,6 @@ describe('InvitationKeyComponent', () => {
     createComponent.passwordAgain = 'passworD';
     updateAndTick(fixture);
     createDebugEl.query(By.css('button[type=submit]')).nativeElement.click();
-
     updateAndTick(fixture);
     expect(profileServiceStub.accountCreates).toEqual(1);
   }));

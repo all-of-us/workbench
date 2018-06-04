@@ -4,11 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -222,6 +218,13 @@ public class ProfileController implements ProfileApiDelegate {
       // Service accounts don't need further initialization.
       return user;
     }
+
+    Boolean twoFactorEnabled = Optional.ofNullable(user.getTwoFactorEnabled()).orElse(false);
+    if (!twoFactorEnabled) {
+      user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
+      userDao.save(user);
+    }
+
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
     if (user.getFirstSignInTime() == null) {
       // TODO(calbach): After the next DB wipe, switch this null check to
@@ -310,12 +313,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
-    try {
-      return ResponseEntity.ok(profileService.getProfile(user));
-    } catch (ApiException e) {
-      log.log(Level.INFO, "Error calling FireCloud", e);
-      return ResponseEntity.status(e.getCode()).build();
-    }
+    return ResponseEntity.ok(profileService.getProfile(user, /* checkEmailVerification */ true));
   }
 
   @Override
@@ -344,15 +342,11 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
-    if (userService.getContactEmailTaken(request.getProfile().getContactEmail())) {
-      throw new ConflictException("That contact email is already taken.");
-    }
-
     verifyInvitationKey(request.getInvitationKey());
     com.google.api.services.admin.directory.model.User googleUser =
         directoryService.createUser(request.getProfile().getGivenName(),
             request.getProfile().getFamilyName(), request.getProfile().getUsername(),
-            request.getPassword());
+            request.getProfile().getContactEmail());
 
     // Create a user that has no data access or FC user associated.
     // We create this account before they sign in so we can keep track of which users we have
@@ -524,15 +518,9 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<Profile>();
-    try {
-      for (User user : userService.getNonVerifiedUsers()) {
-        responseList.add(profileService.getProfile(user));
-      }
-    } catch (ApiException e) {
-      log.log(Level.INFO, "Error calling FireCloud", e);
-      return ResponseEntity.status(e.getCode()).build();
+    for (User user : userService.getNonVerifiedUsers()) {
+      responseList.add(profileService.getProfile(user, /* checkEmailVerification */ false));
     }
-
     response.setProfileList(responseList);
     return ResponseEntity.ok(response);
   }
