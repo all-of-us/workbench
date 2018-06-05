@@ -20,22 +20,18 @@ repositories {   // repositories for Jar's you access in your code
 }
 
 configurations {
-  sharedTestCompile.extendsFrom compile, testCompile
-  sharedTestRuntime.extendsFrom runtime, testRuntime, sharedTestCompile
+  testClasses {
+    extendsFrom(testRuntime)
+  }
 }
 
-sourceSets{
-  sharedTest{
-    java{
-      srcDir 'src/main/java'
-    }
-    compileClasspath = sourceSets.main.output + configurations.sharedTestCompile
-    runtimeClasspath = output + compileClasspath + configurations.sharedTestRuntime
-  }
-  test {
-    compileClasspath = compileClasspath + sourceSets.sharedTest.output
-    runtimeClasspath = runtimeClasspath + sourceSets.sharedTest.output
-  }
+task testJar(type: Jar) {
+  classifier = 'test'
+  from sourceSets.test.output
+}
+
+artifacts {
+  testClasses testJar
 }
 
 dependencies {
