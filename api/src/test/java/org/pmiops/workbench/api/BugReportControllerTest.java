@@ -16,8 +16,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.mail.MessagingException;
 
-import java.io.UnsupportedEncodingException;
-
 import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(SpringRunner.class)
