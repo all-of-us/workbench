@@ -48,9 +48,9 @@ echo "Dumping tables to csv from $BUCKET\n"
 # concept_relationship and concept are only big ones now.
 if [[ $DATASET == *public* ]] || [[ $DATASET == *PUBLIC* ]];
 then
-    tables=(achilles_analysis achilles_results achilles_results_concept concept concept_relationship criteria db_domain domain vocabulary)
+    tables=(achilles_analysis achilles_results concept concept_relationship criteria db_domain domain vocabulary)
 else
-    tables=(achilles_analysis achilles_results achilles_results_concept concept concept_relationship criteria db_domain domain vocabulary concept_ancestor)
+    tables=(achilles_analysis achilles_results concept concept_relationship criteria db_domain domain vocabulary concept_ancestor)
 fi
 
 for table in ${tables[@]}; do
