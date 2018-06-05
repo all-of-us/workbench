@@ -24,10 +24,11 @@ public class DirectoryServiceImplIntegrationTest {
   private final GoogleCredential googleCredential = getGoogleCredential();
   private final WorkbenchConfig workbenchConfig = createConfig();
   private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
-  private final MailService mailService = Mockito.mock(MailServiceImpl.class);
 
   @Before
-  public void setup() {
+  public void setup() throws MessagingException {
+    MailService mailService = Mockito.mock(MailServiceImpl.class);
+    Mockito.doNothing().when(mailService).send(Mockito.any());
     service = new DirectoryServiceImpl(
         Providers.of(googleCredential),
         Providers.of(workbenchConfig),
@@ -47,9 +48,8 @@ public class DirectoryServiceImplIntegrationTest {
   }
 
   @Test
-  public void testCreateAndDeleteTestUser() throws MessagingException {
+  public void testCreateAndDeleteTestUser() {
     String userName = String.format("integration.test.%d", Clock.systemUTC().millis());
-    Mockito.doNothing().when(mailService).send(Mockito.any());
     service.createUser("Integration", "Test", userName, "notasecret");
     assertThat(service.isUsernameTaken(userName)).isTrue();
     service.deleteUser(userName);
