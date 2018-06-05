@@ -42,17 +42,9 @@ div.field {
   margin-right: 2rem;
 }
 
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-  input[type=text]:not([readonly]) {
-    padding: 0.75rem;
-  }
-}
-
 input[type=text]:not([readonly]) {
   width: 15rem;
-  line-height: 1.5rem;
-  height: 1.5rem;
-}
+ }
 
 label {
   padding-bottom: 0.5rem;
