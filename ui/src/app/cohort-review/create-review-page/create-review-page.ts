@@ -52,7 +52,7 @@ export class CreateReviewPage implements OnInit {
   cancelReview() {
     const {ns, wsid} = this.route.parent.snapshot.params;
     console.dir(this.route);
-    this.router.navigate(['workspace', ns, wsid]);
+    this.router.navigate(['workspaces', ns, wsid]);
   }
 
   createReview() {
