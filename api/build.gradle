@@ -187,7 +187,6 @@ dependencies {
 
   compile project(":common-api")
   testCompile files(project(':common-api').sourceSets.test.output)
-  evaluationDependsOn(':common-api')
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
