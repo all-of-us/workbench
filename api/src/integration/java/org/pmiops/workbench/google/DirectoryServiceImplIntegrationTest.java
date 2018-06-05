@@ -26,7 +26,7 @@ public class DirectoryServiceImplIntegrationTest {
   private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
 
   @Before
-  public void setup() throws MessagingException {
+  public void setUp() throws MessagingException {
     MailService mailService = Mockito.mock(MailServiceImpl.class);
     Mockito.doNothing().when(mailService).send(Mockito.any());
     service = new DirectoryServiceImpl(

@@ -27,7 +27,7 @@ public class BugReportControllerTest {
     private MailService mailService;
 
     @Before
-    public void setup() throws MessagingException {
+    public void setUp() throws MessagingException {
         mailService = Mockito.mock(MailServiceImpl.class);
         Mockito.doNothing().when(mailService).send(Mockito.any());
         controller = new BugReportController(
