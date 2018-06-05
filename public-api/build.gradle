@@ -96,6 +96,8 @@ dependencies {
 
   implementation project(path: ':common-api', configuration: 'default')
   testCompile files(project(':common-api').sourceSets.test.output.classesDir)
+  evaluationDependsOn(':common-api')
+  compileTestJava.dependsOn tasks.getByPath(':common-api:testClasses')
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
   compile 'com.google.appengine:appengine:+'
