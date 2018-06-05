@@ -188,7 +188,7 @@ dependencies {
   implementation project(path: ':common-api', configuration: 'default')
   testCompile files(project(':common-api').sourceSets.test.output)
   evaluationDependsOn(':common-api')
-  compileTestJava.dependsOn tasks.getByPath(':common-api:testClasses')
+  compileTestJava.dependsOn tasks.getByPath(':common-api')
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
