@@ -376,16 +376,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         // If Concept name do search on name
 
-        if (conceptName != null && domain_id != null) {
+        if ((conceptName != null && !conceptName.isEmpty()) && domain_id != null) {
             conceptList = conceptDao.findConceptLikeNameAndDomainId(conceptName,domain_id,std_concept);
-        } else if((conceptName != null && !conceptName.isEmpty()) && domain_id == null){
+        }else if((conceptName != null && !conceptName.isEmpty()) && domain_id == null){
             conceptList = conceptDao.findConceptLikeName(conceptName,std_concept);
-        }else if(conceptName==null && domain_id != null){
+        }else if(conceptName==null||conceptName.isEmpty() && domain_id != null){
             conceptList = conceptDao.findConceptsByDomainIdOrderedByCount(domain_id,std_concept);
-        }else if(conceptName.length() == 0){
-            conceptList=conceptDao.findAllConceptsOrderedByCount(std_concept);
-        }
-        else{
+        }else{
             conceptList=conceptDao.findAllConceptsOrderedByCount(std_concept);
         }
 
