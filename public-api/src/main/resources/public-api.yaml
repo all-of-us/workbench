@@ -213,15 +213,14 @@ paths:
             $ref: "#/definitions/ConceptListResponse"
 
 
-
-  /v1/databrowser/child-concepts:
+  /v1/databrowser/source-concepts:
     get:
       security: []
       tags:
         - dataBrowser
 
       description: Get children of the given concept
-      operationId: "getChildConcepts"
+      operationId: "getSourceConcepts"
       parameters:
         - in: query
           name: concept_id
@@ -229,27 +228,12 @@ paths:
           format: int64
           required: true
           description: concept id to get maps to concepts
-      responses:
-        200:
-          description: a collection of concepts
-          schema:
-            $ref: "#/definitions/ConceptListResponse"
-
-  /v1/databrowser/child-concepts-with-source-count:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Get children of the given concept
-      operationId: "getChildConceptsWithSourceCountGTZero"
-      parameters:
         - in: query
-          name: concept_id
+          name: minCount
           type: integer
-          format: int64
-          required: true
-          description: concept id to get maps to concepts
+          format: int32
+          required: false
+          description: minimum source count
       responses:
         200:
           description: a collection of concepts
@@ -425,7 +409,7 @@ definitions:
       stratum5:
         description: stratum 5
         type: string
-      stratum5Name:
+      analysisStratumName:
         description: stratum 5 Name
         type: string
       countValue:

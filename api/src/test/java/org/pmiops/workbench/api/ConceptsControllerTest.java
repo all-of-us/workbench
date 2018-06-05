@@ -283,6 +283,13 @@ public class ConceptsControllerTest {
   }
 
   @Test
+  public void testSearchConceptsMultiWprdQueryOneResult() throws Exception{
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns","name",
+            new SearchConceptsRequest().query("multi word").maxResults(1)),CLIENT_CONCEPT_3);
+  }
+
+  @Test
   public void testSearchConceptsOneResult() throws Exception {
     saveConcepts();
     assertResults(
@@ -326,6 +333,7 @@ public class ConceptsControllerTest {
   private void saveConcepts() {
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
+    conceptDao.save(CONCEPT_3);
   }
 
   private void assertResults(ResponseEntity<ConceptListResponse> response,

@@ -329,18 +329,18 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             conceptAnalysis.setConceptId(conceptId);
             if(genderAnalysis != null){
                 for(AchillesResult ar:genderAnalysis.getResults()){
-                    String stratum5_name=ar.getStratum5Name();
+                    String stratum5_name=ar.getAnalysisStratumName();
                     if (stratum5_name == null || stratum5_name.equals("")) {
-                        ar.setStratum5Name(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
+                        ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
                     }
                 }
                 conceptAnalysis.setGenderAnalysis(TO_CLIENT_ANALYSIS.apply(genderAnalysis));
             }
             if(ageAnalysis != null){
                 for(AchillesResult ar:ageAnalysis.getResults()){
-                    String stratum5_name=ar.getStratum5Name();
+                    String stratum5_name=ar.getAnalysisStratumName();
                     if (stratum5_name == null || stratum5_name.equals("")) {
-                        ar.setStratum5Name(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
+                        ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
                     }
                 }
                 conceptAnalysis.setAgeAnalysis(TO_CLIENT_ANALYSIS.apply(ageAnalysis));
@@ -400,22 +400,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
      * @return
      */
     @Override
-    public ResponseEntity<ConceptListResponse> getChildConcepts(Long conceptId) {
-        List<Concept> conceptList = conceptDao.findConceptsMapsToChildren(conceptId);
-        ConceptListResponse resp = new ConceptListResponse();
-        resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-    }
-
-    /**
-     * This method gets concepts with maps to relationship in concept relationship table
-     *
-     * @param conceptId
-     * @return
-     */
-    @Override
-    public ResponseEntity<ConceptListResponse> getChildConceptsWithSourceCountGTZero(Long conceptId) {
-        List<Concept> conceptList = conceptDao.findConceptsMapsToChildrenWithValidSourceCount(conceptId);
+    public ResponseEntity<ConceptListResponse> getSourceConcepts(Long conceptId,Integer minCount) {
+        if(minCount == null){
+            minCount=0;
+        }
+        List<Concept> conceptList = conceptDao.findConceptsMapsToChildrenBySourceCount(conceptId,minCount);
         ConceptListResponse resp = new ConceptListResponse();
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
