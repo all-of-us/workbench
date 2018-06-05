@@ -17,7 +17,6 @@
       ADD source_count_value INTEGER NULL;
     </sql>
 
-
   </changeSet>
 
 </databaseChangeLog>

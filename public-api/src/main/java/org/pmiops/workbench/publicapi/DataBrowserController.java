@@ -400,10 +400,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
      */
     @Override
     public ResponseEntity<ConceptListResponse> getSourceConcepts(Long conceptId,Integer minCount) {
-        if(minCount == null){
-            minCount=0;
+        Integer count=minCount;
+        if(count == null){
+            count=0;
         }
-        List<Concept> conceptList = conceptDao.findSourceConcepts(conceptId,minCount);
+        List<Concept> conceptList = conceptDao.findSourceConcepts(conceptId,count);
         ConceptListResponse resp = new ConceptListResponse();
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
