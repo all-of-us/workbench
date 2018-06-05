@@ -177,6 +177,9 @@ clean.doFirst {
 repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
+artifacts {
+  sharedTestRuntime sharedTestJar
+}
 
 dependencies {
 
@@ -185,7 +188,7 @@ dependencies {
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
   compile project(":common-api")
-  testCompile project(':common-api').sourceSets.test.output
+  testCompile project(path: ":common-api", configuration: "sharedTestRuntime")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'

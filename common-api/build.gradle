@@ -19,19 +19,39 @@ repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
 
-sourceSets {
-  generated {
-    compileClasspath = configurations.generatedCompile
-  }
-  main {
-    compileClasspath += generated.output
-    runtimeClasspath += generated.output
+configurations {
+  sharedTestCompile.extendsFrom compile, testCompile
+  sharedTestRuntime.extendsFrom runtime, testRuntime, sharedTestCompile
+}
+
+sourceSets{
+  sharedTest{
+    java{
+      srcDir 'src/main/java'
+    }
+    compileClasspath = sourceSets.main.output + configurations.sharedTestCompile
+    runtimeClasspath = output + compileClasspath + configurations.sharedTestRuntime
   }
   test {
-    compileClasspath += generated.output
-    runtimeClasspath += generated.output
+    compileClasspath = compileClasspath + sourceSets.sharedTest.output
+    runtimeClasspath = runtimeClasspath + sourceSets.sharedTest.output
   }
 }
+task sharedTestJar(type: Jar) {
+  classifier = "sharedtest"
+  from sourceSets.sharedTest.output
+}
+assemble.dependsOn sharedTestJar
+idea {
+  module {
+    //and some extra test source dirs
+    testSourceDirs += file('src/sharedTest/java')
+    // put additional dependencies on the classpath
+    scopes.TEST.plus += configurations.sharedTestCompile
+    scopes.TEST.plus += configurations.sharedTestRuntime
+  }
+}
+
 
 dependencies {
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
