@@ -44,7 +44,7 @@ div.field {
 
 input[type=text]:not([readonly]) {
   width: 15rem;
- }
+}
 
 label {
   padding-bottom: 0.5rem;
