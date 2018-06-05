@@ -7,9 +7,10 @@ input[type=tel]:not([readonly]),
 input[type=text]:not([readonly]),
 input[type=time]:not([readonly]),
 input[type=url]:not([readonly]) {
-  padding: 1rem;
   border-radius: 5px;
   background-color: white;
+  line-height: 1.5rem;
+  height: 1.5rem;
 }
 
 label {
