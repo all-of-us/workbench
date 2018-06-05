@@ -58,7 +58,7 @@ export class OverviewComponent {
     const description = this.cohortForm.get('description').value;
     const criteria = JSON.stringify(this.actions.mapAll());
     const cohort = <Cohort>{name, description, criteria, type: COHORT_TYPE};
-    const goBack = (_) => this.router.navigate(['workspace', ns, wsid]);
+    const goBack = (_) => this.router.navigate(['workspaces', ns, wsid]);
     this.cohortApi.createCohort(ns, wsid, cohort).subscribe(goBack);
   }
 
