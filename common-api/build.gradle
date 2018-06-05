@@ -19,6 +19,20 @@ repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
 
+sourceSets {
+  generated {
+    compileClasspath = configurations.generatedCompile
+  }
+  main {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+  test {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+}
+
 dependencies {
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
   compile 'javax.servlet:javax.servlet-api:3.0.1'
