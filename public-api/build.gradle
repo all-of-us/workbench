@@ -95,7 +95,7 @@ dependencies {
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
   implementation project(path: ':common-api', configuration: 'default')
-  testCompile files(project(':common-api').sourceSets.test.output.classesDir)
+  testCompile files(project(':common-api').sourceSets.test.output)
   evaluationDependsOn(':common-api')
   compileTestJava.dependsOn tasks.getByPath(':common-api:testClasses')
   compile 'mysql:mysql-connector-java:+'
