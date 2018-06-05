@@ -158,8 +158,9 @@ label {
 }
 
 .row .chart-wrapper {
-    height:100%;
-    margin-top:.5rem;
+    height: 8rem;
+    margin-top: .25rem;
+    margin-bottom: .25rem;
 }
 
 .db-page-spinner {

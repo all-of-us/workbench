@@ -25,6 +25,7 @@ export class EhrViewComponent implements OnInit {
   searchResults = [];
   loading = true;
   minParticipantCount = 0;
+  totalParticipants;
 
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
@@ -34,6 +35,8 @@ export class EhrViewComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
+
     // Get search result from localStorage
     this.searchText = localStorage.getItem('searchText');
     if (!this.searchText) {

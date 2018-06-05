@@ -12,6 +12,7 @@ import {HighchartsStatic} from 'angular2-highcharts/dist/HighchartsService';
 import * as highcharts from 'highcharts';
 import 'highcharts/highcharts-more';
 
+
 import {ChartComponent} from './chart/chart.component';
 import {ConceptChartsComponent} from './concept-charts/concept-charts.component';
 

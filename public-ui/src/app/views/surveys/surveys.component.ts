@@ -10,7 +10,7 @@ import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListR
   styleUrls: ['../../styles/template.css', '../../styles/cards.css', './surveys.component.css']
 })
 export class SurveysComponent implements OnInit {
-  title = 'Browse Partipant Surveys';
+  title = 'Browse Participant Surveys';
   subTitle = 'Conduct a simple keyword search to quickly identify survey questions ' +
     'related to your area of interest.';
   pageImage = '/assets/images/create-account-male-standing.png';

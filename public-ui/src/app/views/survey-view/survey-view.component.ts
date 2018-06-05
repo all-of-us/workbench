@@ -42,8 +42,6 @@ export class SurveyViewComponent implements OnInit {
     });
   }
 
-
-  function;
   ngOnInit() {
 
     // Get the survey from local storage the user clicked on on a previous page

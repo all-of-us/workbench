@@ -1,5 +1,8 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import * as highcharts from 'highcharts';
+import * as Highcharts from 'highcharts/highcharts.src';
+import 'highcharts/adapters/standalone-framework.src';
+import * as Drilldown from 'highcharts/modules/drilldown.src';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
@@ -47,7 +50,7 @@ export class ChartComponent implements OnChanges {
   @Input() selectedResult: any; // For ppi question answers analysis , we select an answer from the results
   @Input() pointWidth = 10;   // Optional width of bar or point or box plot
   @Input() backgroundColor = '#FFFFFF'; // Optional background color
-  @Input() title;
+  @Input() chartTitle;
   chartOptions: any;
   chartInstance: any;
   chartType = 'column';
@@ -56,6 +59,7 @@ export class ChartComponent implements OnChanges {
     highcharts.setOptions({
       lang: { thousandsSep: ',' },
     });
+    Drilldown(Highcharts);
     //
   }
 
@@ -76,11 +80,18 @@ export class ChartComponent implements OnChanges {
     console.log('Chart clicked ', e);
   }
 
+  columnClick = function(e) {
+    console.log('Column clicked ', e);
+  };
+
+
 
   public hcChartOptions(): any {
+    console.log('Title is ', this.chartTitle);
       const options = this.makeChartOptions();
-      if (! this.title ) {
-        this.title = options.title;
+      // Override title if they passed one
+      if (this.chartTitle ) {
+        options.title.text = this.chartTitle;
       }
       return {
           chart: options.chart,
@@ -88,7 +99,7 @@ export class ChartComponent implements OnChanges {
 
               enabled: false
           },
-          title: this.title,
+          title: options.title,
           subtitle: {
           },
           tooltip: {
@@ -119,29 +130,30 @@ export class ChartComponent implements OnChanges {
                   groupPadding: 0,
                   dataLabels: {
                       enabled: false,
-                    /*
-                      rotation: -90,
-                      align: 'right',
-                      y: 10, // y: value offsets dataLabels in pixels.
-                      style: {
-                          'fontWeight': 'thinner',
-                          'fontSize': '15px',
-                          'textOutline': '1.75px black',
-                          'color': 'white'
-                      } */
-                  }
+                  },
+                events: {
+
+                }
               }
           },
           yAxis: {
+            title: {
+              text: null
+            },
+            lineWidth: 1,
+            lineColor: '#979797',
+            gridLineColor: this.backgroundColor
           },
           xAxis: {
-              categories: options.categories,
-              type: 'category',
-              labels: {
-                  style: {
-                      whiteSpace: 'nowrap',
-                  }
-              }
+            categories: options.categories,
+            type: 'category',
+            labels: {
+                style: {
+                    whiteSpace: 'nowrap',
+                }
+            },
+            lineWidth: 1,
+            lineColor: '#979797'
           },
           zAxis: {
           },
@@ -184,46 +196,46 @@ export class ChartComponent implements OnChanges {
   }
 
   public makeCountChartOptions() {
-      let data = [];
-      let cats = [];
-      for (const a  of this.analysis.results) {
-          data.push({name: a.stratum4, y: a.countValue});
-          cats.push(a.stratum4);
+    let data = [];
+    let cats = [];
+    for (const a  of this.analysis.results) {
+        data.push({name: a.stratum4, y: a.countValue});
+        cats.push(a.stratum4);
+    }
+    data = data.sort((a, b) => {
+      if (a.name > b.name) {
+        return 1;
       }
-      data = data.sort((a, b) => {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0; }
-      );
-      cats = cats.sort((a, b) => {
-        if (a > b) { return 1; }
-        if (a < b) { return -1; }
-        return 0;
-      });
+      if (a.name < b.name) {
+        return -1;
+      }
+      return 0; }
+    );
+    cats = cats.sort((a, b) => {
+      if (a > b) { return 1; }
+      if (a < b) { return -1; }
+      return 0;
+    });
 
-      // Override tooltip and colors and such
-      const series = {
-        name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
-        tooltip: {pointFormat: '<b>{point.y} </b>'}
-      };
-      return {
-        chart: {type: 'column', backgroundColor: this.backgroundColor},
-        title: { text: null },
-        series: series,
-        categories: cats,
-        pointWidth: this.pointWidth
-      };
+    // Override tooltip and colors and such
+    const series = {
+      name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
+      tooltip: {pointFormat: '<b>{point.y} </b>'}
+    };
+    return {
+      chart: {type: 'column', backgroundColor: this.backgroundColor},
+      title: { text: null },
+      series: series,
+      categories: cats,
+      pointWidth: this.pointWidth
+    };
 
   }
   public makeConceptChartOptions() {
     let data = [];
     let cats = [];
     for (const a  of this.concepts) {
-      data.push({name: a.conceptName, y: a.countValue});
+      data.push({name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ', y: a.countValue});
       cats.push(a.conceptName);
     }
     data = data.sort((a, b) => {
@@ -242,14 +254,57 @@ export class ChartComponent implements OnChanges {
     });
 
 
+
     // Override tooltip and colors and such
     const series = {
       name: this.concepts[0].domainId, colorByPoint: true, data: data, colors: ['#6CAEE3'],
       tooltip: {pointFormat: '<b>{point.y} </b>'}
     };
     return {
-      chart: {type: 'column', backgroundColor: this.backgroundColor }, // '#ECF1F4'
-      title: { text: null },
+      chart: {type: 'column', backgroundColor: this.backgroundColor,
+
+        drilldown: function (e) {
+          console.log("drilldown ", e)
+          if (!e.seriesOptions) {
+            let chart = this,
+              drilldowns = {
+                'Animals': {
+                  name: 'Animals',
+                  data: [
+                    ['Cows', 2],
+                    ['Sheep', 3]
+                  ]
+                },
+                'Fruits': {
+                  name: 'Fruits',
+                  data: [
+                    ['Apples', 5],
+                    ['Oranges', 7],
+                    ['Bananas', 2]
+                  ]
+                },
+                'Cars': {
+                  name: 'Cars',
+                  data: [
+                    ['Toyota', 1],
+                    ['Volkswagen', 2],
+                    ['Opel', 5]
+                  ]
+                }
+              },
+              series = drilldowns['Cars'];
+            // Show the loading label
+            chart.showLoading('Simulating Ajax ...');
+
+            setTimeout(function () {
+              chart.hideLoading();
+              chart.addSeriesAsDrilldown(e.point, series);
+            }, 1000);
+          }
+
+        }
+          }, // '#ECF1F4'
+      title: { text: null, style: CHART_TITLE_STYLE }, // default title null , can pass chartTitle input
       series: series,
       categories: cats,
       pointWidth: this.pointWidth
