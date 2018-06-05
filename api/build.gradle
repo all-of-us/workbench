@@ -186,7 +186,7 @@ dependencies {
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
 
   implementation project(path: ':common-api', configuration: 'default')
-  testCompile project(path: ':common-api')
+  testCompile files(project(':common-api').sourceSets.test.output.classesDir)
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
