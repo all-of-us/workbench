@@ -382,7 +382,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             conceptList = conceptDao.findConceptLikeName(conceptName,std_concept);
         }else if(conceptName==null && domain_id != null){
             conceptList = conceptDao.findConceptsByDomainIdOrderedByCount(domain_id,std_concept);
-        }else{
+        }else if(conceptName.length() == 0){
+            conceptList=conceptDao.findAllConceptsOrderedByCount(std_concept);
+        }
+        else{
             conceptList=conceptDao.findAllConceptsOrderedByCount(std_concept);
         }
 
