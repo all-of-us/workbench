@@ -38,7 +38,7 @@
         <div class="title">Create your own workspace</div>
         <div class="description">Here you can create and name a workspace.
             Within a workspace you can create notebooks and build cohorts.</div>
-        <button class="button tooltip" (click)="addWorkspace()"
+        <button class="button btn btn-primary tooltip" (click)="addWorkspace()"
             [disabled]="!billingProjectInitialized || !hasCdrAccess()">
           CREATE WORKSPACE
           <span *ngIf="!billingProjectInitialized" class="tooltip-content">
@@ -53,7 +53,7 @@
         <div class="title">View your workspaces</div>
         <div class="description">Here you can view all workspaces you have created, or that have been
             shared with you.</div>
-        <button class="button tooltip" (click)="listWorkspaces()"
+        <button class="button btn btn-primary tooltip" (click)="listWorkspaces()"
             [disabled]="!FCAccountInitialized || !hasCdrAccess()">
           GO TO WORKSPACES
           <span *ngIf="!FCAccountInitialized" class="tooltip-content">

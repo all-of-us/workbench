@@ -209,8 +209,12 @@
     cursor: pointer;
 }
 
-.card *.button:hover {
+.card *.button:active:hover {
     background: #4356a7;
+}
+
+.card *.button:disabled {
+    cursor: auto;
 }
 
 .bottom-banner {
