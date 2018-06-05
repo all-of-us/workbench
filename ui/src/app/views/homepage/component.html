@@ -38,22 +38,30 @@
         <div class="title">Create your own workspace</div>
         <div class="description">Here you can create and name a workspace.
             Within a workspace you can create notebooks and build cohorts.</div>
-        <button class="button tooltip" (click)="addWorkspace()" [disabled]="!billingProjectInitialized">
-            CREATE WORKSPACE
-            <span *ngIf="!billingProjectInitialized" class="tooltip-content">
-                Your billing project is currently being created, please wait.
-            </span>
+        <button class="button tooltip" (click)="addWorkspace()"
+            [disabled]="!billingProjectInitialized || !hasCdrAccess()">
+          CREATE WORKSPACE
+          <span *ngIf="!billingProjectInitialized" class="tooltip-content">
+              Your billing project is currently being created, please wait.
+          </span>
+          <span *ngIf="billingProjectInitialized && !hasCdrAccess()" class="tooltip-content">
+              You must complete profile setup before accessing data.
+          </span>
         </button>
     </div>
     <div class="card">
         <div class="title">View your workspaces</div>
         <div class="description">Here you can view all workspaces you have created, or that have been
             shared with you.</div>
-        <button class="button tooltip" (click)="listWorkspaces()" [disabled]="!FCAccountInitialized">
-            GO TO WORKSPACES
-            <span *ngIf="!FCAccountInitialized" class="tooltip-content">
-                Your account is being initialized, please wait.
-            </span>
+        <button class="button tooltip" (click)="listWorkspaces()"
+            [disabled]="!FCAccountInitialized || !hasCdrAccess()">
+          GO TO WORKSPACES
+          <span *ngIf="!FCAccountInitialized" class="tooltip-content">
+              Your account is being initialized, please wait.
+          </span>
+          <span *ngIf="billingProjectInitialized && !hasCdrAccess()" class="tooltip-content">
+              You must complete profile setup before accessing data.
+          </span>
         </button>
     </div>
 </div>
