@@ -37,21 +37,6 @@ sourceSets{
     runtimeClasspath = runtimeClasspath + sourceSets.sharedTest.output
   }
 }
-task sharedTestJar(type: Jar) {
-  classifier = "sharedtest"
-  from sourceSets.sharedTest.output
-}
-assemble.dependsOn sharedTestJar
-idea {
-  module {
-    //and some extra test source dirs
-    testSourceDirs += file('src/sharedTest/java')
-    // put additional dependencies on the classpath
-    scopes.TEST.plus += configurations.sharedTestCompile
-    scopes.TEST.plus += configurations.sharedTestRuntime
-  }
-}
-
 
 dependencies {
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
