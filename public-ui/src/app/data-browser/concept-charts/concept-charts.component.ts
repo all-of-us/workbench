@@ -30,6 +30,8 @@ export class ConceptChartsComponent implements OnInit {
 
       this.loading = false;
     } );
+
+    this.getSourceConcepts();
   }
 
   toggleSourceConcepts() {
@@ -40,10 +42,9 @@ export class ConceptChartsComponent implements OnInit {
     this.showSources = true;
   }
   getSourceConcepts() {
-    console.log("getting sources");
-    this.api.getChildConcepts(this.concept.conceptId).subscribe(
+    this.api.getSourceConcepts(this.concept.conceptId).subscribe(
       results => {
-        console.log(results, "source concepts ");
+
         this.sourceConcepts = results.items;
       });
 

@@ -47,6 +47,7 @@ export class ChartComponent implements OnChanges {
   @Input() selectedResult: any; // For ppi question answers analysis , we select an answer from the results
   @Input() pointWidth = 10;   // Optional width of bar or point or box plot
   @Input() backgroundColor = '#FFFFFF'; // Optional background color
+  @Input() title;
   chartOptions: any;
   chartInstance: any;
   chartType = 'column';
@@ -78,13 +79,16 @@ export class ChartComponent implements OnChanges {
 
   public hcChartOptions(): any {
       const options = this.makeChartOptions();
+      if (! this.title ) {
+        this.title = options.title;
+      }
       return {
           chart: options.chart,
           credits: {
 
               enabled: false
           },
-          title: options.title,
+          title: this.title,
           subtitle: {
           },
           tooltip: {
@@ -270,7 +274,8 @@ export class ChartComponent implements OnChanges {
     for (const a  of results) {
       // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
       const color = a.analysisId === GENDER_ANALYSIS_ID ? GENDER_COLORS[a.stratum2] : GENDER_COLORS[a.stratum5];
-      data.push({name: a.stratum5Name, y: a.countValue, color: color, sliced: true});
+      data.push({name: a.analysisStratumName
+        , y: a.countValue, color: color, sliced: true});
       cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
@@ -315,8 +320,10 @@ export class ChartComponent implements OnChanges {
     for (const a  of results) {
       // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
       const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] : AGE_COLORS[a.stratum5];
-      data.push({name: a.stratum5Name, y: a.countValue, color: color});
-      cats.push(a.stratum5Name);
+      data.push({name: a.analysisStratumName
+        , y: a.countValue, color: color});
+      cats.push(a.analysisStratumName
+      );
     }
 
     data = data.sort((a, b) => {

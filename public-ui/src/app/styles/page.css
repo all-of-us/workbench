@@ -1,4 +1,5 @@
-.content-container {
+.content-container, .card-header, .card, .card-title, h1, h2, h3, h4, h5, h6, .title, .view-title, .box-title,
+.box-heading, p, div, .view-sub-title, .box-sub-title, label  {
     font-family: "Gotham HTF", open-sans, sans-serif;
 }
 .page-header {
@@ -28,18 +29,16 @@ h6 {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "Gotham HTF", open-sans, sans-serif !important;
     color: #302C71;
 }
 p {
     font-size: 14px;
-    font-family: "Gotham HTF", open-sans, sans-serif;
     margin-top: .25rem;
+    line-height: 20px;
 }
 
 .title, .view-title, .box-title, .box-heading  {
     color: #302C71;
-    font-family: "Gotham HTF", open-sans, sans-serif;
 }
 
 .view-title {
@@ -48,17 +47,13 @@ p {
 
 }
 .survey-view .view-title {
-    padding-top: 0px;
-    padding-bottom:12px;
     font-weight:300;
 }
 
 .view-sub-title, .box-sub-title {
-   /* font-size: 14px; */
     color: rgba(0,0,0,0.87);
     font-weight: 300;
     line-height: 20px;
-    font-family: "Gotham HTF", open-sans, sans-serif;
 }
 
 .survey-view .view-sub-title {
@@ -116,7 +111,6 @@ p {
 
 label {
     color: #302C71;
-    font-family: "Gotham HTF", open-sans, sans-serif;
     font-size: 14px;
     font-weight: bold;
     line-height: 18px;
@@ -222,7 +216,6 @@ span.keyword {
     font-weight: bolder;
 
 }
-
 
 .inline-search-button {
     text-align: right;

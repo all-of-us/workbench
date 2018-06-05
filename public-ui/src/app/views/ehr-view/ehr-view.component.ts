@@ -21,9 +21,10 @@ export class EhrViewComponent implements OnInit {
   title ;
   subTitle;
   dbDomain;
-  searchText;
+  searchText = null;
   searchResults = [];
   loading = true;
+  minParticipantCount = 0;
 
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
@@ -55,9 +56,17 @@ export class EhrViewComponent implements OnInit {
   }
 
   searchDomain() {
+    if (!this.searchText || this.searchText.length === 0) {
+      this.searchText = null;
+      console.log('null search text');
+    }
+
     this.api.getConceptsSearch(this.searchText, 'S', this.dbDomain.domainId).subscribe(results =>  {
       this.searchResults = results.items;
-      console.log(this.searchResults);
+      // Set our min partipant count
+      if (this.searchResults.length > 0 ) {
+        this.minParticipantCount = this.searchResults[0].countValue;
+      }
       this.loading = false;
     } );
   }

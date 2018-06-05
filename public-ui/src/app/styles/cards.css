@@ -18,7 +18,7 @@
 .card-title {
     font-weight: bold;
     letter-spacing: normal;
-    font-size: 12px;
+    font-size: 14px;
     color: #302C71;
     line-height: 14px;
 }
@@ -33,7 +33,7 @@
 }
 
 .card-text.smaller {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 16px;
 }
 /* Stat card with big number in it */

@@ -10,12 +10,11 @@ import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListR
   styleUrls: ['../../styles/template.css', '../../styles/cards.css', './surveys.component.css']
 })
 export class SurveysComponent implements OnInit {
-  title = 'Browse Survey Instruments';
+  title = 'Browse Partipant Surveys';
   subTitle = 'Conduct a simple keyword search to quickly identify survey questions ' +
     'related to your area of interest.';
   pageImage = '/assets/images/create-account-male-standing.png';
   surveys = [];
-  searchText = '';
 
   constructor(
     private api: DataBrowserService,
@@ -33,7 +32,7 @@ export class SurveysComponent implements OnInit {
   public viewResults(r) {
     console.log("Viewing results ", r);
     localStorage.setItem("dbDomain", JSON.stringify(r));
-    localStorage.setItem("searchText", this.searchText);
+    localStorage.setItem("searchText", '');
     this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
   }
 
