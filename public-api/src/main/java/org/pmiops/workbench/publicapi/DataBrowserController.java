@@ -241,7 +241,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public ResponseEntity<DbDomainListResponse> getDomainSearchResults(String keyword){
 
         keyword = ConceptService.modifyMultipleMatchKeyword(keyword);
-
         List<DbDomain> domains = dbDomainDao.findDomainSearchResults(keyword);
         DbDomainListResponse resp = new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
@@ -404,7 +403,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         if(minCount == null){
             minCount=0;
         }
-        List<Concept> conceptList = conceptDao.findConceptsMapsToChildrenBySourceCount(conceptId,minCount);
+        List<Concept> conceptList = conceptDao.findSourceConcepts(conceptId,minCount);
         ConceptListResponse resp = new ConceptListResponse();
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);

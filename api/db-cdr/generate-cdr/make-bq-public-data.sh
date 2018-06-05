@@ -117,6 +117,16 @@ set count_value =
     end
 where count_value >= 0"
 
+#delete concepts with 0 count / source count value
+
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
+where count_value=0 and source_count_value=0 and domain_id not in ('Race','Gender','Ethnicity')"
+
+#delete concepts from concept_relationship that are not in concepts
+"delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept_relationship\`
+where concept_id_1 not in (select concept_id from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`) or concept_id_2 not in (select concept_id from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`)"
+
 # concept bin size :
 #Aggregate bin size will be set at 20. Counts lower than 20 will be displayed as 20; Counts higher than 20 will be rounded up to the closest multiple of 20. Eg: A count of 1245 will be displayed as 1260 .
 
