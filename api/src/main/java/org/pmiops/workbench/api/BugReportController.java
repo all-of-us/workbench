@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 import java.io.UnsupportedEncodingException;
@@ -41,7 +42,7 @@ public class BugReportController implements BugReportApiDelegate {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<JupyterApi> jupyterApiProvider;
-  private final Provider<User> userProvider;
+  private Provider<User> userProvider;
 
   @Autowired
   BugReportController(
@@ -51,6 +52,11 @@ public class BugReportController implements BugReportApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.jupyterApiProvider = jupyterApiProvider;
+  }
+
+  @VisibleForTesting
+  void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
   }
 
   @Override
@@ -88,6 +94,11 @@ public class BugReportController implements BugReportApiDelegate {
             String logContent = jupyterApi.getRootContents(
                 user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME,
                 fileName, "file", "text", /* content */ 1).getContent();
+            if (logContent == null) {
+              log.info(
+                  String.format("Jupyter returned null content for '%s', continuing", fileName));
+              continue;
+            }
             MimeBodyPart attachPart = new MimeBodyPart();
             attachPart.setDataHandler(new DataHandler(logContent, "text/plain"));
             attachPart.setFileName(fileName);
