@@ -55,9 +55,15 @@
       cursor: default;
     }
 
-    .bullet-img {
+    .bullet {
       height: 31px;
       width: 31px;
+      border-radius: 15px;
+      background-color: #302C71;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #FFFFFF;
     }
 
     .card-text {
@@ -100,23 +106,23 @@
   <div><div class="text user-field">Your Password: </div><div class="user-info">{{PASSWORD-INPUT}}</div></div>
   <br>
   <div class="text">Quick guide on how to get started:</div>
-  <a class="card" href="https://accounts.google.com/signin/oauth/oauthchooseaccount?hd=fake-research-aou.org&client_id=602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com&as=1ivZqDJMGPEMvWasjAquSQ&destination=http%3A%2F%2Flocalhost%3A4200&approval_state=!ChRqd2tjYnk1b040d3VUMzNpZXBpQRIfczlfc0R4d2dERHdUQU9FaERQUmpBazFLYU13VFBSWQ%E2%88%99AB8iHBUAAAAAWxgpw3y6ICN3aJ_etNsSGfEmZbFNYV2d&xsrfsig=AHgIfE85mPI6c5DfCze82tpt7pbw8-XBRg&flowName=GeneralOAuthFlow">
-    <img class="bullet-img" src="assets/Bullet1@2x.png">
+  <a class="card" href="https://accounts.google.com/signin/oauth/oauthchooseaccount?hd={{TARGET-DOMAIN}}&client_id={{CLIENT-ID}}.apps.googleusercontent.com&as=1ivZqDJMGPEMvWasjAquSQ&destination={{URL-INPUT}}&approval_state=!ChRqd2tjYnk1b040d3VUMzNpZXBpQRIfczlfc0R4d2dERHdUQU9FaERQUmpBazFLYU13VFBSWQ%E2%88%99AB8iHBUAAAAAWxgpw3y6ICN3aJ_etNsSGfEmZbFNYV2d&xsrfsig=AHgIfE85mPI6c5DfCze82tpt7pbw8-XBRg&flowName=GeneralOAuthFlow">
+    <div class="bullet">1</div>
     <div class="card-text"><div class="link">Sign into google</div> with your new account</div>
     <img class="step-img" src="assets/Step1@2x.png">
   </a>
   <div class="card">
-    <img class="bullet-img" src="assets/Bullet2@2x.png">
+    <div class="bullet">2</div>
     <div class="card-text">Google will then prompt you to change your password</div>
     <img class="step-img" src="assets/Step2@2x.png">
   </div>
-  <a class="card" href="https://myaccount.google.com/security">
-    <img class="bullet-img" src="assets/Bullet3@2x.png">
+  <a class="card" href="https://myaccount.google.com/signinoptions/two-step-verification">
+    <div class="bullet">3</div>
     <div class="card-text">Using the Researcher Workbench will require you to <div class="link">set up 2-Step Verification</div></div>
     <img class="step-img" src="assets/Step3@2x.png">
   </a>
   <a class="card" href="https://myaccount.google.com/security">
-    <img class="bullet-img" src="assets/Bullet4@2x.png">
+    <div class="bullet">4</div>
     <div class="card-text"><div class="link">Check and verify</div> your recovery email address</div>
     <img class="step-img" src="assets/Step4@2x.png">
   </a>
