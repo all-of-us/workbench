@@ -41,7 +41,7 @@ describe('WorkspaceEditComponent', () => {
     activatedRouteStub = {
       snapshot: {
         url: [
-          {path: 'workspace'},
+          {path: 'workspaces'},
           {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
           {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
           {path: 'clone'}

@@ -43,7 +43,6 @@ div.field {
 }
 
 input[type=text]:not([readonly]) {
-  padding: 0.75rem;
   width: 15rem;
 }
 
