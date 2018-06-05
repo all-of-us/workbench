@@ -177,9 +177,6 @@ clean.doFirst {
 repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
-artifacts {
-  sharedTestRuntime sharedTestJar
-}
 
 dependencies {
 
