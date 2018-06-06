@@ -39,7 +39,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
@@ -73,6 +72,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
@@ -146,9 +146,9 @@ public class WorkspacesControllerTest {
     @Bean
     GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
       Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(GenderRaceEthnicityType.RACE.name(), new HashMap<>());
-      concepts.put(GenderRaceEthnicityType.GENDER.name(), new HashMap<>());
-      concepts.put(GenderRaceEthnicityType.ETHNICITY.name(), new HashMap<>());
+      concepts.put(ParticipantCohortStatusColumns.RACE.name(), new HashMap<>());
+      concepts.put(ParticipantCohortStatusColumns.GENDER.name(), new HashMap<>());
+      concepts.put(ParticipantCohortStatusColumns.ETHNICITY.name(), new HashMap<>());
       return new GenderRaceEthnicityConcept(concepts);
     }
 

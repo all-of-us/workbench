@@ -5,7 +5,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
@@ -15,6 +14,7 @@ import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,13 +152,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         CdrVersionContext.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
         Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
-        List<ConceptIdName> genderList = concepts.get(GenderRaceEthnicityType.GENDER.name()).entrySet().stream()
+        List<ConceptIdName> genderList = concepts.get(ParticipantCohortStatusColumns.GENDER.name()).entrySet().stream()
                 .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
                 .collect(Collectors.toList());
-        List<ConceptIdName> raceList = concepts.get(GenderRaceEthnicityType.RACE.name()).entrySet().stream()
+        List<ConceptIdName> raceList = concepts.get(ParticipantCohortStatusColumns.RACE.name()).entrySet().stream()
                 .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
                 .collect(Collectors.toList());
-        List<ConceptIdName> ethnicityList = concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).entrySet().stream()
+        List<ConceptIdName> ethnicityList = concepts.get(ParticipantCohortStatusColumns.ETHNICITY.name()).entrySet().stream()
                 .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
                 .collect(Collectors.toList());
 

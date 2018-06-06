@@ -115,7 +115,7 @@ export class DetailHeaderComponent implements OnChanges {
     const request = {
         page: page,
         pageSize: size,
-        sortColumn: ParticipantCohortStatusColumns.ParticipantId,
+        sortColumn: ParticipantCohortStatusColumns.PARTICIPANTID,
         sortOrder: SortOrder.Asc,
         pageFilterType: PageFilterType.ParticipantCohortStatuses
     };

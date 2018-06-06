@@ -10,7 +10,7 @@ import {CohortStatus, ParticipantCohortStatusColumns} from 'generated';
   templateUrl: './status-filter.component.html',
 })
 export class StatusFilterComponent extends ChoiceFilterComponent {
-  @Input() property = ParticipantCohortStatusColumns.Status;
+  @Input() property = ParticipantCohortStatusColumns.STATUS;
   @Input() options = [
     CohortStatus.INCLUDED,
     CohortStatus.EXCLUDED,

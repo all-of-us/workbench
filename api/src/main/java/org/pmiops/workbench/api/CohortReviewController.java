@@ -1,14 +1,15 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.*;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityType;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
+import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -29,6 +30,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +44,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public static final Integer PAGE = 0;
   public static final Integer PAGE_SIZE = 25;
   public static final Integer MAX_REVIEW_SIZE = 10000;
+  public static final List<String> GENDER_RACE_ETHNICITY_TYPES =
+    ImmutableList.of(ParticipantCohortStatusColumns.ETHNICITY.name(),
+      ParticipantCohortStatusColumns.GENDER.name(),
+      ParticipantCohortStatusColumns.RACE.name());
 
   private CohortReviewService cohortReviewService;
   private BigQueryService bigQueryService;
@@ -61,7 +67,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         return new org.pmiops.workbench.model.ParticipantCohortStatus()
           .participantId(participant.getParticipantKey().getParticipantId())
           .status(participant.getStatus())
-          .birthDate(participant.getBirthDate().getTime())
+          .birthDate(participant.getBirthDate().toString())
           .ethnicityConceptId(participant.getEthnicityConceptId())
           .ethnicity(participant.getEthnicity())
           .genderConceptId(participant.getGenderConceptId())
@@ -363,7 +369,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     List<Filter> filters = request.getFilters() == null ? Collections.<Filter>emptyList() : request.getFilters().getItems();
     List<ParticipantCohortStatus> participantCohortStatuses =
-      cohortReviewService.findAll(cohortReview.getCohortReviewId(), filters, pageRequest);
+      cohortReviewService.findAll(cohortReview.getCohortReviewId(),
+        convertGenderRaceEthnicityFilters(filters),
+        convertGenderRaceEthnicitySortOrder(pageRequest));
+    lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
     org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
     responseReview.setParticipantCohortStatuses(
@@ -570,10 +579,58 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private void lookupGenderRaceEthnicityValues(List<ParticipantCohortStatus> participantCohortStatuses) {
     Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
     participantCohortStatuses.forEach(pcs -> {
-      pcs.setRace(concepts.get(GenderRaceEthnicityType.RACE.name()).get(pcs.getRaceConceptId()));
-      pcs.setGender(concepts.get(GenderRaceEthnicityType.GENDER.name()).get(pcs.getGenderConceptId()));
-      pcs.setEthnicity(concepts.get(GenderRaceEthnicityType.ETHNICITY.name()).get(pcs.getEthnicityConceptId()));
+      pcs.setRace(concepts.get(ParticipantCohortStatusColumns.RACE.name()).get(pcs.getRaceConceptId()));
+      pcs.setGender(concepts.get(ParticipantCohortStatusColumns.GENDER.name()).get(pcs.getGenderConceptId()));
+      pcs.setEthnicity(concepts.get(ParticipantCohortStatusColumns.ETHNICITY.name()).get(pcs.getEthnicityConceptId()));
     });
+  }
+
+  /**
+   * Helper method that generates a list of concept ids per demo
+   * @param filters
+   * @return
+   */
+  private List<Filter> convertGenderRaceEthnicityFilters(List<Filter> filters) {
+    return filters.stream()
+      .map(filter -> {
+        if (GENDER_RACE_ETHNICITY_TYPES.contains(filter.getProperty().name())) {
+          Map<Long, String> possibleConceptIds =
+            genderRaceEthnicityConceptProvider.get().getConcepts().get(filter.getProperty().name());
+          List<String> values = possibleConceptIds.entrySet().stream()
+            .filter(entry -> filter.getValues().contains(entry.getValue()))
+            .map(entry -> entry.getKey().toString())
+            .collect(Collectors.toList());
+          return new Filter()
+            .property(filter.getProperty())
+            .operator(filter.getOperator())
+            .values(values);
+        }
+        return filter;
+      })
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Helper method that converts sortOrder if gender, race or ethnicity.
+   * @param pageRequest
+   * @return
+   */
+  private PageRequest convertGenderRaceEthnicitySortOrder(PageRequest pageRequest) {
+    String sortColumn = pageRequest.getSortColumn();
+    if (GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
+      Map<String, Map<Long, String>> concepts = genderRaceEthnicityConceptProvider.get().getConcepts();
+      List<String> demoList =
+        concepts.get(sortColumn).entrySet().stream()
+          .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+          .sorted(Comparator.comparing(ConceptIdName::getConceptName))
+          .map(c -> c.getConceptId().toString())
+          .collect(Collectors.toList());
+      if (!demoList.isEmpty()) {
+        pageRequest.setSortColumn("FIELD(" + ParticipantCohortStatusDbInfo.fromName(sortColumn).getDbName() + ","
+          + String.join(",", demoList) + ") " + pageRequest.getSortOrder().name());
+      }
+    }
+    return pageRequest;
   }
 
   private PageRequest createPageRequest(PageFilterRequest request) {

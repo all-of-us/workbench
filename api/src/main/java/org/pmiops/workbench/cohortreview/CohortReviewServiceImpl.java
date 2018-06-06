@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortreview;
 
 import org.apache.commons.lang3.StringUtils;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -43,7 +42,6 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
     private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
     private WorkspaceService workspaceService;
-    private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
 
@@ -53,15 +51,13 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                             ParticipantCohortStatusDao participantCohortStatusDao,
                             ParticipantCohortAnnotationDao participantCohortAnnotationDao,
                             CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao,
-                            WorkspaceService workspaceService,
-                            Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
+                            WorkspaceService workspaceService) {
         this.cohortReviewDao = cohortReviewDao;
         this.cohortDao = cohortDao;
         this.participantCohortStatusDao = participantCohortStatusDao;
         this.participantCohortAnnotationDao = participantCohortAnnotationDao;
         this.cohortAnnotationDefinitionDao = cohortAnnotationDefinitionDao;
         this.workspaceService = workspaceService;
-        this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     }
 
     public CohortReviewServiceImpl() {

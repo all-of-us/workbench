@@ -494,7 +494,7 @@ definitions:
 
   ParticipantCohortStatusColumns:
     type: string
-    enum: [participantId, status, gender, birthDate, race, ethnicity]
+    enum: [PARTICIPANTID, STATUS, GENDER, BIRTHDATE, RACE, ETHNICITY]
 
   ReviewColumns:
     type: string
@@ -555,8 +555,7 @@ definitions:
       gender:
         type: string
       birthDate:
-        type: integer
-        format: int64
+        type: string
       raceConceptId:
         type: integer
         format: int64

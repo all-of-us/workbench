@@ -38,7 +38,7 @@ import static org.junit.Assert.assertEquals;
   ParticipantCounter.class, DomainLookupService.class, CohortQueryBuilder.class,
   TestJpaConfig.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
-public class CohortBuilderControllerTest extends BigQueryBaseTest {
+public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private static final String TYPE_ICD9 = "ICD9";
   private static final String SUBTYPE_NONE = null;

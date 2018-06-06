@@ -31,7 +31,7 @@ export class ReviewResolver implements Resolve<CohortReview> {
     const request = <ParticipantCohortStatuses>{
       page: 0,
       pageSize: 25,
-      sortColumn: ParticipantCohortStatusColumns.ParticipantId,
+      sortColumn: ParticipantCohortStatusColumns.PARTICIPANTID,
       sortOrder: SortOrder.Asc,
       pageFilterType: PageFilterType.ParticipantCohortStatuses,
     };

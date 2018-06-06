@@ -4,10 +4,10 @@
   (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
   <clr-dg-placeholder>No Participants</clr-dg-placeholder>
 
-  <clr-dg-column [clrDgField]="'participantId'">
+  <clr-dg-column [clrDgField]="ColumnEnum.PARTICIPANTID">
     <span class="column-title">Participant ID</span>
   </clr-dg-column>
-  <clr-dg-column [clrDgField]="'birthDate'">
+  <clr-dg-column [clrDgField]="ColumnEnum.BIRTHDATE">
     <span class="column-title">Date of Birth</span>
   </clr-dg-column>
   <clr-dg-column [clrDgField]="'gender'">
@@ -16,7 +16,7 @@
       <app-choice-filter
         #genderFilter
         [options]="genders"
-        [property]="ColumnEnum.Gender">
+        [property]="ColumnEnum.GENDER">
       </app-choice-filter>
     </clr-dg-filter>
   </clr-dg-column>
@@ -26,7 +26,7 @@
       <app-choice-filter
         #raceFilter
         [options]="races"
-        [property]="ColumnEnum.Race">
+        [property]="ColumnEnum.RACE">
       </app-choice-filter>
     </clr-dg-filter>
   </clr-dg-column>
@@ -36,11 +36,11 @@
       <app-choice-filter
         #ethnicityFilter
         [options]="ethnicities"
-        [property]="ColumnEnum.Ethnicity">
+        [property]="ColumnEnum.ETHNICITY">
       </app-choice-filter>
     </clr-dg-filter>
   </clr-dg-column>
-  <clr-dg-column [clrDgField]="'status'">
+  <clr-dg-column [clrDgField]="ColumnEnum.STATUS">
     <span class="column-title">Review Status</span>
     <clr-dg-filter [clrDgFilter]="statusFilter">
       <app-status-filter #statusFilter>
@@ -56,7 +56,7 @@
       {{ participant.id }}
     </clr-dg-cell>
     <clr-dg-cell>
-      {{ participant.dob | date:'yyyy-MM-dd' }}
+      {{ participant.birthDate }}
     </clr-dg-cell>
     <clr-dg-cell>
       {{ participant.gender | titlecase }}

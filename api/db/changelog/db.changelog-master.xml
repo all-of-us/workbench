@@ -45,4 +45,5 @@
   <include file="changelog/db.changelog-35-another-fk-update.xml"/>
   <include file="changelog/db.changelog-36.xml"/>
   <include file="changelog/db.changelog-37-add-two-factor-column.xml"/>
+  <include file="changelog/db.changelog-38.xml"/>
 </databaseChangeLog>
