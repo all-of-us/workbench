@@ -19,19 +19,17 @@ repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
 
-configurations {
-  testClasses {
-    extendsFrom(testRuntime)
-  }
-}
-
 task testJar(type: Jar) {
   classifier = 'test'
   from sourceSets.test.output
 }
 
+configurations {
+  testArtifacts
+}
+
 artifacts {
-  testClasses testJar
+  testArtifacts testJar
 }
 
 dependencies {
