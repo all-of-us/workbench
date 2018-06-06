@@ -2,8 +2,6 @@ package org.pmiops.workbench.mandrill;
 
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +11,6 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @org.springframework.context.annotation.Configuration
 public class MandrillConfig{
-  private static final Logger log = Logger.getLogger(MandrillConfig.class.getName());
 
   private static final String MANDRILL_API_CLIENT = "mandrillApiClient";
 

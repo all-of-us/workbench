@@ -1,5 +1,6 @@
 package org.pmiops.workbench.mandrill;
 
+import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
@@ -28,12 +29,20 @@ public class MandrillServiceImpl implements MandrillService {
   @Override
   public MandrillMessageStatus sendEmail(MandrillMessage email) {
     MandrillApi mandrillApi = mandrillApiProvider.get();
-    String apiKey = configProvider.get().mandrill.apiKey;
+    String apiKey = readMandrillApiKey();
     try {
       return mandrillApi.send(apiKey, email);
     } catch (ApiException e){
       log.log(Level.WARNING, "Sending email via Mandrill Failed.");
       return null;
     }
+  }
+
+  public String readMandrillApiKey() {
+    JSONObject mandrillKeys = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
+    return mandrillKeys.getString("api-key");
+  }
+  String getCredentialsBucketName() {
+    return configProvider.get().googleCloudStorageService.credentialsBucketName;
   }
 }
