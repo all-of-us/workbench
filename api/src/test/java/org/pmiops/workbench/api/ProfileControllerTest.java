@@ -26,11 +26,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AdminConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -45,6 +47,7 @@ import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationSta
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
@@ -116,13 +119,17 @@ public class ProfileControllerTest {
   private FakeClock clock;
   private IdVerificationRequest idVerificationRequest;
   private User user;
+  private MailService mailService;
 
   @Before
   public void setUp() {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
-
+    config.admin = new AdminConfig();
+    config.admin.verifiedSendingAddress = "verifysend@mockemail.mock";
+    config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
+    config.admin.supportGroup = "supportGroup@dummyMockEmail.com";
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
     createAccountRequest = new CreateAccountRequest();
@@ -142,12 +149,13 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
+    mailService = Mockito.mock(MailServiceImpl.class);
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, notebooksService, Providers.of(config), environment,
-        mailServiceProvider);
+        Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, notebooksService, Providers.of(config),
@@ -565,6 +573,32 @@ public class ProfileControllerTest {
     profileController.updateProfile(profile);
     Profile result = profileController.getMe().getBody();
     assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(0);
+  }
+
+  @Test
+  public void testsubmitIdVerificationFirstTime() throws Exception {
+    createUser();
+    Mockito.doNothing().when(mailService).send(Mockito.any());
+    profileController.submitIdVerification();
+    verify(mailService).send(Mockito.any());
+  }
+
+  @Test
+  public void testsubmitIdVerificationWithRequestTrue() throws Exception {
+    createUser();
+    user = userDao.findUserByEmail(PRIMARY_EMAIL);
+    user.setRequestedIdVerification(true);
+    Mockito.doNothing().when(mailService).send(Mockito.any());
+    profileController.submitIdVerification();
+    verify(mailService,never()).send(Mockito.any());
+  }
+
+  @Test
+  public void testRequestInvitationKey() throws Exception {
+    createUser();
+    Mockito.doNothing().when(mailService).send(Mockito.any());
+    profileController.requestInvitationKey("mockEmail@mockServer.mock");
+    verify(mailService).send(Mockito.any());
   }
 
   private Profile createUser() throws Exception {
