@@ -22,5 +22,5 @@ Have you read README.md lately? If not, do that first.
 - [ ] Verify all tests go green, including CI tests
 - [ ] Merge to develop using github's "Squash and Merge" feature
 - [ ] Delete branch after merge
-- [ ] **Test this change works on dev environment after deployment**. YOU own getting it fixed if test isn't working for ANY reason!
+- [ ] **Test this change works on test environment after deployment**. YOU own getting it fixed if test isn't working for ANY reason!
 - [ ] Mark JIRA issue as done once this checklist is completed
