@@ -11,6 +11,7 @@ import com.google.api.services.admin.directory.model.UserName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,6 @@ import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
@@ -36,7 +36,7 @@ import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
 
-  static final String APPLICATION_NAME = "All of Us Researcher Workbench";
+  private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
   private static final String ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   private static SecureRandom rnd = new SecureRandom();
 
@@ -48,21 +48,24 @@ public class DirectoryServiceImpl implements DirectoryService {
   // will accept the email address of the service account and lookup the correct client ID giving
   // the impression that the email address is an acceptable substitute, but testing shows that this
   // doesn't actually work.
-  static final List<String> SCOPES = Arrays.asList(
+  private static final List<String> SCOPES = Arrays.asList(
       DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
   private final Provider<GoogleCredential> googleCredentialProvider;
   private final Provider<WorkbenchConfig> configProvider;
+  private final Provider<MailService> mailServiceProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
       Provider<WorkbenchConfig> configProvider,
+      Provider<MailService> mailServiceProvider,
       HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
+    this.mailServiceProvider = mailServiceProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
   }
@@ -167,7 +170,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         contactEmail, user.getName().getFullName()));
       msg.setSubject("Your new All of Us Account");
       msg.setText(messageBody);
-      Transport.send(msg);
+      mailServiceProvider.get().send(msg);
     } catch (MessagingException | UnsupportedEncodingException e) {
       throw new EmailException("Error sending password email", e);
     }

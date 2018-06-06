@@ -13,7 +13,6 @@ import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -33,12 +32,11 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.mailchimp.MailChimpService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -111,10 +109,10 @@ public class ProfileController implements ProfileApiDelegate {
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
   private final BlockscoreService blockscoreService;
-  private final MailChimpService mailChimpService;
   private final NotebooksService notebooksService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
+  private final Provider<MailService> mailServiceProvider;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
@@ -123,10 +121,10 @@ public class ProfileController implements ProfileApiDelegate {
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
-      MailChimpService mailChimpService,
       NotebooksService notebooksService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkbenchEnvironment workbenchEnvironment) {
+      WorkbenchEnvironment workbenchEnvironment,
+      Provider<MailService> mailServiceProvider) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -137,10 +135,10 @@ public class ProfileController implements ProfileApiDelegate {
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
     this.blockscoreService = blockscoreService;
-    this.mailChimpService = mailChimpService;
     this.notebooksService = notebooksService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
+    this.mailServiceProvider = mailServiceProvider;
   }
 
   @Override
@@ -236,6 +234,7 @@ public class ProfileController implements ProfileApiDelegate {
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+      user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
       try {
         return userDao.save(user);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -389,7 +388,7 @@ public class ProfileController implements ProfileApiDelegate {
             workbenchConfig.admin.adminIdVerification));
         msg.setSubject("[Id Verification Request]: " + user.getEmail());
         msg.setText(ID_VERIFICATION_TEXT + user.getEmail());
-        Transport.send(msg);
+        mailServiceProvider.get().send(msg);
       } catch (MessagingException e) {
         throw new EmailException("Error submitting id verification", e);
       }
@@ -449,7 +448,7 @@ public class ProfileController implements ProfileApiDelegate {
           workbenchConfig.admin.supportGroup, "AofU Workbench Engineers"));
       msg.setSubject("[AofU Invitation Key Request]");
       msg.setText(email + " is requesting the invitation key.");
-      Transport.send(msg);
+      mailServiceProvider.get().send(msg);
     } catch (MessagingException | UnsupportedEncodingException e) {
       throw new EmailException("Error sending invitation key request", e);
     }
@@ -466,8 +465,6 @@ public class ProfileController implements ProfileApiDelegate {
 
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-        mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
-        user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         user.setContactEmail(updatedProfile.getContactEmail());
       }
     }

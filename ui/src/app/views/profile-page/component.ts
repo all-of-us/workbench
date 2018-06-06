@@ -76,9 +76,9 @@ export class ProfilePageComponent implements OnInit {
         this.profileStorageService.reload();
       },
       error => {
-        // if MailChimp throws an error, display to the user
+        // if Profile Service throws an error, display to the user
         const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
-        if (response.message && response.errorClassName.includes('MailchimpException')) {
+        if (response.message) {
           this.errorText = response.message;
         } else {
           this.errorText = '';
