@@ -128,6 +128,9 @@ public class BugReportControllerTest {
     fail("nope");
   }
 
+  public void testSendBugReport_withUnderscore2() throws Exception {
+    fail("nope");
+  }
 
   @Test
   public void testSendBugReportWithNotebooks() throws Exception {
