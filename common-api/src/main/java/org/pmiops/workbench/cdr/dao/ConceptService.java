@@ -39,20 +39,20 @@ public class ConceptService {
     public static String modifyMultipleMatchKeyword(String query){
         // This function modifies the keyword to match all the words if multiple words are present(by adding + before each word to indicate match that matching each word is essential)
         String[] keywords = query.split("[,+\\s+]");
-        for(int i = 0;i < keywords.length;i++){
+        for(int i = 0; i < keywords.length; i++){
             String key = keywords[i];
             if(key.length() < 3){
-                key = "\""+key+"\"";
+                key = "\"" + key + "\"";
                 keywords[i] = key;
             }
         }
 
-        String query2= "";
-        for(String key: keywords){
+        String query2 = "";
+        for(String key : keywords){
             if(query2.isEmpty()){
-                query2 = "+"+key;
+                query2 = "+" + key;
             }else if(key.contains("\"")){
-                query2 = query2+key;
+                query2 = query2 + key;
             }else{
                 query2 = query2+ "+"+ key;
             }

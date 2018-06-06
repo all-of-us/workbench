@@ -283,7 +283,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsMultiWprdQueryOneResult() throws Exception{
+  public void testSearchConceptsMultiWordQueryOneResult() throws Exception{
     saveConcepts();
     assertResults(conceptsController.searchConcepts("ns","name",
             new SearchConceptsRequest().query("multi word").maxResults(1)),CLIENT_CONCEPT_3);

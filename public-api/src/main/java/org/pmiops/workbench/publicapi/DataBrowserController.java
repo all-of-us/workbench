@@ -252,17 +252,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         Integer maxResults=searchConceptsRequest.getMaxResults();
         if(maxResults == null){
-            maxResults=25;
+            maxResults = 25;
         }
-        StandardConceptFilter standardConceptFilter=searchConceptsRequest.getStandardConceptFilter();
+        StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
         if(standardConceptFilter == null){
             standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
-        }else if("S".equals(standardConceptFilter)){
-            standardConceptFilter = StandardConceptFilter.STANDARD_CONCEPTS;
-        }else{
-            standardConceptFilter = StandardConceptFilter.NON_STANDARD_CONCEPTS;
         }
-        ConceptService.StandardConceptFilter convertedConceptFilter=ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
+        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
         List<String> domainIds = null;
         if (searchConceptsRequest.getDomain() != null) {
