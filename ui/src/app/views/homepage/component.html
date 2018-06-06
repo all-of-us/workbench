@@ -54,12 +54,12 @@
         <div class="description">Here you can view all workspaces you have created, or that have been
             shared with you.</div>
         <button class="button btn btn-primary tooltip" (click)="listWorkspaces()"
-            [disabled]="!FCAccountInitialized || !hasCdrAccess()">
+            [disabled]="!hasCdrAccess()">
           GO TO WORKSPACES
-          <span *ngIf="!FCAccountInitialized" class="tooltip-content">
+          <span *ngIf="!profile" class="tooltip-content">
               Your account is being initialized, please wait.
           </span>
-          <span *ngIf="billingProjectInitialized && !hasCdrAccess()" class="tooltip-content">
+          <span *ngIf="profile && !hasCdrAccess()" class="tooltip-content">
               You must complete profile setup before accessing data.
           </span>
         </button>

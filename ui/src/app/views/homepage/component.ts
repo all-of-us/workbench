@@ -44,7 +44,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
       'value': this.numberOfTotalTasks - this.completedTasks
     }
   ];
-  FCAccountInitialized = false;
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
@@ -75,7 +74,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
           this.profileStorageService.reload();
         }, 10000);
       }
-      this.FCAccountInitialized = true;
       this.profile = profile;
       this.reloadSpinner();
       if (profile.firstSignInTime === null) {
@@ -143,12 +141,14 @@ export class HomepageComponent implements OnInit, OnDestroy {
    this.router.navigate(['workspaces']);
   }
 
+  // The user is FC initialized and has access to the CDR, if enforced in this
+  // environment.
   hasCdrAccess(): boolean {
-    if (!this.enforceRegistered) {
-      return true;
-    }
     if (!this.profile) {
       return false;
+    }
+    if (!this.enforceRegistered) {
+      return true;
     }
     return [
       DataAccessLevel.Registered,
