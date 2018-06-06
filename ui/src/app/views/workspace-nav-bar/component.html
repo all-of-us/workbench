@@ -9,7 +9,7 @@
   -->
   <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
     <clr-button class="btn btn-primary btn-top" [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview || !writePermission"
-            [routerLink]="['/workspace', wsNamespace, wsId, 'cohorts', 'build']">
+            [routerLink]="['/workspaces', wsNamespace, wsId, 'cohorts', 'build']">
       Cohort Builder
     </clr-button>
     <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
