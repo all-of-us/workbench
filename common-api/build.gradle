@@ -15,24 +15,9 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 
-sourceSets {
-  generated {
-    compileClasspath = configurations.generatedCompile
-  }
-  main {
-    compileClasspath += generated.output
-    runtimeClasspath += generated.output
-  }
-  test {
-    compileClasspath += generated.output
-    runtimeClasspath += generated.output
-  }
-}
-
 repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
-
 
 dependencies {
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile

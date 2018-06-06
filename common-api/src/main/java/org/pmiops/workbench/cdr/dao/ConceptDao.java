@@ -13,7 +13,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
             "where (match(c.concept_name) against(:conceptName in boolean mode) or " +
             "match(c.concept_code) against(:conceptName in boolean mode)) and " +
             "c.domain_id=:domain_id and c.standard_concept=:standard_concept " +
-            "order by c.count_value desc;",
+            "order by c.count_value desc limit 25;",
             nativeQuery = true)
     List<Concept> findConceptLikeNameAndDomainId(@Param("conceptName") String conceptName,@Param("domain_id") String domain_id,@Param("standard_concept") String standard_concept);
 
@@ -23,24 +23,23 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
             "match(c.concept_code) against(:conceptName in boolean mode)) and " +
             "c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
             "c.standard_concept=:standard_concept " +
-            "order by c.count_value desc;",
+            "order by c.count_value desc limit 25;",
             nativeQuery = true)
     List<Concept> findConceptLikeName(@Param("conceptName") String conceptName,@Param("standard_concept") String standard_concept);
 
     @Query(value = "select c.* from concept c " +
             "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
             "c.standard_concept=:standard_concept " +
-            "order by c.count_value desc;",
-            nativeQuery = true)
+            "order by c.count_value desc limit 25;",
+    nativeQuery = true)
     List<Concept> findAllConceptsOrderedByCount(@Param("standard_concept") String standard_concept);
 
     @Query(value = "select c.* from concept c " +
             "where c.domain_id=:domain_id and " +
             "c.standard_concept=:standard_concept " +
-            "order by c.count_value desc;",
-            nativeQuery = true)
+            "order by c.count_value desc limit 25;",
+          nativeQuery = true)
     List<Concept> findConceptsByDomainIdOrderedByCount(@Param("domain_id") String domain_id,@Param("standard_concept") String standard_concept);
-
 
     @Query(value="select c.* from concept c "+
             "join concept_relationship rel on " +
@@ -59,17 +58,17 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
     List<Concept> findByConceptName(String conceptName);
 
     @Query(value = "select c.concept_id, " +
-            "c.concept_name, " +
-            "c.domain_id, " +
-            "c.vocabulary_id, " +
-            "c.concept_class_id, " +
-            "c.standard_concept, " +
-            "c.concept_code, " +
-            "c.count_value, " +
-            "c.source_count_value, " +
-            "c.prevalence " +
-            "from concept c " +
-            "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
-            nativeQuery = true)
+      "c.concept_name, " +
+      "c.domain_id, " +
+      "c.vocabulary_id, " +
+      "c.concept_class_id, " +
+      "c.standard_concept, " +
+      "c.concept_code, " +
+      "c.count_value, " +
+      "c.source_count_value, " +
+      "c.prevalence " +
+      "from concept c " +
+      "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
+      nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
 }

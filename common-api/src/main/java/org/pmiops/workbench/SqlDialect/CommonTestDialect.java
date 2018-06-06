@@ -1,12 +1,12 @@
-package org.pmiops.workbench.cdr.dialect;
+package org.pmiops.workbench.SqlDialect;
 
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.type.StandardBasicTypes;
 
-public class TestSqlDialect extends MySQLDialect {
+public class CommonTestDialect extends MySQLDialect {
 
-    public TestSqlDialect() {
+    public CommonTestDialect() {
         super();
         // For in-memory tests, use LIKE for full text searches.
         // For some weird reason, we need to have this function use DOUBLE; see
