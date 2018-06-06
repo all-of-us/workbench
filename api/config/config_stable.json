@@ -31,7 +31,7 @@
     "supportGroup": "all-of-us-workbench-eng@googlegroups.com",
     "verifiedSendingAddress": "all-of-us-workbench-eng@googlegroups.com"
   },
-  mandrill: {
+  "mandrill": {
     "apiKey": "mandrill-api-key-should-go-here"
   }
 }

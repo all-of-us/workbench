@@ -1,15 +1,15 @@
 package org.pmiops.workbench.mandrill;
 
+import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
-import javax.inject.Qualifier;
-import java.util.logging.Logger;
 
 @org.springframework.context.annotation.Configuration
 public class MandrillConfig{
@@ -25,7 +25,7 @@ public class MandrillConfig{
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public MandrillApi mandrillApi(@org.springframework.beans.factory.annotation.Qualifier(MANDRILL_API_CLIENT) ApiClient apiClient) {
+  public MandrillApi mandrillApi(@Qualifier(MANDRILL_API_CLIENT) ApiClient apiClient) {
     MandrillApi api = new MandrillApi();
     api.setApiClient(apiClient);
     return api;
