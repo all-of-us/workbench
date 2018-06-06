@@ -6,7 +6,7 @@
       background-color: #F1F1F1;
       padding-left: 1rem;
       padding-top: 1rem;
-      width: 30rem;
+      width: 600px;
     }
     * {
       font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
@@ -38,13 +38,13 @@
       display: inline-block;
     }
     .card {
-      height: 144px;
-      width: 540px;
+      height: 70px;
+      width: 560px;
       border-radius: 4px;
       background-color: #FFFFFF;
       box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
       display: flex;
-      justify-content: space-around;
+      justify-content: flex-start;
       align-items: center;
       margin-bottom: 1rem;
       cursor: pointer;
@@ -57,6 +57,8 @@
 
     .bullet {
       height: 31px;
+      margin-left: 1rem;
+      margin-right: 1rem;
       width: 31px;
       border-radius: 15px;
       background-color: #302C71;
@@ -67,11 +69,11 @@
     }
 
     .card-text {
-      width: 194px;
       color: #302C71;
       font-size: 16px;
       font-weight: 300;
       line-height: 19px;
+      width: 460px;
     }
 
     .step-img {
@@ -106,25 +108,13 @@
   <div><div class="text user-field">Your Password: </div><div class="user-info">{{PASSWORD-INPUT}}</div></div>
   <br>
   <div class="text">Quick guide on how to get started:</div>
-  <a class="card" href="https://accounts.google.com/signin/oauth/oauthchooseaccount?hd={{TARGET-DOMAIN}}&client_id={{CLIENT-ID}}.apps.googleusercontent.com&as=1ivZqDJMGPEMvWasjAquSQ&destination=https://myaccount.google.com/signinoptions/two-step-verification&approval_state=!ChRqd2tjYnk1b040d3VUMzNpZXBpQRIfczlfc0R4d2dERHdUQU9FaERQUmpBazFLYU13VFBSWQ%E2%88%99AB8iHBUAAAAAWxgpw3y6ICN3aJ_etNsSGfEmZbFNYV2d&xsrfsig=AHgIfE85mPI6c5DfCze82tpt7pbw8-XBRg&flowName=GeneralOAuthFlow">
-    <div class="bullet">1</div>
-    <div class="card-text"><div class="link">Sign into google</div> with your new account</div>
-    <img class="step-img" src="assets/Step1@2x.png">
-  </a>
-  <div class="card">
-    <div class="bullet">2</div>
-    <div class="card-text">Google will then prompt you to change your password</div>
-    <img class="step-img" src="assets/Step2@2x.png">
-  </div>
   <a class="card" href="https://myaccount.google.com/signinoptions/two-step-verification">
-    <div class="bullet">3</div>
-    <div class="card-text">Using the Researcher Workbench will require you to <div class="link">set up 2-Step Verification</div></div>
-    <img class="step-img" src="assets/Step3@2x.png">
+    <div class="bullet">1</div>
+    <div class="card-text"><div class="link">Sign into google</div> with your new account, change your password, and set up 2-Step Verification</div>
   </a>
   <a class="card" href="https://myaccount.google.com/intro/recovery/email?hl=en-US">
-    <div class="bullet">4</div>
-    <div class="card-text"><div class="link">Check and verify</div> your recovery email address</div>
-    <img class="step-img" src="assets/Step4@2x.png">
+    <div class="bullet">2</div>
+    <div class="card-text"><div class="link">Add</div> your recovery email address</div>
   </a>
   <div class="text">After these steps are completed, you are now ready to use the Researcher Workbench</div>
   <a class="button" href="{{URL-INPUT}}">Get Started</a>
