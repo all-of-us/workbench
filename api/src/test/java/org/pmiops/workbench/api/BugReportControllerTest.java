@@ -15,7 +15,6 @@ import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.apphosting.api.ApiProxy;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 
@@ -33,7 +32,6 @@ import org.pmiops.workbench.model.BugReport;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.model.JupyterContents;
-import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -55,8 +53,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class BugReportControllerTest {
-  private static final Instant NOW = Instant.now();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String FC_PROJECT_ID = "fc-project";
   private static final String USER_EMAIL = "falco@lombardi.com";
 
@@ -67,11 +63,6 @@ public class BugReportControllerTest {
   @Import({BugReportController.class})
   @MockBean({JupyterApi.class})
   static class Configuration {
-    @Bean
-    Clock clock() {
-      return CLOCK;
-    }
-
     @Bean
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig config = new WorkbenchConfig();
@@ -114,8 +105,6 @@ public class BugReportControllerTest {
 
     ApiProxyLocal proxy = (ApiProxyLocal) ApiProxy.getDelegate();
     mailService = (LocalMailService) proxy.getService(LocalMailService.PACKAGE);
-
-    CLOCK.setInstant(NOW);
   }
 
   @After
