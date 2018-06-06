@@ -1,8 +1,8 @@
-package java.org.pmiops.workbench.cdr.test;
+package org.pmiops.workbench.cdr.dialect;
 
-        import org.hibernate.dialect.MySQLDialect;
-        import org.hibernate.dialect.function.SQLFunctionTemplate;
-        import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.dialect.function.SQLFunctionTemplate;
+import org.hibernate.type.StandardBasicTypes;
 
 public class TestSqlDialect extends MySQLDialect {
 

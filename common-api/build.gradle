@@ -20,19 +20,18 @@ repositories {   // repositories for Jar's you access in your code
 }
 
 configurations {
-  testArtifacts{
+  testClasses {
     extendsFrom(testRuntime)
   }
 }
 
 task testJar(type: Jar) {
-  classifier = 'test'
-  from sourceSets.test.output
+  classifier = 'tests'
+  from sourceSets.test.classes
 }
 
-
 artifacts {
-  testArtifacts testJar
+  testClasses testJar
 }
 
 dependencies {
