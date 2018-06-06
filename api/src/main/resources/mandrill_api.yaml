@@ -1,0 +1,96 @@
+#A subset of the Mandrill Api
+#the part we need
+
+swagger: '2.0'
+info:
+  title: Mandrill
+  version: "0.1"
+
+host: "mandrillapp.com/api/1.0/"
+schemes:
+  - "https"
+basePath: /
+
+produces:
+  - application/json
+
+paths:
+  /messages/send.json:
+    post:
+      tags:
+        - mandrill
+      operationId: send
+      summary: Send an email via mandrill
+      responses:
+        200:
+          description: "Email sent successfully"
+          schema:
+            $ref: '#/definitions/MandrillMessageStatus'
+        500:
+          description: "There was an error, please see response for details"
+      parameters:
+        - in: body
+          description: api key
+          name: apiKey
+          required: true
+          schema:
+            type: string
+        - in: body
+          description: mandrill message
+          name: mandrillMessage
+          required: true
+          schema:
+            $ref: '#/definitions/MandrillMessage'
+
+parameters:
+  {}
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+  MandrillMessage:
+    required:
+      - html
+      - subject
+      - from_email
+      - to
+    type: object
+    properties:
+      html:
+        type: string
+        description: html that makes up email message
+      subject:
+        type: string
+        description: subject of email
+      from_email:
+        type: string
+        description: the from address
+      to:
+        type: array
+        items:
+          "$ref": "#/definitions/RecipientAddress"
+
+  RecipientAddress:
+    description: ''
+    required:
+      - email
+    type: object
+    properties:
+      email:
+        type: string
+        description: recipient address
+
+  MandrillMessageStatus:
+    description: ''
+    type: object
+    properties:
+      email:
+        type: string
+        description: recipient email
+      status:
+        type: string
+        description: status of email
+      reject_reason:
+        type: string
+        description: why email was rejected if it was
+
