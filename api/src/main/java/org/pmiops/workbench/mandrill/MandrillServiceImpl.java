@@ -1,5 +1,7 @@
 package org.pmiops.workbench.mandrill;
 
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.mandrill.ApiException;
@@ -38,11 +40,12 @@ public class MandrillServiceImpl implements MandrillService {
     }
   }
 
-  public String readMandrillApiKey() {
-    JSONObject mandrillKeys = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
+  private String readMandrillApiKey() {
+    String bucketName = configProvider.get().googleCloudStorageService.credentialsBucketName;
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    String content = new String(storage.get(bucketName, "mandrill-keys.json").getContent());
+    JSONObject mandrillKeys = new JSONObject(content);
     return mandrillKeys.getString("api-key");
   }
-  String getCredentialsBucketName() {
-    return configProvider.get().googleCloudStorageService.credentialsBucketName;
-  }
+
 }
