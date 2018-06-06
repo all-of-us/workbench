@@ -87,9 +87,9 @@ public class BugReportControllerTest {
   @Autowired
   BugReportController bugReportController;
 
-  private LocalMailService mailService;
   private LocalServiceTestHelper gaeHelper =
       new LocalServiceTestHelper(new LocalMailServiceTestConfig());
+  private LocalMailService mailService;
 
   @Before
   public void setUp() {
@@ -123,6 +123,11 @@ public class BugReportControllerTest {
     assertThat(mailService.getSentMessages().size()).isEqualTo(1);
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
   }
+
+  public void testSendBugReport_withUnderscore() throws Exception {
+    fail("nope");
+  }
+
 
   @Test
   public void testSendBugReportWithNotebooks() throws Exception {
