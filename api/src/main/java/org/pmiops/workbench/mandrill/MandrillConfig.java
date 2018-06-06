@@ -1,5 +1,6 @@
 package org.pmiops.workbench.mandrill;
 
+import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.springframework.beans.factory.annotation.Qualifier;
