@@ -87,9 +87,9 @@ public class BugReportControllerTest {
   @Autowired
   BugReportController bugReportController;
 
+  private LocalMailService mailService;
   private LocalServiceTestHelper gaeHelper =
       new LocalServiceTestHelper(new LocalMailServiceTestConfig());
-  private LocalMailService mailService;
 
   @Before
   public void setUp() {
