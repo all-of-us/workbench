@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 public class MandrillServiceImpl implements MandrillService {
 
   private static final Logger log = Logger.getLogger(MandrillServiceImpl.class.getName());
-  private String apiKey;
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<MandrillApi> mandrillApiProvider;
 
@@ -24,14 +23,14 @@ public class MandrillServiceImpl implements MandrillService {
                              Provider<MandrillApi> mandrillApiProvider) {
     this.configProvider = configProvider;
     this.mandrillApiProvider = mandrillApiProvider;
-    this.apiKey = configProvider.get().mandrill.apiKey;
   }
 
   @Override
   public MandrillMessageStatus sendEmail(MandrillMessage email) {
     MandrillApi mandrillApi = mandrillApiProvider.get();
+    String apiKey = configProvider.get().mandrill.apiKey;
     try {
-      return mandrillApi.send(this.apiKey, email);
+      return mandrillApi.send(apiKey, email);
     } catch (ApiException e){
       log.log(Level.WARNING, "Sending email via Mandrill Failed.");
       return null;
