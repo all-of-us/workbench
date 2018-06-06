@@ -13,34 +13,35 @@ import {BugReport} from 'generated';
 })
 export class BugReportComponent implements OnInit {
   reporting = false;
-  shortDescription: string;
-  reproSteps: string;
-  contactEmail: string;
-  bugReport: BugReport = {shortDescription: '', reproSteps: '', contactEmail: ''};
-
+  bugReport: BugReport = this.emptyReport();
 
   constructor(
     private bugReportService: BugReportService,
     public profileStorageService: ProfileStorageService
   ) {}
 
+  private emptyReport(): BugReport {
+    return {
+      shortDescription: '',
+      reproSteps: '',
+      includeNotebookLogs: true,
+      contactEmail: ''
+    };
+  }
+
   ngOnInit() {
   }
 
   reportBug() {
     this.reporting = true;
-    this.shortDescription = '';
-    this.reproSteps = '';
+    this.bugReport = this.emptyReport();
     this.profileStorageService.profile$.subscribe((profile) => {
-      this.contactEmail = profile.contactEmail;
+      this.bugReport.contactEmail = profile.contactEmail;
     });
   }
 
   send() {
     this.reporting = false;
-    this.bugReport.shortDescription = this.shortDescription;
-    this.bugReport.reproSteps = this.reproSteps;
-    this.bugReport.contactEmail = this.contactEmail;
-    this.bugReportService.sendBugReport(this.bugReport).subscribe((bugReport: BugReport) => {});
+    this.bugReportService.sendBugReport(this.bugReport).subscribe(() => {});
   }
 }
