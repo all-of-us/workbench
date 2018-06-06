@@ -1,4 +1,4 @@
-package org.pmiops.workbench.SqlDialect;
+package org.pmiops.workbench.sqldialect;
 
 import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
