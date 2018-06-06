@@ -6,9 +6,9 @@ Have you read README.md lately? If not, do that first.
 ---
 
 - [ ] Review code comments; remove done TODOs, create stories for remaining TODOs
+- [ ] Optionally link to the Jira Ticket for the convenience of the reviewer
 - [ ] Run all tests, both **unit** and **integration** tests
 - [ ] Preface the PR title with the Jira Ticket Number and security risk, i.e., "[RW-123][risk=no] My New Feature"
-- [ ] Optionally link to the Jira Ticket for the convenience of the reviewer
   - Risk factors: 
     - **no**: None 
     - **low**: TODO: Need a description of all risk factors
