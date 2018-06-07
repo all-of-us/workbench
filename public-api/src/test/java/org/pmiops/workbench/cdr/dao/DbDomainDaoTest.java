@@ -99,14 +99,6 @@ public class DbDomainDaoTest {
     }
 
     @Test
-    public void findAllDbDomains() throws Exception {
-        /* Todo write more tests */
-        final List<DbDomain> list = dao.findAll();
-        Assert.assertEquals(dbDomain1.getDomainId(),"Condition");
-        Assert.assertEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
-    }
-
-    @Test
     public void findDbDomainsByDbType() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findByDbType("survey");
@@ -117,20 +109,35 @@ public class DbDomainDaoTest {
     @Test
     public void findDbDomainsByDbTypeAndConceptId() throws Exception {
         /* Todo write more tests */
-        final List<DbDomain> list = dao.findByDbTypeAndAndConceptIdNotNull("survey");
+        final List<DbDomain> list = dao.findByDbTypeAndConceptIdNotNull("survey");
         Assert.assertEquals(dbDomain1.getDomainId(),"Condition");
         Assert.assertNotEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
     }
 
+    @Test
+    public void findDomainTotals() throws Exception{
+        final List<DbDomain> list=dao.findDomainTotals();
+        Assert.assertEquals((Long)list.get(0).getCountValue(),Long.valueOf(0));
+        Assert.assertNotEquals(list,null);
+    }
+
+    @Test
+    public void findByConceptIdNotNull() throws Exception{
+        final List<DbDomain> list=dao.findByConceptIdNotNull();
+        Assert.assertNotEquals(list,null);
+    }
+
+
     /*
     @Test
     public void findDomainMatchResults() throws Exception{
-        /* Test does not recognize native match function but the native query works
+        //Dialect does not support match function but native query works fine
         final List<DbDomain> list=dao.findDomainSearchResults("failure");
         Assert.assertNotEquals(list,null);
 
     }
     */
+
 
     private DbDomain createDbDomain(String domainId, String domainDisp, String domainDesc,String dbType,String domainRoute,Long conceptId,Long count) {
         return new DbDomain()

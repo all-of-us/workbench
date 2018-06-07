@@ -31,15 +31,15 @@ public class AchillesAnalysis {
     // Copy constructor for copying everything but results
     public AchillesAnalysis(AchillesAnalysis a) {
         this.analysisId(a.getAnalysisId())
-            .analysisName(a.getAnalysisName())
-            .stratum1Name(a.getStratum1Name())
-            .stratum2Name(a.getStratum2Name())
-            .stratum3Name(a.getStratum3Name())
-            .stratum4Name(a.getStratum4Name())
-            .stratum5Name(a.getStratum5Name())
-            .chartType(a.getChartType())
-            .dataType(a.getDataType())
-            .results(new ArrayList<>());
+                .analysisName(a.getAnalysisName())
+                .stratum1Name(a.getStratum1Name())
+                .stratum2Name(a.getStratum2Name())
+                .stratum3Name(a.getStratum3Name())
+                .stratum4Name(a.getStratum4Name())
+                .stratum5Name(a.getStratum5Name())
+                .chartType(a.getChartType())
+                .dataType(a.getDataType())
+                .results(new ArrayList<>());
     }
 
     @Id

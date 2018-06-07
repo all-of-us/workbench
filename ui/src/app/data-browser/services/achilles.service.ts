@@ -189,7 +189,7 @@ export class AchillesService {
 
   // Get concept children for the concept
   getChildConcepts(concept_id: number) {
-    return this.api.getChildConcepts(concept_id)
+    return this.api.getSourceConcepts(concept_id, 0)
       .map(response => {
         const data = response.items;
         return data.map(item => {

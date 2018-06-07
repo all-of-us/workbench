@@ -80,13 +80,13 @@ public class QuestionConcept {
                 }
                 AchillesAnalysis questionAnalysis = q.getAnalysis(analysis.getAnalysisId());
                 questionAnalysis.addResult(r);
-                String rStratum5Name = r.getStratum5Name();
+                String rStratum5Name = r.getAnalysisStratumName();
                 if (rStratum5Name == null || rStratum5Name.equals("")) {
                     if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
-                        r.setStratum5Name(ageStratumNameMap.get(r.getStratum5()));
+                        r.setAnalysisStratumName(ageStratumNameMap.get(r.getStratum5()));
                     }
                     if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
-                        r.setStratum5Name(genderStratumNameMap.get(r.getStratum5()));
+                        r.setAnalysisStratumName(genderStratumNameMap.get(r.getStratum5()));
                     }
                 }
             }

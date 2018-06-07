@@ -16,7 +16,6 @@
       <column name="concept_id_1" type="NUMERIC"/>
       <column name="concept_id_2" type="NUMERIC"/>
       <column name="relationship_id" type="STRING"/>
-      <column name="vocabulary_id" type="STRING"/>
       <column name="valid_start_date" type="DATE"/>
       <column name="valid_end_date" type="DATE"/>
       <column name="invalid_reason" type="STRING"/>
