@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="brubenst" id="changelog-39-add-cluster-retry-number">
     <addColumn tableName="user">
-      <column name="cluster_retry_number" type="INTEGER" />
+      <column name="cluster_create_retries" type="INTEGER" />
     </addColumn>
   </changeSet>
 </databaseChangeLog>

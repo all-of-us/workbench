@@ -3,7 +3,10 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
@@ -277,10 +280,9 @@ public class ClusterControllerTest {
         .thenReturn(testFcClusterErrored);
 
     Cluster defaultCluster = clusterController.listClusters().getBody().getDefaultCluster();
-    defaultCluster = clusterController.listClusters().getBody().getDefaultCluster();
-    defaultCluster = clusterController.listClusters().getBody().getDefaultCluster();
-    defaultCluster = clusterController.listClusters().getBody().getDefaultCluster();
-    defaultCluster = clusterController.listClusters().getBody().getDefaultCluster();
+    for (int i = 0; i < 5; i++) {
+      defaultCluster = clusterController.listClusters().getBody().getDefaultCluster();
+    }
     assertThat(defaultCluster)
         .isEqualTo(testClusterErrored);
     verify(notebookService, times(2)).deleteCluster(WORKSPACE_NS, "all-of-us");

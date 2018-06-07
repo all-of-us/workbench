@@ -114,17 +114,17 @@ public class ClusterController implements ClusterApiDelegate {
       fcCluster = this.notebooksService.createCluster(
           project, NotebooksService.DEFAULT_CLUSTER_NAME, userProvider.get().getEmail());
     }
-    if (fcCluster.getStatus() != null && fcCluster.getStatus().equals(org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR)) {
+    if (org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR.equals(fcCluster.getStatus())) {
       User user = this.userProvider.get();
-      user.setClusterRetryNumber(user.getClusterRetryNumber() + 1);
+      user.setClusterCreateRetries(user.getClusterCreateRetries() + 1);
       this.userDao.save(user);
-      if (user.getClusterRetryNumber() <= 2) {
+      if (user.getClusterCreateRetries() <= 2) {
         this.notebooksService.deleteCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
       }
-    } else if (fcCluster.getStatus() != null && fcCluster.getStatus().equals(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)){
+    } else if (org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus())) {
       User user = this.userProvider.get();
-      if (user.getClusterRetryNumber() != 0) {
-        user.setClusterRetryNumber(0);
+      if (user.getClusterCreateRetries() != 0) {
+        user.setClusterCreateRetries(0);
         this.userDao.save(user);
       }
     }

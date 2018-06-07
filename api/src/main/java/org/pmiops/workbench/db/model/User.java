@@ -57,7 +57,7 @@ public class User {
   private String aboutYou;
   private String areaOfResearch;
   private Boolean twoFactorEnabled = false;
-  private int clusterRetryNumber = 0;
+  private int clusterCreateRetries = 0;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -298,12 +298,12 @@ public class User {
     this.twoFactorEnabled = twoFactorEnabled;
   }
 
-  @Column(name = "cluster_retry_number")
-  public int getClusterRetryNumber() {
-    return clusterRetryNumber;
+  @Column(name = "cluster_create_retries")
+  public int getClusterCreateRetries() {
+    return clusterCreateRetries;
   }
 
-  public void setClusterRetryNumber(int clusterRetryNumber) {
-    this.clusterRetryNumber = clusterRetryNumber;
+  public void setClusterCreateRetries(int clusterCreateRetries) {
+    this.clusterCreateRetries = clusterCreateRetries;
   }
 }
