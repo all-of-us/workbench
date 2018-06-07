@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
 
+    List<DbDomain> findByConceptIdNotNull();
+
     DbDomain findByConceptId(long conceptId);
 
     List<DbDomain> findByDbType(String db_type);

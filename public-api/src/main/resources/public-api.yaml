@@ -137,6 +137,21 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
+  /v1/databrowser/db-domains:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets list of analysis definitions
+      operationId: "getDbDomains"
+      parameters: []
+      responses:
+        200:
+          description: A collection of databrowser domains
+          schema:
+            $ref: "#/definitions/DbDomainListResponse"
+
   /v1/databrowser/domain-filters:
     get:
       security: []
