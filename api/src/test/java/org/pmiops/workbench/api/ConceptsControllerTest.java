@@ -325,6 +325,23 @@ public class ConceptsControllerTest {
   }
 
   @Test
+  public void testSearchConceptsMultiWordNoResult() throws Exception{
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns","name",
+            new SearchConceptsRequest().query("to test")
+            .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS)
+            .domain(Domain.MEASUREMENT)));
+
+  }
+
+  @Test
+  public void testSearchConceptsTooShortWord() throws Exception{
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns","name",
+            new SearchConceptsRequest().query("t")),CLIENT_CONCEPT_1,CLIENT_CONCEPT_2,CLIENT_CONCEPT_3,CLIENT_CONCEPT_4);
+  }
+
+  @Test
   public void testSearchConceptsOneResult() throws Exception {
     saveConcepts();
     assertResults(
