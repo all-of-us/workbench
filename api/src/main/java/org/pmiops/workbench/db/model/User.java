@@ -298,7 +298,6 @@ public class User {
     this.twoFactorEnabled = twoFactorEnabled;
   }
 
-
   @Column(name = "cluster_retry_number")
   public int getClusterRetryNumber() {
     return clusterRetryNumber;

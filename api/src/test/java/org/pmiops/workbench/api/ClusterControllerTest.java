@@ -284,7 +284,5 @@ public class ClusterControllerTest {
     assertThat(defaultCluster)
         .isEqualTo(testClusterErrored);
     verify(notebookService, times(2)).deleteCluster(WORKSPACE_NS, "all-of-us");
-
   }
-
 }
