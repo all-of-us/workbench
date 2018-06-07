@@ -1,11 +1,11 @@
 id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,domain_id
 316289,0,PM,,01,Blood Pressure,1,0,,,Measurement
 316290,0,PM,,02,Heart Rate,1,0,,,Measurement
-316291,0,PM,,03,Height,0,1,0,903133,Measurement
-316292,0,PM,,04,Weight,0,1,0,,Measurement
-316293,0,PM,,05,BMI,0,1,0,903124,Measurement
-316294,0,PM,,06,Waist Circumference,0,1,0,,Measurement
-316295,0,PM,,07,Hip Circumference,0,1,0,,Measurement
+316291,0,PM,,03,Height,1,0,,,Measurement
+316292,0,PM,,04,Weight,1,0,,,Measurement
+316293,0,PM,,05,BMI,1,0,,,Measurement
+316294,0,PM,,06,Waist Circumference,1,0,,,Measurement
+316295,0,PM,,07,Hip Circumference,1,0,,,Measurement
 316296,0,PM,,08,Pregnancy as observed at enrollments,1,0,0,,Measurement
 316297,0,PM,,09,Wheelchair as observed at enrollments,1,0,0,,Measurement
 316298,316289,PM,,10,Hypotensive (Systolic <= 90 / Diastolic <= 60),0,1,0,,Measurement
@@ -15,9 +15,14 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 316302,316289,PM,,14,Blood Pressure Detail,0,1,0,,Measurement
 316303,316290,PM,,15,Heart Rhythm Status,1,0,,,Measurement
 316304,316290,PM,,16,Heart Rate Detail,0,1,0,,Measurement
-316305,316303,PM,,17,Irregularity detected,0,1,0,,Measurement
-316306,316303,PM,,18,No-irregularity detected,0,1,0,,Measurement
-316307,316296,PM,,19,Yes,0,1,0,,Measurement
-316308,316296,PM,,20,No,0,1,0,,Measurement
-316309,316297,PM,,21,Yes,0,1,0,,Measurement
-316310,316297,PM,,22,No,0,1,0,,Measurement
+316305,316291,PM,,17,Height Detail,0,1,0,903133,Measurement
+316306,316292,PM,,18,Weight Detail,0,1,0,,Measurement
+316307,316293,PM,,19,BMI Detail,0,1,0,903124,Measurement
+316308,316294,PM,,20,Waist Circumference Detail,0,1,0,,Measurement
+316309,316295,PM,,21,Hip Circumference Detail,0,1,0,,Measurement
+316310,316303,PM,,17,Irregularity detected,0,1,0,,Measurement
+316311,316303,PM,,18,No-irregularity detected,0,1,0,,Measurement
+316312,316296,PM,,19,Yes,0,1,0,,Measurement
+316313,316296,PM,,20,No,0,1,0,,Measurement
+316314,316297,PM,,21,Yes,0,1,0,,Measurement
+316315,316297,PM,,22,No,0,1,0,,Measurement
