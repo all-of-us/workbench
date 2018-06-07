@@ -136,11 +136,11 @@ public class ClusterController implements ClusterApiDelegate {
 
         this.notebooksService.deleteCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
       }
-    } else if (org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus())) {
-      if (retries != 0) {
-        user.setClusterCreateRetries(0);
-        this.userDao.save(user);
-      }
+    } else if (
+        org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus()) &&
+        retries != 0) {
+      user.setClusterCreateRetries(0);
+      this.userDao.save(user);
     }
     ClusterListResponse resp = new ClusterListResponse();
     resp.setDefaultCluster(TO_ALL_OF_US_CLUSTER.apply(fcCluster));
