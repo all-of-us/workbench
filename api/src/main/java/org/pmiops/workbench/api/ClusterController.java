@@ -1,13 +1,17 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
+
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javax.inject.Provider;
+
 import org.json.JSONObject;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -106,19 +110,21 @@ public class ClusterController implements ClusterApiDelegate {
       throw new FailedPreconditionException(
           "User billing project is not yet initialized, cannot list/create clusters");
     }
-    String project = userProvider.get().getFreeTierBillingProjectName();
+    User user = this.userProvider.get();
+    String project = user.getFreeTierBillingProjectName();
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
       fcCluster = this.notebooksService.getCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
     } catch (NotFoundException e) {
       fcCluster = this.notebooksService.createCluster(
-          project, NotebooksService.DEFAULT_CLUSTER_NAME, userProvider.get().getEmail());
+          project, NotebooksService.DEFAULT_CLUSTER_NAME, user.getEmail());
     }
+
+    int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);
     if (org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR.equals(fcCluster.getStatus())) {
-      User user = this.userProvider.get();
-      if (user.getClusterCreateRetries() <= 2) {
-        user.setClusterCreateRetries(user.getClusterCreateRetries() + 1);
+      if (retries <= 2) {
+        user.setClusterCreateRetries(retries + 1);
         this.userDao.save(user);
         log.warning("Cluster has errored with logs: ");
         if (fcCluster.getErrors() != null) {
@@ -131,8 +137,7 @@ public class ClusterController implements ClusterApiDelegate {
         this.notebooksService.deleteCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
       }
     } else if (org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus())) {
-      User user = this.userProvider.get();
-      if (user.getClusterCreateRetries() != 0) {
+      if (retries != 0) {
         user.setClusterCreateRetries(0);
         this.userDao.save(user);
       }
