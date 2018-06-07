@@ -24,6 +24,7 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.model.ClusterError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -116,9 +117,14 @@ public class ClusterController implements ClusterApiDelegate {
     }
     if (org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR.equals(fcCluster.getStatus())) {
       User user = this.userProvider.get();
-      user.setClusterCreateRetries(user.getClusterCreateRetries() + 1);
-      this.userDao.save(user);
+      log.warning("Cluster has errored with logs: ");
+      for (ClusterError e : fcCluster.getErrors()) {
+        log.warning(e.getErrorMessage());
+      }
       if (user.getClusterCreateRetries() <= 2) {
+        user.setClusterCreateRetries(user.getClusterCreateRetries() + 1);
+        this.userDao.save(user);
+        log.info("Retrying cluster creation.");
         this.notebooksService.deleteCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
       }
     } else if (org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus())) {
