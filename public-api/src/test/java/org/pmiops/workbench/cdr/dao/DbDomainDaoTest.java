@@ -99,14 +99,6 @@ public class DbDomainDaoTest {
     }
 
     @Test
-    public void findAllDbDomains() throws Exception {
-        /* Todo write more tests */
-        final List<DbDomain> list = dao.findAll();
-        Assert.assertEquals(dbDomain1.getDomainId(),"Condition");
-        Assert.assertEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
-    }
-
-    @Test
     public void findDbDomainsByDbType() throws Exception {
         /* Todo write more tests */
         final List<DbDomain> list = dao.findByDbType("survey");

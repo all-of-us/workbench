@@ -6,13 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
-    List<DbDomain> findAll();
 
     DbDomain findByConceptId(long conceptId);
 
     List<DbDomain> findByDbType(String db_type);
 
-    List<DbDomain> findByDbTypeAndAndConceptIdNotNull(String db_type);
+    List<DbDomain> findByDbTypeAndConceptIdNotNull(String db_type);
 
     @Query(nativeQuery=true,value="select d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.domain_route,d.concept_id, count(distinct c.concept_id) as count_value from db_domain d\n" +
             "join concept c on d.domain_id = c.domain_id\n" +
@@ -42,5 +41,4 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
             "where d.db_type = 'survey' and r.analysis_id = 3110\n" +
             "group by d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.concept_id order by db_type ASC")
     List<DbDomain> findDomainTotals();
-
 }

@@ -81,12 +81,25 @@ public class ConceptsControllerTest {
           .countValue(789L)
           .prevalence(0.4F);
 
+  private static final Concept CLIENT_CONCEPT_4 = new Concept()
+          .conceptId(1234L)
+          .conceptName("sample test con to test the multi word search")
+          .standardConcept(true)
+          .conceptCode("conceptD")
+          .conceptClassId("classId4")
+          .vocabularyId("V4")
+          .domainId("Observation")
+          .countValue(1250L)
+          .prevalence(0.5F);
+
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
       makeConcept(CLIENT_CONCEPT_2);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
           makeConcept(CLIENT_CONCEPT_3);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4=
+          makeConcept(CLIENT_CONCEPT_4);
 
   @TestConfiguration
   @Import({
@@ -158,14 +171,6 @@ public class ConceptsControllerTest {
     assertResults(
         conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query("a")));
-  }
-
-  @Test
-  public void testSearchConceptsMultipleWordQuery(){
-    saveConcepts();
-    assertResults(
-            conceptsController.searchConcepts("ns", "name",
-                    new SearchConceptsRequest().query("multi word")));
   }
 
   @Test
@@ -287,6 +292,36 @@ public class ConceptsControllerTest {
     saveConcepts();
     assertResults(conceptsController.searchConcepts("ns","name",
             new SearchConceptsRequest().query("multi word").maxResults(1)),CLIENT_CONCEPT_3);
+  }
+
+  @Test
+  public void testSearchConceptsMatchMultiWordAndDomainId() throws Exception{
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns","name",
+            new SearchConceptsRequest().query("multi concept").domain(Domain.CONDITION)),CLIENT_CONCEPT_3);
+  }
+
+  @Test
+  public void testSearchConceptsMultiWordQueryNoResult() throws Exception{
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns","name",
+            new SearchConceptsRequest().query("multi war").maxResults(10)));
+  }
+
+  @Test
+  public void testSearchConceptsMultiWordWithQuotes() throws Exception{
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns","name",
+            new SearchConceptsRequest().query("sample \"to\" test").maxResults(1)),CLIENT_CONCEPT_4);
+  }
+
+  @Test
+  public void testSearchConceptsShortMultiWord() throws Exception{
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns","name",
+            new SearchConceptsRequest().query("to test search")
+                    .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)
+                    .domain(Domain.OBSERVATION)),CLIENT_CONCEPT_4);
   }
 
   @Test

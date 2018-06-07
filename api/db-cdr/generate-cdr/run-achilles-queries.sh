@@ -786,3 +786,8 @@ where (dbd.db_type='survey' and dbd.concept_id <> 0) and (o.observation_source_c
 and (o.observation_source_concept_id != 1585966)
 and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
 group by dbd.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5"
+
+#Change concept ids from 0 to null
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
+set concept_id=null where concept_id=0"
