@@ -109,7 +109,7 @@ public class DbDomainDaoTest {
     @Test
     public void findDbDomainsByDbTypeAndConceptId() throws Exception {
         /* Todo write more tests */
-        final List<DbDomain> list = dao.findByDbTypeAndAndConceptIdNotNull("survey");
+        final List<DbDomain> list = dao.findByDbTypeAndConceptIdNotNull("survey");
         Assert.assertEquals(dbDomain1.getDomainId(),"Condition");
         Assert.assertNotEquals(list.get(0).getDomainId(),dbDomain1.getDomainId());
     }
@@ -118,6 +118,12 @@ public class DbDomainDaoTest {
     public void findDomainTotals() throws Exception{
         final List<DbDomain> list=dao.findDomainTotals();
         Assert.assertEquals((Long)list.get(0).getCountValue(),Long.valueOf(0));
+        Assert.assertNotEquals(list,null);
+    }
+
+    @Test
+    public void findByConceptIdNotNull() throws Exception{
+        final List<DbDomain> list=dao.findByConceptIdNotNull();
         Assert.assertNotEquals(list,null);
     }
 
