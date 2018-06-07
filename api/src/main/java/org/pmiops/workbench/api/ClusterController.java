@@ -121,8 +121,10 @@ public class ClusterController implements ClusterApiDelegate {
         user.setClusterCreateRetries(user.getClusterCreateRetries() + 1);
         this.userDao.save(user);
         log.warning("Cluster has errored with logs: ");
-        for (ClusterError e : fcCluster.getErrors()) {
-          log.warning(e.getErrorMessage());
+        if (!fcCluster.getErrors().isEmpty()) {
+          for (ClusterError e : fcCluster.getErrors()) {
+            log.warning(e.getErrorMessage());
+          }
         }
         log.warning("Retrying cluster creation.");
 
