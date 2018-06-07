@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -26,6 +27,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -76,18 +78,21 @@ public class ClusterController implements ClusterApiDelegate {
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
   private final String apiHostName;
+  private final UserDao userDao;
 
   @Autowired
   ClusterController(NotebooksService notebooksService,
       Provider<User> userProvider,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
-      @Qualifier("apiHostName") String apiHostName) {
+      @Qualifier("apiHostName") String apiHostName,
+      UserDao userDao) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
     this.apiHostName = apiHostName;
+    this.userDao = userDao;
   }
 
   @VisibleForTesting
@@ -109,6 +114,20 @@ public class ClusterController implements ClusterApiDelegate {
     } catch (NotFoundException e) {
       fcCluster = this.notebooksService.createCluster(
           project, NotebooksService.DEFAULT_CLUSTER_NAME, userProvider.get().getEmail());
+    }
+    if (fcCluster.getStatus() != null && fcCluster.getStatus().equals(org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR)) {
+      User user = this.userProvider.get();
+      user.setClusterRetryNumber(user.getClusterRetryNumber() + 1);
+      this.userDao.save(user);
+      if (user.getClusterRetryNumber() <= 2) {
+        this.notebooksService.deleteCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
+      }
+    } else if (fcCluster.getStatus() != null && fcCluster.getStatus().equals(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)){
+      User user = this.userProvider.get();
+      if (user.getClusterRetryNumber() != 0) {
+        user.setClusterRetryNumber(0);
+        this.userDao.save(user);
+      }
     }
     ClusterListResponse resp = new ClusterListResponse();
     resp.setDefaultCluster(TO_ALL_OF_US_CLUSTER.apply(fcCluster));
