@@ -7,18 +7,24 @@
         <div class="form-section">
           <label>Description:</label>
           <input id="bug-report-short-descr" type="text" class="input" name="short-description" autofocus
-              [(ngModel)]="shortDescription">
+              [(ngModel)]="bugReport.shortDescription">
         </div>
         <div class="form-section">
           <label>How to Reproduce:</label>
           <textarea id="bug-report-repro-steps" class="input" name="repro-steps"
-              [(ngModel)]="reproSteps">
+              [(ngModel)]="bugReport.reproSteps">
           </textarea>
+        </div>
+        <div class="form-section">
+          <clr-checkbox id="bug-report-notebook-logs" class="notebook-logs" name="notebook-logs"
+              [(ngModel)]="bugReport.includeNotebookLogs">
+          </clr-checkbox>
+          <label>Attach notebook logs?</label>
         </div>
         <div class="form-section">
           <label>Contact Email:</label>
           <input id="bug-report-contact-email" type="text" class="input" name="contact-email"
-              [(ngModel)]="contactEmail">
+              [(ngModel)]="bugReport.contactEmail">
         </div>
       </div>
     </div>

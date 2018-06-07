@@ -9,7 +9,7 @@
 }
 
 .input.description {
-  width: 100%;
+  width: 600px;
 }
 
 .checkbox-group {
@@ -59,7 +59,8 @@
 }
 
 .card {
-  width: 60%
+  width: 60%;
+  min-width: 835px;
 }
 
 .col-xs-6 {

@@ -1,11 +1,13 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
   BillingProjectStatus,
   BlockscoreIdVerificationStatus,
+  DataAccessLevel,
   Profile,
   ProfileService
 } from 'generated';
@@ -42,19 +44,25 @@ export class HomepageComponent implements OnInit, OnDestroy {
       'value': this.numberOfTotalTasks - this.completedTasks
     }
   ];
-  FCAccountInitialized = false;
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
+  private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
+
   constructor(
+    private serverConfigService: ServerConfigService,
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
+
   ngOnInit(): void {
+    this.serverConfigService.getConfig().subscribe((config) => {
+      this.enforceRegistered = config.enforceRegistered;
+    });
     this.profileStorageService.profile$.subscribe((profile) => {
       if (this.firstSignIn === undefined) {
         this.firstSignIn = new Date(profile.firstSignInTime);
@@ -65,9 +73,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
         this.billingProjectQuery = setTimeout(() => {
           this.profileStorageService.reload();
         }, 10000);
-      }
-      if (profile != null) {
-        this.FCAccountInitialized = true;
       }
       this.profile = profile;
       this.reloadSpinner();
@@ -127,13 +132,29 @@ export class HomepageComponent implements OnInit, OnDestroy {
   addWorkspace(): void {
     this.router.navigate(['workspace/build'], {relativeTo : this.route});
   }
-   navigateToProfile(): void {
-    this.router.navigate(['profile']);
-   }
 
-   listWorkspaces(): void {
-    this.router.navigate(['workspaces']);
-   }
+  navigateToProfile(): void {
+   this.router.navigate(['profile']);
+  }
+
+  listWorkspaces(): void {
+   this.router.navigate(['workspaces']);
+  }
+
+  // The user is FC initialized and has access to the CDR, if enforced in this
+  // environment.
+  hasCdrAccess(): boolean {
+    if (!this.profile) {
+      return false;
+    }
+    if (!this.enforceRegistered) {
+      return true;
+    }
+    return [
+      DataAccessLevel.Registered,
+      DataAccessLevel.Protected
+    ].includes(this.profile.dataAccessLevel);
+  }
 
   get twoFactorBannerEnabled() {
     if (this.firstSignIn == null) {

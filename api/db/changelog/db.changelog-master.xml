@@ -46,4 +46,5 @@
   <include file="changelog/db.changelog-36.xml"/>
   <include file="changelog/db.changelog-37-add-two-factor-column.xml"/>
   <include file="changelog/db.changelog-38.xml"/>
+  <include file="changelog/db.changelog-39-add-cluster-retry-number.xml"/>
 </databaseChangeLog>

@@ -91,6 +91,8 @@ configurations {
   generatedCompile
 }
 
+project.ext.GAE_VERSION = '1.9.64'
+
 buildscript {    // Configuration for building
   repositories {
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more
@@ -189,8 +191,8 @@ dependencies {
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'mysql:mysql-connector-java:+'
   compile 'com.google.cloud.sql:mysql-socket-factory:+'
-  compile 'com.google.appengine:appengine:+'
-  compile 'com.google.appengine:appengine-api-1.0-sdk:+'
+  compile "com.google.appengine:appengine:${GAE_VERSION}"
+  compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
   compile('org.springframework.boot:spring-boot-starter-web:+') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
@@ -232,6 +234,9 @@ dependencies {
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
+  testCompile "com.google.appengine:appengine-testing:${GAE_VERSION}"
+  testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
+  testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:+'
   testCompile 'org.springframework.boot:spring-boot-starter-test:+'
   testCompile 'com.h2database:h2:+'

@@ -108,7 +108,6 @@ paths:
         - bugReport
       description: Sends an email to developers about a user reported bug
       operationId: sendBugReport
-      # TODO(dmohs): security: []
       parameters:
         - in: body
           name: bugReport
@@ -834,6 +833,11 @@ definitions:
       projectId:
         type: string
         description: The cloud project in which this app is running.
+      enforceRegistered:
+        type: boolean
+        description: |
+          Whether the user's data access level should gate other Workbench functionality, namely
+          to functionality requiring CDR access.
       publicApiKeyForErrorReports:
         type: string
         description: |
@@ -1228,7 +1232,6 @@ definitions:
     type: object
     required:
       - shortDescription
-      - reproSteps
       - contactEmail
     properties:
       shortDescription:
@@ -1237,6 +1240,11 @@ definitions:
       reproSteps:
         description: Steps to reproduce the bug
         type: string
+      includeNotebookLogs:
+        description:
+          Whether or not to include notebook server logs in the bug
+          report.
+        type: boolean
       contactEmail:
         description: The email with which to contact the bug reporter.
         type: string

@@ -9,3 +9,7 @@
 .form-section:first-child {
   margin-top: 0;
 }
+
+.notebook-logs {
+  display: inline-block;
+}

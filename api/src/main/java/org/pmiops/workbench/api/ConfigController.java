@@ -19,10 +19,12 @@ public class ConfigController implements ConfigApiDelegate {
 
   @Override
   public ResponseEntity<ConfigResponse> getConfig() {
+    WorkbenchConfig config = configProvider.get();
     return ResponseEntity.ok(
       new ConfigResponse()
-        .gsuiteDomain(configProvider.get().googleDirectoryService.gSuiteDomain)
-        .projectId(configProvider.get().server.projectId)
-        .publicApiKeyForErrorReports(configProvider.get().server.publicApiKeyForErrorReports));
+        .gsuiteDomain(config.googleDirectoryService.gSuiteDomain)
+        .projectId(config.server.projectId)
+        .enforceRegistered(config.firecloud.enforceRegistered)
+        .publicApiKeyForErrorReports(config.server.publicApiKeyForErrorReports));
   }
 }
