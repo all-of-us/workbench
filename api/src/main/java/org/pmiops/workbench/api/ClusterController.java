@@ -117,14 +117,15 @@ public class ClusterController implements ClusterApiDelegate {
     }
     if (org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR.equals(fcCluster.getStatus())) {
       User user = this.userProvider.get();
-      log.warning("Cluster has errored with logs: ");
-      for (ClusterError e : fcCluster.getErrors()) {
-        log.warning(e.getErrorMessage());
-      }
       if (user.getClusterCreateRetries() <= 2) {
         user.setClusterCreateRetries(user.getClusterCreateRetries() + 1);
         this.userDao.save(user);
-        log.info("Retrying cluster creation.");
+        log.warning("Cluster has errored with logs: ");
+        for (ClusterError e : fcCluster.getErrors()) {
+          log.warning(e.getErrorMessage());
+        }
+        log.warning("Retrying cluster creation.");
+
         this.notebooksService.deleteCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
       }
     } else if (org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus())) {
