@@ -236,6 +236,7 @@ public class ProfileController implements ProfileApiDelegate {
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+      user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
       try {
         return userDao.save(user);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -467,7 +468,6 @@ public class ProfileController implements ProfileApiDelegate {
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
         mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
-        user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
         user.setContactEmail(updatedProfile.getContactEmail());
       }
     }

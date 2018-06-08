@@ -459,23 +459,6 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_succeedsOnMailchimpFailure() throws Exception {
-    createUser();
-    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
-    user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-    userDao.save(user);
-    when(mailChimpService.addUserContactEmail(CONTACT_EMAIL)).thenThrow(new WorkbenchException(new ErrorResponse().statusCode(400)));
-    Profile profile = profileController.getMe().getBody();
-    assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED, TIMESTAMP, true, true);
-    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
-    verify(fireCloudService).createAllOfUsBillingProject(profile.getFreeTierBillingProjectName());
-    verify(fireCloudService).addUserToBillingProject(
-        PRIMARY_EMAIL, profile.getFreeTierBillingProjectName());
-  }
-
-  @Test
   public void testGetBillingProjects_empty() throws Exception {
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(
         ImmutableList.<org.pmiops.workbench.firecloud.model.BillingProjectMembership>of());
