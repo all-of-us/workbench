@@ -5,33 +5,30 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.appengine.api.mail.MailServicePb;
-import com.google.appengine.api.mail.dev.LocalMailService;
-import com.google.appengine.tools.development.ApiProxyLocal;
-import com.google.appengine.tools.development.testing.LocalMailServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.google.apphosting.api.ApiProxy;
-
-import java.time.Instant;
-import java.time.ZoneId;
-
 import javax.inject.Provider;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BugReport;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.model.JupyterContents;
+import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -45,6 +42,9 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -87,13 +87,18 @@ public class BugReportControllerTest {
   @Autowired
   BugReportController bugReportController;
 
-  private LocalServiceTestHelper gaeHelper =
-      new LocalServiceTestHelper(new LocalMailServiceTestConfig());
-  private LocalMailService mailService;
+  private MailService mailService = Mockito.mock(MailServiceImpl.class);
+  private List<Message> sentMessages = new ArrayList<>();
 
   @Before
-  public void setUp() {
-    gaeHelper.setUp();
+  public void setUp() throws MessagingException {
+    sentMessages.clear();
+    Mockito.doAnswer(
+      invocation -> {
+        sentMessages.add(invocation.getArgumentAt(0, Message.class));
+        return null;
+      }
+    ).when(mailService).send(Mockito.any());
     User user = new User();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
@@ -102,14 +107,7 @@ public class BugReportControllerTest {
     user.setDisabled(false);
     when(userProvider.get()).thenReturn(user);
     bugReportController.setUserProvider(userProvider);
-
-    ApiProxyLocal proxy = (ApiProxyLocal) ApiProxy.getDelegate();
-    mailService = (LocalMailService) proxy.getService(LocalMailService.PACKAGE);
-  }
-
-  @After
-  public void tearDown() {
-    gaeHelper.tearDown();
+    bugReportController.setMailServiceProvider(Providers.of(mailService));
   }
 
   @Test
@@ -120,7 +118,9 @@ public class BugReportControllerTest {
           .includeNotebookLogs(false)
           .reproSteps("press button")
           .shortDescription("bug"));
-    assertThat(mailService.getSentMessages().size()).isEqualTo(1);
+    verify(mailService, times(1)).send(Mockito.any());
+    // The message content should have 1 part, the main body part and no attachments
+    assertSentMessageParts(1);
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
   }
 
@@ -135,9 +135,9 @@ public class BugReportControllerTest {
           .reproSteps("press button")
           .shortDescription("bug"));
 
-    assertThat(mailService.getSentMessages().size()).isEqualTo(1);
-    MailServicePb.MailMessage msg = mailService.getSentMessages().get(0);
-    assertThat(msg.attachments().size()).isEqualTo(3);
+    verify(mailService, times(1)).send(Mockito.any());
+    // The message content should have 4 parts, the main body part and three attachments
+    assertSentMessageParts(4);
     verify(jupyterApi).getRootContents(
         eq(FC_PROJECT_ID), any(), eq("delocalization.log"), any(), any(), any());
     verify(jupyterApi).getRootContents(
@@ -159,8 +159,16 @@ public class BugReportControllerTest {
           .reproSteps("press button")
           .shortDescription("bug"));
 
-    assertThat(mailService.getSentMessages().size()).isEqualTo(1);
-    MailServicePb.MailMessage msg = mailService.getSentMessages().get(0);
-    assertThat(msg.attachments().size()).isEqualTo(2);
+    verify(mailService, times(1)).send(Mockito.any());
+    // The message content should have 3 parts, the main body part and two attachments
+    assertSentMessageParts(3);
   }
+
+  private void assertSentMessageParts(Integer count) throws Exception {
+    assertThat(sentMessages).isNotEmpty();
+    Message msg = sentMessages.get(0);
+    Multipart multipart = (Multipart) msg.getContent();
+    assertThat(multipart.getCount()).isEqualTo(count);
+  }
+
 }

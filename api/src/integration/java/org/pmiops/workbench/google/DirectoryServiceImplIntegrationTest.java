@@ -11,9 +11,13 @@ import java.time.Clock;
 import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.mockito.Mockito;
+
+import javax.mail.MessagingException;
 
 public class DirectoryServiceImplIntegrationTest {
   private DirectoryServiceImpl service;
@@ -23,9 +27,12 @@ public class DirectoryServiceImplIntegrationTest {
 
 
   @Before
-  public void setup() {
+  public void setUp() throws MessagingException {
+    MailService mailService = Mockito.mock(MailServiceImpl.class);
+    Mockito.doNothing().when(mailService).send(Mockito.any());
     service = new DirectoryServiceImpl(
-        Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport,
+        Providers.of(googleCredential), Providers.of(workbenchConfig),
+        Providers.of(mailService), httpTransport,
         new GoogleRetryHandler(new NoBackOffPolicy()));
   }
 
@@ -42,12 +49,10 @@ public class DirectoryServiceImplIntegrationTest {
   @Test
   public void testCreateAndDeleteTestUser() {
     String userName = String.format("integration.test.%d", Clock.systemUTC().millis());
-    DirectoryServiceImpl serviceSpy = Mockito.spy(service);
-    Mockito.doNothing().when(serviceSpy).sendPasswordEmail(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-    serviceSpy.createUser("Integration", "Test", userName, "notasecret");
-    assertThat(serviceSpy.isUsernameTaken(userName)).isTrue();
-    serviceSpy.deleteUser(userName);
-    assertThat(serviceSpy.isUsernameTaken(userName)).isFalse();
+    service.createUser("Integration", "Test", userName, "notasecret");
+    assertThat(service.isUsernameTaken(userName)).isTrue();
+    service.deleteUser(userName);
+    assertThat(service.isUsernameTaken(userName)).isFalse();
   }
 
   private static GoogleCredential getGoogleCredential() {
@@ -63,6 +68,8 @@ public class DirectoryServiceImplIntegrationTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.googleDirectoryService = new WorkbenchConfig.GoogleDirectoryServiceConfig();
     config.googleDirectoryService.gSuiteDomain = "fake-research-aou.org";
+    config.admin = new WorkbenchConfig.AdminConfig();
+    config.admin.verifiedSendingAddress = "test@" + config.googleDirectoryService.gSuiteDomain;
     return config;
   }
 }

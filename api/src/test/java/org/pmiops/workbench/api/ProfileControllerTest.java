@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Provider;
+import javax.mail.MessagingException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -45,6 +47,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -118,12 +122,17 @@ public class ProfileControllerTest {
   private FakeClock clock;
   private IdVerificationRequest idVerificationRequest;
   private User user;
+  private MailService mailService;
 
   @Before
-  public void setUp() {
+  public void setUp() throws MessagingException {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
+    config.admin = new WorkbenchConfig.AdminConfig();
+    config.admin.verifiedSendingAddress = "verifysend@mockemail.mock";
+    config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
+    config.admin.supportGroup = "supportGroup@dummyMockEmail.com";
 
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
@@ -144,14 +153,18 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
+    mailService = Mockito.mock(MailServiceImpl.class);
+    Mockito.doNothing().when(mailService).send(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment);
+        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment,
+        Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), cloudEnvironment);
+        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config),
+        cloudEnvironment, Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 

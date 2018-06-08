@@ -24,6 +24,7 @@ import javax.mail.internet.MimeMultipart;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.EmailException;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BugReport;
@@ -43,20 +44,28 @@ public class BugReportController implements BugReportApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<JupyterApi> jupyterApiProvider;
   private Provider<User> userProvider;
+  private Provider<MailService> mailServiceProvider;
 
   @Autowired
   BugReportController(
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<User> userProvider,
-      Provider<JupyterApi> jupyterApiProvider) {
+      Provider<JupyterApi> jupyterApiProvider,
+      Provider<MailService> mailServiceProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.jupyterApiProvider = jupyterApiProvider;
+    this.mailServiceProvider = mailServiceProvider;
   }
 
   @VisibleForTesting
   void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
+  }
+
+  @VisibleForTesting
+  void setMailServiceProvider(Provider<MailService> mailServiceProvider) {
+    this.mailServiceProvider = mailServiceProvider;
   }
 
   @Override
@@ -109,7 +118,7 @@ public class BugReportController implements BugReportApiDelegate {
         }
       }
       msg.setContent(multipart);
-      Transport.send(msg);
+      mailServiceProvider.get().send(msg);
     } catch (MessagingException e) {
       throw new EmailException("Error sending bug report", e);
     } catch (UnsupportedEncodingException e) {
