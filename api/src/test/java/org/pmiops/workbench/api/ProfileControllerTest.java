@@ -122,7 +122,6 @@ public class ProfileControllerTest {
   private FakeClock clock;
   private IdVerificationRequest idVerificationRequest;
   private User user;
-  private MailService mailService;
 
   @Before
   public void setUp() throws MessagingException {
@@ -153,7 +152,7 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
-    mailService = Mockito.mock(MailServiceImpl.class);
+    MailService mailService = Mockito.mock(MailServiceImpl.class);
     Mockito.doNothing().when(mailService).send(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
