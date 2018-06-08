@@ -57,7 +57,7 @@ public class User {
   private String aboutYou;
   private String areaOfResearch;
   private Boolean twoFactorEnabled = false;
-  private Integer clusterCreateRetries = 0;
+  private Integer clusterCreateRetries;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
