@@ -19,6 +19,9 @@ import {
 export class AdminReviewWorkspaceComponent implements OnInit {
   workspaces: Workspace[] = [];
   contentLoaded = false;
+  fetchingWorkspacesError = false;
+  reviewedWorkspace: Workspace;
+  reviewError = false;
 
   constructor(
       private workspacesService: WorkspacesService
@@ -30,6 +33,8 @@ export class AdminReviewWorkspaceComponent implements OnInit {
             workspacesResp => {
               this.workspaces = workspacesResp.items;
               this.contentLoaded = true;
+            }, () => {
+              this.fetchingWorkspacesError = true;
             });
   }
 
@@ -43,6 +48,12 @@ export class AdminReviewWorkspaceComponent implements OnInit {
               if (i >= 0) {
                 this.workspaces.splice(i, 1);
               }
+            }, () => {
+              const i = this.workspaces.indexOf(workspace, 0);
+              if (i >= 0) {
+                this.reviewedWorkspace = this.workspaces[i];
+              }
+              this.reviewError = true;
             });
   }
 }

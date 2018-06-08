@@ -17,6 +17,7 @@ import {
 export class SettingsComponent implements OnInit, OnDestroy {
   private pollClusterTimer: NodeJS.Timer;
   cluster: Cluster;
+  clusterDeletionFailure = false;
   resetClusterModal = false;
   resetClusterPending = false;
 
@@ -65,10 +66,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.cluster.clusterNamespace, this.cluster.clusterName).subscribe(
         () => {
           this.cluster = null;
+          this.resetClusterPending = false;
           this.closeResetClusterModal();
           this.pollCluster();
         },
-        /* onError */ undefined,
+        /* onError */ () => {
+        this.resetClusterPending = false;
+        this.clusterDeletionFailure = true;
+        },
         /* onCompleted */ () => {
           this.resetClusterPending = false;
         });

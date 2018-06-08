@@ -12,3 +12,13 @@ h3 {
 .purpose, .review-buttons {
   flex: 1;
 }
+
+.error {
+  color: #DC5030;
+  background-color: #FFF1F0;
+  height: 40px;
+  width: 13.5rem;
+  padding-left: 1rem;
+  display: flex;
+  align-items: center;
+}

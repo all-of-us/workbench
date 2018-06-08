@@ -14,9 +14,11 @@ export class ErrorHandlingService {
   public noServerResponse: boolean;
   public serverBusy: boolean;
   public userDisabledError: boolean;
+  public profileLoadError: boolean;
 
   constructor(private zone: NgZone) {
     this.serverError = false;
+    this.profileLoadError = false;
     this.noServerResponse = false;
   }
 

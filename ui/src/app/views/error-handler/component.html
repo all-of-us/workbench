@@ -2,6 +2,10 @@
   Server Error (500)
   <clr-icon shape="times" (click)="this.closeServerError()"></clr-icon>
 </div>
+<div *ngIf="this.errorHandlingService.profileLoadError" class="error-handler">
+  Error Loading User Profile
+  <clr-icon shape="times" (click)="this.errorHandlingService.profileLoadError = false"></clr-icon>
+</div>
 <div *ngIf="this.errorHandlingService.noServerResponse" class="error-handler">
   Server not available (0)
   <clr-icon shape="times" (click)="this.closeNoServerResponse()"></clr-icon>

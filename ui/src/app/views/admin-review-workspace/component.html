@@ -1,4 +1,8 @@
 <h2>Review Workspaces</h2>
+<div *ngIf="fetchingWorkspacesError" class="error">
+  Error fetching workspaces for review
+  <clr-icon style="margin-left: 1rem;" shape="times" (click)="fetchingWorkspacesError = false"></clr-icon>
+</div>
 <div *ngIf="contentLoaded; else contentLoading">
   <ul>
     <li *ngFor="let ws of workspaces">
@@ -15,6 +19,15 @@
     </li>
   </ul>
 </div>
+
+<clr-modal [(clrModalOpen)]="reviewError" *ngIf="reviewError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not review workspace {{reviewedWorkspace.name}}.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="reviewError = false">Ok</button>
+  </div>
+</clr-modal>
+
 <ng-template #contentLoading>
   <div class="loading-area">
     <span class="spinner spinner-md" style="padding-top: 1rem"></span>

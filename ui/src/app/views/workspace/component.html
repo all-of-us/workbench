@@ -95,6 +95,13 @@
         <button type="button" class="btn btn-primary" (click)="cancelCluster()">Cancel</button>
       </div>
     </clr-modal>
+    <clr-modal [(clrModalOpen)]="localizeNotebooksError">
+      <h3 class="modal-title">Error:</h3>
+      <div class="modal-body">Could not load your notebook.</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="localizeNotebooksError = false">Ok</button>
+      </div>
+    </clr-modal>
     <div *ngIf="tabOpen===Tabs.Notebooks">
       <div *ngIf="notebooksLoading || clusterLoading" class="spinner-container">
         <span class="spinner spinner-lg"></span>

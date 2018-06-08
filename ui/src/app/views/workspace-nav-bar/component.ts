@@ -28,6 +28,7 @@ export class WorkspaceNavBarComponent implements OnInit {
   awaitingReview = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
+  workspaceDeletionError = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +51,8 @@ export class WorkspaceNavBarComponent implements OnInit {
     this.workspacesService.deleteWorkspace(
       this.workspace.namespace, this.workspace.id).subscribe(() => {
         this.router.navigate(['/workspaces']);
+    }, () => {
+      this.workspaceDeletionError = true;
     });
   }
 

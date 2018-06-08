@@ -116,6 +116,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   alertCategory: string;
   alertMsg: string;
   tabOpen = Tabs.Notebooks;
+  localizeNotebooksError = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -179,6 +180,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.localizeNotebooks([notebook]).subscribe(() => {
       this.launchedNotebookName = notebook.name;
       this.clusterPulled = true;
+    }, () => {
+      this.localizeNotebooksError = true;
     });
   }
 
@@ -214,6 +217,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         // Reload the notebook list to get the newly created notebook.
         this.loadNotebookList();
       });
+    }, () => {
+      this.localizeNotebooksError = true;
     });
   }
 

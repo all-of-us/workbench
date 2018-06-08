@@ -14,6 +14,7 @@ import {BugReport} from 'generated';
 export class BugReportComponent implements OnInit {
   reporting = false;
   bugReport: BugReport = this.emptyReport();
+  sendBugReportError: boolean;
 
   constructor(
     private bugReportService: BugReportService,
@@ -30,6 +31,7 @@ export class BugReportComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.sendBugReportError = false;
   }
 
   reportBug() {
@@ -42,6 +44,8 @@ export class BugReportComponent implements OnInit {
 
   send() {
     this.reporting = false;
-    this.bugReportService.sendBugReport(this.bugReport).subscribe(() => {});
+    this.bugReportService.sendBugReport(this.bugReport).subscribe(() => {}, () => {
+      this.sendBugReportError = true;
+    });
   }
 }

@@ -45,6 +45,10 @@ export class ProfilePageComponent implements OnInit {
       'value': this.numberOfTotalTasks - this.completedTasks
     }
   ];
+  termsOfServiceError = true;
+  demographicSurveyError = true;
+  ethicsTrainingError = true;
+  idVerificationError = true;
   constructor(
       private profileService: ProfileService,
       private profileStorageService: ProfileStorageService,
@@ -128,6 +132,8 @@ export class ProfilePageComponent implements OnInit {
       this.profile.termsOfServiceCompletionTime = profile.termsOfServiceCompletionTime;
       this.workingProfile.termsOfServiceCompletionTime = profile.termsOfServiceCompletionTime;
       this.reloadSpinner();
+    }, () => {
+      this.termsOfServiceError = true;
     });
   }
 
@@ -137,6 +143,8 @@ export class ProfilePageComponent implements OnInit {
       this.profile.ethicsTrainingCompletionTime = profile.ethicsTrainingCompletionTime;
       this.workingProfile.ethicsTrainingCompletionTime = profile.ethicsTrainingCompletionTime;
       this.reloadSpinner();
+    }, () => {
+      this.ethicsTrainingError = true;
     });
   }
 
@@ -145,6 +153,8 @@ export class ProfilePageComponent implements OnInit {
       this.profile.demographicSurveyCompletionTime = profile.demographicSurveyCompletionTime;
       this.workingProfile.demographicSurveyCompletionTime = profile.demographicSurveyCompletionTime;
       this.reloadSpinner();
+    }, () => {
+      this.demographicSurveyError = true;
     });
   }
 
@@ -187,6 +197,8 @@ export class ProfilePageComponent implements OnInit {
     this.profileService.submitIdVerification().subscribe((profile) => {
       this.profile.requestedIdVerification = profile.requestedIdVerification;
       this.workingProfile.requestedIdVerification = profile.requestedIdVerification;
+    }, () => {
+      this.idVerificationError = true;
     });
   }
 }

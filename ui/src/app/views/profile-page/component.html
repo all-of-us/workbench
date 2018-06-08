@@ -80,7 +80,7 @@
     </div>
     <div class="field-wrapper" style="padding-right: 2rem;">
       <h3 class="profile-header" style="margin-top: 0">Profile Completion Progress:</h3>
-      <div class="card" style="height: 10.4rem;">
+      <div class="card">
         <div style="display: flex; align-items: center;">
           <div style="height: 7.8rem;">
             <ngx-charts-pie-chart
@@ -128,6 +128,22 @@
               </button>
             </div>
           </div>
+        </div>
+        <div *ngIf="termsOfServiceError" class="error">
+          Error submitting terms of service.
+          <clr-icon style="margin-left: 1rem;" shape="times" (click)="termsOfServiceError = false"></clr-icon>
+        </div>
+        <div *ngIf="ethicsTrainingError" class="error">
+          Error submitting ethics training.
+          <clr-icon style="margin-left: 1rem;" shape="times" (click)="ethicsTrainingError = false"></clr-icon>
+        </div>
+        <div *ngIf="demographicSurveyError" class="error">
+          Error submitting demographics survey.
+          <clr-icon style="margin-left: 1rem;" shape="times" (click)="demographicSurveyError = false"></clr-icon>
+        </div>
+        <div *ngIf="idVerificationError" class="error">
+          Error submitting identity verification request.
+          <clr-icon style="margin-left: 1rem;" shape="times" (click)="idVerificationError = false"></clr-icon>
         </div>
       </div>
     </div>
