@@ -83,8 +83,8 @@ fi
 WORKBENCH_DATASET=cdr$CDR_VERSION
 PUBLIC_DATASET=public$CDR_VERSION
 
-startDate=`date`
-echo `date` " Starting generate-cdr-counts $startDate"
+startDate=$(date)
+echo $(date) " Starting generate-cdr-counts $startDate"
 
 ## Make BigQuery denormalized tables
 echo "Making BigQuery denormalized tables"
@@ -140,6 +140,6 @@ else
     exit 1
 fi
 
-stopDate=`date`
+stopDate=$(date)
 echo "Start $startDate Stop: $stopDate"
-echo `date` " Finished generate-cdr-counts "
+echo $(date) " Finished generate-cdr-counts "

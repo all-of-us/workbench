@@ -38,7 +38,7 @@ then
   exit 1
 fi
 
-echo "Dumping tables to csv from $BUCKET\n"
+echo "Dumping tables to csv from $BUCKET"
 
 ##echo "Echoing dataset name"
 ##echo ${DATASET}
