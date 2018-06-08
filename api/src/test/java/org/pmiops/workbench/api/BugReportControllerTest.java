@@ -58,6 +58,8 @@ public class BugReportControllerTest {
 
   private static final JupyterContents TEST_CONTENTS =
       new JupyterContents().content("log contents");
+  private List<Message> sentMessages = new ArrayList<>();
+  private MailService mailService = Mockito.mock(MailServiceImpl.class);
 
   @TestConfiguration
   @Import({BugReportController.class})
@@ -86,9 +88,6 @@ public class BugReportControllerTest {
   JupyterApi jupyterApi;
   @Autowired
   BugReportController bugReportController;
-
-  private MailService mailService = Mockito.mock(MailServiceImpl.class);
-  private List<Message> sentMessages = new ArrayList<>();
 
   @Before
   public void setUp() throws MessagingException {
