@@ -65,7 +65,7 @@ def setup_and_enter_docker(cmd_name, opts)
       exit 1
     end
     live_staging_version = get_live_gae_version(STAGING_PROJECT)
-    if not live_staging_version
+    unless live_staging_version
       common.error "No default staging version could be determined for " +
                    "promotion; please investigate or else be explicit in " +
                    "the version to promote by specifying both " +
@@ -86,7 +86,7 @@ def setup_and_enter_docker(cmd_name, opts)
 
   # TODO: Might be nice to emit the last version creation time here as a
   # sanity check (need to pick which service to do that for...).
-  live_version = get_live_gae_version(opts.project, validate_version=false)
+  live_version = get_live_gae_version(opts.project, false)
   common.status "Current live version is '#{live_version}' (project " +
                 "#{opts.project})"
   puts "Will deploy git version '#{opts.git_version}' as App Engine " +
@@ -100,7 +100,7 @@ def setup_and_enter_docker(cmd_name, opts)
   # By default Tempfile on OS X does not use a docker-friendly location
   key_file = Tempfile.new(["#{opts.account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
-    opts.project, account=opts.account, path=key_file.path).run do
+    opts.project, opts.account, key_file.path).run do
     common.run_inline %W{docker-compose build deploy}
     common.run_inline %W{
       docker-compose run --rm
@@ -123,59 +123,59 @@ def deploy(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--project [project]",
-    lambda {|opts, v| opts.project = v},
+    ->(opts, v) { opts.project = v},
     "The Google Cloud project to deploy to."
   )
   op.add_option(
     "--account [account]",
-    lambda {|opts, v| opts.account = v},
+    ->(opts, v) { opts.account = v},
     "Service account to act as for deployment, if any. Defaults to the GAE " +
     "default service account."
   )
   op.add_option(
     "--key-file [key file]",
-    lambda {|opts, v| opts.key_file = v},
+    ->(opts, v) { opts.key_file = v},
     "Path to a service account key file to be used for deployment"
   )
   op.add_option(
     "--git-version [git version]",
-    lambda {|opts, v| opts.git_version = v},
+    ->(opts, v) { opts.git_version = v},
     "GitHub tag or branch, e.g. 'v1-0-rc1', 'origin/master'. Branch names " +
     "must be prefixed with 'origin/'. By default, uses the current live " +
     "staging release tag (if staging is in a good state)"
   )
   op.add_option(
     "--app-version [app version]",
-    lambda {|opts, v| opts.app_version = v},
+    ->(opts, v) { opts.app_version = v},
     "App Engine version to deploy as. By default, uses the current live " +
     "staging release version (if staging is in a good state)"
   )
   op.add_option(
     "--no-update-jira",
-    lambda {|opts, v| opts.update_jira = false},
+    ->(opts, _) { opts.update_jira = false},
     "Don't update or create a ticket in JIRA; by default will pick " +
     "depending on the target project. On --no-promote JIRA is never updated"
   )
   op.add_option(
     "--promote",
-    lambda {|opts, v| opts.promote = true},
+    ->(opts, _) { opts.promote = true},
     "Promote this version to immediately begin serving traffic"
   )
   op.add_option(
     "--no-promote",
-    lambda {|opts, v| opts.promote = false},
+    ->(opts, _) { opts.promote = false},
     "Deploy, but do not yet serve traffic from this version - DB migrations " +
     "are still applied"
   )
   op.add_option(
     "--circle-url [circle url]",
-    lambda {|opts, v| opts.circle_url = v},
+    ->(opts, v) { opts.circle_url = v},
     "Circle test output URL to attach to the release tracker; only " +
     "relevant for runs where a release ticket is created (staging)"
   )
-  op.add_validator lambda {|opts| raise ArgumentError if opts.project.nil?}
-  op.add_validator lambda {|opts| raise ArgumentError if opts.account.nil?}
-  op.add_validator lambda {|opts| raise ArgumentError if opts.promote.nil?}
+  op.add_validator ->(opts) { raise ArgumentError if opts.project.nil?}
+  op.add_validator ->(opts) { raise ArgumentError if opts.account.nil?}
+  op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
 
   op.parse.validate
 
@@ -184,7 +184,7 @@ def deploy(cmd_name, args)
   end
   op.opts.update_jira = op.opts.update_jira and op.opts.promote
 
-  unless Workbench::in_docker?
+  unless Workbench.in_docker?
     return setup_and_enter_docker(cmd_name, op.opts)
   end
 
@@ -208,7 +208,7 @@ def deploy(cmd_name, args)
   jira_client = nil
   create_ticket = false
   from_version = nil
-  maybe_log_jira = lambda { |msg| common.status msg }
+  maybe_log_jira = ->(msg) { common.status msg }
   if op.opts.update_jira
     if not VERSION_RE.match(op.opts.app_version) or
       op.opts.app_version != op.opts.git_version
@@ -225,7 +225,7 @@ def deploy(cmd_name, args)
     if op.opts.update_jira and op.opts.project == STAGING_PROJECT
       create_ticket = true
       from_version = get_live_gae_version(STAGING_PROJECT)
-      if not from_version
+      unless from_version
         # Alternatively, we could support a --from_version flag
         raise RuntimeError "could not determine live staging version, and " +
                            "therefore could not generate a delta commit log; " +
@@ -278,10 +278,10 @@ end
 Common.register_command({
   :invocation => "deploy",
   :description => "",
-  :fn => lambda { |*args| deploy("deploy", args) }
+  :fn => ->(*args) { deploy("deploy", args) }
 })
 
-def docker_clean(*args)
+def docker_clean()
   common = Common.new
   common.run_inline %W{docker-compose down --volumes}
 end
@@ -292,5 +292,5 @@ Common.register_command({
     "Removes docker containers and volumes, allowing the next `deploy` to " \
     "start from scratch (e.g., no git repo cache). This should not normally " \
     "be necessary outside of deploy script development",
-  :fn => lambda { |*args| docker_clean(*args) }
+  :fn => ->() { docker_clean() }
 })

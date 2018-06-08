@@ -11,8 +11,8 @@ class Options < OpenStruct
 end
 
 def ensure_docker(cmd_name, args)
-  unless Workbench::in_docker?
-    exec *(%W{docker-compose run --rm ui ./project.rb #{cmd_name}} + args)
+  unless Workbench.in_docker?
+    exec(*(%W{docker-compose run --rm ui ./project.rb #{cmd_name}} + args))
   end
 end
 
@@ -34,7 +34,7 @@ end
 Common.register_command({
   :invocation => "install-dependencies",
   :description => "Installs dependencies via yarn.",
-  :fn => Proc.new { |*args| install_dependencies(*args) }
+  :fn => Proc.new { |_| install_dependencies() }
 })
 
 def swagger_regen(cmd_name)
@@ -48,7 +48,7 @@ end
 Common.register_command({
   :invocation => "swagger-regen",
   :description => "Regenerates API client libraries from Swagger definitions.",
-  :fn => Proc.new { |*args| swagger_regen("swagger-regen") }
+  :fn => Proc.new { |_| swagger_regen("swagger-regen") }
 })
 
 class BuildOptions
@@ -61,9 +61,9 @@ class BuildOptions
   end
 
   def parse cmd_name, args
-    parser = OptionParser.new do |parser|
-      parser.banner = "Usage: ./project.rb #{cmd_name} [options]"
-      parser.on(
+    parser = OptionParser.new do |p|
+      p.banner = "Usage: ./project.rb #{cmd_name} [options]"
+      p.on(
         "--environment ENV", ENV_CHOICES,
         "Environment (default: local-test): [#{ENV_CHOICES.join(" ")}]") do |v|
         # The default environment file (called "dev" in Angular language)
@@ -124,7 +124,7 @@ class DeployUI
   end
 
   def validate_options
-    if @opts.project == nil || @opts.version == nil || @opts.promote == nil
+    if @opts.project.nil? || @opts.version.nil? || @opts.promote.nil?
       puts @parser.help
       exit 1
     end
@@ -143,7 +143,7 @@ class DeployUI
 
     swagger_regen(@cmd_name)
     build(@cmd_name, %W{--environment #{environment_name}})
-    ServiceAccountContext.new(@opts.project, service_account=@opts.account, path=@opts.key_file).run do
+    ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       common.run_inline %W{gcloud app deploy
         --project #{@opts.project}
         --version #{@opts.version}
@@ -176,7 +176,7 @@ end
 Common.register_command({
   :invocation => "build",
   :description => "Builds the UI for the given environment.",
-  :fn => lambda { |*args| build("build", args) }
+  :fn => ->(*args) { build("build", args) }
 })
 
 def deploy_ui(cmd_name, args)
@@ -187,7 +187,7 @@ end
 Common.register_command({
   :invocation => "deploy-ui",
   :description => "Deploys the UI to the specified cloud project.",
-  :fn => lambda { |*args| deploy_ui("deploy-ui", args) }
+  :fn => ->(*args) { deploy_ui("deploy-ui", args) }
 })
 
 def dev_up(*args)
@@ -216,7 +216,7 @@ Common.register_command({
   :fn => Proc.new { |*args| dev_up(*args) }
 })
 
-def test(*args)
+def test()
   common = Common.new
 
   install_dependencies
@@ -231,7 +231,7 @@ end
 Common.register_command({
   :invocation => "test",
   :description => "Brings up the testing environment.",
-  :fn => Proc.new { |*args| test(*args) }
+  :fn => Proc.new { |_| test() }
 })
 
 def run_linter()
@@ -241,7 +241,7 @@ end
 Common.register_command({
   :invocation => "lint",
   :description => "Runs linter.",
-  :fn => Proc.new { |*args| run_linter(*args) }
+  :fn => Proc.new { |_| run_linter() }
 })
 
 def rebuild_image()
@@ -253,7 +253,7 @@ end
 Common.register_command({
   :invocation => "rebuild-image",
   :description => "Re-builds the dev docker image (necessary when Dockerfile is updated).",
-  :fn => Proc.new { |*args| rebuild_image(*args) }
+  :fn => Proc.new { |_| rebuild_image() }
 })
 
 def docker_run(cmd_name, args)
@@ -263,10 +263,10 @@ end
 Common.register_command({
   :invocation => "docker-run",
   :description => "Runs the specified command in a docker container.",
-  :fn => lambda { |*args| docker_run("docker-run", args) }
+  :fn => ->(*args) { docker_run("docker-run", args) }
 })
 
-def clean_environment(cmd_name, args)
+def clean_environment()
   common = Common.new
   common.run_inline %W{rm -rf node_modules}
   Common.new.run_inline %W{docker-compose down --volumes --rmi=local}
@@ -275,5 +275,5 @@ end
 Common.register_command({
   :invocation => "clean-environment",
   :description => "Removes node modules, docker volumes and images.",
-  :fn => lambda { |*args| clean_environment("clean-environment", args) }
+  :fn => ->() { clean_environment() }
 })
