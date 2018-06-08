@@ -22,7 +22,7 @@
 
 <clr-modal [(clrModalOpen)]="reviewError" *ngIf="reviewError">
   <h3 class="modal-title">Error:</h3>
-  <div class="modal-body">Could not review workspace {{reviewedWorkspace.name}}.</div>
+  <div class="modal-body">Could not review workspace '{{reviewedWorkspace.name}}'.</div>
   <div class="modal-footer">
     <button type="button" class="btn btn-primary" (click)="reviewError = false">Ok</button>
   </div>

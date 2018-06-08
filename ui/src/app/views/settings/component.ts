@@ -17,7 +17,7 @@ import {
 export class SettingsComponent implements OnInit, OnDestroy {
   private pollClusterTimer: NodeJS.Timer;
   cluster: Cluster;
-  clusterDeletionFailure = false;
+  clusterDeletionFailure = true;
   resetClusterModal = false;
   resetClusterPending = false;
 
@@ -55,6 +55,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   openResetClusterModal(): void {
     this.resetClusterPending = false;
     this.resetClusterModal = true;
+    this.clusterDeletionFailure = false;
   }
 
   closeResetClusterModal(): void {

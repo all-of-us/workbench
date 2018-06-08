@@ -45,10 +45,10 @@ export class ProfilePageComponent implements OnInit {
       'value': this.numberOfTotalTasks - this.completedTasks
     }
   ];
-  termsOfServiceError = true;
-  demographicSurveyError = true;
-  ethicsTrainingError = true;
-  idVerificationError = true;
+  termsOfServiceError = false;
+  demographicSurveyError = false;
+  ethicsTrainingError = false;
+  idVerificationError = false;
   constructor(
       private profileService: ProfileService,
       private profileStorageService: ProfileStorageService,
