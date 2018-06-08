@@ -79,17 +79,16 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
-    if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED) {
-      if (user.getBlockscoreVerificationIsValid() != null
-          && user.getBlockscoreVerificationIsValid()
-          && user.getDemographicSurveyCompletionTime() != null
-          && user.getEthicsTrainingCompletionTime() != null
-          && user.getTermsOfServiceCompletionTime() != null
-          && user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
-        this.fireCloudService.addUserToGroup(user.getEmail(),
-            configProvider.get().firecloud.registeredDomainName);
-        user.setDataAccessLevel(DataAccessLevel.REGISTERED);
-      }
+    if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED
+        && user.getBlockscoreVerificationIsValid() != null
+        && user.getBlockscoreVerificationIsValid()
+        && user.getDemographicSurveyCompletionTime() != null
+        && user.getEthicsTrainingCompletionTime() != null
+        && user.getTermsOfServiceCompletionTime() != null
+        && user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
+      this.fireCloudService.addUserToGroup(user.getEmail(),
+          configProvider.get().firecloud.registeredDomainName);
+      user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     }
   }
 

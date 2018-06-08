@@ -26,7 +26,6 @@ public class InterceptorUtils {
           e);
     }
 
-    Method controllerMethod;
     try {
       return controllerClass.getMethod(
           apiControllerMethod.getName(), apiControllerMethod.getParameterTypes());

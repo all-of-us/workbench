@@ -18,12 +18,9 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.logging.Logger;
 
 @org.springframework.context.annotation.Configuration
 public class FireCloudConfig {
-
-  private static final Logger log = Logger.getLogger(FireCloudConfig.class.getName());
 
   private static final String END_USER_API_CLIENT = "endUserApiClient";
   private static final String ALL_OF_US_API_CLIENT = "allOfUsApiClient";

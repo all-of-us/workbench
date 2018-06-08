@@ -43,7 +43,7 @@ public class CohortReviewDaoTest {
     private long cohortId;
 
     @Before
-    public void setup() throws Exception {
+    public void setUp() throws Exception {
       Cohort cohort = new Cohort();
       cohort.setWorkspaceId(workspaceDao.save(new Workspace()).getWorkspaceId());
       cohortId = cohortDao.save(cohort).getCohortId();
@@ -95,11 +95,6 @@ public class CohortReviewDaoTest {
     }
 
     private CohortReview createCohortReview() {
-        final Sort sort = new Sort(Sort.Direction.ASC, "status");
-        final PageRequest pageRequest = new PageRequest(0, 25, sort);
-
-        Gson gson = new Gson();
-
         return new CohortReview()
                 .cohortId(cohortId)
                 .cdrVersionId(CDR_VERSION_ID)

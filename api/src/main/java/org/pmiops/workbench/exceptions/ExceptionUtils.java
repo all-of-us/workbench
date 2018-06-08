@@ -4,7 +4,6 @@ package org.pmiops.workbench.exceptions;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.model.ErrorCode;
@@ -15,8 +14,6 @@ import org.springframework.http.HttpStatus;
  * Utility methods related to exceptions.
  */
 public class ExceptionUtils {
-
-  private static final Logger log = Logger.getLogger(ExceptionUtils.class.getName());
 
   public static boolean isGoogleServiceUnavailableException(IOException e) {
     // We assume that any 500 range error for Google is something we should retry.

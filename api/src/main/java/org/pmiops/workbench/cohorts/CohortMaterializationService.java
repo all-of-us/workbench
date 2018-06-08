@@ -14,9 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
@@ -50,22 +48,17 @@ public class CohortMaterializationService {
       Arrays.asList(CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW,
           CohortStatus.NOT_REVIEWED);
 
-  private final BigQueryService bigQueryService;
-  private final ParticipantCounter participantCounter;
   private final FieldSetQueryBuilder fieldSetQueryBuilder;
   private final AnnotationQueryBuilder annotationQueryBuilder;
   private final ParticipantCohortStatusDao participantCohortStatusDao;
   private final Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider;
 
   @Autowired
-  public CohortMaterializationService(BigQueryService bigQueryService,
-      ParticipantCounter participantCounter,
+  public CohortMaterializationService(
       FieldSetQueryBuilder fieldSetQueryBuilder,
       AnnotationQueryBuilder annotationQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao,
       Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider) {
-    this.bigQueryService = bigQueryService;
-    this.participantCounter = participantCounter;
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
     this.annotationQueryBuilder = annotationQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;

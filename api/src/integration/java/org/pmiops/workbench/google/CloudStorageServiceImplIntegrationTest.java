@@ -11,7 +11,7 @@ public class CloudStorageServiceImplIntegrationTest {
   private final WorkbenchConfig workbenchConfig = createConfig();
 
   @Before
-  public void setup() {
+  public void setUp() {
     service = new CloudStorageServiceImpl(Providers.of(workbenchConfig));
   }
 
