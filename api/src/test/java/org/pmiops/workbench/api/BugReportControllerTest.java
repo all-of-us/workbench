@@ -22,7 +22,6 @@ import org.mockito.Mockito;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mail.MailServiceImpl;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BugReport;
 import org.pmiops.workbench.notebooks.ApiException;
@@ -59,7 +58,6 @@ public class BugReportControllerTest {
   private static final JupyterContents TEST_CONTENTS =
       new JupyterContents().content("log contents");
   private List<Message> sentMessages = new ArrayList<>();
-  private MailService mailService = Mockito.mock(MailServiceImpl.class);
 
   @TestConfiguration
   @Import({BugReportController.class})
@@ -84,6 +82,8 @@ public class BugReportControllerTest {
 
   @Mock
   Provider<User> userProvider;
+  @Mock
+  MailService mailService;
   @Autowired
   JupyterApi jupyterApi;
   @Autowired
@@ -97,7 +97,7 @@ public class BugReportControllerTest {
         sentMessages.add(invocation.getArgumentAt(0, Message.class));
         return null;
       }
-    ).when(mailService).send(Mockito.any());
+    ).when(mailService).send(any());
     User user = new User();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
@@ -163,7 +163,7 @@ public class BugReportControllerTest {
     assertSentMessageParts(3);
   }
 
-  private void assertSentMessageParts(Integer count) throws Exception {
+  private void assertSentMessageParts(int count) throws Exception {
     assertThat(sentMessages).isNotEmpty();
     Message msg = sentMessages.get(0);
     Multipart multipart = (Multipart) msg.getContent();
