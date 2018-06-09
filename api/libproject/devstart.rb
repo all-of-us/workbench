@@ -746,8 +746,7 @@ Common.register_command({
 })
 
 def write_db_creds_file(project, cdr_db_name, public_db_name,
-                        root_password, workbench_password, cdr_password,
-                        public_password=nil)
+                        root_password, workbench_password, public_password=nil)
   instance_name = "#{project}:us-central1:workbenchmaindb"
   db_creds_file = Tempfile.new("#{project}-vars.env")
   if db_creds_file
@@ -874,11 +873,11 @@ def authority_options(cmd_name, args)
       "Comma-separated list of user authorities to add or remove for the users. ")
   op.add_option(
       "--remove",
-      ->(opts, v) { opts.remove = "true"},
+      ->(opts, _) { opts.remove = "true"},
       "Remove authorities (rather than adding them.)")
   op.add_option(
       "--dry_run",
-      ->(opts, v) { opts.dry_run = "true"},
+      ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
   op.add_validator ->(opts) { raise ArgumentError unless opts.email and opts.authority}
   return op
@@ -891,7 +890,7 @@ def set_authority(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  with_cloud_proxy_and_db(gcc) do |ctx|
+  with_cloud_proxy_and_db(gcc) do
     Dir.chdir("tools") do
       common = Common.new
       common.run_inline %W{
@@ -943,7 +942,7 @@ def delete_clusters(cmd_name, *args)
       "Optional cluster IDs to delete, e.g. 'aou-test-f1-1/all-of-us'")
   op.add_option(
       "--nodry-run",
-      ->(opts, v) { opts.dry_run = false},
+      ->(opts, _) { opts.dry_run = false},
       "Actually delete clusters, defaults to dry run")
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1004,7 +1003,7 @@ def connect_to_cloud_db(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--root",
-    ->(opts, v) { opts.root = true },
+    ->(opts, _) { opts.root = true },
     "Connect as root")
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1059,17 +1058,17 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   )
   op.add_option(
     "--promote",
-    ->(opts, v) { opts.promote = true},
+    ->(opts, _) { opts.promote = true},
     "Promote this deploy to make it available at the root URL"
   )
   op.add_option(
     "--no-promote",
-    ->(opts, v) { opts.promote = false},
+    ->(opts, _) { opts.promote = false},
     "Do not promote this deploy to make it available at the root URL"
   )
   op.add_option(
     "--quiet",
-    ->(opts, v) { opts.quiet = true},
+    ->(opts, _) { opts.quiet = true},
     "Don't display a confirmation prompt when deploying"
   )
   gcc = GcloudContextV2.new(op)
@@ -1088,9 +1087,12 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   end
 
   common.run_inline %W{gradle :appengineStage}
-  promote = op.opts.promote.nil? ? (op.opts.version ? "--no-promote" : "--promote") \
-    : (op.opts.promote ? "--promote" : "--no-promote")
-  quiet = op.opts.quiet ? " --quiet" : ""
+  promote = "--no-promote"
+  unless op.opts.promote.nil?
+    promote = op.opts.promote ? "--promote" : "--no-promote"
+  else
+    promote = op.opts.version ? "--no-promote" : "--promote"
+  end
 
   common.run_inline %W{
     gcloud app deploy
@@ -1105,7 +1107,7 @@ def deploy_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
-  deploy_app(cmd_name, args, with_cron=true, with_gsuite_admin=true)
+  deploy_app(cmd_name, args, true, true)
 end
 
 Common.register_command({
@@ -1120,7 +1122,7 @@ def deploy_public_api(cmd_name, args)
   common = Common.new
   common.status "Deploying public-api..."
   Dir.chdir('../public-api') do
-    deploy_app(cmd_name, args, with_cron=false, with_gsuite_admin=false)
+    deploy_app(cmd_name, args, false, false)
   end
 end
 
@@ -1177,8 +1179,7 @@ end
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
   ENV.update(read_db_vars(gcc))
   ENV["DB_PORT"] = "3307" # TODO(dmohs): Use MYSQL_TCP_PORT to be consistent with mysql CLI.
-  common = Common.new
-  CloudSqlProxyContext.new(gcc.project, account=service_account, path=key_file).run do
+  CloudSqlProxyContext.new(gcc.project, service_account, key_file).run do
     yield(gcc)
   end
 end
@@ -1216,12 +1217,12 @@ def deploy(cmd_name, args)
   )
   op.add_option(
     "--promote",
-    ->(opts, v) { opts.promote = true},
+    ->(opts, _) { opts.promote = true},
     "Promote this version to immediately begin serving API traffic"
   )
   op.add_option(
     "--no-promote",
-    ->(opts, v) { opts.promote = false},
+    ->(opts, _) { opts.promote = false},
     "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
   )
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
@@ -1232,7 +1233,7 @@ def deploy(cmd_name, args)
 
   common = Common.new
   common.status "Running database migrations..."
-  with_cloud_proxy_and_db(gcc, service_account=op.opts.account, key_file=op.opts.key_file) do |ctx|
+  with_cloud_proxy_and_db(gcc, op.opts.account, op.opts.key_file) do |ctx|
     migrate_database
     load_config(ctx.project)
 
@@ -1282,14 +1283,14 @@ Common.register_command({
   :fn => ->(*args) { update_cloud_config("update-cloud-config", args) }
 })
 
-def docker_run(cmd_name, args)
+def docker_run(args)
   Common.new.run_inline %W{docker-compose run --rm scripts} + args
 end
 
 Common.register_command({
   :invocation => "docker-run",
   :description => "Runs the specified command in a docker container.",
-  :fn => ->(*args) { docker_run("docker-run", args) }
+  :fn => ->(*args) { docker_run(args) }
 })
 
 def print_scoped_access_token(cmd_name, args)
@@ -1308,13 +1309,15 @@ def print_scoped_access_token(cmd_name, args)
     scopes = %W{profile email} + op.opts.scopes
 
     require "googleauth"
-    creds = Google::Auth::ServiceAccountCredentials.make_creds(
-      json_key_io: File.open(ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH),
-      scope: scopes
-    )
+    f = File.open(ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH) do
+      creds = Google::Auth::ServiceAccountCredentials.make_creds(
+        json_key_io: f,
+        scope: scopes
+      )
 
-    token_data = creds.fetch_access_token!
-    puts "\n#{token_data["access_token"]}"
+      token_data = creds.fetch_access_token!
+      puts "\n#{token_data["access_token"]}"
+    end
   end
 end
 
@@ -1350,7 +1353,7 @@ def create_project_resources(gcc)
   common.run_inline %W{gcloud app create --region us-central --project #{gcc.project}}
 end
 
-def setup_project_data(gcc, cdr_db_name, public_db_name, args)
+def setup_project_data(gcc, cdr_db_name, public_db_name)
   root_password, workbench_password = random_password(), random_password()
 
   public_password = nil
@@ -1363,7 +1366,7 @@ def setup_project_data(gcc, cdr_db_name, public_db_name, args)
   # This changes database connection information; don't call this while the server is running!
   common.status "Writing DB credentials file..."
   write_db_creds_file(gcc.project, cdr_db_name, public_db_name, root_password,
-                      workbench_password, public_password=public_password)
+                      workbench_password, public_password)
   common.status "Setting root password..."
   run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
@@ -1417,7 +1420,7 @@ def setup_cloud_project(cmd_name, *args)
   gcc.validate
 
   create_project_resources(gcc)
-  setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name, args)
+  setup_project_data(gcc, op.opts.cdr_db_name, op.opts.public_db_name)
   deploy_gcs_artifacts(cmd_name, %W{--project #{gcc.project}})
 end
 
