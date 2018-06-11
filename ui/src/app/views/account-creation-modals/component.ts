@@ -33,7 +33,7 @@ export class AccountCreationModalsComponent implements OnInit {
   }
 
   resendInstructions() {
-    this.resendingEmail = true
+    this.resendingEmail = true;
   }
 
   sendAndUpdate() {
@@ -49,6 +49,6 @@ export class AccountCreationModalsComponent implements OnInit {
 
   send() {
     this.resendingEmail = false;
-    //resend email. Add in once Mandrill API is in.
+    // resend email. Add in once Mandrill API is in.
   }
 }
