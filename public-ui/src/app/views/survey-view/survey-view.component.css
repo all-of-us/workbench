@@ -1,4 +1,6 @@
-
+.white-card-box.top-stat {
+    height: inherit;
+}
 
 .survey-results {
     padding: .5rem;

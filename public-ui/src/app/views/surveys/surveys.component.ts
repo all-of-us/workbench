@@ -24,7 +24,7 @@ export class SurveysComponent implements OnInit {
   ngOnInit() {
     this.api.getSurveyList().subscribe(
       result => {
-        this.surveys = result.items;
+        this.surveys = result.items.filter(item => item.conceptId );
         console.log(this.surveys); }
         );
   }

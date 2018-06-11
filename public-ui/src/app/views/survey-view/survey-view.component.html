@@ -5,8 +5,8 @@
     <div class="col-xs-12">
       <div class="page-header">
         <div *ngIf="survey && survey.conceptId">
-          <h1 class="view-title"> {{survey.domainDisplay}} Survey Module ({{survey.conceptId}}) </h1>
-          <p class="view-sub-title">{{survey.domainDesc}} </p>
+          <h2> {{survey.domainDisplay}} Survey Module ({{survey.conceptId}}) </h2>
+          <h4 class="view-sub-title">{{survey.domainDesc}} </h4>
         </div>
       </div>
     </div>
@@ -14,30 +14,37 @@
   </div>
 
   <div class="row">
-    <div *ngIf="survey && survey.conceptId" class="col-xs-12 col-sm-6 col-md-4">
-      <div class="card stats-card">
 
-        <div class="card-block card-title">
+    <div class="col-md-4 col-sm-6 col-xs-12">
+      <div class="white-card-box top-stat">
+        <div class="row ">
+          <div class="col-xs-12">
+            <h5 class="box-title">
               Number Completed
+            </h5>
+            <div class="card-stat">
+              {{survey.countValue | number }}
+            </div>
+          </div>
         </div>
-        <div class="card-block card-stat">
-          {{survey.countValue | number }}
-        </div>
-
       </div>
     </div>
-    <div *ngIf="(resultsComplete )" class="col-md-3 col-sm-4 col-xs-12">
-      <div class="card stats-card">
 
-        <div class="card-block card-title">
-          Questions
+    <div *ngIf="(resultsComplete)"class="col-md-4 col-sm-6 col-xs-12">
+      <div class="white-card-box top-stat">
+        <div class="row ">
+          <div class="col-xs-12">
+            <h5 class="box-title">
+              Questions
+            </h5>
+            <div class="card-stat">
+              {{ surveyResult.items.length }}
+            </div>
+          </div>
         </div>
-        <div class="card-block card-stat">
-          {{ surveyResult.items.length }}
-        </div>
-
       </div>
     </div>
+
   </div>
 
   <h6> Filtered by {{searchText}}</h6>

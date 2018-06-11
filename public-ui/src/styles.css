@@ -1,5 +1,5 @@
 /* Master Styles */
-@font-face {
+/*@font-face {
     font-family: GothamBook;
     src: url('/assets/fonts/Gotham Book.otf');
 }
@@ -15,7 +15,7 @@
     font-family: GothamMedium;
     src: url('/assets/fonts/Gotham Medium.otf');
 }
-
+*/
 
 body {
   background-color: #E0E0E1;
@@ -60,12 +60,3 @@ input[type=text]:focus, input[type=password]:focus {
  * in the template ie clarity components.
  */
 
-.stack-view {
-    border: none !important;
-}
-
-.answers .stack-view .stack-block-label {
-    background-color: #FFFFFF !important;
-    color: #53A9D8 !important;
-    font-family: "Gotham HTF", open-sans, sans-serif;
-}
