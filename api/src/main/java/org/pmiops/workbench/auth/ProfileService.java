@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.Profile;
@@ -31,18 +30,15 @@ public class ProfileService {
       };
 
   private final FireCloudService fireCloudService;
-  private final MailChimpService mailChimpService;
   private final UserDao userDao;
 
   @Autowired
-  public ProfileService(FireCloudService fireCloudService, MailChimpService mailChimpService,
-      UserDao userDao) {
+  public ProfileService(FireCloudService fireCloudService, UserDao userDao) {
     this.fireCloudService = fireCloudService;
-    this.mailChimpService = mailChimpService;
     this.userDao = userDao;
   }
 
-  public Profile getProfile(User user, boolean checkEmailVerification) {
+  public Profile getProfile(User user) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
     User userWithAuthorities = userDao.findUserWithAuthorities(user.getUserId());
     if (userWithAuthorities != null) {

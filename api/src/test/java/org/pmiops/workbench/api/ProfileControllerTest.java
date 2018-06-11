@@ -145,7 +145,7 @@ public class ProfileControllerTest {
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
-    ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
+    ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment);

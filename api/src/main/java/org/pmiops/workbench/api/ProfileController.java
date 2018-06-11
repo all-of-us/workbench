@@ -33,7 +33,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -236,6 +235,8 @@ public class ProfileController implements ProfileApiDelegate {
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+      // If the user is logged in, then we know that they have followed the account creation instructions sent to
+      // their initial contact email address.
       user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
       try {
         return userDao.save(user);
@@ -314,7 +315,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
-    return ResponseEntity.ok(profileService.getProfile(user, /* checkEmailVerification */ true));
+    return ResponseEntity.ok(profileService.getProfile(user));
   }
 
   @Override
@@ -519,7 +520,7 @@ public class ProfileController implements ProfileApiDelegate {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<Profile>();
     for (User user : userService.getNonVerifiedUsers()) {
-      responseList.add(profileService.getProfile(user, /* checkEmailVerification */ false));
+      responseList.add(profileService.getProfile(user));
     }
     response.setProfileList(responseList);
     return ResponseEntity.ok(response);
