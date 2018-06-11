@@ -15,8 +15,10 @@
       <column name="domain_id" type="STRING"/>
       <column name="domain_display" type="STRING"/>
       <column name="domain_desc" type="STRING"/>
-      <column name="domain_parent" type="STRING"/>
       <column name="domain_route" type="STRING"/>
+      <column name="db_type" type="STRING"/>
+      <column name="concept_id" type="NUMERIC"/>
+      <column name="count_value" type="NUMERIC" />
     </loadData>
 
   </changeSet>
