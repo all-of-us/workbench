@@ -468,7 +468,6 @@ public class ProfileController implements ProfileApiDelegate {
 
     if (updatedProfile.getContactEmail() != null) {
       if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-        mailChimpService.addUserContactEmail(updatedProfile.getContactEmail());
         user.setContactEmail(updatedProfile.getContactEmail());
       }
     }
