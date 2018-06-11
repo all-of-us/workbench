@@ -5,8 +5,10 @@ import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {AccountCreationModalsComponent} from '../account-creation-modals/component';
+
 import {LoginComponent} from '../login/component';
-import {Subscription} from "rxjs/Subscription";
+
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector : 'app-account-creation-success',
