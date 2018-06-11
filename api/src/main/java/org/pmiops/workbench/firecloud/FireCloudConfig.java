@@ -3,6 +3,9 @@ package org.pmiops.workbench.firecloud;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
+import com.google.common.collect.ImmutableList;
+
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -25,11 +28,10 @@ public class FireCloudConfig {
   private static final String END_USER_API_CLIENT = "endUserApiClient";
   private static final String ALL_OF_US_API_CLIENT = "allOfUsApiClient";
 
-  private static final String[] BILLING_SCOPES = new String[] {
+  private static final List<String> BILLING_SCOPES = ImmutableList.of(
       "https://www.googleapis.com/auth/userinfo.profile",
       "https://www.googleapis.com/auth/userinfo.email",
-      "https://www.googleapis.com/auth/cloud-billing"
-  };
+      "https://www.googleapis.com/auth/cloud-billing");
 
   @Bean(name=END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -41,30 +43,14 @@ public class FireCloudConfig {
     return apiClient;
   }
 
-  private String getWorkbenchServiceAccountAccessToken(WorkbenchEnvironment workbenchEnvironment) throws IOException {
-    // When running locally, we get application default credentials in a different way than
-    // when running in Cloud.
-    if (workbenchEnvironment.isDevelopment()) {
-      GoogleCredential credential = GoogleCredential.getApplicationDefault()
-          .createScoped(Arrays.asList(BILLING_SCOPES));
-      credential.refreshToken();
-      return credential.getAccessToken();
-    } else {
-      AppIdentityService appIdentity = AppIdentityServiceFactory.getAppIdentityService();
-      final AppIdentityService.GetAccessTokenResult accessTokenResult =
-          appIdentity.getAccessToken(Arrays.asList(BILLING_SCOPES));
-      return accessTokenResult.getAccessToken();
-    }
-
-  }
-
   @Bean(name=ALL_OF_US_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient allOfUsApiClient(WorkbenchEnvironment workbenchEnvironment,
       WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     try {
-      apiClient.setAccessToken(getWorkbenchServiceAccountAccessToken(workbenchEnvironment));
+      apiClient.setAccessToken(
+          ServiceAccounts.workbenchAccessToken(workbenchEnvironment, BILLING_SCOPES));
       apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);
