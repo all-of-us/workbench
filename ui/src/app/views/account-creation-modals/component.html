@@ -1,0 +1,19 @@
+<div class="change_account_email">
+    <clr-modal [(clrModalOpen)]="changingEmail">
+        <h3 class="modal-title">Change contact email</h3>
+        <div class="modal-body">
+            <div class="form-section">
+                <label>Contact Email:</label>
+                <input id="change-contact-email" type="text" class="input" name="contact-email"
+                       [(ngModel)]="contactEmail">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" (click)="changingEmail=false">Cancel</button>
+            <button id="change_email" type="button" class="btn btn-primary" (click)="send()">Apply</button>
+        </div>
+    </clr-modal>
+</div>
+<div class="resend_welcome">
+
+</div>
