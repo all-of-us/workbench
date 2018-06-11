@@ -43,6 +43,6 @@ RUN mkdir -p /.cache/yarn /.yarn \
 
 RUN apk --no-cache add ruby ruby-json ruby-io-console
 
-ADD with-uid.sh /usr/local/bin
+COPY with-uid.sh /usr/local/bin
 
 ENTRYPOINT ["with-uid.sh"]

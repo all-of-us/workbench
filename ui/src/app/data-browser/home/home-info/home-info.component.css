@@ -61,10 +61,7 @@ p {
 }
 
 .card {
-  padding-left: 3rem;
-  padding-right: 3rem;
-  padding-bottom: 3rem;
-  padding-top: -1rem;
+  padding: -1rem 3rem 3rem 3rem;
 }
 
 .card-link {
