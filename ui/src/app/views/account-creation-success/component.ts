@@ -1,10 +1,10 @@
-import {Component, Input, ViewChild} from '@angular/core';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
-import {AccountCreationModalsComponent} from "../account-creation-modals/component";
+import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 import {LoginComponent} from '../login/component';
 import {Subscription} from "rxjs/Subscription";
 
@@ -13,7 +13,7 @@ import {Subscription} from "rxjs/Subscription";
   styleUrls: ['../../styles/template.css'],
   templateUrl: './component.html'
 })
-export class AccountCreationSuccessComponent {
+export class AccountCreationSuccessComponent implements OnInit {
   username: string;
   @Input('contactEmail') contactEmail: string;
   gsuiteDomain: string;
