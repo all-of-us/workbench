@@ -19,6 +19,7 @@ import {
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 
+import {AccountCreationModalsComponent} from "../account-creation-modals/component";
 import {AccountCreationSuccessComponent} from '../account-creation-success/component';
 import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
@@ -58,6 +59,7 @@ describe('InvitationKeyComponent', () => {
       declarations: [
         LoginComponent,
         AccountCreationComponent,
+        AccountCreationModalsComponent,
         AccountCreationSuccessComponent,
         InvitationKeyComponent,
         PageTemplateSignedOutComponent,
