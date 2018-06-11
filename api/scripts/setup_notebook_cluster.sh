@@ -9,5 +9,5 @@ jupyter kernelspec uninstall -f pyspark2
 jupyter kernelspec uninstall -f pyspark3
 
 for v in "2.7" "3.4"; do
-  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-10.zip#egg=aou_workbench_client&subdirectory=py'
+  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-11.zip#egg=aou_workbench_client&subdirectory=py'
 done
