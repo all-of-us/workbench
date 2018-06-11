@@ -1,6 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
-
-import {AccountCreationService} from '../../services/account-creation.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {ProfileService} from 'generated';
 import {UpdateContactEmailRequest} from 'generated';
@@ -10,7 +8,6 @@ import {UpdateContactEmailRequest} from 'generated';
   templateUrl: './component.html',
   styleUrls: ['./component.css',
     '../../styles/buttons.css'],
-  providers: [AccountCreationService]
 })
 export class AccountCreationModalsComponent implements OnInit {
   changingEmail = false;
@@ -18,9 +15,10 @@ export class AccountCreationModalsComponent implements OnInit {
   @Input('username') username: string;
   @Input('gsuiteDomain') gsuiteDomain: string;
 
+  @Output() updateEmail = new EventEmitter<string>();
+
   constructor(
     private profileService: ProfileService,
-    private accountCreationService: AccountCreationService
   ) {
     this.contactEmail = '';
   }
@@ -38,7 +36,7 @@ export class AccountCreationModalsComponent implements OnInit {
       username: this.username + '@' + this.gsuiteDomain,
       contactEmail: this.contactEmail
     };
-    this.accountCreationService.updateEmail(request.contactEmail);
+    this.updateEmail.emit(this.contactEmail);
     this.profileService.updateContactEmail(request).subscribe(() => {
       this.changingEmail = false;
     });

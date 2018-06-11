@@ -6,14 +6,12 @@ import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationComponent} from '../account-creation/component';
 import {AccountCreationModalsComponent} from "../account-creation-modals/component";
 import {LoginComponent} from '../login/component';
-import {AccountCreationService} from "../../services/account-creation.service";
 import {Subscription} from "rxjs/Subscription";
 
 @Component({
   selector : 'app-account-creation-success',
   styleUrls: ['../../styles/template.css'],
-  templateUrl: './component.html',
-  providers: [AccountCreationService]
+  templateUrl: './component.html'
 })
 export class AccountCreationSuccessComponent {
   username: string;
@@ -30,7 +28,6 @@ export class AccountCreationSuccessComponent {
     private router: Router,
     private signInService: SignInService,
     serverConfigService: ServerConfigService,
-    private accountCreationService: AccountCreationService
   ) {
     serverConfigService.getConfig().subscribe((config) => {
       this.gsuiteDomain = config.gsuiteDomain;
@@ -41,9 +38,6 @@ export class AccountCreationSuccessComponent {
       loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
     }, 0);
     this.username = account.profile.username;
-    this.subscription = accountCreationService.contactEmailUpdated$.subscribe(email => {
-      this.contactEmail = email
-    });
   }
 
   ngOnInit () {
@@ -51,5 +45,9 @@ export class AccountCreationSuccessComponent {
 
   signIn(): void {
     this.signInService.signIn();
+  }
+
+  receiveMessage($event) {
+    this.contactEmail = $event;
   }
 }
