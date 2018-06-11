@@ -10,10 +10,16 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-outline" (click)="changingEmail=false">Cancel</button>
-            <button id="change_email" type="button" class="btn btn-primary" (click)="send()">Apply</button>
+            <button id="change_email" type="button" class="btn btn-primary" (click)="sendAndUpdate()">Apply</button>
         </div>
     </clr-modal>
 </div>
 <div class="resend_welcome">
-
+    <clr-modal [(clrModalOpen)]="resendingEmail">
+        <h3 class="modal-title">Resend Instructions</h3>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" (click)="resendingEmail=false">Cancel</button>
+            <button id="resend_instructions" type="button" class="btn btn-primary" (click)="send()">Send</button>
+        </div>
+    </clr-modal>
 </div>
