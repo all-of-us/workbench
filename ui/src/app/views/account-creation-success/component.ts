@@ -3,11 +3,10 @@ import {Router} from '@angular/router';
 
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
-import {AccountCreationComponent} from '../account-creation/component';
 import {AccountCreationModalsComponent} from '../account-creation-modals/component';
+import {AccountCreationComponent} from '../account-creation/component';
 
 import {LoginComponent} from '../login/component';
-
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
