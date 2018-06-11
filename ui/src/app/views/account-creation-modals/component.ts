@@ -11,6 +11,7 @@ import {UpdateContactEmailRequest} from 'generated';
 })
 export class AccountCreationModalsComponent implements OnInit {
   changingEmail = false;
+  resendingEmail = false;
   contactEmail: string;
   @Input('username') username: string;
   @Input('gsuiteDomain') gsuiteDomain: string;
@@ -26,12 +27,16 @@ export class AccountCreationModalsComponent implements OnInit {
   ngOnInit() {
   }
 
-  resendEmail() {
+  updateAndSendEmail() {
     this.changingEmail = true;
     this.contactEmail = '';
   }
 
-  send() {
+  resendInstructions() {
+    this.resendingEmail = true
+  }
+
+  sendAndUpdate() {
     const request: UpdateContactEmailRequest = {
       username: this.username + '@' + this.gsuiteDomain,
       contactEmail: this.contactEmail
@@ -40,5 +45,10 @@ export class AccountCreationModalsComponent implements OnInit {
     this.profileService.updateContactEmail(request).subscribe(() => {
       this.changingEmail = false;
     });
+  }
+
+  send() {
+    this.resendingEmail = false;
+    //resend email. Add in once Mandrill API is in.
   }
 }

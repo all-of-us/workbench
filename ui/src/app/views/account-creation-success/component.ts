@@ -12,7 +12,8 @@ import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector : 'app-account-creation-success',
-  styleUrls: ['../../styles/template.css'],
+  styleUrls: ['../../styles/template.css',
+              './component.css'],
   templateUrl: './component.html'
 })
 export class AccountCreationSuccessComponent implements OnInit {
@@ -29,7 +30,7 @@ export class AccountCreationSuccessComponent implements OnInit {
     private account: AccountCreationComponent,
     private router: Router,
     private signInService: SignInService,
-    serverConfigService: ServerConfigService,
+    serverConfigService: ServerConfigService
   ) {
     serverConfigService.getConfig().subscribe((config) => {
       this.gsuiteDomain = config.gsuiteDomain;
