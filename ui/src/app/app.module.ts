@@ -17,7 +17,7 @@ import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
-
+import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
@@ -94,6 +94,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
   ],
   declarations: [
     AccountCreationComponent,
+    AccountCreationModalsComponent,
     AccountCreationSuccessComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,

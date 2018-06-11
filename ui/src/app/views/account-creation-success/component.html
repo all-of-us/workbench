@@ -7,15 +7,19 @@
     <h3 style="font-weight:300">Your new account</h3>
   </div>
   <div class="row" style="white-space: nowrap">
-    <h3 style="font-weight:300">{{email}}@{{gsuiteDomain}}</h3>
+    <h3 style="font-weight:300">{{username}}@{{gsuiteDomain}}</h3>
   </div>
   <div class="row">
     <h3 style="margin-top:.5rem; font-weight:300">is hosted by Google.</h3>
   </div>
   <div class="row">
-    <h4>Please log in to your new account.</h4>
+    <h4>Check your contact email for instructions on getting started.</h4>
+  </div>
+  <div class="row">
+    <h4>Your contact email is: {{contactEmail}}</h4>
   </div>
   <div class="row" style="padding-top:0.5rem;">
-    <button class="btn btn-primary" (click)="signIn()">LOGIN</button>
+    <button (click)="accountCreationModalsComponent.resendEmail();">Change contact email</button>
   </div>
 </div>
+<app-account-creation-modals [username]="username" [gsuiteDomain]="gsuiteDomain"></app-account-creation-modals>

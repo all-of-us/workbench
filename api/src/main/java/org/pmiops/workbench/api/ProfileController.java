@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -443,6 +444,29 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException(
         "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
+  }
+
+  @Override
+  public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
+    verifyNoLogins(updateContactEmailRequest.getUsername());
+    //resend Welcome Email to new contact email... Add once Mandrill API complete
+    updateUser(updateContactEmailRequest);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private void verifyNoLogins(String username){
+    User user = userDao.findUserByEmail(username);
+    if (user.getFirstSignInTime() != null) {
+      throw new BadRequestException(
+        "This account has already been in use, if you would like to update your contact email please login and update via the Profile page."
+      );
+    }
+  }
+
+  private void updateUser(UpdateContactEmailRequest updateRequest) {
+    User user = userDao.findUserByEmail(updateRequest.getUsername());
+    user.setContactEmail(updateRequest.getContactEmail());
+    userDao.save(user);
   }
 
   @Override
