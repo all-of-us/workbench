@@ -56,6 +56,7 @@ export class QuickSearchComponent implements OnInit {
     });
   }
 
+  // Subscribe too many here works for demo.
   public searchDomains() {
     // If they clear the search text reset
     const minSearchLength = 3;
