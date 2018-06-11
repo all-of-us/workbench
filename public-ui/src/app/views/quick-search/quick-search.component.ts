@@ -1,27 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
-import {DbDomain} from '../../../publicGenerated/model/dbDomain';
-import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-
+import { Router } from '@angular/router';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
+import { ISubscription } from 'rxjs/Subscription';
+import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 
 @Component({
   selector: 'app-quick-search',
   templateUrl: './quick-search.component.html',
   styleUrls: ['../../styles/template.css', '../../styles/cards.css', './quick-search.component.css']
 })
-export class QuickSearchComponent implements OnInit {
+export class QuickSearchComponent implements OnInit, OnDestroy {
   pageImage = '/assets/db-images/man-standing.png';
   title = 'Quick Guided Search';
   subTitle = 'Enter keywords to search EHR data and survey modules. Or click on an EHR domain or survey.';
-
-  // List of domain filters. We will add a checked to these so type any
-
-
   searchResults = [];
   domainResults = [];
   surveyResults = [];
@@ -30,6 +24,9 @@ export class QuickSearchComponent implements OnInit {
   totalParticipants;
   domains = [];
   loading = false;
+  private subscriptions: ISubscription;
+  private subscription2: ISubscription;
+  private subscription3: ISubscription;
 
 
   constructor(private api: DataBrowserService,
@@ -38,17 +35,18 @@ export class QuickSearchComponent implements OnInit {
 
   ngOnInit() {
 
-    this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
+    this.subscriptions = this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
 
     // Initialize results to all totals
-    this.api.getDomainTotals().subscribe(data => {
+    this.subscription2 = this.api.getDomainTotals().subscribe(data => {
       this.domains = data.items;
       this.searchResults = this.domains;
       this.domainResults = this.domains.filter(d => d.dbType === 'domain_filter');
       this.surveyResults = this.domains.filter(d => d.dbType === 'survey');
-
     });
-    this.searchText.valueChanges
+
+
+    this.subscription3 = this.searchText.valueChanges
       .debounceTime(200)
       .distinctUntilChanged()
       .switchMap((query) => this.searchDomains(query))
@@ -58,26 +56,18 @@ export class QuickSearchComponent implements OnInit {
         this.surveyResults = data.items.filter(s => s.dbType === 'survey');
         this.loading = false;
       });
-
-
+  }
+  ngOnDestroy() {
+    console.log('unsubscribing ');
+    this.subscriptions.unsubscribe();
+    this.subscription2.unsubscribe();
+    this.subscription3.unsubscribe();
   }
 
-  public searchDomains(query) {
-
-
+  public searchDomains(query: string) {
     this.prevSearchText = query;
     localStorage.setItem('searchText', query);
     return this.api.getDomainSearchResults(query);
-
-   /* if (this.searchText.length >= minSearchLength) {
-      this.loading = true;
-      this.api.getDomainSearchResults(this.searchText).subscribe(data => {
-        this.searchResults = data.items;
-        this.domainResults = data.items.filter(d => d.dbType === 'domain_filter');
-        this.surveyResults = data.items.filter(s => s.dbType === 'survey');
-        this.loading = false;
-      });
-    }*/
   }
 
   public viewResults(r) {

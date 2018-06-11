@@ -6,7 +6,7 @@
       <div class="page-header">
         <div *ngIf="survey && survey.conceptId">
           <h2> {{survey.domainDisplay}} Survey Module ({{survey.conceptId}}) </h2>
-          <h4 class="view-sub-title">{{survey.domainDesc}} </h4>
+          <h4 class="view-sub-title">{{survey.domainDesc}}. </h4>
         </div>
       </div>
     </div>
@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <div *ngIf="(resultsComplete)"class="col-md-4 col-sm-6 col-xs-12">
+    <div class="col-md-4 col-sm-6 col-xs-12">
       <div class="white-card-box top-stat">
         <div class="row ">
           <div class="col-xs-12">
@@ -38,7 +38,8 @@
               Questions
             </h5>
             <div class="card-stat">
-              {{ surveyResult.items.length }}
+              <span *ngIf="loading" class="spinner spinner-md"> </span>
+              <span *ngIf="!loading" >{{ surveyResult.items.length }} </span>
             </div>
           </div>
         </div>
@@ -47,7 +48,6 @@
 
   </div>
 
-  <h6> Filtered by {{searchText}}</h6>
 
   <div class="survey-results" *ngIf="resultsComplete">
 

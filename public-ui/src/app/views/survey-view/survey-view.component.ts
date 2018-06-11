@@ -1,15 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs/Rx';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
-import {Analysis} from '../../../publicGenerated/model/analysis';
 import {DbDomain} from '../../../publicGenerated/model/dbDomain';
-import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
-import {ChartComponent} from '../../data-browser/chart/chart.component';
-
+import { ISubscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-survey-view',
@@ -17,7 +13,7 @@ import {ChartComponent} from '../../data-browser/chart/chart.component';
   styleUrls: ['../../styles/template.css', '../../styles/cards.css', './survey-view.component.css']
 })
 
-export class SurveyViewComponent implements OnInit {
+export class SurveyViewComponent implements OnInit, OnDestroy {
 
   domainId: string;
   title ;
@@ -26,7 +22,8 @@ export class SurveyViewComponent implements OnInit {
   survey;
   surveyResult: QuestionConceptListResponse;
   resultsComplete = false;
-
+  private subscription: ISubscription;
+  loading = false;
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -43,7 +40,7 @@ export class SurveyViewComponent implements OnInit {
   }
 
   ngOnInit() {
-
+    this.loading = true;
     // Get the survey from local storage the user clicked on on a previous page
     const obj = localStorage.getItem('dbDomain');
     if (obj) {
@@ -54,7 +51,7 @@ export class SurveyViewComponent implements OnInit {
       this.searchText = '';
     }
 
-    this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
+    this.subscription = this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
       next: x => {
         const questions = x.items;
         this.surveyResult = x;
@@ -71,16 +68,16 @@ export class SurveyViewComponent implements OnInit {
         // Copy all qustions to display initially and filter on any search text passed in.
         this.questions = this.surveyResult.items;
         this.filterResults();
+        this.loading = false;
       },
       error: err => console.error('Observer got an error: ' + err),
       complete: () => { this.resultsComplete = true; }
     });
+  }
 
-    this.api.getSurveyList().subscribe(
-      result => {
-        this.surveys = result.items;
-      });
-
+  ngOnDestroy() {
+    console.log("unsubscribing survey view ");
+    this.subscription.unsubscribe();
   }
 
   public searchQuestion(q: QuestionConcept) {

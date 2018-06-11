@@ -22,9 +22,6 @@ p {
     padding-bottom:12px;
 
 }
-.survey-view .view-title {
-    font-weight:300;
-}
 
 .view-sub-title, .box-sub-title {
     color: rgba(0,0,0,0.87);
@@ -32,13 +29,7 @@ p {
     line-height: 20px;
 }
 
-.survey-view .view-sub-title {
-    font-size: 28px;
-    padding-top: 12px;
-    padding-bottom:12px;
-    color: #302C71;
-    line-height: 40px;
-}
+
 
 
 .white-box {

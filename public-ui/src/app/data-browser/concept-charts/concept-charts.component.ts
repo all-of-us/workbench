@@ -1,12 +1,15 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import {ISubscription} from "rxjs/Subscription";
+
+
 @Component({
   selector: 'app-concept-charts',
   templateUrl: './concept-charts.component.html',
   styleUrls: ['./concept-charts.component.css']
 })
-export class ConceptChartsComponent implements OnInit {
+export class ConceptChartsComponent implements OnInit, OnDestroy {
   @Input() concept: Concept;
   @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
   results;
@@ -15,14 +18,16 @@ export class ConceptChartsComponent implements OnInit {
   genderAnalysis = null;
   sourceConcepts = null;
   showSources = false;
-  selectedResult;
+  private subscription: ISubscription;
+  private subscription2: ISubscription;
+
   constructor(private api: DataBrowserService) { }
 
   ngOnInit() {
     // Get chart results for concept
     this.loading = true;
     const conceptIdStr = '' + this.concept.conceptId.toString();
-    this.api.getConceptAnalysisResults([conceptIdStr]).subscribe(results =>  {
+    this.subscription = this.api.getConceptAnalysisResults([conceptIdStr]).subscribe(results =>  {
       this.results = results.items;
       console.log(this.results);
       this.ageAnalysis = this.results[0].ageAnalysis;
@@ -34,6 +39,11 @@ export class ConceptChartsComponent implements OnInit {
     this.getSourceConcepts();
   }
 
+  ngOnDestroy() {
+    console.log("unsubscribing concept-charts");
+    this.subscription.unsubscribe();
+    this.subscription2.unsubscribe();
+  }
   toggleSourceConcepts() {
     // Get source concepts for first time if we don't have them
     if (this.sourceConcepts === null) {
@@ -42,11 +52,9 @@ export class ConceptChartsComponent implements OnInit {
     this.showSources = true;
   }
   getSourceConcepts() {
-    this.api.getSourceConcepts(this.concept.conceptId).subscribe(
-      results => {
-
-        this.sourceConcepts = results.items;
-      });
+    this.subscription2 = this.api.getSourceConcepts(this.concept.conceptId).subscribe(
+      results => this.sourceConcepts = results.items
+      );
 
   }
 }

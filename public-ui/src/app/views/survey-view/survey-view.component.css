@@ -1,7 +1,10 @@
 .white-card-box.top-stat {
     height: inherit;
 }
-
+.view-sub-title {
+    color: #4A4A4A;
+    font-weight: 300;
+}
 .survey-results {
     padding: .5rem;
     position: relative;
