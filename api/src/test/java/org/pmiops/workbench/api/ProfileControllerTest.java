@@ -145,7 +145,7 @@ public class ProfileControllerTest {
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
-    ProfileService profileService = new ProfileService(fireCloudService, mailChimpService, userDao);
+    ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment);
@@ -456,23 +456,6 @@ public class ProfileControllerTest {
     profile = profileController.getMe().getBody();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
         DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
-  }
-
-  @Test
-  public void testMe_succeedsOnMailchimpFailure() throws Exception {
-    createUser();
-    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
-    user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-    userDao.save(user);
-    when(mailChimpService.addUserContactEmail(CONTACT_EMAIL)).thenThrow(new WorkbenchException(new ErrorResponse().statusCode(400)));
-    Profile profile = profileController.getMe().getBody();
-    assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED, TIMESTAMP, true, true);
-    verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
-    verify(fireCloudService).createAllOfUsBillingProject(profile.getFreeTierBillingProjectName());
-    verify(fireCloudService).addUserToBillingProject(
-        PRIMARY_EMAIL, profile.getFreeTierBillingProjectName());
   }
 
   @Test
