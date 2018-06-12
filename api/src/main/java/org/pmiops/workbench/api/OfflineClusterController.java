@@ -33,6 +33,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class OfflineClusterController implements OfflineClusterApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineClusterController.class.getName());
 
+  // This is temporary while we wait for Leonardo autopause to rollout. Once
+  // available, we should instead take a cluster status of STOPPED to trigger
+  // idle deletion.
+  private static final int IDLE_AFTER_HOURS = 3;
+
   private final Provider<ClusterApi> clusterApiProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final Clock clock;
@@ -59,15 +64,18 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
    * the following cases:
    *
    * 1. It exceeds the max cluster age. Per environment, but O(weeks).
-   * 2. Since a cluster was last accessed, its spent over half its remaining
-   *    lifespan idle (as defined by [1]). This dynamic limit means that as the
-   *    upgrade horizon approaches, we'll be more aggressive in upgrading.
+   * 2. It is idle and exceeds the max idle cluster age. Per environment,
+   *    smaller than (1).
+   *
+   * As an App Engine cron endpoint, the runtime of this method may not exceed
+   * 10 minutes.
    */
   @Override
   public ResponseEntity<CheckClustersResponse> checkClusters() {
-    WorkbenchConfig config = configProvider.get();
     Instant now = clock.instant();
+    WorkbenchConfig config = configProvider.get();
     Duration maxAge = Duration.ofDays(config.firecloud.clusterMaxAgeDays);
+    Duration idleMaxAge = Duration.ofDays(config.firecloud.clusterIdleMaxAgeDays);
 
     ClusterApi clusterApi = clusterApiProvider.get();
     List<Cluster> clusters;
@@ -82,6 +90,15 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     int unusedDeletes = 0;
     for (Cluster c : clusters) {
       String clusterId = c.getGoogleProject() + "/" + c.getClusterName();
+      try {
+        // Refetch the cluster to ensure freshnesss as this iteration may take
+        // some time.
+        c = clusterApi.getCluster(c.getGoogleProject(), c.getClusterName());
+      } catch (ApiException e) {
+        log.log(Level.WARNING, String.format("failed to refetch cluster '%s'", clusterId), e);
+        errors++;
+        continue;
+      }
       if (ClusterStatus.UNKNOWN.equals(c.getStatus()) || c.getStatus() == null) {
         log.warning(String.format("unknown cluster status for cluster '%s'", clusterId));
         continue;
@@ -94,18 +111,17 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
 
       Instant created = Instant.parse(c.getCreatedDate());
       Duration age = Duration.between(created, now);
-      Duration lifeRemaining = maxAge.minus(age);
       Instant lastUsed = Instant.parse(c.getDateAccessed());
-      Duration unusedDuration = Duration.between(lastUsed, now);
-      if (lifeRemaining.isNegative()) {
+      boolean isIdle = Duration.between(lastUsed, now).toHours() > IDLE_AFTER_HOURS;
+      if (age.toMillis() > maxAge.toMillis()) {
         log.info(String.format(
             "deleting cluster '%s', exceeded max lifetime @ %s (>%s)",
             clusterId, formatDuration(age), formatDuration(maxAge)));
         activeDeletes++;
-      } else if (lifeRemaining.toMillis() < unusedDuration.toMillis()) {
+      } else if (isIdle && age.toMillis() > idleMaxAge.toMillis()) {
         log.info(String.format(
-            "deleting cluster '%s', unused for %s, more than its remaining lifespan (>%s)",
-            clusterId, formatDuration(unusedDuration), formatDuration(lifeRemaining)));
+            "deleting cluster '%s', idle with age %s (>%s)",
+            clusterId, formatDuration(age), formatDuration(idleMaxAge)));
         unusedDeletes++;
       } else {
         // Don't delete.
