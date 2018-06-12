@@ -14,7 +14,8 @@ import {
 // TODO(RW-85) Design this UI. Current implementation is a rough sketch.
 @Component({
   templateUrl: './component.html',
-  styleUrls: ['./component.css']
+  styleUrls: ['./component.css',
+              '../../styles/errors.css']
 })
 export class AdminReviewWorkspaceComponent implements OnInit {
   workspaces: Workspace[] = [];

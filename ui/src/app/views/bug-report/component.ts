@@ -9,7 +9,8 @@ import {BugReport} from 'generated';
   selector: 'app-bug-report',
   templateUrl: './component.html',
   styleUrls: ['./component.css',
-              '../../styles/buttons.css']
+              '../../styles/buttons.css',
+              '../../styles/errors.css']
 })
 export class BugReportComponent implements OnInit {
   reporting = false;

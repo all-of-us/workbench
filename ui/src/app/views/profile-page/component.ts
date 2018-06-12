@@ -17,6 +17,7 @@ import {
               '../../styles/cards.css',
               '../../styles/headers.css',
               '../../styles/inputs.css',
+              '../../styles/errors.css',
               './component.css'],
   templateUrl: './component.html',
 })

@@ -116,7 +116,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   alertCategory: string;
   alertMsg: string;
   tabOpen = Tabs.Notebooks;
-  localizeNotebooksError = true;
+  localizeNotebooksError = false;
 
   constructor(
     private route: ActivatedRoute,
