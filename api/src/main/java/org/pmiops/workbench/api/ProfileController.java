@@ -19,7 +19,6 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
-import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -108,7 +107,6 @@ public class ProfileController implements ProfileApiDelegate {
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
-  private final BlockscoreService blockscoreService;
   private final NotebooksService notebooksService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
@@ -120,7 +118,7 @@ public class ProfileController implements ProfileApiDelegate {
       UserDao userDao,
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
-      CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
+      CloudStorageService cloudStorageService,
       NotebooksService notebooksService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
@@ -134,7 +132,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
-    this.blockscoreService = blockscoreService;
     this.notebooksService = notebooksService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
@@ -374,7 +371,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> submitIdVerification() {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     User user = userProvider.get();
-    if (user.getRequestedIdVerification() == null || user.getRequestedIdVerification() == false) {
+    if (user.getRequestedIdVerification() == null || !user.getRequestedIdVerification()) {
       Properties props = new Properties();
       Session session = Session.getDefaultInstance(props, null);
       try {
@@ -465,10 +462,9 @@ public class ProfileController implements ProfileApiDelegate {
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
 
-    if (updatedProfile.getContactEmail() != null) {
-      if (!updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-        user.setContactEmail(updatedProfile.getContactEmail());
-      }
+    if (updatedProfile.getContactEmail() != null &&
+        !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
+      user.setContactEmail(updatedProfile.getContactEmail());
     }
     List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations()

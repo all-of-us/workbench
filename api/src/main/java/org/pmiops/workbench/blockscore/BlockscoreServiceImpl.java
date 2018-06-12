@@ -39,7 +39,7 @@ public class BlockscoreServiceImpl implements BlockscoreService {
     try {
       person.setDateOfBirth(formatter.parse(dobString));
     } catch (ParseException e) {
-      throw new RuntimeException(e);
+      throw new IllegalArgumentException("invalid date of birth", e);
     }
     return person.create();
   }

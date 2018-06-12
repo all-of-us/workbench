@@ -31,7 +31,6 @@ import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
-import org.pmiops.workbench.blockscore.BlockscoreService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -102,8 +101,6 @@ public class ProfileControllerTest {
   @Mock
   private CloudStorageService cloudStorageService;
   @Mock
-  private BlockscoreService blockscoreService;
-  @Mock
   private Person person;
   @Mock
   private Provider<WorkbenchConfig> configProvider;
@@ -116,7 +113,6 @@ public class ProfileControllerTest {
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.admin.directory.model.User googleUser;
   private FakeClock clock;
-  private IdVerificationRequest idVerificationRequest;
   private User user;
 
   @Before
@@ -146,18 +142,18 @@ public class ProfileControllerTest {
 
     clock = new FakeClock(NOW);
 
-    idVerificationRequest = new IdVerificationRequest();
+    IdVerificationRequest idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
     Mockito.doNothing().when(mailService).send(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, notebooksService, Providers.of(config), environment,
+        cloudStorageService, notebooksService, Providers.of(config), environment,
         Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, notebooksService, Providers.of(config),
+        cloudStorageService, notebooksService, Providers.of(config),
         cloudEnvironment, Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }

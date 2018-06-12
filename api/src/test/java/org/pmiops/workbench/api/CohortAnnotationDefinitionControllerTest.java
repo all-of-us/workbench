@@ -133,7 +133,7 @@ public class CohortAnnotationDefinitionControllerTest {
         when(workspaceService.getRequired(namespace, name)).thenReturn(workspace);
         when(cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(cohortId, columnName)).thenReturn(existingDefinition);
 
-        CohortAnnotationDefinition expectedResponse = createClientCohortAnnotationDefinition(
+        createClientCohortAnnotationDefinition(
                 annotationDefinitionId,
                 cohortId,
                 columnName,
@@ -849,7 +849,7 @@ public class CohortAnnotationDefinitionControllerTest {
         request.setCohortAnnotationDefinitionId(annotationDefinitionId);
         request.setCohortId(cohortId);
         request.setColumnName(columnName);
-        request.setAnnotationType(AnnotationType.STRING);
+        request.setAnnotationType(annotationType);
         request.setEnumValues(new ArrayList<>());
         return request;
     }

@@ -63,7 +63,7 @@ public class ProfileService {
     profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
     if (user.getBlockscoreVerificationIsValid() == null) {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.UNVERIFIED);
-    } else if (user.getBlockscoreVerificationIsValid() == false) {
+    } else if (!user.getBlockscoreVerificationIsValid()) {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.REJECTED);
     } else {
       profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.VERIFIED);

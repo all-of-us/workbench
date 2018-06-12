@@ -388,9 +388,7 @@ public class WorkspacesControllerTest {
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    Workspace workspace2 =
-        workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName())
-            .getBody().getWorkspace();
+    workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
   }
 
   @Test
@@ -446,8 +444,7 @@ public class WorkspacesControllerTest {
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
-    Workspace updated =
-        workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
   }
 
   @Test(expected = ConflictException.class)
@@ -494,7 +491,6 @@ public class WorkspacesControllerTest {
   @Test(expected = BadRequestException.class)
   public void testRejectAfterApproveThrows() throws Exception {
     Workspace ws = createDefaultWorkspace();
-    ResearchPurpose researchPurpose = ws.getResearchPurpose();
     workspacesController.createWorkspace(ws);
 
     ResearchPurposeReviewRequest request = new ResearchPurposeReviewRequest();

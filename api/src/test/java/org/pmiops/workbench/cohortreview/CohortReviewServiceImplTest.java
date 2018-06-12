@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -28,7 +27,6 @@ import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
-import javax.inject.Provider;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,9 +58,6 @@ public class CohortReviewServiceImplTest {
 
     @Mock
     private WorkspaceService workspaceService;
-
-    @Mock
-    private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
 
     @InjectMocks
     private CohortReviewServiceImpl cohortReviewService;
