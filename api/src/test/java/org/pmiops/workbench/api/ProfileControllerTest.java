@@ -12,7 +12,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.blockscore.models.Person;
 import com.google.common.collect.ImmutableList;
 
 import java.sql.Timestamp;
@@ -100,8 +99,6 @@ public class ProfileControllerTest {
   private DirectoryService directoryService;
   @Mock
   private CloudStorageService cloudStorageService;
-  @Mock
-  private Person person;
   @Mock
   private Provider<WorkbenchConfig> configProvider;
   @Mock
@@ -213,8 +210,6 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
-    when(person.getId()).thenReturn("id");
-    when(person.isValid()).thenReturn(true);
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.firecloud = new FireCloudConfig();
     testConfig.firecloud.registeredDomainName = "";
