@@ -151,7 +151,8 @@ public class CriteriaDaoTest {
                 .name(name)
                 .parentId(parentId)
                 .type(type)
-                .subtype(subtype);
+                .subtype(subtype)
+                .attribute(Boolean.FALSE);
     }
 
 }
