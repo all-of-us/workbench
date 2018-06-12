@@ -123,6 +123,14 @@ public class BugReportControllerTest {
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
   }
 
+  public void testSendBugReport_withUnderscore() throws Exception {
+    fail("nope");
+  }
+
+  public void testSendBugReport_withUnderscore2() throws Exception {
+    fail("nope");
+  }
+
   @Test
   public void testSendBugReportWithNotebooks() throws Exception {
     when(jupyterApi.getRootContents(any(), any(), any(), any(), any(), any()))
