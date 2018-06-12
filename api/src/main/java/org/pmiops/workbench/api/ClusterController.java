@@ -149,6 +149,9 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteCluster(String projectName, String clusterName) {
+    User user = this.userProvider.get();
+    user.setClusterCreateRetries(0);
+    this.userDao.save(user);
     this.notebooksService.deleteCluster(projectName, clusterName);
     return ResponseEntity.ok(new EmptyResponse());
   }
