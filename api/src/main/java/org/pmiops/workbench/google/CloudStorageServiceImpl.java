@@ -33,16 +33,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return readToString(getCredentialsBucketName(), "blockscore-api-key.txt").trim();
   }
 
-  public String readMailChimpApiKey() {
-    JSONObject mailChimpKeys = new JSONObject(readToString(getCredentialsBucketName(), "mailchimp-keys.json"));
-    return mailChimpKeys.getString("api-key");
-  }
-
-  public String readMailChimpListId() {
-    JSONObject mailChimpKeys = new JSONObject(readToString(getCredentialsBucketName(), "mailchimp-keys.json"));
-    return mailChimpKeys.getString("list-id");
-  }
-
   @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
