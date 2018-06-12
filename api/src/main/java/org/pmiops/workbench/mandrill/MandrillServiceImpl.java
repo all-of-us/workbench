@@ -6,8 +6,9 @@ import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
+import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
+import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.inject.Provider;
@@ -29,11 +30,16 @@ public class MandrillServiceImpl implements MandrillService {
   }
 
   @Override
-  public MandrillMessageStatus sendEmail(MandrillMessage email) {
+  public MandrillMessageStatuses sendEmail(MandrillMessage email) {
     MandrillApi mandrillApi = mandrillApiProvider.get();
     String apiKey = readMandrillApiKey();
+    MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
+    keyAndMessage.setKey(apiKey);
+    keyAndMessage.setMessage(email);
     try {
-      return mandrillApi.send(apiKey, email);
+      MandrillMessageStatuses msgStatuses = mandrillApi.send(keyAndMessage);
+      log.log(Level.INFO, "Message Status: " + msgStatuses.toString());
+      return msgStatuses;
     } catch (ApiException e){
       log.log(Level.WARNING, "Sending email via Mandrill Failed.");
       return null;

@@ -3,6 +3,7 @@ package org.pmiops.workbench.google;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.gax.rpc.ApiException;
 import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
 import com.google.api.services.admin.directory.model.User;
@@ -11,7 +12,10 @@ import com.google.api.services.admin.directory.model.UserName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.mandrill.model.MandrillMessage;
+import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
+import org.pmiops.workbench.mandrill.MandrillService;
+import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -54,19 +58,19 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   private final Provider<GoogleCredential> googleCredentialProvider;
   private final Provider<WorkbenchConfig> configProvider;
-  private final Provider<MailService> mailServiceProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+  private final MandrillService mandrillService;
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
-      Provider<WorkbenchConfig> configProvider, Provider<MailService> mailServiceProvider,
+      Provider<WorkbenchConfig> configProvider, MandrillService mandrillService,
       HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
-    this.mailServiceProvider = mailServiceProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
+    this.mandrillService = mandrillService;
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
@@ -157,21 +161,23 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   protected void sendPasswordEmail(String contactEmail, String password, User user) {
-    WorkbenchConfig workbenchConfig = configProvider.get();
-    Properties props = new Properties();
-    Session session = Session.getDefaultInstance(props, null);
+    MandrillMessage message = new MandrillMessage();
+    RecipientAddress toAddress = new RecipientAddress();
+    toAddress.setEmail(contactEmail);
+    message.setTo(Arrays.asList(toAddress));
     String messageBody = "Your new account is: " + user.getPrimaryEmail() +
       "\nThe password for your new account is: " + password;
+    message.setHtml(messageBody);
+    message.setSubject("Your new All of Us Account");
+    // using this address as a placeholder right now.
+    // do not think it is right since I'm getting a
+    // unsigned rejection right now, but the api should work
+    // once we have the domains/from Email straightened out
+    message.setFromEmail("donotreply@allofus.org");
     try {
-      Message msg = new MimeMessage(session);
-      msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-        contactEmail, user.getName().getFullName()));
-      msg.setSubject("Your new All of Us Account");
-      msg.setText(messageBody);
-      mailServiceProvider.get().send(msg);
-    } catch (MessagingException | UnsupportedEncodingException e) {
-      throw new EmailException("Error sending password email", e);
+      mandrillService.sendEmail(message);
+    } catch (ApiException e) {
+      throw new EmailException("Error sending initial email", e);
     }
   }
 }

@@ -25,22 +25,16 @@ paths:
         200:
           description: "Email sent successfully"
           schema:
-            $ref: '#/definitions/MandrillMessageStatus'
+            $ref: '#/definitions/MandrillMessageStatuses'
         500:
           description: "There was an error, please see response for details"
       parameters:
         - in: body
-          description: api key
-          name: apiKey
+          description: API key and message
+          name: apiKeyAndMessage
           required: true
           schema:
-            type: string
-        - in: body
-          description: mandrill message
-          name: mandrillMessage
-          required: true
-          schema:
-            $ref: '#/definitions/MandrillMessage'
+            $ref: '#/definitions/MandrillApiKeyAndMessage'
 
 parameters:
   {}
@@ -48,6 +42,20 @@ parameters:
 ## DEFINITIONS
 ##########################################################################################
 definitions:
+  MandrillApiKeyAndMessage:
+    required:
+      - key
+      - message
+    type: object
+    properties:
+      key:
+        type: string
+        description: API key
+      message:
+        type: object
+        description: Mandrill Message
+        items:
+          "$ref": "#/definitions/MandrillMessage"
   MandrillMessage:
     required:
       - html
@@ -79,6 +87,12 @@ definitions:
       email:
         type: string
         description: recipient address
+
+  MandrillMessageStatuses:
+    description: ''
+    type: array
+    items:
+      "$ref": "#/definitions/MandrillMessageStatus"
 
   MandrillMessageStatus:
     description: ''
