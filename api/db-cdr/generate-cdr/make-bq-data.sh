@@ -56,7 +56,7 @@ WORKBENCH_DATASET=cdr$CDR_VERSION
 
 
 # Check that bq_dataset exists and exit if not
-datasets=`bq --project=$BQ_PROJECT ls`
+datasets=$(bq --project=$BQ_PROJECT ls)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -70,7 +70,7 @@ else
 fi
 
 # Check that bq_dataset exists and exit if not
-datasets=`bq --project=$BQ_PROJECT ls`
+datasets=$(bq --project=$BQ_PROJECT ls)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -86,7 +86,7 @@ fi
 
 
 # Make dataset for cdr cloudsql tables
-datasets=`bq --project=$WORKBENCH_PROJECT ls`
+datasets=$(bq --project=$WORKBENCH_PROJECT ls)
 re=\\b$WORKBENCH_DATASET\\b
 if [[ $datasets =~ $re ]]; then
   echo "$WORKBENCH_DATASET exists"
@@ -176,7 +176,7 @@ from \`$BQ_PROJECT.$BQ_DATASET.concept\` c"
 
 # Update counts and prevalence in concept
 q="select count_value from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` a where a.analysis_id = 1"
-person_count=`bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9'`
+person_count=$(bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9')
 
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \

@@ -28,7 +28,7 @@ then
   exit 1
 fi
 
-startDate=`date`
+startDate=$(date)
 echo " Starting generate-local-count-dbs $startDate"
 
 #Check cdr_version is of form YYYYMMDD
@@ -60,6 +60,6 @@ else
   exit 1
 fi
 
-stopDate=`date`
+stopDate=$(date)
 echo "Start $startDate Stop: $stopDate"
-echo `date` " Finished generate-local-count-dbs "
+echo $(date) " Finished generate-local-count-dbs "

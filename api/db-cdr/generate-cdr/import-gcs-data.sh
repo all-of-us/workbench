@@ -77,7 +77,7 @@ do
     files=($local_fpath/${table}0*)
     files_count=${#files[@]}
 
-    if (( $files_count == 0 ))
+    if (( files_count == 0 ))
     then
       echo "No files for $table"
     else
