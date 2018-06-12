@@ -7,7 +7,7 @@ import { ISubscription } from 'rxjs/Subscription';
   templateUrl: './surveys.component.html',
   styleUrls: ['../../styles/template.css', '../../styles/cards.css', './surveys.component.css']
 })
-export class SurveysComponent implements OnInit {
+export class SurveysComponent implements OnInit, OnDestroy {
   title = 'Browse Participant Surveys';
   subTitle = 'Conduct a simple keyword search to quickly identify survey questions ' +
     'related to your area of interest.';
