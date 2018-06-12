@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Provider;
+import javax.mail.MessagingException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -40,11 +42,11 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -52,7 +54,6 @@ import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.ErrorResponse;
 import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
@@ -109,6 +110,8 @@ public class ProfileControllerTest {
   private Person person;
   @Mock
   private Provider<WorkbenchConfig> configProvider;
+  @Mock
+  private MailService mailService;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -120,10 +123,14 @@ public class ProfileControllerTest {
   private User user;
 
   @Before
-  public void setUp() {
+  public void setUp() throws MessagingException {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
+    config.admin = new WorkbenchConfig.AdminConfig();
+    config.admin.verifiedSendingAddress = "verifysend@mockemail.mock";
+    config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
+    config.admin.supportGroup = "supportGroup@dummyMockEmail.com";
 
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
@@ -144,14 +151,17 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
+    Mockito.doNothing().when(mailService).send(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment);
+        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment,
+        Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), cloudEnvironment);
+        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config),
+        cloudEnvironment, Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
