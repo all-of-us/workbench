@@ -98,9 +98,10 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchDomain(query: string) {
     this.searchRequest = {query: query, domain: this.dbDomain.domainId, standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS}; // new SearchConceptsRequest();
     this.prevSearchText = query;
-    return this.api.getConceptsSearch(query, 'S', this.dbDomain.domainId);
+    //return this.api.getConceptsSearch(query, 'S', this.dbDomain.domainId);
     // This advanced gives error . Srushti todo uncomment and see what it is.
-    // return this.api.getAdvancedConceptSearch(this.searchRequest);
+    console.log(this.searchRequest , "Search request ");
+     return this.api.getAdvancedConceptSearch(this.searchRequest);
   }
 
   /*
