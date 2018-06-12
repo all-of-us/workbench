@@ -47,7 +47,6 @@ import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationSta
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
@@ -96,8 +95,6 @@ public class ProfileControllerTest {
   private AdminActionHistoryDao adminActionHistoryDao;
   @Mock
   private FireCloudService fireCloudService;
-  @Mock
-  private MailChimpService mailChimpService;
   @Mock
   private NotebooksService notebooksService;
   @Mock
@@ -156,11 +153,11 @@ public class ProfileControllerTest {
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config), environment,
+        cloudStorageService, blockscoreService, notebooksService, Providers.of(config), environment,
         Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, blockscoreService, mailChimpService, notebooksService, Providers.of(config),
+        cloudStorageService, blockscoreService, notebooksService, Providers.of(config),
         cloudEnvironment, Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
@@ -220,7 +217,6 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
-    when(mailChimpService.getMember(CONTACT_EMAIL)).thenReturn("subscribed");
     when(person.getId()).thenReturn("id");
     when(person.isValid()).thenReturn(true);
     WorkbenchConfig testConfig = new WorkbenchConfig();
@@ -268,19 +264,6 @@ public class ProfileControllerTest {
     profileController.reviewIdVerification(user.getUserId(), request);
     response = profileController.getIdVerificationsForReview().getBody();
     assertThat(response.getProfileList()).isEmpty();
-  }
-
-  @Test
-  public void testGetIdVerificationsForReview_noMailChimpCalls() throws Exception {
-    createUser();
-    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
-
-    user.setEmailVerificationStatus(EmailVerificationStatus.PENDING);
-    userDao.save(user);
-
-    profileController.getIdVerificationsForReview();
-    verify(mailChimpService, never()).addUserContactEmail(any());
-    verify(mailChimpService, never()).getMember(any());
   }
 
   @Test

@@ -37,7 +37,6 @@ import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationSta
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mailchimp.MailChimpService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -110,7 +109,6 @@ public class ProfileController implements ProfileApiDelegate {
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
   private final BlockscoreService blockscoreService;
-  private final MailChimpService mailChimpService;
   private final NotebooksService notebooksService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
@@ -123,7 +121,6 @@ public class ProfileController implements ProfileApiDelegate {
       Clock clock, UserService userService, FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService, BlockscoreService blockscoreService,
-      MailChimpService mailChimpService,
       NotebooksService notebooksService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
@@ -138,7 +135,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
     this.blockscoreService = blockscoreService;
-    this.mailChimpService = mailChimpService;
     this.notebooksService = notebooksService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
