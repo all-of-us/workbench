@@ -6,7 +6,7 @@ class GcloudContextV2
   attr_reader :account, :creds_file, :project
 
   def initialize(options_parser)
-    Workbench::assert_in_docker
+    Workbench.assert_in_docker
     @options_parser = options_parser
     # We use both gcloud and gsutil commands for various tasks. While gcloud can take arguments,
     # gsutil uses the current gcloud config, so we want to grab and verify the account from there.
@@ -14,15 +14,15 @@ class GcloudContextV2
     # dangerous, like a production project. Instead, we always require that parameter explicitly.
     @options_parser.add_option(
       "--project [GOOGLE_PROJECT]",
-      lambda {|opts, v| opts.project = v},
+      ->(opts, v) { opts.project = v},
       "Google project to act on (e.g. all-of-us-workbench-test)"
     )
     @options_parser.add_option(
       "--creds-file [PATH]",
-      lambda {|opts, v| opts.creds_file = v},
+      ->(opts, v) { opts.creds_file = v},
       "Path to JSON-encoded Google service account file."
     )
-    @options_parser.add_validator lambda {|opts| raise ArgumentError unless opts.project}
+    @options_parser.add_validator ->(opts) { raise ArgumentError unless opts.project}
   end
 
   def validate()

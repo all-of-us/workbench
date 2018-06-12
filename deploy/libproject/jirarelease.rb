@@ -53,7 +53,7 @@ def get_release_notes_between_tags(project, from_tag, to_tag)
   """Formats release notes for JIRA from commit messages, between the two tags."""
   commit_messages = Common.new.capture_stdout(
     ['git', 'log', "#{from_tag}..#{to_tag}", LOG_LINE_FORMAT])
-  if not commit_messages
+  unless commit_messages
     raise RuntimeError.new "failed to retrieve commits"
   end
 
@@ -89,7 +89,7 @@ class JiraReleaseClient
   def self.from_gcs_creds(project)
     gcs_uri = "gs://#{project}-credentials/jira-login.json"
     jira_creds = Common.new.capture_stdout(['gsutil', 'cat', gcs_uri])
-    if not jira_creds
+    unless jira_creds
       raise RuntimeError.new "failed to read JIRA login from '#{gcs_uri}'"
     end
     jira_json = JSON.parse(jira_creds)
