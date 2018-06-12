@@ -13,7 +13,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.MandrillService;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
