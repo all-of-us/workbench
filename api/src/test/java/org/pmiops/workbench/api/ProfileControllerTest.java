@@ -113,6 +113,8 @@ public class ProfileControllerTest {
   private Person person;
   @Mock
   private Provider<WorkbenchConfig> configProvider;
+  @Mock
+  private MailService mailService;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -152,7 +154,6 @@ public class ProfileControllerTest {
 
     idVerificationRequest = new IdVerificationRequest();
     idVerificationRequest.setFirstName("Bob");
-    MailService mailService = Mockito.mock(MailServiceImpl.class);
     Mockito.doNothing().when(mailService).send(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
