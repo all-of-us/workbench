@@ -185,6 +185,16 @@ public class UserService {
     });
   }
 
+  public User setClusterRetryCount(int clusterRetryCount) {
+    return updateWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setClusterCreateRetries(clusterRetryCount);
+        return user;
+      }
+    });
+  }
+
   public List<User> getNonVerifiedUsers() {
     return userDao.findUserNotValidated();
   }
