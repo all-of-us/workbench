@@ -12,25 +12,19 @@ import com.google.api.services.admin.directory.model.UserName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
-import org.pmiops.workbench.mandrill.MandrillService;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Provider;
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -59,17 +53,17 @@ public class DirectoryServiceImpl implements DirectoryService {
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
-  private final MandrillService mandrillService;
+  private final Provider<MailService> mailServiceProvider;
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
-      Provider<WorkbenchConfig> configProvider, MandrillService mandrillService,
+      Provider<WorkbenchConfig> configProvider, Provider<MailService> mailServiceProvider,
       HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
-    this.mandrillService = mandrillService;
+    this.mailServiceProvider = mailServiceProvider;
   }
 
   private GoogleCredential createCredentialWithImpersonation() {
@@ -132,7 +126,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     //This is a temporary solution until Mandrill is implemented.
     //This way if one merge happens and the other is delayed for any reason,
     //we won't break in a major way.
-    sendPasswordEmail(contactEmail, password, user);
+    mailServiceProvider.get().sendEmail(contactEmail, password, user);
     return user;
   }
   @Override
@@ -174,8 +168,8 @@ public class DirectoryServiceImpl implements DirectoryService {
     // once we have the domains/from Email straightened out
     message.setFromEmail("donotreply@researchallofus.org");
     try {
-      mandrillService.sendEmail(message);
-    } catch (ApiException e) {
+      mailServiceProvider.get().sendEmail(message);
+    } catch (ApiException | MessagingException e) {
       throw new EmailException("Error sending initial email", e);
     }
   }
