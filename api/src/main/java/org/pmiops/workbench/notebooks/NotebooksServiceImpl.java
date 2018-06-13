@@ -47,7 +47,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         .labels(labels)
         .jupyterUserScriptUri(workbenchConfigProvider.get().firecloud.jupyterUserScriptUri)
         .machineConfig(new MachineConfig()
-            .masterDiskSize(100 /* GB */)
+            .masterDiskSize(20 /* GB */)
             .masterMachineType("n1-standard-1"));
   }
 
