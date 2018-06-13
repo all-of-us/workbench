@@ -153,24 +153,4 @@ public class DirectoryServiceImpl implements DirectoryService {
       collect(Collectors.joining(""));
   }
 
-  protected void sendPasswordEmail(String contactEmail, String password, User user) {
-    MandrillMessage message = new MandrillMessage();
-    RecipientAddress toAddress = new RecipientAddress();
-    toAddress.setEmail(contactEmail);
-    message.setTo(Arrays.asList(toAddress));
-    String messageBody = "Your new account is: " + user.getPrimaryEmail() +
-      "\nThe password for your new account is: " + password;
-    message.setHtml(messageBody);
-    message.setSubject("Your new All of Us Account");
-    // using this address as a placeholder right now.
-    // do not think it is right since I'm getting a
-    // unsigned rejection right now, but the api should work
-    // once we have the domains/from Email straightened out
-    message.setFromEmail("donotreply@researchallofus.org");
-    try {
-      mailServiceProvider.get().sendEmail(message);
-    } catch (ApiException | MessagingException e) {
-      throw new EmailException("Error sending initial email", e);
-    }
-  }
 }
