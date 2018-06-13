@@ -6,9 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.inject.Provider;
-
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -91,7 +89,7 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     for (Cluster c : clusters) {
       String clusterId = c.getGoogleProject() + "/" + c.getClusterName();
       try {
-        // Refetch the cluster to ensure freshnesss as this iteration may take
+        // Refetch the cluster to ensure freshness as this iteration may take
         // some time.
         c = clusterApi.getCluster(c.getGoogleProject(), c.getClusterName());
       } catch (ApiException e) {
