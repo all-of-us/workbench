@@ -37,7 +37,7 @@ public class MandrillServiceImpl implements MandrillService {
   @Override
   public MandrillMessageStatuses sendEmail(MandrillMessage email) {
     MandrillApi mandrillApi = mandrillApiProvider.get();
-    String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey(); 
+    String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey();
     MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
     keyAndMessage.setKey(apiKey);
     keyAndMessage.setMessage(email);
