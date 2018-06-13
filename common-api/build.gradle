@@ -24,7 +24,7 @@ dependencies {
   compile 'javax.servlet:javax.servlet-api:3.0.1'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
-  compile 'com.google.guava:guava:22.0'
+  compile 'com.google.guava:guava:24.1.1-jre'
   compile 'org.hibernate:hibernate-ehcache:5.0.12.Final'
   compile 'org.apache.commons:commons-lang3:3.0'
   compile('org.springframework.boot:spring-boot-starter-web:+') {
