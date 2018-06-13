@@ -6,9 +6,9 @@ info:
   title: Mandrill
   version: "0.1"
 
-host: "mandrillapp.com/api/1.0/"
+host: 'mandrillapp.com/api/1.0/'
 schemes:
-  - "https"
+  - 'https'
 basePath: /
 
 produces:
@@ -23,11 +23,11 @@ paths:
       summary: Send an email via mandrill
       responses:
         200:
-          description: "Email sent successfully"
+          description: Email sent successfully
           schema:
             $ref: '#/definitions/MandrillMessageStatuses'
         500:
-          description: "There was an error, please see response for details"
+          description: There was an error, please see response for details
       parameters:
         - in: body
           description: API key and message
@@ -55,7 +55,7 @@ definitions:
         type: object
         description: Mandrill Message
         items:
-          "$ref": "#/definitions/MandrillMessage"
+          '$ref': '#/definitions/MandrillMessage'
   MandrillMessage:
     required:
       - html
@@ -76,10 +76,9 @@ definitions:
       to:
         type: array
         items:
-          "$ref": "#/definitions/RecipientAddress"
+          '$ref': '#/definitions/RecipientAddress'
 
   RecipientAddress:
-    description: ''
     required:
       - email
     type: object
@@ -89,13 +88,11 @@ definitions:
         description: recipient address
 
   MandrillMessageStatuses:
-    description: ''
     type: array
     items:
-      "$ref": "#/definitions/MandrillMessageStatus"
+      '$ref': '#/definitions/MandrillMessageStatus'
 
   MandrillMessageStatus:
-    description: ''
     type: object
     properties:
       email:

@@ -28,6 +28,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return readToString(getCredentialsBucketName(), "invitation-key.txt").trim();
   }
 
+  public String readMandrillApiKey() {
+    return readToString(getCredentialsBucketName(), "mandrill-keys.json").trim();
+  }
+
   @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();

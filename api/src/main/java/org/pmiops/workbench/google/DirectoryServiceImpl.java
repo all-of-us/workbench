@@ -172,7 +172,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     // do not think it is right since I'm getting a
     // unsigned rejection right now, but the api should work
     // once we have the domains/from Email straightened out
-    message.setFromEmail("donotreply@allofus.org");
+    message.setFromEmail("donotreply@researchallofus.org");
     try {
       mandrillService.sendEmail(message);
     } catch (ApiException e) {

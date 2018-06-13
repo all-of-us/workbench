@@ -4,6 +4,8 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.EmailException;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -21,18 +23,21 @@ public class MandrillServiceImpl implements MandrillService {
   private static final Logger log = Logger.getLogger(MandrillServiceImpl.class.getName());
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<MandrillApi> mandrillApiProvider;
+  private final Provider<CloudStorageService> cloudStorageServiceProvider;
 
   @Autowired
   public MandrillServiceImpl(Provider<WorkbenchConfig> configProvider,
-                             Provider<MandrillApi> mandrillApiProvider) {
+                             Provider<MandrillApi> mandrillApiProvider,
+                             Provider<CloudStorageService> cloudStorageServiceProvider) {
     this.configProvider = configProvider;
     this.mandrillApiProvider = mandrillApiProvider;
+    this.cloudStorageServiceProvider = cloudStorageServiceProvider;
   }
 
   @Override
   public MandrillMessageStatuses sendEmail(MandrillMessage email) {
     MandrillApi mandrillApi = mandrillApiProvider.get();
-    String apiKey = readMandrillApiKey();
+    String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey(); 
     MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
     keyAndMessage.setKey(apiKey);
     keyAndMessage.setMessage(email);
@@ -42,16 +47,7 @@ public class MandrillServiceImpl implements MandrillService {
       return msgStatuses;
     } catch (ApiException e){
       log.log(Level.WARNING, "Sending email via Mandrill Failed.");
-      return null;
+      throw new EmailException("Sending email failed.");
     }
   }
-
-  private String readMandrillApiKey() {
-    String bucketName = configProvider.get().googleCloudStorageService.credentialsBucketName;
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    String content = new String(storage.get(bucketName, "mandrill-keys.json").getContent());
-    JSONObject mandrillKeys = new JSONObject(content);
-    return mandrillKeys.getString("api-key");
-  }
-
 }
