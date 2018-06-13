@@ -82,7 +82,7 @@ public class ClusterController implements ClusterApiDelegate {
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
   private final String apiHostName;
-  private final UserService userService;
+  private UserService userService;
 
   @Autowired
   ClusterController(NotebooksService notebooksService,
@@ -102,6 +102,11 @@ public class ClusterController implements ClusterApiDelegate {
   @VisibleForTesting
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
+  }
+
+  @VisibleForTesting
+  public void setUserService(UserService userService) {
+    this.userService = userService;
   }
 
   @Override
