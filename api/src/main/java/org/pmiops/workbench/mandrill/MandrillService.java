@@ -1,6 +1,5 @@
 package org.pmiops.workbench.mandrill;
 
-import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 
 /**

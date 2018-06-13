@@ -11,8 +11,6 @@ import org.springframework.web.context.annotation.RequestScope;
 @Configuration
 public class MandrillConfig{
 
-  private static final String MANDRILL_API_CLIENT = "mandrillApiClient";
-
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient mandrillApiClient(WorkbenchConfig workbenchConfig) {
@@ -21,7 +19,7 @@ public class MandrillConfig{
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public MandrillApi mandrillApi(@Qualifier(MANDRILL_API_CLIENT) ApiClient apiClient) {
+  public MandrillApi mandrillApi(ApiClient apiClient) {
     MandrillApi api = new MandrillApi();
     api.setApiClient(apiClient);
     return api;
