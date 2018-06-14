@@ -70,8 +70,6 @@ public class AuditControllerTest {
   @Autowired
   AuditController auditController;
 
-  private CdrVersion cdrV1, cdrV2;
-
   @Before
   public void setUp() {
     User user = new User();
@@ -81,10 +79,10 @@ public class AuditControllerTest {
     user.setDisabled(false);
     user = userDao.save(user);
 
-    cdrV1 = new CdrVersion();
+    CdrVersion cdrV1 = new CdrVersion();
     cdrV1.setBigqueryProject(CDR_V1_PROJECT_ID);
     cdrV1 = cdrVersionDao.save(cdrV1);
-    cdrV2 = new CdrVersion();
+    CdrVersion cdrV2 = new CdrVersion();
     cdrV2.setBigqueryProject(CDR_V2_PROJECT_ID);
     cdrV2 = cdrVersionDao.save(cdrV2);
 
@@ -127,6 +125,7 @@ public class AuditControllerTest {
   @Test
   public void testAuditBigQueryCdrV1Queries() {
     stubBigQueryCalls(CDR_V1_PROJECT_ID, USER_EMAIL, 5);
+    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
 
   @Test

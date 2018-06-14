@@ -1,6 +1,5 @@
 package org.pmiops.workbench.publicapi;
 
-
 import org.pmiops.workbench.cdr.dao.*;
 import org.pmiops.workbench.cdr.model.*;
 import org.pmiops.workbench.model.ConceptListResponse;
@@ -21,7 +20,6 @@ import com.google.common.collect.ImmutableMultimap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
@@ -65,11 +63,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public static final long COUNT_ANALYSIS_ID = 3000;
     public static final long GENDER_ANALYSIS_ID = 3101;
     public static final long AGE_ANALYSIS_ID = 3102;
-
-
-
-
-    private static final Logger log = Logger.getLogger(DataBrowserController.class.getName());
 
     /**
      * Converter function from backend representation (used with Hibernate) to

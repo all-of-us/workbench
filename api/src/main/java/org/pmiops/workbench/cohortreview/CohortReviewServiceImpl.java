@@ -25,12 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Provider;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,8 +40,6 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
     private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
     private WorkspaceService workspaceService;
-
-    private static final Logger log = Logger.getLogger(CohortReviewServiceImpl.class.getName());
 
     @Autowired
     public CohortReviewServiceImpl(CohortReviewDao cohortReviewDao,

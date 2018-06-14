@@ -87,7 +87,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   public GoogleCredential gsuiteAdminCredential() {
     ServletContext context = getRequestServletContext();
     InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/gsuite-admin-sa.json");
-    GoogleCredential credential = null;
     try {
       return GoogleCredential.fromStream(saFileAsStream);
     } catch (IOException e) {

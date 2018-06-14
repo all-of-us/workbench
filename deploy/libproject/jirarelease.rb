@@ -14,6 +14,8 @@ require_relative "../../aou-utils/utils/common"
 
 REPO_BASE_URL = "https://github.com/all-of-us/workbench"
 
+RISK_RE = / ?\[risk=(no|low|moderate|severe)\]/i
+
 # Formatting for release notes in JIRA comments.
 # Note that JIRA auto-linkifies JIRA IDs, so avoid using commit message text in a link.
 LOG_LINE_FORMAT = "--format=*   [%aN %ad|" + REPO_BASE_URL + "/commit/%h] %s"
@@ -33,19 +35,37 @@ def linkify_pull_request_ids(text)
       '([#\1|' + REPO_BASE_URL + '/pull/\1])')
 end
 
+def annotate_commit_risk(line)
+  # From the commit message, pulls out tokens like [risk=low] and appends a risk
+  # level to the commit.
+  match = RISK_RE.match(line)
+  # Leave a TODO for the release engineer for untagged commits.
+  risk = '**TODO**'
+  if match
+    risk = match[1].downcase
+    line.sub!(RISK_RE, '')
+  end
+  return "#{line} (risk: #{risk})"
+end
+
+
 def get_release_notes_between_tags(project, from_tag, to_tag)
   """Formats release notes for JIRA from commit messages, between the two tags."""
   commit_messages = Common.new.capture_stdout(
     ['git', 'log', "#{from_tag}..#{to_tag}", LOG_LINE_FORMAT])
-  if not commit_messages
+  unless commit_messages
     raise RuntimeError.new "failed to retrieve commits"
   end
 
+  history = ""
+  linkify_pull_request_ids(commit_messages).each_line do |line|
+    history += annotate_commit_risk(line) + "\n"
+  end
   return RELEASE_NOTES_T % {
     :current => to_tag,
     :project => project,
     :prev => from_tag,
-    :history => linkify_pull_request_ids(commit_messages),
+    :history => history
   }
 end
 
@@ -69,7 +89,7 @@ class JiraReleaseClient
   def self.from_gcs_creds(project)
     gcs_uri = "gs://#{project}-credentials/jira-login.json"
     jira_creds = Common.new.capture_stdout(['gsutil', 'cat', gcs_uri])
-    if not jira_creds
+    unless jira_creds
       raise RuntimeError.new "failed to read JIRA login from '#{gcs_uri}'"
     end
     jira_json = JSON.parse(jira_creds)

@@ -203,7 +203,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   private boolean isTrue(Boolean b) {
-    return b != null && b == true;
+    return b != null && b;
   }
 
   @Override

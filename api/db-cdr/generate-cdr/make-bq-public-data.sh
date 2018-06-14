@@ -53,7 +53,7 @@ then
 fi
 
 # Check that source dataset exists and exit if not
-datasets=`bq --project=$WORKBENCH_PROJECT ls`
+datasets=$(bq --project=$WORKBENCH_PROJECT ls)
 if [ -z "$datasets" ]
 then
   echo "$WORKBENCH_PROJECT.$WORKBENCH_DATASET does not exist. Please specify a valid project and dataset."
@@ -68,7 +68,7 @@ else
 fi
 
 # Check that public project exists
-datasets=`bq --project=$PUBLIC_PROJECT ls`
+datasets=$(bq --project=$PUBLIC_PROJECT ls)
 if [ -z "$datasets" ]
 then
   echo "$PUBLIC_PROJECT does not exist. Please specify a valid PUBLIC project and dataset."
@@ -76,7 +76,7 @@ then
 fi
 
 # Make dataset for public cloudsql tables
-datasets=`bq --project=$PUBLIC_PROJECT ls`
+datasets=$(bq --project=$PUBLIC_PROJECT ls)
 re=\\b$PUBLIC_DATASET\\b
 if [[ $datasets =~ $re ]]; then
   echo "$PUBLIC_DATASET exists"

@@ -316,10 +316,6 @@ public class CohortReviewControllerMockTest {
     }
 
     private void assertCreateParticipantCohortAnnotation(ParticipantCohortAnnotation request, AnnotationType annotationType) throws Exception {
-
-        ParticipantCohortStatusKey key = new ParticipantCohortStatusKey().cohortReviewId(cohortReviewId).participantId(participantId);
-        ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus().participantKey(key);
-
         CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition().annotationType(annotationType);
         if (request.getAnnotationValueEnum() != null) {
             CohortAnnotationEnumValue cohortAnnotationEnumValue = new CohortAnnotationEnumValue().name(request.getAnnotationValueEnum());

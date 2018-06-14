@@ -47,7 +47,7 @@ public class FireCloudServiceImplTest {
   public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Before
-  public void setup() {
+  public void setUp() {
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
         Providers.of(workspacesApi), new FirecloudRetryHandler(new NoBackOffPolicy()));

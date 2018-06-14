@@ -708,6 +708,7 @@ definitions:
       - status
       - createdDate
       - labels
+      - dateAccessed
     properties:
       clusterName:
         type: string
@@ -751,6 +752,11 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Instance'
+      dateAccessed:
+        type: string
+        description: |
+          The date and time the cluster was last accessed, in ISO-8601 format.
+          Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
 
   InstanceKey:
     description: ''
@@ -854,7 +860,7 @@ definitions:
       masterDiskSize:
         type: integer
         description: |
-          Optional, the size of the disk on the master node. Minimum size is 100GB. If unspecified, default size is 500GB.
+          Optional, the size in megabytes of the disk on the master node. Minimum size is 10GB. If unspecified, default size is 100GB.
       workerMachineType:
         type: string
         description: |
@@ -864,7 +870,7 @@ definitions:
       workerDiskSize:
         type: integer
         description: |
-          Optional, the size of the disk on the master node. Minimum size is 100GB. If unspecified, default size is 500GB.
+          Optional, the size in megabytes of the disk on the master node. Minimum size is 10GB. If unspecified, default size is 100GB.
           Ignored if numberOfWorkers is 0.
       numberOfWorkerLocalSSDs:
         type: integer

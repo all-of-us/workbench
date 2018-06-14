@@ -46,16 +46,16 @@ then
   exit 1
 fi
 
-echo "Creating cloudsql DB from dump file $SQL_DUMP_FILE \n"
+echo "Creating cloudsql DB from dump file ${SQL_DUMP_FILE}"
 SERVICE_ACCOUNT="${PROJECT}@appspot.gserviceaccount.com"
 
 gsutil acl ch -u $SERVICE_ACCOUNT:O gs://$BUCKET/$SQL_DUMP_FILE
 gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
 # Grant access to buckets for service account for cloudsql
-SQL_SERVICE_ACCOUNT=`gcloud sql instances describe --project $PROJECT \
+SQL_SERVICE_ACCOUNT=$(gcloud sql instances describe --project $PROJECT \
     --account $SERVICE_ACCOUNT $INSTANCE | grep serviceAccountEmailAddress \
-    | cut -d: -f2`
+    | cut -d: -f2)
 # Trim leading whitespace from sql service account
 SQL_SERVICE_ACCOUNT=${SQL_SERVICE_ACCOUNT//[[:blank:]]/}
 
@@ -72,7 +72,7 @@ minutes_waited=0
 while true; do
   sleep 1m
   minutes_waited=$((minutes_waited + 1))
-  import_status=`gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT"`
+  import_status=$(gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT")
   if [[ $import_status =~ .*RUNNING* ]]
   then
      echo "Import is still running after ${minutes_waited} minutes."

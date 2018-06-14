@@ -43,7 +43,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 public CohortAnnotationDefinition apply(org.pmiops.workbench.db.model.CohortAnnotationDefinition cohortAnnotationDefinition) {
                     List<String> enumValues = cohortAnnotationDefinition.getEnumValues() == null ? null :
                             cohortAnnotationDefinition.getEnumValues().stream().map(CohortAnnotationEnumValue::getName).collect(Collectors.toList());
-                    return new org.pmiops.workbench.model.CohortAnnotationDefinition()
+                    return new CohortAnnotationDefinition()
                             .columnName(cohortAnnotationDefinition.getColumnName())
                             .cohortId(cohortAnnotationDefinition.getCohortId())
                             .annotationType(cohortAnnotationDefinition.getAnnotationType())

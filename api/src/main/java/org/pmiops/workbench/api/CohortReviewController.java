@@ -1,8 +1,24 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.*;
+import com.google.cloud.bigquery.BigQueryException;
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.QueryResult;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
@@ -17,26 +33,41 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CohortSummaryListResponse;
+import org.pmiops.workbench.model.ConceptIdName;
+import org.pmiops.workbench.model.Condition;
+import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.Device;
+import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Drug;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.Master;
+import org.pmiops.workbench.model.Measurement;
+import org.pmiops.workbench.model.ModifyCohortStatusRequest;
+import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
+import org.pmiops.workbench.model.Observation;
+import org.pmiops.workbench.model.PageFilterRequest;
+import org.pmiops.workbench.model.PageRequest;
+import org.pmiops.workbench.model.ParticipantCohortAnnotation;
+import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.ParticipantCohortStatuses;
+import org.pmiops.workbench.model.ParticipantData;
+import org.pmiops.workbench.model.ParticipantDataListResponse;
+import org.pmiops.workbench.model.Procedure;
+import org.pmiops.workbench.model.ReviewColumns;
+import org.pmiops.workbench.model.ReviewFilter;
+import org.pmiops.workbench.model.ReviewStatus;
+import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.SortOrder;
+import org.pmiops.workbench.model.Visit;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
@@ -527,7 +558,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         new ParticipantCohortStatus()
           .participantKey(new ParticipantCohortStatusKey(cohortReviewId, bigQueryService.getLong(row, rm.get("person_id"))))
           .status(CohortStatus.NOT_REVIEWED)
-          .birthDate(new java.sql.Date(birthDate.getTime()))
+          .birthDate(new Date(birthDate.getTime()))
           .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
           .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
           .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));

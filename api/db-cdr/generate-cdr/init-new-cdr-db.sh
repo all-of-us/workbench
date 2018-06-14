@@ -48,7 +48,7 @@ function finish {
 }
 trap finish EXIT
 
-cat create_db.sql | envsubst > $CREATE_DB_FILE
+envsubst < create_db.sql > $CREATE_DB_FILE
 
 # Drop and create new cdr database
 if [ "${DROP_IF_EXISTS}" == "Y" ]
