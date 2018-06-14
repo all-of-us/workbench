@@ -24,3 +24,4 @@ public class MandrillConfig{
     return api;
   }
 }
+

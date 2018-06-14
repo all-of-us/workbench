@@ -47,9 +47,9 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   private final Provider<GoogleCredential> googleCredentialProvider;
   private final Provider<WorkbenchConfig> configProvider;
+  private final Provider<MailService> mailServiceProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
-  private final Provider<MailService> mailServiceProvider;
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
@@ -57,9 +57,9 @@ public class DirectoryServiceImpl implements DirectoryService {
       HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
+    this.mailServiceProvider = mailServiceProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
-    this.mailServiceProvider = mailServiceProvider;
   }
 
   private GoogleCredential createCredentialWithImpersonation() {

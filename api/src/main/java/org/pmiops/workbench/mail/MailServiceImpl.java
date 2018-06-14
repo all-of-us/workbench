@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.inject.Provider;
 import java.util.Arrays;
-import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -36,21 +35,19 @@ public class MailServiceImpl implements MailService {
     }
 
     public MandrillMessageStatuses sendEmail(String contactEmail, String password, User user) throws MessagingException {
-        MandrillApi mandrillApi = mandrillApiProvider.get();
         String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey();
         MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
         keyAndMessage.setKey(apiKey);
-        MandrillMessage msg = buildMandrillMessage(contactEmail, password, user);
+        MandrillMessage msg = buildWelcomeMessage(contactEmail, password, user);
         keyAndMessage.setMessage(msg);
         try {
-            MandrillMessageStatuses msgStatuses = mandrillApi.send(keyAndMessage);
-            return msgStatuses;
+            return mandrillApiProvider.get().send(keyAndMessage);
         } catch (ApiException e){
             throw new MessagingException("Sending email failed.");
         }
     }
 
-    private MandrillMessage buildMandrillMessage(String contactEmail, String password, User user) {
+    private MandrillMessage buildWelcomeMessage(String contactEmail, String password, User user) {
         MandrillMessage msg = new MandrillMessage();
         RecipientAddress toAddress = new RecipientAddress();
         toAddress.setEmail(contactEmail);
