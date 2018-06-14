@@ -15,6 +15,7 @@ public class WorkbenchConfig {
   public GoogleDirectoryServiceConfig googleDirectoryService;
   public ServerConfig server;
   public AdminConfig admin;
+  public MandrillConfig mandrill;
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
@@ -55,5 +56,9 @@ public class WorkbenchConfig {
     public String adminIdVerification;
     public String supportGroup;
     public String verifiedSendingAddress;
+  }
+
+  public static class MandrillConfig {
+    public String fromEmail;
   }
 }
