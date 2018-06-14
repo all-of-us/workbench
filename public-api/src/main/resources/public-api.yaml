@@ -325,6 +325,13 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/Concept"
+        matchType:
+          type: string
+          description: match column type
+        standardConcept:
+          type: integer
+          format: int64
+          description: standard concept associated with the matched concept
 
   QuestionConcept:
     type: object

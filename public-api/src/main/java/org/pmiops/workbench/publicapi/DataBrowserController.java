@@ -262,7 +262,15 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                         searchConceptsRequest.getVocabularyIds(), domainIds, maxResults);
         ConceptListResponse response=new ConceptListResponse();
-        response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        List<Concept> matchedConcepts=concepts.getContent();
+        for(Concept con:matchedConcepts){
+            String conceptCode = con.getConceptCode();
+            if(conceptCode.equals(searchConceptsRequest.getQuery())){
+                response.setMatchType("ConceptCode");
+            }
+            response.setStandardConcept(questionConceptDao.findStandardConcept(con.getConceptId()));
+        }
+        response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 

@@ -13,4 +13,7 @@ public interface QuestionConceptDao extends CrudRepository<QuestionConcept, Long
             "where r.concept_id_1=?1 and r.relationship_id = 'Module of' and ar.analysis_id=3110\n" +
             "group by c.concept_id,c.concept_name,c.domain_id,c.vocabulary_id,c.concept_code,c.count_value,c.prevalence")
     List<QuestionConcept> findSurveyQuestions(long survey_concept_id);
+
+    @Query(nativeQuery=true, value="SELECT cr.concept_id_2 from concept_relationship cr where cr.concept_id_1=?1 and cr.relationship_id='Maps to' ")
+    Long findStandardConcept(long concept_id);
 }
