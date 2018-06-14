@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import org.junit.Before;
@@ -16,8 +15,6 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;

@@ -428,7 +428,7 @@ Common.register_command({
 })
 
 
-def connect_to_db(*args)
+def connect_to_db()
   common = Common.new
 
   cmd = "MYSQL_PWD=root-notasecret mysql --database=workbench"
@@ -438,7 +438,7 @@ end
 Common.register_command({
   :invocation => "connect-to-db",
   :description => "Connect to the running database via mysql.",
-  :fn => ->(*args) { connect_to_db(*args) }
+  :fn => ->() { connect_to_db() }
 })
 
 
@@ -1373,7 +1373,7 @@ def setup_project_data(gcc, cdr_db_name, public_db_name)
                      root_password)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
-  with_cloud_proxy_and_db(gcc) do |ctx|
+  with_cloud_proxy_and_db(gcc) do
     common.status "Copying service account key to GCS..."
     gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json").path
     common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}

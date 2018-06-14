@@ -256,14 +256,14 @@ Common.register_command({
   :fn => Proc.new { |_| rebuild_image() }
 })
 
-def docker_run(cmd_name, args)
+def docker_run(args)
   Common.new.run_inline %W{docker-compose run --rm ui} + args
 end
 
 Common.register_command({
   :invocation => "docker-run",
   :description => "Runs the specified command in a docker container.",
-  :fn => ->(*args) { docker_run("docker-run", args) }
+  :fn => ->(*args) { docker_run(args) }
 })
 
 def clean_environment()

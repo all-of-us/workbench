@@ -558,7 +558,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         new ParticipantCohortStatus()
           .participantKey(new ParticipantCohortStatusKey(cohortReviewId, bigQueryService.getLong(row, rm.get("person_id"))))
           .status(CohortStatus.NOT_REVIEWED)
-          .birthDate(new java.sql.Date(birthDate.getTime()))
+          .birthDate(new Date(birthDate.getTime()))
           .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
           .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
           .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));
