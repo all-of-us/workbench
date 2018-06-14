@@ -7,7 +7,6 @@ import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,14 +37,14 @@ public class MailServiceImpl implements MailService {
         Transport.send(msg);
     }
 
-    public MandrillMessageStatuses sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException {
+    public void sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException {
         String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey();
         MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
         keyAndMessage.setKey(apiKey);
         MandrillMessage msg = buildWelcomeMessage(contactEmail, password, user);
         keyAndMessage.setMessage(msg);
         try {
-            return mandrillApiProvider.get().send(keyAndMessage);
+            mandrillApiProvider.get().send(keyAndMessage);
         } catch (ApiException e){
             throw new MessagingException("Sending email failed.");
         }

@@ -4,11 +4,10 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 
 import com.google.api.services.admin.directory.model.User;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 
 public interface MailService {
 
     void send(Message msg) throws MessagingException;
 
-    MandrillMessageStatuses sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException;
+    void sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException;
 }
