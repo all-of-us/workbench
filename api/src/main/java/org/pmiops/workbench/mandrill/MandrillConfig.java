@@ -2,7 +2,6 @@ package org.pmiops.workbench.mandrill;
 
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
