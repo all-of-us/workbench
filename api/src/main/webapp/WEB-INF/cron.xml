@@ -6,4 +6,10 @@
     <description>daily BigQuery audit job</description>
     <schedule>every 24 hours</schedule>
   </cron>
+  <cron>
+    <url>/v1/cron/checkClusters</url>
+    <target>api</target>
+    <description>Periodic notebook cluster checks</description>
+    <schedule>every 3 hours</schedule>
+  </cron>
 </cronentries>
