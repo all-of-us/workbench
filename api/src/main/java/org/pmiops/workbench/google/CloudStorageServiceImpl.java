@@ -49,7 +49,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   String readToString(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    return new String(storage.get(bucketName, objectPath).getContent().trim());
+    return new String(storage.get(bucketName, objectPath).getContent()).trim();
   }
 
   @Override

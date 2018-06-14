@@ -120,7 +120,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setChangePasswordAtNextLogin(true);
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     try {
-      mailServiceProvider.get().sendEmail(contactEmail, password, user);
+      mailServiceProvider.get().sendWelcomeEmail(contactEmail, password, user);
     } catch (MessagingException e) {
       return user;
     }

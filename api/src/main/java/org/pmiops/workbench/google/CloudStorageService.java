@@ -11,7 +11,6 @@ public interface CloudStorageService {
 
   public String readInvitationKey();
   public String readMandrillApiKey();
-  public String readMandrillFromEmail();
   public List<Blob> getBlobList(String bucketName, String directory);
   public void writeFile(String bucketName, String fileName, byte[] bytes);
   public void copyBlob(BlobId from, BlobId to);
