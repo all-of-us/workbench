@@ -243,9 +243,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<ConceptListResponse> getAdvancedConceptSearch(SearchConceptsRequest searchConceptsRequest){
 
-        Integer maxResults=searchConceptsRequest.getMaxResults();
-        if(maxResults == null){
-            maxResults = 25;
+        Integer maxResults = searchConceptsRequest.getMaxResults();
+        if(maxResults == null || maxResults == 0){
+            maxResults = Integer.MAX_VALUE;
         }
         StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
         if(standardConceptFilter == null){
@@ -261,7 +261,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         Slice<Concept> concepts =
                 conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                         searchConceptsRequest.getVocabularyIds(), domainIds, maxResults);
-        ConceptListResponse response = new ConceptListResponse();
+        ConceptListResponse response=new ConceptListResponse();
         response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }

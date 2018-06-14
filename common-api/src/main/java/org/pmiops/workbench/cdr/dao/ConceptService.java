@@ -41,23 +41,28 @@ public class ConceptService {
         String[] keywords = query.split("[,+\\s+]");
         for(int i = 0; i < keywords.length; i++){
             String key = keywords[i];
-            if(key.length() < 3){
+            if(key.length() < 3 && !key.isEmpty()){
                 key = "\"" + key + "\"";
                 keywords[i] = key;
             }
         }
 
-        String query2 = "";
+        StringBuilder query2 = new StringBuilder();
         for(String key : keywords){
-            if(query2.isEmpty()){
-                query2 = "+" + key;
-            }else if(key.contains("\"")){
-                query2 = query2 + key;
-            }else{
-                query2 = query2+ "+"+ key;
+            if(!key.isEmpty()){
+                if(query2.length()==0){
+                    query2.append("+");
+                    query2.append(key);
+                }else if(key.contains("\"")){
+                    query2.append(key);
+                }else{
+                    query2.append("+");
+                    query2.append(key);
+                }
             }
+
         }
-        return query2;
+        return query2.toString();
     }
 
     public static final String STANDARD_CONCEPT_CODE = "S";
@@ -68,18 +73,18 @@ public class ConceptService {
 
 
         final String keyword = modifyMultipleMatchKeyword(query);
-
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
                     List<Predicate> predicates = new ArrayList<>();
 
                     // Check that the concept name, code, or ID matches the query string.
                     List<Predicate> queryPredicates = new ArrayList<>();
-                    Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
-                            root.get("conceptName"), criteriaBuilder.literal(keyword));
-                    queryPredicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+
+                    //concept_Code match
                     queryPredicates.add(criteriaBuilder.equal(root.get("conceptCode"),
                             criteriaBuilder.literal(query)));
+
+                    //concept_id match
                     try {
                         long conceptId = Long.parseLong(query);
                         queryPredicates.add(criteriaBuilder.equal(root.get("conceptId"),
@@ -87,6 +92,11 @@ public class ConceptService {
                     } catch (NumberFormatException e) {
                         // Not a long, don't try to match it to a concept ID.
                     }
+
+                    //concept_name match
+                    queryPredicates.add(criteriaBuilder.greaterThan(criteriaBuilder.function("match",Double.class,root.get("conceptName"),
+                            criteriaBuilder.parameter(String.class,"keyword")), 0.0));
+
                     predicates.add(criteriaBuilder.or(queryPredicates.toArray(new Predicate[0])));
 
                     // Optionally filter on standard concept, vocabulary ID, domain ID
@@ -115,6 +125,7 @@ public class ConceptService {
                 new Sort(Direction.DESC, "countValue"));
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);
+        conceptDao.keyword=keyword;
         return conceptDao.findAll(conceptSpecification, pageable);
     }
 }
