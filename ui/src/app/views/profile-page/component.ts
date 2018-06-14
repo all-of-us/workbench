@@ -5,8 +5,8 @@ import {SignInService} from 'app/services/sign-in.service';
 import {deepCopy} from 'app/utils/index';
 
 import {
-  IdVerificationStatus,
   ErrorResponse,
+  IdVerificationStatus,
   InstitutionalAffiliation,
   Profile,
   ProfileService,

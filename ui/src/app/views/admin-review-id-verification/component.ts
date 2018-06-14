@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 
 import {
-  IdVerificationStatus,
   IdVerificationReviewRequest,
+  IdVerificationStatus,
   Profile,
   ProfileService,
 } from 'generated';

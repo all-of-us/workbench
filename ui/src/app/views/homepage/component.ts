@@ -6,8 +6,8 @@ import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
   BillingProjectStatus,
-  IdVerificationStatus,
   DataAccessLevel,
+  IdVerificationStatus,
   Profile,
   ProfileService
 } from 'generated';
