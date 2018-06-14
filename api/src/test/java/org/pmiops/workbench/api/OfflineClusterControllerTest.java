@@ -13,12 +13,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
@@ -75,9 +72,6 @@ public class OfflineClusterControllerTest {
       return config;
     }
   }
-
-  @Captor
-  private ArgumentCaptor<Map<String, String>> mapCaptor;
 
   @Autowired
   ClusterApi clusterApi;
