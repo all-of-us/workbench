@@ -524,7 +524,7 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     BlockscoreIdVerificationStatus status = review.getNewStatus();
-    Boolean oldVerification = userDao.findUserByUserId(userId).getBlockscoreVerificationIsValid();
+    Boolean oldVerification = userDao.findUserByUserId(userId).getIdVerificationIsValid();
     String newValue;
 
     if (status == BlockscoreIdVerificationStatus.VERIFIED) {
