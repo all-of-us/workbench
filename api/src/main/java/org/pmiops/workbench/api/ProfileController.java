@@ -39,7 +39,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
-import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
+import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -523,11 +523,11 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
-    BlockscoreIdVerificationStatus status = review.getNewStatus();
+    IdVerificationStatus status = review.getNewStatus();
     Boolean oldVerification = userDao.findUserByUserId(userId).getIdVerificationIsValid();
     String newValue;
 
-    if (status == BlockscoreIdVerificationStatus.VERIFIED) {
+    if (status == IdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
       newValue = "true";
     } else {

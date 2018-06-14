@@ -97,9 +97,9 @@
           <div *ngIf="profileLoaded">
             <div>
               <button class="btn btn-secondary" (click)="requestVerification()"
-                      [disabled]="workingProfile.blockscoreIdVerificationStatus === 'VERIFIED' || workingProfile.requestedIdVerification">
+                      [disabled]="workingProfile.idVerificationStatus === 'VERIFIED' || workingProfile.requestedIdVerification">
                 Submit Identity Verification
-                <clr-tooltip *ngIf="workingProfile.blockscoreIdVerificationStatus === 'REJECTED'">
+                <clr-tooltip *ngIf="workingProfile.idVerificationStatus === 'REJECTED'">
                   <clr-icon clrTooltipTrigger shape="warning-standard"></clr-icon>
                   <clr-tooltip-content clrPosition="top-left" clrSize="md" *clrIfOpen>
                     <span>Your identity could not be verified. Please try again or contact an administrator</span>

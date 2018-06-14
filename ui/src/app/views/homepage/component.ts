@@ -6,7 +6,7 @@ import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
   BillingProjectStatus,
-  BlockscoreIdVerificationStatus,
+  IdVerificationStatus,
   DataAccessLevel,
   Profile,
   ProfileService
@@ -93,7 +93,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     if (this.profile === undefined) {
       return completedTasks;
     }
-    if (this.profile.blockscoreIdVerificationStatus === BlockscoreIdVerificationStatus.VERIFIED) {
+    if (this.profile.idVerificationStatus === IdVerificationStatus.VERIFIED) {
       completedTasks += 1;
     }
     if (this.profile.demographicSurveyCompletionTime !== null) {

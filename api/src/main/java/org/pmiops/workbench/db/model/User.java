@@ -182,7 +182,7 @@ public class User {
     this.workspaceUserRoles = userRoles;
   }
 
-  @Column(name = "blockscore_verification_is_valid")
+  @Column(name = "id_verification_is_valid")
   public Boolean getIdVerificationIsValid() {
     return idVerificationIsValid;
   }

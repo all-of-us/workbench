@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 
 import {
-  BlockscoreIdVerificationStatus,
+  IdVerificationStatus,
   IdVerificationReviewRequest,
   Profile,
   ProfileService,
@@ -32,8 +32,8 @@ export class AdminReviewIdVerificationComponent implements OnInit {
           });
   }
 
-  setIdVerificationStatus(profile: Profile, newStatus: BlockscoreIdVerificationStatus): void {
-    if (profile.blockscoreIdVerificationStatus !== newStatus) {
+  setIdVerificationStatus(profile: Profile, newStatus: IdVerificationStatus): void {
+    if (profile.idVerificationStatus !== newStatus) {
       this.contentLoaded = false;
       const request = <IdVerificationReviewRequest> {newStatus};
       this.profileService.reviewIdVerification(profile.userId, request).subscribe(

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
+import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,11 +62,11 @@ public class ProfileService {
     profile.setRequestedIdVerification(user.getRequestedIdVerification());
     profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
     if (user.getIdVerificationIsValid() == null) {
-      profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.UNVERIFIED);
+      profile.setIdVerificationStatus(IdVerificationStatus.UNVERIFIED);
     } else if (!user.getIdVerificationIsValid()) {
-      profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.REJECTED);
+      profile.setIdVerificationStatus(IdVerificationStatus.REJECTED);
     } else {
-      profile.setBlockscoreIdVerificationStatus(BlockscoreIdVerificationStatus.VERIFIED);
+      profile.setIdVerificationStatus(IdVerificationStatus.VERIFIED);
     }
 
     if (user.getTermsOfServiceCompletionTime() != null) {

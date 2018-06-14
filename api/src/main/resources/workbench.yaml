@@ -1178,7 +1178,7 @@ definitions:
       - newStatus
     properties:
       newStatus:
-        $ref: "#/definitions/BlockscoreIdVerificationStatus"
+        $ref: "#/definitions/IdVerificationStatus"
 
   CohortListResponse:
     type: object
@@ -1318,8 +1318,8 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Authority"
-      blockscoreIdVerificationStatus:
-        $ref: "#/definitions/BlockscoreIdVerificationStatus"
+      idVerificationStatus:
+        $ref: "#/definitions/IdVerificationStatus"
         description: Status of ID verification
       termsOfServiceCompletionTime:
         type: integer
@@ -1386,43 +1386,7 @@ definitions:
         $ref: "#/definitions/ErrorCode"
       # TODO: add list of field-level error messages with field names.
 
-  IdVerificationRequest:
-    type: object
-    properties:
-      firstName:
-        type: string
-      lastName:
-        type: string
-      streetLine1:
-        type: string
-      streetLine2:
-        type: string
-      city:
-        type: string
-      state:
-        type: string
-      zip:
-        type: string
-      dob:
-        type: string
-      documentType:
-        description: https://docs.blockscore.com/v4/curl/#documents
-        type: string
-      documentNumber:
-        description: https://docs.blockscore.com/v4/curl/#documents
-        type: string
-    required:
-      - firstName
-      - lastName
-      - addressLine1
-      - city
-      - state
-      - zip
-      - dob
-      - documentType
-      - documentNumber
-
-  BlockscoreIdVerificationStatus:
+  IdVerificationStatus:
     type: string
     description: possible values indicating whether the user's ID has been verified
     enum: [UNVERIFIED, VERIFIED, REJECTED]
