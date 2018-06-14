@@ -84,6 +84,7 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     }
 
     int errors = 0;
+    int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
     for (Cluster c : clusters) {
@@ -107,10 +108,14 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
         continue;
       }
 
-      Instant created = Instant.parse(c.getCreatedDate());
-      Duration age = Duration.between(created, now);
       Instant lastUsed = Instant.parse(c.getDateAccessed());
       boolean isIdle = Duration.between(lastUsed, now).toHours() > IDLE_AFTER_HOURS;
+      if (isIdle) {
+        idles++;
+      }
+
+      Instant created = Instant.parse(c.getCreatedDate());
+      Duration age = Duration.between(created, now);
       if (age.toMillis() > maxAge.toMillis()) {
         log.info(String.format(
             "deleting cluster '%s', exceeded max lifetime @ %s (>%s)",
@@ -133,8 +138,9 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
       }
     }
     log.info(String.format(
-        "deleted %d old clusters and %d inactive clusters (with %d errors) of %d total clusters",
-        activeDeletes, unusedDeletes, errors, clusters.size()));
+        "deleted %d old clusters and %d idle clusters (with %d errors) " +
+        "of %d total clusters (%d of which were idle)",
+        activeDeletes, unusedDeletes, errors, clusters.size(), idles));
     if (errors > 0) {
       throw new ServerErrorException(
           String.format("%d cluster deletion calls failed", errors));
