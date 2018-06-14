@@ -249,7 +249,7 @@ export class ChartComponent implements OnChanges {
 
     const seriesClick = function(event) {
       const thisCtrl = event.point.options.thisCtrl;
-      console.log("Clicked point :"  event.point);
+      console.log("Clicked point :",  event.point);
       thisCtrl.resultClicked.emit(event.point.result);
 
 
