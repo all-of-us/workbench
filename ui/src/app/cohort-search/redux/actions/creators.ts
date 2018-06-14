@@ -33,6 +33,7 @@ import {
   WIZARD_FINISH,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
+  SHOW_ATTRIBUTES_PAGE,
 
   LOAD_ENTITIES,
   RESET_STORE,
@@ -167,6 +168,11 @@ export const removeGroupItem =
   (groupId: string, itemId: string
   ): ActionTypes[typeof REMOVE_ITEM] =>
   ({type: REMOVE_ITEM, groupId, itemId});
+
+export const showAttributesPage =
+  (node: any
+  ): ActionTypes[typeof SHOW_ATTRIBUTES_PAGE] =>
+  ({type: SHOW_ATTRIBUTES_PAGE, node});
 
 /**
  * Context mgmt

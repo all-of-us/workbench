@@ -28,6 +28,7 @@ export const SET_WIZARD_FOCUS = 'SET_WIZARD_FOCUS';
 export const CLEAR_WIZARD_FOCUS = 'CLEAR_WIZARD_FOCUS';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
+export const SHOW_ATTRIBUTES_PAGE = 'SHOW_ATTRIBUTES_PAGE';
 
 export const OPEN_WIZARD = 'OPEN_WIZARD';
 export const REOPEN_WIZARD = 'REOPEN_WIZARD';
@@ -163,6 +164,10 @@ export interface ActionTypes {
   CLEAR_WIZARD_FOCUS: {
     type: typeof CLEAR_WIZARD_FOCUS;
   };
+  SHOW_ATTRIBUTES_PAGE: {
+    type: typeof SHOW_ATTRIBUTES_PAGE;
+    node: any
+  }
 
   REMOVE_ITEM: {
     type: typeof REMOVE_ITEM;
@@ -239,6 +244,7 @@ export type RootAction =
   | ActionTypes[typeof WIZARD_FINISH]
   | ActionTypes[typeof WIZARD_CANCEL]
   | ActionTypes[typeof SET_WIZARD_CONTEXT]
+  | ActionTypes[typeof SHOW_ATTRIBUTES_PAGE]
 
   | ActionTypes[typeof LOAD_ENTITIES]
   | ActionTypes[typeof RESET_STORE]

@@ -68,6 +68,7 @@ export class CohortSearchActions {
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
+  @dispatch() showAttributesPage = ActionFuncs.showAttributesPage;
 
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
