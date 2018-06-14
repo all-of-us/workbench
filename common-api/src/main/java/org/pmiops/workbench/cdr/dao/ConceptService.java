@@ -73,6 +73,7 @@ public class ConceptService {
 
 
         final String keyword = modifyMultipleMatchKeyword(query);
+
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
                     List<Predicate> predicates = new ArrayList<>();
@@ -80,11 +81,9 @@ public class ConceptService {
                     // Check that the concept name, code, or ID matches the query string.
                     List<Predicate> queryPredicates = new ArrayList<>();
 
-                    //concept_Code match
                     queryPredicates.add(criteriaBuilder.equal(root.get("conceptCode"),
                             criteriaBuilder.literal(query)));
 
-                    //concept_id match
                     try {
                         long conceptId = Long.parseLong(query);
                         queryPredicates.add(criteriaBuilder.equal(root.get("conceptId"),
@@ -93,11 +92,12 @@ public class ConceptService {
                         // Not a long, don't try to match it to a concept ID.
                     }
 
-                    //concept_name match
-                    queryPredicates.add(criteriaBuilder.greaterThan(criteriaBuilder.function("match",Double.class,root.get("conceptName"),
-                            criteriaBuilder.parameter(String.class,"keyword")), 0.0));
+                    Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
+                            root.get("conceptName"), criteriaBuilder.parameter(String.class , "keyword"));
+                    queryPredicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
 
                     predicates.add(criteriaBuilder.or(queryPredicates.toArray(new Predicate[0])));
+
 
                     // Optionally filter on standard concept, vocabulary ID, domain ID
                     if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
@@ -111,15 +111,16 @@ public class ConceptService {
                         predicates.add(criteriaBuilder.or(
                                 standardConceptPredicates.toArray(new Predicate[0])));
                     }
+
                     if (vocabularyIds != null) {
                         predicates.add(root.get("vocabularyId").in(vocabularyIds));
                     }
                     if (domainIds != null) {
                         predicates.add(root.get("domainId").in(domainIds));
                     }
+
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
-
         // Return up to limit results, sorted in descending count value order.
         Pageable pageable = new PageRequest(0, limit,
                 new Sort(Direction.DESC, "countValue"));
