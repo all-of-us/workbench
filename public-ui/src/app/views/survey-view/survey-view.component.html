@@ -71,14 +71,14 @@
 
           <div class="row question">
 
-            <div class="col-md-7 col-xs-12 col-sm-12">
+            <div class="col-md-4 col-xs-12 col-sm-12">
               <div class="box-title"> Question {{i + 1}}</div>
               <div class="box-sub-title"> {{ q.conceptName}} ({{q.conceptId}}) </div>
             </div>
 
-            <div class="col-md-5 col-xs-12 col-sm-12">
+            <div class="col-md-8 col-xs-12 col-sm-12">
               <div class="response-dist" style="height:200px">
-                <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" ></app-chart>
+                <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" [chartType]="'bar'" (resultClicked)="graphAnswerClicked(item)"></app-chart>
               </div>
             </div>
 

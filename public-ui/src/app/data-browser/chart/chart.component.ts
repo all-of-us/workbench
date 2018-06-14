@@ -1,7 +1,7 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnChanges} from '@angular/core';
 import * as highcharts from 'highcharts';
-import * as Highcharts from 'highcharts/highcharts.src';
 import 'highcharts/adapters/standalone-framework.src';
+import * as Highcharts from 'highcharts/highcharts.src';
 import * as Drilldown from 'highcharts/modules/drilldown.src';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
@@ -51,9 +51,11 @@ export class ChartComponent implements OnChanges {
   @Input() pointWidth = 10;   // Optional width of bar or point or box plot
   @Input() backgroundColor = '#FFFFFF'; // Optional background color
   @Input() chartTitle;
+  @Input() chartType;
+  @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any;
   chartInstance: any;
-  chartType = 'column';
+
 
   constructor() {
     highcharts.setOptions({
@@ -84,14 +86,17 @@ export class ChartComponent implements OnChanges {
     console.log('Column clicked ', e);
   };
 
-
-
   public hcChartOptions(): any {
       const options = this.makeChartOptions();
       // Override title if they passed one
       if (this.chartTitle ) {
         options.title.text = this.chartTitle;
       }
+      // Override chart type if we have it
+      if (this.chartType) {
+        options.chart.type = this.chartType;
+      }
+
       return {
           chart: options.chart,
           credits: {
@@ -110,7 +115,19 @@ export class ChartComponent implements OnChanges {
                       duration: 100,
                   },
                   pointWidth: options.pointWidth ? options.pointWidth : null,
-                  minPointLength: 3
+                  minPointLength: 3,
+                  events: {
+                    click: function (event) {
+                      console.log(event.point);
+                      alert(
+                        this.name + ' clicked\n' +
+                        'Alt: ' + event.altKey + '\n' +
+                        'Control: ' + event.ctrlKey + '\n' +
+                        'Meta: ' + event.metaKey + '\n' +
+                        'Shift: ' + event.shiftKey
+                      );
+                    }
+                  }
               },
               pie: {
                   borderColor: null,
@@ -132,6 +149,17 @@ export class ChartComponent implements OnChanges {
                   },
                 events: {
 
+                }
+              },
+              bar: {
+                shadow: false,
+                borderColor: null,
+                colorByPoint: true,
+                groupPadding: 0,
+                dataLabels: {
+                  enabled: false,
+                },
+                events: {
                 }
               }
           },
@@ -193,12 +221,15 @@ export class ChartComponent implements OnChanges {
       return this.makeAgeChartOptions();
     }
   }
-
+  seriesClick(event) {
+    console.log(this.analysis, "Clicked analysis");
+    console.log(event.point);
+  }
   public makeCountChartOptions() {
     let data = [];
     let cats = [];
     for (const a  of this.analysis.results) {
-        data.push({name: a.stratum4, y: a.countValue});
+        data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});
         cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
@@ -216,10 +247,22 @@ export class ChartComponent implements OnChanges {
       return 0;
     });
 
+    const seriesClick = function(event) {
+      const thisCtrl = event.point.options.thisCtrl;
+      console.log("Clicked point :"  event.point);
+      thisCtrl.resultClicked.emit(event.point.result);
+
+
+
+    }
     // Override tooltip and colors and such
     const series = {
       name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
-      tooltip: {pointFormat: '<b>{point.y} </b>'}
+      tooltip: {pointFormat: '<b>{point.y} </b>'},
+      events: {
+        click: seriesClick
+      }
+
     };
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
@@ -263,9 +306,9 @@ export class ChartComponent implements OnChanges {
       chart: {type: 'column', backgroundColor: this.backgroundColor,
 
         drilldown: function (e) {
-          console.log("drilldown ", e)
+          console.log('drilldown ', e);
           if (!e.seriesOptions) {
-            let chart = this,
+            const chart = this,
               drilldowns = {
                 'Animals': {
                   name: 'Animals',

@@ -79,7 +79,7 @@
     <div class="white-card-box">
       <div class="results-grid" *ngIf="searchResults.length > 0" >
         <div class="row expandable-grid-row" *ngFor="let r of searchResults, let i = index" [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-4 flex-xs-middle"> {{i+1}}. {{r.conceptName}} ({{r.conceptId}})</div>
+          <div class="col-md-4 flex-xs-middle"> {{i+1}}. {{r.conceptName}} <span class="debug"> ( conceptId:{{r.conceptId}} Standard:{{r.standardConcept}} )</span></div>
           <div class="col-md-3 flex-xs-middle"> {{r.countValue | number }} partipants</div>
           <div class="col-md-4 flex-xs-middle"> {{r.vocabularyId}} {{r.conceptCode}}</div>
           <div class="col-md-1 flex-xs-middle"> <button class="icon-btn" (click)="r.expanded = !r.expanded"> <clr-icon shape="bar-chart" style="height: 24px; color: #2691D0;"></clr-icon> </button> </div>

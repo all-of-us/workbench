@@ -122,4 +122,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     console.log('Selected answer for q ' , q );
   }
 
+  public graphAnswerClicked(achillesResult) {
+    console.log("Graph answer clicked ", achillesResult);
+  }
 }

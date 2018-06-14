@@ -23,7 +23,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   prevSearchText = '';
   totalParticipants;
   domains = [];
-  loading = false;
+  loading = true;
   private subscriptions: ISubscription;
   private subscription2: ISubscription;
   private subscription3: ISubscription;
@@ -39,10 +39,12 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
 
     // Initialize results to all totals
     this.subscription2 = this.api.getDomainTotals().subscribe(data => {
+      this.loading = true;
       this.domains = data.items;
       this.searchResults = this.domains;
       this.domainResults = this.domains.filter(d => d.dbType === 'domain_filter');
       this.surveyResults = this.domains.filter(d => d.dbType === 'survey');
+      this.loading = false;
     });
 
 

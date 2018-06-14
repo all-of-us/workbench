@@ -19,14 +19,16 @@
       </div>
     </div>
 
-    <div class="db-page-spinner" *ngIf="loading" >
-      <span  class="spinner spinner-inline">
+    <div class="row" *ngIf="loading" >
+      <div class="col-xs-12 flex-xs-middle" style="text-align: center" >
+        <span  class="spinner">
         Loading...
       </span>
+      </div>
     </div>
 
-    <h5 class="box-heading"> EHR Domains: </h5>
-    <div class="row" >
+    <h5 class="box-heading" *ngIf="!loading" > EHR Domains: </h5>
+    <div class="row" *ngIf="!loading" >
       <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
           <div class="white-card-box search-result">
             <h5 class="box-title">
@@ -50,8 +52,8 @@
 
     </div>
 
-    <h5 class="box-heading"> Surveys:  </h5>
-    <div class="row" >
+    <h5 class="box-heading" *ngIf="!loading"> Surveys:  </h5>
+    <div class="row" *ngIf="!loading">
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
         <div class="white-card-box search-result">
           <h5 class="box-title">
