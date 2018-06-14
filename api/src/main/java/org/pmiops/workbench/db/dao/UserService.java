@@ -79,17 +79,16 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
-    if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED) {
-      if (user.getBlockscoreVerificationIsValid() != null
-          && user.getBlockscoreVerificationIsValid()
-          && user.getDemographicSurveyCompletionTime() != null
-          && user.getEthicsTrainingCompletionTime() != null
-          && user.getTermsOfServiceCompletionTime() != null
-          && user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
-        this.fireCloudService.addUserToGroup(user.getEmail(),
-            configProvider.get().firecloud.registeredDomainName);
-        user.setDataAccessLevel(DataAccessLevel.REGISTERED);
-      }
+    if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED
+        && user.getBlockscoreVerificationIsValid() != null
+        && user.getBlockscoreVerificationIsValid()
+        && user.getDemographicSurveyCompletionTime() != null
+        && user.getEthicsTrainingCompletionTime() != null
+        && user.getTermsOfServiceCompletionTime() != null
+        && user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
+      this.fireCloudService.addUserToGroup(user.getEmail(),
+          configProvider.get().firecloud.registeredDomainName);
+      user.setDataAccessLevel(DataAccessLevel.REGISTERED);
     }
   }
 
@@ -180,6 +179,16 @@ public class UserService {
       @Override
       public User apply(User user) {
         user.setDemographicSurveyCompletionTime(timestamp);
+        return user;
+      }
+    });
+  }
+
+  public User setClusterRetryCount(int clusterRetryCount) {
+    return updateWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setClusterCreateRetries(clusterRetryCount);
         return user;
       }
     });

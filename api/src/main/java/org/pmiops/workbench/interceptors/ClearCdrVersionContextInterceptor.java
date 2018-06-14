@@ -1,7 +1,6 @@
 package org.pmiops.workbench.interceptors;
 
 import com.google.api.client.http.HttpMethods;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -16,9 +15,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  */
 @Service
 public class ClearCdrVersionContextInterceptor extends HandlerInterceptorAdapter {
-
-  private static final Logger logger =
-      Logger.getLogger(ClearCdrVersionContextInterceptor.class.getName());
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)

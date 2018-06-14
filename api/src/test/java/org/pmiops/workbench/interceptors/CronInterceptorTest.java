@@ -31,7 +31,7 @@ public class CronInterceptorTest {
   private CronInterceptor interceptor;
 
   @Before
-  public void setup() {
+  public void setUp() {
     interceptor = new CronInterceptor();
   }
 

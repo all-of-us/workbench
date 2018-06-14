@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.bigquery.BigQuery;
-import com.google.cloud.bigquery.Dataset;
 import com.google.cloud.bigquery.DatasetInfo;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -30,12 +29,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 @SpringBootTest(classes = {TestBigQueryConfig.class, WorkbenchConfigConfig.class})
 public abstract class BigQueryBaseTest {
 
-    private static final Logger log = Logger.getLogger(BigQueryBaseTest.class.getName());
     public static final String CB_DATA = "cbdata";
     public static final String MATERIALIZED_DATA = "materializeddata";
 
@@ -69,7 +66,7 @@ public abstract class BigQueryBaseTest {
     public abstract String getTestDataDirectory();
 
     private void createDataSet(String dataSetId) {
-        Dataset dataSet = bigquery.create(DatasetInfo.newBuilder(dataSetId).build());
+        bigquery.create(DatasetInfo.newBuilder(dataSetId).build());
     }
 
     private void createTable(String dataSetId, String tableId) throws Exception {

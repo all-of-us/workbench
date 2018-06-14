@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 /**
  * A DAO used to get results using Specification without issuing a count query.
  */
-public class NoCountFindAllDao<T, ID extends Serializable> extends SimpleJpaRepository<T, ID> {
+public class NoCountFindAllDao<T, I extends Serializable> extends SimpleJpaRepository<T, I> {
 
   public NoCountFindAllDao(Class<T> domainClass, EntityManager em) {
     super(domainClass, em);

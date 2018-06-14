@@ -4,6 +4,6 @@ engines:
     base_sub_dir: ui
 exclude_paths:
   // These SQL files are templated for env var substitution, which causes lint complaints.
-  - '*.sql'
+  - '**.sql'
   // We use Typescript; JS files are for tool configuration only.
-  - '*.js'
+  - '**.js'

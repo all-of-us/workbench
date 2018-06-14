@@ -32,8 +32,8 @@ then
 fi
 
 dump_path=/tmp/$DB_NAME.sql
-startDate=`date`
-echo "Dumping $DB_NAME to $BUCKET \n"
+startDate=$(date)
+echo "Dumping $DB_NAME to $BUCKET"
 
 mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
     --add-drop-table --disable-keys --ignore-table=$DB_NAME.DATABASECHANGELOG \
@@ -44,7 +44,7 @@ mysqldump -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} \
 gsutil cp $dump_path gs://$BUCKET/$DB_NAME.sql
 
 rm $dump_path
-stopDate=`date`
+stopDate=$(date)
 
-echo "Finished dumping $DB_NAME to $BUCKET \n"
+echo "Finished dumping $DB_NAME to $BUCKET"
 echo "Start $startDate Stop: $stopDate"

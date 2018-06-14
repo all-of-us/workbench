@@ -72,10 +72,9 @@ public class AuthInterceptorTest {
 
   private AuthInterceptor interceptor;
   private User user;
-  private User userWithAuthorities;
 
   @Before
-  public void setup() {
+  public void setUp() {
     WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.googleDirectoryService = new GoogleDirectoryServiceConfig();
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";

@@ -48,8 +48,8 @@ fi
 # Export CDR_DB_NAME for all scripts
 CDR_DB_NAME=${CDR_DB_PREFIX}${CDR_VERSION}
 
-startDate=`date`
-echo "Starting generate-local-cdr-db $startDate\n"
+startDate=$(date)
+echo "Starting generate-local-cdr-db ${startDate}"
 
 # Init the local cdr database
 echo "Initializing new cdr db $CDR_DB_NAME"
@@ -71,7 +71,7 @@ else
   exit 1
 fi
 
-stopDate=`date`
-echo "Start $startDate Stop: $stopDate"
-echo "Finished generate-local-cdr-db \n"
+stopDate=$(date)
+echo "Start ${startDate} Stop: ${stopDate}"
+echo "Finished generate-local-cdr-db"
 

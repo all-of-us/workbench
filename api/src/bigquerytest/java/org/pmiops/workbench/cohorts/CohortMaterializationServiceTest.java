@@ -73,8 +73,6 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Autowired
   private CohortMaterializationService cohortMaterializationService;
-
-  private CdrVersion cdrVersion = new CdrVersion();
   private CohortReview cohortReview;
 
   @Autowired
@@ -110,7 +108,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    cdrVersion = new CdrVersion();
+    CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersionDao.save(cdrVersion);

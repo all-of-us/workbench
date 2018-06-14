@@ -23,7 +23,7 @@ public class StatusController implements StatusApiDelegate {
   @Override
   public ResponseEntity<StatusResponse> getStatus() {
     StatusResponse statusResponse = new StatusResponse();
-    // TODO: Check mailchimp and blockscore
+    // TODO: Check blockscore
     statusResponse.setFirecloudStatus(fireCloudService.getFirecloudStatus());
     statusResponse.setNotebooksStatus(notebooksService.getNotebooksStatus());
     return ResponseEntity.ok(statusResponse);

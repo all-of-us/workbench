@@ -3,8 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +18,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -36,6 +36,7 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -70,8 +71,8 @@ public class ClusterControllerTest {
   @MockBean({
     FireCloudService.class,
     NotebooksService.class,
+    WorkspaceService.class,
     UserService.class,
-    WorkspaceService.class
   })
   static class Configuration {
     @Bean
@@ -93,6 +94,8 @@ public class ClusterControllerTest {
 
   @Autowired
   NotebooksService notebookService;
+  @Mock
+  private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired
   FireCloudService fireCloudService;
   @Autowired
@@ -105,12 +108,13 @@ public class ClusterControllerTest {
   Provider<User> userProvider;
   @Autowired
   ClusterController clusterController;
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
 
   private CdrVersion cdrVersion;
+  private FakeClock clock;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
-  private org.pmiops.workbench.notebooks.model.Cluster testFcClusterErrored;
   private Cluster testCluster;
-  private Cluster testClusterErrored;
 
   @Before
   public void setUp() {
@@ -121,6 +125,9 @@ public class ClusterControllerTest {
     user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
+
+    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
+    clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -134,20 +141,10 @@ public class ClusterControllerTest {
         .googleProject(WORKSPACE_NS)
         .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
         .createdDate(createdDate);
-    testFcClusterErrored = new org.pmiops.workbench.notebooks.model.Cluster()
-        .clusterName("all-of-us")
-        .googleProject(WORKSPACE_NS)
-        .status(org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR)
-        .createdDate(createdDate);
     testCluster = new Cluster()
         .clusterName("all-of-us")
         .clusterNamespace(WORKSPACE_NS)
         .status(ClusterStatus.DELETING)
-        .createdDate(createdDate);
-    testClusterErrored = new Cluster()
-        .clusterName("all-of-us")
-        .clusterNamespace(WORKSPACE_NS)
-        .status(ClusterStatus.ERROR)
         .createdDate(createdDate);
   }
 
@@ -210,9 +207,6 @@ public class ClusterControllerTest {
 
     assertThat(clusterController.listClusters().getBody().getDefaultCluster())
         .isEqualTo(testCluster);
-
-    // Should not retry unless necessary.
-    verify(notebookService, never()).deleteCluster(any(), any());
   }
 
   @Test
@@ -271,20 +265,4 @@ public class ClusterControllerTest {
     // Config files only.
     assertThat(mapCaptor.getValue().size()).isEqualTo(2);
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
-  }
-
-  @Test
-  public void testClusterRetriesThreeTimes() throws Exception {
-    when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(WORKSPACE_NS), eq("all-of-us"), any()))
-        .thenReturn(testFcClusterErrored);
-
-    Cluster defaultCluster = clusterController.listClusters().getBody().getDefaultCluster();
-    for (int i = 0; i < 5; i++) {
-      defaultCluster = clusterController.listClusters().getBody().getDefaultCluster();
-    }
-    assertThat(defaultCluster)
-        .isEqualTo(testClusterErrored);
-    verify(notebookService, times(3)).deleteCluster(WORKSPACE_NS, "all-of-us");
-  }
-}
+  }}
