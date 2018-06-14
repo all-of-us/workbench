@@ -10,11 +10,8 @@ import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserEmail;
 import com.google.api.services.admin.directory.model.UserName;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.mandrill.model.MandrillMessage;
-import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -123,10 +120,11 @@ public class DirectoryServiceImpl implements DirectoryService {
       .setEmails(new UserEmail().setType("custom").setAddress(contactEmail).setCustomType("contact"))
       .setChangePasswordAtNextLogin(true);
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
-    //This is a temporary solution until Mandrill is implemented.
-    //This way if one merge happens and the other is delayed for any reason,
-    //we won't break in a major way.
-    mailServiceProvider.get().sendEmail(contactEmail, password, user);
+    try {
+      mailServiceProvider.get().sendEmail(contactEmail, password, user);
+    } catch (MessagingException e) {
+      return user;
+    }
     return user;
   }
   @Override

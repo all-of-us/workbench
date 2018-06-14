@@ -36,7 +36,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   public String readMandrillFromEmail() {
-    JSONObject mandrillAdrresses = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-address.json").trim());
+    JSONObject mandrillAddresses = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-address.json").trim());
     return mandrillAddresses.getString("from-email");
   }
 

@@ -1,11 +1,13 @@
 package org.pmiops.workbench.mail;
 
-import org.pmiops.workbench.db.model.User;
+import com.google.api.services.admin.directory.model.User;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
+import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
+import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.inject.Provider;
@@ -33,7 +35,6 @@ public class MailServiceImpl implements MailService {
         Transport.send(msg);
     }
 
-    @Override
     public MandrillMessageStatuses sendEmail(String contactEmail, String password, User user) throws MessagingException {
         MandrillApi mandrillApi = mandrillApiProvider.get();
         String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey();
