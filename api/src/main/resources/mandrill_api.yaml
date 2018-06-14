@@ -24,6 +24,8 @@ paths:
       responses:
         200:
           description: Email sent successfully
+          schema:
+            $ref: '#/definitions/MandrillMessageStatuses'
         500:
           description: There was an error, please see response for details
       parameters:
@@ -54,6 +56,7 @@ definitions:
         description: Mandrill Message
         items:
           '$ref': '#/definitions/MandrillMessage'
+
   MandrillMessage:
     required:
       - html
@@ -84,5 +87,23 @@ definitions:
       email:
         type: string
         description: recipient address
+
+  MandrillMessageStatuses:
+    type: array
+    items:
+      '$ref': '#/definitions/MandrillMessageStatus'
+
+  MandrillMessageStatus:
+    type: object
+    properties:
+      email:
+        type: string
+        description: recipient email
+      status:
+        type: string
+        description: status of email
+      reject_reason:
+        type: string
+        description: why email was rejected if it was
 
 

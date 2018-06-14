@@ -7,11 +7,16 @@ import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
+import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
+import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.inject.Provider;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -23,6 +28,7 @@ public class MailServiceImpl implements MailService {
     private final Provider<MandrillApi> mandrillApiProvider;
     private final Provider<CloudStorageService> cloudStorageServiceProvider;
     private Provider<WorkbenchConfig> workbenchConfigProvider;
+    private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
 
     @Autowired
     public MailServiceImpl(Provider<MandrillApi> mandrillApiProvider,
@@ -44,9 +50,16 @@ public class MailServiceImpl implements MailService {
         MandrillMessage msg = buildWelcomeMessage(contactEmail, password, user);
         keyAndMessage.setMessage(msg);
         try {
-            mandrillApiProvider.get().send(keyAndMessage);
+            MandrillMessageStatuses msgStatuses = mandrillApiProvider.get().send(keyAndMessage);
+            for (MandrillMessageStatus msgStatus : msgStatuses) {
+                if (msgStatus.getRejectReason() != null) {
+                  throw new MessagingException(msgStatus.getRejectReason());
+                }
+            }
         } catch (ApiException e){
             throw new MessagingException("Sending email failed.");
+        } catch (MessagingException e) {
+            throw new MessagingException("Sending email failed with message: " + e.getMessage());
         }
     }
 
@@ -54,7 +67,7 @@ public class MailServiceImpl implements MailService {
         MandrillMessage msg = new MandrillMessage();
         RecipientAddress toAddress = new RecipientAddress();
         toAddress.setEmail(contactEmail);
-        msg.setTo(Arrays.asList(toAddress));
+        msg.setTo(Collections.singletonList(toAddress));
         String msgBody = "Your new account is: " + user.getPrimaryEmail() +
           "\nThe password for your new account is: " + password;
         msg.setHtml(msgBody);
