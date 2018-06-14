@@ -18,6 +18,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -34,6 +36,7 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -68,8 +71,8 @@ public class ClusterControllerTest {
   @MockBean({
     FireCloudService.class,
     NotebooksService.class,
+    WorkspaceService.class,
     UserService.class,
-    WorkspaceService.class
   })
   static class Configuration {
     @Bean
@@ -91,6 +94,8 @@ public class ClusterControllerTest {
 
   @Autowired
   NotebooksService notebookService;
+  @Mock
+  private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired
   FireCloudService fireCloudService;
   @Autowired
@@ -103,8 +108,11 @@ public class ClusterControllerTest {
   Provider<User> userProvider;
   @Autowired
   ClusterController clusterController;
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
 
   private CdrVersion cdrVersion;
+  private FakeClock clock;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
 
@@ -117,6 +125,9 @@ public class ClusterControllerTest {
     user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
+
+    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
+    clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");

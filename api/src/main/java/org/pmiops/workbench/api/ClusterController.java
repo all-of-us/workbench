@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 
 import org.json.JSONObject;
-import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -82,7 +82,7 @@ public class ClusterController implements ClusterApiDelegate {
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
   private final String apiHostName;
-  private final UserDao userDao;
+  private UserService userService;
 
   @Autowired
   ClusterController(NotebooksService notebooksService,
@@ -90,18 +90,23 @@ public class ClusterController implements ClusterApiDelegate {
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       @Qualifier("apiHostName") String apiHostName,
-      UserDao userDao) {
+      UserService userService) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
     this.apiHostName = apiHostName;
-    this.userDao = userDao;
+    this.userService = userService;
   }
 
   @VisibleForTesting
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
+  }
+
+  @VisibleForTesting
+  public void setUserService(UserService userService) {
+    this.userService = userService;
   }
 
   @Override
@@ -124,8 +129,7 @@ public class ClusterController implements ClusterApiDelegate {
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);
     if (org.pmiops.workbench.notebooks.model.ClusterStatus.ERROR.equals(fcCluster.getStatus())) {
       if (retries <= 2) {
-        user.setClusterCreateRetries(retries + 1);
-        this.userDao.save(user);
+        this.userService.setClusterRetryCount(retries + 1);
         log.warning("Cluster has errored with logs: ");
         if (fcCluster.getErrors() != null) {
           for (ClusterError e : fcCluster.getErrors()) {
@@ -139,8 +143,7 @@ public class ClusterController implements ClusterApiDelegate {
     } else if (
         org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING.equals(fcCluster.getStatus()) &&
         retries != 0) {
-      user.setClusterCreateRetries(0);
-      this.userDao.save(user);
+      this.userService.setClusterRetryCount(0);
     }
     ClusterListResponse resp = new ClusterListResponse();
     resp.setDefaultCluster(TO_ALL_OF_US_CLUSTER.apply(fcCluster));
@@ -149,6 +152,7 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteCluster(String projectName, String clusterName) {
+    this.userService.setClusterRetryCount(0);
     this.notebooksService.deleteCluster(projectName, clusterName);
     return ResponseEntity.ok(new EmptyResponse());
   }
