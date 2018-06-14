@@ -10,5 +10,5 @@ public interface MailService {
 
     void send(Message msg) throws MessagingException;
 
-    MandrillMessageStatuses sendEmail(String contactEmail, String password, User user) throws MessagingException;
+    MandrillMessageStatuses sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException;
 }

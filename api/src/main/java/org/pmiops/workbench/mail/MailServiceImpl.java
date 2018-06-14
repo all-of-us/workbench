@@ -1,6 +1,7 @@
 package org.pmiops.workbench.mail;
 
 import com.google.api.services.admin.directory.model.User;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.ApiException;
@@ -22,19 +23,22 @@ public class MailServiceImpl implements MailService {
 
     private final Provider<MandrillApi> mandrillApiProvider;
     private final Provider<CloudStorageService> cloudStorageServiceProvider;
+    private Provider<WorkbenchConfig> workbenchConfigProvider;
 
     @Autowired
     public MailServiceImpl(Provider<MandrillApi> mandrillApiProvider,
-                               Provider<CloudStorageService> cloudStorageServiceProvider) {
+                           Provider<CloudStorageService> cloudStorageServiceProvider,
+                           Provider<WorkbenchConfig> workbenchConfigProvider) {
         this.mandrillApiProvider = mandrillApiProvider;
         this.cloudStorageServiceProvider = cloudStorageServiceProvider;
+        this.workbenchConfigProvider = workbenchConfigProvider;
     }
 
     public void send(Message msg) throws MessagingException {
         Transport.send(msg);
     }
 
-    public MandrillMessageStatuses sendEmail(String contactEmail, String password, User user) throws MessagingException {
+    public MandrillMessageStatuses sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException {
         String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey();
         MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
         keyAndMessage.setKey(apiKey);
@@ -56,7 +60,7 @@ public class MailServiceImpl implements MailService {
           "\nThe password for your new account is: " + password;
         msg.setHtml(msgBody);
         msg.setSubject("Your new All of Us Account");
-        msg.setFromEmail(cloudStorageServiceProvider.get().readMandrillFromEmail());
+        msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
         return msg;
     }
 

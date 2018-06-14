@@ -35,11 +35,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return mandrillKeys.getString("api-key");
   }
 
-  public String readMandrillFromEmail() {
-    JSONObject mandrillAddresses = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-address.json"));
-    return mandrillAddresses.getString("from-email");
-  }
-
   @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
