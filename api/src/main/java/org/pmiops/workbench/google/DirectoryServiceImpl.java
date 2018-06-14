@@ -126,7 +126,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     try {
       mailServiceProvider.get().sendWelcomeEmail(contactEmail, password, user);
     } catch (MessagingException e) {
-      log.log(Level.WARNING, "Welcome Email not sent: " + e.toString());
+      log.log(Level.SEVERE, "Welcome Email not sent: " + e.toString());
       throw new WorkbenchException(e);
     }
     return user;
