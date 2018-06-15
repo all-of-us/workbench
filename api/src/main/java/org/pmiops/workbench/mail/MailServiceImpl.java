@@ -13,9 +13,7 @@ import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.inject.Provider;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.mail.Message;
@@ -28,7 +26,6 @@ public class MailServiceImpl implements MailService {
     private final Provider<MandrillApi> mandrillApiProvider;
     private final Provider<CloudStorageService> cloudStorageServiceProvider;
     private Provider<WorkbenchConfig> workbenchConfigProvider;
-    private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
 
     @Autowired
     public MailServiceImpl(Provider<MandrillApi> mandrillApiProvider,
