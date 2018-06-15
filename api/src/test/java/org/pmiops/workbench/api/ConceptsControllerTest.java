@@ -124,7 +124,7 @@ public class ConceptsControllerTest {
           makeConcept(CLIENT_CONCEPT_4);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_5 =
           makeConcept(CLIENT_CONCEPT_5);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_5 =
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_6 =
           makeConcept(CLIENT_CONCEPT_6);
 
 
@@ -422,6 +422,8 @@ public class ConceptsControllerTest {
     conceptDao.save(CONCEPT_2);
     conceptDao.save(CONCEPT_3);
     conceptDao.save(CONCEPT_4);
+    conceptDao.save(CONCEPT_5);
+    conceptDao.save(CONCEPT_6)
   }
 
   private void assertResults(ResponseEntity<ConceptListResponse> response,
