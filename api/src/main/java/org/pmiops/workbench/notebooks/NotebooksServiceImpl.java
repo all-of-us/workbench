@@ -14,6 +14,7 @@ import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
 import org.pmiops.workbench.notebooks.model.MachineConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,7 +31,8 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final NotebooksRetryHandler retryHandler;
 
   @Autowired
-  public NotebooksServiceImpl(Provider<ClusterApi> clusterApiProvider,
+  public NotebooksServiceImpl(
+      @Qualifier(NotebooksConfig.USER_CLUSTER_API) Provider<ClusterApi> clusterApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider, NotebooksRetryHandler retryHandler) {
     this.clusterApiProvider = clusterApiProvider;
