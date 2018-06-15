@@ -111,9 +111,9 @@ dependencies {
   }
   compile 'org.springframework.security:spring-security-web:+'
 
-  compile 'com.fasterxml.jackson.core:jackson-annotations:+'
-  compile 'com.fasterxml.jackson.core:jackson-core:+'
-  compile 'com.fasterxml.jackson.core:jackson-databind:+'
+  compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
+  compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
+  compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'

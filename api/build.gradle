@@ -205,9 +205,9 @@ dependencies {
   }
   compile 'org.springframework.security:spring-security-web:+'
 
-  compile 'com.fasterxml.jackson.core:jackson-annotations:+'
-  compile 'com.fasterxml.jackson.core:jackson-core:+'
-  compile 'com.fasterxml.jackson.core:jackson-databind:+'
+  compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
+  compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
+  compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
   compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
