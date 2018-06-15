@@ -423,7 +423,7 @@ public class ConceptsControllerTest {
     conceptDao.save(CONCEPT_3);
     conceptDao.save(CONCEPT_4);
     conceptDao.save(CONCEPT_5);
-    conceptDao.save(CONCEPT_6)
+    conceptDao.save(CONCEPT_6);
   }
 
   private void assertResults(ResponseEntity<ConceptListResponse> response,
