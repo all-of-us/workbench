@@ -31,11 +31,12 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   ctype: string;
   subscription;
+  attributesNode: any;
 
   open = false;
   noSelection = true;
   title = '';
-  mode: 'tree' | 'modifiers' = 'tree'; // default to criteria tree
+  mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -77,6 +78,8 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.attributes$
       .subscribe(node => {
         console.log(node);
+        this.attributesNode = node;
+        this.mode = 'attributes';
       })
     );
   }

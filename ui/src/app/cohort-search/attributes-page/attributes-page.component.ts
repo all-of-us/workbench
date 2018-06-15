@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
-  selector: 'app-attributes-page',
+  selector: 'crit-attributes-page',
   templateUrl: './attributes-page.component.html',
   styleUrls: ['./attributes-page.component.css']
 })
 export class AttributesPageComponent implements OnInit {
+  @Input() node;
 
   constructor() { }
 
