@@ -11,6 +11,7 @@ export class AttributesPageComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
+    console.log(this.node);
   }
 
 }

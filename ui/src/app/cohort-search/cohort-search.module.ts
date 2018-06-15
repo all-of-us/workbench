@@ -30,6 +30,7 @@ import {CohortCommonModule} from '../cohort-common/module';
 /* Other Objects */
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 import { AttributesPageComponent } from './attributes-page/attributes-page.component';
+import { AttributesSelectComponent } from './attributes-select/attributes-select.component';
 
 
 const routes: Routes = [{
@@ -71,6 +72,7 @@ const routes: Routes = [{
     SelectionInfoComponent,
     TreeComponent,
     AttributesPageComponent,
+    AttributesSelectComponent,
   ],
   providers: [
     CohortSearchActions,
