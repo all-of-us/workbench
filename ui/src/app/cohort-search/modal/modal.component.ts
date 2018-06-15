@@ -7,6 +7,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaType,
   activeParameterList,
+  attributesPage,
   CohortSearchActions,
   wizardOpen,
 } from '../redux';
@@ -26,6 +27,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeParameterList) selection$: Observable<any>;
+  @select(attributesPage) attributes$: Observable<any>;
 
   ctype: string;
   subscription;
@@ -70,6 +72,12 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.selection$
       .map(sel => sel.size === 0)
       .subscribe(sel => this.noSelection = sel)
+    );
+
+    this.subscription.add(this.attributes$
+      .subscribe(node => {
+        console.log(node);
+      })
     );
   }
 

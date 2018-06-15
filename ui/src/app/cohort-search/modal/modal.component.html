@@ -12,6 +12,7 @@
             Criteria Tree
           </button>
           <button type="button" class="btn"
+            *ngIf="ctype !== 'pm'"
             [class.active]="mode === 'modifiers'"
             (click)="mode = 'modifiers'">
             Modifiers

@@ -47,6 +47,7 @@ import {
   WIZARD_FINISH,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
+  SHOW_ATTRIBUTES_PAGE,
 
   LOAD_ENTITIES,
   RESET_STORE,
@@ -202,7 +203,10 @@ export const rootReducer: Reducer<CohortSearchState> =
       case CLEAR_WIZARD_FOCUS:
         return state.setIn(['wizard', 'focused'], Map());
 
-      case REMOVE_ITEM: {
+      case SHOW_ATTRIBUTES_PAGE:
+        return state.setIn(['wizard', 'item', 'attributes'], action.node);
+
+        case REMOVE_ITEM: {
         state = state
           .updateIn(
             ['entities', 'groups', action.groupId, 'items'],

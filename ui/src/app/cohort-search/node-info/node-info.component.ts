@@ -21,7 +21,7 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  * other types of attribute.
  */
 function needsAttributes(node) {
-  return false;
+  return node.get('id', '') === 316302;
 }
 
 
@@ -114,9 +114,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      * fire a request for children (if there are any)
      */
     event.stopPropagation();
-
     if (needsAttributes(this.node)) {
-      this.actions.setWizardFocus(this.node);
+      this.actions.showAttributesPage(this.node);
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
