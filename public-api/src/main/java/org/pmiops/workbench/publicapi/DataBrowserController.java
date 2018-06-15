@@ -243,8 +243,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<ConceptListResponse> getAdvancedConceptSearch(SearchConceptsRequest searchConceptsRequest){
 
-        System.out.println(searchConceptsRequest);
-
         Integer maxResults = searchConceptsRequest.getMaxResults();
         if(maxResults == null || maxResults == 0){
             maxResults = Integer.MAX_VALUE;
