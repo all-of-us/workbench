@@ -96,7 +96,7 @@ public class ConceptService {
 
 
                     Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
-                            root.get("conceptName"), criteriaBuilder.parameter(String.class , "keyword"));
+                            root.get("conceptName"), criteriaBuilder.literal(keyword));
                     conceptName_Filter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
 
 
@@ -133,7 +133,6 @@ public class ConceptService {
                 new Sort(Direction.DESC, "countValue"));
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);
-        conceptDao.keyword=keyword;
         return conceptDao.findAll(conceptSpecification, pageable);
     }
 }

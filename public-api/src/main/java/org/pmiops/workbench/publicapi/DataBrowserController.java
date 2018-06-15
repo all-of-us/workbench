@@ -264,36 +264,37 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         ConceptListResponse response = new ConceptListResponse();
         List<Concept> matchedConcepts = concepts.getContent();
         List<Concept> conceptCodeMatches = new ArrayList<>();
-        for(Concept con:matchedConcepts){
+        for(Concept con : matchedConcepts){
             String conceptCode = con.getConceptCode();
             Long conceptId = con.getConceptId();
-            if(conceptCode.equals(searchConceptsRequest.getQuery())) {
+            if(!con.getStandardConcept().equals("S")){
+                if(conceptCode.equals(searchConceptsRequest.getQuery())) {
 
-                conceptCodeMatches.add(con);
+                    conceptCodeMatches.add(con);
 
-                response.setMatchType("ConceptCode");
+                    response.setMatchType("ConceptCode");
 
-                Concept std_concept = conceptDao.findStandardConcept(con.getConceptId());
-                response.setStandardConcept(TO_CLIENT_CONCEPT.apply(std_concept));
-
-                response.setItems(conceptCodeMatches.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
-                return ResponseEntity.ok(response);
-            }else if(String.valueOf(conceptId).equals(searchConceptsRequest.getQuery())){
-
-                conceptCodeMatches.add(con);
-
-                response.setMatchType("ConceptId");
-
-                if(!con.getStandardConcept().equals("S")){
                     Concept std_concept = conceptDao.findStandardConcept(con.getConceptId());
                     response.setStandardConcept(TO_CLIENT_CONCEPT.apply(std_concept));
+
+                    response.setItems(conceptCodeMatches.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+
+                    return ResponseEntity.ok(response);
+                }else if(String.valueOf(conceptId).equals(searchConceptsRequest.getQuery())){
+
+                    conceptCodeMatches.add(con);
+
+                    response.setMatchType("ConceptId");
+
+                    Concept std_concept = conceptDao.findStandardConcept(con.getConceptId());
+                    response.setStandardConcept(TO_CLIENT_CONCEPT.apply(std_concept));
+
+                    response.setItems(conceptCodeMatches.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+
+                    return ResponseEntity.ok(response);
                 }
-
-                response.setItems(conceptCodeMatches.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
-                return ResponseEntity.ok(response);
             }
+
         }
         response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);

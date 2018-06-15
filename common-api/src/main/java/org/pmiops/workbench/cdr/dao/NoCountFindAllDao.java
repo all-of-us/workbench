@@ -15,8 +15,6 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
  */
 public class NoCountFindAllDao<T, I extends Serializable> extends SimpleJpaRepository<T, I> {
 
-  public String keyword;
-
   public NoCountFindAllDao(Class<T> domainClass, EntityManager em) {
     super(domainClass, em);
   }
@@ -26,7 +24,7 @@ public class NoCountFindAllDao<T, I extends Serializable> extends SimpleJpaRepos
       final Specification<S> spec) {
     query.setFirstResult(pageable.getOffset());
     query.setMaxResults(pageable.getPageSize());
-    List<S> content = query.setParameter("keyword",keyword).getResultList();
+    List<S> content = query.getResultList();
     return new PageImpl<S>(content, pageable, content.size());
   }
 }
