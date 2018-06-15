@@ -92,14 +92,41 @@ public class ConceptsControllerTest {
           .countValue(1250L)
           .prevalence(0.5F);
 
+  private static final Concept CLIENT_CONCEPT_5 = new Concept()
+          .conceptId(7890L)
+          .conceptName("conceptD test concept")
+          .standardConcept(true)
+          .conceptCode("conceptE")
+          .conceptClassId("classId5")
+          .vocabularyId("V5")
+          .domainId("Condition")
+          .countValue(7890L)
+          .prevalence(0.9F);
+
+  private static final Concept CLIENT_CONCEPT_6 = new Concept()
+          .conceptId(7891L)
+          .conceptName("conceptD test concept 2")
+          .standardConcept(false)
+          .conceptCode("conceptD")
+          .conceptClassId("classId6")
+          .vocabularyId("V6")
+          .domainId("Condition")
+          .countValue(7891L)
+          .prevalence(0.1F);
+
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
       makeConcept(CLIENT_CONCEPT_2);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
           makeConcept(CLIENT_CONCEPT_3);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4=
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4 =
           makeConcept(CLIENT_CONCEPT_4);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_5 =
+          makeConcept(CLIENT_CONCEPT_5);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_5 =
+          makeConcept(CLIENT_CONCEPT_6);
+
 
   @TestConfiguration
   @Import({
@@ -211,6 +238,14 @@ public class ConceptsControllerTest {
     assertResults(
         conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query("456")), CLIENT_CONCEPT_2);
+  }
+
+  @Test
+  public void testSearchConceptsMatchOrder() throws Exception{
+    saveConcepts();
+    assertResults(
+            conceptsController.searchConcepts("ns", "name",
+                    new SearchConceptsRequest().query("conceptD")), CLIENT_CONCEPT_4 , CLIENT_CONCEPT_6);
   }
 
   @Test
