@@ -329,8 +329,8 @@ definitions:
           type: string
           description: match column type
         standardConcept:
-          type: integer
-          format: int64
+          type: object
+          $ref: "#/definitions/Concept"
           description: standard concept associated with the matched concept
 
   QuestionConcept:
