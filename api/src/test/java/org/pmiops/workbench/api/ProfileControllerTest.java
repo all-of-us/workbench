@@ -12,7 +12,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.blockscore.models.Person;
 import com.google.common.collect.ImmutableList;
 
 import java.sql.Timestamp;
@@ -48,12 +47,11 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
-import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
+import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationListResponse;
-import org.pmiops.workbench.model.IdVerificationRequest;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
@@ -101,8 +99,6 @@ public class ProfileControllerTest {
   @Mock
   private CloudStorageService cloudStorageService;
   @Mock
-  private Person person;
-  @Mock
   private Provider<WorkbenchConfig> configProvider;
   @Mock
   private MailService mailService;
@@ -142,8 +138,6 @@ public class ProfileControllerTest {
 
     clock = new FakeClock(NOW);
 
-    IdVerificationRequest idVerificationRequest = new IdVerificationRequest();
-    idVerificationRequest.setFirstName("Bob");
     Mockito.doNothing().when(mailService).send(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
@@ -182,7 +176,7 @@ public class ProfileControllerTest {
     createUser();
     Profile profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getBlockscoreIdVerificationStatus()).isEqualTo(BlockscoreIdVerificationStatus.UNVERIFIED);
+    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
     assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
@@ -193,7 +187,7 @@ public class ProfileControllerTest {
     createUser();
     Profile profile = profileController.submitTermsOfService().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getBlockscoreIdVerificationStatus()).isEqualTo(BlockscoreIdVerificationStatus.UNVERIFIED);
+    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
@@ -204,7 +198,7 @@ public class ProfileControllerTest {
     createUser();
     Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getBlockscoreIdVerificationStatus()).isEqualTo(BlockscoreIdVerificationStatus.UNVERIFIED);
+    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
     assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
@@ -213,8 +207,6 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
-    when(person.getId()).thenReturn("id");
-    when(person.isValid()).thenReturn(true);
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.firecloud = new FireCloudConfig();
     testConfig.firecloud.registeredDomainName = "";
@@ -223,7 +215,7 @@ public class ProfileControllerTest {
     Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     IdVerificationReviewRequest reviewStatus = new IdVerificationReviewRequest();
-    reviewStatus.setNewStatus(BlockscoreIdVerificationStatus.VERIFIED);
+    reviewStatus.setNewStatus(IdVerificationStatus.VERIFIED);
     profileController.reviewIdVerification(profile.getUserId(), reviewStatus);
     profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
@@ -231,7 +223,7 @@ public class ProfileControllerTest {
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
     verify(fireCloudService).addUserToGroup("bob@researchallofus.org", "");
 
-    assertThat(profile.getBlockscoreIdVerificationStatus()).isEqualTo(BlockscoreIdVerificationStatus.VERIFIED);
+    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.VERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
@@ -256,7 +248,7 @@ public class ProfileControllerTest {
     assertThat(response.getProfileList().size()).isEqualTo(1);
 
     IdVerificationReviewRequest request =
-        new IdVerificationReviewRequest().newStatus(BlockscoreIdVerificationStatus.VERIFIED);
+        new IdVerificationReviewRequest().newStatus(IdVerificationStatus.VERIFIED);
     profileController.reviewIdVerification(user.getUserId(), request);
     response = profileController.getIdVerificationsForReview().getBody();
     assertThat(response.getProfileList()).isEmpty();
