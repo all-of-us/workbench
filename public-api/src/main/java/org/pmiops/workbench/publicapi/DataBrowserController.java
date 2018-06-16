@@ -274,8 +274,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                     response.setMatchType("ConceptCode");
 
-                    Concept std_concept = conceptDao.findStandardConcept(con.getConceptId());
-                    response.setStandardConcept(TO_CLIENT_CONCEPT.apply(std_concept));
+                    List<Concept> std_concepts = conceptDao.findStandardConcept(con.getConceptId());
+                    response.setStandardConcept(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
 
                     response.setItems(conceptCodeMatches.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
 
@@ -286,8 +286,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                     response.setMatchType("ConceptId");
 
-                    Concept std_concept = conceptDao.findStandardConcept(con.getConceptId());
-                    response.setStandardConcept(TO_CLIENT_CONCEPT.apply(std_concept));
+                    List<Concept> std_concepts = conceptDao.findStandardConcept(con.getConceptId());
+                    response.setStandardConcept(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
 
                     response.setItems(conceptCodeMatches.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
 
