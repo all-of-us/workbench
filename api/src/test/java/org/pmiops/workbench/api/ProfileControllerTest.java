@@ -292,7 +292,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_secondCallErrorsProject() throws Exception {
+  public void testMe_retriesBillingProjectErrors() throws Exception {
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
@@ -305,6 +305,29 @@ public class ProfileControllerTest {
     membership.setCreationStatus(CreationStatusEnum.ERROR);
     membership.setProjectName(profile.getFreeTierBillingProjectName());
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
+  }
+
+  @Test
+  public void testMe_errorsAfterFourProjectFailures() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    // Simulate FC "Error".
+    org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
+        new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
+    membership.setCreationStatus(CreationStatusEnum.ERROR);
+    membership.setProjectName(profile.getFreeTierBillingProjectName());
+    when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
+    profile = profileController.getMe().getBody();
+    profile = profileController.getMe().getBody();
+    profile = profileController.getMe().getBody();
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.ERROR);
 
