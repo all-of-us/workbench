@@ -119,7 +119,7 @@ paths:
             $ref: "#/definitions/DbDomainListResponse"
 
   /v1/databrowser/advanced-concept-search:
-    get:
+    post:
       security: []
       tags:
         - dataBrowser
