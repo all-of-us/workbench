@@ -6,18 +6,18 @@
     <div class="form-group" *ngFor="let field of fields; let i = index">
       <label>{{field}}</label>
       <div class="select">
-        <select [name]="'operator'+i" ngModel>
-          <option value="=">Equals</option>
+        <select [name]="'operator'+i" ngModel required>
+          <option value="=" selected>Equals</option>
           <option value=">=">Greater than or Equal to</option>
           <option value="<=">Less than or Equal to</option>
-          <option value="<>">Between</option>
+          <option value="between">Between</option>
         </select>
       </div>
-      <input type="number" [name]="'valueA'+i" ngModel>
-      <label *ngIf="attrs.value['operator'+i] === '<>'">and</label>
-      <input *ngIf="attrs.value['operator'+i] === '<>'" type="number" [name]="'valueB'+i" ngModel>
+      <input type="number" [name]="'valueA'+i" ngModel required>
+      <label *ngIf="attrs.value['operator'+i] === 'between'">and</label>
+      <input *ngIf="attrs.value['operator'+i] === 'between'" type="number" [name]="'valueB'+i" ngModel required>
     </div>
     <button class="btn link" type="button" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" type="submit">Add Item</button>
+    <button class="btn btn-primary" type="submit" [disabled]="!attrs.valid">Add Item</button>
   </section>
 </form>
