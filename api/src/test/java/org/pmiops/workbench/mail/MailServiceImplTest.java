@@ -9,11 +9,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.pmiops.workbench.api.ProfileController;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
-import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import com.google.api.services.admin.directory.model.User;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryServiceImpl;
@@ -21,6 +18,7 @@ import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
+import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
@@ -41,6 +39,7 @@ import java.util.Collections;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(SpringRunner.class)
 public class MailServiceImplTest {
 
   private MailServiceImpl service;
@@ -61,17 +60,29 @@ public class MailServiceImplTest {
   private WorkbenchConfig workbenchConfig;
 
   @Mock
-  private CloudStorageService cloudStorageService;
+  private CloudStorageServiceImpl cloudStorageService;
+
+  @Mock
+  private Provider<CloudStorageService> cloudStorageServiceProvider;
 
   @Mock
   private MandrillApi mandrillApi;
 
+  @Mock
+  private Provider<MandrillApi> mandrillApiProvider;
+
+  @Rule
+  public MockitoRule mockitoRule = MockitoJUnit.rule();
+
   @Before
   public void setup() {
     workbenchConfig = new WorkbenchConfig();
+    workbenchConfig.mandrill = new WorkbenchConfig.MandrillConfig();
+    workbenchConfig.mandrill.fromEmail = "test-donotreply@fake-research-aou.org";
     workbenchConfig.googleCloudStorageService = new WorkbenchConfig.GoogleCloudStorageServiceConfig();
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
-    cloudStorageService = new CloudStorageServiceImpl(Providers.of(workbenchConfig));
+    when(mandrillApiProvider.get()).thenReturn(mandrillApi);
+    when(cloudStorageServiceProvider.get()).thenReturn(cloudStorageService);
     service = new MailServiceImpl(Providers.of(mandrillApi),
       Providers.of(cloudStorageService), Providers.of(workbenchConfig));
     apiKeyAndMessage = new MandrillApiKeyAndMessage();
@@ -84,11 +95,10 @@ public class MailServiceImplTest {
     mandrillMessage.setFromEmail(FROM_EMAIL);
     apiKeyAndMessage.setKey(API_KEY);
     apiKeyAndMessage.setMessage(mandrillMessage);
-    when(cloudStorageService.readMandrillApiKey()).thenReturn(API_KEY);
   }
 
   @NotNull
-  private User createUser() throws Exception {
+  private User createUser() {
     return new User()
       .setPrimaryEmail(PRIMARY_EMAIL)
       .setPassword(PASSWORD)
@@ -107,9 +117,9 @@ public class MailServiceImplTest {
 //  }
 
   @Test(expected = MessagingException.class)
-  public void testSendWelcomeEmail_throwsMessagingException() throws Exception {
-//    when(Providers.of(cloudStorageService).get().readMandrillApiKey()).thenReturn(API_KEY);
-    when(mandrillApi.send(apiKeyAndMessage)).thenThrow(new MessagingException());
+  public void testSendWelcomeEmail_throwsMessagingException() throws MessagingException, ApiException {
+    when(Providers.of(cloudStorageService).get().readMandrillApiKey()).thenReturn(API_KEY);
+    when(Providers.of(mandrillApi).get().send(apiKeyAndMessage)).thenThrow(new ApiException());
     User user = createUser();
     service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
   }
