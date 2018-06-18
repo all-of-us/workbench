@@ -12,14 +12,11 @@ import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.google.DirectoryServiceImpl;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
-import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
-import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.pmiops.workbench.test.Providers;
 
 import javax.inject.Provider;
@@ -40,8 +37,6 @@ public class MailServiceImplTest {
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String API_KEY = "this-is-an-api-key";
 
-  @Mock
-  private WorkbenchConfig workbenchConfig;
 
   @Mock
   private CloudStorageServiceImpl cloudStorageService;
@@ -64,15 +59,19 @@ public class MailServiceImplTest {
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
 
+  @Mock
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
+
   @Before
-  public void setup() {
-    workbenchConfig = new WorkbenchConfig();
+  public void setUp() {
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.mandrill = new WorkbenchConfig.MandrillConfig();
     workbenchConfig.mandrill.fromEmail = "test-donotreply@fake-research-aou.org";
     workbenchConfig.googleCloudStorageService = new WorkbenchConfig.GoogleCloudStorageServiceConfig();
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
     when(mandrillApiProvider.get()).thenReturn(mandrillApi);
     when(cloudStorageServiceProvider.get()).thenReturn(cloudStorageService);
+    when(workbenchConfigProvider.get()).thenReturn(workbenchConfig);
     service = new MailServiceImpl(Providers.of(mandrillApi),
       Providers.of(cloudStorageService), Providers.of(workbenchConfig));
     msgStatuses = new MandrillMessageStatuses();
