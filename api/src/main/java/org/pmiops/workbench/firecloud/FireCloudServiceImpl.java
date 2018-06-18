@@ -156,6 +156,15 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
+  public void removeUserFromBillingProject(String email, String projectName) {
+    BillingApi billingApi = billingApiProvider.get();
+    retryHandler.run((context) -> {
+      billingApi.removeUserFromBillingProject(projectName, USER_FC_ROLE, email);
+      return null;
+    });
+  }
+
+  @Override
   public void createWorkspace(String projectName, String workspaceName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();

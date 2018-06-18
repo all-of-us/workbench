@@ -150,6 +150,10 @@ public class ProfileController implements ProfileApiDelegate {
     // If the user is already registered, their profile will get updated.
     fireCloudService.registerUser(user.getContactEmail(),
         user.getGivenName(), user.getFamilyName());
+    return createFirecloudBillingProject(user);
+  }
+
+  private String createFirecloudBillingProject(User user) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     long suffix;
     if (workbenchEnvironment.isDevelopment()) {
@@ -269,11 +273,20 @@ public class ProfileController implements ProfileApiDelegate {
         return user;
 
       case ERROR:
-        log.log(Level.SEVERE, String.format(
-            "free tier project %s failed to be created", user.getFreeTierBillingProjectName()));
-        user.setFreeTierBillingProjectStatus(status);
-        return userDao.save(user);
-
+        int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
+        if (retries <= 2) {
+          this.userService.setBillingRetryCount(retries + 1);
+          fireCloudService.removeUserFromBillingProject(user.getEmail(), user.getFreeTierBillingProjectName());
+          String billingProjectName = createFirecloudBillingProject(user);
+          user.setFreeTierBillingProjectName(billingProjectName);
+          user.setFreeTierBillingProjectStatus(BillingProjectStatus.PENDING);
+          return userDao.save(user);
+        } else {
+          log.log(Level.SEVERE, String.format(
+              "free tier project %s failed to be created", user.getFreeTierBillingProjectName()));
+          user.setFreeTierBillingProjectStatus(status);
+          return userDao.save(user);
+        }
       case READY:
         break;
 
