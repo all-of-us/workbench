@@ -48,7 +48,7 @@ export class AttributesPageComponent implements OnInit {
       if (currentNode.get('subtype') === 'BP') {
         this.fields = ['Systolic', 'Diastolic'];
       } else {
-        this.fields = ['Value'];
+        this.fields = [''];
       }
     }
   }
@@ -59,21 +59,27 @@ export class AttributesPageComponent implements OnInit {
 
   addAttrs(attrs: NgForm) {
     let code = '';
+    let name = this.node.get('name', '') + ' (';
     this.fields.forEach((field, i) => {
       if (i > 0) {
         code += ';';
+        name += ' / ';
       }
       if (attrs.value['operator' + i] === 'between') {
         code += 'between;' + attrs.value['valueA' + i] + ' and ' + attrs.value['valueB' + i];
+        name += field + ' ' + attrs.value['valueA' + i] + '-' + attrs.value['valueB' + i];
       } else {
         code += code += attrs.value['operator' + i] + ';' + attrs.value['valueA' + i];
+        name += field + ' ' + attrs.value['operator' + i] + attrs.value['valueA' + i];
       }
     });
+    name += ')';
     const param = this.node
         .set('parameterId', this.paramId)
-        .set('code', code);
-    console.log(param);
+        .set('code', code)
+        .set('name', name);
     this.actions.addParameter(param);
+    this.actions.hideAttributesPage();
   }
 
   cancel() {
