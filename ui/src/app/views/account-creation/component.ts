@@ -96,7 +96,7 @@ export class AccountCreationComponent {
     if (username.includes('..') || username.endsWith('.')) {
       return true;
     }
-    return !(new RegExp(/^[\w-][\w.-]*$/).test(username));
+    return !(new RegExp(/^[\w'-][\w.'-]*$/).test(username));
   }
 
   usernameChanged(): void {
