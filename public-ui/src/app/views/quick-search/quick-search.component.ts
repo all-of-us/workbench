@@ -4,10 +4,10 @@ import { Router } from '@angular/router';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
+import { Observable } from 'rxjs/Rx';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
-import { Observable } from "rxjs/Rx";
-import {DbDomainListResponse} from "../../../publicGenerated/model/dbDomainListResponse";
+import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
 
 
 @Component({
@@ -27,10 +27,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   totalParticipants;
   domains = [];
   loading = true;
-  private subscriptions: ISubscription;
-  private subscription2: ISubscription;
-  private subscription3: ISubscription;
-
+  private subscriptions: ISubscription[] = [];
 
   constructor(private api: DataBrowserService,
               private router: Router) {
@@ -38,35 +35,63 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this.subscriptions = this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
+    // Get search result from localStorage
+    this.prevSearchText = localStorage.getItem('searchText');
+    if (!this.prevSearchText) {
+      this.prevSearchText = '';
+    }
+    this.searchText.setValue(this.prevSearchText);
 
+    this.subscriptions.push(
+      this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue)
+    );
+
+    // Do initial search if we have search text
+    if (this.prevSearchText) {
+      this.subscriptions.push(
+        this.searchDomains(this.prevSearchText).subscribe((data: DbDomainListResponse) => {
+          this.loading = true;
+          this.searchResults = data.items;
+          this.domainResults = data.items.filter(d => d.dbType === 'domain_filter');
+          this.surveyResults = data.items.filter(d => d.dbType === 'survey');
+          this.loading = false;
+        })
+      );
+    }
     // Initialize results to all totals
-    this.subscription2 = this.api.getDomainTotals().subscribe((data: DbDomainListResponse) => {
-      this.loading = true;
-      this.domains = data.items;
-      this.searchResults = this.domains;
-      this.domainResults = this.domains.filter(d => d.dbType === 'domain_filter');
-      this.surveyResults = this.domains.filter(d => d.dbType === 'survey');
-      this.loading = false;
-    });
-
-
-    this.subscription3 = this.searchText.valueChanges
-      .debounceTime(200)
-      .distinctUntilChanged()
-      .switchMap((query) => this.searchDomains(query))
-      .subscribe((data: DbDomainListResponse) => {
-        this.searchResults = data.items;
-        this.domainResults = data.items.filter(d => d.dbType === 'domain_filter');
-        this.surveyResults = data.items.filter(s => s.dbType === 'survey');
+    this.subscriptions.push(
+      this.api.getDomainTotals().subscribe((data: DbDomainListResponse) => {
+        this.loading = true;
+        this.domains = data.items;
+        // Only set results to the totals if we don't have a searchText
+        if (!this.prevSearchText) {
+          this.searchResults = this.domains;
+          this.domainResults = this.domains.filter(d => d.dbType === 'domain_filter');
+          this.surveyResults = this.domains.filter(d => d.dbType === 'survey');
+        }
         this.loading = false;
-      });
+      })
+    );
+
+
+    this.subscriptions.push(
+      this.searchText.valueChanges
+        .debounceTime(200)
+        .distinctUntilChanged()
+        .switchMap((query) => this.searchDomains(query))
+        .subscribe((data: DbDomainListResponse) => {
+          this.searchResults = data.items;
+          this.domainResults = data.items.filter(d => d.dbType === 'domain_filter');
+          this.surveyResults = data.items.filter(s => s.dbType === 'survey');
+          this.loading = false;
+        })
+    );
   }
   ngOnDestroy() {
-    console.log('unsubscribing ');
-    this.subscriptions.unsubscribe();
-    this.subscription2.unsubscribe();
-    this.subscription3.unsubscribe();
+    console.log('unsubscribing quick search ');
+    for (const s of this.subscriptions){
+      s.unsubscribe();
+    }
   }
 
   public searchDomains(query: string) {
@@ -79,7 +104,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
       });
       return resultsObservable;
     }
-    console.log("Searching domains ", query)
+    console.log('Searching domains ', query);
     this.prevSearchText = query;
     localStorage.setItem('searchText', query);
     return this.api.getDomainSearchResults(query);

@@ -5,6 +5,9 @@
     color: #4A4A4A;
     font-weight: 300;
 }
+.box-sub-title.question {
+    font-size: larger;
+}
 .survey-results {
     padding: .5rem;
     position: relative;
@@ -71,6 +74,9 @@
     padding-left: 0px;
 }
 
+.chart-wrapper {
+    height: 240px;
+}
 .answer-charts .chart-wrapper {
     height: 240px;
     margin-top:0;
@@ -83,3 +89,16 @@
 .row.answers .chart-wrapper {
     margin-bottom:0px;
 }
+
+
+.answers-bar-col {
+    margin-top:1rem;
+}
+
+.extra-search  {
+    font-weight: bolder;
+    text-decoration: underline;
+    color: #302C71;
+}
+
+

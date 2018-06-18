@@ -21,6 +21,7 @@ produces:
 # date formatting is inconsistent between server and client. Time values are stored as
 # milliseconds since the UNIX epoch.
 
+
 ##########################################################################################
 ## PATHS
 ##########################################################################################
@@ -130,7 +131,7 @@ paths:
           name: request
           description: search concept request
           schema:
-            $ref: "#/definitions/SearchConceptsRequest"
+             $ref: "#/definitions/SearchConceptsRequest"
       responses:
         200:
           description: A collection of matched concepts
@@ -324,7 +325,14 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/Concept"
-
+        matchType:
+          type: string
+          description: match column type
+        standardConcept:
+          type: "array"
+          items:
+            $ref: "#/definitions/Concept"
+          description: standard concept associated with the matched concept
 
   QuestionConcept:
     type: object

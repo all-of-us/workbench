@@ -36,6 +36,7 @@ import {DataBrowserService} from 'publicGenerated';
 import { overriddenPublicUrlKey } from './views/app/component';
 import { QuickSearchComponent } from './views/quick-search/quick-search.component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
+import { HighlightSearchPipe } from './utils/highlight-search.pipe';
 
 function getPublicBasePath() {
   return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
@@ -68,6 +69,7 @@ const DataBrowserServiceFactory = (http: Http) => {
     DbHomeComponent,
     QuickSearchComponent,
     EhrViewComponent,
+    HighlightSearchPipe,
   ],
   providers: [
     {

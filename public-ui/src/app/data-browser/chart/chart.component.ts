@@ -176,6 +176,7 @@ export class ChartComponent implements OnChanges {
             type: 'category',
             labels: {
                 style: {
+
                     whiteSpace: 'nowrap',
                 }
             },

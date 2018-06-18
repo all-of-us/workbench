@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
-import { ISubscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-survey-view',
@@ -28,8 +28,10 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
   searchText = '';
+  andSearchText = '';
   prevSearchText = '';
-
+  searchMethod = 'or';
+  noResultsMessage = 'No questions match your search term.';
   /* Show answers toggle */
   showAnswer = {};
 
@@ -65,7 +67,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           });
         }
 
-        // Copy all qustions to display initially and filter on any search text passed in.
+        // Copy all questions to the display array and filter on search text passed in.
         this.questions = this.surveyResult.items;
         this.filterResults();
         this.loading = false;
@@ -76,36 +78,74 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log("unsubscribing survey view ");
+    console.log('unsubscribing survey view ');
     this.subscription.unsubscribe();
   }
 
   public searchQuestion(q: QuestionConcept) {
-      if (q.conceptName.toLowerCase().indexOf(this.searchText.toLowerCase()) >= 0 ) { return true; }
-      const results = q.countAnalysis.results.filter(r =>
-          r.stratum4.toLowerCase().indexOf(this.searchText) >= 0);
-      console.log('answer results filter ', results);
-      if (results.length > 0) {
-        return true;
+    // Todo , match all words maybe instead of any. Or allow some operators such as 'OR' 'AND'
+    let words = this.searchText.split(new RegExp(',| | and | or '));
+    words = words.filter(w => w.length > 0 && w.toLowerCase() != 'and' && w.toLowerCase() != 'or');
+    let reString = words.join('|');
+
+    // If doing an and search lookahead assertions to match all words
+    if (this.searchMethod === 'and') {
+      reString = '^';
+      for (const w of words) {
+        if (q.conceptName.toLowerCase().indexOf(w) === -1  &&
+          q.countAnalysis.results.filter(r => r.stratum4.toLowerCase().indexOf(w) === -1 ))
+        {
+          return false;
+        }
       }
-      // No hit
-      return false ;
+      // All words found in either question or answers
+      return true;
+    }
+
+    // Or search
+
+    const re = new RegExp(reString, 'gi');
+   // const re = new RegExp('/^(?=.*smoke)(?=.*cigar).+/', 'gi');
+    // Test question
+    if (re.test(q.conceptName)) {
+      return true;
+    }
+    // Test answers
+    const results = q.countAnalysis.results.filter(r => re.test(r.stratum4));
+    if (results.length > 0) {
+      return true;
+    }
+
+    // No hit
+    return false ;
   }
 
   public filterResults() {
+    // Todo add delay like quicksearch
     /* Reset questions before filtering if length becomes less than prev or zero
       so backspacing works */
-    if (this.prevSearchText.length > this.searchText.length ||
+    this.loading = true;
+    this.questions = this.surveyResult.items;
+   /* if (this.prevSearchText.length > this.searchText.length ||
             this.searchText.length === 0) {
-        this.questions = this.surveyResult.items;
-    }
+
+    }*/
     this.prevSearchText = this.searchText;
+    /* playing with adding and to search text
+    let words = this.searchText.split(new RegExp(' |,| and | or ','gi'));
+    words = words.filter(w => w.length > 0)
+    this.andSearchText = words.join(' and ');
+    */
+
     if (this.searchText.length > 0) {
-        let filtered: QuestionConcept[] = [];
-        filtered = this.questions.filter(this.searchQuestion, this);
-        this.questions = filtered;
-        console.log('Filtered to ' + this.searchText);
+      this.questions = this.questions.filter(this.searchQuestion, this);
     }
+    this.loading = false;
+  }
+
+  public setSearchMethod(method:string) {
+    this.searchMethod = method;
+    this.filterResults();
   }
 
   public toggleAnswer(qid) {
@@ -117,12 +157,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
 
   public showAnswerGraphs(q, a: AchillesResult) {
-    console.log('In show answer graphs', a);
     q.selectedAnswer = a;
-    console.log('Selected answer for q ' , q );
   }
 
   public graphAnswerClicked(achillesResult) {
-    console.log("Graph answer clicked ", achillesResult);
+    console.log('Graph answer clicked ', achillesResult);
   }
+
 }

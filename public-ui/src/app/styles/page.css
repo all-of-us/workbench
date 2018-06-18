@@ -188,3 +188,12 @@ span.keyword {
 .inline-search-button {
     text-align: right;
 }
+
+.results-heading {
+    font-size: larger;
+}
+
+.highlight {
+    background-color: yellow;
+
+}

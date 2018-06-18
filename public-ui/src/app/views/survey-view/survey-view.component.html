@@ -64,20 +64,42 @@
           </div>
         </div>
       </div>
-      <div class="row box-sub-title"> Click on each response to view age and gender distributions</div>
+      <div class="row box-sub-title">
+        <div *ngIf="loading" class="col-xs-12 flex">  <span *ngIf="loading" class="spinner spinner-md"> </span> </div>
+        <p class="results-heading no-results" *ngIf="questions.length === 0 && !loading">
+          <span *ngIf="searchMethod === 'and'"> No questions match *ALL* keywords: <mark> {{searchText}}</mark>.
+            <span  class="search-extra"> <a class="extra-search" (click)="setSearchMethod('or')"> Match Any Key Word </a>.</span>
+          </span>
+          <span *ngIf="searchMethod === 'or'"> No questions match any of the keywords: <mark> {{searchText}}</mark>.
+            <span  class="search-extra"> <a class="extra-search" (click)="setSearchMethod('or')"> Start Over </a>.</span>
+          </span>
+        </p>
+        <p class="results-heading" *ngIf="questions.length > 0 && !loading">
+          <span *ngIf="searchMethod==='or'" >
+            <b> {{questions.length}} </b> questions match <b>*ANY*</b> keyword: <mark>{{searchText}}</mark>.
+            <a class="extra-search" (click)="setSearchMethod('and')"> Match All Key Words </a>.
+          </span>
+          <span *ngIf="searchMethod==='and'" >
+            <span> <b> {{questions.length}} </b> questions match <b>*ALL*</b> keywords: <mark>{{searchText}}</mark>.</span>
+            <a class="extra-search" (click)="setSearchMethod('or')"> Match Any Key Word </a>.
+          </span>
+          <br>
+          Click on each response to view age and gender distributions.
+        </p>
+      </div>
       <div class="row question-result" *ngFor="let q of questions, let i = index">
 
         <div class=" question-card">
 
           <div class="row question">
 
-            <div class="col-md-4 col-xs-12 col-sm-12">
+            <div class="col-xs-12 col-sm-12">
               <div class="box-title"> Question {{i + 1}}</div>
-              <div class="box-sub-title"> {{ q.conceptName}} ({{q.conceptId}}) </div>
+              <div class="box-sub-title question" innerHtml="{{ q.conceptName | highlightSearch : this.searchText}} ({{q.conceptId}})">   </div>
             </div>
 
-            <div class="col-md-8 col-xs-12 col-sm-12">
-              <div class="response-dist" style="height:200px">
+            <div class="col-xs-12 col-sm-12 answers-bar-col">
+              <div class="chart-wrapper">
                 <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" [chartType]="'bar'" (resultClicked)="graphAnswerClicked(item)"></app-chart>
               </div>
             </div>
@@ -95,7 +117,7 @@
             <div class="col-sm-7 col-xs-12 answer-list">
               <div *ngFor="let a of q.countAnalysis.results"  >
                 <div class="answer-text" (click)="showAnswerGraphs(q, a)" [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
-                  <label> {{a.stratum4}} </label>
+                  <label innerHtml="{{a.stratum4 | highlightSearch : this.searchText}}"> {{a.stratum4}} </label>
                 </div>
               </div>
             </div>
