@@ -6,6 +6,9 @@ import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import { Observable } from "rxjs/Rx";
+import {DbDomainListResponse} from "../../../publicGenerated/model/dbDomainListResponse";
+
 
 @Component({
   selector: 'app-quick-search',
@@ -38,7 +41,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.subscriptions = this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
 
     // Initialize results to all totals
-    this.subscription2 = this.api.getDomainTotals().subscribe(data => {
+    this.subscription2 = this.api.getDomainTotals().subscribe((data: DbDomainListResponse) => {
       this.loading = true;
       this.domains = data.items;
       this.searchResults = this.domains;
@@ -52,7 +55,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
       .debounceTime(200)
       .distinctUntilChanged()
       .switchMap((query) => this.searchDomains(query))
-      .subscribe(data => {
+      .subscribe((data: DbDomainListResponse) => {
         this.searchResults = data.items;
         this.domainResults = data.items.filter(d => d.dbType === 'domain_filter');
         this.surveyResults = data.items.filter(s => s.dbType === 'survey');
@@ -67,6 +70,16 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   }
 
   public searchDomains(query: string) {
+    // If query empty reset to already reatrieved domain totals
+    if (query.length === 0) {
+      const resultsObservable = new Observable((observer) => {
+        const domains: DbDomainListResponse = {items: this.domains};
+        observer.next(domains);
+        observer.complete();
+      });
+      return resultsObservable;
+    }
+    console.log("Searching domains ", query)
     this.prevSearchText = query;
     localStorage.setItem('searchText', query);
     return this.api.getDomainSearchResults(query);
