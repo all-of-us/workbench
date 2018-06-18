@@ -5,8 +5,8 @@ import {SignInService} from 'app/services/sign-in.service';
 import {deepCopy} from 'app/utils/index';
 
 import {
-  BlockscoreIdVerificationStatus,
   ErrorResponse,
+  IdVerificationStatus,
   InstitutionalAffiliation,
   Profile,
   ProfileService,
@@ -86,7 +86,7 @@ export class ProfilePageComponent implements OnInit {
     if (this.profile === undefined) {
       return completedTasks;
     }
-    if (this.profile.blockscoreIdVerificationStatus === BlockscoreIdVerificationStatus.VERIFIED) {
+    if (this.profile.idVerificationStatus === IdVerificationStatus.VERIFIED) {
       completedTasks += 1;
     }
     if (this.profile.demographicSurveyCompletionTime !== null) {

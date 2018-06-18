@@ -28,10 +28,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return readToString(getCredentialsBucketName(), "invitation-key.txt").trim();
   }
 
-  public String readBlockscoreApiKey() {
-    return readToString(getCredentialsBucketName(), "blockscore-api-key.txt").trim();
-  }
-
   @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();

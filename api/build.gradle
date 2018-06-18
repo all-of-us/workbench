@@ -205,9 +205,9 @@ dependencies {
   }
   compile 'org.springframework.security:spring-security-web:+'
 
-  compile 'com.fasterxml.jackson.core:jackson-annotations:+'
-  compile 'com.fasterxml.jackson.core:jackson-core:+'
-  compile 'com.fasterxml.jackson.core:jackson-databind:+'
+  compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
+  compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
+  compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
   compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
@@ -222,7 +222,6 @@ dependencies {
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
-  compile 'com.blockscore:blockscore-java:4.0.2'
   compile 'com.google.guava:guava:24.1.1-jre'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
 
