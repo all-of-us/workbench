@@ -48,6 +48,7 @@ import {
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
+  HIDE_ATTRIBUTES_PAGE,
 
   LOAD_ENTITIES,
   RESET_STORE,
@@ -205,6 +206,9 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SHOW_ATTRIBUTES_PAGE:
         return state.setIn(['wizard', 'item', 'attributes'], action.node);
+
+      case HIDE_ATTRIBUTES_PAGE:
+        return state.setIn(['wizard', 'item', 'attributes'], Map());
 
         case REMOVE_ITEM: {
         state = state

@@ -78,7 +78,11 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.attributes$
       .subscribe(node => {
         this.attributesNode = node;
-        this.mode = 'attributes';
+        if (node.size === 0) {
+          this.mode = 'tree';
+        } else {
+          this.mode = 'attributes';
+        }
       })
     );
   }
