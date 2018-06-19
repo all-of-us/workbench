@@ -1,4 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
+
+import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
   ResearchPurposeReviewRequest,
@@ -24,6 +26,8 @@ export class AdminReviewWorkspaceComponent implements OnInit {
   reviewedWorkspace: Workspace;
   reviewError = false;
 
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
   constructor(
       private workspacesService: WorkspacesService
   ) {}
@@ -56,5 +60,19 @@ export class AdminReviewWorkspaceComponent implements OnInit {
               }
               this.reviewError = true;
             });
+  }
+
+  submitFetchingWorkspacesBugReport(): void {
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription =
+        'Could not fetch workspaces for approval';
+  }
+
+  submitReviewWorkspaceBugReport(): void {
+    this.reviewError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription =
+        'Could not review workspace: \'' + this.reviewedWorkspace.namespace + '/' +
+        this.reviewedWorkspace.name + '\'';
   }
 }

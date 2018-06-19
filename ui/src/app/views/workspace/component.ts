@@ -6,6 +6,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
+import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -117,6 +118,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   alertMsg: string;
   tabOpen = Tabs.Notebooks;
   localizeNotebooksError = false;
+
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -320,22 +324,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-  edit(): void {
-    this.router.navigate(['edit'], {relativeTo : this.route});
-  }
-
-  clone(): void {
-    this.router.navigate(['clone'], {relativeTo : this.route});
-  }
-
-  delete(): void {
-    this.deleting = true;
-    this.workspacesService.deleteWorkspace(
-        this.workspace.namespace, this.workspace.id).subscribe(() => {
-          this.router.navigate(['/workspaces']);
-        });
-  }
-
   buildCohort(): void {
     if (!this.awaitingReview) {
       this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
@@ -398,5 +386,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   share(): void {
     this.shareModal.open();
+  }
+
+  submitNotebooksLoadBugReport(): void {
+    this.notebookError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Could not load notebooks';
+  }
+
+  submitNotebookLocalizeBugReport(): void {
+    this.localizeNotebooksError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Could not localize notebook.';
   }
 }

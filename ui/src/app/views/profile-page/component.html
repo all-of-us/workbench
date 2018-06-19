@@ -130,19 +130,19 @@
           </div>
         </div>
         <div *ngIf="termsOfServiceError" class="error">
-          Error submitting terms of service.
+          <div> Error submitting terms of service. Please <a (click)="submitTermsOfServiceBugReport()">submit a bug report.</a></div>
           <clr-icon style="margin-left: 1rem;" shape="times" (click)="termsOfServiceError = false"></clr-icon>
         </div>
         <div *ngIf="ethicsTrainingError" class="error">
-          Error submitting ethics training.
+          <div> Error submitting ethics training. Please <a (click)="submitEthicsTrainingBugReport()">submit a bug report.</a></div>
           <clr-icon style="margin-left: 1rem;" shape="times" (click)="ethicsTrainingError = false"></clr-icon>
         </div>
         <div *ngIf="demographicSurveyError" class="error">
-          Error submitting demographics survey.
+          <div> Error submitting demographics survey. Please <a (click)="submitDemographicsSurveyBugReport()">submit a bug report.</a></div>
           <clr-icon style="margin-left: 1rem;" shape="times" (click)="demographicSurveyError = false"></clr-icon>
         </div>
         <div *ngIf="idVerificationError" class="error">
-          Error submitting identity verification request.
+          <div> Error submitting identity verification. Please <a (click)="submitIdVerificationBugReport()">submit a bug report.</a></div>
           <clr-icon style="margin-left: 1rem;" shape="times" (click)="idVerificationError = false"></clr-icon>
         </div>
       </div>
@@ -185,3 +185,4 @@
     </div>
   </div>
 </div>
+<app-bug-report></app-bug-report>

@@ -1,8 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {deepCopy} from 'app/utils/index';
+import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
   BlockscoreIdVerificationStatus,
@@ -50,6 +51,10 @@ export class ProfilePageComponent implements OnInit {
   demographicSurveyError = false;
   ethicsTrainingError = false;
   idVerificationError = false;
+
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
+
   constructor(
       private profileService: ProfileService,
       private profileStorageService: ProfileStorageService,
@@ -201,5 +206,29 @@ export class ProfilePageComponent implements OnInit {
     }, () => {
       this.idVerificationError = true;
     });
+  }
+
+  submitTermsOfServiceBugReport(): void {
+    this.termsOfServiceError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Error submitting terms of service';
+  }
+
+  submitEthicsTrainingBugReport(): void {
+    this.ethicsTrainingError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Error submitting ethics training';
+  }
+
+  submitDemographicsSurveyBugReport(): void {
+    this.demographicSurveyError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Error submitting demographics survey';
+  }
+
+  submitIdVerificationBugReport(): void {
+    this.idVerificationError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Error submitting identity verification';
   }
 }
