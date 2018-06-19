@@ -20,7 +20,7 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  * been left intact in order to provide a "hook-in" location for implementing
  * other types of attribute.
  */
-function needsAttributes(node) {
+function needsAttributes(node: any) {
   return node.get('id', '') === 316302;
 }
 

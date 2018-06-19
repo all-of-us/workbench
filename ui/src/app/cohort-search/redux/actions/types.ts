@@ -249,6 +249,7 @@ export type RootAction =
   | ActionTypes[typeof WIZARD_CANCEL]
   | ActionTypes[typeof SET_WIZARD_CONTEXT]
   | ActionTypes[typeof SHOW_ATTRIBUTES_PAGE]
+  | ActionTypes[typeof HIDE_ATTRIBUTES_PAGE]
 
   | ActionTypes[typeof LOAD_ENTITIES]
   | ActionTypes[typeof RESET_STORE]
