@@ -45,7 +45,7 @@ export class SignedInComponent implements OnInit {
   }
   constructor(
     /* Ours */
-    private errorHandlingService: ErrorHandlingService,
+    public errorHandlingService: ErrorHandlingService,
     private signInService: SignInService,
     private profileStorageService: ProfileStorageService,
     /* Angular's */
