@@ -145,6 +145,49 @@ paths:
               - openid
               - email
               - profile
+      delete:
+        responses:
+          '200':
+            description: Successfully Removed User From Billing Project
+          '403':
+            description: You must be a project owner to add a user to a billing project
+            schema:
+              $ref: '#/definitions/ErrorReport'
+          '404':
+            description: User not found
+            schema:
+              $ref: '#/definitions/ErrorReport'
+          '500':
+            description: Rawls Internal Error
+            schema:
+              $ref: '#/definitions/ErrorReport'
+        description: remove user or group from billing project the caller owns
+        parameters:
+          - in: path
+            description: Project ID
+            name: projectId
+            required: true
+            type: string
+          - in: path
+            description: role of user for project
+            name: workbenchRole
+            required: true
+            type: string
+            enum: ["user", "owner"]
+          - in: path
+            description: email of user or group to remove
+            name: email
+            required: true
+            type: string
+        tags:
+          - billing
+        summary: remove user or group from billing project the caller owns
+        operationId: removeUserFromBillingProject
+        security:
+          - authorization:
+              - openid
+              - email
+              - profile
 
   /api/billing/{projectId}/googleRole/{role}/{email}:
     put:

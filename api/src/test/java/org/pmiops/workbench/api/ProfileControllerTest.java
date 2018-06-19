@@ -116,6 +116,7 @@ public class ProfileControllerTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
+    config.firecloud.billingRetryCount = 2;
     config.admin = new WorkbenchConfig.AdminConfig();
     config.admin.verifiedSendingAddress = "verifysend@mockemail.mock";
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
@@ -292,7 +293,11 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testMe_secondCallErrorsProject() throws Exception {
+  public void testMe_retriesBillingProjectErrors() throws Exception {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new FireCloudConfig();
+    config.firecloud.billingRetryCount = 2;
+    when(configProvider.get()).thenReturn(config);
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
 
@@ -306,6 +311,32 @@ public class ProfileControllerTest {
     membership.setProjectName(profile.getFreeTierBillingProjectName());
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
+  }
+
+  @Test
+  public void testMe_errorsAfterFourProjectFailures() throws Exception {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new FireCloudConfig();
+    config.firecloud.billingRetryCount = 2;
+    when(configProvider.get()).thenReturn(config);
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    // Simulate FC "Error".
+    org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
+        new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
+    membership.setCreationStatus(CreationStatusEnum.ERROR);
+    membership.setProjectName(profile.getFreeTierBillingProjectName());
+    when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
+    for (int i = 0; i <= configProvider.get().firecloud.billingRetryCount; i++) {
+      profile = profileController.getMe().getBody();
+    }
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.ERROR);
 
     verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
