@@ -12,16 +12,19 @@ import {IconsModule} from 'app/icons/icons.module';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
+  BugReportService,
   ClusterService,
   CohortsService,
   WorkspaceAccessLevel,
   WorkspacesService} from 'generated';
 
+import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
@@ -100,11 +103,13 @@ describe('WorkspaceComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
+        BugReportComponent,
         WorkspaceComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
       ],
       providers: [
+        { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: Http, useValue: new HttpStub() },
