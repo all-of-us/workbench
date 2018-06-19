@@ -12,12 +12,15 @@ import {ISubscription} from "rxjs/Subscription";
 export class ConceptChartsComponent implements OnInit, OnDestroy {
   @Input() concept: Concept;
   @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
+  @Input() showSources = false;
+  @Input() showGender = true;
+  @Input() showAge = true;
   results;
   loading = false;
   ageAnalysis = null;
   genderAnalysis = null;
   sourceConcepts = null;
-  showSources = false;
+
   private subscription: ISubscription;
   private subscription2: ISubscription;
 
@@ -29,12 +32,10 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     const conceptIdStr = '' + this.concept.conceptId.toString();
     this.subscription = this.api.getConceptAnalysisResults([conceptIdStr]).subscribe(results =>  {
       this.results = results.items;
-      console.log(this.results);
       this.ageAnalysis = this.results[0].ageAnalysis;
       this.genderAnalysis = this.results[0].genderAnalysis;
-
       this.loading = false;
-    } );
+    });
 
     this.getSourceConcepts();
   }

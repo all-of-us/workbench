@@ -95,7 +95,7 @@
 
             <div class="col-xs-12 col-sm-12">
               <div class="box-title"> Question {{i + 1}}</div>
-              <div class="box-sub-title question" innerHtml="{{ q.conceptName | highlightSearch : this.searchText}} ({{q.conceptId}})">   </div>
+              <div class="box-sub-title question" innerHtml="{{ q.conceptName | highlightSearch : searchText}} ({{q.conceptId}})">   </div>
             </div>
 
             <div class="col-xs-12 col-sm-12 answers-bar-col">
@@ -117,7 +117,7 @@
             <div class="col-sm-7 col-xs-12 answer-list">
               <div *ngFor="let a of q.countAnalysis.results"  >
                 <div class="answer-text" (click)="showAnswerGraphs(q, a)" [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
-                  <label innerHtml="{{a.stratum4 | highlightSearch : this.searchText}}"> {{a.stratum4}} </label>
+                  <label innerHtml="{{a.stratum4 | highlightSearch : searchText }}"> {{a.stratum4}} </label>
                 </div>
               </div>
             </div>

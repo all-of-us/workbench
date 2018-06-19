@@ -27,6 +27,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   loading = true;
   minParticipantCount = 0;
   totalParticipants;
+
+  top10Results = [];
   private searchRequest: SearchConceptsRequest;
   private subscription: ISubscription;
   private subscription2: ISubscription;
@@ -64,6 +66,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       // Run search initially filter to domain, a empty search returns top ordered by count_value desc
       this.subscription = this.searchDomain(this.prevSearchText).subscribe(results => {
         this.searchResults = results.items;
+        this.top10Results = this.searchResults.slice(0,10);
         // Set our min partipant count
         if (this.searchResults.length > 0) {
           this.minParticipantCount = this.searchResults[0].countValue;
@@ -120,5 +123,15 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.loading = false;
     } );
   }*/
+
+  public toggleSources(row) {
+    if (row.showSources) {
+      row.showSources = false;
+    }
+    else {
+      row.showSources = true;
+      row.expanded = true;
+    }
+  }
 
 }

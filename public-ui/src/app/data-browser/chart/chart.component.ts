@@ -118,14 +118,7 @@ export class ChartComponent implements OnChanges {
                   minPointLength: 3,
                   events: {
                     click: function (event) {
-                      console.log(event.point);
-                      alert(
-                        this.name + ' clicked\n' +
-                        'Alt: ' + event.altKey + '\n' +
-                        'Control: ' + event.ctrlKey + '\n' +
-                        'Meta: ' + event.metaKey + '\n' +
-                        'Shift: ' + event.shiftKey
-                      );
+                      console.log("plot options clicked ",  event.point);
                     }
                   }
               },
@@ -223,8 +216,7 @@ export class ChartComponent implements OnChanges {
     }
   }
   seriesClick(event) {
-    console.log(this.analysis, "Clicked analysis");
-    console.log(event.point);
+    console.log("Global series clicked " , this.analysis, "Clicked analysis", event.point);
   }
   public makeCountChartOptions() {
     let data = [];
@@ -250,11 +242,8 @@ export class ChartComponent implements OnChanges {
 
     const seriesClick = function(event) {
       const thisCtrl = event.point.options.thisCtrl;
-      console.log("Clicked point :",  event.point);
+      console.log("Count plot Clicked point :",  event.point);
       thisCtrl.resultClicked.emit(event.point.result);
-
-
-
     }
     // Override tooltip and colors and such
     const series = {
@@ -275,17 +264,18 @@ export class ChartComponent implements OnChanges {
 
   }
   public makeConceptChartOptions() {
+    console.log("Concept options ");
     let data = [];
     let cats = [];
     for (const a  of this.concepts) {
       data.push({name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ', y: a.countValue});
-      cats.push(a.conceptName);
+      cats.push(a.vocabularyId + '-' + a.conceptCode + ' ' + a.conceptName);
     }
     data = data.sort((a, b) => {
-      if (a.name > b.name) {
+      if (a.countValue > b.countValue) {
         return 1;
       }
-      if (a.name < b.name) {
+      if (a.countValue < b.countValue) {
         return -1;
       }
       return 0; }
@@ -304,9 +294,11 @@ export class ChartComponent implements OnChanges {
       tooltip: {pointFormat: '<b>{point.y} </b>'}
     };
     return {
-      chart: {type: 'column', backgroundColor: this.backgroundColor,
+      chart: {
+        type: 'column',
+        backgroundColor: this.backgroundColor,
 
-        drilldown: function (e) {
+        /*drilldown: function (e) {
           console.log('drilldown ', e);
           if (!e.seriesOptions) {
             const chart = this,
@@ -345,8 +337,8 @@ export class ChartComponent implements OnChanges {
             }, 1000);
           }
 
-        }
-          }, // '#ECF1F4'
+        }*/
+      }, // '#ECF1F4'
       title: { text: null, style: CHART_TITLE_STYLE }, // default title null , can pass chartTitle input
       series: series,
       categories: cats,
