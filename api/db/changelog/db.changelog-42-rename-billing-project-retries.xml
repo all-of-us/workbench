@@ -5,7 +5,6 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="brubenst" id="changelog-42-rename-billing-project-retries">
-    <dropColumn tableName="user" columnName="blockscore_id"/>
     <renameColumn newColumnName="billing_project_retries"
                   oldColumnName="billing_project_retry"
                   columnDataType="INTEGER"
