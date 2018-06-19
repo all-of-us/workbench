@@ -1,7 +1,5 @@
 package org.pmiops.workbench.cdr.dao;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.After;
@@ -19,11 +17,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.pmiops.workbench.publicapi.DataBrowserController;
 
 import java.util.List;
-import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -38,8 +35,6 @@ public class DataBrowserControllerTest {
     @Autowired
     ConceptRelationshipDao conceptRelationshipDao;
 
-    @PersistenceContext
-    private EntityManager entityManager;
 
     Concept concept1 = makeConcept(123L, "concept a", "S", "conceptA", "classId", "V1", "Condition", 123L, 0.2F, 0L);
     Concept concept2 = makeConcept(456L, "concept b", null, "conceptB", "classId", "V2", "Condition", 456L, 0.2F, 0L);
@@ -52,12 +47,12 @@ public class DataBrowserControllerTest {
     @Before
     public void setUp() {
 
-        conceptDao.save(makeConcept(123L, "concept a", "S", "conceptA", "classId", "V1", "Condition", 123L, 0.2F, 0L));
-        conceptDao.save(makeConcept(456L, "concept b", null, "conceptB", "classId", "V2", "Condition", 456L, 0.2F, 0L));
-        conceptDao.save(makeConcept(789L, "concept c", null, "conceptC", "classId", "V3", "Condition", 567L, 0.2F, 0L));
-        conceptDao.save(makeConcept(1234L, "concept D test concept 1", null, "conceptD", "classId", "V4", "Measurement", 567L, 0.2F, 0L));
-        conceptDao.save(makeConcept(5678L, "concept E test concept 1", "S", "conceptE", "classId", "V5", "Condition", 1234L, 0.2F, 0L));
-        conceptDao.save(makeConcept(7890L, "concept F test concept 2", null, "conceptF", "classId", "V6", "Condition", 1234L, 0.2f, 0L));
+        conceptDao.save(concept1);
+        conceptDao.save(concept2);
+        conceptDao.save(concept3);
+        conceptDao.save(concept4);
+        conceptDao.save(concept5);
+        conceptDao.save(concept6);
 
         conceptRelationshipDao.save(makeConceptRelationship(1234L, 5678L, "Maps to"));
         conceptRelationshipDao.save(makeConceptRelationship(456L, 5678L, "Maps to"));
@@ -76,6 +71,7 @@ public class DataBrowserControllerTest {
         final List<Concept> list = conceptDao.findStandardConcepts(1234L);
         Assert.assertEquals(list.get(0),concept5);
     }
+
 
 
     private Concept makeConcept(long conceptId, String conceptName, String standardConcept, String conceptCode, String conceptClassId, String vocabularyId, String domainId, long count, float prevalence,
