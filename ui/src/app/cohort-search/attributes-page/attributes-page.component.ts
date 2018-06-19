@@ -1,29 +1,28 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import {FormControl, FormGroup, NgForm, ReactiveFormsModule} from '@angular/forms';
+import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import { NgForm} from '@angular/forms';
 
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
+import {
+    activeParameterList,
+    CohortSearchActions,
+    CohortSearchState,
+    isParameterActive
+} from '../redux';
+import {Observable} from 'rxjs/Observable';
 
 @Component({
   selector: 'crit-attributes-page',
   templateUrl: './attributes-page.component.html',
   styleUrls: ['./attributes-page.component.css']
 })
-export class AttributesPageComponent implements OnInit {
+export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
+  @select(activeParameterList) selection$: Observable<any>;
   @Input() node;
   fields: Array<string>;
   private isSelected: boolean;
   private subscription: Subscription;
-
-  /*form = new FormGroup({
-      attr1: new FormGroup({
-          operator: new FormControl(),
-          valueA: new FormControl(),
-          valueB: new FormControl()
-      })
-  });*/
 
   constructor(
       private ngRedux: NgRedux<CohortSearchState>,
@@ -32,12 +31,18 @@ export class AttributesPageComponent implements OnInit {
   ngOnInit() {
     console.log(this.node);
     this.subscription = this.ngRedux
-        .select(isParameterActive(this.paramId))
-        .map(val => true && val)
-        .subscribe(val => {
-          console.log(val);
-          this.isSelected = val;
-        });
+      .select(isParameterActive(this.paramId))
+      .map(val => true && val)
+      .subscribe(val => {
+        console.log(val);
+        this.isSelected = val;
+      });
+
+    this.subscription.add(this.selection$
+      .subscribe(list => {
+        console.log(list);
+      })
+    );
   }
 
   ngOnChanges (changes: SimpleChanges) {
@@ -51,6 +56,10 @@ export class AttributesPageComponent implements OnInit {
         this.fields = [''];
       }
     }
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   get paramId() {
