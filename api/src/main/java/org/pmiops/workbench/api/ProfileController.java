@@ -274,18 +274,22 @@ public class ProfileController implements ProfileApiDelegate {
 
       case ERROR:
         int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
-        if (retries <= 2) {
+        if (retries < workbenchConfigProvider.get().firecloud.billingRetryCount) {
           this.userService.setBillingRetryCount(retries + 1);
-          fireCloudService.removeUserFromBillingProject(user.getEmail(), user.getFreeTierBillingProjectName());
+          log.log(Level.INFO, String.format(
+              "Billing project %s failed to be created, retrying.", user.getFreeTierBillingProjectName()));
+          try {
+            fireCloudService.removeUserFromBillingProject(user.getEmail(), user.getFreeTierBillingProjectName());
+          } catch (WorkbenchException e) {
+            log.log(Level.INFO, String.format("Failed to remove user from errored billing project"));
+          }
           String billingProjectName = createFirecloudBillingProject(user);
-          user.setFreeTierBillingProjectName(billingProjectName);
-          user.setFreeTierBillingProjectStatus(BillingProjectStatus.PENDING);
-          return userDao.save(user);
+          return this.userService.setBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
         } else {
+          String billingProjectName = user.getFreeTierBillingProjectName();
           log.log(Level.SEVERE, String.format(
-              "free tier project %s failed to be created", user.getFreeTierBillingProjectName()));
-          user.setFreeTierBillingProjectStatus(status);
-          return userDao.save(user);
+              "free tier project %s failed to be created", billingProjectName));
+          return userService.setBillingProjectNameAndStatus(billingProjectName, status);
         }
       case READY:
         break;
@@ -319,8 +323,7 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
-    return userDao.save(user);
+    return userService.setBillingProjectNameAndStatus(user.getFreeTierBillingProjectName(), BillingProjectStatus.READY);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {

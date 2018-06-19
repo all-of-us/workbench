@@ -8,7 +8,8 @@
     "debugEndpoints": false,
     "enforceRegistered": false,
     "jupyterUserScriptUri": "gs:\/\/all-of-us-workbench-test-scripts/setup_notebook_cluster.sh",
-    "registeredDomainName": "all-of-us-registered-test"
+    "registeredDomainName": "all-of-us-registered-test",
+    "billingRetryCount": 2
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
