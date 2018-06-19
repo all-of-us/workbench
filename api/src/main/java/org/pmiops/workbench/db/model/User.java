@@ -299,7 +299,7 @@ public class User {
     this.clusterCreateRetries = clusterCreateRetries;
   }
 
-  @Column(name = "billing_project_retry")
+  @Column(name = "billing_project_retries")
   public Integer getBillingProjectRetries() {
     return billingProjectRetries;
   }
