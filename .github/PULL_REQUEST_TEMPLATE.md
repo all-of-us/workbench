@@ -1,11 +1,13 @@
+Please replace this this template with your PR description.
 
-<your comments for this PR go here>
+Please remember to keep in mind the security levels outlined in [CONTRIBUTING.md](CONTRIBUTING.md)
 
-Have you read [CONTRIBUTING.md](CONTRIBUTING.md) lately? If not, do that first.
+* **no**: None 
+* **low**: Low chance of potential impact to, or exposure of patient data
+* **moderate**: Moderate chance of potential impact to, or exposure of patient data
+* **severe**: Severe chance of potential impact to, or exposure of patient data
 
----
+And to:
 
-- [ ] Request at least one reviewer, preferably two or more if necessary
-- [ ] Get thumbs from all reviewers
-- [ ] Verify all tests go green, including CI tests
-- [ ] Merge to develop using github's "Squash and Merge" feature
+* Get thumbs from all reviewers
+* Verify all tests go green, including CI tests

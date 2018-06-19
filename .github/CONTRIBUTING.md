@@ -20,15 +20,15 @@ the change might have on anything security related. Sensitive information that
 relates to users or patients would be an example where we need to indicate the
 level of risk involved. 
 
-- **no**: None 
-- **low**: TODO: Need a description of all risk factors
-- **moderate**: TODO: Need a description of all risk factors
-- **severe**: TODO: Need a description of all risk factors
+* **no**: None 
+* **low**: Low chance of potential impact to, or exposure of patient data
+* **moderate**: Moderate chance of potential impact to, or exposure of patient data
+* **severe**: Severe chance of potential impact to, or exposure of patient data
 
 ## PR Approval Process
 
 * Get approval from at least one reviewer, preferably two.   
-* Ensure all CI tests pass.  
+* Ensure all CI tests and Codacy checks pass.  
 
 ## PR Completion
 
