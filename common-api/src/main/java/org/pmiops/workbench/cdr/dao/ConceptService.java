@@ -66,6 +66,7 @@ public class ConceptService {
     }
 
     public static final String STANDARD_CONCEPT_CODE = "S";
+    public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
     public Slice<Concept> searchConcepts(String query,
                                          StandardConceptFilter standardConceptFilter, List<String> vocabularyIds,
@@ -102,13 +103,21 @@ public class ConceptService {
 
                     // Optionally filter on standard concept, vocabulary ID, domain ID
                     if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
-                        conceptName_Filter.add(criteriaBuilder.equal(root.get("standardConcept"),
+                        List<Predicate> standardConceptPredicates = new ArrayList<>();
+                        standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
                                 criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+                        standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                                criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
+                        conceptName_Filter.add(criteriaBuilder.or(
+                                standardConceptPredicates.toArray(new Predicate[0])));
+
                     } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
                         List<Predicate> standardConceptPredicates = new ArrayList<>();
                         standardConceptPredicates.add(criteriaBuilder.isNull(root.get("standardConcept")));
                         standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                                 criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+                        standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
+                                criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
                         conceptName_Filter.add(criteriaBuilder.or(
                                 standardConceptPredicates.toArray(new Predicate[0])));
                     }

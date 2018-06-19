@@ -61,13 +61,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     .put(Domain.RACE, "Race")
                     .build();
 
-    private static final ImmutableMultimap<MatchType, String> MATCH_TYPE_MAP =
-            ImmutableMultimap.<MatchType, String>builder()
-                    .put(MatchType.CODE, "ConceptCode")
-                    .put(MatchType.ID, "ConceptId")
-                    .put(MatchType.NAME, "ConceptName")
-                    .build();
-
     public static final long PARTICIPANT_COUNT_ANALYSIS_ID = 1;
     public static final long COUNT_ANALYSIS_ID = 3000;
     public static final long GENDER_ANALYSIS_ID = 3101;
@@ -274,7 +267,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         List<Concept> matchedConcepts = concepts.getContent();
         for(Concept con : matchedConcepts){
             String conceptCode = con.getConceptCode();
-            Long conceptId = con.getConceptId();
             if(!con.getStandardConcept().equals("S")){
 
                 response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
