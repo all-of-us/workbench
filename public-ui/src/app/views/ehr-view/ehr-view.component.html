@@ -33,13 +33,15 @@
           <div class="card-stat" >
             {{searchResults.length}}
           </div>
-
+          <div class="card-text">
+            matching medical concepts.
+          </div>
           <div class="card-text bottom info-text">
-            <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon> What is SNOMED?
+
           </div>
         </div>
         <div class="col-md-8 col-xs-12 chart-wrapper flex-xs-middle">
-            <app-chart [concepts]="top10Results" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
+            <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
         </div>
       </div>
 
@@ -57,9 +59,15 @@
   <div class="col-xs-12">
     <div class="white-card-box">
       <div class="results-grid" *ngIf="searchResults.length > 0" >
+        <div class="row">
+          <div class="col-md-4 grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
+          <div class="col-md-4 grid-header flex-xs-middle"> Number of particpants </div>
+          <div class="col-md-4 grid-header flex-xs-middle info-text"> <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon> What is SNOMED? </div>
+
+        </div>
         <div class="row expandable-grid-row" *ngFor="let r of searchResults, let i = index" [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-4 flex-xs-middle"> {{i+1}}. {{r.conceptName | highlightSearch : searchText}} <span class="debug"> ( conceptId:{{r.conceptId}} Standard:{{r.standardConcept}} )</span></div>
-          <div class="col-md-3 flex-xs-middle">
+          <div class="col-md-4 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}"> </div>
+          <div class="col-md-4 flex-xs-middle">
             {{r.countValue | number }} partipants
             <button class="icon-btn" (click)="r.expanded = !r.expanded">
               <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>

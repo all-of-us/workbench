@@ -62,7 +62,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
 
     if (this.dbDomain) {
-
       // Run search initially filter to domain, a empty search returns top ordered by count_value desc
       this.subscription = this.searchDomain(this.prevSearchText).subscribe(results => {
         this.searchResults = results.items;

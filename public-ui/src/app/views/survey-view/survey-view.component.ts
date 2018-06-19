@@ -57,7 +57,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       next: x => {
         const questions = x.items;
         this.surveyResult = x;
-        this.surveyResult.items = questions ;
         // Temp until answer order is fixed on server side , sort abc
         for (const q of questions ) {
           q.countAnalysis.results.sort((a1, a2) => {
@@ -67,10 +66,9 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           });
         }
 
-        // Copy all questions to the display array and filter on search text passed in.
-        this.questions = this.surveyResult.items;
         this.filterResults();
         this.loading = false;
+        console.log(this.surveyResult);
       },
       error: err => console.error('Observer got an error: ' + err),
       complete: () => { this.resultsComplete = true; }
@@ -143,8 +141,12 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
 
-  public setSearchMethod(method:string) {
+  public setSearchMethod(method:string, resetSearch: boolean = false) {
     this.searchMethod = method;
+    if (resetSearch) {
+      this.searchText = '';
+      this.prevSearchText = '';
+    }
     this.filterResults();
   }
 

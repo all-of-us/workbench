@@ -95,10 +95,9 @@
     margin-top:1rem;
 }
 
-.extra-search  {
+.btn-link.extra-search  {
     font-weight: bolder;
     text-decoration: underline;
-    color: #302C71;
 }
 
 
