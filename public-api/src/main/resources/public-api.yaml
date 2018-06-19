@@ -332,7 +332,7 @@ definitions:
           type: "array"
           items:
             $ref: "#/definitions/Concept"
-          description: standard concept associated with the matched concept
+          description: standard concepts associated with the matched concept
 
   QuestionConcept:
     type: object
