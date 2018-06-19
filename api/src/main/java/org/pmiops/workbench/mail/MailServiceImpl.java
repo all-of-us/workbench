@@ -52,10 +52,8 @@ public class MailServiceImpl implements MailService {
                   throw new MessagingException(msgStatus.getRejectReason());
                 }
             }
-        } catch (ApiException e) {
-            throw new MessagingException("Sending email failed.");
-        } catch (MessagingException e) {
-            throw new MessagingException("Sending email failed with message: " + e.getMessage());
+        } catch (ApiException | MessagingException e) {
+            throw new MessagingException("Sending email failed: " + e.getMessage());
         }
     }
 
