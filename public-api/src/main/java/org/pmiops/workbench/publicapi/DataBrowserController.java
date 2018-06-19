@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.MatchType;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +39,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Autowired
     private ConceptService conceptService;
 
+
     // TODO: consider putting this in CDM config, fetching it from there
     private static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
             ImmutableMultimap.<Domain, String>builder()
@@ -57,6 +59,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     .put(Domain.PROCEDURE, "Meas/Procedure")
                     .put(Domain.PROCEDURE, "Condition/Procedure")
                     .put(Domain.RACE, "Race")
+                    .build();
+
+    private static final ImmutableMultimap<MatchType, String> MATCH_TYPE_MAP =
+            ImmutableMultimap.<MatchType, String>builder()
+                    .put(MatchType.CODE, "ConceptCode")
+                    .put(MatchType.ID, "ConceptId")
+                    .put(MatchType.NAME, "ConceptName")
                     .build();
 
     public static final long PARTICIPANT_COUNT_ANALYSIS_ID = 1;
@@ -263,36 +272,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         searchConceptsRequest.getVocabularyIds(), domainIds, maxResults);
         ConceptListResponse response = new ConceptListResponse();
         List<Concept> matchedConcepts = concepts.getContent();
-        List<Concept> conceptCodeMatches = new ArrayList<>();
         for(Concept con : matchedConcepts){
             String conceptCode = con.getConceptCode();
             Long conceptId = con.getConceptId();
             if(!con.getStandardConcept().equals("S")){
-                if(conceptCode.equals(searchConceptsRequest.getQuery())) {
 
-                    conceptCodeMatches.add(con);
+                response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
 
-                    response.setMatchType("ConceptCode");
+                List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
+                response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
 
-                    List<Concept> std_concepts = conceptDao.findStandardConcept(con.getConceptId());
-                    response.setStandardConcept(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
-                    response.setItems(conceptCodeMatches.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
-                    return ResponseEntity.ok(response);
-                }else if(String.valueOf(conceptId).equals(searchConceptsRequest.getQuery())){
-
-                    conceptCodeMatches.add(con);
-
-                    response.setMatchType("ConceptId");
-
-                    List<Concept> std_concepts = conceptDao.findStandardConcept(con.getConceptId());
-                    response.setStandardConcept(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
-                    response.setItems(conceptCodeMatches.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
-                    return ResponseEntity.ok(response);
-                }
             }
 
         }

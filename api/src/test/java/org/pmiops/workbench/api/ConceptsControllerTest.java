@@ -245,7 +245,7 @@ public class ConceptsControllerTest {
     saveConcepts();
     assertResults(
             conceptsController.searchConcepts("ns", "name",
-                    new SearchConceptsRequest().query("conceptD")), CLIENT_CONCEPT_4 , CLIENT_CONCEPT_6);
+                    new SearchConceptsRequest().query("conceptD")), CLIENT_CONCEPT_4 , CLIENT_CONCEPT_5, CLIENT_CONCEPT_6);
   }
 
   @Test

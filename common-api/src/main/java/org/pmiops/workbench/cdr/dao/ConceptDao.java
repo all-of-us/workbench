@@ -10,7 +10,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
 
     @Query(nativeQuery=true, value="select c.* from concept c join concept_relationship cr on c.concept_id=cr.concept_id_2 " +
             "where cr.concept_id_1=?1 and cr.relationship_id='Maps to' and c.standard_concept='S' ")
-    List<Concept> findStandardConcept(long concept_id);
+    List<Concept> findStandardConcepts(long concept_id);
 
     @Query(value = "select c.* " +
             "from concept c " +

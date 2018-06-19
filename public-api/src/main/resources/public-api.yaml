@@ -326,9 +326,9 @@ definitions:
           items:
             $ref: "#/definitions/Concept"
         matchType:
-          type: string
-          description: match column type
-        standardConcept:
+          description: match column type on which concept search was successful
+          $ref: "#/definitions/MatchType"
+        standardConcepts:
           type: "array"
           items:
             $ref: "#/definitions/Concept"
@@ -564,6 +564,10 @@ definitions:
     type: string
     description: filter on the domain in which concepts should be returned
     enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, RACE, GENDER, ETHNICITY]
+  MatchType:
+    type: string
+    description: match column type on concept search
+    enum: [CONCEPT_CODE, CONCEPT_ID, CONCEPT_NAME]
 
   SearchConceptsRequest:
     type: object
