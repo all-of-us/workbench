@@ -65,11 +65,13 @@ public class MailServiceImpl implements MailService {
                           "ApiException: On Last Attempt! Welcome Email to '%s' for user '%s' not sent: %s", contactEmail, user.getName(), attempt.getRight().toString()));
                         throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
                     }
+                    break;
 
                 case REJECTED:
                     log.log(Level.SEVERE, String.format(
                       "Messaging Exception: Welcome Email to '%s' for user '%s' not sent: %s", contactEmail, user.getName(), attempt.getRight().toString()));
                     throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
+                    break;
 
                 case SUCCESSFUL:
                     log.log(Level.INFO, String.format(
