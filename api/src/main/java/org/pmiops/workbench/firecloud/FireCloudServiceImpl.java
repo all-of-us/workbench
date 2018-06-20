@@ -64,6 +64,16 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
   }
 
+  private WorkspaceIngest checkAndAddRegistered(WorkspaceIngest workspaceIngest) {
+    if (configProvider.get().firecloud.enforceRegistered) {
+      ArrayList<ManagedGroupRef> authDomain = new ArrayList<ManagedGroupRef>();
+      ManagedGroupRef registeredDomain = new ManagedGroupRef();
+      registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
+      authDomain.add(registeredDomain);
+      workspaceIngest.setAuthorizationDomain(authDomain);
+    }
+  }
+
   @Override
   public boolean getFirecloudStatus() {
     try {
@@ -171,13 +181,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     workspaceIngest.setName(workspaceName);
     workspaceIngest.setNamespace(projectName);
     // TODO: add concept of controlled auth domain.
-    if (configProvider.get().firecloud.enforceRegistered) {
-      ArrayList<ManagedGroupRef> authDomain = new ArrayList<ManagedGroupRef>();
-      ManagedGroupRef registeredDomain = new ManagedGroupRef();
-      registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
-      authDomain.add(registeredDomain);
-      workspaceIngest.setAuthorizationDomain(authDomain);
-    }
+    workspaceIngest = checkAndAddRegistered(workspaceIngest);
     retryHandler.run((context) -> {
       workspacesApi.createWorkspace(workspaceIngest);
       return null;
@@ -199,6 +203,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setNamespace(toProject);
     workspaceIngest.setName(toName);
+    workspaceIngest = checkAndAddRegistered(workspaceIngest);
     retryHandler.run((context) -> {
       workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest);
       return null;
