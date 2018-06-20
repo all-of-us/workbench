@@ -1,4 +1,4 @@
-Teplace this this template with your PR description.
+Replace this this template with your PR description.
 Please remember to keep in mind the security levels outlined in [CONTRIBUTING.md](CONTRIBUTING.md) and to 
 include a risk tag of the form `[risk=no|low|moderate|severe]` in the PR title
 
