@@ -27,11 +27,11 @@ level of risk involved.
 
 ## PR Approval Process
 
-* Get approval from at least one reviewer, preferably two.   
-* Ensure all CI tests and Codacy checks pass.  
+* In most cases, assign and get approval from one reviewer. PRs that may have an impact on other developers should include more than one, preferably two.
+* Ensure all CI tests and Codacy checks pass
+* Tag Product Owner and Designer for PRs that include UI improvements
 
 ## PR Completion
 
 * Use the "Squash and Merge" feature in github
-* Mark the jira ticket as "Done"
 * Delete the feature branch after all work is complete 
