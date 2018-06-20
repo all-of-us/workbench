@@ -10,7 +10,8 @@ import {BugReport} from 'generated';
   templateUrl: './component.html',
   styleUrls: ['./component.css',
               '../../styles/buttons.css',
-              '../../styles/errors.css']
+              '../../styles/errors.css',
+              '../../styles/inputs.css']
 })
 export class BugReportComponent implements OnInit {
   reporting = false;
