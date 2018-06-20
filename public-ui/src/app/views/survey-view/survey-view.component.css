@@ -57,7 +57,7 @@
     margin-left: .5rem;
 }
 
-.answer-active, .answer-card {
+.answer-active, .answer-card, .answer-charts-wrapper {
     background-color: #D9E4EA;
 }
 .answer-card {
@@ -66,8 +66,7 @@
 
 /* remove space between list and charts */
 .answer-list {
-    margin-right: 0px;
-    padding-right: 0px;
+
 }
 .answer-charts {
     margin-left: 0px;
@@ -77,6 +76,7 @@
 .chart-wrapper {
     height: 240px;
 }
+
 .answer-charts .chart-wrapper {
     height: 240px;
     margin-top:0;

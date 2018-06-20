@@ -118,15 +118,15 @@
 
           </div>
 
-          <div class="row ">
+          <div class="row">
               <div class="col-xs-12">
                 <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
               </div>
           </div>
 
-          <div class="row answers" [hidden]="!showAnswer[q.conceptId]">
+          <div class="row flex-items-xs-middle answers" [hidden]="!showAnswer[q.conceptId]">
 
-            <div class="col-md-6 col-sm-6 col-xs-12 answer-list">
+            <div class="col-md-5 col-sm-5 col-xs-12 answer-list">
               <div *ngFor="let a of q.countAnalysis.results"  >
                 <div class="answer-text" (click)="showAnswerGraphs(q, a)" [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
                   <label innerHtml="{{a.stratum4 | highlightSearch : searchText }}"> {{a.stratum4}} </label>
@@ -135,12 +135,12 @@
               </div>
             </div>
 
-            <div class="col-md-6 col-sm-6 col-xs-12 answer-charts">
-              <div class="" *ngIf="q.selectedAnswer" >
-                <div class="chart-wrapper">
+            <div class="col-md-7 col-sm-7 col-xs-12 answer-charts">
+              <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer" >
+                <div class="chart-wrapper col-md-6 col-sm-12">
                   <app-chart [analysis]="q.genderAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
                 </div>
-                <div class="chart-wrapper age">
+                <div class="chart-wrapper age col-md-6 col-sm-12">
                   <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
                 </div>
 

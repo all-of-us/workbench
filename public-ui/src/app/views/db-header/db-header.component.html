@@ -3,7 +3,7 @@
     <a routerLink="/" class="nav-link logo"><img [src]="logo"></a>
   </div>
 
-  <div *ngIf="! noMenu" class="header-nav menu" [clr-nav-level]="2">
+  <div  class="header-nav menu" [clr-nav-level]="2">
     <a class="title nav-link db-logo" routerLink="/"> &nbsp; <img [src]="dbLogo"> &nbsp; </a>
     <a class="nav-link nav-text" #home routerLinkActive="active" routerLink="/quick-search">Quick Guided Search</a>
     <a class="nav-link nav-text" routerLinkActive="active" routerLink="/surveys">Survey Instruments</a>
