@@ -3,6 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 
+import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -28,6 +29,10 @@ export class WorkspaceNavBarComponent implements OnInit {
   awaitingReview = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
+  workspaceDeletionError = false;
+
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -50,6 +55,8 @@ export class WorkspaceNavBarComponent implements OnInit {
     this.workspacesService.deleteWorkspace(
       this.workspace.namespace, this.workspace.id).subscribe(() => {
         this.router.navigate(['/workspaces']);
+    }, () => {
+      this.workspaceDeletionError = true;
     });
   }
 
@@ -64,5 +71,11 @@ export class WorkspaceNavBarComponent implements OnInit {
 
   get ownerPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
+  }
+
+  submitWorkspaceDeleteBugReport(): void {
+    this.workspaceDeletionError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
   }
 }

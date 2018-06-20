@@ -11,12 +11,14 @@ import {
               '../../styles/cards.css',
               '../../styles/headers.css',
               '../../styles/inputs.css',
+              '../../styles/errors.css',
               './component.css'],
   templateUrl: './component.html',
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   private pollClusterTimer: NodeJS.Timer;
   cluster: Cluster;
+  clusterDeletionFailure = true;
   resetClusterModal = false;
   resetClusterPending = false;
 
@@ -54,6 +56,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   openResetClusterModal(): void {
     this.resetClusterPending = false;
     this.resetClusterModal = true;
+    this.clusterDeletionFailure = false;
   }
 
   closeResetClusterModal(): void {
@@ -65,10 +68,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.cluster.clusterNamespace, this.cluster.clusterName).subscribe(
         () => {
           this.cluster = null;
+          this.resetClusterPending = false;
           this.closeResetClusterModal();
           this.pollCluster();
         },
-        /* onError */ undefined,
+        /* onError */ () => {
+        this.resetClusterPending = false;
+        this.clusterDeletionFailure = true;
+        },
         /* onCompleted */ () => {
           this.resetClusterPending = false;
         });
