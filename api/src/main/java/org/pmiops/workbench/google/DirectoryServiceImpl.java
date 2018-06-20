@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,7 +33,6 @@ public class DirectoryServiceImpl implements DirectoryService {
   static final String APPLICATION_NAME = "All of Us Researcher Workbench";
   private static final String ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   private static SecureRandom rnd = new SecureRandom();
-  private static final Logger log = Logger.getLogger(DirectoryServiceImpl.class.getName());
 
   // This list must exactly match the scopes allowed via the GSuite Domain Admin page here:
   // https://admin.google.com/AdminHome?chromeless=1#OGX:ManageOauthClients
@@ -126,8 +123,6 @@ public class DirectoryServiceImpl implements DirectoryService {
     try {
       mailServiceProvider.get().sendWelcomeEmail(contactEmail, password, user);
     } catch (MessagingException e) {
-      log.log(Level.SEVERE, String.format(
-        "Welcome Email to '%s' for user '%s' not sent: %s", contactEmail, username, e.toString()));
       throw new WorkbenchException(e);
     }
     return user;

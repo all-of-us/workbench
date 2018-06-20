@@ -21,8 +21,7 @@ import org.pmiops.workbench.test.Providers;
 import javax.mail.MessagingException;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class MailServiceImplTest {
 
@@ -64,30 +63,33 @@ public class MailServiceImplTest {
   }
 
   @Test(expected = MessagingException.class)
-  public void testSendWelcomeEmail_throwsAPIException() throws MessagingException {
+  public void testSendWelcomeEmail_throwsMessagingException() throws MessagingException, ApiException {
     when(msgStatus.getRejectReason()).thenReturn("this was rejected");
     User user = createUser();
     service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
+    verify(mandrillApi, times(1)).send(any());
   }
 
   @Test(expected = MessagingException.class)
-  public void testSendWelcomeEmail_throwsMessagingException() throws MessagingException, ApiException {
-    when(Providers.of(mandrillApi).get().send(any())).thenThrow(new ApiException());
+  public void testSendWelcomeEmail_throwsApiException() throws MessagingException, ApiException {
+    doThrow(ApiException.class).when(mandrillApi).send(any());
     User user = createUser();
     service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
+    verify(mandrillApi, times(3)).send(any());
   }
 
   @Test
   public void testSendWelcomeEmail() throws MessagingException, ApiException {
     User user = createUser();
     service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
-    verify(mandrillApi).send(any(MandrillApiKeyAndMessage.class));
+    verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
   }
 
   private WorkbenchConfig createWorkbenchConfig() {
     WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.mandrill = new WorkbenchConfig.MandrillConfig();
     workbenchConfig.mandrill.fromEmail = "test-donotreply@fake-research-aou.org";
+    workbenchConfig.mandrill.sendRetries = 3;
     workbenchConfig.googleCloudStorageService = new WorkbenchConfig.GoogleCloudStorageServiceConfig();
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
     return workbenchConfig;

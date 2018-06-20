@@ -60,5 +60,6 @@ public class WorkbenchConfig {
 
   public static class MandrillConfig {
     public String fromEmail;
+    public int sendRetries;
   }
 }

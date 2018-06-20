@@ -32,6 +32,7 @@
     "verifiedSendingAddress": "all-of-us-workbench-eng@googlegroups.com"
   },
   "mandrill": {
-    "fromEmail": "donotreply@fake-research-aou.org"
+    "fromEmail": "donotreply@fake-research-aou.org",
+    "sendRetries": 3
   }
 }
