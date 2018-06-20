@@ -1,10 +1,7 @@
-package org.pmiops.workbench.publicapi;;
+package org.pmiops.workbench.publicapi;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.when;
 
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
-import java.time.Clock;
 import java.util.Arrays;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -23,9 +20,6 @@ import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
 import org.pmiops.workbench.cdr.model.*;
 import org.pmiops.workbench.model.ConceptListResponse;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.SearchConceptsRequest;
-import org.pmiops.workbench.model.StandardConceptFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -112,17 +106,17 @@ public class DataBrowserControllerTest {
             .count(7891L)
             .prevalence(0.1F);
 
-    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
+    private static final Concept CONCEPT_1 =
             makeConcept(CLIENT_CONCEPT_1);
-    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
+    private static final Concept CONCEPT_2 =
             makeConcept(CLIENT_CONCEPT_2);
-    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
+    private static final Concept CONCEPT_3 =
             makeConcept(CLIENT_CONCEPT_3);
-    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4 =
+    private static final Concept CONCEPT_4 =
             makeConcept(CLIENT_CONCEPT_4);
-    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_5 =
+    private static final Concept CONCEPT_5 =
             makeConcept(CLIENT_CONCEPT_5);
-    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_6 =
+    private static final Concept CONCEPT_6 =
             makeConcept(CLIENT_CONCEPT_6);
 
     @TestConfiguration
@@ -138,20 +132,23 @@ public class DataBrowserControllerTest {
     @Autowired
     private ConceptDao conceptDao;
     @Autowired
+    ConceptRelationshipDao conceptRelationshipDao;
+    @Autowired
+    private ConceptService conceptService;
+    /*
+    @Autowired
     private QuestionConceptDao  questionConceptDao;
     @Autowired
     private AchillesAnalysisDao achillesAnalysisDao;
     @Autowired
-    ConceptRelationshipDao conceptRelationshipDao;
-    @Autowired
     private AchillesResultDao achillesResultDao;
     @Autowired
     private DbDomainDao dbDomainDao;
-    @Autowired
-    private ConceptService conceptService;
+
 
     @PersistenceContext
     private EntityManager entityManager;
+    */
 
     private DataBrowserController dataBrowserController;
 
@@ -165,6 +162,7 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testGetParentConcepts() throws Exception {
+        saveConcepts();
         assertResults(
                 dataBrowserController.getParentConcepts(1234L),CLIENT_CONCEPT_5
         );
@@ -172,13 +170,22 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testGetConceptsSearchAll() throws Exception{
+        saveConcepts();
         assertResults(
                 dataBrowserController.getConceptsSearch(null, null, null), CLIENT_CONCEPT_1, CLIENT_CONCEPT_2, CLIENT_CONCEPT_3, CLIENT_CONCEPT_4, CLIENT_CONCEPT_5, CLIENT_CONCEPT_6
         );
     }
 
-    private static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
-        org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
+    @Test
+    public void testGetConceptsSearchWithName() throws Exception{
+        saveConcepts();
+        assertResults(
+                dataBrowserController.getConceptsSearch("multi", null, null), CLIENT_CONCEPT_3, CLIENT_CONCEPT_4
+        );
+    }
+
+    private static Concept makeConcept(Concept concept) {
+        Concept result = new Concept();
         result.setConceptId(concept.getConceptId());
         result.setConceptName(concept.getConceptName());
         result.setStandardConcept(concept.getStandardConcept() == null ? null :
