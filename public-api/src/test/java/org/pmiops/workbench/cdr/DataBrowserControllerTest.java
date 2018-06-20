@@ -6,8 +6,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
@@ -18,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import org.pmiops.workbench.publicapi.DataBrowserController;
 
 import java.util.List;
 
@@ -86,7 +83,7 @@ public class DataBrowserControllerTest {
                 .domainId(domainId)
                 .count(count)
                 .prevalence(prevalence)
-                .sourceCountValue(0L);
+                .sourceCountValue(sourceCountValue);
     }
 
     private ConceptRelationship makeConceptRelationship(long conceptId1, long conceptId2, String relationshipId) {
