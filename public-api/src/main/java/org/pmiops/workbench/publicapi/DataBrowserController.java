@@ -36,8 +36,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private AchillesResultDao achillesResultDao;
     @Autowired
     private DbDomainDao dbDomainDao;
-    @Autowired
+
     private ConceptService conceptService;
+
+    @Autowired
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao) {
+        this.conceptService = conceptService;
+        this.conceptDao = conceptDao;
+    }
 
 
     // TODO: consider putting this in CDM config, fetching it from there
@@ -391,6 +397,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }else{
             conceptList = conceptDao.findAllConceptsOrderedByCount(std_concept);
         }
+
+        System.out.println("I am here from test 2");
 
         ConceptListResponse resp = new ConceptListResponse();
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));

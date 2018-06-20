@@ -249,6 +249,14 @@ public class ConceptsControllerTest {
   }
 
   @Test
+  public void testSearchConceptsNonStandard() throws Exception{
+    saveConcepts();
+    assertResults(
+            conceptsController.searchConcepts("ns", "name",
+                    new SearchConceptsRequest().query("conceptB")), CLIENT_CONCEPT_2);
+  }
+
+  @Test
   public void testSearchConceptsStandardConcept() throws Exception {
     saveConcepts();
     assertResults(
