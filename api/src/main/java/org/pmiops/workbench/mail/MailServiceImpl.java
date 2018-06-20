@@ -5,7 +5,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
-import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
@@ -76,6 +75,14 @@ public class MailServiceImpl implements MailService {
                     log.log(Level.INFO, String.format(
                       "Welcome Email to '%s' for user '%s' was sent.", contactEmail, user.getName()));
                     break retry;
+
+                default:
+                  log.log(Level.SEVERE, String.format(
+                    "Something went wrong when trying to send Welcome Email. This case signifies something wrong in the code."));
+                  if (retries == 0) {
+                  log.log(Level.SEVERE, String.format(
+                    "Welcome Email to '%s' for user '%s' was not sent.", contactEmail, user.getName()));
+                  }
             }
         } while (retries > 0);
     }
