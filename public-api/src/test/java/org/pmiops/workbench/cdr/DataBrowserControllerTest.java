@@ -3,23 +3,24 @@ package org.pmiops.workbench.publicapi;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.Arrays;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+//import javax.persistence.EntityManager;
+//import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.DbDomainDao;
-import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
-import org.pmiops.workbench.cdr.dao.AchillesResultDao;
-import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
+//import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
+//import org.pmiops.workbench.cdr.dao.AchillesResultDao;
+//import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
-import org.pmiops.workbench.cdr.model.*;
+import org.pmiops.workbench.cdr.model.DbDomain;
 import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.DbDomainListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -51,6 +52,7 @@ public class DataBrowserControllerTest {
             .vocabularyId("V1")
             .domainId("Condition")
             .count(123L)
+            .sourceCountValue(20L)
             .prevalence(0.2F);
 
     private static final Concept CLIENT_CONCEPT_2 = new Concept()
@@ -61,6 +63,7 @@ public class DataBrowserControllerTest {
             .vocabularyId("V2")
             .domainId("Measurement")
             .count(456L)
+            .sourceCountValue(25L)
             .prevalence(0.3F);
 
     private static final Concept CLIENT_CONCEPT_3 = new Concept()
@@ -71,6 +74,7 @@ public class DataBrowserControllerTest {
             .vocabularyId("V3")
             .domainId("Condition")
             .count(789L)
+            .sourceCountValue(0L)
             .prevalence(0.4F);
 
     private static final Concept CLIENT_CONCEPT_4 = new Concept()
@@ -82,6 +86,7 @@ public class DataBrowserControllerTest {
             .vocabularyId("V4")
             .domainId("Observation")
             .count(1250L)
+            .sourceCountValue(99L)
             .prevalence(0.5F);
 
     private static final Concept CLIENT_CONCEPT_5 = new Concept()
@@ -93,6 +98,7 @@ public class DataBrowserControllerTest {
             .vocabularyId("V5")
             .domainId("Condition")
             .count(7890L)
+            .sourceCountValue(78L)
             .prevalence(0.9F);
 
     private static final Concept CLIENT_CONCEPT_6 = new Concept()
@@ -104,7 +110,44 @@ public class DataBrowserControllerTest {
             .vocabularyId("V6")
             .domainId("Condition")
             .count(7891L)
+            .sourceCountValue(20L)
             .prevalence(0.1F);
+
+    private static final DbDomain CLIENT_DB_DOMAIN_1 = new DbDomain()
+            .domainId("Condition")
+            .domainDisplay("Diagnoses")
+            .domainDesc("Condition Domain")
+            .dbType("domain_filter")
+            .domainRoute("condition")
+            .conceptId(19L)
+            .countValue(0L);
+
+    private static final DbDomain CLIENT_DB_DOMAIN_2 = new DbDomain()
+            .domainId("Drug")
+            .domainDisplay("Medications")
+            .domainDesc("Drug Domain")
+            .dbType("domain_filter")
+            .domainRoute("drug")
+            .conceptId(13L)
+            .countValue(0L);
+
+    private static final DbDomain CLIENT_DB_DOMAIN_3 = new DbDomain()
+            .domainId("Lifestyle")
+            .domainDisplay("Lifestyle")
+            .domainDesc("he Lifestyle module provides information on smoking, alcohol and recreational drug use")
+            .dbType("survey")
+            .domainRoute("ppi")
+            .conceptId(1585855L)
+            .countValue(568120L);
+
+    private static final DbDomain CLIENT_DB_DOMAIN_4 = new DbDomain()
+            .domainId("TheBasics")
+            .domainDisplay("The Basics")
+            .domainDesc("The Basics module provides demographics and economic information for participants")
+            .dbType("survey")
+            .domainRoute("ppi")
+            .conceptId(1586134L)
+            .countValue(567437L);
 
     private static final Concept CONCEPT_1 =
             makeConcept(CLIENT_CONCEPT_1);
@@ -118,6 +161,15 @@ public class DataBrowserControllerTest {
             makeConcept(CLIENT_CONCEPT_5);
     private static final Concept CONCEPT_6 =
             makeConcept(CLIENT_CONCEPT_6);
+
+    private static final DbDomain DBDOMAIN_1 =
+            makeDbDomain(CLIENT_DB_DOMAIN_1);
+    private static final DbDomain DBDOMAIN_2 =
+            makeDbDomain(CLIENT_DB_DOMAIN_2);
+    private static final DbDomain DBDOMAIN_3 =
+            makeDbDomain(CLIENT_DB_DOMAIN_3);
+    private static final DbDomain DBDOMAIN_4 =
+            makeDbDomain(CLIENT_DB_DOMAIN_4);
 
     @TestConfiguration
     @Import({
@@ -135,6 +187,8 @@ public class DataBrowserControllerTest {
     ConceptRelationshipDao conceptRelationshipDao;
     @Autowired
     private ConceptService conceptService;
+    @Autowired
+    private DbDomainDao dbDomainDao;
     /*
     @Autowired
     private QuestionConceptDao  questionConceptDao;
@@ -142,8 +196,6 @@ public class DataBrowserControllerTest {
     private AchillesAnalysisDao achillesAnalysisDao;
     @Autowired
     private AchillesResultDao achillesResultDao;
-    @Autowired
-    private DbDomainDao dbDomainDao;
 
 
     @PersistenceContext
@@ -156,26 +208,35 @@ public class DataBrowserControllerTest {
     @Before
     public void setUp() {
        // ConceptService conceptService = new ConceptService(entityManager);
-        dataBrowserController = new DataBrowserController(conceptService, conceptDao);
+        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao);
     }
 
 
     @Test
     public void testGetParentConcepts() throws Exception {
-        saveConcepts();
+        saveData();
         assertResults(
                 dataBrowserController.getParentConcepts(1234L),CLIENT_CONCEPT_5
         );
     }
 
     @Test
-    public void testGetConceptsSearchAll() throws Exception{
-        saveConcepts();
+    public void testGetConceptsSearchAll() throws Exception {
+        saveData();
         assertResults(
                 dataBrowserController.getConceptsSearch(null, null, null), CLIENT_CONCEPT_1, CLIENT_CONCEPT_2, CLIENT_CONCEPT_3, CLIENT_CONCEPT_4, CLIENT_CONCEPT_5, CLIENT_CONCEPT_6
         );
     }
 
+    @Test
+    public void testGetSourceConcepts() throws Exception {
+        saveData();
+        assertResults(
+                dataBrowserController.getSourceConcepts(7890L,15), CLIENT_CONCEPT_4, CLIENT_CONCEPT_2
+        );
+    }
+
+    /*
     @Test
     public void testGetConceptsSearchWithName() throws Exception{
         saveConcepts();
@@ -183,6 +244,32 @@ public class DataBrowserControllerTest {
                 dataBrowserController.getConceptsSearch("multi", null, null), CLIENT_CONCEPT_3, CLIENT_CONCEPT_4
         );
     }
+    */
+
+    @Test
+    public void testGetDomainFilters() throws Exception {
+        saveData();
+        assertDomains(
+                dataBrowserController.getDomainFilters(), CLIENT_DB_DOMAIN_1, CLIENT_DB_DOMAIN_2
+        );
+    }
+
+    @Test
+    public void testGetSurveyList() throws Exception{
+        saveData();
+        assertDomains(
+                dataBrowserController.getSurveyList(), CLIENT_DB_DOMAIN_3, CLIENT_DB_DOMAIN_4
+        );
+    }
+
+    @Test
+    public void testGetDbDomains() throws Exception{
+        saveData();
+        assertDomains(
+                dataBrowserController.getDbDomains(), CLIENT_DB_DOMAIN_1, CLIENT_DB_DOMAIN_2, CLIENT_DB_DOMAIN_3, CLIENT_DB_DOMAIN_4
+        );
+    }
+
 
     private static Concept makeConcept(Concept concept) {
         Concept result = new Concept();
@@ -195,6 +282,7 @@ public class DataBrowserControllerTest {
         result.setVocabularyId(concept.getVocabularyId());
         result.setDomainId(concept.getDomainId());
         result.setCountValue(concept.getCountValue());
+        result.setSourceCountValue(concept.getSourceCountValue());
         result.setPrevalence(concept.getPrevalence());
         return result;
     }
@@ -210,7 +298,19 @@ public class DataBrowserControllerTest {
         return result;
     }
 
-    private void saveConcepts() {
+    private static DbDomain makeDbDomain(DbDomain dbDomain){
+        DbDomain dbd = new DbDomain();
+        dbd.setDomainId(dbDomain.getDomainId());
+        dbd.setDomainDisplay(dbDomain.getDomainDisplay());
+        dbd.setDomainDesc(dbDomain.getDomainDesc());
+        dbd.setDbType(dbDomain.getDbType());
+        dbd.setDomainRoute(dbDomain.getDomainRoute());
+        dbd.setConceptId(dbDomain.getConceptId());
+        dbd.setCountValue(dbDomain.getCountValue());
+        return dbd;
+    }
+
+    private void saveData() {
         conceptDao.save(CONCEPT_1);
         conceptDao.save(CONCEPT_2);
         conceptDao.save(CONCEPT_3);
@@ -220,10 +320,20 @@ public class DataBrowserControllerTest {
 
         conceptRelationshipDao.save(makeConceptRelationship(1234L, 7890L, "Maps to"));
         conceptRelationshipDao.save(makeConceptRelationship(456L, 7890L, "Maps to"));
+
+        dbDomainDao.save(DBDOMAIN_1);
+        dbDomainDao.save(DBDOMAIN_2);
+        dbDomainDao.save(DBDOMAIN_3);
+        dbDomainDao.save(DBDOMAIN_4);
     }
 
     private void assertResults(ResponseEntity<ConceptListResponse> response,
                                Concept... expectedConcepts) {
         assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
+    }
+
+    private void assertDomains(ResponseEntity<DbDomainListResponse> response,
+                               DbDomain... expectedDomains) {
+        assertThat(response.getBody().getItems().equals(Arrays.asList(expectedDomains)));
     }
 }

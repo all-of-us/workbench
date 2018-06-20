@@ -40,9 +40,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private ConceptService conceptService;
 
     @Autowired
-    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao) {
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
+        this.dbDomainDao = dbDomainDao;
     }
 
 
