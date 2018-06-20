@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 public interface ConceptDao extends CrudRepository<Concept, Long> {
 
     @Query(nativeQuery=true, value="select c.* from concept c join concept_relationship cr on c.concept_id=cr.concept_id_2 " +
-            "where cr.concept_id_1=?1 and cr.relationship_id='Maps to' and c.standard_concept='S' ")
+            "where cr.concept_id_1=?1 and cr.relationship_id='Maps to' ")
     List<Concept> findStandardConcepts(long concept_id);
 
     @Query(value = "select c.* " +
@@ -37,6 +37,10 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
             "order by c.count_value desc limit 25;",
     nativeQuery = true)
     List<Concept> findAllConceptsOrderedByCount(@Param("standard_concept") String standard_concept);
+
+    @Query(value = "select c.* from concept c order by c.count_value desc", nativeQuery = true)
+    List<Concept> findConceptsOrderedByCount();
+
 
     @Query(value = "select c.* from concept c " +
             "where c.domain_id=:domain_id and " +

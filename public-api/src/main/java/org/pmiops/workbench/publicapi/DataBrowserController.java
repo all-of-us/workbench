@@ -256,6 +256,17 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         if(maxResults == null || maxResults == 0){
             maxResults = Integer.MAX_VALUE;
         }
+
+        if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
+            List<Concept> concepts = conceptDao.findConceptsOrderedByCount();
+            ConceptListResponse response = new ConceptListResponse();
+            if(maxResults < concepts.size()){
+                concepts = concepts.subList(0, maxResults);
+            }
+            response.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+            return ResponseEntity.ok(response);
+        }
+
         StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
         if(standardConceptFilter == null){
             standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
@@ -284,6 +295,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             }
 
         }
+
+        if(response.getMatchType() == null && response.getStandardConcepts() == null){
+            response.setMatchType(MatchType.NAME);
+        }
+
         response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
@@ -398,8 +414,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }else{
             conceptList = conceptDao.findAllConceptsOrderedByCount(std_concept);
         }
-
-        System.out.println("I am here from test 2");
 
         ConceptListResponse resp = new ConceptListResponse();
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));

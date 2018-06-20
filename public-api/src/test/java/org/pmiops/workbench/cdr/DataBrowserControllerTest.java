@@ -3,8 +3,8 @@ package org.pmiops.workbench.publicapi;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.Arrays;
-//import javax.persistence.EntityManager;
-//import javax.persistence.PersistenceContext;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -170,7 +170,7 @@ public class DataBrowserControllerTest {
             makeDbDomain(CLIENT_DB_DOMAIN_3);
     private static final DbDomain DBDOMAIN_4 =
             makeDbDomain(CLIENT_DB_DOMAIN_4);
-
+    /*
     @TestConfiguration
     @Import({
             ConceptService.class
@@ -180,13 +180,14 @@ public class DataBrowserControllerTest {
     })
     static class Configuration {
     }
+    */
 
     @Autowired
     private ConceptDao conceptDao;
     @Autowired
     ConceptRelationshipDao conceptRelationshipDao;
-    @Autowired
-    private ConceptService conceptService;
+    //@Autowired
+    //private ConceptService conceptService;
     @Autowired
     private DbDomainDao dbDomainDao;
     /*
@@ -196,18 +197,17 @@ public class DataBrowserControllerTest {
     private AchillesAnalysisDao achillesAnalysisDao;
     @Autowired
     private AchillesResultDao achillesResultDao;
-
-
+    */
     @PersistenceContext
     private EntityManager entityManager;
-    */
+
 
     private DataBrowserController dataBrowserController;
 
 
     @Before
     public void setUp() {
-       // ConceptService conceptService = new ConceptService(entityManager);
+        ConceptService conceptService = new ConceptService(entityManager);
         dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao);
     }
 
@@ -236,15 +236,15 @@ public class DataBrowserControllerTest {
         );
     }
 
-    /*
+
     @Test
     public void testGetConceptsSearchWithName() throws Exception{
-        saveConcepts();
+        saveData();
         assertResults(
                 dataBrowserController.getConceptsSearch("multi", null, null), CLIENT_CONCEPT_3, CLIENT_CONCEPT_4
         );
     }
-    */
+
 
     @Test
     public void testGetDomainFilters() throws Exception {
