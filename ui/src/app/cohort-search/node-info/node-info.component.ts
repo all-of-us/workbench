@@ -43,14 +43,12 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    const noAttr = !needsAttributes(this.node);
+    const noAttr = true;
 
     this.subscription = this.ngRedux
       .select(isParameterActive(this.paramId))
       .map(val => noAttr && val)
       .subscribe(val => {
-        console.log(this.paramId);
-        console.log(val);
         this.isSelected = val;
       });
   }
