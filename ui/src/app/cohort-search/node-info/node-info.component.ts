@@ -21,7 +21,8 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  * other types of attribute.
  */
 function needsAttributes(node: any) {
-  return node.get('id', '') === 316302;
+  // will change to check for attributes property
+  return node.get('id', '') === 316305;
 }
 
 
@@ -43,6 +44,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    // set to true so parameters with attrs will show as selected when added
     const noAttr = true;
 
     this.subscription = this.ngRedux
