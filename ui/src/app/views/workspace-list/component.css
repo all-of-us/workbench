@@ -2,10 +2,13 @@
   margin-top: 0;
   padding-right: 0.5rem;
   vertical-align: middle;
+  color: #262262;
+  font-size: 20px;
+  font-weight: 500;
 }
 
 .table-header {
-  margin: 1rem 0 0.25rem 0;
+  margin: 2rem 0 0.25rem 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -71,7 +74,7 @@
 }
 
 .workspace-name {
-  color: #6cace4;
+  color: #216FB4;
   font-weight: bold;
   margin-bottom: 0.5rem;
 }
@@ -89,4 +92,23 @@
 
 .alert-item *.warning-link {
   color: #2691D0;
+}
+
+.create-workspace-card {
+  display: flex;
+  justify-content: center;
+}
+
+.card .create-workspace-text {
+  color: #216FB4;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  width: 6rem;
+}
+
+.plus-circle {
+  width: 32px;
+  height: 32px;
+  color: #216FB4;
 }

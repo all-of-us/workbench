@@ -34,7 +34,7 @@ class WorkspaceListPage {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
     const de = this.fixture.debugElement;
-    this.workspaceCards = de.queryAll(By.css('.card'));
+    this.workspaceCards = de.queryAll(By.css('.workspace-card'));
     this.loggedOutMessage = de.query(By.css('.logged-out-message'));
   }
 }
