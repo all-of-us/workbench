@@ -13,10 +13,9 @@ import * as highcharts from 'highcharts';
 import 'highcharts/highcharts-more';
 
 
+import {LocalStorageModule} from 'angular-2-local-storage';
 import {ChartComponent} from './chart/chart.component';
 import {ConceptChartsComponent} from './concept-charts/concept-charts.component';
-
-import {LocalStorageModule} from 'angular-2-local-storage';
 
 @NgModule({
   imports: [

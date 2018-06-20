@@ -6,6 +6,7 @@ import {QuickSearchComponent} from './views/quick-search/quick-search.component'
 import {SurveyViewComponent} from './views/survey-view/survey-view.component';
 import {SurveysComponent} from './views/surveys/surveys.component';
 import {EhrViewComponent} from "./views/ehr-view/ehr-view.component";
+import {PhysicalMeasurementsComponent} from "./views/physical-measurements/physical-measurements.component";
 
 declare let gtag: Function;
 declare let ga_tracking_id: string;
@@ -35,6 +36,11 @@ const routes: Routes = [
     path: 'ehr/:id',
     component: EhrViewComponent,
     data: {title: 'View Full Results'}
+  },
+  {
+    path: 'physical-measurements',
+    component: PhysicalMeasurementsComponent,
+    data: {title: 'Physical Measurements from Enrollment'}
   },
 
 ];

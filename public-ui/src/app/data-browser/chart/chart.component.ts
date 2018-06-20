@@ -264,12 +264,11 @@ export class ChartComponent implements OnChanges {
 
   }
   public makeConceptChartOptions() {
-    console.log("Concept options ");
     let data = [];
     let cats = [];
     for (const a  of this.concepts) {
       data.push({name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ', y: a.countValue});
-      cats.push(a.vocabularyId + '-' + a.conceptCode + ' ' + a.conceptName);
+      cats.push(a.conceptName);
     }
     data = data.sort((a, b) => {
       if (a.countValue > b.countValue) {

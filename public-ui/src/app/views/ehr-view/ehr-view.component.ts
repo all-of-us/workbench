@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
 import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
+import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 
 import { FormControl } from '@angular/forms';
 import 'rxjs/add/operator/debounceTime';
@@ -23,14 +24,16 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   dbDomain;
   searchText: FormControl = new FormControl();
   prevSearchText = '';
-  searchResults = [];
+  searchResult: ConceptListResponse;
+  items: any[] = [];
+  standardConcepts: any[] = [];
   loading = true;
   minParticipantCount = 0;
   totalParticipants;
 
   top10Results = [];
   private searchRequest: SearchConceptsRequest;
-  private subscription: ISubscription;
+  private subscriptions: ISubscription[] = [];
   private subscription2: ISubscription;
 
 
@@ -42,6 +45,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
+    this.items = [];
 
     // Get search result from localStorage
     this.prevSearchText = localStorage.getItem('searchText');
@@ -50,84 +54,69 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
     this.searchText.setValue(this.prevSearchText);
 
+
+
     const obj = localStorage.getItem('dbDomain');
     if (obj) {
       this.dbDomain = JSON.parse(obj);
       this.subTitle = 'Keyword: ' + this.searchText;
-      this.title = 'View Full Results: ' + this.dbDomain.domainDisplay;
+      this.title = 'Domain Search Results: ' + this.dbDomain.domainDisplay;
     } else {
       /* Error. We need a db Domain object. */
       this.title   = 'Keyword: ' + this.searchText;
-      this.title = 'View Full Results: ' + 'Error - no result domain selected';
+      this.title = 'Domain Search Results: ' + 'Error - no result domain selected';
     }
 
     if (this.dbDomain) {
       // Run search initially filter to domain, a empty search returns top ordered by count_value desc
-      this.subscription = this.searchDomain(this.prevSearchText).subscribe(results => {
-        this.searchResults = results.items;
-        this.top10Results = this.searchResults.slice(0,10);
-        // Set our min partipant count
-        if (this.searchResults.length > 0) {
-          this.minParticipantCount = this.searchResults[0].countValue;
-        }
-        this.loading = false;
-      });
+      this.subscriptions.push(this.searchDomain(this.prevSearchText).subscribe(results =>
+        this.searchCallback(results)));
 
-      this.subscription2 = this.searchText.valueChanges
-        .debounceTime(200)
+      // Add value changed event to search when value changes
+      this.subscriptions.push(this.searchText.valueChanges
+        .debounceTime(300)
         .distinctUntilChanged()
         .switchMap((query) => this.searchDomain(query))
-        .subscribe(results => {
-          this.searchResults = results.items;
-          // Set our min partipant count
-          if (this.searchResults.length > 0) {
-            this.minParticipantCount = this.searchResults[0].countValue;
-          }
-          this.loading = false;
-        });
-
-
-
+        .subscribe(results => this.searchCallback(results)));
     }
   }
 
   ngOnDestroy() {
-    console.log("unsubscribing ehr view");
-    this.subscription.unsubscribe();
-    this.subscription2.unsubscribe();
-  }
-
-  private searchDomain(query: string) {
-    this.searchRequest = {query: query, domain: this.dbDomain.domainId.toUpperCase(), standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS}; // new SearchConceptsRequest();
-    this.prevSearchText = query;
-    //return this.api.getConceptsSearch(query, 'S', this.dbDomain.domainId);
-    // This advanced gives error . Srushti todo uncomment and see what it is.
-
-     return this.api.getAdvancedConceptSearch(this.searchRequest);
-  }
-
-  /*
-  searchDomain() {
-    if (!this.searchText || this.searchText.length === 0) {
-      this.searchText = null;
-      console.log('null search text');
+    for (const s of this.subscriptions){
+      s.unsubscribe();
     }
+  }
 
-    this.api.getConceptsSearch(this.searchText, 'S', this.dbDomain.domainId).subscribe(results =>  {
-      this.searchResults = results.items;
-      // Set our min partipant count
-      if (this.searchResults.length > 0 ) {
-        this.minParticipantCount = this.searchResults[0].countValue;
-      }
-      this.loading = false;
-    } );
-  }*/
+  private searchCallback(results:any) {
+    console.log("Search callback ");
+    this.searchResult = results;
+    this.items = this.searchResult.items;
+    if (this.searchResult.standardConcepts) {
+      this.standardConcepts = this.searchResult.standardConcepts;
+    }
+    this.top10Results = this.searchResult.items.slice(0, 10);
+    // Set the localStorage to empty so making a new search here does not follow them if they hit back button
+    localStorage.setItem('searchText', '');
+    this.loading = false;
+  }
+  private searchDomain(query: string) {
+    this.searchRequest = {
+      query: query,
+      domain: this.dbDomain.domainId.toUpperCase(),
+      standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
+      maxResults: 100
+    };
+    this.prevSearchText = query;
+    return this.api.getAdvancedConceptSearch(this.searchRequest);
+  }
+
+
 
   public toggleSources(row) {
+    console.log("search result " , this.searchResult);
     if (row.showSources) {
       row.showSources = false;
-    }
-    else {
+    } else {
       row.showSources = true;
       row.expanded = true;
     }
