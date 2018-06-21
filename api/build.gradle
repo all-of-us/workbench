@@ -82,6 +82,30 @@ task generateNotebooksClient {
   }
 }
 
+def mandrillApiFile = 'src/main/resources/mandrill_api.yaml'
+
+task generateMandrillClient {
+  inputs.file("$projectDir/$mandrillApiFile")
+  outputs.dir("$projectDir/$swaggerTargetFolder")
+  doLast {
+    def config = new CodegenConfigurator()
+    config.setInputSpec("file:///$projectDir/$mandrillApiFile")
+    config.setOutputDir("$projectDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
+    config.setLang('java')
+    config.setAdditionalProperties([
+            'invokerPackage'   : 'org.pmiops.workbench.mandrill',
+            'modelPackage'     : 'org.pmiops.workbench.mandrill.model',
+            'apiPackage'       : 'org.pmiops.workbench.mandrill.api',
+            'sourceFolder'     : swaggerTargetFolder,
+            'library'          : 'okhttp-gson',
+            'serializableModel': 'true',
+            'dateLibrary'      : 'java8'
+    ])
+    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+  }
+}
+
 task generate_local_appengine_web_xml(type: Exec) {
   executable "bash"
   args "libproject/generate_appengine_web_xml.sh"
@@ -167,6 +191,8 @@ ideaModule.dependsOn generateFireCloudClient
 compileGeneratedJava.dependsOn generateFireCloudClient
 ideaModule.dependsOn generateNotebooksClient
 compileGeneratedJava.dependsOn generateNotebooksClient
+ideaModule.dependsOn generateMandrillClient
+compileGeneratedJava.dependsOn generateMandrillClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
