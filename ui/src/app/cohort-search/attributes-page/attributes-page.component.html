@@ -17,7 +17,19 @@
       <label *ngIf="attrs.value['operator'+i] === 'between'">and</label>
       <input *ngIf="attrs.value['operator'+i] === 'between'" type="number" [name]="'valueB'+i" ngModel required>
     </div>
-    <button class="btn link" type="button" (click)="cancel()">Cancel</button>
+    <div class="count-preview">
+      <button type="button" class="btn">
+        Calculate
+      </button>
+      Number Participants:
+      <span *ngIf="false">
+        {{ preview.get('count', 0) }}
+      </span>
+          <span *ngIf="false" class="spinner spinner-inline">
+        Loading...
+      </span>
+    </div>
+    <button class="btn btn-link" type="button" (click)="cancel()">Cancel</button>
     <button class="btn btn-primary" type="submit" [disabled]="!attrs.valid">Add Item</button>
   </section>
 </form>

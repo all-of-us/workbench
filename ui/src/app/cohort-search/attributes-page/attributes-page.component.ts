@@ -9,7 +9,7 @@ import {CohortSearchActions} from '../redux';
   styleUrls: ['./attributes-page.component.css']
 })
 export class AttributesPageComponent implements OnChanges {
-  @Input() node;
+  @Input() node: any;
   fields: Array<string>;
 
   constructor(private actions: CohortSearchActions) { }
