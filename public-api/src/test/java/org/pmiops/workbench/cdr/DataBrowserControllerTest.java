@@ -25,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -170,24 +168,11 @@ public class DataBrowserControllerTest {
             makeDbDomain(CLIENT_DB_DOMAIN_3);
     private static final DbDomain DBDOMAIN_4 =
             makeDbDomain(CLIENT_DB_DOMAIN_4);
-    /*
-    @TestConfiguration
-    @Import({
-            ConceptService.class
-    })
-    @MockBean({
-            ConceptService.class
-    })
-    static class Configuration {
-    }
-    */
 
     @Autowired
     private ConceptDao conceptDao;
     @Autowired
     ConceptRelationshipDao conceptRelationshipDao;
-    //@Autowired
-    //private ConceptService conceptService;
     @Autowired
     private DbDomainDao dbDomainDao;
     /*
@@ -233,15 +218,6 @@ public class DataBrowserControllerTest {
         saveData();
         assertResults(
                 dataBrowserController.getSourceConcepts(7890L,15), CLIENT_CONCEPT_4, CLIENT_CONCEPT_2
-        );
-    }
-
-
-    @Test
-    public void testGetConceptsSearchWithName() throws Exception{
-        saveData();
-        assertResults(
-                dataBrowserController.getConceptsSearch("multi", null, null), CLIENT_CONCEPT_3, CLIENT_CONCEPT_4
         );
     }
 
