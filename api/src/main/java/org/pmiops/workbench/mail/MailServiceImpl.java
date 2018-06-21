@@ -56,7 +56,6 @@ public class MailServiceImpl implements MailService {
       retries--;
       ImmutablePair attempt = trySend(keyAndMessage);
       Status status = Status.valueOf(attempt.getLeft().toString());
-//            Status status = Status.valueOf(attempt.getLeft().toString());
       switch (status) {
         case API_ERROR:
           log.log(Level.WARNING, String.format(
@@ -79,9 +78,11 @@ public class MailServiceImpl implements MailService {
           return;
 
         default:
-          log.log(Level.SEVERE, String.format(
-            "Welcome Email to '%s' for user '%s' was not sent. Default case.", contactEmail, user.getName()));
-          throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
+          if (retries == 0) {
+            log.log(Level.SEVERE, String.format(
+              "Welcome Email to '%s' for user '%s' was not sent. Default case.", contactEmail, user.getName()));
+            throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
+          }
       }
     } while (retries > 0);
   }
@@ -101,7 +102,6 @@ public class MailServiceImpl implements MailService {
 
   private ImmutablePair<Status, String> trySend(MandrillApiKeyAndMessage keyAndMessage) {
     try {
-      log.log(Level.INFO, "trying send");
       MandrillMessageStatuses msgStatuses = mandrillApiProvider.get().send(keyAndMessage);
       for (MandrillMessageStatus msgStatus : msgStatuses) {
         if (msgStatus.getRejectReason() != null) {
@@ -109,7 +109,6 @@ public class MailServiceImpl implements MailService {
         }
       }
     } catch (Exception e) {
-      log.log(Level.INFO, "in catch");
       return new ImmutablePair<>(Status.API_ERROR, e.toString());
     }
     return new ImmutablePair<>(Status.SUCCESSFUL, "");
