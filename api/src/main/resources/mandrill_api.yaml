@@ -1,5 +1,6 @@
 #A subset of the Mandrill Api
 #the part we need
+# https://mandrillapp.com/api/docs/
 
 swagger: '2.0'
 info:
