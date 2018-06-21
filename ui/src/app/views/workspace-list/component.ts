@@ -93,7 +93,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspace/build']);
+    this.router.navigate(['workspaces/build']);
   }
 
   get twoFactorBannerEnabled() {
