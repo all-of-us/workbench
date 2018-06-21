@@ -48,6 +48,12 @@ public class MailServiceImpl implements MailService {
   }
 
   public void sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException {
+    try {
+      InternetAddress email = new InternetAddress(contactEmail);
+      email.validate();
+    } catch (AddressException e) {
+      throw new MessagingException("Email: " + contactEmail + " is invalid.");
+    }
     String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey();
     int retries = workbenchConfigProvider.get().mandrill.sendRetries;
     MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
@@ -90,12 +96,6 @@ public class MailServiceImpl implements MailService {
   }
 
   private MandrillMessage buildWelcomeMessage(String contactEmail, String password, User user) throws MessagingException{
-    try {
-      InternetAddress email = new InternetAddress(contactEmail);
-      email.validate();
-    } catch (AddressException e) {
-      throw new MessagingException("Email: " + contactEmail + " is invalid.");
-    }
     MandrillMessage msg = new MandrillMessage();
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(contactEmail);
