@@ -53,15 +53,6 @@ public class MailServiceImplTest {
       Providers.of(createWorkbenchConfig()));
   }
 
-  private User createUser() {
-    return new User()
-      .setPrimaryEmail(PRIMARY_EMAIL)
-      .setPassword(PASSWORD)
-      .setName(new UserName().setGivenName(GIVEN_NAME).setFamilyName(FAMILY_NAME))
-      .setEmails(new UserEmail().setType("custom").setAddress(CONTACT_EMAIL).setCustomType("contact"))
-      .setChangePasswordAtNextLogin(true);
-  }
-
   @Test(expected = MessagingException.class)
   public void testSendWelcomeEmail_throwsMessagingException() throws MessagingException, ApiException {
     when(msgStatus.getRejectReason()).thenReturn("this was rejected");
@@ -83,6 +74,15 @@ public class MailServiceImplTest {
     User user = createUser();
     service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
     verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+  }
+
+  private User createUser() {
+    return new User()
+      .setPrimaryEmail(PRIMARY_EMAIL)
+      .setPassword(PASSWORD)
+      .setName(new UserName().setGivenName(GIVEN_NAME).setFamilyName(FAMILY_NAME))
+      .setEmails(new UserEmail().setType("custom").setAddress(CONTACT_EMAIL).setCustomType("contact"))
+      .setChangePasswordAtNextLogin(true);
   }
 
   private WorkbenchConfig createWorkbenchConfig() {
