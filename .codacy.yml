@@ -2,3 +2,5 @@ engines:
   tslint:
     enabled: true
     base_sub_dir: ui
+exclude_paths:	
+  - ui/karma.conf.js
