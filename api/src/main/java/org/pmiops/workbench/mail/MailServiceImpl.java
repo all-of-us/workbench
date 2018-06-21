@@ -78,11 +78,8 @@ public class MailServiceImpl implements MailService {
 
                 default:
                   log.log(Level.SEVERE, String.format(
-                    "Something went wrong when trying to send Welcome Email. This case signifies something wrong in the code."));
-                  if (retries == 0) {
-                  log.log(Level.SEVERE, String.format(
-                    "Welcome Email to '%s' for user '%s' was not sent.", contactEmail, user.getName()));
-                  }
+                    "Welcome Email to '%s' for user '%s' was not sent. Default case.", contactEmail, user.getName()));
+                  throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
             }
         } while (retries > 0);
     }
