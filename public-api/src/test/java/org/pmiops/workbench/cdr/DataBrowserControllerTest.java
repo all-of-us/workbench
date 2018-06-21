@@ -205,13 +205,6 @@ public class DataBrowserControllerTest {
         );
     }
 
-    @Test
-    public void testGetConceptsSearchAll() throws Exception {
-        saveData();
-        assertResults(
-                dataBrowserController.getConceptsSearch(null, null, null), CLIENT_CONCEPT_1, CLIENT_CONCEPT_2, CLIENT_CONCEPT_3, CLIENT_CONCEPT_4, CLIENT_CONCEPT_5, CLIENT_CONCEPT_6
-        );
-    }
 
     @Test
     public void testGetSourceConcepts() throws Exception {
