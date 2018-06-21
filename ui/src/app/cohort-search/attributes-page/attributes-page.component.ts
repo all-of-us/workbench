@@ -1,18 +1,35 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {select} from '@angular-redux/store';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {NgForm} from '@angular/forms';
 
-import {CohortSearchActions} from '../redux';
+import {Map} from 'immutable';
+import {Subscription} from 'rxjs/Subscription';
+
+import {CohortSearchActions, previewStatus} from '../redux';
 
 @Component({
   selector: 'crit-attributes-page',
   templateUrl: './attributes-page.component.html',
   styleUrls: ['./attributes-page.component.css']
 })
-export class AttributesPageComponent implements OnChanges {
+export class AttributesPageComponent implements OnChanges, OnInit {
+  @select(previewStatus) preview$;
   @Input() node: any;
   fields: Array<string>;
+  preview = Map();
+  subscription: Subscription;
 
   constructor(private actions: CohortSearchActions) { }
+
+  ngOnInit() {
+    this.subscription = this.preview$.subscribe(prev => {
+      if (!prev.get('requesting')) {
+        // remove parameter from list once preview request has finished
+        this.actions.removeParameter(this.paramId);
+      }
+      this.preview = prev;
+    });
+  }
 
   ngOnChanges (changes: SimpleChanges) {
     if (changes.node) {
@@ -29,27 +46,37 @@ export class AttributesPageComponent implements OnChanges {
       return `param${this.node.get('id')}`;
   }
 
-  addAttrs(attrs: NgForm) {
+  getParamWithAttributes(values: any) {
     let code = '';
     let name = this.node.get('name', '') + ' (';
     this.fields.forEach((field, i) => {
-      if (i > 0) {
-        code += ';';
-        name += ' / ';
-      }
-      if (attrs.value['operator' + i] === 'between') {
-        code += 'between;' + attrs.value['valueA' + i] + ' and ' + attrs.value['valueB' + i];
-        name += field + ' ' + attrs.value['valueA' + i] + '-' + attrs.value['valueB' + i];
-      } else {
-        code += code += attrs.value['operator' + i] + ';' + attrs.value['valueA' + i];
-        name += field + ' ' + attrs.value['operator' + i] + attrs.value['valueA' + i];
-      }
+        if (i > 0) {
+            code += ';';
+            name += ' / ';
+        }
+        if (values['operator' + i] === 'between') {
+            code += 'between;' + values['valueA' + i] + ' and ' + values['valueB' + i];
+            name += field + ' ' + values['valueA' + i] + '-' + values['valueB' + i];
+        } else {
+            code += code += values['operator' + i] + ';' + values['valueA' + i];
+            name += field + ' ' + values['operator' + i] + values['valueA' + i];
+        }
     });
     name += ')';
-    const param = this.node
+    return this.node
         .set('parameterId', this.paramId)
         .set('code', code)
         .set('name', name);
+  }
+
+  requestPreview(attrs: NgForm) {
+    const param = this.getParamWithAttributes(attrs.value);
+    this.actions.addParameter(param);
+    this.actions.requestPreview();
+  }
+
+  addAttrs(attrs: NgForm) {
+    const param = this.getParamWithAttributes(attrs.value);
     this.actions.addParameter(param);
     this.actions.hideAttributesPage();
   }

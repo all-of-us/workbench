@@ -18,14 +18,16 @@
       <input *ngIf="attrs.value['operator'+i] === 'between'" type="number" [name]="'valueB'+i" ngModel required>
     </div>
     <div class="count-preview">
-      <button type="button" class="btn">
+      <button type="button"
+          class="btn"
+          (click)="requestPreview(attrs)">
         Calculate
       </button>
       Number Participants:
-      <span *ngIf="false">
+      <span *ngIf="!preview.get('requesting')">
         {{ preview.get('count', 0) }}
       </span>
-          <span *ngIf="false" class="spinner spinner-inline">
+          <span *ngIf="preview.get('requesting')" class="spinner spinner-inline">
         Loading...
       </span>
     </div>
