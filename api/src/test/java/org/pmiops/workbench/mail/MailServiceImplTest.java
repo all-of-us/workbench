@@ -69,6 +69,12 @@ public class MailServiceImplTest {
     verify(mandrillApi, times(3)).send(any());
   }
 
+  @Test(expected = MessagingException.class)
+  public void testSendWelcomeEmail_invalidEmail() throws MessagingException {
+    User user = createUser();
+    service.sendWelcomeEmail("Nota valid email", PASSWORD, user);
+  }
+
   @Test
   public void testSendWelcomeEmail() throws MessagingException, ApiException {
     User user = createUser();

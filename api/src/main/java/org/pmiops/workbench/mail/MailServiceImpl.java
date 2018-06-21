@@ -21,6 +21,8 @@ import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 @Service
 public class MailServiceImpl implements MailService {
@@ -87,7 +89,13 @@ public class MailServiceImpl implements MailService {
     } while (retries > 0);
   }
 
-  private MandrillMessage buildWelcomeMessage(String contactEmail, String password, User user) {
+  private MandrillMessage buildWelcomeMessage(String contactEmail, String password, User user) throws MessagingException{
+    try {
+      InternetAddress email = new InternetAddress(contactEmail);
+      email.validate();
+    } catch (AddressException e) {
+      throw new MessagingException("Email: " + contactEmail + " is invalid.");
+    }
     MandrillMessage msg = new MandrillMessage();
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(contactEmail);
