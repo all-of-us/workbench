@@ -250,27 +250,25 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ConceptListResponse> getAdvancedConceptSearch(SearchConceptsRequest searchConceptsRequest){
+    public ResponseEntity<ConceptListResponse> searchConcepts(SearchConceptsRequest searchConceptsRequest){
 
         Integer maxResults = searchConceptsRequest.getMaxResults();
         if(maxResults == null || maxResults == 0){
             maxResults = Integer.MAX_VALUE;
         }
 
-        if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
-            List<Concept> concepts = conceptDao.findConceptsOrderedByCount();
-            ConceptListResponse response = new ConceptListResponse();
-            if(maxResults < concepts.size()){
-                concepts = concepts.subList(0, maxResults);
-            }
-            response.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-            return ResponseEntity.ok(response);
-        }
-
         StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
         if(standardConceptFilter == null){
             standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
         }
+
+        if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
+            List<Concept> concepts = conceptDao.findAllConceptsOrderedByCount(standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS ? "S" : null, maxResults);
+            ConceptListResponse response = new ConceptListResponse();
+            response.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+            return ResponseEntity.ok(response);
+        }
+
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
         List<String> domainIds = null;
@@ -381,45 +379,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(resp);
     }
 
-
-    /**
-     * This method searches concepts
-     *
-     * @param conceptName
-     * @param standardConcept
-     * @param concept_code
-     * @param vocabulary_id
-     * @param domain_id
-     * @return
-     */
-    @Override
-    public ResponseEntity<ConceptListResponse> getConceptsSearch(
-            String conceptName,
-            String standard_concept,
-            String domain_id) {
-
-        String std_concept="S";
-        List<Concept> conceptList;
-
-        // If Concept name do search on name
-
-        if ((conceptName != null && !conceptName.isEmpty()) && domain_id != null) {
-            String queryWord = ConceptService.modifyMultipleMatchKeyword(conceptName);
-            conceptList = conceptDao.findConceptLikeNameAndDomainId(queryWord,domain_id,std_concept);
-        }else if((conceptName != null && !conceptName.isEmpty()) && domain_id == null){
-            String queryWord = ConceptService.modifyMultipleMatchKeyword(conceptName);
-            conceptList = conceptDao.findConceptLikeName(queryWord,std_concept);
-        }else if(conceptName == null || conceptName.isEmpty() && domain_id != null){
-            conceptList = conceptDao.findConceptsByDomainIdOrderedByCount(domain_id,std_concept);
-        }else{
-            conceptList = conceptDao.findAllConceptsOrderedByCount(std_concept);
-        }
-
-        ConceptListResponse resp = new ConceptListResponse();
-        resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
-        return ResponseEntity.ok(resp);
-    }
 
     /**
      * This method gets concepts with maps to relationship in concept relationship table
