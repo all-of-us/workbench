@@ -6,8 +6,8 @@
     <div class="form-group" *ngFor="let field of fields; let i = index">
       <label>{{field}}</label>
       <div class="select">
-        <select [name]="'operator'+i" ngModel required>
-          <option value="=" selected>Equals</option>
+        <select [name]="'operator'+i" [ngModel]="'='" required>
+          <option value="=">Equals</option>
           <option value=">=">Greater than or Equal to</option>
           <option value="<=">Less than or Equal to</option>
           <option value="between">Between</option>

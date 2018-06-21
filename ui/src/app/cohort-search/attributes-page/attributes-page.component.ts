@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {NgForm} from '@angular/forms';
 
 import {CohortSearchActions} from '../redux';
@@ -8,15 +8,11 @@ import {CohortSearchActions} from '../redux';
   templateUrl: './attributes-page.component.html',
   styleUrls: ['./attributes-page.component.css']
 })
-export class AttributesPageComponent implements OnChanges, OnInit {
+export class AttributesPageComponent implements OnChanges {
   @Input() node;
   fields: Array<string>;
 
   constructor(private actions: CohortSearchActions) { }
-
-  ngOnInit () {
-    console.log('');
-  }
 
   ngOnChanges (changes: SimpleChanges) {
     if (changes.node) {
