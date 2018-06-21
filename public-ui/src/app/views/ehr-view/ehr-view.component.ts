@@ -100,11 +100,13 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
   private searchDomain(query: string) {
+    let maxResults = 100;
+    if (query.length) { maxResults = null; }
     this.searchRequest = {
       query: query,
       domain: this.dbDomain.domainId.toUpperCase(),
       standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
-      maxResults: 100
+      maxResults: maxResults;
     };
     this.prevSearchText = query;
     return this.api.getAdvancedConceptSearch(this.searchRequest);

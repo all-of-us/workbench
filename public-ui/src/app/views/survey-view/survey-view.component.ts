@@ -57,8 +57,9 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
       next: x => {
-        const questions = x.items;
         this.surveyResult = x;
+        const questions = this.surveyResult.items;
+
         // Temp until answer order is fixed on server side , sort abc
         for (const q of questions ) {
           q.countAnalysis.results.sort((a1, a2) => {
@@ -110,6 +111,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       return true;
     }
     // Or search
+    console.log(reString);
     const re = new RegExp(reString, 'gi');
     if (re.test(q.conceptName)) {
       return true;
@@ -123,6 +125,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
 
   public filterResults() {
+    console.log("Search ran", this.searchText.value);
     this.loading = true;
     this.questions = this.surveyResult.items;
     if (this.searchText.value.length > 0) {
