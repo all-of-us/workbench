@@ -106,7 +106,7 @@ public class MailServiceImpl implements MailService {
             MandrillMessageStatuses msgStatuses = mandrillApiProvider.get().send(keyAndMessage);
             for (MandrillMessageStatus msgStatus : msgStatuses) {
                 if (msgStatus.getRejectReason() != null) {
-                    return new ImmutablePair<String, String>("REJECTED", msgStatus.getRejectReason());
+                    return new ImmutablePair<>("REJECTED", msgStatus.getRejectReason());
                 }
             }
         } catch (Exception e) {
