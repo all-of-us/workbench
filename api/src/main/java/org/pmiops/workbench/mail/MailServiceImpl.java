@@ -51,9 +51,8 @@ public class MailServiceImpl implements MailService {
         keyAndMessage.setKey(apiKey);
         MandrillMessage msg = buildWelcomeMessage(contactEmail, password, user);
         keyAndMessage.setMessage(msg);
-        retry: do {
+        do {
             retries--;
-            log.log(Level.INFO, "retries: " + retries);
             ImmutablePair attempt = trySend(keyAndMessage);
             Status status = Status.valueOf(attempt.getLeft().toString());
             switch (status) {
@@ -75,7 +74,7 @@ public class MailServiceImpl implements MailService {
                 case SUCCESSFUL:
                     log.log(Level.INFO, String.format(
                       "Welcome Email to '%s' for user '%s' was sent.", contactEmail, user.getName()));
-                    break retry;
+                    return;
 
                 default:
                   log.log(Level.SEVERE, String.format(
