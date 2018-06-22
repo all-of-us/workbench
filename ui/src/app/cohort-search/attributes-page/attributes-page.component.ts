@@ -56,10 +56,14 @@ export class AttributesPageComponent implements OnChanges, OnInit {
         }
         if (values['operator' + i] === 'between') {
             code += 'between;' + values['valueA' + i] + ' and ' + values['valueB' + i];
-            name += field + ' ' + values['valueA' + i] + '-' + values['valueB' + i];
+            name += (field !== '' ? field + ' ' : '')
+                + values['valueA' + i] + '-'
+                + values['valueB' + i];
         } else {
             code += code += values['operator' + i] + ';' + values['valueA' + i];
-            name += field + ' ' + values['operator' + i] + values['valueA' + i];
+            name += (field !== '' ? field + ' ' : '')
+                + values['operator' + i] + ' '
+                + values['valueA' + i];
         }
     });
     name += ')';

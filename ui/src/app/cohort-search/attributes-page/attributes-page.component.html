@@ -20,7 +20,9 @@
     <div class="count-preview">
       <button type="button"
           class="btn"
-          (click)="requestPreview(attrs)">
+          (click)="requestPreview(attrs)"
+          [disabled]="!attrs.valid"
+      >
         Calculate
       </button>
       Number Participants:
