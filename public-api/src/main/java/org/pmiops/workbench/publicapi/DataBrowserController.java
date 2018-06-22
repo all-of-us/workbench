@@ -259,7 +259,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
         if(standardConceptFilter == null){
-            standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
+            standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
         }
 
         if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
