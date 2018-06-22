@@ -130,7 +130,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspace/build'], {relativeTo : this.route});
+    this.router.navigate(['workspaces/build'], {relativeTo : this.route});
   }
 
   navigateToProfile(): void {
