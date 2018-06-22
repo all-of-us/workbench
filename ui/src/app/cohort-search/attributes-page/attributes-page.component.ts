@@ -3,6 +3,7 @@ import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core'
 import {NgForm} from '@angular/forms';
 
 import {Map} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {CohortSearchActions, previewStatus} from '../redux';
@@ -13,7 +14,7 @@ import {CohortSearchActions, previewStatus} from '../redux';
   styleUrls: ['./attributes-page.component.css']
 })
 export class AttributesPageComponent implements OnChanges, OnInit {
-  @select(previewStatus) preview$;
+  @select(previewStatus) preview$: Observable<any>;
   @Input() node: any;
   fields: Array<string>;
   preview = Map();

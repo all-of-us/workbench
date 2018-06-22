@@ -30,7 +30,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(attributesPage) attributes$: Observable<any>;
 
   ctype: string;
-  subscription;
+  subscription: Subscription;
   attributesNode: any;
 
   open = false;
