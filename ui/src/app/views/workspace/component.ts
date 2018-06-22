@@ -112,8 +112,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   deleting = false;
   showAlerts = false;
   notebookList: FileDetail[] = [];
-  listenerAdded = false;
-  notebookAuthListener: EventListenerOrEventListenerObject;
+  notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
   alertCategory: string;
   alertMsg: string;
   tabOpen = Tabs.Notebooks;
@@ -171,7 +170,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('message', this.notebookAuthListener);
+    this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
     if (this.pollClusterTimer) {
       clearTimeout(this.pollClusterTimer);
     }
@@ -299,29 +298,33 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const notebook = window.open(leoNotebookUrl, '_blank');
     this.launchedNotebookName = '';
     this.clusterPulled = false;
-    // TODO (blrubenstein): Make the notebook page a list of pages, and
-    //    move this to component scope.
-    if (!this.listenerAdded) {
-      this.notebookAuthListener = (e: MessageEvent) => {
-        if (e.source !== notebook) {
-          return;
+
+    // TODO(RW-474): Remove the authHandler integration. This is messy,
+    // non-standard, and currently will break in the following situation:
+    // - User opens a new notebook tab.
+    // - While that tab is loading, user immediately navigates away from this
+    //   page.
+    // This is not easily fixed without leaking listeners outside the lifespan
+    // of the workspace component.
+    const authHandler = (e: MessageEvent) => {
+      if (e.source !== notebook) {
+        return;
+      }
+      if (e.origin !== WorkspaceComponent.leoBaseUrl) {
+        return;
+      }
+      if (e.data.type !== 'bootstrap-auth.request') {
+        return;
+      }
+      notebook.postMessage({
+        'type': 'bootstrap-auth.response',
+        'body': {
+          'googleClientId': this.signInService.clientId
         }
-        if (e.origin !== WorkspaceComponent.leoBaseUrl) {
-          return;
-        }
-        if (e.data.type !== 'bootstrap-auth.request') {
-          return;
-        }
-        notebook.postMessage({
-          'type': 'bootstrap-auth.response',
-          'body': {
-            'googleClientId': this.signInService.clientId
-          }
-        }, WorkspaceComponent.leoBaseUrl);
-      };
-      window.addEventListener('message', this.notebookAuthListener);
-      this.listenerAdded = true;
-    }
+      }, WorkspaceComponent.leoBaseUrl);
+    };
+    window.addEventListener('message', authHandler);
+    this.notebookAuthListeners.push(authHandler);
   }
 
   buildCohort(): void {
