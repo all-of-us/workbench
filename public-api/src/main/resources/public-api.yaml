@@ -528,7 +528,7 @@ definitions:
   StandardConceptFilter:
     type: string
     description: filter on whether standard, non-standard, or all concepts should be returned\
-    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS]
+    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS, STANDARD_OR_CODE_ID_MATCH]
   Domain:
     type: string
     description: filter on the domain in which concepts should be returned
