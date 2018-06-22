@@ -32,7 +32,7 @@ export class AttributesPageComponent implements OnChanges, OnInit {
     });
   }
 
-  ngOnChanges (changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges) {
     if (changes.node) {
       const currentNode = changes.node.currentValue;
       if (currentNode.get('subtype') === 'BP') {

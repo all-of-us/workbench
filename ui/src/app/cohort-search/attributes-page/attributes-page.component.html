@@ -1,7 +1,7 @@
 <div class="title">
   {{node.get('name','')}}
 </div>
-<form #attrs="ngForm" (ngSubmit)="addAttrs(attrs)">
+<form *ngIf="node.size" #attrs="ngForm" (ngSubmit)="addAttrs(attrs)">
   <section class="form-block">
     <div class="form-group" *ngFor="let field of fields; let i = index">
       <label>{{field}}</label>
