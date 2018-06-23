@@ -1,0 +1,15 @@
+<h2 *ngIf="notebookName">Loading Notebook '{{notebookName}}'</h2>
+<h2 *ngIf="!notebookName">Creating a New Notebook</h2>
+<div [ngSwitch]="progress" class="spinner-container">
+  <span class="spinner spinner-lg"></span>
+  <p *ngSwitchCase="Progress.Initializing" class="spinner-text">
+    <span class="spinner-header">Initializing Notebook Server</span><br>
+    May take up to 5 minutes
+  </p>
+  <p *ngSwitchCase="Progress.Configuring" class="spinner-text">
+    Configuring Notebook Server
+  </p>
+  <p *ngSwitchCase="Progress.Redirecting" class="spinner-text">
+    Redirecting to the Notebook Server
+  </p>
+</div>

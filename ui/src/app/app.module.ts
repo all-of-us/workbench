@@ -31,6 +31,7 @@ import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
+import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
@@ -119,6 +120,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
+    NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,

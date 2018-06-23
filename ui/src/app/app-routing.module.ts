@@ -11,6 +11,7 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
+import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
@@ -117,7 +118,19 @@ const routes: Routes = [
               resolve: {
                 cohort: CohortResolver,
               },
-            }],
+            }, {
+              path: 'notebooks/create',
+              component: NotebookRedirectComponent,
+              data: {
+                title: 'Creating a new Notebook'
+              }
+            }, {
+              path: 'notebooks/:nbName',
+              component: NotebookRedirectComponent,
+              data: {
+                title: 'Opening a Notebook'
+              }
+            }]
           }
         ]
       },

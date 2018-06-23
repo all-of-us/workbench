@@ -21,10 +21,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-import {
-  JupyterService,
-  NotebooksService,
-} from 'notebooks-generated';
 
 
 /*
@@ -100,25 +96,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   awaitingReview = false;
   cohortsLoading = true;
   cohortsError = false;
-  notebookError = false;
-  notebooksLoading = true;
   cohortList: Cohort[] = [];
-  private pollClusterTimer: NodeJS.Timer;
-  cluster: Cluster;
-  clusterLoading = true;
-  clusterLongWait = false;
-  clusterPulled = false;
-  launchedNotebookName: string;
-  private clusterLocalDirectory: string;
   private accessLevel: WorkspaceAccessLevel;
-  deleting = false;
-  showAlerts = false;
+  notebooksLoading = true;
+  notebookError = false;
   notebookList: FileDetail[] = [];
   notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
-  alertCategory: string;
-  alertMsg: string;
   tabOpen = Tabs.Notebooks;
-  localizeNotebooksError = false;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -126,13 +110,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
-    private clusterService: ClusterService,
     private http: Http,
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
-    private leoNotebooksService: NotebooksService,
-    private jupyterService: JupyterService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
@@ -157,7 +138,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
-    this.initCluster();
   }
 
   private loadNotebookList() {
@@ -175,116 +155,20 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
-    if (this.pollClusterTimer) {
-      clearTimeout(this.pollClusterTimer);
-    }
-  }
-
-  openNotebook(notebook: any): void {
-    if (this.clusterLoading) {
-      return;
-    }
-    this.localizeNotebooks([notebook]).subscribe(() => {
-      this.launchedNotebookName = notebook.name;
-      this.clusterPulled = true;
-    }, () => {
-      this.localizeNotebooksError = true;
-    });
   }
 
   newNotebook(): void {
-    if (this.clusterLoading) {
-      return;
-    }
-    this.localizeNotebooks([]).subscribe(() => {
-      // Use the Jupyter Server API directly to create a new notebook. This
-      // API handles notebook name collisions and matches the behavior of
-      // clicking "new notebook" in the Jupyter UI.
-
-      // The Jupyter Swagger already contains the "/workspaces/" infix.
-      const workspaceDir = this.clusterLocalDirectory.replace(/^workspaces\//, '');
-      this.jupyterService.postContents(
-        this.cluster.clusterNamespace, this.cluster.clusterName,
-        workspaceDir, {
-          'type': 'notebook'
-        }).subscribe((resp) => {
-          // TODO(calbach): Going through this modal is a temporary hack to avoid
-          // triggering pop-up blockers. Likely we'll want to switch notebook
-          // cluster opening to go through a redirect URL to make the localize and
-          // redirect look more atomic to the browser. Once this is in place, rm the
-          // modal and this hacky passing of the launched notebook name.
-          this.launchedNotebookName = resp.name;
-          this.clusterPulled = true;
-          // Reload the notebook list to get the newly created notebook.
-          this.loadNotebookList();
-        });
-    }, () => {
-      this.localizeNotebooksError = true;
-    });
+    this.openNotebook();
   }
 
-  private initCluster(): void {
-    this.pollCluster().subscribe((c) => {
-      // Use lower level *withHttpInfo() method to work around
-      // https://github.com/DataBiosphere/leonardo/issues/444
-      this.leoNotebooksService.setCookieWithHttpInfo(c.clusterNamespace, c.clusterName, {
-        withCredentials: true
-      }).subscribe(() => {
-          this.clusterLoading = false;
-        });
-    });
-  }
-
-  private pollCluster(): Observable<Cluster> {
-    return new Observable<Cluster>(observer => {
-      // Repoll every 15s if not ready.
-      const repoll = () => {
-        this.pollClusterTimer = setTimeout(() => {
-          this.pollCluster().subscribe(c => {
-            observer.next(c);
-            observer.complete();
-          });
-        }, 15000);
-      };
-      this.clusterService.listClusters()
-        .subscribe((resp) => {
-          this.cluster = resp.defaultCluster;
-          if (this.cluster.status !== ClusterStatus.Running) {
-            // Once cluster creation has started, it may take ~5 minutes.
-            this.clusterLongWait = true;
-            repoll();
-          } else {
-            this.clusterLongWait = false;
-            observer.next(this.cluster);
-            observer.complete();
-          }
-          // Repoll on errors.
-        }, repoll);
-    });
-  }
-
-  cancelCluster(): void {
-    this.launchedNotebookName = '';
-    this.clusterPulled = false;
-  }
-
-  openCluster(notebookName?: string): void {
-    let leoNotebookUrl = environment.leoApiUrl + '/notebooks/'
-      + this.cluster.clusterNamespace + '/'
-      + this.cluster.clusterName;
-    if (notebookName) {
-      leoNotebookUrl = [
-        leoNotebookUrl, 'notebooks', this.clusterLocalDirectory, notebookName
-      ].join('/');
+  openNotebook(nb?: FileDetail): void {
+    let nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/notebooks/`;
+    if (nb) {
+      nbUrl += encodeURIComponent(nb.name);
     } else {
-      leoNotebookUrl = [
-        leoNotebookUrl, 'tree', this.clusterLocalDirectory
-      ].join('/');
+      nbUrl += 'create';
     }
-
-    const notebook = window.open(leoNotebookUrl, '_blank');
-    this.launchedNotebookName = '';
-    this.clusterPulled = false;
+    const notebook = window.open(nbUrl, '_blank');
 
     // TODO(RW-474): Remove the authHandler integration. This is messy,
     // non-standard, and currently will break in the following situation:
@@ -320,41 +204,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-  private localizeNotebooks(notebooks: any): Observable<void> {
-    const names: Array<string> = notebooks.map(n => n.name);
-    return new Observable<void>(obs => {
-      this.clusterService
-        .localize(this.cluster.clusterNamespace, this.cluster.clusterName, {
-          workspaceNamespace: this.workspace.namespace,
-          workspaceId: this.workspace.id,
-          notebookNames: names
-        })
-        .subscribe((resp) => {
-          this.clusterLocalDirectory = resp.clusterLocalDirectory;
-          obs.next();
-          obs.complete();
-        }, (err) => {
-          this.handleLocalizeError();
-          setTimeout(() => {
-            this.resetAlerts();
-          }, 5000);
-          obs.error(err);
-        });
-    });
-  }
-
-  handleLocalizeError(): void {
-    this.alertCategory = 'alert-danger';
-    this.alertMsg = 'There was an issue while saving file(s) please try again later';
-    this.showAlerts = true;
-  }
-
-  resetAlerts(): void {
-    this.alertCategory = '';
-    this.alertMsg = '';
-    this.showAlerts = false;
-  }
-
   get workspaceCreationTime(): string {
     const asDate = new Date(this.workspace.creationTime);
     return asDate.toDateString();
@@ -382,11 +231,5 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.notebookError = false;
     this.bugReportComponent.reportBug();
     this.bugReportComponent.bugReport.shortDescription = 'Could not load notebooks';
-  }
-
-  submitNotebookLocalizeBugReport(): void {
-    this.localizeNotebooksError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not localize notebook.';
   }
 }

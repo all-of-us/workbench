@@ -29,28 +29,6 @@ h3 {
   margin: 1rem 0rem 0rem 1rem;
 }
 
-.spinner-container {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-}
-
-.spinner {
-  margin-top: 1rem;
-}
-
-.spinner-header {
-  color: #007CBB;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.spinner-text {
-  text-align: center;
-  /* This forces the flex layout to put the text on a new line. */
-  width: 100%;
-}
-
 .notebook-table-row {
   cursor: pointer;
 }
