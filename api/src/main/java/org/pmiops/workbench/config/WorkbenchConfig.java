@@ -16,6 +16,7 @@ public class WorkbenchConfig {
   public ServerConfig server;
   public AdminConfig admin;
   public JiraConfig jira;
+  public MandrillConfig mandrill;
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
@@ -26,6 +27,7 @@ public class WorkbenchConfig {
     public String registeredDomainName;
     public boolean enforceRegistered;
     public String jupyterUserScriptUri;
+    public Integer billingRetryCount;
   }
 
   public static class AuthConfig {
@@ -61,5 +63,9 @@ public class WorkbenchConfig {
   public static class JiraConfig {
     public String projectKey;
     public String issueType;
+
+  public static class MandrillConfig {
+    public String fromEmail;
+    public int sendRetries;
   }
 }

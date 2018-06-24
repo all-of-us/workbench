@@ -40,12 +40,12 @@ def annotate_commit_risk(line)
   # level to the commit.
   match = RISK_RE.match(line)
   # Leave a TODO for the release engineer for untagged commits.
-  risk = '**TODO**'
+  risk = '*TODO*'
   if match
     risk = match[1].downcase
     line.sub!(RISK_RE, '')
   end
-  return "#{line} (risk: #{risk})"
+  return "#{line.chomp} (risk: #{risk})"
 end
 
 

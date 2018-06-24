@@ -338,12 +338,17 @@ definitions:
   StandardConceptFilter:
     type: string
     description: filter on whether standard, non-standard, or all concepts should be returned\
-    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS]
+    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS, STANDARD_OR_CODE_ID_MATCH]
 
   Domain:
     type: string
     description: filter on the domain in which concepts should be returned
     enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, RACE, GENDER, ETHNICITY]
+
+  MatchType:
+    type: string
+    description: match column type on concept search
+    enum: [CONCEPT_CODE, CONCEPT_ID, CONCEPT_NAME]
 
   Concept:
     description: A concept describing a type of entity (e.g. measurement, observation, procedure.)
@@ -432,3 +437,11 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Concept"
+      matchType:
+        description: match column type on which concept search was successful
+        $ref: "#/definitions/MatchType"
+      standardConcepts:
+        type: "array"
+        items:
+          $ref: "#/definitions/Concept"
+        description: standard concepts associated with the matched concept

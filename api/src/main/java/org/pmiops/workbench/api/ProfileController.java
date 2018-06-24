@@ -150,6 +150,10 @@ public class ProfileController implements ProfileApiDelegate {
     // If the user is already registered, their profile will get updated.
     fireCloudService.registerUser(user.getContactEmail(),
         user.getGivenName(), user.getFamilyName());
+    return createFirecloudBillingProject(user);
+  }
+
+  private String createFirecloudBillingProject(User user) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     long suffix;
     if (workbenchEnvironment.isDevelopment()) {
@@ -269,11 +273,24 @@ public class ProfileController implements ProfileApiDelegate {
         return user;
 
       case ERROR:
-        log.log(Level.SEVERE, String.format(
-            "free tier project %s failed to be created", user.getFreeTierBillingProjectName()));
-        user.setFreeTierBillingProjectStatus(status);
-        return userDao.save(user);
-
+        int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
+        if (retries < workbenchConfigProvider.get().firecloud.billingRetryCount) {
+          this.userService.setBillingRetryCount(retries + 1);
+          log.log(Level.INFO, String.format(
+              "Billing project %s failed to be created, retrying.", user.getFreeTierBillingProjectName()));
+          try {
+            fireCloudService.removeUserFromBillingProject(user.getEmail(), user.getFreeTierBillingProjectName());
+          } catch (WorkbenchException e) {
+            log.log(Level.INFO, String.format("Failed to remove user from errored billing project"));
+          }
+          String billingProjectName = createFirecloudBillingProject(user);
+          return this.userService.setBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
+        } else {
+          String billingProjectName = user.getFreeTierBillingProjectName();
+          log.log(Level.SEVERE, String.format(
+              "free tier project %s failed to be created", billingProjectName));
+          return userService.setBillingProjectNameAndStatus(billingProjectName, status);
+        }
       case READY:
         break;
 
@@ -306,8 +323,7 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
-    return userDao.save(user);
+    return userService.setBillingProjectNameAndStatus(user.getFreeTierBillingProjectName(), BillingProjectStatus.READY);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {

@@ -6,6 +6,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
+import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -111,11 +112,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   deleting = false;
   showAlerts = false;
   notebookList: FileDetail[] = [];
-  listenerAdded = false;
-  notebookAuthListener: EventListenerOrEventListenerObject;
+  notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
   alertCategory: string;
   alertMsg: string;
   tabOpen = Tabs.Notebooks;
+  localizeNotebooksError = false;
+
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -166,7 +170,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('message', this.notebookAuthListener);
+    this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
     if (this.pollClusterTimer) {
       clearTimeout(this.pollClusterTimer);
     }
@@ -179,6 +183,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.localizeNotebooks([notebook]).subscribe(() => {
       this.launchedNotebookName = notebook.name;
       this.clusterPulled = true;
+    }, () => {
+      this.localizeNotebooksError = true;
     });
   }
 
@@ -214,6 +220,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         // Reload the notebook list to get the newly created notebook.
         this.loadNotebookList();
       });
+    }, () => {
+      this.localizeNotebooksError = true;
     });
   }
 
@@ -290,45 +298,33 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const notebook = window.open(leoNotebookUrl, '_blank');
     this.launchedNotebookName = '';
     this.clusterPulled = false;
-    // TODO (blrubenstein): Make the notebook page a list of pages, and
-    //    move this to component scope.
-    if (!this.listenerAdded) {
-      this.notebookAuthListener = (e: MessageEvent) => {
-        if (e.source !== notebook) {
-          return;
-        }
-        if (e.origin !== WorkspaceComponent.leoBaseUrl) {
-          return;
-        }
-        if (e.data.type !== 'bootstrap-auth.request') {
-          return;
-        }
-        notebook.postMessage({
-          'type': 'bootstrap-auth.response',
-          'body': {
-            'googleClientId': this.signInService.clientId
-          }
-        }, WorkspaceComponent.leoBaseUrl);
-      };
-      window.addEventListener('message', this.notebookAuthListener);
-      this.listenerAdded = true;
-    }
-  }
 
-  edit(): void {
-    this.router.navigate(['edit'], {relativeTo : this.route});
-  }
-
-  clone(): void {
-    this.router.navigate(['clone'], {relativeTo : this.route});
-  }
-
-  delete(): void {
-    this.deleting = true;
-    this.workspacesService.deleteWorkspace(
-        this.workspace.namespace, this.workspace.id).subscribe(() => {
-          this.router.navigate(['/workspaces']);
-        });
+    // TODO(RW-474): Remove the authHandler integration. This is messy,
+    // non-standard, and currently will break in the following situation:
+    // - User opens a new notebook tab.
+    // - While that tab is loading, user immediately navigates away from this
+    //   page.
+    // This is not easily fixed without leaking listeners outside the lifespan
+    // of the workspace component.
+    const authHandler = (e: MessageEvent) => {
+      if (e.source !== notebook) {
+        return;
+      }
+      if (e.origin !== WorkspaceComponent.leoBaseUrl) {
+        return;
+      }
+      if (e.data.type !== 'bootstrap-auth.request') {
+        return;
+      }
+      notebook.postMessage({
+        'type': 'bootstrap-auth.response',
+        'body': {
+          'googleClientId': this.signInService.clientId
+        }
+      }, WorkspaceComponent.leoBaseUrl);
+    };
+    window.addEventListener('message', authHandler);
+    this.notebookAuthListeners.push(authHandler);
   }
 
   buildCohort(): void {
@@ -393,5 +389,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   share(): void {
     this.shareModal.open();
+  }
+
+  submitNotebooksLoadBugReport(): void {
+    this.notebookError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Could not load notebooks';
+  }
+
+  submitNotebookLocalizeBugReport(): void {
+    this.localizeNotebooksError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Could not localize notebook.';
   }
 }

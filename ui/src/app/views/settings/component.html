@@ -22,6 +22,7 @@
     to describe the reason for this reset.
   </div>
   <div class="modal-footer">
+    <div *ngIf="clusterDeletionFailure" class="error">Could not reset your notebook server.</div>
     <button type="button" class="btn btn-primary reset-modal-button"
             [clrLoading]="resetClusterPending"
             (click)="resetCluster()">

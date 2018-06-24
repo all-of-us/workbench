@@ -183,6 +183,27 @@ public class UserService {
     });
   }
 
+  public User setBillingRetryCount(int billingRetryCount) {
+    return updateWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setBillingProjectRetries(billingRetryCount);
+        return user;
+      }
+    });
+  }
+
+  public User setBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
+    return updateWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setFreeTierBillingProjectName(name);
+        user.setFreeTierBillingProjectStatus(status);
+        return user;
+      }
+    });
+  }
+
   public List<User> getNonVerifiedUsers() {
     return userDao.findUserNotValidated();
   }

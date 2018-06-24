@@ -175,6 +175,7 @@ export class SearchTableComponent implements OnChanges {
     }
 
     this.loading = true;
+    /*
     this.achillesService.getConceptResults(this.searchParams)
       .subscribe(results => {
         this.conceptResults = results.data;
@@ -182,6 +183,7 @@ export class SearchTableComponent implements OnChanges {
 
        this.loading = false;
       });
+      */
   }
 
   logSearchParams(params) {

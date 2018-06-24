@@ -95,6 +95,13 @@
         <button type="button" class="btn btn-primary" (click)="cancelCluster()">Cancel</button>
       </div>
     </clr-modal>
+    <clr-modal [(clrModalOpen)]="localizeNotebooksError">
+      <h3 class="modal-title">Error:</h3>
+      <div class="modal-body">Could not load your notebook. Please <a (click)="submitNotebookLocalizeBugReport()">submit a bug report.</a></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="localizeNotebooksError = false">Ok</button>
+      </div>
+    </clr-modal>
     <div *ngIf="tabOpen===Tabs.Notebooks">
       <div *ngIf="notebooksLoading || clusterLoading" class="spinner-container">
         <span class="spinner spinner-lg"></span>
@@ -182,8 +189,9 @@
 <app-workspace-share></app-workspace-share>
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>
-  <div class="modal-body">Could not fetch notebooks from workspace.</div>
+  <div class="modal-body">Could not fetch notebooks from workspace. Please <a (click)="submitNotebooksLoadBugReport()">submit a bug report.</a></div>
   <div class="modal-footer">
     <button type="button" class="btn btn-primary" (click)="notebookError = false">Ok</button>
   </div>
 </clr-modal>
+<app-bug-report></app-bug-report>
