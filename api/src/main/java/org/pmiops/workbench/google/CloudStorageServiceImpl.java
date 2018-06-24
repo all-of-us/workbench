@@ -8,8 +8,11 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 import javax.inject.Provider;
+
+import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,5 +66,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     BlobId blobId = BlobId.of(bucketName, fileName);
     BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
     storage.create(blobInfo, bytes);
+  }
+
+  @Override
+  public JSONObject getJiraCredentials() {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    return new JSONObject(readToString(getCredentialsBucketName(), "jira-login.json"));
   }
 }

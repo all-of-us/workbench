@@ -67,6 +67,7 @@ sourceSets {
       includes = ['org/pmiops/workbench/tools/**/*.java',
                   'org/pmiops/workbench/db/**/*.java',
                   'org/pmiops/workbench/notebooks/**/*.java',
+                  'org/pmiops/workbench/jira/**/*.java',
                   // In general, command-line tools won't need access to
                   // org.pmiops.workbench.model (Swagger-generated classes),
                   // so we selectively whitelist as needed.
@@ -97,6 +98,8 @@ sourceSets {
                   'org/pmiops/workbench/model/Operator.java',
                   'org/pmiops/workbench/model/ParticipantCohortStatusColumns.java',
                   'org/pmiops/workbench/model/SortOrder.java',
+                  'org/pmiops/workbench/jira/JiraService.java',
+                  'org/pmiops/workbench/jira/JiraServiceImpl.java',
                   'org/pmiops/workbench/notebooks/NotebooksService.java',
                   'org/pmiops/workbench/notebooks/NotebooksServiceImpl.java',
                   'org/pmiops/workbench/notebooks/NotebooksConfig.java',
@@ -127,6 +130,15 @@ dependencies {
   compile 'org.hibernate:hibernate-validator:+'
   compile 'com.squareup.okhttp:okhttp:2.6.0'
   compile 'com.squareup.okhttp:logging-interceptor:2.6.0'
+  compile 'org.apache.commons:commons-lang3:3.7'
+  compile 'com.blockscore:blockscore-java:4.0.2'
+  // compile 'org.json:json:20160810'
+  compile 'javax.json:javax.json-api:1.0'
+  // compile 'org.glassfish:javax.json:1.0.4'
+  compile 'com.sun.jersey:jersey-client:1.19.3'
+  compile 'org.apache.httpcomponents:httpmime:4.3.1'
+
+
 }
 
 

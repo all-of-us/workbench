@@ -1,0 +1,129 @@
+#This file provide the end points for jira interactions
+swagger: '2.0'
+
+info:
+  title: Jira
+  description: |
+    Service for Jira Interactions.
+  version: "0.1"
+
+host: "precisionmedicineinitiative.atlassian.net"
+schemes:
+  - "https"
+basePath: /rest/api/2
+
+produces:
+  - application/json
+
+securityDefinitions:
+  AdminSecurity:
+    type: basic
+
+
+paths:
+ /issue:
+    post:
+      summary: Create issue in jira.
+      description: "Creates issue in JIRA and return IssueResponse"
+      tags:
+        - Jira
+      operationId: createIssue
+      parameters:
+        - name: fields
+          in: body
+          description: Attributes for creating issue
+          schema:
+            $ref: '#/definitions/IssueRequest'
+      responses:
+        200:
+          description: File saved
+          schema:
+            $ref: '#/definitions/IssueResponse'
+        503:
+          description: Cannot connect to JIRA. Please try again later
+      security:
+        - AdminSecurity: []
+
+ /issue/{issueKey}/attachments:
+   post:
+     summary: Add attachment to the jira ticket
+     tags:
+       - Jira
+     operationId: addAttachments
+     consumes:
+       - multipart/form-data
+     parameters:
+       - in: path
+         name: issueKey
+         type: string
+         required: true
+       - name: file
+         in: formData
+         description: Upload multiple files
+         required: true
+         type: file
+       - in: header
+         name: X-Atlassian-Token
+         type: string
+         default: nocheck
+     responses:
+       200:
+         description: File saved
+       503:
+         description: Cannot connect to JIRA. Please try again later
+     security:
+       - AdminSecurity: []
+
+
+
+definitions:
+  IssueRequest:
+      description: ''
+      required:
+        - fields
+      properties:
+        fields:
+          description: Information about issue
+          $ref: '#/definitions/FieldsDetails'
+
+
+  FieldsDetails:
+      description: Fields
+      required:
+        - project
+      properties:
+        project:
+          $ref: '#/definitions/ProjectDetails'
+        summary:
+          type: string
+        description:
+          type: string
+        issuetype:
+          $ref: '#/definitions/IssueType'
+
+  ProjectDetails:
+      description: Project
+      required:
+        - key
+      properties:
+        key:
+          type: string
+
+  IssueType:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+
+  IssueResponse:
+      required:
+        - id
+        - key
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        self:
+          type: string

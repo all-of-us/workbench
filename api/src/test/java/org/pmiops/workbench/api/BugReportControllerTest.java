@@ -14,6 +14,8 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 
+import org.json.JSONObject;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BugReport;
@@ -61,7 +65,7 @@ public class BugReportControllerTest {
 
   @TestConfiguration
   @Import({BugReportController.class})
-  @MockBean({JupyterApi.class})
+  @MockBean({CloudStorageService.class, JiraService.class, JupyterApi.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
@@ -85,19 +89,16 @@ public class BugReportControllerTest {
   @Mock
   MailService mailService;
   @Autowired
+  JiraService jiraService;
+  @Autowired
+  CloudStorageService cloudStorageService;
+  @Autowired
   JupyterApi jupyterApi;
   @Autowired
   BugReportController bugReportController;
 
   @Before
   public void setUp() throws MessagingException {
-    sentMessages.clear();
-    Mockito.doAnswer(
-      invocation -> {
-        sentMessages.add(invocation.getArgumentAt(0, Message.class));
-        return null;
-      }
-    ).when(mailService).send(any());
     User user = new User();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
@@ -106,20 +107,28 @@ public class BugReportControllerTest {
     user.setDisabled(false);
     when(userProvider.get()).thenReturn(user);
     bugReportController.setUserProvider(userProvider);
-    bugReportController.setMailServiceProvider(Providers.of(mailService));
+    JSONObject credentails = new JSONObject();
+   
+   try{ credentails.put("username","fakeusername");
+    credentails.put("password","fakepassword");
+    when(cloudStorageService.getJiraCredentials()).thenReturn(credentails);
+    Mockito.doNothing().when(jiraService).authenticate("fakeusername","fakepassword");
+
+    Mockito.doNothing().when(jiraService).createIssue(any());
+  }
+  catch(Exception ex){}
   }
 
   @Test
   public void testSendBugReport() throws Exception {
-    bugReportController.sendBugReport(
-        new BugReport()
-          .contactEmail(USER_EMAIL)
-          .includeNotebookLogs(false)
-          .reproSteps("press button")
-          .shortDescription("bug"));
-    verify(mailService, times(1)).send(Mockito.any());
+    BugReport input = new BugReport()
+        .contactEmail(USER_EMAIL)
+        .includeNotebookLogs(false)
+        .reproSteps("press button")
+        .shortDescription("bug");
+    bugReportController.sendBugReport(input);
+    verify(jiraService, times(1)).createIssue(input);
     // The message content should have 1 part, the main body part and no attachments
-    assertSentMessageParts(1);
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
   }
 
@@ -127,16 +136,16 @@ public class BugReportControllerTest {
   public void testSendBugReportWithNotebooks() throws Exception {
     when(jupyterApi.getRootContents(any(), any(), any(), any(), any(), any()))
         .thenReturn(TEST_CONTENTS);
-    bugReportController.sendBugReport(
-        new BugReport()
-          .contactEmail(USER_EMAIL)
-          .includeNotebookLogs(true)
-          .reproSteps("press button")
-          .shortDescription("bug"));
+    BugReport input = new BugReport()
+        .contactEmail(USER_EMAIL)
+        .includeNotebookLogs(true)
+        .reproSteps("press button")
+        .shortDescription("bug");
+    bugReportController.sendBugReport(input
+       );
 
-    verify(mailService, times(1)).send(Mockito.any());
+    verify(jiraService, times(1)).createIssue(input);
     // The message content should have 4 parts, the main body part and three attachments
-    assertSentMessageParts(4);
     verify(jupyterApi).getRootContents(
         eq(FC_PROJECT_ID), any(), eq("delocalization.log"), any(), any(), any());
     verify(jupyterApi).getRootContents(
@@ -151,23 +160,17 @@ public class BugReportControllerTest {
         .thenReturn(TEST_CONTENTS);
     when(jupyterApi.getRootContents(any(), any(), eq("jupyter.log"), any(), any(), any()))
         .thenThrow(new ApiException(404, "not found"));
-    bugReportController.sendBugReport(
-        new BugReport()
-          .contactEmail(USER_EMAIL)
-          .includeNotebookLogs(true)
-          .reproSteps("press button")
-          .shortDescription("bug"));
+    BugReport input = new BugReport()
+        .contactEmail(USER_EMAIL)
+        .includeNotebookLogs(true)
+        .reproSteps("press button")
+        .shortDescription("bug");
+    bugReportController.sendBugReport(input);
 
-    verify(mailService, times(1)).send(Mockito.any());
+    verify(jiraService, times(1)).createIssue(input);
     // The message content should have 3 parts, the main body part and two attachments
-    assertSentMessageParts(3);
   }
 
-  private void assertSentMessageParts(int count) throws Exception {
-    assertThat(sentMessages).isNotEmpty();
-    Message msg = sentMessages.get(0);
-    Multipart multipart = (Multipart) msg.getContent();
-    assertThat(multipart.getCount()).isEqualTo(count);
-  }
+
 
 }

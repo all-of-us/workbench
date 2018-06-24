@@ -3,35 +3,28 @@ package org.pmiops.workbench.api;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.logging.Logger;
-
-import javax.activation.DataHandler;
-import javax.inject.Provider;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-
+import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.EmailException;
-import org.pmiops.workbench.mail.MailService;
-import org.pmiops.workbench.notebooks.ApiException;
+import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BugReport;
+import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import javax.mail.Session;
+import java.io.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.logging.Logger;
+import java.util.ArrayList;
 
 
 @RestController
@@ -40,21 +33,24 @@ public class BugReportController implements BugReportApiDelegate {
   private static final List<String> notebookLogFiles =
       ImmutableList.of("delocalization.log", "jupyter.log", "localization.log");
 
+  private final Provider<JiraService> jiraServiceProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<JupyterApi> jupyterApiProvider;
   private Provider<User> userProvider;
-  private Provider<MailService> mailServiceProvider;
+  private Provider<CloudStorageService> cloudStorageServiceProvider;
 
   @Autowired
   BugReportController(
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<User> userProvider,
       Provider<JupyterApi> jupyterApiProvider,
-      Provider<MailService> mailServiceProvider) {
+      Provider<CloudStorageService> cloudStorageService,
+      Provider<JiraService> jiraService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.jupyterApiProvider = jupyterApiProvider;
-    this.mailServiceProvider = mailServiceProvider;
+    this.jiraServiceProvider = jiraService;
+    this.cloudStorageServiceProvider = cloudStorageService;
   }
 
   @VisibleForTesting
@@ -62,10 +58,6 @@ public class BugReportController implements BugReportApiDelegate {
     this.userProvider = userProvider;
   }
 
-  @VisibleForTesting
-  void setMailServiceProvider(Provider<MailService> mailServiceProvider) {
-    this.mailServiceProvider = mailServiceProvider;
-  }
 
   @Override
   public ResponseEntity<BugReport> sendBugReport(BugReport bugReport) {
@@ -74,30 +66,18 @@ public class BugReportController implements BugReportApiDelegate {
     JupyterApi jupyterApi = jupyterApiProvider.get();
     Properties props = new Properties();
     Session session = Session.getDefaultInstance(props, null);
+    CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
+    JiraService jiraService = jiraServiceProvider.get();
     try {
-      Message msg = new MimeMessage(session);
-      msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
-      InternetAddress[] replyTo = new InternetAddress[1];
-      replyTo[0] = new InternetAddress(bugReport.getContactEmail());
-      msg.setReplyTo(replyTo);
-      // To test the bug reporting functionality, change the recipient email to your email rather
-      // than the group.
-      // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-          workbenchConfig.admin.supportGroup, "AofU Workbench Engineers"));
-      msg.setSubject("[AofU Bug Report]: " + bugReport.getShortDescription());
+      JSONObject jiraCredentails = cloudStorageService.getJiraCredentials();
+      jiraService.authenticate(jiraCredentails.getString("username"),
+                               jiraCredentails.getString("password"));
 
-      Multipart multipart = new MimeMultipart();
-      MimeBodyPart textPart = new MimeBodyPart();
-      textPart.setText(bugReport.getReproSteps());
-      multipart.addBodyPart(textPart);
-
-      // If requested, try to pull logs from the notebook cluster using the researcher's creds. Some
-      // or all of these log files might be missing, or the cluster may not even exist, so ignore
-      // failures here.
+      String issueKey = jiraService.createIssue(bugReport);
       if (Optional.ofNullable(bugReport.getIncludeNotebookLogs()).orElse(false) &&
           BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
-        for (String fileName : BugReportController.notebookLogFiles) {
+       List<File> logAttachments = new ArrayList<File>();
+       for (String fileName : BugReportController.notebookLogFiles) {
           try {
             String logContent = jupyterApi.getRootContents(
                 user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME,
@@ -107,23 +87,32 @@ public class BugReportController implements BugReportApiDelegate {
                   String.format("Jupyter returned null content for '%s', continuing", fileName));
               continue;
             }
-            MimeBodyPart attachPart = new MimeBodyPart();
-            attachPart.setDataHandler(new DataHandler(logContent, "text/plain"));
-            attachPart.setFileName(fileName);
-            multipart.addBodyPart(attachPart);
+            logAttachments.add(createTempFile(fileName,logContent));
           } catch (ApiException e) {
             log.info(String.format("failed to retrieve notebook log '%s', continuing", fileName));
           }
         }
+        jiraService.attachLogFiles(issueKey,logAttachments);
+        for(File logs: logAttachments)
+          logs.delete();
       }
-      msg.setContent(multipart);
-      mailServiceProvider.get().send(msg);
-    } catch (MessagingException e) {
-      throw new EmailException("Error sending bug report", e);
-    } catch (UnsupportedEncodingException e) {
-      throw new EmailException("Error sending bug report", e);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+   return ResponseEntity.ok(bugReport);
+  }
 
-    return ResponseEntity.ok(bugReport);
+  private File createTempFile(String name,String content) {
+    try{
+      File temp = File.createTempFile(name, ".log");
+      BufferedWriter bw = new BufferedWriter(new FileWriter(temp));
+      bw.write(content);
+      bw.close();
+      return temp;
+    } catch(IOException e){
+      e.printStackTrace();
+    }
+    return null;
   }
 }
+
