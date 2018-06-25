@@ -49,8 +49,6 @@ export class AccountCreationModalsComponent implements OnInit {
   }
 
   send() {
-    console.log(this.contactEmail);
-    this.profileService.resendWelcomeEmail(this.contactEmail).subscribe(() => {});
-    // resend email. Add in once Mandrill API is in.
+    this.profileService.resendWelcomeEmail(this.username + "@" + this.gsuiteDomain).subscribe(() => {});
   }
 }

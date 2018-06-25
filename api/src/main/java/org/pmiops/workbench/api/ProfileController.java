@@ -467,15 +467,14 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(updateRequest.getUsername());
     googleUser.setPrimaryEmail(updateRequest.getContactEmail());
-
     User user = userDao.findUserByEmail(updateRequest.getUsername());
     user.setContactEmail(updateRequest.getContactEmail());
     userDao.save(user);
   }
 
   @Override
-  public ResponseEntity<Void> resendWelcomeEmail(String contactEmail) {
-    directoryService.resendWelcomeEmail(contactEmail);
+  public ResponseEntity<Void> resendWelcomeEmail(String profileName) {
+    directoryService.resendWelcomeEmail(profileName);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
