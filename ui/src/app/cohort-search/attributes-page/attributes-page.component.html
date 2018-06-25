@@ -19,9 +19,9 @@
     </div>
     <div class="count-preview">
       <button type="button"
-          class="btn"
-          (click)="requestPreview(attrs)"
-          [disabled]="!attrs.valid"
+              class="btn"
+              (click)="requestPreview(attrs)"
+              [disabled]="!attrs.valid"
       >
         Calculate
       </button>
@@ -29,7 +29,7 @@
       <span *ngIf="!preview.get('requesting')">
         {{ preview.get('count', 0) }}
       </span>
-          <span *ngIf="preview.get('requesting')" class="spinner spinner-inline">
+      <span *ngIf="preview.get('requesting')" class="spinner spinner-inline">
         Loading...
       </span>
     </div>
