@@ -127,6 +127,20 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
     return user;
   }
+
+  @Override
+  public void resendWelcomeEmail(String contactEmail) {
+    User user = getUser(contactEmail);
+    String password = randomString();
+    user.setPassword(password);
+    retryHandler.run((context) -> getGoogleDirectoryService().users().update(user.getPrimaryEmail(), user).execute());
+    try {
+      mailServiceProvider.get().sendWelcomeEmail(contactEmail, password, user);
+    } catch (MessagingException e) {
+      throw new WorkbenchException(e);
+    }
+  }
+
   @Override
   public void deleteUser(String username) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;

@@ -179,6 +179,24 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /v1/resend-welcome-email:
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Resend welcome email
+      operationId: resendWelcomeEmail
+      security: []
+      parameters:
+        - in: body
+          name: contactEmail
+          schema:
+            type: string
+      responses:
+        200:
+          description: Welcome Email sent.
+
   /v1/invitation-key-verification:
     post:
       tags:

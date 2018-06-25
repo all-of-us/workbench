@@ -45,10 +45,12 @@ export class AccountCreationModalsComponent implements OnInit {
     this.profileService.updateContactEmail(request).subscribe(() => {
       this.changingEmail = false;
     });
+    this.send();
   }
 
   send() {
-    this.resendingEmail = false;
+    console.log(this.contactEmail);
+    this.profileService.resendWelcomeEmail(this.contactEmail).subscribe(() => {});
     // resend email. Add in once Mandrill API is in.
   }
 }
