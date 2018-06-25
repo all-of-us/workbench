@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.MatchType;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,8 +36,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private AchillesResultDao achillesResultDao;
     @Autowired
     private DbDomainDao dbDomainDao;
-    @Autowired
+
     private ConceptService conceptService;
+
+    @Autowired
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao) {
+        this.conceptService = conceptService;
+        this.conceptDao = conceptDao;
+        this.dbDomainDao = dbDomainDao;
+    }
+
 
     // TODO: consider putting this in CDM config, fetching it from there
     private static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
@@ -241,16 +250,25 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ConceptListResponse> getAdvancedConceptSearch(SearchConceptsRequest searchConceptsRequest){
+    public ResponseEntity<ConceptListResponse> searchConcepts(SearchConceptsRequest searchConceptsRequest){
 
-        Integer maxResults=searchConceptsRequest.getMaxResults();
-        if(maxResults == null){
-            maxResults = 25;
+        Integer maxResults = searchConceptsRequest.getMaxResults();
+        if(maxResults == null || maxResults == 0){
+            maxResults = Integer.MAX_VALUE;
         }
+
         StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
         if(standardConceptFilter == null){
-            standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
+            standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
         }
+
+        if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
+            List<Concept> concepts = conceptDao.findAllConceptsOrderedByCount(standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS ? "S" : null, maxResults);
+            ConceptListResponse response = new ConceptListResponse();
+            response.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+            return ResponseEntity.ok(response);
+        }
+
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
         List<String> domainIds = null;
@@ -262,7 +280,25 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                         searchConceptsRequest.getVocabularyIds(), domainIds, maxResults);
         ConceptListResponse response = new ConceptListResponse();
-        response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        List<Concept> matchedConcepts = concepts.getContent();
+        for(Concept con : matchedConcepts){
+            String conceptCode = con.getConceptCode();
+            String conceptId = String.valueOf(con.getConceptId());
+
+            if(!con.getStandardConcept().equals("S") && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
+                response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
+
+                List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
+                response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+            }
+
+        }
+
+        if(response.getMatchType() == null && response.getStandardConcepts() == null){
+            response.setMatchType(MatchType.NAME);
+        }
+
+        response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 
@@ -343,45 +379,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(resp);
     }
 
-
-    /**
-     * This method searches concepts
-     *
-     * @param conceptName
-     * @param standardConcept
-     * @param concept_code
-     * @param vocabulary_id
-     * @param domain_id
-     * @return
-     */
-    @Override
-    public ResponseEntity<ConceptListResponse> getConceptsSearch(
-            String conceptName,
-            String standard_concept,
-            String domain_id) {
-
-        String std_concept="S";
-        List<Concept> conceptList;
-
-        // If Concept name do search on name
-
-        if ((conceptName != null && !conceptName.isEmpty()) && domain_id != null) {
-            String queryWord = ConceptService.modifyMultipleMatchKeyword(conceptName);
-            conceptList = conceptDao.findConceptLikeNameAndDomainId(queryWord,domain_id,std_concept);
-        }else if((conceptName != null && !conceptName.isEmpty()) && domain_id == null){
-            String queryWord = ConceptService.modifyMultipleMatchKeyword(conceptName);
-            conceptList = conceptDao.findConceptLikeName(queryWord,std_concept);
-        }else if(conceptName == null || conceptName.isEmpty() && domain_id != null){
-            conceptList = conceptDao.findConceptsByDomainIdOrderedByCount(domain_id,std_concept);
-        }else{
-            conceptList = conceptDao.findAllConceptsOrderedByCount(std_concept);
-        }
-
-        ConceptListResponse resp = new ConceptListResponse();
-        resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-
-        return ResponseEntity.ok(resp);
-    }
 
     /**
      * This method gets concepts with maps to relationship in concept relationship table
