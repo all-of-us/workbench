@@ -138,7 +138,7 @@ const routes: Routes = [
         component: SettingsComponent,
         data: {title: 'Settings'}
       }, {
-        path: 'workspace/build',
+        path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
       }

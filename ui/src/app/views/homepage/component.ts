@@ -6,8 +6,8 @@ import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
   BillingProjectStatus,
-  BlockscoreIdVerificationStatus,
   DataAccessLevel,
+  IdVerificationStatus,
   Profile,
   ProfileService
 } from 'generated';
@@ -93,7 +93,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     if (this.profile === undefined) {
       return completedTasks;
     }
-    if (this.profile.blockscoreIdVerificationStatus === BlockscoreIdVerificationStatus.VERIFIED) {
+    if (this.profile.idVerificationStatus === IdVerificationStatus.VERIFIED) {
       completedTasks += 1;
     }
     if (this.profile.demographicSurveyCompletionTime !== null) {
@@ -130,7 +130,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspace/build'], {relativeTo : this.route});
+    this.router.navigate(['workspaces/build'], {relativeTo : this.route});
   }
 
   navigateToProfile(): void {

@@ -120,7 +120,7 @@ export class AchillesService {
       q['domain_id[]'] = domains;
     }
 
-    */
+
     let search = args.search;
     if (!search || search === '') {
       search = null;
@@ -133,7 +133,7 @@ export class AchillesService {
         return {data: data, totalItems: data.length};
 
       });
-
+*/
   }
 
   logSearchParams(args) {

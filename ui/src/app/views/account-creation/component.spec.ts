@@ -120,4 +120,15 @@ describe('AccountCreationComponent', () => {
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeFalsy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeFalsy();
   }));
+
+  it('handles long username with mismatch at end', fakeAsync(() => {
+    page.readPageData();
+
+    simulateInput(
+      page.fixture, page.usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
+    tick(300);
+    tick();
+    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
+    expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
+  }));
 });

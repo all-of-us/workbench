@@ -50,6 +50,12 @@ public interface FireCloudService {
   void addUserToBillingProject(String email, String projectName);
 
   /**
+   * Removes the specified user from the specified billing project.
+   * Only used for errored billing projects
+   */
+  void removeUserFromBillingProject(String email, String projectName);
+
+  /**
    * Creates a new FC workspace.
    */
   void createWorkspace(String projectName, String workspaceName);

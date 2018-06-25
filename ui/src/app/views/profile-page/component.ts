@@ -1,12 +1,13 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {deepCopy} from 'app/utils/index';
+import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
-  BlockscoreIdVerificationStatus,
   ErrorResponse,
+  IdVerificationStatus,
   InstitutionalAffiliation,
   Profile,
   ProfileService,
@@ -17,6 +18,7 @@ import {
               '../../styles/cards.css',
               '../../styles/headers.css',
               '../../styles/inputs.css',
+              '../../styles/errors.css',
               './component.css'],
   templateUrl: './component.html',
 })
@@ -45,6 +47,14 @@ export class ProfilePageComponent implements OnInit {
       'value': this.numberOfTotalTasks - this.completedTasks
     }
   ];
+  termsOfServiceError = false;
+  demographicSurveyError = false;
+  ethicsTrainingError = false;
+  idVerificationError = false;
+
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
+
   constructor(
       private profileService: ProfileService,
       private profileStorageService: ProfileStorageService,
@@ -86,7 +96,7 @@ export class ProfilePageComponent implements OnInit {
     if (this.profile === undefined) {
       return completedTasks;
     }
-    if (this.profile.blockscoreIdVerificationStatus === BlockscoreIdVerificationStatus.VERIFIED) {
+    if (this.profile.idVerificationStatus === IdVerificationStatus.VERIFIED) {
       completedTasks += 1;
     }
     if (this.profile.demographicSurveyCompletionTime !== null) {
@@ -123,6 +133,8 @@ export class ProfilePageComponent implements OnInit {
       this.profile.termsOfServiceCompletionTime = profile.termsOfServiceCompletionTime;
       this.workingProfile.termsOfServiceCompletionTime = profile.termsOfServiceCompletionTime;
       this.reloadSpinner();
+    }, () => {
+      this.termsOfServiceError = true;
     });
   }
 
@@ -132,6 +144,8 @@ export class ProfilePageComponent implements OnInit {
       this.profile.ethicsTrainingCompletionTime = profile.ethicsTrainingCompletionTime;
       this.workingProfile.ethicsTrainingCompletionTime = profile.ethicsTrainingCompletionTime;
       this.reloadSpinner();
+    }, () => {
+      this.ethicsTrainingError = true;
     });
   }
 
@@ -140,6 +154,8 @@ export class ProfilePageComponent implements OnInit {
       this.profile.demographicSurveyCompletionTime = profile.demographicSurveyCompletionTime;
       this.workingProfile.demographicSurveyCompletionTime = profile.demographicSurveyCompletionTime;
       this.reloadSpinner();
+    }, () => {
+      this.demographicSurveyError = true;
     });
   }
 
@@ -182,6 +198,32 @@ export class ProfilePageComponent implements OnInit {
     this.profileService.submitIdVerification().subscribe((profile) => {
       this.profile.requestedIdVerification = profile.requestedIdVerification;
       this.workingProfile.requestedIdVerification = profile.requestedIdVerification;
+    }, () => {
+      this.idVerificationError = true;
     });
+  }
+
+  submitTermsOfServiceBugReport(): void {
+    this.termsOfServiceError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Error submitting terms of service';
+  }
+
+  submitEthicsTrainingBugReport(): void {
+    this.ethicsTrainingError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Error submitting ethics training';
+  }
+
+  submitDemographicsSurveyBugReport(): void {
+    this.demographicSurveyError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Error submitting demographics survey';
+  }
+
+  submitIdVerificationBugReport(): void {
+    this.idVerificationError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Error submitting identity verification';
   }
 }

@@ -10,6 +10,8 @@ import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import javax.inject.Provider;
+
+import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,11 +27,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   public String readInvitationKey() {
-    return readToString(getCredentialsBucketName(), "invitation-key.txt").trim();
+    return readToString(getCredentialsBucketName(), "invitation-key.txt");
   }
 
-  public String readBlockscoreApiKey() {
-    return readToString(getCredentialsBucketName(), "blockscore-api-key.txt").trim();
+  public String readMandrillApiKey() {
+    JSONObject mandrillKeys = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
+    return mandrillKeys.getString("api-key");
   }
 
   @Override
@@ -46,7 +49,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   String readToString(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    return new String(storage.get(bucketName, objectPath).getContent());
+    return new String(storage.get(bucketName, objectPath).getContent()).trim();
   }
 
   @Override

@@ -4,6 +4,7 @@ import {
   Router,
 } from '@angular/router';
 
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {navigateLogin} from 'app/utils';
@@ -14,7 +15,8 @@ import {Authority} from 'generated';
 @Component({
   selector: 'app-signed-in',
   styleUrls: ['./component.css',
-              '../../styles/buttons.css'],
+              '../../styles/buttons.css',
+              '../../styles/errors.css'],
   templateUrl: './component.html'
 })
 export class SignedInComponent implements OnInit {
@@ -43,6 +45,7 @@ export class SignedInComponent implements OnInit {
   }
   constructor(
     /* Ours */
+    public errorHandlingService: ErrorHandlingService,
     private signInService: SignInService,
     private profileStorageService: ProfileStorageService,
     /* Angular's */

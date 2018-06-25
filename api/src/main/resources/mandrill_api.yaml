@@ -1,0 +1,110 @@
+#A subset of the Mandrill Api
+#the part we need
+# https://mandrillapp.com/api/docs/
+
+swagger: '2.0'
+info:
+  title: Mandrill
+  version: '0.1'
+
+host: 'mandrillapp.com/api/1.0/'
+schemes:
+  - 'https'
+basePath: /
+
+produces:
+  - application/json
+
+paths:
+  /messages/send.json:
+    post:
+      tags:
+        - mandrill
+      operationId: send
+      summary: Send an email via mandrill
+      responses:
+        200:
+          description: Email sent successfully
+          schema:
+            $ref: '#/definitions/MandrillMessageStatuses'
+        500:
+          description: There was an error, please see response for details
+      parameters:
+        - in: body
+          description: API key and message
+          name: apiKeyAndMessage
+          required: true
+          schema:
+            $ref: '#/definitions/MandrillApiKeyAndMessage'
+
+parameters:
+  {}
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+  MandrillApiKeyAndMessage:
+    required:
+      - key
+      - message
+    type: object
+    properties:
+      key:
+        type: string
+        description: API key
+      message:
+        type: object
+        description: Mandrill Message
+        items:
+          '$ref': '#/definitions/MandrillMessage'
+
+  MandrillMessage:
+    required:
+      - html
+      - subject
+      - from_email
+      - to
+    type: object
+    properties:
+      html:
+        type: string
+        description: html that makes up email message
+      subject:
+        type: string
+        description: subject of email
+      from_email:
+        type: string
+        description: the from address
+      to:
+        type: array
+        items:
+          '$ref': '#/definitions/RecipientAddress'
+
+  RecipientAddress:
+    required:
+      - email
+    type: object
+    properties:
+      email:
+        type: string
+        description: recipient address
+
+  MandrillMessageStatuses:
+    type: array
+    items:
+      '$ref': '#/definitions/MandrillMessageStatus'
+
+  MandrillMessageStatus:
+    type: object
+    properties:
+      email:
+        type: string
+        description: recipient email
+      status:
+        type: string
+        description: status of email
+      reject_reason:
+        type: string
+        description: why email was rejected if it was
+
+
