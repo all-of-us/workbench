@@ -467,7 +467,7 @@ public class ProfileController implements ProfileApiDelegate {
   private void updateUser(UpdateContactEmailRequest updateRequest) {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(updateRequest.getUsername());
-    contactEmail = updateRequest.getContactEmail();
+    String contactEmail = updateRequest.getContactEmail();
     try {
       InternetAddress email = new InternetAddress(contactEmail);
       email.validate();
