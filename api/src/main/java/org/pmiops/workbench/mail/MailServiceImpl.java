@@ -1,6 +1,7 @@
 package org.pmiops.workbench.mail;
 
 import com.google.api.services.admin.directory.model.User;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -13,9 +14,18 @@ import org.pmiops.workbench.mandrill.model.RecipientAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import javax.inject.Provider;
 import javax.mail.Message;
@@ -31,6 +41,7 @@ public class MailServiceImpl implements MailService {
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
+  private String emailPath = "../resources/main/emails/welcomeemail/content.html";
 
   enum Status {REJECTED, API_ERROR, SUCCESSFUL}
 
@@ -100,12 +111,31 @@ public class MailServiceImpl implements MailService {
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(contactEmail);
     msg.setTo(Collections.singletonList(toAddress));
-    String msgBody = "Your new account is: " + user.getPrimaryEmail() +
-      "\nThe password for your new account is: " + password;
-    msg.setHtml(msgBody);
+    String msgHtml = buildEmailHtml(emailPath, password, user);
+    msg.setHtml(msgHtml);
     msg.setSubject("Your new All of Us Account");
     msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
     return msg;
+  }
+
+  private String buildEmailHtml(String path, String password, User user) throws MessagingException {
+    CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
+    StringBuilder contentBuilder = new StringBuilder();
+    try (Stream<String> stream = Files.lines( Paths.get(path), StandardCharsets.UTF_8)) {
+      stream.forEach(s -> contentBuilder.append(s).append("\n"));
+    } catch (IOException e) {
+      throw new MessagingException("Error reading in email");
+    }
+    String string = contentBuilder.toString();
+    Map<String, String> replaceMap = new HashMap<>();
+    replaceMap.put("USERNAME", user.getPrimaryEmail());
+    replaceMap.put("PASSWORD", password);
+    replaceMap.put("URL", workbenchConfigProvider.get().admin.loginPage);
+    replaceMap.put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"));
+    replaceMap.put("BULLET_1", cloudStorageService.getImageUrl("bullet_1.png"));
+    replaceMap.put("BULLET_2", cloudStorageService.getImageUrl("bullet_2.png"));
+    StrSubstitutor email = new StrSubstitutor(replaceMap);
+    return email.replace(string);
   }
 
   private ImmutablePair<Status, String> trySend(MandrillApiKeyAndMessage keyAndMessage) {

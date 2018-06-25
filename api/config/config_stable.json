@@ -20,7 +20,8 @@
     "debugQueries": true
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "all-of-us-rw-stable-credentials"
+    "credentialsBucketName": "all-of-us-rw-stable-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "stable.fake-research-aou.org"
@@ -32,7 +33,8 @@
   "admin": {
     "adminIdVerification": "stable-environment-manual-id-verification-requests@fake-research-aou.org",
     "supportGroup": "all-of-us-workbench-eng@googlegroups.com",
-    "verifiedSendingAddress": "all-of-us-workbench-eng@googlegroups.com"
+    "verifiedSendingAddress": "all-of-us-workbench-eng@googlegroups.com",
+    "loginPage": "http:\/\/all-of-us-workbench-stable.appspot.com/login"
   },
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",

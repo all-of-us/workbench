@@ -35,6 +35,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return mandrillKeys.getString("api-key");
   }
 
+  public String getImageUrl(String image_name) {
+    return "http://storage.googleapis.com/" + getImagesBucketName() + "/" + image_name;
+  }
+
   @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
@@ -45,6 +49,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   String getCredentialsBucketName() {
     return configProvider.get().googleCloudStorageService.credentialsBucketName;
+  }
+
+  String getImagesBucketName() {
+    return configProvider.get().googleCloudStorageService.emailImagesBucketName;
   }
 
   String readToString(String bucketName, String objectPath) {

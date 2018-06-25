@@ -44,6 +44,7 @@ public class WorkbenchConfig {
 
   public static class GoogleCloudStorageServiceConfig {
     public String credentialsBucketName;
+    public String emailImagesBucketName;
   }
 
   public static class GoogleDirectoryServiceConfig {
@@ -59,6 +60,7 @@ public class WorkbenchConfig {
     public String adminIdVerification;
     public String supportGroup;
     public String verifiedSendingAddress;
+    public String loginPage;
   }
 
   public static class MandrillConfig {
