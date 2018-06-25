@@ -464,7 +464,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void updateUser(UpdateContactEmailRequest updateRequest) {
+  private void updateUser(UpdateContactEmailRequest updateRequest) throws MessagingException {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(updateRequest.getUsername());
     String contactEmail = updateRequest.getContactEmail();
