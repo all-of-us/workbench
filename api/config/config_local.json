@@ -36,6 +36,7 @@
   "jira": {
     "projectKey": "RW",
     "issueType": "Bug"
+  },
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3

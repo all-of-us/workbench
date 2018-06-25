@@ -114,6 +114,7 @@ task generateMandrillClient {
   doLast {
     def config = new CodegenConfigurator()
     config.setInputSpec("file:///$projectDir/$mandrillApiFile")
+    config.setAdditionalProperties([
             'invokerPackage'   : 'org.pmiops.workbench.mandrill',
             'modelPackage'     : 'org.pmiops.workbench.mandrill.model',
             'apiPackage'       : 'org.pmiops.workbench.mandrill.api',
