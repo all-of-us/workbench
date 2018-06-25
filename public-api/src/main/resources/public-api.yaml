@@ -119,13 +119,13 @@ paths:
           schema:
             $ref: "#/definitions/DbDomainListResponse"
 
-  /v1/databrowser/advanced-concept-search:
+  /v1/databrowser/searchConcepts:
     post:
       security: []
       tags:
         - dataBrowser
       description: Gets list of matched concepts
-      operationId: "getAdvancedConceptSearch"
+      operationId: "searchConcepts"
       parameters:
         - in: body
           name: request
@@ -182,37 +182,6 @@ paths:
           description: A collection of surveys
           schema:
             $ref: "#/definitions/DbDomainListResponse"
-
-  /v1/databrowser/search-concepts:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Searches for concepts in concept table with search string and filters
-      operationId: "getConceptsSearch"
-      parameters:
-        - in: query
-          name: concept_name
-          type: string
-          required: false
-          description: concept name search string
-        - in: query
-          name: standard_concept
-          type: string
-          required: false
-          description: standard concept filter
-        - in: query
-          name: domain_id
-          type: string
-          required: false
-          description: vocabulary id filter
-      responses:
-        200:
-          description: A collection of concepts
-          schema:
-            $ref: "#/definitions/ConceptListResponse"
-
 
   /v1/databrowser/source-concepts:
     get:
@@ -559,7 +528,7 @@ definitions:
   StandardConceptFilter:
     type: string
     description: filter on whether standard, non-standard, or all concepts should be returned\
-    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS]
+    enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS, STANDARD_OR_CODE_ID_MATCH]
   Domain:
     type: string
     description: filter on the domain in which concepts should be returned

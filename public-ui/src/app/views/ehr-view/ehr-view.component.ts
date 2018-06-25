@@ -105,11 +105,12 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.searchRequest = {
       query: query,
       domain: this.dbDomain.domainId.toUpperCase(),
-      standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
-      maxResults: maxResults;
+      standardConceptFilter: StandardConceptFilter.STANDARDORCODEIDMATCH
+      ,
+      maxResults: maxResults
     };
     this.prevSearchText = query;
-    return this.api.getAdvancedConceptSearch(this.searchRequest);
+    return this.api.searchConcepts(this.searchRequest);
   }
 
 
