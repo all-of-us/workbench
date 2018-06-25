@@ -13,6 +13,7 @@ import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -466,6 +467,12 @@ public class ProfileController implements ProfileApiDelegate {
   private void updateUser(UpdateContactEmailRequest updateRequest) {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(updateRequest.getUsername());
+    try {
+      InternetAddress email = new InternetAddress(updateRequest.getContactEmail());
+      email.validate();
+    } catch (AddressException e) {
+      throw new MessagingException("Email: " + contactEmail + " is invalid.");
+    }
     googleUser.setPrimaryEmail(updateRequest.getContactEmail());
     User user = userDao.findUserByEmail(updateRequest.getUsername());
     user.setContactEmail(updateRequest.getContactEmail());
