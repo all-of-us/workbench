@@ -49,6 +49,7 @@ export class AccountCreationModalsComponent implements OnInit {
   }
 
   send() {
-    this.profileService.resendWelcomeEmail(this.username + "@" + this.gsuiteDomain).subscribe(() => {});
+    this.profileService.resendWelcomeEmail(this.username + '@' + this.gsuiteDomain)
+      .subscribe(() => {});
   }
 }
