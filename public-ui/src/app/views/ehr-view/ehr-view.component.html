@@ -1,0 +1,113 @@
+
+
+<div class="row">
+  <div class="col-xs-12">
+    <h2 class="title">  {{title}} </h2>
+  </div>
+  <div class="col-md-6 col-sm-12 col-xs-12">
+    <div class="white-card-box" >
+      <div class="row search  flex-items-xs-between">
+        <div class="col-xs-12 flex-xs-middle search-input-full">
+          <div class="search-wrapper ">
+            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+            <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Top summary boxes -- only show if have results -->
+<div class="row" *ngIf="items.length > 0">
+  <div class="col-xs-12">
+    <div class="white-card-box top-stat one-row">
+      <div class="row" >
+        <div class="col-md-4 col-xs-12">
+          <h5 class="box-title">
+            {{dbDomain.domainDisplay}}
+          </h5>
+          <div class="card-stat" >
+            {{items.length}}
+          </div>
+          <div class="card-text">
+            matching medical concepts.
+          </div>
+          <div class="card-text bottom info-text">
+
+          </div>
+        </div>
+        <div class="col-md-8 col-xs-12 chart-wrapper flex-xs-middle">
+            <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="db-page-spinner" *ngIf="loading" >
+  <span  class="spinner">
+    Loading...
+  </span>
+</div>
+
+<div  class="row result-list">
+  <div class="col-xs-12">
+    <div class="white-card-box">
+
+      <div class="results-grid" *ngIf="items.length > 0" >
+        <div class="row" *ngIf="items.length === 1 && items[0].standardConcept != 'S'">
+          <div class="col-xs-12 db-alert">
+            <clr-alert  [clrAlertClosable]="false" [clrAlertType]="info">
+              Note: {{items[0].vocabularyId}} {{items[0].conceptCode}} "{{items[0].conceptName}}"
+              maps to a Standard Vocabulary {{standardConcepts[0].vocabularyId}} {{standardConcepts[0].conceptCode}}
+              and any listed below. Standard vocabularies capture data across a variety of source vocabularies.
+            </clr-alert>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
+          <div class="col-md-4 grid-header flex-xs-middle"> Number of particpants </div>
+          <div class="col-md-4 grid-header flex-xs-middle info-text"> <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon> What is SNOMED? </div>
+        </div>
+        <div class="row expandable-grid-row" *ngFor="let r of items.concat(standardConcepts), let i = index" [ngClass]="{'expanded-grid-row': r.expanded}" >
+          <div class="col-md-4 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}"> </div>
+          <div class="col-md-4 flex-xs-middle">
+            {{r.countValue | number }} partipants
+            <button class="icon-btn" (click)="r.expanded = !r.expanded">
+              <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
+            </button>
+          </div>
+          <div class="col-md-4 flex-xs-middle">
+            {{r.vocabularyId}} {{r.conceptCode}}
+            <button class="icon-btn" (click)="toggleSources(r)" > <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem; color: #2691D0;"></clr-icon> </button>
+          </div>
+          <!-- <div class="col-md-1 flex-xs-middle">
+            <button class="icon-btn" (click)="r.expanded = !r.expanded">
+              <clr-icon shape="bar-chart" style="height: 24px; color: #2691D0;"></clr-icon>
+            </button>
+          </div> -->
+          <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded">
+            <app-concept-charts [concept]="r" [showSources]="r.showSources" [backgroundColor]="'#ECF1F4'"></app-concept-charts>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-grid">
+        <div class="row" *ngIf="!loading && items.length === 0">
+          <div class="col-xs-12">
+            <h5 class="no-results"> No results match your search. </h5>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 col-xs-12">
+            <button class="btn btn-primary btn-sm" [routerLink]="['/quick-search']"> Back to Quick Search </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,151 @@
+<div class="survey-view">
+
+  <div class="row">
+
+    <div class="col-xs-12">
+      <div class="page-header">
+        <div *ngIf="survey && survey.conceptId">
+          <h2> {{survey.domainDisplay}} Survey Module </h2>
+          <h4 class="view-sub-title">{{survey.domainDesc}}. </h4>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="col-md-4 col-sm-6 col-xs-12">
+      <div class="white-card-box top-stat">
+        <div class="row ">
+          <div class="col-xs-12">
+            <h5 class="box-title">
+              Number Completed
+            </h5>
+            <div class="card-stat">
+              {{survey.countValue | number }}
+            </div>
+            <div class="card-text">
+              partipants completed this survey
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 col-sm-6 col-xs-12">
+      <div class="white-card-box top-stat">
+        <div class="row ">
+          <div class="col-xs-12">
+            <h5 class="box-title">
+              Questions
+            </h5>
+            <div class="card-stat">
+              <span *ngIf="loading" class="spinner spinner-md"> </span>
+              <span *ngIf="!loading" >{{ surveyResult.items.length }} </span>
+            </div>
+            <div class="card-text">
+              questions on this survey
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="survey-results" *ngIf="resultsComplete">
+
+    <div class="row search">
+      <div class="col-xs-12 flex-xs-middle search-input-full ">
+        <div class="search-wrapper">
+          <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+          <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
+        </div>
+      </div>
+    </div>
+
+    <div class="row box-sub-title">
+      <div *ngIf="loading" class="col-xs-12 flex">
+        <span *ngIf="loading" class="spinner spinner-md"> </span>
+      </div>
+      <div class="col-xs-12 flex" *ngIf="searchText.value.length > 0">
+        <p class="results-heading no-results" *ngIf="questions.length === 0 && !loading">
+          <span *ngIf="searchMethod === 'and'"> No questions match *ALL* keywords: <mark> {{searchText.value}}</mark>.
+            <span  class="search-extra"> <button class="btn btn-link" (click)="setSearchMethod('or')">Match any keyword</button> </span>
+          </span>
+          <span *ngIf="searchMethod === 'or'"> No questions match any of the keywords: <mark> {{searchText.value}}</mark>.
+            <span  class="search-extra"> <button class="btn btn-link" (click)="setSearchMethod('or', true)">Reset search</button></span>
+          </span>
+        </p>
+        <p class="results-heading" *ngIf="questions.length > 0 && !loading">
+          <span *ngIf="searchMethod==='or'" >
+            <b> {{questions.length}} </b> questions match <b>*ANY*</b> keyword: <mark>{{searchText.value}}</mark>.
+            <button class="btn btn-link" (click)="setSearchMethod('and')">Match all keywords</button>
+          </span>
+          <span *ngIf="searchMethod==='and'" >
+            <span> <b> {{questions.length}} </b> questions match <b>*ALL*</b> keywords: <mark>{{searchText.value}}</mark>.</span>
+            <button class="btn btn-link" (click)="setSearchMethod('or')">Match any keyword</button>
+          </span>
+        </p>
+      </div>
+      <div class="col-xs-12">
+      Click on each response to view age and gender distributions.
+      </div>
+    </div>
+    <div class="row question-result" *ngFor="let q of questions, let i = index">
+
+      <div class=" question-card">
+
+        <div class="row question">
+
+          <div class="col-xs-12 col-sm-12">
+            <div class="box-title"> Question {{i + 1}}</div>
+            <div class="box-sub-title question" innerHtml="{{ q.conceptName | highlightSearch : searchText.value}} ({{q.conceptId}})">   </div>
+          </div>
+
+          <!-- Don't show this chart <div class="col-md-6 col-xs-12 col-sm-6 answers-bar-col">
+            <div class="chart-wrapper">
+              <app-chart *ngIf="q.countAnalysis" [analysis]="q.countAnalysis" [chartType]="'bar'" (resultClicked)="graphAnswerClicked(item)"></app-chart>
+            </div>
+          </div>-->
+
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+              <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
+            </div>
+        </div>
+
+        <div class="row flex-items-xs-middle answers" [hidden]="!showAnswer[q.conceptId]">
+          <div class="col-md-5 col-sm-5 col-xs-12 answer-list">
+            <div *ngFor="let a of q.countAnalysis.results"  >
+              <div class="answer-text" (click)="showAnswerGraphs(q, a)" [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
+                <label innerHtml="{{a.stratum4 | highlightSearch : searchText.value }}"> {{a.stratum4}} </label>
+                <label class="participant-count"> -- {{a.countValue | number}}  </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-7 col-sm-7 col-xs-12 answer-charts">
+            <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer" >
+              <div class="chart-wrapper col-md-6 col-sm-12">
+                <app-chart [analysis]="q.genderAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
+              </div>
+              <div class="chart-wrapper age col-md-6 col-sm-12">
+                <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
+              </div>
+
+            </div>
+          </div>
+        </div> <!-- end collapsible answers -->
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,14 @@
+.row.search {
+    margin: .25rem;
+}
+.white-card-box{
+    padding: .25rem;
+}
+.white-card-box.top-stat {
+    padding: 1rem;
+}
+
+.emphatic-red {
+    color: red;
+}
+

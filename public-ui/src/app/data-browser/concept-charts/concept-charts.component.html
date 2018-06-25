@@ -1,0 +1,19 @@
+<div class="db-page-spinner" *ngIf="loading" >
+  <span  class="spinner">
+    Loading...
+  </span>
+</div>
+
+<div class="row concept-charts chart"  >
+  <div class="col-md-4 col-xs-12" *ngIf="showGender && genderAnalysis"  >
+    <app-chart [analysis]="genderAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
+  </div>
+  <div class="col-md-4 col-xs-12 chart" *ngIf="showAge && ageAnalysis" >
+    <app-chart [analysis]="ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
+  </div>
+
+  <div class="col-md-4 col-xs-12 chart"  *ngIf="showSources && ageAnalysis && sourceConcepts && sourceConcepts.length">
+    <!--<button class="btn btn-link btn-sm" (click)="toggleSourceConcepts()"> Show Sources </button>-->
+    <app-chart [concepts]="sourceConcepts" [pointWidth]="20" [backgroundColor]="backgroundColor" [chartTitle]="'Sources'"> </app-chart>
+  </div>
+</div>
