@@ -467,15 +467,16 @@ public class ProfileController implements ProfileApiDelegate {
   private void updateUser(UpdateContactEmailRequest updateRequest) {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(updateRequest.getUsername());
+    contactEmail = updateRequest.getContactEmail();
     try {
-      InternetAddress email = new InternetAddress(updateRequest.getContactEmail());
+      InternetAddress email = new InternetAddress(contactEmail);
       email.validate();
     } catch (AddressException e) {
       throw new MessagingException("Email: " + contactEmail + " is invalid.");
     }
-    googleUser.setPrimaryEmail(updateRequest.getContactEmail());
+    googleUser.setPrimaryEmail(contactEmail);
     User user = userDao.findUserByEmail(updateRequest.getUsername());
-    user.setContactEmail(updateRequest.getContactEmail());
+    user.setContactEmail(contactEmail);
     userDao.save(user);
   }
 
