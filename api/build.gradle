@@ -114,6 +114,9 @@ task generateMandrillClient {
   doLast {
     def config = new CodegenConfigurator()
     config.setInputSpec("file:///$projectDir/$mandrillApiFile")
+    config.setOutputDir("$projectDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
+    config.setLang('java')
     config.setAdditionalProperties([
             'invokerPackage'   : 'org.pmiops.workbench.mandrill',
             'modelPackage'     : 'org.pmiops.workbench.mandrill.model',
@@ -270,22 +273,12 @@ dependencies {
   compile 'joda-time:joda-time:+'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
-
-  compile 'org.apache.commons:commons-lang3:3.7'
-  compile 'commons-io:commons-io:2.6'
-  compile 'org.apache.commons:commons-io:1.3.2'
-
-  compile 'com.blockscore:blockscore-java:4.0.2'
+  compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.guava:guava:24.1.1-jre'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
- // compile 'org.json:json:20160810'
-  compile 'javax.json:javax.json-api:1.0'
- // compile 'org.glassfish:javax.json:1.0.4'
-  compile 'com.sun.jersey:jersey-client:1.19.3'
-  compile 'org.apache.httpcomponents:httpmime:4.3.1'
-
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
+  compile 'org.json:json:20160810'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.+'
@@ -296,7 +289,6 @@ dependencies {
   testCompile 'com.h2database:h2:+'
   testCompile 'org.liquibase:liquibase-core:+'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
-
 
   // For Swagger generation. These should include dependencies found in the Swagger codegen
   // example here:
@@ -413,7 +405,7 @@ targetCompatibility = 1.8
 // Custom task based on https://docs.gradle.org/2.5/userguide/custom_tasks.html#incremental_tasks
 class IncrementalHotSwapTask extends DefaultTask {
     @InputDirectory
-    File inputDir
+    def File inputDir
 
     @TaskAction
     void execute(IncrementalTaskInputs inputs) {
@@ -443,7 +435,5 @@ class IncrementalHotSwapTask extends DefaultTask {
 task incrementalHotSwap(type: IncrementalHotSwapTask) {
     inputDir = sourceSets.main.java.outputDir
 }
-test {
-  testLogging.showStandardStreams = true
-}
+
 incrementalHotSwap.dependsOn compileJava
