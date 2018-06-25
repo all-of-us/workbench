@@ -29,6 +29,16 @@ h3 {
   margin: 1rem 0rem 0rem 1rem;
 }
 
+.spinner-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+.spinner {
+  margin-top: 1rem;
+}
+
 .notebook-table-row {
   cursor: pointer;
 }
