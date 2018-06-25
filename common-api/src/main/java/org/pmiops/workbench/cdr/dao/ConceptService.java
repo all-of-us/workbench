@@ -22,7 +22,8 @@ public class ConceptService {
     public enum StandardConceptFilter {
         ALL_CONCEPTS,
         STANDARD_CONCEPTS,
-        NON_STANDARD_CONCEPTS
+        NON_STANDARD_CONCEPTS,
+        STANDARD_OR_CODE_ID_MATCH
     }
 
     @PersistenceContext(unitName = "cdr")
@@ -41,26 +42,32 @@ public class ConceptService {
         String[] keywords = query.split("[,+\\s+]");
         for(int i = 0; i < keywords.length; i++){
             String key = keywords[i];
-            if(key.length() < 3){
+            if(key.length() < 3 && !key.isEmpty()){
                 key = "\"" + key + "\"";
                 keywords[i] = key;
             }
         }
 
-        String query2 = "";
+        StringBuilder query2 = new StringBuilder();
         for(String key : keywords){
-            if(query2.isEmpty()){
-                query2 = "+" + key;
-            }else if(key.contains("\"")){
-                query2 = query2 + key;
-            }else{
-                query2 = query2+ "+"+ key;
+            if(!key.isEmpty()){
+                if(query2.length()==0){
+                    query2.append("+");
+                    query2.append(key);
+                }else if(key.contains("\"")){
+                    query2.append(key);
+                }else{
+                    query2.append("+");
+                    query2.append(key);
+                }
             }
+
         }
-        return query2;
+        return query2.toString();
     }
 
     public static final String STANDARD_CONCEPT_CODE = "S";
+    public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
     public Slice<Concept> searchConcepts(String query,
                                          StandardConceptFilter standardConceptFilter, List<String> vocabularyIds,
@@ -74,42 +81,100 @@ public class ConceptService {
                     List<Predicate> predicates = new ArrayList<>();
 
                     // Check that the concept name, code, or ID matches the query string.
-                    List<Predicate> queryPredicates = new ArrayList<>();
-                    Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
-                            root.get("conceptName"), criteriaBuilder.literal(keyword));
-                    queryPredicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                    queryPredicates.add(criteriaBuilder.equal(root.get("conceptCode"),
+                    List<Predicate> conceptCodeIDName = new ArrayList<>();
+
+                    conceptCodeIDName.add(criteriaBuilder.equal(root.get("conceptCode"),
                             criteriaBuilder.literal(query)));
+
                     try {
                         long conceptId = Long.parseLong(query);
-                        queryPredicates.add(criteriaBuilder.equal(root.get("conceptId"),
+                        conceptCodeIDName.add(criteriaBuilder.equal(root.get("conceptId"),
                                 criteriaBuilder.literal(conceptId)));
                     } catch (NumberFormatException e) {
                         // Not a long, don't try to match it to a concept ID.
                     }
-                    predicates.add(criteriaBuilder.or(queryPredicates.toArray(new Predicate[0])));
+
+
+                    Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
+                            root.get("conceptName"), criteriaBuilder.literal(keyword));
+
 
                     // Optionally filter on standard concept, vocabulary ID, domain ID
                     if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
-                        predicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                        conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        conceptCodeIDName.toArray(new Predicate[0])
+                                )
+                        );
+
+                        List<Predicate> standardConceptPredicates = new ArrayList<>();
+                        standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
                                 criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+                        standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                                criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
+
+                        predicates.add(
+                                criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0]))
+                        );
+
                     } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
+                        conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        conceptCodeIDName.toArray(new Predicate[0])
+                                )
+                        );
+
                         List<Predicate> standardConceptPredicates = new ArrayList<>();
                         standardConceptPredicates.add(criteriaBuilder.isNull(root.get("standardConcept")));
                         standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                                 criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-                        predicates.add(criteriaBuilder.or(
+                        standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
+                                criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
+
+                        predicates.add(
+                               criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0]))
+                        );
+
+
+                    } else if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
+
+                        List<Predicate> conceptNameFilter = new ArrayList<>();
+                        conceptNameFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+
+                        List<Predicate> standardConceptPredicates = new ArrayList<>();
+                        standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                                criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+                        standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                                criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
+                        conceptNameFilter.add(criteriaBuilder.or(
                                 standardConceptPredicates.toArray(new Predicate[0])));
+
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])),
+                                        criteriaBuilder.and(conceptNameFilter.toArray(new Predicate[0]))
+                                ));
+                    } else {
+                        conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        conceptCodeIDName.toArray(new Predicate[0])
+                                )
+                        );
                     }
+
+
                     if (vocabularyIds != null) {
                         predicates.add(root.get("vocabularyId").in(vocabularyIds));
                     }
                     if (domainIds != null) {
                         predicates.add(root.get("domainId").in(domainIds));
                     }
+
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
-
         // Return up to limit results, sorted in descending count value order.
         Pageable pageable = new PageRequest(0, limit,
                 new Sort(Direction.DESC, "countValue"));

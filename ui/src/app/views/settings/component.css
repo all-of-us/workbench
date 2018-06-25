@@ -1,3 +1,9 @@
 .notebook-settings {
   margin-top: 1rem;
 }
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}

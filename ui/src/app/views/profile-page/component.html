@@ -80,7 +80,7 @@
     </div>
     <div class="field-wrapper" style="padding-right: 2rem;">
       <h3 class="profile-header" style="margin-top: 0">Profile Completion Progress:</h3>
-      <div class="card" style="height: 10.4rem;">
+      <div class="card">
         <div style="display: flex; align-items: center;">
           <div style="height: 7.8rem;">
             <ngx-charts-pie-chart
@@ -97,9 +97,9 @@
           <div *ngIf="profileLoaded">
             <div>
               <button class="btn btn-secondary" (click)="requestVerification()"
-                      [disabled]="workingProfile.blockscoreIdVerificationStatus === 'VERIFIED' || workingProfile.requestedIdVerification">
+                      [disabled]="workingProfile.idVerificationStatus === 'VERIFIED' || workingProfile.requestedIdVerification">
                 Submit Identity Verification
-                <clr-tooltip *ngIf="workingProfile.blockscoreIdVerificationStatus === 'REJECTED'">
+                <clr-tooltip *ngIf="workingProfile.idVerificationStatus === 'REJECTED'">
                   <clr-icon clrTooltipTrigger shape="warning-standard"></clr-icon>
                   <clr-tooltip-content clrPosition="top-left" clrSize="md" *clrIfOpen>
                     <span>Your identity could not be verified. Please try again or contact an administrator</span>
@@ -128,6 +128,22 @@
               </button>
             </div>
           </div>
+        </div>
+        <div *ngIf="termsOfServiceError" class="error">
+          <div> Error submitting terms of service. Please <a (click)="submitTermsOfServiceBugReport()">submit a bug report.</a></div>
+          <clr-icon style="margin-left: 1rem;" shape="times" (click)="termsOfServiceError = false"></clr-icon>
+        </div>
+        <div *ngIf="ethicsTrainingError" class="error">
+          <div> Error submitting ethics training. Please <a (click)="submitEthicsTrainingBugReport()">submit a bug report.</a></div>
+          <clr-icon style="margin-left: 1rem;" shape="times" (click)="ethicsTrainingError = false"></clr-icon>
+        </div>
+        <div *ngIf="demographicSurveyError" class="error">
+          <div> Error submitting demographics survey. Please <a (click)="submitDemographicsSurveyBugReport()">submit a bug report.</a></div>
+          <clr-icon style="margin-left: 1rem;" shape="times" (click)="demographicSurveyError = false"></clr-icon>
+        </div>
+        <div *ngIf="idVerificationError" class="error">
+          <div> Error submitting identity verification. Please <a (click)="submitIdVerificationBugReport()">submit a bug report.</a></div>
+          <clr-icon style="margin-left: 1rem;" shape="times" (click)="idVerificationError = false"></clr-icon>
         </div>
       </div>
     </div>
@@ -169,3 +185,4 @@
     </div>
   </div>
 </div>
+<app-bug-report></app-bug-report>

@@ -43,8 +43,7 @@ public class User {
   private Timestamp firstSignInTime;
   private Set<Authority> authorities = new HashSet<Authority>();
   private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
-  private String blockscoreId;
-  private Boolean blockscoreVerificationIsValid;
+  private Boolean idVerificationIsValid;
   private Timestamp termsOfServiceCompletionTime;
   private Timestamp ethicsTrainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
@@ -58,6 +57,7 @@ public class User {
   private String areaOfResearch;
   private Boolean twoFactorEnabled = false;
   private Integer clusterCreateRetries;
+  private Integer billingProjectRetries;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -183,20 +183,12 @@ public class User {
     this.workspaceUserRoles = userRoles;
   }
 
-  @Column(name = "blockscore_id")
-  public String getBlockscoreId() {
-    return blockscoreId;
+  @Column(name = "id_verification_is_valid")
+  public Boolean getIdVerificationIsValid() {
+    return idVerificationIsValid;
   }
-  public void setBlockscoreId(String blockscoreId) {
-    this.blockscoreId = blockscoreId;
-  }
-
-  @Column(name = "blockscore_verification_is_valid")
-  public Boolean getBlockscoreVerificationIsValid() {
-    return blockscoreVerificationIsValid;
-  }
-  public void setBlockscoreVerificationIsValid(Boolean value) {
-    blockscoreVerificationIsValid = value;
+  public void setIdVerificationIsValid(Boolean value) {
+    idVerificationIsValid = value;
   }
 
   @Column(name = "terms_of_service_completion_time")
@@ -305,5 +297,14 @@ public class User {
 
   public void setClusterCreateRetries(Integer clusterCreateRetries) {
     this.clusterCreateRetries = clusterCreateRetries;
+  }
+
+  @Column(name = "billing_project_retries")
+  public Integer getBillingProjectRetries() {
+    return billingProjectRetries;
+  }
+
+  public void setBillingProjectRetries(Integer billingProjectRetries) {
+    this.billingProjectRetries = billingProjectRetries;
   }
 }

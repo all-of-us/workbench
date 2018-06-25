@@ -38,6 +38,14 @@
     <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>
   </span>
 </clr-button-group>
+<clr-modal [(clrModalOpen)]="workspaceDeletionError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not delete workspace '{{workspace.name}}'. Please <a (click)="submitWorkspaceDeleteBugReport()">submit a bug report.</a></div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="workspaceDeletionError = false">Ok</button>
+  </div>
+</clr-modal>
 
 <app-workspace-share></app-workspace-share>
+<app-bug-report></app-bug-report>
 <router-outlet></router-outlet>

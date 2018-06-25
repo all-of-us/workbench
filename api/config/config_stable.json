@@ -7,7 +7,8 @@
     "debugEndpoints": false,
     "enforceRegistered": false,
     "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-stable-scripts/setup_notebook_cluster.sh",
-    "registeredDomainName": "all-of-us-registered-stable"
+    "registeredDomainName": "all-of-us-registered-stable",
+    "billingRetryCount": 2
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-rw-stable@appspot.gserviceaccount.com" ]
@@ -30,5 +31,9 @@
     "adminIdVerification": "stable-environment-manual-id-verification-requests@fake-research-aou.org",
     "supportGroup": "all-of-us-workbench-eng@googlegroups.com",
     "verifiedSendingAddress": "all-of-us-workbench-eng@googlegroups.com"
+  },
+  "mandrill": {
+    "fromEmail": "donotreply@fake-research-aou.org",
+    "sendRetries": 3
   }
 }

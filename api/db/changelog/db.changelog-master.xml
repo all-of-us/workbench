@@ -47,4 +47,7 @@
   <include file="changelog/db.changelog-37-add-two-factor-column.xml"/>
   <include file="changelog/db.changelog-38.xml"/>
   <include file="changelog/db.changelog-39-add-cluster-retry-number.xml"/>
+  <include file="changelog/db.changelog-40-remove-blockscore.xml"/>
+  <include file="changelog/db.changelog-41-billing-project-retry.xml"/>
+  <include file="changelog/db.changelog-42-rename-billing-project-retries.xml"/>
 </databaseChangeLog>

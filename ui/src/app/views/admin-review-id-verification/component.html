@@ -7,7 +7,7 @@
     <clr-dg-column [style.width.%]="15">Action</clr-dg-column>
     <clr-dg-placeholder>No rejected or unverified profiles found.</clr-dg-placeholder>
     <clr-dg-row *clrDgItems="let profile of profiles" class="table-row workspace-table-row">
-      <clr-dg-cell>{{profile.blockscoreIdVerificationStatus | lowercase}}</clr-dg-cell>
+      <clr-dg-cell>{{profile.idVerificationStatus | lowercase}}</clr-dg-cell>
       <clr-dg-cell>{{profile.familyName}}, {{profile.givenName}}</clr-dg-cell>
       <clr-dg-cell>{{profile.username}}</clr-dg-cell>
       <clr-dg-cell>{{profile.contactEmail}}</clr-dg-cell>

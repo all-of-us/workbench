@@ -29,6 +29,10 @@
       </div>
     </div>
     <div class="modal-footer">
+      <div *ngIf="sendBugReportError" class="error">
+        Error sending the bug report.
+        <clr-icon style="margin-left: 1rem;" shape="times" (click)="sendBugReportError = false"></clr-icon>
+      </div>
       <button type="button" class="btn btn-outline" (click)="reporting=false">Cancel</button>
       <button id="send-bug-report" type="button" class="btn btn-primary" (click)="send()">Send</button>
     </div>

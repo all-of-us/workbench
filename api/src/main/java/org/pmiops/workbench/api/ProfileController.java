@@ -39,7 +39,7 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
-import org.pmiops.workbench.model.BlockscoreIdVerificationStatus;
+import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -150,6 +150,10 @@ public class ProfileController implements ProfileApiDelegate {
     // If the user is already registered, their profile will get updated.
     fireCloudService.registerUser(user.getContactEmail(),
         user.getGivenName(), user.getFamilyName());
+    return createFirecloudBillingProject(user);
+  }
+
+  private String createFirecloudBillingProject(User user) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     long suffix;
     if (workbenchEnvironment.isDevelopment()) {
@@ -269,11 +273,24 @@ public class ProfileController implements ProfileApiDelegate {
         return user;
 
       case ERROR:
-        log.log(Level.SEVERE, String.format(
-            "free tier project %s failed to be created", user.getFreeTierBillingProjectName()));
-        user.setFreeTierBillingProjectStatus(status);
-        return userDao.save(user);
-
+        int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
+        if (retries < workbenchConfigProvider.get().firecloud.billingRetryCount) {
+          this.userService.setBillingRetryCount(retries + 1);
+          log.log(Level.INFO, String.format(
+              "Billing project %s failed to be created, retrying.", user.getFreeTierBillingProjectName()));
+          try {
+            fireCloudService.removeUserFromBillingProject(user.getEmail(), user.getFreeTierBillingProjectName());
+          } catch (WorkbenchException e) {
+            log.log(Level.INFO, String.format("Failed to remove user from errored billing project"));
+          }
+          String billingProjectName = createFirecloudBillingProject(user);
+          return this.userService.setBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
+        } else {
+          String billingProjectName = user.getFreeTierBillingProjectName();
+          log.log(Level.SEVERE, String.format(
+              "free tier project %s failed to be created", billingProjectName));
+          return userService.setBillingProjectNameAndStatus(billingProjectName, status);
+        }
       case READY:
         break;
 
@@ -306,8 +323,7 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (GatewayTimeoutException e) {
       log.log(Level.WARNING, "Socket Timeout creating cluster.");
     }
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
-    return userDao.save(user);
+    return userService.setBillingProjectNameAndStatus(user.getFreeTierBillingProjectName(), BillingProjectStatus.READY);
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
@@ -523,11 +539,11 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
-    BlockscoreIdVerificationStatus status = review.getNewStatus();
-    Boolean oldVerification = userDao.findUserByUserId(userId).getBlockscoreVerificationIsValid();
+    IdVerificationStatus status = review.getNewStatus();
+    Boolean oldVerification = userDao.findUserByUserId(userId).getIdVerificationIsValid();
     String newValue;
 
-    if (status == BlockscoreIdVerificationStatus.VERIFIED) {
+    if (status == IdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
       newValue = "true";
     } else {

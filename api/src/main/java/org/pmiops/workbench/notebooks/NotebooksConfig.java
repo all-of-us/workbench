@@ -1,7 +1,8 @@
 package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableList;
-
+import java.io.IOException;
+import java.util.List;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -15,20 +16,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
-import java.io.IOException;
-import java.util.List;
-
 @org.springframework.context.annotation.Configuration
 public class NotebooksConfig {
+  public static final String USER_CLUSTER_API = "userClusterApi";
   public static final String SERVICE_CLUSTER_API = "svcClusterApi";
-  private static final String NOTEBOOKS_CLIENT = "notebooksApiClient";
+  private static final String USER_NOTEBOOKS_CLIENT = "notebooksApiClient";
   private static final String NOTEBOOKS_SERVICE_CLIENT = "notebooksSvcApiClient";
 
   private static final List<String> NOTEBOOK_SCOPES = ImmutableList.of(
       "https://www.googleapis.com/auth/userinfo.profile",
       "https://www.googleapis.com/auth/userinfo.email");
 
-  @Bean(name=NOTEBOOKS_CLIENT)
+  @Bean(name=USER_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient notebooksApiClient(UserAuthentication userAuthentication,
       WorkbenchConfig workbenchConfig) {
@@ -53,9 +52,9 @@ public class NotebooksConfig {
     return apiClient;
   }
 
-  @Bean
+  @Bean(name=USER_CLUSTER_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ClusterApi clusterApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
+  public ClusterApi clusterApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
     ClusterApi api = new ClusterApi();
     api.setApiClient(apiClient);
     return api;
@@ -63,7 +62,7 @@ public class NotebooksConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public NotebooksApi notebooksApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
+  public NotebooksApi notebooksApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
     NotebooksApi api = new NotebooksApi();
     api.setApiClient(apiClient);
     return api;
@@ -71,7 +70,7 @@ public class NotebooksConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public JupyterApi jupyterApi(@Qualifier(NOTEBOOKS_CLIENT) ApiClient apiClient) {
+  public JupyterApi jupyterApi(@Qualifier(USER_NOTEBOOKS_CLIENT) ApiClient apiClient) {
     JupyterApi api = new JupyterApi();
     api.setApiClient(apiClient);
     return api;
