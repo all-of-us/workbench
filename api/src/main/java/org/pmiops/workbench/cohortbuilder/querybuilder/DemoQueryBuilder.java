@@ -43,9 +43,12 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
                     "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n" +
                     "where d.person_id = p.person_id)\n";
 
+    private static final String DEMO_ETH =
+      "p.ethnicity_concept_id in unnest(${eth})\n";
+
     private static final String AND_TEMPLATE = "and\n";
 
-    public enum DEMOTYPE { GEN, AGE, DEC, RACE };
+    public enum DEMOTYPE { GEN, AGE, DEC, RACE, ETH };
 
     @Override
     public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
@@ -54,8 +57,6 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
         List<String> queryParts = new ArrayList<>();
 
         for (String key : paramMap.keySet()) {
-            paramMap.get(key);
-
             if (key.equals(DEMOTYPE.GEN.name())) {
                 final String namedParameter = key.toLowerCase() + getUniqueNamedParameterPostfix();
                 queryParts.add(DEMO_GEN.replace("${gen}", "@" + namedParameter));
@@ -85,6 +86,10 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
                     throw new IllegalArgumentException("Dec must provide a value of: " + DECEASED);
                 }
 
+            } else if (key.equals(DEMOTYPE.ETH.name())) {
+                final String namedParameter = key.toLowerCase() + getUniqueNamedParameterPostfix();
+                queryParts.add(DEMO_ETH.replace("${eth}", "@" + namedParameter));
+                queryParams.put(namedParameter, QueryParameterValue.array(paramMap.get(key).stream().toArray(Long[]::new), Long.class));
             }
         }
 
