@@ -80,7 +80,8 @@ export function getConfiguration(signInService: SignInService): Configuration {
   });
 }
 
-export function getLeoConfiguration(signInService: SignInService): LeoConfiguration {
+export function getLeoConfiguration(
+    signInService: SignInService, configService: ConfigService): LeoConfiguration {
   return new LeoConfiguration({
     basePath: environment.leoApiUrl,
     accessToken: () => signInService.currentAccessToken
