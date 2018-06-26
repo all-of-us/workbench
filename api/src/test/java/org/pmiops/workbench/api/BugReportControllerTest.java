@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 
 import org.json.JSONObject;
 
@@ -31,7 +30,6 @@ import org.pmiops.workbench.model.BugReport;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
 import org.pmiops.workbench.notebooks.model.JupyterContents;
-import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -113,7 +111,7 @@ public class BugReportControllerTest {
      credentails.put("username", "mockUsername");
      credentails.put("password", "mockPassword");
      when(cloudStorageService.getJiraCredentials()).thenReturn(credentails);
-     Mockito.doNothing().when(jiraService).authenticate("mockUsername", "mockPassword");
+     Mockito.doNothing().when(jiraService).setJiraCredentials("mockUsername", "mockPassword");
      Mockito.doNothing().when(jiraService).createIssue(any());
      Mockito.doNothing().when(jiraService).attachLogFiles(any(), any());
    }
@@ -176,7 +174,5 @@ public class BugReportControllerTest {
     verify(jiraService,times(2)).attachLogFiles(any(),any());
 
   }
-
-
 
 }

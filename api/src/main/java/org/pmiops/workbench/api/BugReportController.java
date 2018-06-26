@@ -71,13 +71,13 @@ public class BugReportController implements BugReportApiDelegate {
     JiraService jiraService = jiraServiceProvider.get();
     try {
       JSONObject jiraCredentails = cloudStorageService.getJiraCredentials();
-      jiraService.authenticate(jiraCredentails.getString("username"),
+      jiraService.setJiraCredentials(jiraCredentails.getString("username"),
                                jiraCredentails.getString("password"));
 
       String issueKey = jiraService.createIssue(bugReport);
       if (Optional.ofNullable(bugReport.getIncludeNotebookLogs()).orElse(false) &&
           BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
-       for (String fileName : BugReportController.notebookLogFiles) {
+        for (String fileName : BugReportController.notebookLogFiles) {
           try {
             String logContent = jupyterApi.getRootContents(
                 user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME,
@@ -94,7 +94,7 @@ public class BugReportController implements BugReportApiDelegate {
         }
      }
     } catch (org.pmiops.workbench.jira.ApiException e) {
-      log.info("Error while connecting to JIRA server" + e.getMessage());
+      log.severe("Error while connecting to JIRA server" + e.getMessage());
       throw new ServerErrorException("Error while connecting to JIRA server ");
     }
    return ResponseEntity.ok(bugReport);
@@ -108,9 +108,8 @@ public class BugReportController implements BugReportApiDelegate {
       bw.close();
       return temp;
     } catch(IOException e){
-      log.info("Error while creating temprory log files");
+      log.severe("Error while creating temporary log files");
     }
     return null;
   }
 }
-

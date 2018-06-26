@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Provider;
@@ -36,7 +34,7 @@ public class JiraServiceImpl implements JiraService {
    * @param username
    * @param password
    */
-  public void authenticate(String username, String password){
+  public void setJiraCredentials(String username, String password){
     api.getApiClient().setUsername(username);
     api.getApiClient().setPassword(password);
   }

@@ -8,7 +8,6 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.common.collect.ImmutableList;
-
 import java.util.List;
 import javax.inject.Provider;
 
