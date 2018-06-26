@@ -1,6 +1,6 @@
 {
   "firecloud": {
-    "baseUrl": "https://api.firecloud.org",
+    "baseUrl": "https:\/\/api.firecloud.org",
     "billingAccountId": "014D91-FCB792-33D2C0",
     "billingProjectPrefix": "aou-rw-staging-",
     "clusterMaxAgeDays": 7,
@@ -8,7 +8,7 @@
     "debugEndpoints": false,
     "enforceRegistered": true,
     "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-staging-scripts/setup_notebook_cluster.sh",
-    "leoBaseUrl": "https://notebooks.firecloud.org",
+    "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-staging",
     "billingRetryCount": 2
   },

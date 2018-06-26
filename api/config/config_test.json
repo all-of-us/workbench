@@ -1,7 +1,7 @@
 // Configuration for the all-of-us-workbench-test.
 {
   "firecloud": {
-    "baseUrl": "https://firecloud-orchestration.dsde-dev.broadinstitute.org",
+    "baseUrl": "https:\/\/firecloud-orchestration.dsde-dev.broadinstitute.org",
     "billingAccountId": "014D91-FCB792-33D2C0",
     "billingProjectPrefix": "aou-rw-test-",
     "clusterMaxAgeDays": 7,
@@ -9,7 +9,7 @@
     "debugEndpoints": false,
     "enforceRegistered": false,
     "jupyterUserScriptUri": "gs:\/\/all-of-us-workbench-test-scripts/setup_notebook_cluster.sh",
-    "leoBaseUrl": "https://leonardo.dsde-dev.broadinstitute.org",
+    "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
     "billingRetryCount": 2
   },

@@ -80,9 +80,10 @@ export function getConfiguration(signInService: SignInService): Configuration {
   });
 }
 
-export function getLeoConfiguration(signInService: SignInService): LeoConfiguration {
+export function getLeoConfiguration(
+    signInService: SignInService, configService: ConfigService): LeoConfiguration {
   return new LeoConfiguration({
-    // TODO(RW-847): Inject the baseUrl according to the environment.
+    basePath: environment.leoApiUrl,
     accessToken: () => signInService.currentAccessToken
   });
 }

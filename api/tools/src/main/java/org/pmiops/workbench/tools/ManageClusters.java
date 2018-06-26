@@ -50,7 +50,7 @@ public class ManageClusters {
         .collect(Collectors.toSet());
   }
 
-  private static ClusterApi newApiClient(apiUrl) throws IOException {
+  private static ClusterApi newApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
     GoogleCredential credential = GoogleCredential.getApplicationDefault()
@@ -81,7 +81,7 @@ public class ManageClusters {
         clusterId(c), creator, status, c.getCreatedDate());
   }
 
-  private static void listClusters(apiUrl) throws IOException, ApiException {
+  private static void listClusters(String apiUrl) throws IOException, ApiException {
     AtomicInteger count = new AtomicInteger();
     newApiClient(apiUrl).listClusters(null, false).stream()
         .sorted(Comparator.comparing(c -> Instant.parse(c.getCreatedDate())))
