@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {ProfileService} from 'generated';
 import {UpdateContactEmailRequest} from 'generated';
-import {ServerConfigService} from "../../services/server-config.service";
+import {ServerConfigService} from '../../services/server-config.service';
 
 @Component({
   selector: 'app-account-creation-modals',
