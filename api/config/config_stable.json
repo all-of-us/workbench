@@ -32,6 +32,9 @@
     "supportGroup": "all-of-us-workbench-eng@googlegroups.com",
     "verifiedSendingAddress": "all-of-us-workbench-eng@googlegroups.com"
   },
+  "jira": {
+    "projectKey": "RW"
+  },
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3

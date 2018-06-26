@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.inject.Provider;
 
@@ -16,8 +18,13 @@ import javax.inject.Provider;
 @Service
 public class JiraServiceImpl implements JiraService {
 
+  private static final Logger log = Logger.getLogger(JiraServiceImpl.class.getName());
+
   private JiraApi api = new JiraApi();
   private final Provider<WorkbenchConfig> configProvider;
+  public enum IssueTypeEnum {
+    Bug
+  }
 
   @Autowired
   public JiraServiceImpl(Provider<WorkbenchConfig> configProvider) {
@@ -39,8 +46,9 @@ public class JiraServiceImpl implements JiraService {
    * @param bugReport
    * @return Issue number created
    */
-  public String createIssue(BugReport bugReport) {
-    bugReport.setReproSteps(bugReport.getReproSteps() +"\\n Contact Email: "+bugReport.getContactEmail());
+  public String createIssue(BugReport bugReport) throws ApiException {
+    bugReport.setReproSteps(bugReport.getReproSteps() + System.getProperty("line.separator")+
+        "Contact Email: "+bugReport.getContactEmail());
 
     IssueRequest issueDetails = new IssueRequest();
     IssueType issueType = new IssueType();
@@ -53,32 +61,25 @@ public class JiraServiceImpl implements JiraService {
     fieldsDetail.setSummary(bugReport.getShortDescription());
     fieldsDetail.setProject(projectDetails);
 
-    issueType.setName(configProvider.get().jira.issueType);
+    issueType.setName(IssueTypeEnum.Bug.name());
     fieldsDetail.setIssuetype(issueType);
 
     issueDetails.setFields(fieldsDetail);
-    try{
-      IssueResponse response = api.createIssue(issueDetails);
-      return response.getKey();
-    }
-    catch(Exception ex){
-      System.out.println(ex);
-    }
-      return "";
+    IssueResponse response = api.createIssue(issueDetails);
+    return response.getKey();
   }
 
   /**
    * Attach Log files to issue
    * @param issueKey : Issue Id number to which log files are to be attached
-   * @param fileList: List of attachments
+   * @param file: Attachment
    */
-  public void attachLogFiles(String issueKey, List<File> fileList) {
+  public void attachLogFiles(String issueKey, File file) throws ApiException {
+    api.addAttachments(issueKey, file,"nocheck");
     try {
-      for(File file: fileList) {
-        api.addAttachments(issueKey, file,"nocheck");
-      }
-    }catch(Exception ex){
-      System.out.println(ex);
+      file.delete();
+    } catch(SecurityException ex){
+      log.warning("Exception while deleting temp log files");
     }
     return;
   }

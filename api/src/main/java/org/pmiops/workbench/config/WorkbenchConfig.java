@@ -62,7 +62,6 @@ public class WorkbenchConfig {
 
   public static class JiraConfig {
     public String projectKey;
-    public String issueType;
   }
 
   public static class MandrillConfig {

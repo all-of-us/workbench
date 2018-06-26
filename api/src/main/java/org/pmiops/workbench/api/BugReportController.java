@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -18,13 +19,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
-import javax.mail.Session;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
-import java.util.ArrayList;
 
 
 @RestController
@@ -65,7 +67,6 @@ public class BugReportController implements BugReportApiDelegate {
     User user = userProvider.get();
     JupyterApi jupyterApi = jupyterApiProvider.get();
     Properties props = new Properties();
-    Session session = Session.getDefaultInstance(props, null);
     CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     JiraService jiraService = jiraServiceProvider.get();
     try {
@@ -76,7 +77,6 @@ public class BugReportController implements BugReportApiDelegate {
       String issueKey = jiraService.createIssue(bugReport);
       if (Optional.ofNullable(bugReport.getIncludeNotebookLogs()).orElse(false) &&
           BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
-       List<File> logAttachments = new ArrayList<File>();
        for (String fileName : BugReportController.notebookLogFiles) {
           try {
             String logContent = jupyterApi.getRootContents(
@@ -87,17 +87,15 @@ public class BugReportController implements BugReportApiDelegate {
                   String.format("Jupyter returned null content for '%s', continuing", fileName));
               continue;
             }
-            logAttachments.add(createTempFile(fileName,logContent));
+            jiraService.attachLogFiles(issueKey,createTempFile(fileName,logContent));
           } catch (ApiException e) {
             log.info(String.format("failed to retrieve notebook log '%s', continuing", fileName));
           }
         }
-        jiraService.attachLogFiles(issueKey,logAttachments);
-        for(File logs: logAttachments)
-          logs.delete();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
+     }
+    } catch (org.pmiops.workbench.jira.ApiException e) {
+      log.info("Error while connecting to JIRA server" + e.getMessage());
+      throw new ServerErrorException("Error while connecting to JIRA server ");
     }
    return ResponseEntity.ok(bugReport);
   }
@@ -110,7 +108,7 @@ public class BugReportController implements BugReportApiDelegate {
       bw.close();
       return temp;
     } catch(IOException e){
-      e.printStackTrace();
+      log.info("Error while creating temprory log files");
     }
     return null;
   }

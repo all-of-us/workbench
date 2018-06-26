@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.List;
 
 public interface JiraService {
-  void authenticate(String username, String password);
-  String createIssue(BugReport bugReport);
-  void attachLogFiles(String issueKey, List<File> fileList);
+  void authenticate(String username, String password) throws ApiException;
+  String createIssue(BugReport bugReport) throws ApiException;
+  void attachLogFiles(String issueKey, File fileList) throws ApiException;
 }
