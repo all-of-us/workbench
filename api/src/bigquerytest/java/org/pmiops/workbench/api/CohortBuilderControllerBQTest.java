@@ -43,9 +43,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private static final String SUBTYPE_NONE = null;
   private static final String TYPE_ICD10 = "ICD10";
   private static final String TYPE_CPT = "CPT";
+  private static final String TYPE_DEMO = "DEMO";
   private static final String SUBTYPE_CPT4 = "CPT4";
   private static final String SUBTYPE_ICD10CM = "ICD10CM";
   private static final String SUBTYPE_ICD10PCS = "ICD10PCS";
+  private static final String SUBTYPE_GEN = "GEN";
   private static final String DOMAIN_CONDITION = "Condition";
   private static final String DOMAIN_PROCEDURE = "Procedure";
   private static final String DOMAIN_MEASUREMENT = "Measurement";
@@ -386,6 +388,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
     SearchParameter demo = createSearchParameter(demoGender, null);
     SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDemoEthnicity() throws Exception {
+    Criteria demoEthnicity = createDemoCriteria("DEMO", "ETH", "9898");
+    SearchParameter demo = createSearchParameter(demoEthnicity, null);
+    SearchRequest searchRequest = createSearchRequests(demoEthnicity.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
