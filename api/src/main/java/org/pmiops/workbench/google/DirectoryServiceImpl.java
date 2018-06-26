@@ -134,7 +134,6 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Override
   public void resendWelcomeEmail(String userKey) {
-    log.log(Level.INFO, "User Key: " + userKey);
     User user = getUser(userKey);
     String password = randomString();
     user.setPassword(password);

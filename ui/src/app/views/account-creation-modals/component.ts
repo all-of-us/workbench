@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {ProfileService} from 'generated';
 import {UpdateContactEmailRequest} from 'generated';
+import {ServerConfigService} from "../../services/server-config.service";
 
 @Component({
   selector: 'app-account-creation-modals',
@@ -20,7 +21,11 @@ export class AccountCreationModalsComponent implements OnInit {
 
   constructor(
     private profileService: ProfileService,
+    serverConfigService: ServerConfigService
   ) {
+    serverConfigService.getConfig().subscribe((config) => {
+      this.gsuiteDomain = config.gsuiteDomain;
+    });
     this.contactEmail = '';
   }
 
