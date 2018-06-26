@@ -51,6 +51,7 @@ import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.model.WelcomeEmailSent;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -464,16 +465,16 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void updateUser(UpdateContactEmailRequest updateRequest) throws MessagingException {
+  private void updateUser(UpdateContactEmailRequest updateRequest) {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(updateRequest.getUsername());
     String contactEmail = updateRequest.getContactEmail();
-    try {
-      InternetAddress email = new InternetAddress(contactEmail);
-      email.validate();
-    } catch (AddressException e) {
-      throw new MessagingException("Email: " + contactEmail + " is invalid.");
-    }
+//    try {
+//      InternetAddress email = new InternetAddress(contactEmail);
+//      email.validate();
+//    } catch (AddressException e) {
+//      throw new MessagingException("Email: " + contactEmail + " is invalid.");
+//    }
     googleUser.setPrimaryEmail(contactEmail);
     User user = userDao.findUserByEmail(updateRequest.getUsername());
     user.setContactEmail(contactEmail);
@@ -481,9 +482,16 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> resendWelcomeEmail(String profileName) {
-    directoryService.resendWelcomeEmail(profileName);
+  public ResponseEntity<Void> resendWelcomeEmail(String userName) {
+    com.google.api.services.admin.directory.model.User googleUser = getGoogleUser(userName);
+//    com.google.api.services.admin.directory.model.User user = directoryService.getUser(userName);
+    log.log(Level.INFO, "user in controller: " + googleUser.toString() );
+    directoryService.resendWelcomeEmail(userName);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private com.google.api.services.admin.directory.model.User getGoogleUser(String userName) {
+    return directoryService.getUser(userName);
   }
 
   @Override
