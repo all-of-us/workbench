@@ -10,9 +10,10 @@
     <div class="white-card-box" >
       <div class="row flex-items-xs-middle">
         <div class="col-md-9 col-sm-9 col-xs-12">
-          <h5 class="box-title"> Quick Guided Search</h5>
+          <h5 class="box-title"> Search by Keyword or Code</h5>
           <p class="box-sub-title">
-            Input a keyword and answer two quick questions to assess feasibility and learn more about what data is available on your topic of interest.
+            Search by keyword or data standards codes (eg ICD, SNOMED) across all All of Us Research Program data types,
+            including electronic health records, surveys, and program physical measurements
           </p>
         </div>
         <div class="col-md-3 col-sm-3 col-xs-12 button-col">
@@ -21,18 +22,33 @@
       </div>
     </div>
 
-    <h4 class="box-heading"> Learn more about the data types</h4>
+    <h4 class="box-heading"> Search and browse individual data types</h4>
 
     <div class="white-card-box" >
       <div class="row flex-items-xs-middle">
         <div class="col-sm-9 col-xs-12>">
-          <h5 class="box-title"> Browse Survey Instruments </h5>
+          <h5 class="box-title"> Browse Participant Surveys </h5>
           <p class="box-sub-title">
-            View the full survey instruments and browse topics addressed by survey questions.
+            View the full content of participant surveys.
           </p>
         </div>
         <div class="col-sm-3  col-xs-12 button-col">
-          <button class="btn btn-primary search" [routerLink]="['surveys']">Browse</button>
+          <button class="btn btn-primary search" [routerLink]="['quick-search/surveys']">Search</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="white-card-box" >
+      <div class="row flex-items-xs-middle">
+        <div class="col-sm-9 col-xs-12>">
+          <h5 class="box-title"> Browse Electronic Health Data </h5>
+          <p class="box-sub-title">
+            View aggregate counts for medical concepts (eg diagnoses, procedures, medications and labs) from participant
+            electronic health records
+          </p>
+        </div>
+        <div class="col-sm-3 col-xs-12 button-col">
+          <button class="btn btn-primary search" [routerLink]="['quick-search/ehr']">Search</button>
         </div>
       </div>
     </div>
@@ -42,7 +58,7 @@
         <div class="col-sm-9 col-xs-12>">
           <h5 class="box-title"> Browse Program Physical Measurements  </h5>
           <p class="box-sub-title">
-            View cohort distributions for physical measurements collected during program enrollment.
+            View distributions of participant results for program physical measurements.
           </p>
         </div>
         <div class="col-sm-3 col-xs-12 button-col">

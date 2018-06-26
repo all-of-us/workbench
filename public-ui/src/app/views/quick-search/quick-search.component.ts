@@ -32,6 +32,10 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
 
   constructor(private api: DataBrowserService,
               private router: Router) {
+      this.route.params.subscribe(params => {
+        this.dataType = params.dataType;
+      });
+    }
   }
 
   ngOnInit() {

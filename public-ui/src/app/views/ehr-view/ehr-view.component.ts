@@ -109,7 +109,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       maxResults: maxResults
     };
     this.prevSearchText = query;
-    console.log(this.searchRequest);
+    //console.log(this.searchRequest);
     return this.api.searchConcepts(this.searchRequest);
   }
 
