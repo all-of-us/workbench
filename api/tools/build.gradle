@@ -130,7 +130,6 @@ dependencies {
   compile 'org.hibernate:hibernate-validator:+'
   compile 'com.squareup.okhttp:okhttp:2.6.0'
   compile 'com.squareup.okhttp:logging-interceptor:2.6.0'
- // compile 'javax.json:javax.json-api:1.0'
 }
 
 

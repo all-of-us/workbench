@@ -4,10 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import javax.inject.Provider;
 import javax.mail.Message;
@@ -96,7 +93,7 @@ public class BugReportControllerTest {
   BugReportController bugReportController;
 
   @Before
-  public void setUp() throws MessagingException {
+  public void setUp() throws Exception {
     User user = new User();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
@@ -106,16 +103,12 @@ public class BugReportControllerTest {
     when(userProvider.get()).thenReturn(user);
     bugReportController.setUserProvider(userProvider);
     JSONObject credentails = new JSONObject();
-   
-   try {
-     credentails.put("username", "mockUsername");
-     credentails.put("password", "mockPassword");
-     when(cloudStorageService.getJiraCredentials()).thenReturn(credentails);
-     Mockito.doNothing().when(jiraService).setJiraCredentials("mockUsername", "mockPassword");
-     Mockito.doNothing().when(jiraService).createIssue(any());
-     Mockito.doNothing().when(jiraService).attachLogFiles(any(), any());
-   }
-  catch(Exception ex){}
+    credentails.put("username", "mockUsername");
+    credentails.put("password", "mockPassword");
+    when(cloudStorageService.getJiraCredentials()).thenReturn(credentails);
+    Mockito.doNothing().when(jiraService).setJiraCredentials("mockUsername", "mockPassword");
+    doReturn("RW-111").when(jiraService).createIssue(any());
+    Mockito.doNothing().when(jiraService).attachLogFiles(any(), any());
   }
 
   @Test
@@ -130,7 +123,6 @@ public class BugReportControllerTest {
     // The message content should have 1 part, the main body part and no attachments
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
     verify(jiraService,never()).attachLogFiles(any(),any());
-
   }
 
   @Test
@@ -168,11 +160,9 @@ public class BugReportControllerTest {
         .reproSteps("press button")
         .shortDescription("bug");
     bugReportController.sendBugReport(input);
-
     verify(jiraService, times(1)).createIssue(input);
     // The message content should have 3 parts, the main body part and two attachments
     verify(jiraService,times(2)).attachLogFiles(any(),any());
-
   }
 
 }

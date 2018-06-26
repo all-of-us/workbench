@@ -1,7 +1,6 @@
 package org.pmiops.workbench.jira;
 
 import org.pmiops.workbench.model.BugReport;
-
 import java.io.File;
 
 public interface JiraService {

@@ -59,7 +59,7 @@ paths:
          required: true
        - name: file
          in: formData
-         description: Upload multiple files
+         description: Upload file as attachment
          required: true
          type: file
        - in: header
@@ -83,12 +83,12 @@ definitions:
         - fields
       properties:
         fields:
-          description: Information about issue
+          description: Detials about issue
           $ref: '#/definitions/FieldsDetails'
 
 
   FieldsDetails:
-      description: Fields
+      description: Fields information like project id, issue type etc
       required:
         - project
       properties:
@@ -102,7 +102,7 @@ definitions:
           $ref: '#/definitions/IssueType'
 
   ProjectDetails:
-      description: Project
+      description: Project information
       required:
         - key
       properties:

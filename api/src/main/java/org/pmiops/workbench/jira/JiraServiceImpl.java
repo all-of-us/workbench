@@ -30,7 +30,7 @@ public class JiraServiceImpl implements JiraService {
   }
 
   /**
-   * Authenticate Jira API
+   * Set credentials for Jira API
    * @param username
    * @param password
    */
@@ -68,8 +68,8 @@ public class JiraServiceImpl implements JiraService {
   }
 
   /**
-   * Attach Log files to issue
-   * @param issueKey : Issue Id number to which log files are to be attached
+   * Attach Log file to issue
+   * @param issueKey : Issue Id number to which log file is attached
    * @param file: Attachment
    */
   public void attachLogFiles(String issueKey, File file) throws ApiException {
