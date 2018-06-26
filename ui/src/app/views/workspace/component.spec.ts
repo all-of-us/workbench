@@ -22,12 +22,19 @@ import {
   ClusterService,
   CohortsService,
   WorkspaceAccessLevel,
-  WorkspacesService} from 'generated';
+  WorkspacesService
+} from 'generated';
+import {
+  JupyterService,
+  NotebooksService,
+} from 'notebooks-generated';
 
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
+import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
+import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
@@ -112,6 +119,8 @@ describe('WorkspaceComponent', () => {
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
+        { provide: NotebooksService, useValue: new NotebooksServiceStub() },
+        { provide: JupyterService, useValue: new JupyterServiceStub() },
         { provide: Http, useValue: new HttpStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: SignInService, useValue: SignInService },
