@@ -109,13 +109,14 @@ public class BugReportControllerTest {
     bugReportController.setUserProvider(userProvider);
     JSONObject credentails = new JSONObject();
    
-   try{ credentails.put("username","fakeusername");
-    credentails.put("password","fakepassword");
-    when(cloudStorageService.getJiraCredentials()).thenReturn(credentails);
-    Mockito.doNothing().when(jiraService).authenticate("fakeusername","fakepassword");
-
-    Mockito.doNothing().when(jiraService).createIssue(any());
-  }
+   try {
+     credentails.put("username", "mockUsername");
+     credentails.put("password", "mockPassword");
+     when(cloudStorageService.getJiraCredentials()).thenReturn(credentails);
+     Mockito.doNothing().when(jiraService).authenticate("mockUsername", "mockPassword");
+     Mockito.doNothing().when(jiraService).createIssue(any());
+     Mockito.doNothing().when(jiraService).attachLogFiles(any(), any());
+   }
   catch(Exception ex){}
   }
 
@@ -130,6 +131,8 @@ public class BugReportControllerTest {
     verify(jiraService, times(1)).createIssue(input);
     // The message content should have 1 part, the main body part and no attachments
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
+    verify(jiraService,never()).attachLogFiles(any(),any());
+
   }
 
   @Test
@@ -152,6 +155,7 @@ public class BugReportControllerTest {
         eq(FC_PROJECT_ID), any(), eq("localization.log"), any(), any(), any());
     verify(jupyterApi).getRootContents(
         eq(FC_PROJECT_ID), any(), eq("jupyter.log"), any(), any(), any());
+    verify(jiraService,times(3)).attachLogFiles(any(),any());
   }
 
   @Test
@@ -169,6 +173,8 @@ public class BugReportControllerTest {
 
     verify(jiraService, times(1)).createIssue(input);
     // The message content should have 3 parts, the main body part and two attachments
+    verify(jiraService,times(2)).attachLogFiles(any(),any());
+
   }
 
 
