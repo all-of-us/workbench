@@ -79,6 +79,5 @@ public class JiraServiceImpl implements JiraService {
     } catch(SecurityException ex){
       log.warning("Exception while deleting temp log files");
     }
-    return;
   }
 }

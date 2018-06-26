@@ -106,9 +106,9 @@ public class BugReportControllerTest {
     credentails.put("username", "mockUsername");
     credentails.put("password", "mockPassword");
     when(cloudStorageService.getJiraCredentials()).thenReturn(credentails);
-    Mockito.doNothing().when(jiraService).setJiraCredentials("mockUsername", "mockPassword");
+    doNothing().when(jiraService).setJiraCredentials("mockUsername", "mockPassword");
     doReturn("RW-111").when(jiraService).createIssue(any());
-    Mockito.doNothing().when(jiraService).attachLogFiles(any(), any());
+    doNothing().when(jiraService).attachLogFiles(any(), any());
   }
 
   @Test

@@ -74,7 +74,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public JSONObject getJiraCredentials() {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
     return new JSONObject(readToString(getCredentialsBucketName(), "jira-login.json"));
   }
 }
