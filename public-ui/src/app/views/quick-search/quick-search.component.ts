@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
@@ -28,14 +29,14 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   totalParticipants;
   domains = [];
   loading = true;
+  dataType = null;
   private subscriptions: ISubscription[] = [];
 
   constructor(private api: DataBrowserService,
-              private router: Router) {
-      this.route.params.subscribe(params => {
-        this.dataType = params.dataType;
-      });
-    }
+              private route: ActivatedRoute) {
+    this.route.params.subscribe(params => {
+          this.dataType = params.dataType;
+    });
   }
 
   ngOnInit() {
