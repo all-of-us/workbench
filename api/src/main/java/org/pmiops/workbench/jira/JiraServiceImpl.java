@@ -45,8 +45,8 @@ public class JiraServiceImpl implements JiraService {
    * @return Issue number created
    */
   public String createIssue(BugReport bugReport) throws ApiException {
-    bugReport.setReproSteps(bugReport.getReproSteps() + System.getProperty("line.separator")+
-        "Contact Email: "+bugReport.getContactEmail());
+    bugReport.setReproSteps(bugReport.getReproSteps() + System.getProperty("line.separator") +
+        "Contact Email: "+ bugReport.getContactEmail());
 
     IssueRequest issueDetails = new IssueRequest();
     IssueType issueType = new IssueType();
