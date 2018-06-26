@@ -20,6 +20,10 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
+import {
+  JupyterService,
+  NotebooksService,
+} from 'notebooks-generated';
 
 
 /*
@@ -129,6 +133,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
+    private leoNotebooksService: NotebooksService,
+    private jupyterService: JupyterService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
@@ -196,30 +202,24 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
       // clicking "new notebook" in the Jupyter UI.
-      // TODO: Use the Swagger generated code instead:
-      // https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
-      const leoNewNotebookUrl =
-        WorkspaceComponent.leoBaseUrl + '/notebooks/' +
-        this.cluster.clusterNamespace + '/' + this.cluster.clusterName +
-        '/api/contents/' + this.clusterLocalDirectory;
 
-      const headers = new Headers();
-      headers.append('Authorization', 'Bearer ' + this.signInService.currentAccessToken);
-      this.http.post(leoNewNotebookUrl, {
-        'type': 'notebook'
-      }, {
-        headers: headers,
-      }).subscribe((resp) => {
-        // TODO(calbach): Going through this modal is a temporary hack to avoid
-        // triggering pop-up blockers. Likely we'll want to switch notebook
-        // cluster opening to go through a redirect URL to make the localize and
-        // redirect look more atomic to the browser. Once this is in place, rm the
-        // modal and this hacky passing of the launched notebook name.
-        this.launchedNotebookName = resp.json().name;
-        this.clusterPulled = true;
-        // Reload the notebook list to get the newly created notebook.
-        this.loadNotebookList();
-      });
+      // The Jupyter Swagger already contains the "/workspaces/" infix.
+      const workspaceDir = this.clusterLocalDirectory.replace(/^workspaces\//, '');
+      this.jupyterService.postContents(
+        this.cluster.clusterNamespace, this.cluster.clusterName,
+        workspaceDir, {
+          'type': 'notebook'
+        }).subscribe((resp) => {
+          // TODO(calbach): Going through this modal is a temporary hack to avoid
+          // triggering pop-up blockers. Likely we'll want to switch notebook
+          // cluster opening to go through a redirect URL to make the localize and
+          // redirect look more atomic to the browser. Once this is in place, rm the
+          // modal and this hacky passing of the launched notebook name.
+          this.launchedNotebookName = resp.name;
+          this.clusterPulled = true;
+          // Reload the notebook list to get the newly created notebook.
+          this.loadNotebookList();
+        });
     }, () => {
       this.localizeNotebooksError = true;
     });
@@ -227,24 +227,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   private initCluster(): void {
     this.pollCluster().subscribe((c) => {
-      this.initializeNotebookCookies(c).subscribe(() => {
-        this.clusterLoading = false;
-      });
-    });
-  }
-
-  private initializeNotebookCookies(cluster: Cluster): Observable<Response> {
-    // TODO(calbach): Generate the FC notebook Typescript client and call here.
-    const leoNotebookUrl = WorkspaceComponent.leoBaseUrl + '/notebooks/'
-      + cluster.clusterNamespace + '/'
-      + cluster.clusterName;
-    const leoSetCookieUrl = leoNotebookUrl + '/setCookie';
-
-    const headers = new Headers();
-    headers.append('Authorization', 'Bearer ' + this.signInService.currentAccessToken);
-    return this.http.get(leoSetCookieUrl, {
-      headers: headers,
-      withCredentials: true
+      // Use lower level *withHttpInfo() method to work around
+      // https://github.com/DataBiosphere/leonardo/issues/444
+      this.leoNotebooksService.setCookieWithHttpInfo(c.clusterNamespace, c.clusterName)
+        .subscribe(() => {
+          this.clusterLoading = false;
+        });
     });
   }
 
