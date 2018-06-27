@@ -26,7 +26,7 @@ const routes: Routes = [
     path: 'quick-search/:dataType',
     component: QuickSearchComponent,
     data: {title: 'Quick Search'}
-  }
+  },
   {
     path: 'surveys',
     component: SurveysComponent,
