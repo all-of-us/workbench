@@ -33,7 +33,6 @@ public class BugReportController implements BugReportApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<JupyterApi> jupyterApiProvider;
   private Provider<User> userProvider;
-  private Provider<CloudStorageService> cloudStorageServiceProvider;
 
   @Autowired
   BugReportController(
@@ -46,7 +45,6 @@ public class BugReportController implements BugReportApiDelegate {
     this.userProvider = userProvider;
     this.jupyterApiProvider = jupyterApiProvider;
     this.jiraServiceProvider = jiraService;
-    this.cloudStorageServiceProvider = cloudStorageService;
   }
 
   @VisibleForTesting
@@ -57,11 +55,8 @@ public class BugReportController implements BugReportApiDelegate {
 
   @Override
   public ResponseEntity<BugReport> sendBugReport(BugReport bugReport) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     User user = userProvider.get();
     JupyterApi jupyterApi = jupyterApiProvider.get();
-    Properties props = new Properties();
-    CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     JiraService jiraService = jiraServiceProvider.get();
     try {
       String issueKey = jiraService.createIssue(bugReport);
