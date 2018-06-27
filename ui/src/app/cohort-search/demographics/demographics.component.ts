@@ -19,7 +19,7 @@ const RACE = 'RACE';
  * is not actually any subtype corresponding to ethnicity.  When that subtype
  * is added, we should be able to just plug it in here and everything should
  * work */
-const ETHNICITY = 'ETHN';
+const ETHNICITY = 'ETH';
 const minAge = 0;
 const maxAge = 120;
 
