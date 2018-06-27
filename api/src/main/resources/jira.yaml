@@ -87,14 +87,12 @@ paths:
 ##########################################################################################
 definitions:
   IssueRequest:
-      description: ''
+      description: Details required for creating issue project info, summary, description etc
       required:
         - fields
       properties:
         fields:
-          description: Detials about issue
           $ref: '#/definitions/FieldsDetails'
-
 
   FieldsDetails:
       description: Fields information like project id, issue type etc

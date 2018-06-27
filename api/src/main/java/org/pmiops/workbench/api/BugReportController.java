@@ -96,7 +96,6 @@ public class BugReportController implements BugReportApiDelegate {
     return ResponseEntity.ok(bugReport);
   }
 
-
   /**
    * Creates temp File to be attached to jira issue
    * @param name
