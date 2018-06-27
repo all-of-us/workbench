@@ -143,7 +143,7 @@ public class BugReportControllerTest {
         .shortDescription("bug");
     bugReportController.sendBugReport(input);
     verify(jiraService, times(1)).createIssue(input);
-    // The message content should have 3 parts, the main body part and two attachments
+    // There should be just 2 calls for uploads
     verify(jiraService,times(2)).uploadAttachment(any(), any());
   }
 
