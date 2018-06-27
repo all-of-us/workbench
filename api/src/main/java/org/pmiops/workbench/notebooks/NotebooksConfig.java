@@ -32,6 +32,7 @@ public class NotebooksConfig {
   public ApiClient notebooksApiClient(UserAuthentication userAuthentication,
       WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(workbenchConfig.firecloud.leoBaseUrl);
     apiClient.setAccessToken(userAuthentication.getCredentials());
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     return apiClient;
@@ -42,6 +43,7 @@ public class NotebooksConfig {
   public ApiClient workbenchServiceAccountClient(
       WorkbenchEnvironment workbenchEnvironment, WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(workbenchConfig.firecloud.leoBaseUrl);
     try {
       apiClient.setAccessToken(
           ServiceAccounts.workbenchAccessToken(workbenchEnvironment, NOTEBOOK_SCOPES));

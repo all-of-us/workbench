@@ -8,6 +8,7 @@ import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {environment} from 'environments/environment';
 
 import {
   Cluster,
@@ -80,9 +81,6 @@ enum Tabs {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
-  // Keep in sync with api/src/main/resources/notebooks.yaml.
-  private static readonly leoBaseUrl = 'https://notebooks.firecloud.org';
-
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
 
@@ -271,7 +269,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   openCluster(notebookName?: string): void {
-    let leoNotebookUrl = WorkspaceComponent.leoBaseUrl + '/notebooks/'
+    let leoNotebookUrl = environment.leoApiUrl + '/notebooks/'
       + this.cluster.clusterNamespace + '/'
       + this.cluster.clusterName;
     if (notebookName) {
@@ -299,7 +297,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       if (e.source !== notebook) {
         return;
       }
-      if (e.origin !== WorkspaceComponent.leoBaseUrl) {
+      if (e.origin !== environment.leoApiUrl) {
         return;
       }
       if (e.data.type !== 'bootstrap-auth.request') {
@@ -310,7 +308,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         'body': {
           'googleClientId': this.signInService.clientId
         }
-      }, WorkspaceComponent.leoBaseUrl);
+      }, environment.leoApiUrl);
     };
     window.addEventListener('message', authHandler);
     this.notebookAuthListeners.push(authHandler);

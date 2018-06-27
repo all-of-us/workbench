@@ -20,6 +20,7 @@ public class WorkbenchConfig {
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
+    public String baseUrl;
     public String billingAccountId;
     public String billingProjectPrefix;
     public Integer clusterMaxAgeDays;
@@ -27,6 +28,7 @@ public class WorkbenchConfig {
     public String registeredDomainName;
     public boolean enforceRegistered;
     public String jupyterUserScriptUri;
+    public String leoBaseUrl;
     public Integer billingRetryCount;
   }
 
