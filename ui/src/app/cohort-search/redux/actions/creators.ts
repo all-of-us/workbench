@@ -34,6 +34,7 @@ import {
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
+  HIDE_ATTRIBUTES_PAGE,
 
   LOAD_ENTITIES,
   RESET_STORE,
@@ -173,6 +174,10 @@ export const showAttributesPage =
   (node: any
   ): ActionTypes[typeof SHOW_ATTRIBUTES_PAGE] =>
   ({type: SHOW_ATTRIBUTES_PAGE, node});
+
+export const hideAttributesPage =
+  (): ActionTypes[typeof HIDE_ATTRIBUTES_PAGE] =>
+  ({type: HIDE_ATTRIBUTES_PAGE});
 
 /**
  * Context mgmt

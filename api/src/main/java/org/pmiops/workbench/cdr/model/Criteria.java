@@ -12,8 +12,6 @@ import java.util.Objects;
 
 
 @Entity
-//TODO need to add a way to dynamically switch between database versions
-//this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "criteria")
 public class Criteria {
 
@@ -28,6 +26,7 @@ public class Criteria {
     private String count;
     private String conceptId;
     private String domainId;
+    private boolean attribute;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -185,6 +184,20 @@ public class Criteria {
         return this;
     }
 
+    @Column(name = "is_attribute")
+    public boolean getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(boolean attribute) {
+        this.attribute = attribute;
+    }
+
+    public Criteria attribute(boolean attribute) {
+        this.attribute = attribute;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -199,12 +212,13 @@ public class Criteria {
                 Objects.equals(name, criteria.name) &&
                 Objects.equals(count, criteria.count) &&
                 Objects.equals(conceptId, criteria.conceptId) &&
-                Objects.equals(domainId, criteria.domainId);
+                Objects.equals(domainId, criteria.domainId) &&
+                Objects.equals(attribute, criteria.attribute);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId);
+        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId, attribute);
     }
 
     @Override
