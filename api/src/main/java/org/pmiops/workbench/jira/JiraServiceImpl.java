@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.logging.Logger;
-
 import javax.inject.Provider;
 
 @Service
@@ -35,19 +32,17 @@ public class JiraServiceImpl implements JiraService {
     this.cloudStorageService = cloudStorageServiceProvider.get();
   }
 
-  /**
-   * Sets username password for JIRA api
-   */
-  private void setJiraCredentails(){
-    JSONObject jiraCredentails = cloudStorageService.getJiraCredentials();
-    api.getApiClient().setUsername(jiraCredentails.getString("username"));
-    api.getApiClient().setPassword(jiraCredentails.getString("password"));
+  //Sets username password for JIRA api
+  private void setJiraCredentials(){
+    JSONObject jiraCredentials = cloudStorageService.getJiraCredentials();
+    api.getApiClient().setUsername(jiraCredentials.getString("username"));
+    api.getApiClient().setPassword(jiraCredentials.getString("password"));
   }
 
 
   @Override
-  public String createIssue(BugReport bugReport) throws ApiException {
-    setJiraCredentails();
+  public IssueResponse createIssue(BugReport bugReport) throws ApiException {
+    setJiraCredentials();
     IssueRequest issueDetails = new IssueRequest();
     IssueType issueType = new IssueType();
     FieldsDetails fieldsDetail = new FieldsDetails();
@@ -64,40 +59,13 @@ public class JiraServiceImpl implements JiraService {
     fieldsDetail.setIssuetype(issueType);
 
     issueDetails.setFields(fieldsDetail);
-    api.getApiClient().setDebugging(true);
-    IssueResponse response = api.createIssue(issueDetails);
-    return response.getKey();
+    return api.createIssue(issueDetails);
   }
 
 
   @Override
-  public void uploadAttachment(String issueKey, String attachmentName, Object content) throws ApiException {
-    try {
-      if (content instanceof String) {
-        File temporary = createTempFile(attachmentName, ((String) content).getBytes());
-        api.addAttachments(issueKey, temporary, "nocheck");
-        temporary.delete();
-      }
-    } catch (SecurityException ex) {
-      log.warning(String.format("Exception while deleting temp file '%s'", attachmentName));
-    }
-  }
-
-  /**
-   * Creates temp File to be attached to jira issue
-   * @param name
-   * @param content
-   * @return temp File
-   */
-  private File createTempFile(String name,byte[] content) {
-    try{
-      File tempFile = File.createTempFile(name, ".log");
-      FileOutputStream writer = new FileOutputStream(tempFile);
-      writer.write(content);
-      return tempFile;
-    } catch(IOException e){
-      log.severe(String.format("Error while creating temporary log files %s", name));
-    }
-    return null;
+  public void uploadAttachment(String issueKey, File attachment)
+      throws ApiException {
+    api.addAttachments(issueKey, attachment, "nocheck");
   }
 }

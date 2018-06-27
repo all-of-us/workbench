@@ -19,6 +19,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.jira.JiraService;
+import org.pmiops.workbench.jira.model.IssueResponse;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BugReport;
@@ -54,7 +55,7 @@ public class BugReportControllerTest {
 
   @TestConfiguration
   @Import({BugReportController.class})
-  @MockBean({CloudStorageService.class, JiraService.class, JupyterApi.class})
+  @MockBean({JiraService.class, JupyterApi.class})
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
@@ -75,12 +76,8 @@ public class BugReportControllerTest {
 
   @Mock
   Provider<User> userProvider;
-  @Mock
-  MailService mailService;
   @Autowired
   JiraService jiraService;
-  @Autowired
-  CloudStorageService cloudStorageService;
   @Autowired
   JupyterApi jupyterApi;
   @Autowired
@@ -96,8 +93,8 @@ public class BugReportControllerTest {
     user.setDisabled(false);
     when(userProvider.get()).thenReturn(user);
     bugReportController.setUserProvider(userProvider);
-    doReturn("RW-111").when(jiraService).createIssue(any());
-    doNothing().when(jiraService).uploadAttachment(any(), any(), any());
+    doReturn(new IssueResponse()).when(jiraService).createIssue(any());
+    doNothing().when(jiraService).uploadAttachment(any(), any());
   }
 
   @Test
@@ -111,7 +108,7 @@ public class BugReportControllerTest {
     verify(jiraService, times(1)).createIssue(input);
     // The message content should have 1 part, the main body part and no attachments
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
-    verify(jiraService,never()).uploadAttachment(any(), any(), any());
+    verify(jiraService,never()).uploadAttachment(any(), any());
   }
 
   @Test
@@ -132,7 +129,7 @@ public class BugReportControllerTest {
         eq(FC_PROJECT_ID), any(), eq("localization.log"), any(), any(), any());
     verify(jupyterApi).getRootContents(
         eq(FC_PROJECT_ID), any(), eq("jupyter.log"), any(), any(), any());
-    verify(jiraService,times(3)).uploadAttachment(any(), any(), any());
+    verify(jiraService,times(3)).uploadAttachment(any(), any());
   }
 
   @Test
@@ -149,7 +146,7 @@ public class BugReportControllerTest {
     bugReportController.sendBugReport(input);
     verify(jiraService, times(1)).createIssue(input);
     // The message content should have 3 parts, the main body part and two attachments
-    verify(jiraService,times(2)).uploadAttachment(any(), any(), any());
+    verify(jiraService,times(2)).uploadAttachment(any(), any());
   }
 
 }

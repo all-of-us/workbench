@@ -1,6 +1,8 @@
 package org.pmiops.workbench.jira;
 
+import org.pmiops.workbench.jira.model.IssueResponse;
 import org.pmiops.workbench.model.BugReport;
+import java.io.File;
 
 public interface JiraService {
 
@@ -17,14 +19,13 @@ public interface JiraService {
    * @param bugReport
    * @return Issue key created
    */
-  String createIssue(BugReport bugReport) throws ApiException;
+  IssueResponse createIssue(BugReport bugReport) throws ApiException;
 
   /**
-   * Uploads attachment to jira ticket issueKey
-   * @param issueKey
-   * @param attachmentName
-   * @param content
+   * Uploads attachment to Jira Issue number issueKey
+   * @param issueKey : Issue number
+   * @param attachment: File to be uploaded
    * @throws ApiException
    */
-  void uploadAttachment(String issueKey, String attachmentName, Object content) throws ApiException;
+  void uploadAttachment(String issueKey, File attachment) throws ApiException;
 }
