@@ -263,7 +263,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }
 
         if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
-            List<Concept> concepts = conceptDao.findAllConceptsOrderedByCount(standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS ? "S" : null, maxResults);
+            List<Concept> concepts;
+            if(standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS){
+                concepts = conceptDao.findAllStandardConceptsOrderedByCount(maxResults);
+            }else if(standardConceptFilter == StandardConceptFilter.NON_STANDARD_CONCEPTS){
+                concepts = conceptDao.findAllNonStandardConceptsOrderedByCount(maxResults);
+            }else{
+                concepts = conceptDao.findAllConceptsOrderedByCount(maxResults);
+            }
             ConceptListResponse response = new ConceptListResponse();
             response.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
             return ResponseEntity.ok(response);

@@ -14,11 +14,24 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
 
 
     @Query(value = "select c.* from concept c " +
-            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
-            "c.standard_concept=:standard_concept " +
+            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') " +
             "order by c.count_value desc limit :maxResults ",
     nativeQuery = true)
-    List<Concept> findAllConceptsOrderedByCount(@Param("standard_concept") String standard_concept, @Param("maxResults") long maxResults);
+    List<Concept> findAllConceptsOrderedByCount(@Param("maxResults") long maxResults);
+
+    @Query(value = "select c.* from concept c " +
+            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
+            "c.standard_concept='S' " +
+            "order by c.count_value desc limit :maxResults ",
+            nativeQuery = true)
+    List<Concept> findAllStandardConceptsOrderedByCount(@Param("maxResults") long maxResults);
+
+    @Query(value = "select c.* from concept c " +
+            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
+            "c.standard_concept='' or c.standard_concept is null " +
+            "order by c.count_value desc limit :maxResults ",
+            nativeQuery = true)
+    List<Concept> findAllNonStandardConceptsOrderedByCount(@Param("maxResults") long maxResults);
 
     @Query(value = "select c.* from concept c " +
             "where c.domain_id=:domain_id and " +

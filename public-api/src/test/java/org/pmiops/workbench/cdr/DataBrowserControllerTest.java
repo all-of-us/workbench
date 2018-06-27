@@ -18,6 +18,7 @@ import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
+import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.cdr.model.DbDomain;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.DbDomainListResponse;
@@ -102,7 +103,7 @@ public class DataBrowserControllerTest {
     private static final Concept CLIENT_CONCEPT_6 = new Concept()
             .conceptId(7891L)
             .conceptName("conceptD test concept 2")
-            .standardConcept(null)
+            .standardConcept("")
             .conceptCode("conceptD")
             .conceptClassId("classId6")
             .vocabularyId("V6")
@@ -110,6 +111,18 @@ public class DataBrowserControllerTest {
             .count(7891L)
             .sourceCountValue(20L)
             .prevalence(0.1F);
+
+    private static final Concept CLIENT_CONCEPT_7 = new Concept()
+            .conceptId(7892L)
+            .conceptName("conceptD test concept 3")
+            .standardConcept("S")
+            .conceptCode("conceptF")
+            .conceptClassId("classId7")
+            .vocabularyId("V7")
+            .domainId("Condition")
+            .count(0L)
+            .sourceCountValue(0L)
+            .prevalence(0.0F);
 
     private static final DbDomain CLIENT_DB_DOMAIN_1 = new DbDomain()
             .domainId("Condition")
@@ -159,6 +172,8 @@ public class DataBrowserControllerTest {
             makeConcept(CLIENT_CONCEPT_5);
     private static final Concept CONCEPT_6 =
             makeConcept(CLIENT_CONCEPT_6);
+    private static final Concept CONCEPT_7 =
+            makeConcept(CLIENT_CONCEPT_7);
 
     private static final DbDomain DBDOMAIN_1 =
             makeDbDomain(CLIENT_DB_DOMAIN_1);
@@ -239,6 +254,23 @@ public class DataBrowserControllerTest {
         );
     }
 
+    @Test
+    public void testConceptSearchWithEmptyQuery() throws Exception{
+        saveData();
+        assertResults(
+                dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")), CLIENT_CONCEPT_1, CLIENT_CONCEPT_2, CLIENT_CONCEPT_3, CLIENT_CONCEPT_4, CLIENT_CONCEPT_5, CLIENT_CONCEPT_6)
+        ;
+    }
+
+    @Test
+    public void testConceptSearchEmptyCount() throws Exception{
+        saveData();
+        assertResults(
+                dataBrowserController.searchConcepts(new SearchConceptsRequest().query("conceptD")), CLIENT_CONCEPT_5, CLIENT_CONCEPT_6)
+        ;
+    }
+
+
 
     private static Concept makeConcept(Concept concept) {
         Concept result = new Concept();
@@ -286,6 +318,7 @@ public class DataBrowserControllerTest {
         conceptDao.save(CONCEPT_4);
         conceptDao.save(CONCEPT_5);
         conceptDao.save(CONCEPT_6);
+        conceptDao.save(CONCEPT_7);
 
         conceptRelationshipDao.save(makeConceptRelationship(1234L, 7890L, "Maps to"));
         conceptRelationshipDao.save(makeConceptRelationship(456L, 7890L, "Maps to"));
