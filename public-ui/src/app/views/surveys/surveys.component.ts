@@ -27,7 +27,6 @@ export class SurveysComponent implements OnInit, OnDestroy {
       });
   }
   ngOnDestroy() {
-    console.log("unsubscribing surveys list view");
     this.subscription.unsubscribe();
   }
   public viewResults(r) {

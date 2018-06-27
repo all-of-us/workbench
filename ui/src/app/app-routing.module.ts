@@ -30,14 +30,6 @@ declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
-    path: 'data-browser/home',
-    component: HomeComponent,
-    data: {title: 'Data Browser'}
-  }, {
-    path: 'data-browser/browse',
-    component: SearchComponent,
-    data: {title: 'Browse'}
-  }, {
     path: 'login',
     component: LoginComponent,
     data: {title: 'Sign In'}

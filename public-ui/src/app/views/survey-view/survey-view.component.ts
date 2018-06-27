@@ -23,6 +23,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   subTitle;
   surveys: DbDomain[] = [];
   survey;
+  surveyConceptId;
   surveyResult: QuestionConceptListResponse;
   resultsComplete = false;
   private subscriptions: ISubscription[] = [];
@@ -48,21 +49,41 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     // Get the survey from local storage the user clicked on on a previous page
     const obj = localStorage.getItem('dbDomain');
     if (obj) {
-      this.survey = JSON.parse(obj);
+      const survey = JSON.parse(obj);
+      this.surveyConceptId = survey.conceptId;
     }
+    console.log(this.survey);
     this.searchText.setValue(localStorage.getItem('searchText'));
     if (!this.searchText.value) {
       this.searchText.setValue('');
     }
 
-    this.subscriptions.push(this.api.getSurveyResults(this.survey.conceptId.toString()).subscribe({
+    this.subscriptions.push(this.api.getSurveyResults(this.surveyConceptId.toString()).subscribe({
       next: x => {
         this.surveyResult = x;
+        this.survey = this.surveyResult.survey;
         const questions = this.surveyResult.items;
+
+        // Add Did not answer to each question
+        for (let q of this.surveyResult.items) {
+
+          // Get did not answer count for question by subtracting all answered num participants that completed survey
+          // Todo -- add this to api maybe
+          let didNotAnswerCount  = this.survey.countValue;
+          for (let a of q.countAnalysis.results) {
+            didNotAnswerCount = didNotAnswerCount - a.countValue;
+          }
+          const result = q.countAnalysis.results[0];
+          let didNotAnswerResult = {analysisId : result.analysisId, countValue: didNotAnswerCount ,
+            stratum1: result.stratum1, stratum2: result.stratum2, stratum3: result.stratum3, stratum4: "Did not answer",
+            stratum5: result.stratum5};
+          q.countAnalysis.results.push(didNotAnswerResult);
+        }
 
         // Temp until answer order is fixed on server side , sort abc
         for (const q of questions ) {
           q.countAnalysis.results.sort((a1, a2) => {
+            if (a1.stratum4 === 'Did not answer' ) { return 1; }
             if (a1.stratum4 > a2.stratum4) { return 1; }
             if (a1.stratum4 < a2.stratum4) { return -1; }
             return 0;
@@ -111,7 +132,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       return true;
     }
     // Or search
-    console.log(reString);
     const re = new RegExp(reString, 'gi');
     if (re.test(q.conceptName)) {
       return true;
@@ -125,7 +145,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
 
   public filterResults() {
-    console.log("Search ran", this.searchText.value);
     this.loading = true;
     this.questions = this.surveyResult.items;
     if (this.searchText.value.length > 0) {

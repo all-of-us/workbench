@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
@@ -30,10 +31,15 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   domains = [];
   loading = true;
   dataType = null;
+  EHR_DATATYPE = 'ehr';
+  SURVEY_DATATYPE = 'surveys';
+  ANY_DATATYPE = null;
+
   private subscriptions: ISubscription[] = [];
 
   constructor(private api: DataBrowserService,
-              private route: ActivatedRoute) {
+              private route: ActivatedRoute,
+              private router: Router) {
     this.route.params.subscribe(params => {
           this.dataType = params.dataType;
     });
@@ -41,6 +47,13 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
+    // Set title based on datatype
+    if (this.dataType === this.EHR_DATATYPE) {
+      this.title = "Electronic Health Data"
+    }
+    if (this.dataType === this.SURVEY_DATATYPE) {
+      this.title = "Participant Survey Data"
+    }
     // Get search result from localStorage
     this.prevSearchText = localStorage.getItem('searchText');
     if (!this.prevSearchText) {
@@ -86,6 +99,10 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     for (const s of this.subscriptions){
       s.unsubscribe();
     }
+  }
+
+  public showDataType(showType) {
+    return !this.loading && (this.dataType == this.ANY_DATATYPE  || this.dataType === showType);
   }
 
   private searchCallback(results:DbDomainListResponse) {

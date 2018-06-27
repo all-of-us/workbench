@@ -22,7 +22,7 @@
             <h5 class="box-title">
               Number Completed
             </h5>
-            <div class="card-stat">
+            <div class="card-stat" *ngIf="!loading">
               {{survey.countValue | number }}
             </div>
             <div class="card-text">
