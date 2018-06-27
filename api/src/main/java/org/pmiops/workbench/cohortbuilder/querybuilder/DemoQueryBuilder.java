@@ -107,6 +107,8 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
           Long[] ethIds = paramMap.get(key).stream().filter(Long.class::isInstance).map(Long.class::cast).toArray(Long[]::new);
           queryParams.put(namedParameter, QueryParameterValue.array(ethIds, Long.class));
           break;
+        default:
+          break;
       }
     }
 
