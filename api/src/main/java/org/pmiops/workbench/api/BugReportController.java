@@ -7,7 +7,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.BugReport;
@@ -25,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 @RestController
@@ -44,7 +42,6 @@ public class BugReportController implements BugReportApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<User> userProvider,
       Provider<JupyterApi> jupyterApiProvider,
-      Provider<CloudStorageService> cloudStorageService,
       Provider<JiraService> jiraService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
