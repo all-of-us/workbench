@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
-import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -19,15 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
-
 
 @RestController
 public class BugReportController implements BugReportApiDelegate {
@@ -70,11 +64,10 @@ public class BugReportController implements BugReportApiDelegate {
     CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     JiraService jiraService = jiraServiceProvider.get();
     try {
-      JSONObject jiraCredentails = cloudStorageService.getJiraCredentials();
-      jiraService.setJiraCredentials(jiraCredentails.getString("username"),
-                               jiraCredentails.getString("password"));
-
       String issueKey = jiraService.createIssue(bugReport);
+      // If requested, try to pull logs from the notebook cluster using the researcher's creds. Some
+      // or all of these log files might be missing, or the cluster may not even exist, so ignore
+      // failures here.
       if (Optional.ofNullable(bugReport.getIncludeNotebookLogs()).orElse(false) &&
           BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
         for (String fileName : BugReportController.notebookLogFiles) {
@@ -87,7 +80,7 @@ public class BugReportController implements BugReportApiDelegate {
                   String.format("Jupyter returned null content for '%s', continuing", fileName));
               continue;
             }
-            jiraService.attachLogFiles(issueKey,createTempFile(fileName,logContent));
+            jiraService.uploadAttachment(issueKey, fileName, logContent);
           } catch (ApiException e) {
             log.info(String.format("failed to retrieve notebook log '%s', continuing", fileName));
           }
@@ -100,16 +93,4 @@ public class BugReportController implements BugReportApiDelegate {
    return ResponseEntity.ok(bugReport);
   }
 
-  private File createTempFile(String name,String content) {
-    try{
-      File temp = File.createTempFile(name, ".log");
-      BufferedWriter bw = new BufferedWriter(new FileWriter(temp));
-      bw.write(content);
-      bw.close();
-      return temp;
-    } catch(IOException e){
-      log.severe("Error while creating temporary log files");
-    }
-    return null;
-  }
 }

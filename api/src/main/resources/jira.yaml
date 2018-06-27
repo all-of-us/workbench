@@ -1,4 +1,7 @@
 #This file provide the end points for jira interactions
+# JIRA REST API information can be found at :
+# https://developer.atlassian.com/cloud/jira/platform/rest/
+
 swagger: '2.0'
 
 info:
@@ -42,6 +45,8 @@ paths:
           description: File saved
           schema:
             $ref: '#/definitions/IssueResponse'
+        400:
+          description: Bad request, check the summary/description field
         503:
           description: Cannot connect to JIRA. Please try again later
       security:
