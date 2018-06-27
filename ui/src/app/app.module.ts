@@ -54,6 +54,11 @@ import {
   Configuration,
 } from 'generated';
 
+import {
+  ApiModule as LeoApiModule,
+  Configuration as LeoConfiguration,
+} from 'notebooks-generated';
+
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
 // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/2
@@ -69,15 +74,23 @@ export function getConfigService(http: Http) {
 
 // "Configuration" means Swagger API Client configuration.
 export function getConfiguration(signInService: SignInService): Configuration {
-    return new Configuration({
-      basePath: getBasePath(),
-      accessToken: () => signInService.currentAccessToken
-    });
+  return new Configuration({
+    basePath: getBasePath(),
+    accessToken: () => signInService.currentAccessToken
+  });
+}
+
+export function getLeoConfiguration(signInService: SignInService): LeoConfiguration {
+  return new LeoConfiguration({
+    // TODO(RW-847): Inject the baseUrl according to the environment.
+    accessToken: () => signInService.currentAccessToken
+  });
 }
 
 @NgModule({
   imports: [
     ApiModule,
+    LeoApiModule,
     AppRoutingModule,
 
     BrowserModule,
@@ -127,6 +140,11 @@ export function getConfiguration(signInService: SignInService): Configuration {
       provide: Configuration,
       deps: [SignInService],
       useFactory: getConfiguration
+    },
+    {
+      provide: LeoConfiguration,
+      deps: [SignInService],
+      useFactory: getLeoConfiguration
     },
     ErrorHandlingService,
     ServerConfigService,
