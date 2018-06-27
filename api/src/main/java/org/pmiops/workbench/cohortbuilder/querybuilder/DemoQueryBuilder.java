@@ -6,7 +6,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
