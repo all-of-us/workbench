@@ -44,7 +44,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
                     "where d.person_id = p.person_id)\n";
 
     private static final String DEMO_ETH =
-      "p.ethnicity_concept_id in unnest(${eth})\n";
+            "p.ethnicity_concept_id in unnest(${eth})\n";
 
     private static final String AND_TEMPLATE = "and\n";
 
