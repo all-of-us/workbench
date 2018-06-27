@@ -1,19 +1,29 @@
-import {Component} from '@angular/core';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
+import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 import {AccountCreationComponent} from '../account-creation/component';
+
 import {LoginComponent} from '../login/component';
+
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector : 'app-account-creation-success',
-  styleUrls: ['../../styles/template.css'],
+  styleUrls: ['../../styles/template.css',
+              './component.css'],
   templateUrl: './component.html'
 })
-export class AccountCreationSuccessComponent {
-  email: string;
+export class AccountCreationSuccessComponent implements OnInit {
+  username: string;
+  @Input('contactEmail') contactEmail: string;
   gsuiteDomain: string;
+  subscription: Subscription;
+
+  @ViewChild(AccountCreationModalsComponent)
+  accountCreationModalsComponent: AccountCreationModalsComponent;
 
   constructor(
     private loginComponent: LoginComponent,
@@ -30,10 +40,17 @@ export class AccountCreationSuccessComponent {
       loginComponent.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
       loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
     }, 0);
-    this.email = account.profile.username;
+    this.username = account.profile.username;
+  }
+
+  ngOnInit () {
   }
 
   signIn(): void {
     this.signInService.signIn();
+  }
+
+  receiveMessage($event) {
+    this.contactEmail = $event;
   }
 }

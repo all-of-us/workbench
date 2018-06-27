@@ -13,6 +13,7 @@ import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.pmiops.workbench.annotations.AuthorityRequired;
@@ -48,7 +49,9 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.model.WelcomeEmailSent;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -443,6 +446,52 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException(
         "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
+  }
+
+  @Override
+  public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
+    verifyNoLogins(updateContactEmailRequest.getUsername());
+    //resend Welcome Email to new contact email... Add once Mandrill API complete
+    updateUser(updateContactEmailRequest);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private void verifyNoLogins(String username){
+    User user = userDao.findUserByEmail(username);
+    if (user.getFirstSignInTime() != null) {
+      throw new BadRequestException(
+        "This account has already been in use, if you would like to update your contact email please login and update via the Profile page."
+      );
+    }
+  }
+
+  private void updateUser(UpdateContactEmailRequest updateRequest) {
+    com.google.api.services.admin.directory.model.User googleUser =
+      directoryService.getUser(updateRequest.getUsername());
+    String contactEmail = updateRequest.getContactEmail();
+//    try {
+//      InternetAddress email = new InternetAddress(contactEmail);
+//      email.validate();
+//    } catch (AddressException e) {
+//      throw new MessagingException("Email: " + contactEmail + " is invalid.");
+//    }
+    googleUser.setPrimaryEmail(contactEmail);
+    User user = userDao.findUserByEmail(updateRequest.getUsername());
+    user.setContactEmail(contactEmail);
+    userDao.save(user);
+  }
+
+  @Override
+  public ResponseEntity<Void> resendWelcomeEmail(String userName) {
+    com.google.api.services.admin.directory.model.User googleUser = getGoogleUser(userName);
+//    com.google.api.services.admin.directory.model.User user = directoryService.getUser(userName);
+    log.log(Level.INFO, "user in controller: " + googleUser.toString() );
+    directoryService.resendWelcomeEmail(userName);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private com.google.api.services.admin.directory.model.User getGoogleUser(String userName) {
+    return directoryService.getUser(userName);
   }
 
   @Override

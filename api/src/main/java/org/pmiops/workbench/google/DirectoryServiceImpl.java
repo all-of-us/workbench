@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -51,6 +53,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   private final Provider<MailService> mailServiceProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+  private static final Logger log = Logger.getLogger(DirectoryServiceImpl.class.getName());
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
@@ -90,10 +93,11 @@ public class DirectoryServiceImpl implements DirectoryService {
   public User getUser(String email) {
     try {
       return retryHandler.runAndThrowChecked((context) ->
-          getGoogleDirectoryService().users().get(email).execute());
+      getGoogleDirectoryService().users().get(email).execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
+      log.log(Level.INFO, "error: " + e.toString());
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         return null;
       }
@@ -127,6 +131,20 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
     return user;
   }
+
+  @Override
+  public void resendWelcomeEmail(String userKey) {
+    User user = getUser(userKey);
+    String password = randomString();
+    user.setPassword(password);
+    retryHandler.run((context) -> getGoogleDirectoryService().users().update(userKey, user).execute());
+    try {
+      mailServiceProvider.get().sendWelcomeEmail(userKey, password, user);
+    } catch (MessagingException e) {
+      throw new WorkbenchException(e);
+    }
+  }
+
   @Override
   public void deleteUser(String username) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
