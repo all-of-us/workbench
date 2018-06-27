@@ -1,6 +1,8 @@
 import {Router} from '@angular/router';
 import {fromJS} from 'immutable';
 
+export const WINDOW_REF = 'window-ref';
+
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
     return true;

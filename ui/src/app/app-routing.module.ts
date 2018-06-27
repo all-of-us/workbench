@@ -46,34 +46,35 @@ const routes: Routes = [
     canActivateChild: [SignInGuard],
     runGuardsAndResolvers: 'always',
     children: [
+      {
+        path: '',
+        component: HomepageComponent,
+        data: {title: 'Homepage'},
+      }, {
+      path: 'workspaces',
+      data: {breadcrumb: 'Workspaces'},
+      children: [
         {
           path: '',
-          component: HomepageComponent,
-          data: {title: 'Homepage'},
-        }, {
-        path: 'workspaces',
-        data: {breadcrumb: 'Workspaces'},
-        children: [
-          {
-            path: '',
-            component: WorkspaceListComponent,
-            data: {title: 'View Workspaces'}
+          component: WorkspaceListComponent,
+          data: {title: 'View Workspaces'}
+        },
+        {
+          /* TODO The children under ./views need refactoring to use the data
+           * provided by the route rather than double-requesting it.
+           */
+          path: ':ns/:wsid',
+          component: WorkspaceNavBarComponent,
+          data: {
+            title: 'View Workspace Details',
+            breadcrumb: 'Param: Workspace Name'
           },
-          {
-            /* TODO The children under ./views need refactoring to use the data
-             * provided by the route rather than double-requesting it.
-             */
-            path: ':ns/:wsid',
-            component: WorkspaceNavBarComponent,
-            data: {
-              title: 'View Workspace Details',
-              breadcrumb: 'Param: Workspace Name'
-            },
-            runGuardsAndResolvers: 'always',
-            resolve: {
-              workspace: WorkspaceResolver,
-            },
-            children: [{
+          runGuardsAndResolvers: 'always',
+          resolve: {
+            workspace: WorkspaceResolver,
+          },
+          children: [
+            {
               path: '',
               component: WorkspaceComponent,
               data: {
@@ -118,18 +119,6 @@ const routes: Routes = [
               resolve: {
                 cohort: CohortResolver,
               },
-            }, {
-              path: 'notebooks/create',
-              component: NotebookRedirectComponent,
-              data: {
-                title: 'Creating a new Notebook'
-              }
-            }, {
-              path: 'notebooks/:nbName',
-              component: NotebookRedirectComponent,
-              data: {
-                title: 'Opening a Notebook'
-              }
             }]
           }
         ]
@@ -154,6 +143,21 @@ const routes: Routes = [
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
+      }, {
+        // The notebook redirect pages are interstitial pages, so we want to
+        // them special chrome treatment - we therefore put them outside the
+        // normal /workspaces hierarchy.
+        path: 'workspaces/:ns/:wsid/notebooks/create',
+        component: NotebookRedirectComponent,
+        data: {
+          title: 'Creating a new Notebook'
+        }
+      }, {
+        path: 'workspaces/:ns/:wsid/notebooks/:nbName',
+        component: NotebookRedirectComponent,
+        data: {
+          title: 'Opening a Notebook'
+        }
       }
     ]
   }

@@ -1,10 +1,13 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Headers, Http, Response} from '@angular/http';
+import {Location} from '@angular/common';
+import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
+import {timer} from 'rxjs/observable/timer';
+import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
-import {SignInService} from 'app/services/sign-in.service';
+import {WINDOW_REF} from 'app/utils';
+import {environment} from 'environments/environment';
 
 import {
   Cluster,
@@ -12,6 +15,7 @@ import {
   ClusterStatus,
 } from 'generated';
 import {
+  ClusterService as LeoClusterService,
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
@@ -19,7 +23,10 @@ import {
 enum Progress {
   Unknown,
   Initializing,
-  Configuring,
+  Resuming,
+  Authenticating,
+  Copying,
+  Creating,
   Redirecting
 }
 
@@ -43,12 +50,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private cluster: Cluster;
 
   constructor(
+    @Inject(WINDOW_REF) private window: Window,
     private route: ActivatedRoute,
     private clusterService: ClusterService,
-    private signInService: SignInService,
+    private leoClusterService: LeoClusterService,
     private leoNotebooksService: NotebooksService,
     private jupyterService: JupyterService,
-    private http: Http) {}
+  ) {}
 
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
@@ -58,32 +66,44 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
         const c = resp.defaultCluster;
-        // TODO:
-        //  - Resume here if suspended. Throw an error from the resume Obs.
-        //  - Fail if the cluster enters permanent error mode.
+        if (c.status === ClusterStatus.Starting ||
+            c.status === ClusterStatus.Stopping ||
+            c.status === ClusterStatus.Stopped) {
+          this.progress = Progress.Resuming;
+        } else {
+          this.progress = Progress.Initializing;
+        }
+
         if (c.status === ClusterStatus.Running) {
           return Observable.from([c]);
         }
-        this.progress = Progress.Initializing;
+        if (c.status === ClusterStatus.Stopped) {
+          // Resume the cluster and continue polling.
+          return this.leoClusterService
+            .startCluster(c.clusterNamespace, c.clusterName)
+            .flatMap(() => Error('resuming'));
+        }
         throw Error(`cluster has status ${c.status}`);
       })
-      .retryWhen(errs => errs.delay(10000))
+      .retryWhen(errs => this.clusterRetryDelay(errs))
       .do((c) => {
         this.cluster = c;
-        this.progress = Progress.Configuring;
+        this.progress = Progress.Authenticating;
       })
       .flatMap(c => this.initializeNotebookCookies(c))
       .flatMap(c => {
         // This will contain the Jupyter-local path to the localized notebook.
         if (this.notebookName) {
+          this.progress = Progress.Copying;
           return this.localizeNotebooks([this.notebookName])
             .map(localDir => `${localDir}/${this.notebookName}`);
         }
+        this.progress = Progress.Creating;
         return this.newNotebook();
       })
       .subscribe((nbName) => {
         this.progress = Progress.Redirecting;
-        window.location.href = `${this.clusterUrl(this.cluster)}/notebooks/${nbName}`;
+        this.window.location.href = this.notebookUrl(this.cluster, nbName);
       });
   }
 
@@ -93,16 +113,23 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     }
   }
 
-  private clusterUrl(cluster: Cluster): string {
-    return environment.leoApiUrl + '/notebooks/'
-      + cluster.clusterNamespace + '/'
-      + cluster.clusterName;
+  private clusterRetryDelay(errs: Observable<Error>) {
+    // Ideally we'd just call .delay(10000), but that doesn't work in
+    // combination with fakeAsync(). This is a workaround for
+    // https://github.com/angular/angular/issues/10127
+    return errs.switchMap(v => timer(10000).pipe(mapTo(v)));
   }
 
-  private initializeNotebookCookies(cluster: Cluster): Observable<Cluster> {
+  private notebookUrl(cluster: Cluster, nbName: string): string {
+    return environment.leoApiUrl + '/notebooks/'
+      + cluster.clusterNamespace + '/'
+      + cluster.clusterName + '/notebooks/' + nbName;
+  }
+
+  private initializeNotebookCookies(c: Cluster): Observable<Cluster> {
     return this.leoNotebooksService.setCookieWithHttpInfo(c.clusterNamespace, c.clusterName, {
       withCredentials: true
-    }).map(_ => cluster);
+    }).map(_ => c);
   }
 
   private newNotebook(): Observable<string> {
@@ -110,12 +137,12 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
       // clicking "new notebook" in the Jupyter UI.
-      const workspaceDir = this.clusterLocalDirectory.replace(/^workspaces\//, '');
+      const workspaceDir = localDir.replace(/^workspaces\//, '');
       return this.jupyterService.postContents(
         this.cluster.clusterNamespace, this.cluster.clusterName,
         workspaceDir, {
           'type': 'notebook'
-        }).map(resp => `${localDir}/${resp.json().name}`);
+        }).map(resp => `${localDir}/${resp.name}`);
     });
   }
 
