@@ -104,7 +104,7 @@ public class BugReportControllerTest {
         .shortDescription("bug");
     bugReportController.sendBugReport(input);
     verify(jiraService, times(1)).createIssue(input);
-    // The message content should have 1 part, the main body part and no attachments
+    // No calls should be made for uploads
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
     verify(jiraService,never()).uploadAttachment(any(), any());
   }
@@ -120,7 +120,6 @@ public class BugReportControllerTest {
         .shortDescription("bug");
     bugReportController.sendBugReport(input);
     verify(jiraService, times(1)).createIssue(input);
-    // The message content should have 4 parts, the main body part and three attachments
     verify(jupyterApi).getRootContents(
         eq(FC_PROJECT_ID), any(), eq("delocalization.log"), any(), any(), any());
     verify(jupyterApi).getRootContents(
