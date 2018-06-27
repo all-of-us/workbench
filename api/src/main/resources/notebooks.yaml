@@ -549,6 +549,63 @@ paths:
             $ref: '#/definitions/JupyterContents'
         500:
           description: Model key error
+  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: workspaceDir
+        description: workspaceDir
+        required: true
+        type: string
+    post:
+      summary: Create a new file in the specified path
+      description: "A POST to /api/contents/path creates a New untitled, empty file or directory. A POST to /api/contents/path with body {'copy_from': '/path/to/OtherNotebook.ipynb'} creates a new copy of OtherNotebook in path."
+      tags:
+        - jupyter
+      operationId: postContents
+      parameters:
+        - name: model
+          in: body
+          description: Path of file to copy
+          schema:
+            type: object
+            properties:
+              ext:
+                type: string
+              type:
+                type: string
+      responses:
+        201:
+          description: File created
+          headers:
+            Location:
+              description: URL for the new file
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        404:
+          description: No item found
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
   /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}/{fileName}:
     parameters:
       - in: path

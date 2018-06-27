@@ -390,6 +390,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsDemoEthnicity() throws Exception {
+    Criteria demoEthnicity = createDemoCriteria("DEMO", "ETH", "9898");
+    SearchParameter demo = createSearchParameter(demoEthnicity, null);
+    SearchRequest searchRequest = createSearchRequests(demoEthnicity.getType(), Arrays.asList(demo), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsDemoDec() throws Exception {
     Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
     SearchParameter demo = createSearchParameter(demoGender, "Deceased");
