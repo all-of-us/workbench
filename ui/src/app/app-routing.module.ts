@@ -145,8 +145,8 @@ const routes: Routes = [
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
       }, {
         // The notebook redirect pages are interstitial pages, so we want to
-        // them special chrome treatment - we therefore put them outside the
-        // normal /workspaces hierarchy.
+        // give them special chrome treatment - we therefore put them outside
+        // the normal /workspaces hierarchy.
         path: 'workspaces/:ns/:wsid/notebooks/create',
         component: NotebookRedirectComponent,
         data: {

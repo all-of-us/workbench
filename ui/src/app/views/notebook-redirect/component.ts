@@ -94,18 +94,22 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       })
       .flatMap(c => this.initializeNotebookCookies(c))
       .flatMap(c => {
+        let localizeObs: Observable<string>;
         // This will contain the Jupyter-local path to the localized notebook.
         if (this.notebookName) {
           this.progress = Progress.Copying;
-          return this.localizeNotebooks([this.notebookName])
+          localizeObs = this.localizeNotebooks([this.notebookName])
             .map(localDir => `${localDir}/${this.notebookName}`);
+        } else {
+          this.progress = Progress.Creating;
+          localizeObs = this.newNotebook();
         }
-        this.progress = Progress.Creating;
-        return this.newNotebook();
+        // The cluster may be running, but we've observed some 504s on localize
+        // right after it comes up. Retry here to mitigate that. The retry must
+        // be on this inner observable to prevent resubscribing to upstream
+        // observables (we just want to retry localization).
+        return localizeObs.retry(3);
       })
-      // The cluster may be running, but we've observed some 504s on localize
-      // right after it comes up. Retry here to mitigate that.
-      .retry(3)
       .subscribe((nbName) => {
         this.progress = Progress.Redirecting;
         this.window.location.href = this.notebookUrl(this.cluster, nbName);
