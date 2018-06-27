@@ -948,12 +948,13 @@ def delete_clusters(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
+  api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
     Dir.chdir("tools") do
       common = Common.new
       common.run_inline %W{
          gradle --info manageClusters
-        -PappArgs=['delete','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
+        -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
     end
   end
 end
@@ -971,10 +972,13 @@ def list_clusters(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
+  api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
     Dir.chdir("tools") do
       common = Common.new
-      common.run_inline %W{gradle --info manageClusters -PappArgs=['list']}
+      common.run_inline %W{
+        gradle --info manageClusters -PappArgs=['list','#{api_url}']
+      }
     end
   end
 end
@@ -1155,6 +1159,11 @@ def migrate_workbench_data()
   Dir.chdir("db") do
     common.run_inline(%W{gradle --info update -PrunList=data -Pcontexts=cloud})
   end
+end
+
+def get_leo_api_url(project)
+  config_json = get_config(project)
+  return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["leoBaseUrl"]
 end
 
 def get_auth_domain(project)

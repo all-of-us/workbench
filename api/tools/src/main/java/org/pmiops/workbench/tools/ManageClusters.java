@@ -50,8 +50,9 @@ public class ManageClusters {
         .collect(Collectors.toSet());
   }
 
-  private static ClusterApi newApiClient() throws IOException {
+  private static ClusterApi newApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(apiUrl);
     GoogleCredential credential = GoogleCredential.getApplicationDefault()
         .createScoped(Arrays.asList(BILLING_SCOPES));
     credential.refreshToken();
@@ -80,9 +81,9 @@ public class ManageClusters {
         clusterId(c), creator, status, c.getCreatedDate());
   }
 
-  private static void listClusters() throws IOException, ApiException {
+  private static void listClusters(String apiUrl) throws IOException, ApiException {
     AtomicInteger count = new AtomicInteger();
-    newApiClient().listClusters(null, false).stream()
+    newApiClient(apiUrl).listClusters(null, false).stream()
         .sorted(Comparator.comparing(c -> Instant.parse(c.getCreatedDate())))
         .forEachOrdered((c) -> {
               System.out.println(formatTabular(c));
@@ -91,13 +92,14 @@ public class ManageClusters {
     System.out.println(String.format("listed %d clusters", count.get()));
   }
 
-  private static void deleteClusters(@Nullable Instant oldest, Set<String> ids, boolean dryRun)
+  private static void deleteClusters(
+      String apiUrl, @Nullable Instant oldest, Set<String> ids, boolean dryRun)
       throws IOException, ApiException {
     Set<String> remaining = new HashSet<>(ids);
     String dryMsg = dryRun? "[DRY RUN]: would have... " : "";
 
     AtomicInteger deleted = new AtomicInteger();
-    ClusterApi api = newApiClient();
+    ClusterApi api = newApiClient(apiUrl);
     api.listClusters(null, false).stream()
         .sorted(Comparator.comparing(c -> Instant.parse(c.getCreatedDate())))
         .filter((c) -> {
@@ -141,30 +143,31 @@ public class ManageClusters {
       args = Arrays.copyOfRange(args, 1, args.length);
       switch (cmd) {
         case "list":
-          if (args.length > 0) {
-            throw new IllegalArgumentException("Expected 0 args. Got " + Arrays.asList(args));
+          if (args.length > 1) {
+            throw new IllegalArgumentException("Expected 1 arg. Got " + Arrays.asList(args));
           }
-          listClusters();
+          listClusters(args[0]);
           return;
 
         case "delete":
           // User-friendly command-line parsing is done in devstart.rb, so we do only simple
           // positional argument parsing here.
-          if (args.length != 3) {
+          if (args.length != 4) {
             throw new IllegalArgumentException(
-                "Expected 3 args (min_age, ids, dry_run). Got " + Arrays.asList(args));
+                "Expected 4 args (api_url, min_age, ids, dry_run). Got " + Arrays.asList(args));
           }
+          String apiUrl = args[0];
           Instant oldest = null;
-          if (!args[0].isEmpty()) {
-            Duration age = Duration.ofDays(Long.parseLong(args[0]));
+          if (!args[1].isEmpty()) {
+            Duration age = Duration.ofDays(Long.parseLong(args[1]));
             oldest = Clock.systemUTC().instant().minus(age);
             log.info("only clusters created before " + oldest + " will be considered");
           }
 
           // Note: IDs are optional, this set may be empty.
-          Set<String> ids = commaDelimitedStringToSet(args[1]);
-          boolean dryRun = Boolean.valueOf(args[2]);
-          deleteClusters(oldest, ids, dryRun);
+          Set<String> ids = commaDelimitedStringToSet(args[2]);
+          boolean dryRun = Boolean.valueOf(args[3]);
+          deleteClusters(apiUrl, oldest, ids, dryRun);
           return;
 
         default:
