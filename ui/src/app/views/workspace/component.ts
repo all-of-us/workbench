@@ -229,8 +229,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.pollCluster().subscribe((c) => {
       // Use lower level *withHttpInfo() method to work around
       // https://github.com/DataBiosphere/leonardo/issues/444
-      this.leoNotebooksService.setCookieWithHttpInfo(c.clusterNamespace, c.clusterName)
-        .subscribe(() => {
+      this.leoNotebooksService.setCookieWithHttpInfo(c.clusterNamespace, c.clusterName, {
+        withCredentials: true
+      }).subscribe(() => {
           this.clusterLoading = false;
         });
     });
