@@ -79,9 +79,11 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         }
         if (c.status === ClusterStatus.Stopped) {
           // Resume the cluster and continue polling.
-          return this.leoClusterService
+          return <Observable<Cluster>> this.leoClusterService
             .startCluster(c.clusterNamespace, c.clusterName)
-            .flatMap(() => Error('resuming'));
+            .flatMap(_ => {
+              throw Error('resuming');
+            });
         }
         throw Error(`cluster has status ${c.status}`);
       })
@@ -101,6 +103,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         this.progress = Progress.Creating;
         return this.newNotebook();
       })
+      // The cluster may be running, but we've observed some 504s on localize
+      // right after it comes up. Retry here to mitigate that.
+      .retry(3)
       .subscribe((nbName) => {
         this.progress = Progress.Redirecting;
         this.window.location.href = this.notebookUrl(this.cluster, nbName);
