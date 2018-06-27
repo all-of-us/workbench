@@ -1,11 +1,11 @@
 id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,domain_id,is_attribute
 316289,0,PM,BP,,Blood Pressure,1,0,,,Measurement,0
 316290,0,PM,HR,,Heart Rate,1,0,,,Measurement,0
-316291,0,PM,HEIGHT,,Height,1,0,,,Measurement,0
-316292,0,PM,WEIGHT,,Weight,1,0,,,Measurement,0
-316293,0,PM,BMI,,BMI,1,0,,,Measurement,0
-316294,0,PM,WC,,Waist Circumference,1,0,,,Measurement,0
-316295,0,PM,HC,,Hip Circumference,1,0,,,Measurement,0
+316305,0,PM,HEIGHT,,Height Detail,0,1,0,,Measurement,1
+316306,0,PM,WEIGHT,,Weight Detail,0,1,0,,Measurement,1
+316307,0,PM,BMI,,BMI Detail,0,1,0,903124,Measurement,1
+316308,0,PM,WC,,Waist Circumference Detail,0,1,0,,Measurement,1
+316309,0,PM,HC,,Hip Circumference Detail,0,1,0,,Measurement,1
 316296,0,PM,PREG,,Pregnancy as observed at enrollments,1,0,0,,Measurement,0
 316297,0,PM,WHEEL,,Wheelchair as observed at enrollments,1,0,0,,Measurement,0
 316298,316289,PM,BP,<=;90;<=;60,Hypotensive (Systolic <= 90 / Diastolic <= 60),0,1,0,903115,Measurement,0
@@ -15,11 +15,6 @@ id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,
 316302,316289,PM,BP,,Blood Pressure Detail,0,1,0,903115,Measurement,1
 316303,316290,PM,HR,,Heart Rhythm Status,1,0,,,Measurement,0
 316304,316290,PM,HR,,Heart Rate Detail,0,1,0,,Measurement,1
-316305,316291,PM,HEIGHT,,Height Detail,0,1,0,,Measurement,1
-316306,316292,PM,WEIGHT,,Weight Detail,0,1,0,,Measurement,1
-316307,316293,PM,BMI,,BMI Detail,0,1,0,903124,Measurement,1
-316308,316294,PM,WC,,Waist Circumference Detail,0,1,0,,Measurement,1
-316309,316295,PM,HC,,Hip Circumference Detail,0,1,0,,Measurement,1
 316310,316303,PM,HR,,Irregularity detected,0,1,0,,Measurement,0
 316311,316303,PM,HR,,No-irregularity detected,0,1,0,,Measurement,0
 316312,316296,PM,PREG,Yes,Yes,0,1,0,,Measurement,0
