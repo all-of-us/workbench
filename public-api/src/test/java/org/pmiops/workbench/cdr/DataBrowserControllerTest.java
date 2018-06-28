@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
