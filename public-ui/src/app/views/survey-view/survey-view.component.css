@@ -100,4 +100,6 @@
     text-decoration: underline;
 }
 
-
+.percent-bar {
+    padding-right: 1rem;
+}

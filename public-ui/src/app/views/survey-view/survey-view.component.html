@@ -128,7 +128,7 @@
               <div class="answer-text col-sm-2 col-xs-12"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
                 <label class="participant-count">{{a.countValue | number}}  </label>
               </div>
-              <div class="col-sm-4 col-xs-12"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
+              <div class="col-sm-4 col-xs-12 percent-bar"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
                 <div class="progress labeled">
                   <progress max="100" value="{{a.countPercent}}" data-displayval="0%"></progress>
                   <span>{{a.countPercent}}%</span>
