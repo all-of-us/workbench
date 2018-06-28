@@ -11,6 +11,7 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
+import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
@@ -45,34 +46,35 @@ const routes: Routes = [
     canActivateChild: [SignInGuard],
     runGuardsAndResolvers: 'always',
     children: [
+      {
+        path: '',
+        component: HomepageComponent,
+        data: {title: 'Homepage'},
+      }, {
+      path: 'workspaces',
+      data: {breadcrumb: 'Workspaces'},
+      children: [
         {
           path: '',
-          component: HomepageComponent,
-          data: {title: 'Homepage'},
-        }, {
-        path: 'workspaces',
-        data: {breadcrumb: 'Workspaces'},
-        children: [
-          {
-            path: '',
-            component: WorkspaceListComponent,
-            data: {title: 'View Workspaces'}
+          component: WorkspaceListComponent,
+          data: {title: 'View Workspaces'}
+        },
+        {
+          /* TODO The children under ./views need refactoring to use the data
+           * provided by the route rather than double-requesting it.
+           */
+          path: ':ns/:wsid',
+          component: WorkspaceNavBarComponent,
+          data: {
+            title: 'View Workspace Details',
+            breadcrumb: 'Param: Workspace Name'
           },
-          {
-            /* TODO The children under ./views need refactoring to use the data
-             * provided by the route rather than double-requesting it.
-             */
-            path: ':ns/:wsid',
-            component: WorkspaceNavBarComponent,
-            data: {
-              title: 'View Workspace Details',
-              breadcrumb: 'Param: Workspace Name'
-            },
-            runGuardsAndResolvers: 'always',
-            resolve: {
-              workspace: WorkspaceResolver,
-            },
-            children: [{
+          runGuardsAndResolvers: 'always',
+          resolve: {
+            workspace: WorkspaceResolver,
+          },
+          children: [
+            {
               path: '',
               component: WorkspaceComponent,
               data: {
@@ -117,7 +119,7 @@ const routes: Routes = [
               resolve: {
                 cohort: CohortResolver,
               },
-            }],
+            }]
           }
         ]
       },
@@ -141,6 +143,21 @@ const routes: Routes = [
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
+      }, {
+        // The notebook redirect pages are interstitial pages, so we want to
+        // give them special chrome treatment - we therefore put them outside
+        // the normal /workspaces hierarchy.
+        path: 'workspaces/:ns/:wsid/notebooks/create',
+        component: NotebookRedirectComponent,
+        data: {
+          title: 'Creating a new Notebook'
+        }
+      }, {
+        path: 'workspaces/:ns/:wsid/notebooks/:nbName',
+        component: NotebookRedirectComponent,
+        data: {
+          title: 'Opening a Notebook'
+        }
       }
     ]
   }

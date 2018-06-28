@@ -44,19 +44,17 @@ public class JiraServiceImpl implements JiraService {
   public IssueResponse createIssue(BugReport bugReport) throws ApiException {
     setJiraCredentials();
     IssueRequest issueDetails = new IssueRequest();
-    IssueType issueType = new IssueType();
-    FieldsDetails fieldsDetail = new FieldsDetails();
-    ProjectDetails projectDetails = new ProjectDetails();
 
-    projectDetails.setKey(configProvider.get().jira.projectKey);
+    IssueType issueType = new IssueType().name(IssueTypeEnum.Bug.name());
 
-    fieldsDetail.setDescription(String.format("%s %nContact Email: %s",bugReport.getReproSteps(),
-        bugReport.getContactEmail()));
-    fieldsDetail.setSummary(bugReport.getShortDescription());
-    fieldsDetail.setProject(projectDetails);
+    ProjectDetails projectDetails = new ProjectDetails()
+        .key(configProvider.get().jira.projectKey);
 
-    issueType.setName(IssueTypeEnum.Bug.name());
-    fieldsDetail.setIssuetype(issueType);
+    FieldsDetails fieldsDetail = new FieldsDetails()
+        .description(String.format("%s %nContact Email: %s",bugReport.getReproSteps(), bugReport.getContactEmail()))
+        .summary(bugReport.getShortDescription())
+        .project(projectDetails).issuetype(issueType);
+
 
     issueDetails.setFields(fieldsDetail);
     return api.createIssue(issueDetails);
