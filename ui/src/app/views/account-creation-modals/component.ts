@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {ProfileService} from 'generated';
-import {UpdateContactEmailRequest} from 'generated';
+import {UpdateContactEmailRequest, ResendWelcomeEmailRequest} from 'generated';
 import {ServerConfigService} from '../../services/server-config.service';
 
 @Component({
@@ -54,7 +54,11 @@ export class AccountCreationModalsComponent implements OnInit {
   }
 
   send() {
-    this.profileService.resendWelcomeEmail(this.username + '@' + this.gsuiteDomain)
-      .subscribe(() => {});
+    const request: ResendWelcomeEmailRequest = {
+      username: this.username + '@' + this.gsuiteDomain
+    };
+    this.profileService.resendWelcomeEmail(request).subscribe(() => {
+      this.resendingEmail = false;
+    });
   }
 }
