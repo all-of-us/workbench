@@ -9,16 +9,6 @@
         <button class="btn btn-link final" [class.selected]="tabOpen === Tabs.Cohorts" (click)="tabOpen = Tabs.Cohorts">
           Cohorts ({{cohortList.length}})
         </button>
-        <div class="alert {{alertCategory}}" *ngIf="showAlerts">
-          <div class="alert-items">
-            <div class="alert-item static">
-              <div class="alert-icon-wrapper">
-                <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
-              </div>
-              <span class="alert-text">{{alertMsg}}</span>
-            </div>
-          </div>
-        </div>
       </div>
       <div>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
@@ -30,15 +20,11 @@
         </span>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
           <button *ngIf="tabOpen===Tabs.Notebooks" class="btn btn-primary btn-create"
-                  [disabled]="clusterLoading || awaitingReview || !writePermission" (click)="newNotebook()">
+                  [disabled]="awaitingReview || !writePermission" (click)="newNotebook()">
             + New Notebook
           </button>
           <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
           <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
-          <span *ngIf="cluster && clusterLoading" class="tooltip-content">
-            Your notebook server is still being initialized - this may take up
-            to 5 minutes. Please try again later.
-          </span>
         </span>
       </div>
     </div>
@@ -87,30 +73,11 @@
       </div>
     </clr-modal>
 
-    <clr-modal [(clrModalOpen)]="clusterPulled">
-      <h3 class="modal-title">Notebook Server Ready:</h3>
-      <div class="modal-body">Your notebook server is ready, please confirm to open in a new tab</div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" (click)="openCluster(launchedNotebookName)">Ok</button>
-        <button type="button" class="btn btn-primary" (click)="cancelCluster()">Cancel</button>
-      </div>
-    </clr-modal>
-    <clr-modal [(clrModalOpen)]="localizeNotebooksError">
-      <h3 class="modal-title">Error:</h3>
-      <div class="modal-body">Could not load your notebook. Please <a (click)="submitNotebookLocalizeBugReport()">submit a bug report.</a></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" (click)="localizeNotebooksError = false">Ok</button>
-      </div>
-    </clr-modal>
     <div *ngIf="tabOpen===Tabs.Notebooks">
-      <div *ngIf="notebooksLoading || clusterLoading" class="spinner-container">
+      <div *ngIf="notebooksLoading" class="spinner-container">
         <span class="spinner spinner-lg"></span>
-        <p *ngIf="clusterLongWait" class="spinner-text">
-          <span class="spinner-header">Initializing Notebook Server</span><br>
-          May take up to 5 minutes
-        </p>
       </div>
-      <clr-datagrid *ngIf="!notebooksLoading && !clusterLoading">
+      <clr-datagrid *ngIf="!notebooksLoading">
         <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
           Name
           <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
