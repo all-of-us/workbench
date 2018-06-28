@@ -288,6 +288,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         searchConceptsRequest.getVocabularyIds(), domainIds, maxResults);
         ConceptListResponse response = new ConceptListResponse();
         List<Concept> matchedConcepts = concepts.getContent();
+
         for(Concept con : matchedConcepts){
             String conceptCode = con.getConceptCode();
             String conceptId = String.valueOf(con.getConceptId());

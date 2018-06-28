@@ -1,16 +1,21 @@
 package org.pmiops.workbench.publicapi;
 
-import static com.google.common.truth.Truth.assertThat;
+import java.util.stream.Collectors;
+import java.util.function.Function;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
+import java.util.List;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.DbDomainDao;
+import org.pmiops.workbench.model.StandardConceptFilter;
 //import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
 //import org.pmiops.workbench.cdr.dao.AchillesResultDao;
 //import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
@@ -42,6 +47,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DataBrowserControllerTest {
 
+    private static final Function<org.pmiops.workbench.model.Concept, Concept>
+            TO_CLIENT_CONCEPT =
+            new Function<org.pmiops.workbench.model.Concept, Concept>() {
+                @Override
+                public Concept apply(org.pmiops.workbench.model.Concept concept) {
+                    return new Concept()
+                            .conceptId(concept.getConceptId())
+                            .conceptName(concept.getConceptName())
+                            .standardConcept(concept.getStandardConcept())
+                            .conceptCode(concept.getConceptCode())
+                            .conceptClassId(concept.getConceptClassId())
+                            .vocabularyId(concept.getVocabularyId())
+                            .domainId(concept.getDomainId())
+                            .count(concept.getCountValue())
+                            .sourceCountValue(concept.getSourceCountValue())
+                            .prevalence(concept.getPrevalence());
+                }
+            };
+
     private static final Concept CLIENT_CONCEPT_1 = new Concept()
             .conceptId(123L)
             .conceptName("a concept")
@@ -57,6 +81,7 @@ public class DataBrowserControllerTest {
     private static final Concept CLIENT_CONCEPT_2 = new Concept()
             .conceptId(456L)
             .conceptName("b concept")
+            .standardConcept("")
             .conceptCode("conceptB")
             .conceptClassId("classId2")
             .vocabularyId("V2")
@@ -68,6 +93,7 @@ public class DataBrowserControllerTest {
     private static final Concept CLIENT_CONCEPT_3 = new Concept()
             .conceptId(789L)
             .conceptName("multi word concept")
+            .standardConcept("")
             .conceptCode("conceptC")
             .conceptClassId("classId3")
             .vocabularyId("V3")
@@ -103,12 +129,12 @@ public class DataBrowserControllerTest {
     private static final Concept CLIENT_CONCEPT_6 = new Concept()
             .conceptId(7891L)
             .conceptName("conceptD test concept 2")
-            .standardConcept("")
+            .standardConcept("S")
             .conceptCode("conceptD")
             .conceptClassId("classId6")
             .vocabularyId("V6")
             .domainId("Condition")
-            .count(7891L)
+            .count(0L)
             .sourceCountValue(20L)
             .prevalence(0.1F);
 
@@ -116,7 +142,7 @@ public class DataBrowserControllerTest {
             .conceptId(7892L)
             .conceptName("conceptD test concept 3")
             .standardConcept("S")
-            .conceptCode("conceptF")
+            .conceptCode("conceptD")
             .conceptClassId("classId7")
             .vocabularyId("V7")
             .domainId("Condition")
@@ -215,18 +241,22 @@ public class DataBrowserControllerTest {
     @Test
     public void testGetParentConcepts() throws Exception {
         saveData();
-        assertResults(
-                dataBrowserController.getParentConcepts(1234L),CLIENT_CONCEPT_5
-        );
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.getParentConcepts(1234L);
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_5)
+        ;
     }
 
 
     @Test
     public void testGetSourceConcepts() throws Exception {
         saveData();
-        assertResults(
-                dataBrowserController.getSourceConcepts(7890L,15), CLIENT_CONCEPT_4, CLIENT_CONCEPT_2
-        );
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.getSourceConcepts(7890L, 15);
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_4, CONCEPT_2)
+        ;
     }
 
 
@@ -257,19 +287,57 @@ public class DataBrowserControllerTest {
     @Test
     public void testConceptSearchWithEmptyQuery() throws Exception{
         saveData();
-        assertResults(
-                dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")), CLIENT_CONCEPT_1, CLIENT_CONCEPT_2, CLIENT_CONCEPT_3, CLIENT_CONCEPT_4, CLIENT_CONCEPT_5, CLIENT_CONCEPT_6)
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query(""));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_1, CONCEPT_2, CONCEPT_3, CONCEPT_4, CONCEPT_5, CONCEPT_6)
         ;
     }
+
 
     @Test
     public void testConceptSearchEmptyCount() throws Exception{
+        // Exact concept search was not tested. Match in tests was replaced by like and like > 0.0 was not possible to test
         saveData();
-        assertResults(
-                dataBrowserController.searchConcepts(new SearchConceptsRequest().query("conceptD")), CLIENT_CONCEPT_5, CLIENT_CONCEPT_6)
-        ;
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("conceptD")
+                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_4, CONCEPT_6)
+                .inOrder();
     }
 
+    @Test
+    public void testConceptIdSearch() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("456")
+                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_2)
+                .inOrder();
+    }
+
+
+
+    @Test
+    public void testConceptCodeMatch() throws Exception {
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("conceptB")
+                .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        List<org.pmiops.workbench.model.Concept> stds= response.getBody().getStandardConcepts();
+        if(stds.size() > 0){
+            List<Concept> std_concepts = response.getBody().getStandardConcepts().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+            assertThat(std_concepts)
+                    .containsExactly(CONCEPT_5)
+                    .inOrder();
+        }
+
+        assertThat(concepts)
+                .containsExactly(CONCEPT_2)
+                .inOrder();
+    }
 
 
     private static Concept makeConcept(Concept concept) {
@@ -320,18 +388,13 @@ public class DataBrowserControllerTest {
         conceptDao.save(CONCEPT_6);
         conceptDao.save(CONCEPT_7);
 
-        conceptRelationshipDao.save(makeConceptRelationship(1234L, 7890L, "Maps to"));
-        conceptRelationshipDao.save(makeConceptRelationship(456L, 7890L, "Maps to"));
+        conceptRelationshipDao.save(makeConceptRelationship(1234L, 7890L, "maps to"));
+        conceptRelationshipDao.save(makeConceptRelationship(456L, 7890L, "maps to"));
 
         dbDomainDao.save(DBDOMAIN_1);
         dbDomainDao.save(DBDOMAIN_2);
         dbDomainDao.save(DBDOMAIN_3);
         dbDomainDao.save(DBDOMAIN_4);
-    }
-
-    private void assertResults(ResponseEntity<ConceptListResponse> response,
-                               Concept... expectedConcepts) {
-        assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
     }
 
     private void assertDomains(ResponseEntity<DbDomainListResponse> response,
