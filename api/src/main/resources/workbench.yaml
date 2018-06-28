@@ -190,9 +190,9 @@ paths:
       security: []
       parameters:
         - in: body
-          name: contactEmail
+          name: resendWelcomeEmail
           schema:
-            type: string
+            $ref: "#/definitions/ResendWelcomeEmailRequest"
       responses:
         200:
           description: Welcome Email sent.
@@ -1282,6 +1282,15 @@ definitions:
       invitationKey:
         type: string
         description: Invitation key for verification
+
+  ResendWelcomeEmailRequest:
+    type: object
+    required:
+      - username
+    properties:
+      username:
+        type: string
+        description: Username of account to resend welcome email to
 
   UpdateContactEmailRequest:
     type: object

@@ -5,9 +5,8 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
-import com.google.api.services.admin.directory.model.User;
-import com.google.api.services.admin.directory.model.UserEmail;
-import com.google.api.services.admin.directory.model.UserName;
+import com.google.api.services.admin.directory.model.*;
+import com.google.appengine.api.datastore.Email;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -37,14 +36,16 @@ public class DirectoryServiceImpl implements DirectoryService {
   private static SecureRandom rnd = new SecureRandom();
 
   // This list must exactly match the scopes allowed via the GSuite Domain Admin page here:
-  // https://admin.google.com/AdminHome?chromeless=1#OGX:ManageOauthClients
+  // https://admin.google.com/fake-research-aou.org/AdminHome?chromeless=1#OGX:ManageOauthClients
+  // replace 'fake-research-aou.org' with the specific domain that you want to manage
   // For example, ADMIN_DIRECTORY_USER does not encapsulate ADMIN_DIRECTORY_USER_READONLY — it must
   // be explicit.
-  // The "Client Name" field in that form must be the cient ID of the service account. The field
+  // The "Client Name" field in that form must be the client ID of the service account. The field
   // will accept the email address of the service account and lookup the correct client ID giving
   // the impression that the email address is an acceptable substitute, but testing shows that this
   // doesn't actually work.
   static final List<String> SCOPES = Arrays.asList(
+    DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS, DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
       DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
@@ -93,7 +94,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   public User getUser(String email) {
     try {
       return retryHandler.runAndThrowChecked((context) ->
-      getGoogleDirectoryService().users().get(email).execute());
+      getGoogleDirectoryService().users().get(email).setProjection("full").execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
@@ -117,13 +118,18 @@ public class DirectoryServiceImpl implements DirectoryService {
   public User createUser(String givenName, String familyName, String username, String contactEmail) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     String password = randomString();
+    Alias alias = new Alias();
+    alias.setAlias(contactEmail);
     User user = new User()
       .setPrimaryEmail(username+"@"+gSuiteDomain)
       .setPassword(password)
       .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
-      .setEmails(new UserEmail().setType("custom").setAddress(contactEmail).setCustomType("contact"))
+//      .setAliases(Arrays.asList(contactEmail))
+//      .setEmails(new UserEmail().setAddress(contactEmail).setType("custom").setCustomType("contact").setPrimary(false))
       .setChangePasswordAtNextLogin(true);
+    log.log(Level.INFO, "user before insert: " + user.toString());
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
+    retryHandler.run((context) -> getGoogleDirectoryService().users().aliases().insert(username+'@'+gSuiteDomain, alias).execute());
     try {
       mailServiceProvider.get().sendWelcomeEmail(contactEmail, password, user);
     } catch (MessagingException e) {
@@ -137,9 +143,12 @@ public class DirectoryServiceImpl implements DirectoryService {
     User user = getUser(userKey);
     String password = randomString();
     user.setPassword(password);
-    retryHandler.run((context) -> getGoogleDirectoryService().users().update(userKey, user).execute());
+//    retryHandler.run((context) -> getGoogleDirectoryService().users().update(userKey, user).execute());
+    Aliases emails = retryHandler.run((context) -> getGoogleDirectoryService().users().aliases().list(userKey).execute());
+    log.log(Level.INFO, "user: " + user.toString());
+    log.log(Level.INFO, "emails: " + emails.getAliases().toString());
     try {
-      mailServiceProvider.get().sendWelcomeEmail(userKey, password, user);
+      mailServiceProvider.get().sendWelcomeEmail(user.getPrimaryEmail(), password, user);
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }

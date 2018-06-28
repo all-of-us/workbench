@@ -49,9 +49,9 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
-import org.pmiops.workbench.model.WelcomeEmailSent;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -482,16 +482,9 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> resendWelcomeEmail(String userName) {
-    com.google.api.services.admin.directory.model.User googleUser = getGoogleUser(userName);
-//    com.google.api.services.admin.directory.model.User user = directoryService.getUser(userName);
-    log.log(Level.INFO, "user in controller: " + googleUser.toString() );
-    directoryService.resendWelcomeEmail(userName);
+  public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
+    directoryService.resendWelcomeEmail(resendRequest.getUsername());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  private com.google.api.services.admin.directory.model.User getGoogleUser(String userName) {
-    return directoryService.getUser(userName);
   }
 
   @Override
