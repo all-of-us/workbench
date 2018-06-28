@@ -150,8 +150,8 @@ label {
 /* This is a column in our grid */
 .expandable-grid-row > div {
 
-    font-size: 13px;
-    font-weight: 300;
+    font-size: 14px;
+    font-weight: 400;
     line-height: 16px;
 
 }

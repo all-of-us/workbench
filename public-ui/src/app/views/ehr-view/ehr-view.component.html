@@ -36,7 +36,7 @@
             matching medical concepts.
           </div>
           <div class="card-text bottom info-text">
-
+            Total participants: {{totalParticipants}}
           </div>
         </div>
         <div class="col-md-8 col-xs-12 chart-wrapper flex-xs-middle">
@@ -79,7 +79,7 @@
              [ngClass]="{'expanded-grid-row': r.expanded}" >
           <div class="col-md-4 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}"> </div>
           <div class="col-md-4 flex-xs-middle">
-            {{r.countValue | number }} partipants
+            {{r.countValue | number }} out of {{totalParticipants | number}} participants
 
           </div>
           <div class="col-md-3 flex-xs-middle">

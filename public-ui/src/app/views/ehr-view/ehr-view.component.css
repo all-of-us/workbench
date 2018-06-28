@@ -12,3 +12,8 @@
     color: red;
 }
 
+.row.expandable-grid-row {
+    font-size: larger !important;
+    font-weight: 600 !important;
+}
+
