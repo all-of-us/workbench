@@ -70,7 +70,7 @@ public class DataBrowserControllerTest {
             .conceptId(123L)
             .conceptName("a concept")
             .standardConcept("S")
-            .conceptCode("conceptA")
+            .conceptCode("001")
             .conceptClassId("classId")
             .vocabularyId("V1")
             .domainId("Condition")
@@ -82,7 +82,7 @@ public class DataBrowserControllerTest {
             .conceptId(456L)
             .conceptName("b concept")
             .standardConcept("")
-            .conceptCode("conceptB")
+            .conceptCode("002")
             .conceptClassId("classId2")
             .vocabularyId("V2")
             .domainId("Measurement")
@@ -94,7 +94,7 @@ public class DataBrowserControllerTest {
             .conceptId(789L)
             .conceptName("multi word concept")
             .standardConcept("")
-            .conceptCode("conceptC")
+            .conceptCode("003")
             .conceptClassId("classId3")
             .vocabularyId("V3")
             .domainId("Condition")
@@ -106,7 +106,7 @@ public class DataBrowserControllerTest {
             .conceptId(1234L)
             .conceptName("sample test con to test the multi word search")
             .standardConcept("S")
-            .conceptCode("conceptD")
+            .conceptCode("004")
             .conceptClassId("classId4")
             .vocabularyId("V4")
             .domainId("Observation")
@@ -118,7 +118,7 @@ public class DataBrowserControllerTest {
             .conceptId(7890L)
             .conceptName("conceptD test concept")
             .standardConcept("S")
-            .conceptCode("conceptE")
+            .conceptCode("005")
             .conceptClassId("classId5")
             .vocabularyId("V5")
             .domainId("Condition")
@@ -130,7 +130,7 @@ public class DataBrowserControllerTest {
             .conceptId(7891L)
             .conceptName("conceptD test concept 2")
             .standardConcept("S")
-            .conceptCode("conceptD")
+            .conceptCode("004")
             .conceptClassId("classId6")
             .vocabularyId("V6")
             .domainId("Condition")
@@ -142,7 +142,7 @@ public class DataBrowserControllerTest {
             .conceptId(7892L)
             .conceptName("conceptD test concept 3")
             .standardConcept("S")
-            .conceptCode("conceptD")
+            .conceptCode("004")
             .conceptClassId("classId7")
             .vocabularyId("V7")
             .domainId("Condition")
@@ -297,9 +297,9 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testConceptSearchEmptyCount() throws Exception{
-        // Exact concept search was not tested. Match in tests was replaced by like and like > 0.0 was not possible to test
+        // We can't test limiting to count > 0 with a concept name search because the match function does not work in hibernate. So we make several concepts with same concept code and one with count 0. The limit > 0 works the same weather it is code or name match.
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("conceptD")
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("004")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
@@ -323,7 +323,7 @@ public class DataBrowserControllerTest {
     @Test
     public void testConceptCodeMatch() throws Exception {
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("conceptB")
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("002")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         List<org.pmiops.workbench.model.Concept> stds= response.getBody().getStandardConcepts();
