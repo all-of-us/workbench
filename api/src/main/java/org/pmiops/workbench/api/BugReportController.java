@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -33,17 +32,14 @@ public class BugReportController implements BugReportApiDelegate {
       ImmutableList.of("delocalization.log", "jupyter.log", "localization.log");
 
   private final Provider<JiraService> jiraServiceProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<JupyterApi> jupyterApiProvider;
   private Provider<User> userProvider;
 
   @Autowired
   BugReportController(
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<User> userProvider,
       Provider<JupyterApi> jupyterApiProvider,
       Provider<JiraService> jiraService) {
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
     this.jupyterApiProvider = jupyterApiProvider;
     this.jiraServiceProvider = jiraService;
