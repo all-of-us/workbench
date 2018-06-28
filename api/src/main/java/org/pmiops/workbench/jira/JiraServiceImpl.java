@@ -20,7 +20,6 @@ import javax.inject.Provider;
 @Service
 public class JiraServiceImpl implements JiraService {
 
-  private static final Logger log = Logger.getLogger(JiraServiceImpl.class.getName());
   private JiraApi api = new JiraApi();
   private final Provider<WorkbenchConfig> configProvider;
   private CloudStorageService cloudStorageService;
