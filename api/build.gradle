@@ -236,9 +236,7 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:+'
-  compile ('com.google.cloud:google-cloud-bigquery:0.30.0-beta') {
-    exclude group: 'com.google.guava', module:'guava'
-  }
+  compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
   compile ('com.google.cloud:google-cloud-storage:1.8.0') {
     exclude group: 'com.google.guava', module:'guava-jdk5'
   }
@@ -250,7 +248,7 @@ dependencies {
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
-  compile 'com.google.guava:guava:25.1-jre'
+  compile 'com.google.guava:guava:22.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
