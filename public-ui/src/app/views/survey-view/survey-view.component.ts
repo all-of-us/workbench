@@ -24,10 +24,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   surveys: DbDomain[] = [];
   survey;
   surveyConceptId;
-  surveyResult: QuestionConceptListResponse;
+  surveyResult: any;
   resultsComplete = false;
   private subscriptions: ISubscription[] = [];
   loading = false;
+  surveyPdfUrl='/assets/surveys/AoU PPI_Basics_version_2018.06.04.docx';
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -62,30 +63,34 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       next: x => {
         this.surveyResult = x;
         this.survey = this.surveyResult.survey;
-        const questions = this.surveyResult.items;
+
 
         // Add Did not answer to each question
         for (let q of this.surveyResult.items) {
-
-          // Get did not answer count for question by subtracting all answered num participants that completed survey
+          // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
           let didNotAnswerCount  = this.survey.countValue;
           for (let a of q.countAnalysis.results) {
             didNotAnswerCount = didNotAnswerCount - a.countValue;
+            a.countPercent = this.countPercentage(a.countValue);
+
           }
           const result = q.countAnalysis.results[0];
-          let didNotAnswerResult = {analysisId : result.analysisId, countValue: didNotAnswerCount ,
+          if (didNotAnswerCount < 0 ) { didNotAnswerCount = 0; }
+          const notAnswerPercent = this.countPercentage(didNotAnswerCount);
+          let didNotAnswerResult = {
+            analysisId : result.analysisId, countValue: didNotAnswerCount , countPercent: notAnswerPercent,
             stratum1: result.stratum1, stratum2: result.stratum2, stratum3: result.stratum3, stratum4: "Did not answer",
             stratum5: result.stratum5};
           q.countAnalysis.results.push(didNotAnswerResult);
         }
 
-        // Temp until answer order is fixed on server side , sort abc
-        for (const q of questions ) {
+        this.questions = this.surveyResult.items;
+        // Sort count value desc
+        for (const q of this.questions ) {
           q.countAnalysis.results.sort((a1, a2) => {
-            if (a1.stratum4 === 'Did not answer' ) { return 1; }
-            if (a1.stratum4 > a2.stratum4) { return 1; }
-            if (a1.stratum4 < a2.stratum4) { return -1; }
+            if (a1.countValue > a2.countValue) { return -1; }
+            if (a1.countValue < a2.countValue) { return 1; }
             return 0;
           });
         }
@@ -112,6 +117,13 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  public countPercentage(countValue: number) {
+    if (!countValue || countValue <= 0) { return 0; }
+    let percent: number = countValue / this.survey.countValue ;
+    percent = parseFloat(percent.toFixed(2));
+
+    return percent * 100;
+  }
   public searchQuestion(q: QuestionConcept) {
     // Todo , match all words maybe instead of any. Or allow some operators such as 'OR' 'AND'
     const text = this.searchText.value;

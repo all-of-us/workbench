@@ -13,7 +13,6 @@
   </div>
 
   <div class="col-md-4 col-xs-12 chart"  *ngIf="showSources && ageAnalysis && sourceConcepts && sourceConcepts.length">
-    <!--<button class="btn btn-link btn-sm" (click)="toggleSourceConcepts()"> Show Sources </button>-->
     <app-chart [concepts]="sourceConcepts" [pointWidth]="20" [backgroundColor]="backgroundColor" [chartTitle]="'Sources'"> </app-chart>
   </div>
 </div>

@@ -12,7 +12,7 @@ import {ISubscription} from "rxjs/Subscription";
 export class ConceptChartsComponent implements OnInit, OnDestroy {
   @Input() concept: Concept;
   @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
-  @Input() showSources = false;
+  @Input() showSources = true;
   @Input() showGender = true;
   @Input() showAge = true;
   results;
@@ -45,13 +45,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
     this.subscription2.unsubscribe();
   }
-  toggleSourceConcepts() {
-    // Get source concepts for first time if we don't have them
-    if (this.sourceConcepts === null) {
-      this.getSourceConcepts();
-    }
-    this.showSources = true;
-  }
+
   getSourceConcepts() {
     this.subscription2 = this.api.getSourceConcepts(this.concept.conceptId).subscribe(
       results => this.sourceConcepts = results.items

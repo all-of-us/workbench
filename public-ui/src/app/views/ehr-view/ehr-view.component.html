@@ -70,27 +70,28 @@
         <div class="row">
           <div class="col-md-4 grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
           <div class="col-md-4 grid-header flex-xs-middle"> Number of particpants </div>
-          <div class="col-md-4 grid-header flex-xs-middle info-text"> <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon> What is SNOMED? </div>
+          <div class="col-md-3 grid-header flex-xs-middle info-text"> <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon> What is SNOMED? </div>
+          <div class="col-md-1 grid-header flex-xs-middle info-text"> View graphs </div>
+
         </div>
-        <div class="row expandable-grid-row" *ngFor="let r of items.concat(standardConcepts), let i = index" [ngClass]="{'expanded-grid-row': r.expanded}" >
+        <div class="row expandable-grid-row" (click)="r.expanded = !r.expanded"
+             *ngFor="let r of items.concat(standardConcepts), let i = index"
+             [ngClass]="{'expanded-grid-row': r.expanded}" >
           <div class="col-md-4 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}"> </div>
           <div class="col-md-4 flex-xs-middle">
             {{r.countValue | number }} partipants
+
+          </div>
+          <div class="col-md-3 flex-xs-middle">
+            {{r.vocabularyId}} {{r.conceptCode}}
+          </div>
+          <div class="col-md-1 flex-xs-middle">
             <button class="icon-btn" (click)="r.expanded = !r.expanded">
               <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
             </button>
           </div>
-          <div class="col-md-4 flex-xs-middle">
-            {{r.vocabularyId}} {{r.conceptCode}}
-            <button class="icon-btn" (click)="toggleSources(r)" > <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem; color: #2691D0;"></clr-icon> </button>
-          </div>
-          <!-- <div class="col-md-1 flex-xs-middle">
-            <button class="icon-btn" (click)="r.expanded = !r.expanded">
-              <clr-icon shape="bar-chart" style="height: 24px; color: #2691D0;"></clr-icon>
-            </button>
-          </div> -->
           <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded">
-            <app-concept-charts [concept]="r" [showSources]="r.showSources" [backgroundColor]="'#ECF1F4'"></app-concept-charts>
+            <app-concept-charts [concept]="r" [showSources]="true" [backgroundColor]="'#ECF1F4'"></app-concept-charts>
           </div>
         </div>
       </div>
