@@ -141,7 +141,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         });
     this.loadNotebookList();
 
-    if (this.cohortList.length == 0 && this.notebookList.length == 0) {
+    if (this.cohortList.length === 0 && this.notebookList.length === 0) {
       this.greeting = 'Get Started';
     } else {
       this.greeting = 'Recent Work';
