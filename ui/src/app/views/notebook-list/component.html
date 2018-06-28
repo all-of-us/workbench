@@ -1,0 +1,38 @@
+<h3 class="notebooks-header">Notebooks</h3>
+<div *ngIf="notebooksLoading" class="spinner-container">
+  <span class="spinner spinner-lg"></span>
+</div>
+<div class="card-area" *ngIf="!notebooksLoading">
+  <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
+       [class.disabled]="createDisabled" (click)="newNotebook()">
+    <h4 class="create-text">Create a New Notebook</h4>
+    <clr-icon class="plus-circle" shape="plus-circle"></clr-icon>
+    <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+    <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
+  </div>
+
+  <div class="card" *ngFor="let notebook of notebookList" (click)="openNotebook(notebook)">
+    <div class="notebook-name">{{notebook.name}}</div>
+    <div class="notebook-description">Temp</div>
+    <div class="footer">
+      <div class="last-accessed">{{notebook.lastModifiedTime | date}}</div>
+      <div class="notebook-type"></div>
+    </div>
+  </div>
+</div>
+
+<clr-modal [(clrModalOpen)]="notebookError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not fetch notebooks from workspace. Please <a (click)="submitNotebooksLoadBugReport()">submit a bug report.</a></div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="notebookError = false">Ok</button>
+  </div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="localizeNotebooksError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not load your notebook. Please <a (click)="submitNotebookLocalizeBugReport()">submit a bug report.</a></div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="localizeNotebooksError = false">Ok</button>
+  </div>
+</clr-modal>
+<app-bug-report></app-bug-report>

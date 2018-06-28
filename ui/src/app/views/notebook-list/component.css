@@ -1,0 +1,64 @@
+.spinner {
+  margin-top: 1rem;
+}
+
+.spinner-text {
+  text-align: center;
+  /* This forces the flex layout to put the text on a new line. */
+  width: 100%;
+}
+
+.spinner-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+.card .plus-circle {
+  width: 21px;
+  height: 21px;
+  color: #216FB4;
+}
+
+.card {
+  width: 200px;
+  height: 223px;
+  margin-right: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.card.add-card {
+  height: 105px;
+}
+
+.card.add-card.disabled {
+  cursor: not-allowed;
+}
+
+.card-area {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.create-text {
+  color: #216FB4;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.notebooks-header {
+  color: #2F2E7E;
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.notebook-name {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 22px;
+  color: #216FB4;
+}

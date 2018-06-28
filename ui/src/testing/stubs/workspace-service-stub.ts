@@ -221,7 +221,7 @@ export class WorkspacesServiceStub {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(() => {
         const fileDetailsList =
-            [{'name': 'FileDetails', 'path': 'gs://bucket/notebooks/mockFile'}];
+            [{'name': 'FileDetails', 'path': 'gs://bucket/notebooks/mockFile', 'lastModifiedTime': 100}];
         observer.next(fileDetailsList);
         observer.complete();
       }, 0);

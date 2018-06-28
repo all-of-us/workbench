@@ -149,7 +149,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         },
         error => {
           this.notebooksLoading = false;
-          this.notebookError = false;
+          this.notebookError = true;
         });
   }
 

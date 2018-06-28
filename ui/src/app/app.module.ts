@@ -27,12 +27,14 @@ import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
+import {CohortListComponent} from './views/cohort-list/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
+import {NotebookListComponent} from './views/notebook-list/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
@@ -116,11 +118,13 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     BreadcrumbComponent,
     BugReportComponent,
     CohortEditComponent,
+    CohortListComponent,
     ErrorHandlerComponent,
     WorkspaceListComponent,
     InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
+    NotebookListComponent,
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
