@@ -115,8 +115,8 @@ label {
 
 /* stat box at tops of pages */
 .white-card-box.top-stat {
-    /* Height for this row fixed */
-    height: 9rem;
+    /* Min Height for this row fixed. Needs to get taller for small screens */
+    min-height: 9rem;
 }
 
 /* A white card box that is divided in columns needs the row to be 100% of of the height of the box */

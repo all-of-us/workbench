@@ -1,10 +1,10 @@
 
 
-<div class="row">
+<div class="row flex-items-xs-middle">
   <div class="col-xs-12">
     <h2 class="title">  {{title}} </h2>
   </div>
-  <div class="col-md-6 col-sm-12 col-xs-12">
+  <div class="col-md-8 col-sm-10 col-xs-11">
     <div class="white-card-box" >
       <div class="row search  flex-items-xs-between">
         <div class="col-xs-12 flex-xs-middle search-input-full">
@@ -16,11 +16,68 @@
       </div>
     </div>
   </div>
+  <div class="col-md-4 col-sm-2 col-xs-1" *ngIf="loading" >
+    <span  class="spinner spinner-lg hidden-sm-down">Loading ...</span>
+    <span  class="spinner spinner-md hidden-md-up">Loading ...</span>
+  </div>
 </div>
 
+<div class="row flex-items-xs-middle">
+  <div class="col-xs-12">
+    <h2 class="title">  {{title}} </h2>
+  </div>
+</div>
 
+  <div class="row ">
+        <div class="col-md-8 col-sm-10 col-xs-11 white-card-box flex-xs-middle search-input-full">
+          <div class="search-wrapper ">
+            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+            <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
+          </div>
+        </div>
+
+  <div class="col-md-4 col-sm-2 col-xs-1 flex-xs-middle" *ngIf="loading" >
+    <span  class="spinner spinner-lg hidden-sm-down">Loading ...</span>
+    <span  class="spinner spinner-md hidden-md-up">Loading ...</span>
+  </div>
+</div>
 
 <!-- Top summary boxes -- only show if have results -->
+<div class="row white-card-box top-stat one-row" *ngIf="items.length > 0">
+
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="row">
+          <h5 class="col-xs-12 box-title">
+            {{dbDomain.domainDisplay}}
+          </h5>
+          </div>
+
+          <div class="row">
+          <div class="col-md-4 col-sm-6 col-xs-6 card-stat" >
+            {{items.length}}
+          </div>
+            <div class="col-md-8 col-sm-6 col-xs-6 card-text">
+              matching medical concepts.
+            </div>
+          </div>
+          <div class="row">
+
+          </div>
+
+          <div class="row">
+          <div class="col-xs-12 card-text">
+            Total participants: {{totalParticipants}}
+          </div>
+          </div>
+        </div>
+
+        <div class="col-md-8 col-sm-6 col-xs-12  flex-xs-middle">
+          <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
+        </div>
+
+
+</div>
+
 <div class="row" *ngIf="items.length > 0">
   <div class="col-xs-12">
     <div class="white-card-box top-stat one-row">
@@ -47,11 +104,7 @@
   </div>
 </div>
 
-<div class="db-page-spinner" *ngIf="loading" >
-  <span  class="spinner">
-    Loading...
-  </span>
-</div>
+
 
 <div  class="row result-list">
   <div class="col-xs-12">

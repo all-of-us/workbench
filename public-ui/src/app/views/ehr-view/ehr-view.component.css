@@ -6,14 +6,6 @@
 }
 .white-card-box.top-stat {
     padding: 1rem;
-}
+    min-height:9rem;
 
-.emphatic-red {
-    color: red;
 }
-
-.row.expandable-grid-row {
-    font-size: larger !important;
-    font-weight: 600 !important;
-}
-

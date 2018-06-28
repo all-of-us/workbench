@@ -74,7 +74,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
       // Add value changed event to search when value changes
       this.subscriptions.push(this.searchText.valueChanges
-        .debounceTime(300)
+        .debounceTime(200)
         .distinctUntilChanged()
         .switchMap((query) => this.searchDomain(query))
         .subscribe(results => this.searchCallback(results)));
@@ -97,10 +97,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.top10Results = this.searchResult.items.slice(0, 10);
     // Set the localStorage to empty so making a new search here does not follow them if they hit back button
     localStorage.setItem('searchText', '');
-    this.loading = false;
+    this.loading = true;
   }
   private searchDomain(query: string) {
     let maxResults = 100;
+    this.loading=true;
     if (query.length) { maxResults = null; }
     this.searchRequest = {
       query: query,
