@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {ProfileService} from 'generated';
-import {UpdateContactEmailRequest, ResendWelcomeEmailRequest} from 'generated';
+import {ResendWelcomeEmailRequest, UpdateContactEmailRequest} from 'generated';
 import {ServerConfigService} from '../../services/server-config.service';
 
 @Component({
