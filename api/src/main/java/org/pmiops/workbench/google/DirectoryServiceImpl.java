@@ -122,21 +122,13 @@ public class DirectoryServiceImpl implements DirectoryService {
   public User createUser(String givenName, String familyName, String username, String contactEmail) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     String password = randomString();
-    Alias alias = new Alias();
-    alias.setAlias(contactEmail);
-    UserEmail userEmail = new UserEmail().setAddress(contactEmail).setType("custom").setCustomType("contact")
-        .setPrimary(false);
-    List<UserEmail> userEmails = new ArrayList<>();
-    userEmails.add(userEmail);
     User user = new User()
-        .setPrimaryEmail(username + "@" + gSuiteDomain)
+        .setPrimaryEmail(username+"@"+gSuiteDomain)
         .setPassword(password)
         .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
-        .setEmails(userEmails)
+        .setEmails(new UserEmail().setType("custom").setAddress(contactEmail).setCustomType("contact"))
         .setChangePasswordAtNextLogin(true);
-    log.log(Level.INFO, "user before insert: " + user.toString());
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
-    retryHandler.run((context) -> getGoogleDirectoryService().users().aliases().insert(username + '@' + gSuiteDomain, alias).execute());
     try {
       mailServiceProvider.get().sendWelcomeEmail(contactEmail, password, user);
     } catch (MessagingException e) {
