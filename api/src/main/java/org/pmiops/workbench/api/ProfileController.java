@@ -1,10 +1,16 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMap;
+
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +22,7 @@ import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -65,10 +72,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
-      .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
-      .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
-      .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
-      .build();
+          .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
+          .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
+          .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
+          .build();
   private static final Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership,
       BillingProjectMembership> TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
       new Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>() {
@@ -257,7 +264,7 @@ public class ProfileController implements ProfileApiDelegate {
     // On subsequent sign-ins to the first, attempt to complete the setup of the FC billing project
     // and mark the Workbench's project setup as completed. FC project creation is asynchronous, so
     // first confirm whether Firecloud claims the project setup is complete.
-    BillingProjectStatus status = null;
+    BillingProjectStatus status;
     try {
       status = fireCloudService.getBillingProjectMemberships().stream()
           .filter(m -> user.getFreeTierBillingProjectName().equals(m.getProjectName()))
@@ -284,7 +291,7 @@ public class ProfileController implements ProfileApiDelegate {
           try {
             fireCloudService.removeUserFromBillingProject(user.getEmail(), user.getFreeTierBillingProjectName());
           } catch (WorkbenchException e) {
-            log.log(Level.INFO, String.format("Failed to remove user from errored billing project"));
+            log.log(Level.INFO, "Failed to remove user from errored billing project");
           }
           String billingProjectName = createFirecloudBillingProject(user);
           return this.userService.setBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
@@ -436,15 +443,15 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> invitationKeyVerification(InvitationVerificationRequest invitationVerificationRequest){
+  public ResponseEntity<Void> invitationKeyVerification(InvitationVerificationRequest invitationVerificationRequest) {
     verifyInvitationKey(invitationVerificationRequest.getInvitationKey());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  private void verifyInvitationKey(String invitationKey){
-    if(invitationKey == null || invitationKey.equals("") || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
+  private void verifyInvitationKey(String invitationKey) {
+    if (invitationKey == null || invitationKey.equals("") || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
       throw new BadRequestException(
-        "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+          "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
   }
 
@@ -456,25 +463,26 @@ public class ProfileController implements ProfileApiDelegate {
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  private void verifyNoLogins(String username){
+  private void verifyNoLogins(String username) {
     User user = userDao.findUserByEmail(username);
     if (user.getFirstSignInTime() != null) {
       throw new BadRequestException(
-        "This account has already been in use, if you would like to update your contact email please login and update via the Profile page."
+          "This account has already been in use, if you would like to update your contact email please login and update via the Profile page."
       );
     }
   }
 
   private void updateUser(UpdateContactEmailRequest updateRequest) {
     com.google.api.services.admin.directory.model.User googleUser =
-      directoryService.getUser(updateRequest.getUsername());
+        directoryService.getUser(updateRequest.getUsername());
     String contactEmail = updateRequest.getContactEmail();
-//    try {
-//      InternetAddress email = new InternetAddress(contactEmail);
-//      email.validate();
-//    } catch (AddressException e) {
+    try {
+      InternetAddress email = new InternetAddress(contactEmail);
+      email.validate();
+    } catch (AddressException e) {
+      // TODO
 //      throw new MessagingException("Email: " + contactEmail + " is invalid.");
-//    }
+    }
     googleUser.setPrimaryEmail(contactEmail);
     User user = userDao.findUserByEmail(updateRequest.getUsername());
     user.setContactEmail(contactEmail);
@@ -526,8 +534,8 @@ public class ProfileController implements ProfileApiDelegate {
     }
     List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations()
-        .stream().map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
-        .collect(Collectors.toList());
+            .stream().map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+            .collect(Collectors.toList());
     int i = 0;
     ListIterator<org.pmiops.workbench.db.model.InstitutionalAffiliation> oldAffilations =
         user.getInstitutionalAffiliations().listIterator();
@@ -570,7 +578,7 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
     IdVerificationListResponse response = new IdVerificationListResponse();
-    List<Profile> responseList = new ArrayList<Profile>();
+    List<Profile> responseList = new ArrayList<>();
     for (User user : userService.getNonVerifiedUsers()) {
       responseList.add(profileService.getProfile(user));
     }

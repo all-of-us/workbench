@@ -5,8 +5,11 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.admin.directory.Directory;
 import com.google.api.services.admin.directory.DirectoryScopes;
-import com.google.api.services.admin.directory.model.*;
-import com.google.appengine.api.datastore.Email;
+import com.google.api.services.admin.directory.model.Alias;
+import com.google.api.services.admin.directory.model.Aliases;
+import com.google.api.services.admin.directory.model.User;
+import com.google.api.services.admin.directory.model.UserEmail;
+import com.google.api.services.admin.directory.model.UserName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -19,6 +22,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,7 +35,7 @@ import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
 
-  static final String APPLICATION_NAME = "All of Us Researcher Workbench";
+  private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
   private static final String ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   private static SecureRandom rnd = new SecureRandom();
 
@@ -44,8 +48,8 @@ public class DirectoryServiceImpl implements DirectoryService {
   // will accept the email address of the service account and lookup the correct client ID giving
   // the impression that the email address is an acceptable substitute, but testing shows that this
   // doesn't actually work.
-  static final List<String> SCOPES = Arrays.asList(
-    DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS, DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
+  private static final List<String> SCOPES = Arrays.asList(
+      DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS, DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
       DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY
   );
 
@@ -58,8 +62,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
-      Provider<WorkbenchConfig> configProvider, Provider<MailService> mailServiceProvider,
-      HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
+                              Provider<WorkbenchConfig> configProvider, Provider<MailService> mailServiceProvider,
+                              HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
     this.mailServiceProvider = mailServiceProvider;
@@ -74,7 +78,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         .setTransport(httpTransport)
         .setJsonFactory(getDefaultJsonFactory())
         // Must be an admin user in the GSuite domain.
-        .setServiceAccountUser("directory-service@"+gSuiteDomain)
+        .setServiceAccountUser("directory-service@" + gSuiteDomain)
         .setServiceAccountId(googleCredential.getServiceAccountId())
         .setServiceAccountScopes(SCOPES)
         .setServiceAccountPrivateKey(googleCredential.getServiceAccountPrivateKey())
@@ -85,7 +89,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   private Directory getGoogleDirectoryService() {
     return new Directory.Builder(httpTransport, getDefaultJsonFactory(),
-          createCredentialWithImpersonation())
+        createCredentialWithImpersonation())
         .setApplicationName(APPLICATION_NAME)
         .build();
   }
@@ -94,7 +98,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   public User getUser(String email) {
     try {
       return retryHandler.runAndThrowChecked((context) ->
-      getGoogleDirectoryService().users().get(email).setProjection("full").execute());
+          getGoogleDirectoryService().users().get(email).setProjection("full").execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
@@ -120,16 +124,19 @@ public class DirectoryServiceImpl implements DirectoryService {
     String password = randomString();
     Alias alias = new Alias();
     alias.setAlias(contactEmail);
+    UserEmail userEmail = new UserEmail().setAddress(contactEmail).setType("custom").setCustomType("contact")
+        .setPrimary(false);
+    List<UserEmail> userEmails = new ArrayList<>();
+    userEmails.add(userEmail);
     User user = new User()
-      .setPrimaryEmail(username+"@"+gSuiteDomain)
-      .setPassword(password)
-      .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
-//      .setAliases(Arrays.asList(contactEmail))
-//      .setEmails(new UserEmail().setAddress(contactEmail).setType("custom").setCustomType("contact").setPrimary(false))
-      .setChangePasswordAtNextLogin(true);
+        .setPrimaryEmail(username + "@" + gSuiteDomain)
+        .setPassword(password)
+        .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
+        .setEmails(userEmails)
+        .setChangePasswordAtNextLogin(true);
     log.log(Level.INFO, "user before insert: " + user.toString());
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
-    retryHandler.run((context) -> getGoogleDirectoryService().users().aliases().insert(username+'@'+gSuiteDomain, alias).execute());
+    retryHandler.run((context) -> getGoogleDirectoryService().users().aliases().insert(username + '@' + gSuiteDomain, alias).execute());
     try {
       mailServiceProvider.get().sendWelcomeEmail(contactEmail, password, user);
     } catch (MessagingException e) {
@@ -158,7 +165,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   public void deleteUser(String username) {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
-      retryHandler.runAndThrowChecked((context)-> getGoogleDirectoryService().users()
+      retryHandler.runAndThrowChecked((context) -> getGoogleDirectoryService().users()
           .delete(username + "@" + gSuiteDomain).execute());
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
@@ -171,11 +178,11 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
   }
 
-  private String randomString(){
+  private String randomString() {
     return IntStream.range(0, 17).boxed().
-      map(x -> ALLOWED.charAt(rnd.nextInt(ALLOWED.length()))).
-      map(Object::toString).
-      collect(Collectors.joining(""));
+        map(x -> ALLOWED.charAt(rnd.nextInt(ALLOWED.length()))).
+        map(Object::toString).
+        collect(Collectors.joining(""));
   }
 
 }
