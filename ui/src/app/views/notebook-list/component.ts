@@ -18,9 +18,9 @@ import {
 } from 'generated';
 
 @Component({
-  styleUrls: ['./component.css',
-    '../../styles/buttons.css',
-    '../../styles/cards.css'],
+  styleUrls: ['../../styles/buttons.css',
+    '../../styles/cards.css',
+    './component.css'],
   templateUrl: './component.html',
 })
 export class NotebookListComponent implements OnInit, OnDestroy {
@@ -65,7 +65,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
       .subscribe(
         fileList => {
-          console.log(fileList);
           this.notebookList = fileList;
           this.notebooksLoading = false;
         },

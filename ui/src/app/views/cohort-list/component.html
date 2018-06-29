@@ -1,6 +1,50 @@
-<div *ngIf="">
-
+<h3 class="cohorts-header">Cohorts</h3>
+<div *ngIf="cohortsLoading" class="spinner-container">
+  <span class="spinner spinner-lg"></span>
 </div>
-<div class="card" *ngFor="let cohort of cohortList">
-  <h5 >{{cohort.name}}</h5>
+<div class="card-area">
+  <div *ngIf="!cohortsLoading">
+    <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
+         [class.disabled]="awaitingReview || !writePermission" (click)="buildCohort()">
+      <h4 class="create-text">Create a New Cohort</h4>
+      <clr-icon class="plus-circle" shape="plus-circle"></clr-icon>
+      <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+      <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
+    </div>
+  </div>
+  <div class="card item-card" *ngFor="let cohort of cohortList">
+    <div>
+      <div class="header-area">
+        <clr-dropdown [clrCloseMenuOnItemClick]="false">
+          <button type="button" clrDropdownTrigger>
+            <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+          </button>
+          <clr-dropdown-menu *clrIfOpen>
+            <button class="action-item"
+                    [routerLink]="['build']"
+                    [queryParams]="{criteria: cohort.criteria}">
+              <clr-icon shape="copy"></clr-icon>
+              Clone
+            </button>
+            <button class="action-item"
+                    routerLink="{{cohort.id}}/edit">
+              <clr-icon shape="pencil"></clr-icon>
+              Edit
+            </button>
+            <button class="action-item"
+                    routerLink="{{cohort.id}}/review">
+              <clr-icon shape="grid-view"></clr-icon>
+              Review
+            </button>
+          </clr-dropdown-menu>
+        </clr-dropdown>
+        <div class="name">{{cohort.name}}</div>
+      </div>
+      <div class="description">{{cohort.description}}</div>
+    </div>
+    <div class="footer">
+      <div class="last-modified">Last Updated <br/>{{cohort.lastModifiedTime | date}}</div>
+      <div class="item-type cohort"><div>CH</div></div>
+    </div>
+  </div>
 </div>
