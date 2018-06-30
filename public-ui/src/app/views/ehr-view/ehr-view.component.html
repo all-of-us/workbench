@@ -26,19 +26,30 @@
 </div>
 -->
 
+<div class="row">
+  <p *showItStandard="['iphone','ipad']">I'll show you if I'm a iPhone or ipad device.</p>
+  <p *isIphone>I'll show you if I'm a iPhone device.</p>
+  <p *isChrome>I'll show you if I'm a chrome browser.</p>
+  <p *xl>I'll show you if I'm a xl screen size.</p>
+  <p *lg>I'll show you if I'm a lg screen size.</p>
+  <p *md>I'll show you if I'm a md screen size.</p>
+  <p *sm>I'll show you if I'm a sm screen size.</p>
+  <p *xs>I'll show you if I'm a xs screen size.</p>
+</div>
+
 <div class="row flex-items-xs-middle">
-  <div class="col-xs-12">
+  <div class="col-xs-12 col-no-gutter">
     <h2 class="title">  {{title}} </h2>
   </div>
 </div>
 
-  <div class="row ">
-        <div class="col-md-8 col-sm-10 col-xs-11 white-card-box flex-xs-middle search-input-full">
-          <div class="search-wrapper ">
-            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
-            <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
-          </div>
-        </div>
+<div class="row ">
+  <div class="col-md-8 col-sm-10 col-xs-11 white-card-box flex-xs-middle search-input-full">
+    <div class="search-wrapper ">
+      <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+      <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
+    </div>
+  </div>
 
   <div class="col-md-4 col-sm-2 col-xs-1 flex-xs-middle" *ngIf="loading" >
     <span  class="spinner spinner-lg hidden-sm-down">Loading ...</span>
@@ -50,35 +61,34 @@
 <!-- Top summary boxes -- only show if have results -->
 <div class="row white-card-box top-stat one-row" *ngIf="items.length > 0">
 
-        <div class="col-md-4 col-sm-6 col-xs-12">
-          <div class="row">
-          <h5 class="col-xs-12 box-title">
-            {{dbDomain.domainDisplay}}
-          </h5>
-          </div>
+    <div class="col-md-4 col-sm-6 col-xs-12">
+      <div class="row">
+        <h5 class="col-xs-12 box-title">
+          {{dbDomain.domainDisplay}}
+        </h5>
+      </div>
 
-          <div class="row">
-          <div class="col-md-4 col-sm-6 col-xs-6 card-stat" >
-            {{items.length}}
-          </div>
-            <div class="col-md-8 col-sm-6 col-xs-6 card-text">
-              matching medical concepts.
-            </div>
-          </div>
-          <div class="row">
-
-          </div>
-
-          <div class="row">
-          <div class="col-xs-12 card-text">
-            Total participants: {{totalParticipants}}
-          </div>
-          </div>
+      <div class="row">
+      <div class="col-md-4 col-sm-6 col-xs-6 card-stat" >
+        {{items.length}}
+      </div>
+        <div class="col-md-8 col-sm-6 col-xs-6 flex-xs-middle card-text">
+          matching medical concepts.
         </div>
+      </div>
 
-        <div class="col-md-8 col-sm-6 col-xs-12  flex-xs-middle">
-          <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
+      <div class="row">
+        <div class="col-xs-12 card-text">
+          Total participants: {{totalParticipants}}
         </div>
+      </div>
+    </div>
+
+    <div class="col-md-8 col-sm-6 col-xs-12 chart-wrapper flex-xs-middle">
+      <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
+      <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
+
+    </div>
 
 
 </div>
@@ -112,7 +122,7 @@
 
 
 <div  class="row result-list">
-  <div class="col-xs-12">
+  <div class="col-xs-12 col-no-gutter">
     <div class="white-card-box">
 
       <div class="results-grid" *ngIf="items.length > 0" >

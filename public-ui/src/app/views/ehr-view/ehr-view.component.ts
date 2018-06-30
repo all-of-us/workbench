@@ -10,7 +10,10 @@ import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
 import { ISubscription } from 'rxjs/Subscription';
-
+import {
+  ResponsiveSizeInfoRx,
+  UserAgentInfoRx, BrowserInfoRx
+} from 'ngx-responsive';
 
 @Component({
   selector: 'app-ehr-view',
@@ -30,20 +33,43 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   loading = true;
   minParticipantCount = 0;
   totalParticipants;
-
   top10Results = [];
+  screenWidth: any;
+
   private searchRequest: SearchConceptsRequest;
   private subscriptions: ISubscription[] = [];
-  private subscription2: ISubscription;
 
-
-  constructor(private route: ActivatedRoute, private api: DataBrowserService) {
+  constructor(private route: ActivatedRoute,
+              private api: DataBrowserService,
+              public responsiveSizeInfoRx: ResponsiveSizeInfoRx,
+              public userAgentInfoRx: UserAgentInfoRx) {
     this.route.params.subscribe(params => {
       this.domainId = params.id;
     });
   }
 
   ngOnInit() {
+    this.screenWidth = window.innerWidth;
+    console.log("Screen width", this.screenWidth);
+
+    // Connect responsize listeners
+    this.subscriptions.push(
+      this.responsiveSizeInfoRx.getResponsiveSize.subscribe((data) => {
+        console.log('this.responsiveSizeInfoRx.getResponsiveSize ===>', data);
+      }, (err) => {
+        console.log('Error', err);
+      })
+    );
+    this.subscriptions.push(
+      this.userAgentInfoRx.getUserAgent.subscribe((data) => {
+        console.log('this.userAgentInfoRx.getUserAgent ===>', data);
+      }, (err) => {
+        console.log('Error', err);
+      })
+    );
+    this.responsiveSizeInfoRx.connect();
+    this.userAgentInfoRx.connect();
+
     this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
     this.items = [];
 
@@ -85,6 +111,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     for (const s of this.subscriptions){
       s.unsubscribe();
     }
+    this.responsiveSizeInfoRx.disconnect();
+    this.userAgentInfoRx.disconnect();
   }
 
   private searchCallback(results:any) {

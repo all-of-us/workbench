@@ -48,6 +48,7 @@
     "mutationobserver-shim": "^0.3.2",
     "ng2-nouislider": "^1.7.7",
     "ngx-popper": "^1.9.9",
+    "ngx-responsive": "^6.0.0",
     "nouislider": "10.0.0",
     "popper.js": "^1.13.0",
     "redux": "^3.7.2",

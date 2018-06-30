@@ -7,6 +7,7 @@ import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
+import { ResponsiveModule } from 'ngx-responsive'
 
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 
@@ -57,7 +58,8 @@ const DataBrowserServiceFactory = (http: Http) => {
     ReactiveFormsModule,
     NgxChartsModule,
     ClarityModule,
-    DataBrowserModule
+    DataBrowserModule,
+    ResponsiveModule.forRoot()
   ],
   declarations: [
     AppComponent,

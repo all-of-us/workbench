@@ -69,7 +69,7 @@ export class ChartComponent implements OnChanges {
     this.chartInstance = chartInstance;
   }
 
-  // If analysis object results changed , update the chart
+  // Render new chart on changes
   ngOnChanges() {
     if ((this.analysis && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {

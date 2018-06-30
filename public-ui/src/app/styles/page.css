@@ -116,7 +116,7 @@ label {
 /* stat box at tops of pages */
 .white-card-box.top-stat {
     /* Min Height for this row fixed. Needs to get taller for small screens */
-    min-height: 9rem;
+    /*min-height: 9rem;*/
 }
 
 /* A white card box that is divided in columns needs the row to be 100% of of the height of the box */
@@ -196,4 +196,11 @@ span.keyword {
 .highlight {
     background-color: yellow;
 
+}
+
+/* column with no 12 px gutter on either side */
+.col-no-gutter
+{
+    padding-left: 0;
+    padding-right: 0;
 }

@@ -15,6 +15,7 @@ input[type=url]:not([readonly]) {
   background: none;
 }
 
+
 .search-input-big {
   padding: 0;
   margin-left:-24px;
@@ -28,6 +29,11 @@ input[type=url]:not([readonly]) {
   padding-left: 1rem;
   padding-right: 1rem;
 }
+.search-wrapper input[type="text"]
+{
+  font-size:1rem;
+}
+
 .search-input-full input{
   border-bottom: none;
   width: 100%;
