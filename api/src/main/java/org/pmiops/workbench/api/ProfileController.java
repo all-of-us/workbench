@@ -388,6 +388,12 @@ public class ProfileController implements ProfileApiDelegate {
         request.getProfile().getFamilyName(),
         googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
 
+    try {
+      mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
+    } catch (MessagingException e) {
+      throw new WorkbenchException(e);
+    }
+
     // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
     // doesn't allow this. Fix.
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

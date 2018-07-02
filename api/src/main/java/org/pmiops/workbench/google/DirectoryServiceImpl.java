@@ -129,11 +129,6 @@ public class DirectoryServiceImpl implements DirectoryService {
         .setEmails(new UserEmail().setType("custom").setAddress(contactEmail).setCustomType("contact"))
         .setChangePasswordAtNextLogin(true);
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
-    try {
-      mailServiceProvider.get().sendWelcomeEmail(contactEmail, password, user);
-    } catch (MessagingException e) {
-      throw new WorkbenchException(e);
-    }
     return user;
   }
 
