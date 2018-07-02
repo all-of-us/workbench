@@ -1,19 +1,19 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
 import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
-import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 
 import { FormControl } from '@angular/forms';
+import {
+  BrowserInfoRx,
+  ResponsiveSizeInfoRx, UserAgentInfoRx
+} from 'ngx-responsive';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
 import { ISubscription } from 'rxjs/Subscription';
-import {
-  ResponsiveSizeInfoRx,
-  UserAgentInfoRx, BrowserInfoRx
-} from 'ngx-responsive';
 
 @Component({
   selector: 'app-ehr-view',
@@ -51,7 +51,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.screenWidth = window.innerWidth;
-    console.log("Screen width", this.screenWidth);
+    console.log('Screen width', this.screenWidth);
 
     // Connect responsize listeners
     /* In progress Testing
@@ -111,14 +111,14 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    for (const s of this.subscriptions){
+    for (const s of this.subscriptions) {
       s.unsubscribe();
     }
     /*this.responsiveSizeInfoRx.disconnect();
     this.userAgentInfoRx.disconnect();*/
   }
 
-  private searchCallback(results:any) {
+  private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
     if (this.searchResult.standardConcepts) {
@@ -131,7 +131,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   }
   private searchDomain(query: string) {
     let maxResults = 100;
-    this.loading=true;
+    this.loading = true;
     if (query.length) { maxResults = null; }
     this.searchRequest = {
       query: query,
@@ -146,7 +146,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
 
   public toggleSources(row) {
-    console.log("search result " , this.searchResult);
+    console.log('search result ' , this.searchResult);
     if (row.showSources) {
       row.showSources = false;
     } else {
