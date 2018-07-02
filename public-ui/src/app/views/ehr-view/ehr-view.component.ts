@@ -40,9 +40,10 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private subscriptions: ISubscription[] = [];
 
   constructor(private route: ActivatedRoute,
-              private api: DataBrowserService,
-              public responsiveSizeInfoRx: ResponsiveSizeInfoRx,
-              public userAgentInfoRx: UserAgentInfoRx) {
+              private api: DataBrowserService
+              //public responsiveSizeInfoRx: ResponsiveSizeInfoRx,
+              //public userAgentInfoRx: UserAgentInfoRx
+  ) {
     this.route.params.subscribe(params => {
       this.domainId = params.id;
     });
@@ -53,7 +54,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     console.log("Screen width", this.screenWidth);
 
     // Connect responsize listeners
-    this.subscriptions.push(
+    /* In progress Testing
+     this.subscriptions.push(
       this.responsiveSizeInfoRx.getResponsiveSize.subscribe((data) => {
         console.log('this.responsiveSizeInfoRx.getResponsiveSize ===>', data);
       }, (err) => {
@@ -69,6 +71,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     );
     this.responsiveSizeInfoRx.connect();
     this.userAgentInfoRx.connect();
+    */
 
     this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
     this.items = [];
@@ -111,12 +114,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     for (const s of this.subscriptions){
       s.unsubscribe();
     }
-    this.responsiveSizeInfoRx.disconnect();
-    this.userAgentInfoRx.disconnect();
+    /*this.responsiveSizeInfoRx.disconnect();
+    this.userAgentInfoRx.disconnect();*/
   }
 
   private searchCallback(results:any) {
-    console.log("Search callback ");
     this.searchResult = results;
     this.items = this.searchResult.items;
     if (this.searchResult.standardConcepts) {
@@ -138,7 +140,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       maxResults: maxResults
     };
     this.prevSearchText = query;
-    console.log(this.searchRequest);
     return this.api.searchConcepts(this.searchRequest);
   }
 

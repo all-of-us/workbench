@@ -26,16 +26,15 @@
 </div>
 -->
 
+<!--
 <div class="row">
-  <p *showItStandard="['iphone','ipad']">I'll show you if I'm a iPhone or ipad device.</p>
-  <p *isIphone>I'll show you if I'm a iPhone device.</p>
   <p *isChrome>I'll show you if I'm a chrome browser.</p>
   <p *xl>I'll show you if I'm a xl screen size.</p>
   <p *lg>I'll show you if I'm a lg screen size.</p>
   <p *md>I'll show you if I'm a md screen size.</p>
   <p *sm>I'll show you if I'm a sm screen size.</p>
   <p *xs>I'll show you if I'm a xs screen size.</p>
-</div>
+</div> -->
 
 <div class="row flex-items-xs-middle">
   <div class="col-xs-12 col-no-gutter">
@@ -85,39 +84,14 @@
     </div>
 
     <div class="col-md-8 col-sm-6 col-xs-12 chart-wrapper flex-xs-middle">
-      <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
-      <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
+      <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="15" [backgroundColor]="'#D9E4EA'"> </app-chart>
+
+     <!-- <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart> -->
 
     </div>
 
-
 </div>
 
-<div class="row" *ngIf="items.length > 0">
-  <div class="col-xs-12">
-    <div class="white-card-box top-stat one-row">
-      <div class="row" >
-        <div class="col-md-4 col-xs-12">
-          <h5 class="box-title">
-            {{dbDomain.domainDisplay}}
-          </h5>
-          <div class="card-stat" >
-            {{items.length}}
-          </div>
-          <div class="card-text">
-            matching medical concepts.
-          </div>
-          <div class="card-text bottom info-text">
-            Total participants: {{totalParticipants}}
-          </div>
-        </div>
-        <div class="col-md-8 col-xs-12 chart-wrapper flex-xs-middle">
-            <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"> </app-chart>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 
 
