@@ -232,10 +232,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   get newWorkspace(): boolean {
-    console.log("In new workspace query");
-    console.log("cohort list length" + this.cohortList.length);
-    console.log("notebookList length" + this.notebookList.length);
-    return this.cohortList.length === 0 && this.notebookList.length === 0);
+    return this.cohortList.length === 0 && this.notebookList.length === 0;
   }
 
   share(): void {
