@@ -45,9 +45,9 @@ export class CohortListComponent implements OnInit, OnDestroy {
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
       .subscribe(
         cohortsReceived => {
-          for (const coho of cohortsReceived.items) {
-            this.cohortList.push(coho);
-          }
+          this.cohortList = cohortsReceived.items.map(function(cohorts) {
+            return cohorts;
+          });
           this.cohortsLoading = false;
         },
         error => {
@@ -62,7 +62,7 @@ export class CohortListComponent implements OnInit, OnDestroy {
 
   buildCohort(): void {
     if (!this.awaitingReview) {
-      this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
+      this.router.navigate(['build'], {relativeTo: this.route});
     }
   }
 
