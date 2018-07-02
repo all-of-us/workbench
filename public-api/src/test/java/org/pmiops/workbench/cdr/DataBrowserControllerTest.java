@@ -11,6 +11,7 @@ import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import java.util.List;
+import org.pmiops.workbench.model.Domain;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
