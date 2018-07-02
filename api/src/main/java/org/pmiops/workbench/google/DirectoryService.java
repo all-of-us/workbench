@@ -9,6 +9,6 @@ public interface DirectoryService {
   public boolean isUsernameTaken(String username);
   public User getUser(String email);
   public User createUser(String givenName, String familyName, String username, String contactEmail);
-  public void resendWelcomeEmail(String userName);
+  public User resetUserPassword(String userName);
   public void deleteUser(String username);
 }

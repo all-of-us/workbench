@@ -491,7 +491,14 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
-    directoryService.resendWelcomeEmail(resendRequest.getUsername());
+    com.google.api.services.admin.directory.model.User googleUser =
+        directoryService.resetUserPassword(resendRequest.getUsername());
+    User user = userDao.findUserByEmail(googleUser.getPrimaryEmail());
+    try {
+      mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
+    } catch (MessagingException e) {
+      throw new WorkbenchException(e);
+    }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 

@@ -138,19 +138,12 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   @Override
-  public void resendWelcomeEmail(String userKey) {
+  public User resetUserPassword(String userKey) {
     User user = getUser(userKey);
     String password = randomString();
     user.setPassword(password);
-//    retryHandler.run((context) -> getGoogleDirectoryService().users().update(userKey, user).execute());
-    Aliases emails = retryHandler.run((context) -> getGoogleDirectoryService().users().aliases().list(userKey).execute());
-    log.log(Level.INFO, "user: " + user.toString());
-    log.log(Level.INFO, "emails: " + emails.getAliases().toString());
-    try {
-      mailServiceProvider.get().sendWelcomeEmail(user.getPrimaryEmail(), password, user);
-    } catch (MessagingException e) {
-      throw new WorkbenchException(e);
-    }
+    retryHandler.run((context) -> getGoogleDirectoryService().users().update(userKey, user).execute());
+    return user;
   }
 
   @Override
