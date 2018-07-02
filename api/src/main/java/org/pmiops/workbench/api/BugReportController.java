@@ -76,6 +76,8 @@ public class BugReportController implements BugReportApiDelegate {
             File tempLogFile = createTempFile(fileName, logContent);
             try {
               jiraService.uploadAttachment(issueKey, tempLogFile);
+            } catch (org.pmiops.workbench.jira.ApiException e) {
+              log.severe(String.format("failed to upload attachment '%s', continuing", fileName));
             } finally {
               if ( tempLogFile != null) {
                 try {
