@@ -288,10 +288,11 @@ public class DataBrowserControllerTest {
     @Test
     public void testConceptSearchWithEmptyQuery() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query(""));
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")
+        .domain(Domain.CONDITION));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
-                .containsExactly(CONCEPT_1, CONCEPT_2, CONCEPT_3, CONCEPT_4, CONCEPT_5, CONCEPT_6)
+                .containsExactly(CONCEPT_1, CONCEPT_3, CONCEPT_5, CONCEPT_6)
         ;
     }
 

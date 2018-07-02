@@ -14,7 +14,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
 
 
     @Query(value = "select c.* from concept c " +
-            "where c.domain_id in :domain and " +
+            "where c.domain_id in (:domain) and " +
             "c.vocabulary_id != 'PPI' " +
             "and (c.count_value > 0 or c.source_count_value > 0) " +
             "order by c.count_value desc limit :maxResults ",
@@ -22,7 +22,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
     List<Concept> findAllConceptsOrderedByCount(@Param("maxResults") long maxResults, @Param("domain") List<String> domain);
 
     @Query(value = "select c.* from concept c " +
-            "where c.domain_id in :domain and " +
+            "where c.domain_id in (:domain) and " +
             "c.vocabulary_id != 'PPI' and " +
             "c.standard_concept='S' " +
             "and (c.count_value > 0 or c.source_count_value > 0) " +
@@ -31,7 +31,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
     List<Concept> findAllStandardConceptsOrderedByCount(@Param("maxResults") long maxResults, @Param("domain") List<String> domain);
 
     @Query(value = "select c.* from concept c " +
-            "where c.domain_id in :domain and " +
+            "where c.domain_id in (:domain) and " +
             "c.vocabulary_id != 'PPI' and " +
             "c.standard_concept='' or c.standard_concept is null " +
             "and (c.count_value > 0 or c.source_count_value > 0) " +
