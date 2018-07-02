@@ -1,9 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
-import {HomeComponent} from './data-browser/home/home.component';
-import {SearchComponent} from './data-browser/search/search.component';
-
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
