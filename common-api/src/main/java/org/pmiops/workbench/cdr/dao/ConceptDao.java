@@ -14,27 +14,30 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
 
 
     @Query(value = "select c.* from concept c " +
-            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') " +
-            "and c.count_value > 0 or c.source_count_value > 0 " +
+            "where c.domain_id in :domain and " +
+            "c.vocabulary_id != 'PPI' " +
+            "and (c.count_value > 0 or c.source_count_value > 0) " +
             "order by c.count_value desc limit :maxResults ",
     nativeQuery = true)
-    List<Concept> findAllConceptsOrderedByCount(@Param("maxResults") long maxResults);
+    List<Concept> findAllConceptsOrderedByCount(@Param("maxResults") long maxResults, @Param("domain") List<String> domain);
 
     @Query(value = "select c.* from concept c " +
-            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
+            "where c.domain_id in :domain and " +
+            "c.vocabulary_id != 'PPI' and " +
             "c.standard_concept='S' " +
             "and (c.count_value > 0 or c.source_count_value > 0) " +
             "order by c.count_value desc limit :maxResults ",
             nativeQuery = true)
-    List<Concept> findAllStandardConceptsOrderedByCount(@Param("maxResults") long maxResults);
+    List<Concept> findAllStandardConceptsOrderedByCount(@Param("maxResults") long maxResults, @Param("domain") List<String> domain);
 
     @Query(value = "select c.* from concept c " +
-            "where c.domain_id in ('Condition','Observation','Procedure', 'Measurement', 'Drug') and " +
+            "where c.domain_id in :domain and " +
+            "c.vocabulary_id != 'PPI' and " +
             "c.standard_concept='' or c.standard_concept is null " +
             "and (c.count_value > 0 or c.source_count_value > 0) " +
             "order by c.count_value desc limit :maxResults ",
             nativeQuery = true)
-    List<Concept> findAllNonStandardConceptsOrderedByCount(@Param("maxResults") long maxResults);
+    List<Concept> findAllNonStandardConceptsOrderedByCount(@Param("maxResults") long maxResults,  @Param("domain") List<String> domain);
 
     @Query(value = "select c.* from concept c " +
             "where c.domain_id=:domain_id and " +

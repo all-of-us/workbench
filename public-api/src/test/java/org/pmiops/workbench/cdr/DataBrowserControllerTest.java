@@ -318,6 +318,15 @@ public class DataBrowserControllerTest {
                 .inOrder();
     }
 
+    @Test
+    public void testConceptSearchDomainFilter() thriws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest("004").domain(Domain.CONDITION));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_6)
+                .inOrder();
+    }
 
 
     @Test
