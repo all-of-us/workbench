@@ -7,10 +7,11 @@ import static junit.framework.TestCase.fail;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.ImmutableList;
 
@@ -57,6 +58,7 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
@@ -633,6 +635,32 @@ public class ProfileControllerTest {
     request.setUsername(user.getEmail());
 
     ResponseEntity response = profileController.updateContactEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+  }
+
+  @Test
+  public void resentWelcomeEmail_messagingException() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    doThrow(new MessagingException("exception")).when(mailService).sendWelcomeEmail(any(), any(), any());
+    ResendWelcomeEmailRequest request = new ResendWelcomeEmailRequest();
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.resendWelcomeEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @Test
+  public void resentWelcomeEmail_OK() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    doNothing().when(mailService).sendWelcomeEmail(any(), any(), any());
+    ResendWelcomeEmailRequest request = new ResendWelcomeEmailRequest();
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.resendWelcomeEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
   }
 

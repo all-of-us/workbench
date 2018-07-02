@@ -491,7 +491,7 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
-      throw new WorkbenchException(e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
