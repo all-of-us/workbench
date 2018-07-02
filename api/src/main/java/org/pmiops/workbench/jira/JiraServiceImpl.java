@@ -1,5 +1,6 @@
 package org.pmiops.workbench.jira;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -30,8 +31,13 @@ public class JiraServiceImpl implements JiraService {
     this.cloudStorageService = cloudStorageServiceProvider.get();
   }
 
+  @VisibleForTesting
+  public void setJiraApi(JiraApi api) {
+    this.api = api;
+  }
+
   //Sets username password for JIRA api
-  private void setJiraCredentials(){
+  private void setJiraCredentials() {
     JSONObject jiraCredentials = cloudStorageService.getJiraCredentials();
     api.getApiClient().setUsername(jiraCredentials.getString("username"));
     api.getApiClient().setPassword(jiraCredentials.getString("password"));
@@ -42,26 +48,21 @@ public class JiraServiceImpl implements JiraService {
   public IssueResponse createIssue(BugReport bugReport) throws ApiException {
     setJiraCredentials();
     IssueRequest issueDetails = new IssueRequest();
-
     IssueType issueType = new IssueType().name(IssueTypeEnum.Bug.name());
-
-    ProjectDetails projectDetails = new ProjectDetails()
-        .key(configProvider.get().jira.projectKey);
-
+    ProjectDetails projectDetails = new ProjectDetails().key(configProvider.get().jira.projectKey);
     FieldsDetails fieldsDetail = new FieldsDetails()
-        .description(String.format("%s %nContact Email: %s",bugReport.getReproSteps(), bugReport.getContactEmail()))
+        .description(String.format("%s %nContact Email: %s", bugReport.getReproSteps(), bugReport.getContactEmail()))
         .summary(bugReport.getShortDescription())
-        .project(projectDetails).issuetype(issueType);
-
-
+        .project(projectDetails)
+        .issuetype(issueType);
     issueDetails.setFields(fieldsDetail);
     return api.createIssue(issueDetails);
   }
 
 
   @Override
-  public void uploadAttachment(String issueKey, File attachment)
-      throws ApiException {
+  public void uploadAttachment(String issueKey, File attachment) throws ApiException {
     api.addAttachments(issueKey, attachment, "nocheck");
   }
 }
+
