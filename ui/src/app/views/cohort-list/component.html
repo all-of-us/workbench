@@ -6,8 +6,10 @@
   <div *ngIf="!cohortsLoading">
     <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
          [class.disabled]="awaitingReview || !writePermission" (click)="buildCohort()">
-      <h4 class="create-text">Create a New Cohort</h4>
-      <clr-icon class="plus-circle" shape="plus-circle"></clr-icon>
+      <div class="create-text">
+        Create a <br/>New Cohort
+        <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+      </div>
       <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
       <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
     </div>

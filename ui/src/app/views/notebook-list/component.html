@@ -5,8 +5,10 @@
 <div class="card-area" *ngIf="!notebooksLoading">
   <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
        [class.disabled]="createDisabled" (click)="newNotebook()">
-    <h4 class="create-text">Create a New Notebook</h4>
-    <clr-icon class="plus-circle" shape="plus-circle"></clr-icon>
+    <div class="create-text">
+      Create a<br/>New Notebook
+      <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+    </div>
     <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
     <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
   </div>

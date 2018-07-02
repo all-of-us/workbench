@@ -73,6 +73,7 @@ enum Tabs {
 @Component({
   styleUrls: ['../../styles/buttons.css',
     '../../styles/headers.css',
+    '../../styles/cards.css',
     './component.css'],
   templateUrl: './component.html',
 })
@@ -90,6 +91,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cohortDescriptionComparator = new CohortDescriptionComparator();
   notebookNameComparator = new NotebookNameComparator();
 
+  greeting: string;
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
@@ -138,6 +140,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
+
+    if (this.cohortList.length === 0 && this.notebookList.length === 0) {
+      this.greeting = 'Get Started';
+    } else {
+      this.greeting = 'Recent Work';
+    }
   }
 
   private loadNotebookList() {

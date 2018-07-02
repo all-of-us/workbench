@@ -26,25 +26,33 @@
   flex-direction: column;
   justify-content: flex-start;
   cursor: pointer;
-  padding: 0.75rem;
+  padding: 0px;
   height: 105px;
+  color: #216FB4;
+  box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+  background-color: #FFFFFF;
 }
 
 .card.add-card.disabled {
   cursor: not-allowed;
+  color: #AAAFB4;
 }
 
 .card.add-card .create-text {
-  color: #216FB4;
   font-size: 18px;
   font-weight: 500;
   line-height: 22px;
+  position: relative;
+  margin-top: 10%;
+  margin-left: 12%;
+  cursor: pointer;
 }
 
 .card.add-card .plus-circle {
+  margin-top: 5px;
   width: 21px;
   height: 21px;
-  color: #216FB4;
+  display: block;
 }
 
 .card.item-card .footer {
