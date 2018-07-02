@@ -1,4 +1,4 @@
-# UI project management commands and command-line flag definitions.
+# Public UI project management commands and command-line flag definitions.
 
 require "optparse"
 require "set"
