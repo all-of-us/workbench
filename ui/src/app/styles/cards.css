@@ -18,10 +18,15 @@
   font-size: 18px;
 }
 
+.card.create-card.disabled {
+  color: #AAAFB4;
+}
+
 .create-card-text {
   position: relative;
   top: 28%;
   transform: translateY(-50%);
   margin-left: 15%;
   font-weight: 500;
+  cursor: pointer;
 }

@@ -1,16 +1,24 @@
 <div class="workspace-container">
   <div class="main-body">
     <h2 style="height: 65px">{{greeting}}</h2>
-    <div class="card-area">
-      <div class="card create-card" style="height: 125px; width: 195px" (click)="newNotebook()">
+    <div style="width: 200px">
+      <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+        <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+        <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
+        <div [ngClass]="{'card' : true, 'create-card' : true, 'disabled' : !writePermission}" style="height: 125px; width: 195px" (click)="!writePermission || buildCohort()">
           <div class="create-card-text">Create a</div>
           <div class="create-card-text">New Cohort</div>
           <div class="create-card-text" style="padding-top: 10px"><clr-icon shape="plus-circle" size="21"></clr-icon></div>
+        </div>
       </div>
-      <div class="card create-card" style="height: 125px; width: 195px; margin-top: 13px;" (click)="buildCohort()">
-        <div class="create-card-text">Create a</div>
-        <div class="create-card-text">New Notebook</div>
-        <div class="create-card-text" style="padding-top: 10px"><clr-icon shape="plus-circle" size="21"></clr-icon></div>
+      <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+        <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+        <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
+        <div [ngClass]="{'card' : true, 'create-card' : true, 'disabled' : !writePermission}" style="height: 125px; width: 195px; margin-top: 13px;" (click)="!writePermission || newNotebook()">
+          <div class="create-card-text">Create a</div>
+          <div class="create-card-text">New Notebook</div>
+          <div class="create-card-text" style="padding-top: 10px"><clr-icon shape="plus-circle" size="21"></clr-icon></div>
+        </div>
       </div>
     </div>
   </div>
