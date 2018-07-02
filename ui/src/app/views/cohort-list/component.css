@@ -23,6 +23,7 @@
   color: #2F2E7E;
   font-size: 20px;
   line-height: 24px;
+  font-weight: 500;
 }
 
 .header-area {
@@ -41,6 +42,7 @@ clr-dropdown-menu {
 .ellipsis-vertical {
   width: 21px;
   height: 21px;
+  margin-left: -9px;
   color: #216FB4;
 }
 

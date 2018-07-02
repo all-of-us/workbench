@@ -18,6 +18,10 @@
   justify-content: space-between;
 }
 
+.card.item-card .name {
+  cursor: pointer;
+}
+
 .card-area {
   display: flex;
   justify-content: flex-start;
@@ -27,6 +31,7 @@
   color: #2F2E7E;
   font-size: 20px;
   line-height: 24px;
+  font-weight: 500;
 }
 
 

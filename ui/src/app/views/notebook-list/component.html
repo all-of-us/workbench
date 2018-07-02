@@ -13,8 +13,8 @@
     <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
   </div>
 
-  <div class="card item-card notebook-card" *ngFor="let notebook of notebookList" (click)="openNotebook(notebook)">
-    <div class="name">{{notebook.name}}</div>
+  <div class="card item-card notebook-card" *ngFor="let notebook of notebookList">
+    <div class="name" (click)="openNotebook(notebook)">{{notebook.name}}</div>
     <div class="footer">
       <div class="last-modified">
         <div>Last Update<br/>{{notebook.lastModifiedTime | date}}</div>
