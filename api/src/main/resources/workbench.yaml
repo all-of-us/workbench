@@ -174,10 +174,10 @@ paths:
       responses:
         200:
           description: Contact Email Updated
+        400:
+          description: Invalid contact email address
         403:
-          description: Operation cannot be performed on this account.
-          schema:
-            $ref: "#/definitions/ErrorResponse"
+          description: Unable to process this request
 
   /v1/resend-welcome-email:
     post:
@@ -196,6 +196,8 @@ paths:
       responses:
         200:
           description: Welcome Email sent.
+        500:
+          description: Error occurred sending the welcome email
 
   /v1/invitation-key-verification:
     post:

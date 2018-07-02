@@ -461,38 +461,26 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
+  /*
+   * This un-authed API method is limited such that we only allow contact email updates before the user has ever
+   * signed in. This is necessary for the new user sign-up case where the user has not yet created their account.
+   * Once they have a full account, they can change their password through the normal profile update process.
+   */
   @Override
   public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
-    verifyNoLogins(updateContactEmailRequest.getUsername());
-    //resend Welcome Email to new contact email... Add once Mandrill API complete
-    updateUser(updateContactEmailRequest);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  private void verifyNoLogins(String username) {
-    User user = userDao.findUserByEmail(username);
+    User user = userDao.findUserByEmail(updateContactEmailRequest.getUsername());
     if (user.getFirstSignInTime() != null) {
-      throw new BadRequestException(
-          "This account has already been in use, if you would like to update your contact email please login and update via the Profile page."
-      );
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-  }
-
-  private void updateUser(UpdateContactEmailRequest updateRequest) {
-    com.google.api.services.admin.directory.model.User googleUser =
-        directoryService.getUser(updateRequest.getUsername());
-    String contactEmail = updateRequest.getContactEmail();
     try {
-      InternetAddress email = new InternetAddress(contactEmail);
+      InternetAddress email = new InternetAddress(updateContactEmailRequest.getContactEmail());
       email.validate();
     } catch (AddressException e) {
-      // TODO
-//      throw new MessagingException("Email: " + contactEmail + " is invalid.");
+      return ResponseEntity.badRequest().build();
     }
-    googleUser.setPrimaryEmail(contactEmail);
-    User user = userDao.findUserByEmail(updateRequest.getUsername());
-    user.setContactEmail(contactEmail);
+    user.setContactEmail(updateContactEmailRequest.getContactEmail());
     userDao.save(user);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

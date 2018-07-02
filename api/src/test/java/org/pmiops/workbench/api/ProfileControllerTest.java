@@ -17,6 +17,7 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Provider;
@@ -56,6 +57,7 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
@@ -64,6 +66,8 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -591,6 +595,45 @@ public class ProfileControllerTest {
     profileController.updateProfile(profile);
     Profile result = profileController.getMe().getBody();
     assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(0);
+  }
+
+  @Test
+  public void updateContactEmail_forbidden() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    user.setFirstSignInTime(new Timestamp(new Date().getTime()));
+    UpdateContactEmailRequest request = new UpdateContactEmailRequest();
+    request.setContactEmail(user.getContactEmail());
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.updateContactEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+  }
+
+  @Test
+  public void updateContactEmail_badRequest() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    user.setFirstSignInTime(null);
+    UpdateContactEmailRequest request = new UpdateContactEmailRequest();
+    request.setContactEmail("bad email address *(SD&(*D&F&*(DS ");
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.updateContactEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+  }
+
+  @Test
+  public void updateContactEmail_OK() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    user.setFirstSignInTime(null);
+    UpdateContactEmailRequest request = new UpdateContactEmailRequest();
+    request.setContactEmail(user.getContactEmail());
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.updateContactEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
   }
 
   private Profile createUser() throws Exception {
