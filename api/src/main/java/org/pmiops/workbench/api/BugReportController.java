@@ -74,12 +74,19 @@ public class BugReportController implements BugReportApiDelegate {
               continue;
             }
             File tempLogFile = createTempFile(fileName, logContent);
-            jiraService.uploadAttachment(issueKey, tempLogFile);
-            tempLogFile.delete();
+            try {
+              jiraService.uploadAttachment(issueKey, tempLogFile);
+            } finally {
+              if ( tempLogFile != null) {
+                try {
+                  tempLogFile.delete();
+                } catch (SecurityException ex){
+                  log.severe(String.format("Error while deleting temporary log file %s", fileName));
+                }
+              }
+            }
           } catch (ApiException e) {
             log.info(String.format("failed to retrieve notebook log '%s', continuing", fileName));
-          } catch (SecurityException ex){
-            log.severe(String.format("Error while deleting temporary log file %s", fileName));
           }
         }
      }
