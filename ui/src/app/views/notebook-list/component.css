@@ -1,0 +1,37 @@
+.spinner {
+  margin-top: 1rem;
+}
+
+.spinner-text {
+  text-align: center;
+  /* This forces the flex layout to put the text on a new line. */
+  width: 100%;
+}
+
+.spinner-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+.card.notebook-card {
+  justify-content: space-between;
+}
+
+.card.item-card .name {
+  cursor: pointer;
+}
+
+.card-area {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.notebooks-header {
+  color: #2F2E7E;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+

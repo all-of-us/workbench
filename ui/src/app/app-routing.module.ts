@@ -9,8 +9,10 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
+import {CohortListComponent} from './views/cohort-list/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
+import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
@@ -97,7 +99,24 @@ const routes: Routes = [
                 mode: WorkspaceEditMode.Clone,
                 breadcrumb: 'Clone Workspace'
               }
-            }, {
+            },
+            {
+              path: 'notebooks',
+              component: NotebookListComponent,
+              data: {
+                title: 'View Notebooks',
+                breadcrumb: 'Notebooks'
+              }
+            },
+            {
+              path: 'cohorts',
+              component: CohortListComponent,
+              data: {
+                title: 'View Cohorts',
+                breadcrumb: 'Cohorts'
+              }
+            },
+            {
               path: 'cohorts/build',
               loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
               data: {
