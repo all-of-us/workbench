@@ -32,7 +32,7 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 class NotebookListPage {
   fixture: ComponentFixture<NotebookListComponent>;
   workspacesService: WorkspacesService;
-  cohortsService; CohortService;
+  cohortsService: CohortsService;
   route: UrlSegment[];
   workspaceNamespace: string;
   workspaceId: string;
