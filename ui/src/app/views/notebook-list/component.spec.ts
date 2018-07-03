@@ -19,6 +19,7 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {
   BugReportService,
   WorkspaceAccessLevel,
+  CohortsService,
   WorkspacesService
 } from 'generated';
 
@@ -31,6 +32,7 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 class NotebookListPage {
   fixture: ComponentFixture<NotebookListComponent>;
   workspacesService: WorkspacesService;
+  cohortsService; CohortService;
   route: UrlSegment[];
   workspaceNamespace: string;
   workspaceId: string;
@@ -41,6 +43,7 @@ class NotebookListPage {
     this.fixture = testBed.createComponent(NotebookListComponent);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
+    this.cohortsService = this.fixture.debugElement.injector.get(this.CohortService);
     this.readPageData();
   }
 
