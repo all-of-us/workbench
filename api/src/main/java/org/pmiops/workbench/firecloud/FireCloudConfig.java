@@ -33,6 +33,7 @@ public class FireCloudConfig {
   public ApiClient fireCloudApiClient(UserAuthentication userAuthentication,
       WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
     apiClient.setAccessToken(userAuthentication.getCredentials());
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     return apiClient;
@@ -43,6 +44,7 @@ public class FireCloudConfig {
   public ApiClient allOfUsApiClient(WorkbenchEnvironment workbenchEnvironment,
       WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
     try {
       apiClient.setAccessToken(
           ServiceAccounts.workbenchAccessToken(workbenchEnvironment, BILLING_SCOPES));

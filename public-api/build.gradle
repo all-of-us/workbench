@@ -45,8 +45,8 @@ buildscript {    // Configuration for building
   }
   dependencies {
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
-    classpath 'com.google.cloud.tools:appengine-gradle-plugin:+'
-    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.9.0'
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
+    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
     classpath 'io.swagger:swagger-codegen:2.2.3'
   }
 }

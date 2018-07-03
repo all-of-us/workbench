@@ -1,6 +1,12 @@
 import {Observable} from 'rxjs/Observable';
 
-import {Cluster, ClusterListResponse, ClusterLocalizeRequest, ClusterStatus} from 'generated';
+import {
+  Cluster,
+  ClusterListResponse,
+  ClusterLocalizeRequest,
+  ClusterLocalizeResponse,
+  ClusterStatus
+} from 'generated';
 
 export class ClusterServiceStub {
 
@@ -26,9 +32,11 @@ export class ClusterServiceStub {
 
   localize(projectName: string, clusterName: string, req: ClusterLocalizeRequest,
       extraHttpRequestParams?: any): Observable<{}> {
-    return new Observable<{}>(observer => {
+    return new Observable<ClusterLocalizeResponse>(observer => {
       setTimeout(() => {
-        observer.next({});
+        observer.next({
+          clusterLocalDirectory: 'workspaces/${req.workspaceId}'
+        });
         observer.complete();
       }, 0);
     });

@@ -2,6 +2,13 @@
   display: flex;
 }
 
+.greeting {
+  color: #2F2E7E;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
 .description-text {
   color: #333;
   width: 100ex;
@@ -37,18 +44,6 @@ h3 {
 
 .spinner {
   margin-top: 1rem;
-}
-
-.spinner-header {
-  color: #007CBB;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.spinner-text {
-  text-align: center;
-  /* This forces the flex layout to put the text on a new line. */
-  width: 100%;
 }
 
 .notebook-table-row {

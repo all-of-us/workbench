@@ -740,6 +740,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FileDetail fileDetail = new FileDetail();
       fileDetail.setName(parts[parts.length-1]);
       fileDetail.setPath("gs://" + bucketName + "/" + blob.getName());
+      fileDetail.setLastModifiedTime(blob.getUpdateTime());
       fileList.add(fileDetail);
     });
     return fileList;
