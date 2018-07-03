@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -17,6 +18,8 @@ import org.pmiops.workbench.test.Providers;
 
 import java.io.File;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -35,6 +38,10 @@ public class JiraServiceImplTest {
   private ApiClient apiClient;
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
 
   private File mockFile = new File("dummyPath");
 
@@ -58,44 +65,36 @@ public class JiraServiceImplTest {
 
     service.setJiraApi(jiraApi);
     when(jiraApi.getApiClient()).thenReturn(apiClient);
-    when(jiraApi.createIssue( any() )).thenReturn(new IssueResponse());
+    when(jiraApi.createIssue(any())).thenReturn(new IssueResponse());
   }
 
   @Test
   public void testCreateIssue() throws Exception {
     IssueResponse response = service.createIssue(new BugReport());
-    Assert.assertNotNull(response);
+    assertNotNull(response);
   }
 
   @Test
-  public void testAddAttachmentNullIssueKey() {
-    try {
-      service.uploadAttachment(null, mockFile);
-      Assert.assertTrue(false);
-    } catch (ApiException e) {
-      Assert.assertEquals(e.getMessage(),
-          "Missing the required parameter 'issueKey' when calling addAttachments(Async)");
-    }
+  public void testAddAttachmentNullIssueKey() throws ApiException {
+    expectedException.expect(ApiException.class);
+    expectedException.expectMessage("Missing the required parameter 'issueKey' when calling addAttachments(Async)");
+    service.uploadAttachment(null, mockFile);
+
   }
 
   @Test
-  public void testAddAttachmentNoFile() {
-    try {
-      service.uploadAttachment("IssueKey", null);
-      Assert.assertTrue(false);
-    } catch (ApiException e) {
-      Assert.assertEquals(e.getMessage(),
-          "Missing the required parameter 'file' when calling addAttachments(Async)");
-    }
+  public void testAddAttachmentNoFile() throws ApiException {
+    expectedException.expect(ApiException.class);
+    expectedException.expectMessage("Missing the required parameter 'file' when calling addAttachments(Async)");
+    service.uploadAttachment("IssueKey", null);
   }
 
   @Test
   public void testAddAttachment() {
     try {
       service.uploadAttachment("IssueKey", mockFile);
-      Assert.assertTrue(true);
     } catch (ApiException e) {
-      Assert.assertFalse(true);
+      fail();
     }
   }
 }

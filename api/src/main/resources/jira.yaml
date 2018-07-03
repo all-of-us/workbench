@@ -77,8 +77,12 @@ paths:
      responses:
        200:
          description: File saved
-       503:
-         description: Cannot connect to JIRA. Please try again later
+       403:
+         description: Attachments are disabled
+       404:
+         description: Issue Not Found/Attachments exceeds the maximum configured attachment size
+       413:
+         description: Attachment is too big
      security:
        - AdminSecurity: []
 
