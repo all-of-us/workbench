@@ -92,8 +92,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
         });
   }
 
-  private loadCohort
-
   ngOnDestroy(): void {
     this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
   }
@@ -159,7 +157,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   get noCohorts(): boolean {
-    return this.cohortList.length == 0 && this.showTip;
+    return this.cohortList.length === 0 && this.showTip;
   }
 
   dismissTip(): void {
