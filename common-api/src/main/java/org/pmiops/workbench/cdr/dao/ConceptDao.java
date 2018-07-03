@@ -39,13 +39,6 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
             nativeQuery = true)
     List<Concept> findAllNonStandardConceptsOrderedByCount(@Param("maxResults") long maxResults,  @Param("domain") List<String> domain);
 
-    @Query(value = "select c.* from concept c " +
-            "where c.domain_id=:domain_id and " +
-            "c.standard_concept=:standard_concept " +
-            "order by c.count_value desc limit 25;",
-          nativeQuery = true)
-    List<Concept> findConceptsByDomainIdOrderedByCount(@Param("domain_id") String domain_id,@Param("standard_concept") String standard_concept);
-
     @Query(value="select c.* from concept c "+
             "join concept_relationship rel on " +
             "rel.concept_id_1 = c.concept_id and rel.concept_id_2 = :conceptId and " +
