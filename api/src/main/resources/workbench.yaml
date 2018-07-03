@@ -1452,6 +1452,7 @@ definitions:
     required:
       - name
       - path
+      - lastModifiedTime
     properties:
       name:
         type: string
@@ -1459,6 +1460,10 @@ definitions:
       path:
         type: string
         description: The path is in format of gs://bucket-name/name
+      lastModifiedTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
 
   ClusterListResponse:
     type: object

@@ -1,101 +1,30 @@
 <div class="workspace-container">
   <div class="main-body">
-    <h2>{{workspace.name}}</h2>
-    <div style="display: flex; justify-content: space-between">
-      <div style="margin-left: -0.5rem;">
-        <button class="btn btn-link" [class.selected]="tabOpen === Tabs.Notebooks" (click)="tabOpen = Tabs.Notebooks">
-          Notebooks ({{notebookList.length}})
-        </button>
-        <button class="btn btn-link final" [class.selected]="tabOpen === Tabs.Cohorts" (click)="tabOpen = Tabs.Cohorts">
-          Cohorts ({{cohortList.length}})
-        </button>
+    <h2 class="greeting">{{greeting}}</h2>
+    <div style="width: 200px">
+      <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+        <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+        <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
+        <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
+          <div class="create-text">
+            Create a <br/>New Cohort
+            <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+          </div>
+        </div>
       </div>
-      <div>
-        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
-          <button *ngIf="tabOpen===Tabs.Cohorts" class="btn btn-primary btn-create"
-                  [class.awaiting-review]="awaitingReview" [disabled]="awaitingReview || !writePermission" (click)="buildCohort()">
-            + Add a Cohort
-          </button>
-          <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
-        </span>
-        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
-          <button *ngIf="tabOpen===Tabs.Notebooks" class="btn btn-primary btn-create"
-                  [disabled]="awaitingReview || !writePermission" (click)="newNotebook()">
-            + New Notebook
-          </button>
-          <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
-          <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
-        </span>
+      <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+        <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
+        <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
+        <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" style="margin-top: 13px;" (click)="!writePermission || newNotebook()">
+          <div class="create-text">
+            Create a<br/>New Notebook
+            <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+          </div>
+        </div>
       </div>
-    </div>
-    <div *ngIf="tabOpen===Tabs.Cohorts">
-      <clr-datagrid [clrDgLoading]="cohortsLoading">
-        <clr-dg-column [clrDgField]="'cohort.name'" [clrDgSortBy]="cohortNameComparator">
-          Name
-          <clr-dg-string-filter [clrDgStringFilter]="cohortNameFilter"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column [clrDgField]="'cohort.description'" [clrDgSortBy]="cohortDescriptionComparator">
-          Description
-          <clr-dg-string-filter [clrDgStringFilter]="cohortDescriptionFilter"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column>Created Date</clr-dg-column>
-        <clr-dg-placeholder>No cohorts found in this workspace.</clr-dg-placeholder>
-        <clr-dg-row *clrDgItems="let cohort of cohortList" [clrDgItem]="cohort" class="table-row cohort-table-row">
-          <clr-dg-action-overflow>
-            <button class="action-item"
-                    [routerLink]="['cohorts', 'build']"
-                    [queryParams]="{criteria: cohort.criteria}">
-              <clr-icon shape="copy"></clr-icon>
-              Clone
-            </button>
-            <button class="action-item"
-                    routerLink="cohorts/{{cohort.id}}/edit">
-              <clr-icon shape="pencil"></clr-icon>
-              Edit
-            </button>
-            <button class="action-item"
-                    routerLink="cohorts/{{cohort.id}}/review">
-              <clr-icon shape="grid-view"></clr-icon>
-              Review
-            </button>
-          </clr-dg-action-overflow>
-          <clr-dg-cell>{{cohort.name}}</clr-dg-cell>
-          <clr-dg-cell>{{cohort.description}}</clr-dg-cell>
-          <clr-dg-cell>{{cohort.creationTime | date:'medium'}}</clr-dg-cell>
-        </clr-dg-row>
-      </clr-datagrid>
-    </div>
-    <clr-modal [(clrModalOpen)]="cohortsError">
-      <h3 class="modal-title">Error:</h3>
-      <div class="modal-body">Could not fetch cohorts from workspace.</div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" (click)="cohortsError = false">Ok</button>
-      </div>
-    </clr-modal>
-
-    <div *ngIf="tabOpen===Tabs.Notebooks">
-      <div *ngIf="notebooksLoading" class="spinner-container">
-        <span class="spinner spinner-lg"></span>
-      </div>
-      <clr-datagrid *ngIf="!notebooksLoading">
-        <clr-dg-column [clrDgField]="'notebook.name'" [clrDgSortBy]="notebookNameComparator">
-          Name
-          <clr-dg-string-filter [clrDgStringFilter]="notebookNameFilter"></clr-dg-string-filter>
-        </clr-dg-column>
-        <clr-dg-column>Path</clr-dg-column>
-        <clr-dg-placeholder>No notebooks found in this workspace.</clr-dg-placeholder>
-        <clr-dg-row
-            class="table-row notebook-table-row"
-            *clrDgItems="let notebook of notebookList"
-            [clrDgItem]="notebook"
-            (click)="openNotebook(notebook)">
-          <clr-dg-cell>{{notebook.name}}</clr-dg-cell>
-          <clr-dg-cell>{{notebook.path}}</clr-dg-cell>
-        </clr-dg-row>
-      </clr-datagrid>
     </div>
     <div style="padding-top: 1rem;">
-      <h4 class="subheader">About the Workspace</h4>
+      <h4 class="subheader">Research Purpose</h4>
       <div class="description-text">
         {{workspace.description}}
       </div>
