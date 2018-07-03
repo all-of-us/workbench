@@ -147,10 +147,10 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private String randomString() {
-    return IntStream.range(0, 17).boxed().
-        map(x -> ALLOWED.charAt(rnd.nextInt(ALLOWED.length()))).
-        map(Object::toString).
-        collect(Collectors.joining(""));
+    return IntStream.range(0, 17).boxed()
+        .map(x -> ALLOWED.charAt(rnd.nextInt(ALLOWED.length())))
+        .map(Object::toString)
+        .collect(Collectors.joining(""));
   }
 
 }

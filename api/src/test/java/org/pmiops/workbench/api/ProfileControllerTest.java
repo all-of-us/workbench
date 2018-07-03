@@ -639,7 +639,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void resentWelcomeEmail_messagingException() throws Exception {
+  public void resendWelcomeEmail_messagingException() throws Exception {
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
@@ -652,7 +652,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void resentWelcomeEmail_OK() throws Exception {
+  public void resendWelcomeEmail_OK() throws Exception {
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
