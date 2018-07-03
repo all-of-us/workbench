@@ -24,6 +24,7 @@ import {
 } from 'generated';
 
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
+import {CohortsServiceStub} from "../../../testing/stubs/cohort-service-stub";
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
@@ -100,6 +101,7 @@ describe('NotebookListComponent', () => {
         { provide: SignInService, useValue: SignInService },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
+        { provide: CohortsService, useValue: new CohortsServiceStub()},
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
       notebookListPage = new NotebookListPage(TestBed);
