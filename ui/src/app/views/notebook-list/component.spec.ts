@@ -18,8 +18,8 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   BugReportService,
-  WorkspaceAccessLevel,
   CohortsService,
+  WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
 
