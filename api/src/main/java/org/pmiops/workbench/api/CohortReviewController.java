@@ -19,7 +19,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -84,7 +83,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private ParticipantCounter participantCounter;
   private ReviewTabQueryBuilder reviewTabQueryBuilder;
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
-  private CdrVersionContext cdrVersionContext;
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -178,14 +176,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                          BigQueryService bigQueryService,
                          ParticipantCounter participantCounter,
                          ReviewTabQueryBuilder reviewTabQueryBuilder,
-                         Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
-                         CdrVersionContext cdrVersionContext) {
+                         Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider) {
     this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
     this.reviewTabQueryBuilder = reviewTabQueryBuilder;
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
-    this.cdrVersionContext = cdrVersionContext;
   }
 
   /**

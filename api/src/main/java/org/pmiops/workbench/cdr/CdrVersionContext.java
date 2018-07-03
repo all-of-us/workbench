@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cdr;
 
-import com.google.common.annotations.VisibleForTesting;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -22,7 +21,7 @@ public class CdrVersionContext {
   private FireCloudService fireCloudService;
 
   @Autowired
-  public CdrVersionContext(Provider<WorkbenchConfig> workbenchConfigProvider,
+  public CdrVersionContext(Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService) {
     this.configProvider = configProvider;
     this.fireCloudService = fireCloudService;

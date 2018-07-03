@@ -28,6 +28,7 @@ public class CohortBuilderControllerMockTest {
     @Mock
     private CdrVersionDao mockCdrVersionDao;
 
+    @SuppressWarnings("unused")
     @Mock
     private CdrVersionContext mockCdrVersionContext;
 
