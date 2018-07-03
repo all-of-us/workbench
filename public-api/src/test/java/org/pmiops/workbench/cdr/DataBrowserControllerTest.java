@@ -305,6 +305,28 @@ public class DataBrowserControllerTest {
                 .doesNotContain(CONCEPT_2);
     }
 
+    @Test
+    public void testConceptSearchStandardCodeIdMatchFilter() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")
+                .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        List<Concept> standard_concepts = Arrays.asList(CONCEPT_1, CONCEPT_4, CONCEPT_5, CONCEPT_6, CONCEPT_7);
+        assertThat(concepts)
+                .doesNotContain(standard_concepts);
+    }
+
+    @Test
+    public void testConceptSearchNonStandardConcepts() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("7891")
+                .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        //Search on concept id fetches the non standard concept
+        assertThat(concepts)
+                .contains(CONCEPT_6);
+    }
+
 
     @Test
     public void testConceptSearchEmptyCount() throws Exception{
@@ -322,7 +344,7 @@ public class DataBrowserControllerTest {
     public void testConceptIdSearch() throws Exception{
         saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("456")
-                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+                .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
                 .containsExactly(CONCEPT_2)
@@ -365,7 +387,7 @@ public class DataBrowserControllerTest {
         result.setConceptId(concept.getConceptId());
         result.setConceptName(concept.getConceptName());
         result.setStandardConcept(concept.getStandardConcept() == null ? null :
-                (concept.getStandardConcept().equals("S") ? "S" : "C"));
+                (concept.getStandardConcept()));
         result.setConceptCode(concept.getConceptCode());
         result.setConceptClassId(concept.getConceptClassId());
         result.setVocabularyId(concept.getVocabularyId());

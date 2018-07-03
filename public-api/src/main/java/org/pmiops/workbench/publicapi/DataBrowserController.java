@@ -257,6 +257,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             maxResults = Integer.MAX_VALUE;
         }
 
+        Integer minCount = searchConceptsRequest.getMinCount();
+        if(minCount == null){
+            minCount = 1;
+        }
+
         StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
         if(standardConceptFilter == null){
             standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
@@ -286,7 +291,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         Slice<Concept> concepts =
                 conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                        searchConceptsRequest.getVocabularyIds(), domainIds, maxResults);
+                        searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
         ConceptListResponse response = new ConceptListResponse();
         List<Concept> matchedConcepts = concepts.getContent();
 
@@ -314,6 +319,15 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<DbDomainListResponse> getDomainTotals(){
         List<DbDomain> domains=dbDomainDao.findDomainTotals();
+        for(DbDomain dbd : domains){
+            if(dbd.getParticipantCount() == 0){
+                Long participantCount = achillesResultDao.getDomainParticipantCount(String.valueOf(dbd.getConceptId()));
+                if(participantCount != null){
+                    dbd.setParticipantCount(participantCount);
+                }
+            }
+        }
+        System.out.println(domains);
         DbDomainListResponse resp=new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);

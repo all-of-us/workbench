@@ -233,11 +233,8 @@ where c1.concept_id=question_id
 echo "Inserting concept_relationship"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_relationship\`
- (concept_id_1, concept_id_2, relationship_id, valid_start_date, valid_end_date, invalid_reason)
-SELECT c.concept_id_1, c.concept_id_2, c.relationship_id,
-Concat(substr(c.valid_start_date, 1,4), '-',substr(c.valid_start_date,5,2),'-',substr(c.valid_start_date,7,2)) as valid_start_date,
-Concat(substr(c.valid_end_date, 1,4), '-',substr(c.valid_end_date,5,2),'-',substr(c.valid_end_date,7,2)) as valid_end_date,
-c.invalid_reason
+ (concept_id_1, concept_id_2, relationship_id)
+SELECT c.concept_id_1, c.concept_id_2, c.relationship_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
 
 

@@ -21,7 +21,6 @@ public class DbDomain {
     private long countValue;
     private long participantCount;
 
-
     @Id
     @Column(name = "domain_id")
     public String getDomainId() {
@@ -122,15 +121,15 @@ public class DbDomain {
     }
 
     @Transient
-    public Long getParticipantCount() {
+    public Long getParticipantCount(){
         return participantCount;
     }
 
-    public void setParticipantCount(Long participantCount) {
+    public void setParticipantCount(Long participantCount){
         this.participantCount = participantCount;
     }
 
-    public DbDomain participantCount(Long participantCount) {
+    public DbDomain participantCount(Long participantCount){
         this.participantCount = participantCount;
         return this;
     }
@@ -160,7 +159,5 @@ public class DbDomain {
         return  ToStringBuilder.reflectionToString(this);
 
     }
-
-
 
 }

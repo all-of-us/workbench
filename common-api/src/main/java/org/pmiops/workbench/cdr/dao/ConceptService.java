@@ -71,7 +71,7 @@ public class ConceptService {
 
     public Slice<Concept> searchConcepts(String query,
                                          StandardConceptFilter standardConceptFilter, List<String> vocabularyIds,
-                                         List<String> domainIds, int limit) {
+                                         List<String> domainIds, int limit, int minCount) {
 
 
         final String keyword = modifyMultipleMatchKeyword(query);
@@ -173,12 +173,14 @@ public class ConceptService {
                         predicates.add(root.get("domainId").in(domainIds));
                     }
 
-                    List<Predicate> countPredicates = new ArrayList<>();
-                    countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
-                    countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
+                    if(minCount == 1){
+                        List<Predicate> countPredicates = new ArrayList<>();
+                        countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
+                        countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
 
-                    predicates.add(criteriaBuilder.or(
-                            countPredicates.toArray(new Predicate[0])));
+                        predicates.add(criteriaBuilder.or(
+                                countPredicates.toArray(new Predicate[0])));
+                    }
 
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };

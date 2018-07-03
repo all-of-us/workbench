@@ -79,12 +79,16 @@ public class ConceptsController implements ConceptsApiDelegate {
     CdrVersion cdrVersion = workspace.getCdrVersion();
     CdrVersionContext.setCdrVersion(cdrVersion);
     Integer maxResults = request.getMaxResults();
+    Integer minCount = request.getMinCount();
     if (maxResults == null) {
       maxResults = DEFAULT_MAX_RESULTS;
     } else if (maxResults < 1) {
       throw new BadRequestException("Invalid value for maxResults: " + maxResults);
     } else if (maxResults > MAX_MAX_RESULTS) {
       maxResults = MAX_MAX_RESULTS;
+    }
+    if(minCount == null){
+      minCount = 1;
     }
     StandardConceptFilter standardConceptFilter = request.getStandardConceptFilter();
     if (standardConceptFilter == null) {
@@ -103,7 +107,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     // TODO: move Swagger codegen to common-api, pass request with modified values into service
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
         conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
-            request.getVocabularyIds(), domainIds, maxResults);
+            request.getVocabularyIds(), domainIds, maxResults, minCount);
     ConceptListResponse response = new ConceptListResponse();
     response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
         .collect(Collectors.toList()));
