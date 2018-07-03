@@ -73,11 +73,9 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     public Workspace validateMatchingWorkspace(
         String workspaceNamespace, String workspaceName,
         long workspaceId, WorkspaceAccessLevel accessRequired) {
-      // This also enforces registered auth domain.
-      workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceName, accessRequired);
-
-
-      Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
+      Workspace workspace =
+          workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace,
+                workspaceName, accessRequired);
       if (workspace.getWorkspaceId() != workspaceId) {
           throw new NotFoundException(
                   String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",

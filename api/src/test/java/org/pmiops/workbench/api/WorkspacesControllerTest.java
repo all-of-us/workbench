@@ -119,6 +119,7 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
+    CdrVersionContext.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     CohortsController.class,
@@ -614,7 +615,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testCloneWorkspaceWithCohorts() throws Exception {
     Long participantId = 1L;
-    CdrVersionContext.setCdrVersion(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 

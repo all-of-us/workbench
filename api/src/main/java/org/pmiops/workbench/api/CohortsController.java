@@ -92,6 +92,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final CohortMaterializationService cohortMaterializationService;
   private final Provider<User> userProvider;
   private final Clock clock;
+  private final CdrVersionContext cdrVersionContext;
 
   @Autowired
   CohortsController(
@@ -101,7 +102,8 @@ public class CohortsController implements CohortsApiDelegate {
       CohortReviewDao cohortReviewDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
-      Clock clock) {
+      Clock clock,
+      CdrVersionContext cdrVersionContext) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
@@ -109,6 +111,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
     this.clock = clock;
+    this.cdrVersionContext = cdrVersionContext;
   }
 
   @Override
@@ -223,11 +226,9 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
       String workspaceId, MaterializeCohortRequest request) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     CdrVersion cdrVersion = workspace.getCdrVersion();
-    CdrVersionContext.setCdrVersion(cdrVersion);
 
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
@@ -235,6 +236,7 @@ public class CohortsController implements CohortsApiDelegate {
         throw new NotFoundException(String.format("Couldn't find CDR version with name %s",
             request.getCdrVersionName()));
       }
+      cdrVersionContext.setCdrVersion(cdrVersion);
     }
     String cohortSpec;
     CohortReview cohortReview = null;

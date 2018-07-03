@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -26,6 +27,9 @@ public class CohortBuilderControllerMockTest {
 
     @Mock
     private CdrVersionDao mockCdrVersionDao;
+
+    @Mock
+    private CdrVersionContext mockCdrVersionContext;
 
     @InjectMocks
     private CohortBuilderController controller;

@@ -25,4 +25,7 @@ public interface WorkspaceService {
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(String workspaceNamespace,
       String workspaceId, WorkspaceAccessLevel requiredAccess);
+  public Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(String workspaceNamespace,
+      String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
+
 }

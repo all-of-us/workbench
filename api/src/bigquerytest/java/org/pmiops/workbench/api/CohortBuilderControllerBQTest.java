@@ -112,7 +112,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    CdrVersionContext.setCdrVersion(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     cdrVersionDao.save(cdrVersion);
 

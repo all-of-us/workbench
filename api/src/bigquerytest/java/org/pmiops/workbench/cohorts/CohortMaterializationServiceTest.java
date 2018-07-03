@@ -112,7 +112,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersionDao.save(cdrVersion);
-    CdrVersionContext.setCdrVersion(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     Criteria icd9CriteriaGroup =
             new Criteria().group(true)

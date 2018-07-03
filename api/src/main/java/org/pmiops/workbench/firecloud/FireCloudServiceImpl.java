@@ -20,6 +20,7 @@ import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
 import org.pmiops.workbench.firecloud.model.ManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceIngest;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,6 +42,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<ProfileApi> profileApiProvider;
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
+  private final Provider<GroupsApi> endUserGroupsApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final FirecloudRetryHandler retryHandler;
 
@@ -56,12 +59,14 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
+      @Qualifier("user") Provider<GroupsApi> endUserGroupsApiProvider,
       Provider<WorkspacesApi> workspacesApiProvider,
       FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
+    this.endUserGroupsApiProvider = endUserGroupsApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
     this.retryHandler = retryHandler;
   }
@@ -273,6 +278,21 @@ public class FireCloudServiceImpl implements FireCloudService {
     retryHandler.run((context) -> {
       groupsApi.removeUserFromGroup(groupName, "member", email);
       return null;
+    });
+  }
+
+  @Override
+  public boolean isUserMemberOfGroup(String groupName) {
+    return retryHandler.run((context) -> {
+      // There is no endpoint in FireCloud for checking whether a user is a member of a particular
+      // group; so instead, fetch all the group memberships. (There won't be that many for our
+      // users anyway.)
+      for (ManagedGroupAccessResponse group : endUserGroupsApiProvider.get().getGroups()) {
+        if (group.getGroupName().equals(groupName) && group.getRole().equals("member")) {
+          return true;
+        }
+      }
+      return false;
     });
   }
 }

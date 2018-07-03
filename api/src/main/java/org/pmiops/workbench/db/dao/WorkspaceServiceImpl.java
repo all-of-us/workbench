@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -231,5 +232,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     } else {
       return access;
     }
+  }
+
+  @Override
+  public Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(String workspaceNamespace,
+      String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
+    enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, workspaceAccessLevel);
+    Workspace workspace = getRequired(workspaceNamespace, workspaceId);
+    // Because we've already checked that the user has access to the workspace in question,
+    // we don't need to check their membership in the authorization domain for the workspace.
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(workspace.getCdrVersion());
+    return workspace;
   }
 }

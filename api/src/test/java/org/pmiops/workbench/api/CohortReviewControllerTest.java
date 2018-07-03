@@ -24,12 +24,14 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.SortOrder;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -113,6 +115,7 @@ public class CohortReviewControllerTest {
 
   @TestConfiguration
   @Import({
+    CdrVersionContext.class,
     CohortReviewController.class,
     CohortReviewServiceImpl.class,
     ParticipantCounter.class,
@@ -122,7 +125,8 @@ public class CohortReviewControllerTest {
   })
   @MockBean({
     WorkspaceService.class,
-    BigQueryService.class
+    BigQueryService.class,
+    FireCloudService.class
   })
   static class Configuration {
 
@@ -147,7 +151,7 @@ public class CohortReviewControllerTest {
     cdrVersion.setBigqueryDataset("dataSetId");
     cdrVersion.setBigqueryProject("projectId");
     cdrVersionDao.save(cdrVersion);
-    CdrVersionContext.setCdrVersion(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
@@ -232,7 +236,8 @@ public class CohortReviewControllerTest {
         SortOrder.ASC,
         ParticipantCohortStatusColumns.PARTICIPANTID);
 
-    when(workspaceService.getRequired(WORKSPACE_NAMESPACE, WORKSPACE_NAME)).thenReturn(workspace);
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME, WorkspaceAccessLevel.READER)).thenReturn(workspace);
 
     assertParticipantCohortStatuses(expectedReview1, page, pageSize, SortOrder.DESC, ParticipantCohortStatusColumns.STATUS);
     assertParticipantCohortStatuses(expectedReview2, page, pageSize, SortOrder.DESC, ParticipantCohortStatusColumns.PARTICIPANTID);
