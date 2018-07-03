@@ -40,6 +40,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   private accessLevel: WorkspaceAccessLevel;
   cohortList: Cohort[] = [];
   showTip: boolean;
+  cohortsLoading: true;
+  cohortsError: false;
 
 
   @ViewChild(BugReportComponent)
