@@ -40,8 +40,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   private accessLevel: WorkspaceAccessLevel;
   cohortList: Cohort[] = [];
   showTip: boolean;
-  cohortsLoading: true;
-  cohortsError: false;
+  cohortsLoading: boolean;
+  cohortsError: boolean;
 
 
   @ViewChild(BugReportComponent)
@@ -60,6 +60,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
     this.showTip = true;
+    this.cohortsLoading = true;
+    this.cohortsError = false;
   }
 
   ngOnInit(): void {
