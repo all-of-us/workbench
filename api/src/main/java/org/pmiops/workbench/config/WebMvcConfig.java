@@ -5,13 +5,12 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.apphosting.api.ApiProxy;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
-import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
+import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,8 +30,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableWebMvc
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
-
-  private static final Logger logger = Logger.getLogger(WebMvcConfig.class.getName());
 
   @Autowired
   private AuthInterceptor authInterceptor;
@@ -62,7 +59,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public User user(UserAuthentication userAuthentication) {
-    logger.info("HERE = " + userAuthentication.getUser());
     return userAuthentication.getUser();
   }
 

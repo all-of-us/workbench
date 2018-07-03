@@ -208,7 +208,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     Cohort cohort = cohortReviewService.findCohort(cohortId);
     //this validates that the user is in the proper workspace
-    cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace,
         workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
     CohortReview cohortReview = null;
     try {
@@ -382,7 +382,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReview cohortReview = null;
     Cohort cohort = cohortReviewService.findCohort(cohortId);
 
-    cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace, workspaceId,
         cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
     try {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
@@ -503,7 +503,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                        WorkspaceAccessLevel level) {
     Cohort cohort = cohortReviewService.findCohort(cohortId);
     //this validates that the user is in the proper workspace
-    cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace,
         workspaceId, cohort.getWorkspaceId(), level);
 
     return cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);

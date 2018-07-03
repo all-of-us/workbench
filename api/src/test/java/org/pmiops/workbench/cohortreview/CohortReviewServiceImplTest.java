@@ -109,7 +109,7 @@ public class CohortReviewServiceImplTest {
             workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER)).thenReturn(workspace);
 
         try {
-            cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceName, workspaceId,
+            cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace, workspaceName, workspaceId,
                 WorkspaceAccessLevel.READER);
             fail("Should have thrown NotFoundException!");
         } catch (NotFoundException e) {
@@ -131,7 +131,7 @@ public class CohortReviewServiceImplTest {
         when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER)).thenReturn(workspace);
 
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceName, workspaceId,
+        cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace, workspaceName, workspaceId,
             WorkspaceAccessLevel.READER);
     }
 

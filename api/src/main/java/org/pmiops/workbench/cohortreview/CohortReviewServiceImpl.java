@@ -70,7 +70,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
-    public Workspace validateMatchingWorkspace(
+    public Workspace validateMatchingWorkspaceAndSetCdrVersion(
         String workspaceNamespace, String workspaceName,
         long workspaceId, WorkspaceAccessLevel accessRequired) {
       Workspace workspace =
