@@ -173,6 +173,13 @@ public class ConceptService {
                         predicates.add(root.get("domainId").in(domainIds));
                     }
 
+                    List<Predicate> countPredicates = new ArrayList<>();
+                    countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
+                    countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
+
+                    predicates.add(criteriaBuilder.or(
+                            countPredicates.toArray(new Predicate[0])));
+
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
         // Return up to limit results, sorted in descending count value order.

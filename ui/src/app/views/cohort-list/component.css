@@ -1,0 +1,69 @@
+.spinner {
+  margin-top: 1rem;
+}
+
+.spinner-text {
+  text-align: center;
+  /* This forces the flex layout to put the text on a new line. */
+  width: 100%;
+}
+
+.spinner-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+.card-area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.cohorts-header {
+  color: #2F2E7E;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+.header-area {
+  display: flex;
+  align-items: center;
+}
+
+clr-dropdown-menu {
+  padding: 0;
+}
+
+.dropdown button.dropdown-toggle:not(.btn) {
+  padding: 0;
+}
+
+.ellipsis-vertical {
+  width: 21px;
+  height: 21px;
+  margin-left: -9px;
+  color: #216FB4;
+}
+
+.action-item {
+  text-align: left;
+  color: #4A4A4A;
+  background-color: white;
+  fill: none;
+  cursor: pointer;
+  border: none;
+}
+
+.action-item:hover {
+  background-color: #E0EAF1;
+}
+
+.card.item-card {
+  cursor: default;
+}
+
+.card.item-card {
+  justify-content: space-between;
+}

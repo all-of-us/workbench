@@ -17,6 +17,7 @@ import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
+import {WINDOW_REF} from './utils';
 
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AccountCreationComponent} from './views/account-creation/component';
@@ -26,11 +27,14 @@ import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
+import {CohortListComponent} from './views/cohort-list/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
+import {NotebookListComponent} from './views/notebook-list/component';
+import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
@@ -82,7 +86,7 @@ export function getConfiguration(signInService: SignInService): Configuration {
 
 export function getLeoConfiguration(signInService: SignInService): LeoConfiguration {
   return new LeoConfiguration({
-    // TODO(RW-847): Inject the baseUrl according to the environment.
+    basePath: environment.leoApiUrl,
     accessToken: () => signInService.currentAccessToken
   });
 }
@@ -114,11 +118,14 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     BreadcrumbComponent,
     BugReportComponent,
     CohortEditComponent,
+    CohortListComponent,
     ErrorHandlerComponent,
     WorkspaceListComponent,
     InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
+    NotebookListComponent,
+    NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
@@ -163,6 +170,10 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
       useClass: InterceptedHttp,
       deps: [XHRBackend, RequestOptions, ErrorHandlingService]
     },
+    {
+      provide: WINDOW_REF,
+      useValue: window
+    }
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]

@@ -1,0 +1,22 @@
+.spinner-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.spinner {
+  margin-top: 1rem;
+}
+
+.spinner-header {
+  color: #007CBB;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.spinner-text {
+  text-align: center;
+  /* This forces the flex layout to put the text on a new line. */
+  width: 100%;
+}
