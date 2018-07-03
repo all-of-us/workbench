@@ -1,11 +1,17 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -13,11 +19,6 @@ import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Arrays;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CohortBuilderControllerMockTest {
@@ -30,7 +31,7 @@ public class CohortBuilderControllerMockTest {
 
     @SuppressWarnings("unused")
     @Mock
-    private CdrVersionContext mockCdrVersionContext;
+    private CdrVersionService mockCdrVersionService;
 
     @InjectMocks
     private CohortBuilderController controller;
