@@ -19,6 +19,7 @@ public class DbDomain {
     private String domainRoute;
     private long conceptId;
     private long countValue;
+    private long participantCount;
 
 
     @Id
@@ -117,6 +118,20 @@ public class DbDomain {
 
     public DbDomain countValue(Long countValue) {
         this.countValue = countValue;
+        return this;
+    }
+
+    @Transient
+    public Long getParticipantCount() {
+        return participantCount;
+    }
+
+    public void setParticipantCount(Long participantCount) {
+        this.participantCount = participantCount;
+    }
+
+    public DbDomain participantCount(Long participantCount) {
+        this.participantCount = participantCount;
         return this;
     }
 

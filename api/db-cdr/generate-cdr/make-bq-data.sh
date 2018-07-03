@@ -167,11 +167,9 @@ echo "Inserting concept table data ... "
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\`
 (concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept,
-concept_code, valid_start_date, valid_end_date, invalid_reason, count_value, prevalence)
+concept_code, count_value, prevalence, source_count_value)
 SELECT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
-Concat(substr(c.valid_start_date, 1,4), '-',substr(c.valid_start_date,5,2),'-',substr(c.valid_start_date,7,2)) as valid_start_date,
-Concat(substr(c.valid_end_date, 1,4), '-',substr(c.valid_end_date,5,2),'-',substr(c.valid_end_date,7,2)) as valid_end_date,
-invalid_reason, 0 as count_value , 0.0 as prevalence
+0 as count_value , 0.0 as prevalence, 0 as source_count_value
 from \`$BQ_PROJECT.$BQ_DATASET.concept\` c"
 
 # Update counts and prevalence in concept

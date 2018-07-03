@@ -487,6 +487,10 @@ definitions:
         description: count value
         type: integer
         format: int64
+      participantCount:
+        description: participant count
+        type: integer
+        format: int64
 
   DbDomainListResponse:
     type: object

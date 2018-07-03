@@ -33,21 +33,6 @@
 	"mode": "REQUIRED", 
 	"name": "concept_code", 
 	"type": "STRING"
-	}, 
-	{
-	"mode": "REQUIRED", 
-	"name": "valid_start_date", 
-	"type": "STRING"
-	}, 
-	{
-	"mode": "REQUIRED", 
-	"name": "valid_end_date", 
-	"type": "STRING"
-	}, 
-	{
-	"mode": "NULLABLE", 
-	"name": "invalid_reason", 
-	"type": "STRING"
 	},
 	{
 	"mode": "NULLABLE", 

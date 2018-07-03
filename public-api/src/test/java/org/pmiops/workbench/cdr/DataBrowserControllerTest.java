@@ -82,7 +82,6 @@ public class DataBrowserControllerTest {
     private static final Concept CLIENT_CONCEPT_2 = new Concept()
             .conceptId(456L)
             .conceptName("b concept")
-            .standardConcept("")
             .conceptCode("002")
             .conceptClassId("classId2")
             .vocabularyId("V2")
@@ -292,8 +291,18 @@ public class DataBrowserControllerTest {
         .domain(Domain.CONDITION));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
-                .containsExactly(CONCEPT_1, CONCEPT_3, CONCEPT_5, CONCEPT_6)
+                .containsExactly(CONCEPT_1, CONCEPT_5, CONCEPT_6)
         ;
+    }
+
+    @Test
+    public void testConceptSearchStandardConcept() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("002")
+        .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .doesNotContain(CONCEPT_2);
     }
 
 

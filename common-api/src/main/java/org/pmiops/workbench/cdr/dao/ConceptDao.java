@@ -76,4 +76,9 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
       "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
       nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
+
+    @Query(value = "select c.count_value from concept c " +
+            "where c.concept_id=:conceptId",
+            nativeQuery = true)
+    Long findConceptCount(@Param("conceptId") Long conceptId);
 }

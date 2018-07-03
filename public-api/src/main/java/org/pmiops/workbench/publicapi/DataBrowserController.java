@@ -269,6 +269,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
             List<Concept> concepts;
+            standardConceptFilter = (standardConceptFilter==StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH ? StandardConceptFilter.STANDARD_CONCEPTS : standardConceptFilter);
             if(standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS){
                 concepts = conceptDao.findAllStandardConceptsOrderedByCount(maxResults, domainIds);
             }else if(standardConceptFilter == StandardConceptFilter.NON_STANDARD_CONCEPTS){
