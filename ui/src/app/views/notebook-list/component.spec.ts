@@ -24,7 +24,7 @@ import {
 } from 'generated';
 
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
-import {CohortsServiceStub} from "../../../testing/stubs/cohort-service-stub";
+import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
