@@ -178,6 +178,8 @@ paths:
           description: Invalid contact email address
         403:
           description: Unable to process this request
+        500:
+          description: Internal Server Error
 
   /v1/resend-welcome-email:
     post:
@@ -197,7 +199,7 @@ paths:
         200:
           description: Welcome Email sent.
         500:
-          description: Error occurred sending the welcome email
+          description: Internal Server Error
 
   /v1/invitation-key-verification:
     post:

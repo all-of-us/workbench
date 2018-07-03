@@ -462,9 +462,9 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   /*
-   * This un-authed API method is limited such that we only allow contact email updates before the user has ever
-   * signed in. This is necessary for the new user sign-up case where the user has not yet created their account.
-   * Once they have a full account, they can change their password through the normal profile update process.
+   * This un-authed API method is limited such that we only allow contact email updates before the user has signed in
+   * with the newly created gsuite account. Once the user has logged in, they can change their contact email through
+   * the normal profile update process.
    */
   @Override
   public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {

@@ -31,8 +31,7 @@ public class DirectoryServiceImplIntegrationTest {
     MailService mailService = Mockito.mock(MailServiceImpl.class);
     Mockito.doNothing().when(mailService).send(Mockito.any());
     service = new DirectoryServiceImpl(
-        Providers.of(googleCredential), Providers.of(workbenchConfig),
-        Providers.of(mailService), httpTransport,
+        Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport,
         new GoogleRetryHandler(new NoBackOffPolicy()));
   }
 

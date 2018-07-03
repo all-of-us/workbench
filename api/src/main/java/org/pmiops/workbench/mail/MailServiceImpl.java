@@ -16,15 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 import javax.inject.Provider;
 import javax.mail.Message;
@@ -40,6 +38,7 @@ public class MailServiceImpl implements MailService {
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
+  private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
 
   enum Status {REJECTED, API_ERROR, SUCCESSFUL}
 
@@ -109,22 +108,24 @@ public class MailServiceImpl implements MailService {
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(contactEmail);
     msg.setTo(Collections.singletonList(toAddress));
-    String msgHtml = buildEmailHtml(password, user);
-    msg.setHtml(msgHtml);
-    msg.setSubject("Your new All of Us Account");
-    msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
-    return msg;
-  }
-
-  private String buildEmailHtml(String password, User user) throws MessagingException {
-    CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
-    StringBuilder contentBuilder = new StringBuilder();
-    String path = Resources.getResource("emails/welcomeemail/content.html").getPath();
-    try (Stream<String> stream = Files.lines( Paths.get(path), StandardCharsets.UTF_8)) {
-      stream.forEach(s -> contentBuilder.append(s).append("\n"));
+    try {
+      String msgHtml = buildEmailHtml(password, user);
+      msg.setHtml(msgHtml);
+      msg.setSubject("Your new All of Us Account");
+      msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+      return msg;
     } catch (IOException e) {
       throw new MessagingException("Error reading in email");
     }
+  }
+
+  private String buildEmailHtml(String password, User user) throws IOException {
+    CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
+    StringBuilder contentBuilder = new StringBuilder();
+    URL emailContent = Resources.getResource(WELCOME_RESOURCE);
+    Resources
+        .readLines(emailContent, StandardCharsets.UTF_8)
+        .forEach(s -> contentBuilder.append(s).append("\n"));
     String string = contentBuilder.toString();
     Map<String, String> replaceMap = new HashMap<>();
     replaceMap.put("USERNAME", user.getPrimaryEmail());

@@ -10,7 +10,6 @@ import com.google.api.services.admin.directory.model.UserEmail;
 import com.google.api.services.admin.directory.model.UserName;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
-import org.pmiops.workbench.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -50,18 +49,16 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   private final Provider<GoogleCredential> googleCredentialProvider;
   private final Provider<WorkbenchConfig> configProvider;
-  private final Provider<MailService> mailServiceProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
   private static final Logger log = Logger.getLogger(DirectoryServiceImpl.class.getName());
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
-                              Provider<WorkbenchConfig> configProvider, Provider<MailService> mailServiceProvider,
-                              HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
+      Provider<WorkbenchConfig> configProvider,
+      HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
-    this.mailServiceProvider = mailServiceProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
   }
@@ -93,11 +90,10 @@ public class DirectoryServiceImpl implements DirectoryService {
   public User getUser(String email) {
     try {
       return retryHandler.runAndThrowChecked((context) ->
-          getGoogleDirectoryService().users().get(email).setProjection("full").execute());
+          getGoogleDirectoryService().users().get(email).execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
-      log.log(Level.INFO, "error: " + e.toString());
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         return null;
       }
