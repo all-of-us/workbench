@@ -1,6 +1,7 @@
 package org.pmiops.workbench.mail;
 
 import com.google.api.services.admin.directory.model.User;
+import com.google.common.io.Resources;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -41,7 +42,6 @@ public class MailServiceImpl implements MailService {
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
-  private String emailPath = "../resources/main/emails/welcomeemail/content.html";
 
   enum Status {REJECTED, API_ERROR, SUCCESSFUL}
 
@@ -111,16 +111,17 @@ public class MailServiceImpl implements MailService {
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(contactEmail);
     msg.setTo(Collections.singletonList(toAddress));
-    String msgHtml = buildEmailHtml(emailPath, password, user);
+    String msgHtml = buildEmailHtml(password, user);
     msg.setHtml(msgHtml);
     msg.setSubject("Your new All of Us Account");
     msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
     return msg;
   }
 
-  private String buildEmailHtml(String path, String password, User user) throws MessagingException {
+  private String buildEmailHtml(String password, User user) throws MessagingException {
     CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     StringBuilder contentBuilder = new StringBuilder();
+    String path = Resources.getResource("emails/welcomeemail/content.html").getPath();
     try (Stream<String> stream = Files.lines( Paths.get(path), StandardCharsets.UTF_8)) {
       stream.forEach(s -> contentBuilder.append(s).append("\n"));
     } catch (IOException e) {

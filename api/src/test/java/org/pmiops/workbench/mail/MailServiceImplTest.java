@@ -98,6 +98,8 @@ public class MailServiceImplTest {
     workbenchConfig.mandrill.sendRetries = 3;
     workbenchConfig.googleCloudStorageService = new WorkbenchConfig.GoogleCloudStorageServiceConfig();
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
+    workbenchConfig.admin = new WorkbenchConfig.AdminConfig();
+    workbenchConfig.admin.loginPage = "http://localhost:4200/";
     return workbenchConfig;
   }
 
