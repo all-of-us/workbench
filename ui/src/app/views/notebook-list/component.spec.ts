@@ -18,7 +18,7 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   BugReportService,
-  CohortsService,
+  CohortService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -32,7 +32,7 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 class NotebookListPage {
   fixture: ComponentFixture<NotebookListComponent>;
   workspacesService: WorkspacesService;
-  cohortsService: CohortsService;
+  cohortsService: CohortService;
   route: UrlSegment[];
   workspaceNamespace: string;
   workspaceId: string;
