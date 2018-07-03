@@ -92,6 +92,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   notebookNameComparator = new NotebookNameComparator();
 
   greeting: string;
+  showTip: boolean;
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
@@ -122,6 +123,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.accessLevel = wsData.accessLevel;
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
+    this.showTip = true;
   }
 
   ngOnInit(): void {
@@ -232,11 +234,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   get newWorkspace(): boolean {
-    return this.cohortList.length === 0 && this.notebookList.length === 0;
+    return this.cohortList.length === 0 && this.notebookList.length === 0 && this.showTip;
   }
 
   share(): void {
     this.shareModal.open();
+  }
+
+  dismissTip(): void {
+    this.showTip = false;
   }
 
   submitNotebooksLoadBugReport(): void {
