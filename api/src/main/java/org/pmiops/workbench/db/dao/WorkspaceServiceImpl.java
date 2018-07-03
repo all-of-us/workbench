@@ -240,7 +240,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, workspaceAccessLevel);
     Workspace workspace = getRequired(workspaceNamespace, workspaceId);
     // Because we've already checked that the user has access to the workspace in question,
-    // we don't need to check their membership in the authorization domain for the workspace.
+    // we don't need to check their membership in the authorization domain for the CDR version
+    // associated with the workspace.
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(workspace.getCdrVersion());
     return workspace;
   }

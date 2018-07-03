@@ -23,6 +23,9 @@ public class FireCloudConfig {
   private static final String END_USER_API_CLIENT = "endUserApiClient";
   private static final String ALL_OF_US_API_CLIENT = "allOfUsApiClient";
 
+  public static final String END_USER_GROUPS_API = "endUserGroupsApi";
+  public static final String ALL_OF_US_GROUPS_API = "allOfUsGroupsApi";
+
   private static final List<String> BILLING_SCOPES = ImmutableList.of(
       "https://www.googleapis.com/auth/userinfo.profile",
       "https://www.googleapis.com/auth/userinfo.email",
@@ -81,7 +84,7 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean
+  @Bean(name = ALL_OF_US_GROUPS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public GroupsApi groupsApi(@Qualifier(ALL_OF_US_API_CLIENT) ApiClient apiClient) {
     // Group/Auth Domain creation and addition are made by the AllOfUs service account
@@ -90,7 +93,7 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean(name = "user")
+  @Bean(name = END_USER_GROUPS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public GroupsApi groupApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
     // When checking for membership in groups, we use the end user credentials.

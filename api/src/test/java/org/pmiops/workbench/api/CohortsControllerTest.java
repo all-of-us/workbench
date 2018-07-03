@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -102,7 +102,7 @@ public class CohortsControllerTest {
   @Mock
   CloudStorageService cloudStorageService;
   @Mock
-  CdrVersionContext cdrVersionContext;
+  CdrVersionService cdrVersionService;
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
@@ -147,7 +147,7 @@ public class CohortsControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, cdrVersionDao, cohortReviewDao, cohortMaterializationService,
-        userProvider, CLOCK, cdrVersionContext);
+        userProvider, CLOCK, cdrVersionService);
   }
 
   private void stubGetWorkspace(String ns, String name, String creator,

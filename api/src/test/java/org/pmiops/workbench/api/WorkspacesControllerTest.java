@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -119,7 +120,7 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
-    CdrVersionContext.class,
+    CdrVersionService.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     CohortsController.class,

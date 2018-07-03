@@ -46,6 +46,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final FirecloudRetryHandler retryHandler;
 
+  private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
   private static final String USER_FC_ROLE = "user";
@@ -58,8 +59,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
-      Provider<GroupsApi> groupsApiProvider,
-      @Qualifier("user") Provider<GroupsApi> endUserGroupsApiProvider,
+      @Qualifier(FireCloudConfig.ALL_OF_US_GROUPS_API) Provider<GroupsApi> groupsApiProvider,
+      @Qualifier(FireCloudConfig.END_USER_GROUPS_API) Provider<GroupsApi> endUserGroupsApiProvider,
       Provider<WorkspacesApi> workspacesApiProvider,
       FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
@@ -267,7 +268,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public void addUserToGroup(String email, String groupName) {
     GroupsApi groupsApi = groupsApiProvider.get();
     retryHandler.run((context) -> {
-      groupsApi.addUserToGroup(groupName, "member", email);
+      groupsApi.addUserToGroup(groupName, MEMBER_ROLE, email);
       return null;
     });
   }
@@ -276,7 +277,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public void removeUserFromGroup(String email, String groupName) {
     GroupsApi groupsApi = groupsApiProvider.get();
     retryHandler.run((context) -> {
-      groupsApi.removeUserFromGroup(groupName, "member", email);
+      groupsApi.removeUserFromGroup(groupName, MEMBER_ROLE, email);
       return null;
     });
   }
@@ -288,7 +289,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       // group; so instead, fetch all the group memberships. (There won't be that many for our
       // users anyway.)
       for (ManagedGroupAccessResponse group : endUserGroupsApiProvider.get().getGroups()) {
-        if (group.getGroupName().equals(groupName) && group.getRole().equals("member")) {
+        if (groupName.equals(group.getGroupName()) && MEMBER_ROLE.equals(group.getRole())) {
           return true;
         }
       }

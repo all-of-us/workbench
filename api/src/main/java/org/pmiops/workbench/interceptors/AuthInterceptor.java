@@ -160,6 +160,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     // TODO: setup this in the context, get rid of log statement
     log.log(Level.INFO, "{0} logged in", userInfo.getEmail());
+    log.log(Level.INFO, "user = " + user);
 
     if (!hasRequiredAuthority(method, user)) {
       response.sendError(HttpServletResponse.SC_FORBIDDEN);

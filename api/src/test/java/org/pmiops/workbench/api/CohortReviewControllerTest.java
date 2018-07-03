@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
@@ -115,7 +116,7 @@ public class CohortReviewControllerTest {
 
   @TestConfiguration
   @Import({
-    CdrVersionContext.class,
+    CdrVersionService.class,
     CohortReviewController.class,
     CohortReviewServiceImpl.class,
     ParticipantCounter.class,
