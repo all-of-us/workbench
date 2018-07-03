@@ -44,7 +44,7 @@ class NotebookListPage {
     this.fixture = testBed.createComponent(NotebookListComponent);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
-    this.cohortsService = this.fixture.debugElement.injector.get(this.cohortsService);
+    this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
     this.readPageData();
   }
 
