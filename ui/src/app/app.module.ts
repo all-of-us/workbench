@@ -21,6 +21,7 @@ import {WINDOW_REF} from './utils';
 
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AccountCreationComponent} from './views/account-creation/component';
+import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
@@ -112,6 +113,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   declarations: [
     AccountCreationComponent,
     AccountCreationSuccessComponent,
+    AccountCreationModalsComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
