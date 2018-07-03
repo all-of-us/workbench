@@ -52,6 +52,7 @@ export class ChartComponent implements OnChanges {
   @Input() backgroundColor = '#FFFFFF'; // Optional background color
   @Input() chartTitle;
   @Input() chartType;
+  @Input() sources = false;
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any;
   chartInstance: any;
@@ -268,7 +269,12 @@ export class ChartComponent implements OnChanges {
     let cats = [];
     for (const a  of this.concepts) {
       data.push({name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ', y: a.countValue});
-      cats.push(a.conceptName);
+      if (!this.sources) {
+        cats.push(a.conceptName);
+      }
+      else {
+        cats.push(a.vocabularyId + '-' + a.conceptCode);
+      }
     }
     data = data.sort((a, b) => {
       if (a.countValue > b.countValue) {

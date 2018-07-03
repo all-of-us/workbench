@@ -120,7 +120,7 @@
         </div>
 
         <div class="row flex-items-xs-middle answers" [hidden]="!showAnswer[q.conceptId]">
-          <div class="col-md-5 col-sm-5 col-xs-12 answer-list">
+          <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
             <div  class="row"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
               <div class="answer-text col-sm-6 col-xs-12" >
                 <label innerHtml="{{a.stratum4 | highlightSearch : searchText.value }}"> {{a.stratum4}} </label>
@@ -137,12 +137,12 @@
             </div>
           </div>
 
-          <div class="col-md-7 col-sm-7 col-xs-12 answer-charts">
+          <div class="col-md-5 col-sm-7 col-xs-12 answer-charts">
             <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer" >
-              <div class="chart-wrapper col-md-6 col-sm-12">
+              <div class="chart-wrapper col-xs-12 col-sm-12">
                 <app-chart [analysis]="q.genderAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
               </div>
-              <div class="chart-wrapper age col-md-6 col-sm-12">
+              <div class="chart-wrapper age col-xs-12 col-sm-12">
                 <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
               </div>
 

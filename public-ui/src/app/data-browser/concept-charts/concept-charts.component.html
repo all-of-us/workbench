@@ -13,6 +13,6 @@
   </div>
 
   <div class="col-md-4 col-xs-12 chart"  *ngIf="showSources && ageAnalysis && sourceConcepts && sourceConcepts.length">
-    <app-chart [concepts]="sourceConcepts" [pointWidth]="20" [backgroundColor]="backgroundColor" [chartTitle]="'Sources'"> </app-chart>
+    <app-chart [concepts]="sourceConcepts" [sources]="true" [pointWidth]="20" [backgroundColor]="backgroundColor" [chartTitle]="'Sources'"> </app-chart>
   </div>
 </div>

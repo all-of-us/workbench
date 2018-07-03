@@ -76,6 +76,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.api.getDomainTotals().subscribe((data: DbDomainListResponse) => {
         this.domains = data.items;
+        console.log(this.domains);
         // Only set results to the totals if we don't have a searchText
         if (!this.prevSearchText) {
           this.searchCallback(data);
