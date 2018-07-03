@@ -37,8 +37,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   public void copyDemoNotebook(String workspaceBucket)  {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    Blob demoNotebook = storage.get(getDemosBucketName(), "demo-notebook.ipynb");
-    BlobId demoNotebookId = demoNotebook.getBlobId();
+    BlobId demoNotebookId = storage.get(getDemosBucketName(), "demo-notebook.ipynb").getBlobId();
     BlobId targetLocation = BlobId.of(workspaceBucket, "notebooks/demo_notebook.ipynb");
     copyBlob(demoNotebookId, targetLocation);
   }
