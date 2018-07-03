@@ -45,6 +45,7 @@ public class WorkbenchConfig {
 
   public static class GoogleCloudStorageServiceConfig {
     public String credentialsBucketName;
+    public String demosBucketName;
   }
 
   public static class GoogleDirectoryServiceConfig {

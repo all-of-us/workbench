@@ -21,7 +21,8 @@
     "debugQueries": true
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "all-of-us-workbench-test-credentials"
+    "credentialsBucketName": "all-of-us-workbench-test-credentials",
+    "demosBucketName": "all-of-us-workbench-test-demos"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "fake-research-aou.org"

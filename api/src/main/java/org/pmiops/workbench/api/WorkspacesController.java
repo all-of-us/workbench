@@ -341,7 +341,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = null;
     for (int attemptValue = 0; attemptValue < MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
       try {
-         fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+        fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
         break;
       } catch (ConflictException e) {
         if (attemptValue >= 5) {
@@ -353,6 +353,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         }
       }
     }
+
+    cloudStorageService.copyDemoNotebook(fcWorkspace.getBucketName());
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =

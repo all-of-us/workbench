@@ -35,6 +35,14 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return mandrillKeys.getString("api-key");
   }
 
+  public void copyDemoNotebook(String workspaceBucket)  {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    Blob demoNotebook = storage.get(getDemosBucketName(), "demo_notebook.ipynb");
+    BlobId demoNotebookId = demoNotebook.getBlobId();
+    BlobId targetLocation = BlobId.of(workspaceBucket, "notebooks/demo_notebook.ipynb");
+    copyBlob(demoNotebookId, targetLocation);
+  }
+
   @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
@@ -45,6 +53,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   String getCredentialsBucketName() {
     return configProvider.get().googleCloudStorageService.credentialsBucketName;
+  }
+
+  String getDemosBucketName() {
+    return configProvider.get().googleCloudStorageService.demosBucketName;
   }
 
   String readToString(String bucketName, String objectPath) {

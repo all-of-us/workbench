@@ -20,7 +20,8 @@
     "debugQueries": true
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "all-of-us-rw-staging-credentials"
+    "credentialsBucketName": "all-of-us-rw-staging-credentials",
+    "demosBucketName": "all-of-us-rw-staging-demos"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "staging.fake-research-aou.org"
