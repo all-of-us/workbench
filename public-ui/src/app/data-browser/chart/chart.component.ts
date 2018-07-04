@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter, OnChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import * as highcharts from 'highcharts';
 import 'highcharts/adapters/standalone-framework.src';
 import * as Highcharts from 'highcharts/highcharts.src';
@@ -47,7 +47,8 @@ const DATA_LABEL_STYLE = {
 export class ChartComponent implements OnChanges {
   @Input() analysis: Analysis;
   @Input() concepts: Concept[] = []; // Can put in analysis or concepts to chart. Don't put both
-  @Input() selectedResult: any; // For ppi question answers analysis , we select an answer from the results
+  @Input() selectedResult: any;
+  // For ppi question answers analysis , we select an answer from the results
   @Input() pointWidth = 10;   // Optional width of bar or point or box plot
   @Input() backgroundColor = '#FFFFFF'; // Optional background color
   @Input() chartTitle;
@@ -119,7 +120,7 @@ export class ChartComponent implements OnChanges {
                   minPointLength: 3,
                   events: {
                     click: function (event) {
-                      console.log("plot options clicked ",  event.point);
+                      console.log('plot options clicked ',  event.point);
                     }
                   }
               },
@@ -217,7 +218,7 @@ export class ChartComponent implements OnChanges {
     }
   }
   seriesClick(event) {
-    console.log("Global series clicked " , this.analysis, "Clicked analysis", event.point);
+    console.log('Global series clicked ' , this.analysis, 'Clicked analysis', event.point);
   }
   public makeCountChartOptions() {
     let data = [];
@@ -243,9 +244,9 @@ export class ChartComponent implements OnChanges {
 
     const seriesClick = function(event) {
       const thisCtrl = event.point.options.thisCtrl;
-      console.log("Count plot Clicked point :",  event.point);
+      console.log('Count plot Clicked point :',  event.point);
       thisCtrl.resultClicked.emit(event.point.result);
-    }
+    };
     // Override tooltip and colors and such
     const series = {
       name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
@@ -271,8 +272,7 @@ export class ChartComponent implements OnChanges {
       data.push({name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ', y: a.countValue});
       if (!this.sources) {
         cats.push(a.conceptName);
-      }
-      else {
+      } else {
         cats.push(a.vocabularyId + '-' + a.conceptCode);
       }
     }
@@ -344,7 +344,7 @@ export class ChartComponent implements OnChanges {
 
         }*/
       }, // '#ECF1F4'
-      title: { text: null, style: CHART_TITLE_STYLE }, // default title null , can pass chartTitle input
+      title: { text: null, style: CHART_TITLE_STYLE }, // can pass chartTitle input
       series: series,
       categories: cats,
       pointWidth: this.pointWidth
@@ -368,7 +368,8 @@ export class ChartComponent implements OnChanges {
     let cats = [];
     for (const a  of results) {
       // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
-      const color = a.analysisId === GENDER_ANALYSIS_ID ? GENDER_COLORS[a.stratum2] : GENDER_COLORS[a.stratum5];
+      const color = a.analysisId === GENDER_ANALYSIS_ID ?
+        GENDER_COLORS[a.stratum2] : GENDER_COLORS[a.stratum5];
       data.push({name: a.analysisStratumName
         , y: a.countValue, color: color, sliced: true});
       cats.push(a.stratum4);
