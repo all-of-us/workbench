@@ -4,7 +4,6 @@ import {Http, HttpModule, RequestOptions, XHRBackend} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
-import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 import { ResponsiveModule } from 'ngx-responsive'
@@ -56,7 +55,6 @@ const DataBrowserServiceFactory = (http: Http) => {
     FormsModule,
     HttpModule,
     ReactiveFormsModule,
-    NgxChartsModule,
     ClarityModule,
     DataBrowserModule,
     ResponsiveModule.forRoot()
