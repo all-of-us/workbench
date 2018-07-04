@@ -4,6 +4,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 
 
 @Entity
@@ -20,6 +23,8 @@ public class DbDomain {
     private long conceptId;
     private long countValue;
     private long participantCount;
+
+    public static Map<Long, Long> conceptCountMap  = new HashMap<Long, Long>();
 
     @Id
     @Column(name = "domain_id")
@@ -158,6 +163,14 @@ public class DbDomain {
     public String toString() {
         return  ToStringBuilder.reflectionToString(this);
 
+    }
+
+    public static void mapConceptCounts(List<Concept> concepts){
+        for(Concept c: concepts){
+            Long conceptId = c.getConceptId();
+            Long countValue = c.getCountValue();
+            conceptCountMap.put(conceptId, countValue);
+        }
     }
 
 }

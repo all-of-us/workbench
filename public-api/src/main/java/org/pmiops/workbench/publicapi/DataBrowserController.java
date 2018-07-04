@@ -318,16 +318,17 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDomainTotals(){
-        List<DbDomain> domains=dbDomainDao.findDomainTotals();
+        List<DbDomain> domains = dbDomainDao.findDomainTotals();
+        List<Concept> concepts = conceptDao.findDbDomainParticpantCounts();
+        DbDomain.mapConceptCounts(concepts);
         for(DbDomain dbd : domains){
             if(dbd.getParticipantCount() == 0){
-                Long participantCount = achillesResultDao.getDomainParticipantCount(String.valueOf(dbd.getConceptId()));
+                Long participantCount = DbDomain.conceptCountMap.get(dbd.getConceptId());
                 if(participantCount != null){
                     dbd.setParticipantCount(participantCount);
                 }
             }
         }
-        System.out.println(domains);
         DbDomainListResponse resp=new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);

@@ -70,4 +70,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
       nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
 
+    @Query(value = "select c.* from concept c join db_domain d on c.concept_id=d.concept_id", nativeQuery = true)
+    List<Concept> findDbDomainParticpantCounts();
+
 }
