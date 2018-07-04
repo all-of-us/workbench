@@ -240,6 +240,68 @@ jobs:
               --key-file circle-sa-key.json \
               --promote
 
+  public-ui-build-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Fetch Submodules
+          command: git submodule update --init --recursive
+      - run:
+          working_directory: ~/workbench
+          name: Download Swagger CLI
+          command: |
+            ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
+      - restore_cache:
+          keys:
+          - public-ui-cache-{{ checksum "~/workbench/public-ui/package.json" }}
+          - public-ui-cache-
+      - run:
+          working_directory: ~/workbench/public-ui
+          command: yarn install && yarn codegen
+      - save_cache:
+          paths:
+            - ~/workbench/public-ui/node_modules
+          key: public-ui-cache-{{ checksum "~/workbench/public-ui/package.json" }}
+      - run:
+          name: Lint Angular app
+          working_directory: ~/workbench/public-ui
+          command: yarn run lint
+      - run:
+          name: Run Angular tests
+          working_directory: ~/workbench/public-ui
+          command: |
+            yarn test --no-watch --no-progress --browsers=ChromeHeadless
+      - run:
+          name: Build with strict compilation
+          working_directory: ~/workbench/public-ui
+          command: ./project.rb build --environment test
+      - persist_to_workspace:
+          root: .
+          paths:
+            - public-ui
+
+  public-ui-deploy-to-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          command: git submodule update --init --recursive
+      # Use the ui-build-test workspace here to avoid redoing the setup.
+      - attach_workspace:
+          at: .
+      - deploy:
+          name: Deploy to App Engine
+          working_directory: ~/workbench/public-ui
+          command: |
+            ../ci/activate_creds.sh circle-sa-key.json
+            ./project.rb deploy-ui \
+              --project all-of-us-workbench-test \
+              --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com \
+              --version circle-ci-test \
+              --key-file circle-sa-key.json \
+              --promote
+
   # In staging, we deploy all at once in order to track and control the release
   # for a tagged version only. In "test", we maintain individual release jobs
   # for API and UI to allow faster deploys and because we lack a version tag.
@@ -287,6 +349,7 @@ workflows:
       - api-local-test
       - api-build-test
       - ui-build-test
+      - public-ui-build-test
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
@@ -296,6 +359,10 @@ workflows:
           <<: *filter_master
           requires:
             - ui-build-test
+      - public-ui-deploy-to-test:
+          <<: *filter_master
+          requires:
+            - public-ui-build-test
   deploy-staging:
     jobs:
       - api-local-test:
@@ -303,6 +370,8 @@ workflows:
       - api-build-test:
           <<: *filter_releases
       - ui-build-test:
+          <<: *filter_releases
+      - public-ui-build-test:
           <<: *filter_releases
       # Run slower integration tests and dep checks on release tags only.
       - api-bigquery-test:
@@ -320,6 +389,7 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-build-test
+            - public-ui-build-test
   integration-test:
     triggers:
       - schedule:
