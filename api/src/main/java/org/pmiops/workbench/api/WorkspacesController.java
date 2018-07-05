@@ -400,7 +400,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
 
     JSONObject demoCohort = cloudStorageService.readDemoCohort();
-
+    // TODO: Make this a service method to avoid duplication with CohortsController
     Cohort dbCohort = new Cohort();
     dbCohort.setName(demoCohort.getString("name"));
     dbCohort.setDescription(demoCohort.getString("description"));

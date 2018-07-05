@@ -54,15 +54,15 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return ImmutableList.copyOf(blobList);
   }
 
-  String getCredentialsBucketName() {
+  private String getCredentialsBucketName() {
     return configProvider.get().googleCloudStorageService.credentialsBucketName;
   }
 
-  String getDemosBucketName() {
+  private String getDemosBucketName() {
     return configProvider.get().googleCloudStorageService.demosBucketName;
   }
 
-  String readToString(String bucketName, String objectPath) {
+  private String readToString(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     return new String(storage.get(bucketName, objectPath).getContent()).trim();
   }

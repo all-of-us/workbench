@@ -4,13 +4,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
@@ -33,6 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -204,7 +204,23 @@ public class WorkspacesControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
+    JSONObject demoCohort = new JSONObject();
+    demoCohort.put("name", "demo");
+    demoCohort.put("description", "demo");
+    demoCohort.put("criteria", createDemoCriteria());
+    when(cloudStorageService.readDemoCohort()).thenReturn(demoCohort);
+    when(cloudStorageService.readInvitationKey()).thenReturn("Dummy Value");
+    when(cloudStorageService.readMandrillApiKey()).thenReturn("Dummy Value");
+    doNothing().when(cloudStorageService).copyDemoNotebook(any());
+
     CLOCK.setInstant(NOW);
+  }
+
+  private JSONObject createDemoCriteria() {
+    JSONObject criteria = new JSONObject();
+    criteria.append("includes", new JSONArray());
+    criteria.append("excludes", new JSONArray());
+    return criteria;
   }
 
   private Blob mockBlob(String bucket, String path) {
@@ -742,7 +758,8 @@ public class WorkspacesControllerTest {
     List<Cohort> cohorts = cohortsController
         .getCohortsInWorkspace(cloned.getNamespace(), cloned.getId()).getBody().getItems();
     Map<String, Cohort> cohortsByName = Maps.uniqueIndex(cohorts, c -> c.getName());
-    assertThat(cohortsByName.keySet()).containsExactlyElementsIn(ImmutableSet.of("c1", "c2"));
+    assertThat(cohortsByName.keySet()).containsAllOf("c1", "c2");
+    assertThat(cohortsByName.keySet().size()).isEqualTo(3);
     assertThat(cohorts.stream().map(c -> c.getId()).collect(Collectors.toList()))
         .containsNoneOf(c1.getId(), c2.getId());
 
@@ -793,7 +810,7 @@ public class WorkspacesControllerTest {
             participantId);
 
     assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
-        .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortId());
+        .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortReviewId());
   }
 
   private void assertCohortAnnotationDefinitions(CohortAnnotationDefinitionListResponse responseList,

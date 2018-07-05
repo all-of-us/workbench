@@ -124,6 +124,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Cohort dbCohort = FROM_CLIENT_COHORT.apply(cohort);
+    // TODO: Make this a service method to avoid duplication with WorkspacesController
     dbCohort.setCreator(userProvider.get());
     dbCohort.setWorkspaceId(workspace.getWorkspaceId());
     dbCohort.setCreationTime(now);

@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
@@ -12,6 +14,9 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
 import javax.inject.Provider;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,14 +104,14 @@ public class CohortsControllerTest {
   FireCloudService fireCloudService;
   @Autowired
   UserService userService;
-  @Mock
+  @Autowired
   CloudStorageService cloudStorageService;
   @Mock
   CdrVersionService cdrVersionService;
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
-  @MockBean({FireCloudService.class, NotebooksService.class})
+  @MockBean({FireCloudService.class, NotebooksService.class, CloudStorageService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -140,14 +145,30 @@ public class CohortsControllerTest {
 
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
-        cdrVersionDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
+        cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
         userService);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
+    JSONObject demoCohort = new JSONObject();
+    demoCohort.put("name", "demo");
+    demoCohort.put("description", "demo");
+    demoCohort.put("criteria", createDemoCriteria());
+    when(cloudStorageService.readDemoCohort()).thenReturn(demoCohort);
+    when(cloudStorageService.readInvitationKey()).thenReturn("Dummy Value");
+    when(cloudStorageService.readMandrillApiKey()).thenReturn("Dummy Value");
+    doNothing().when(cloudStorageService).copyDemoNotebook(any());
+
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, cdrVersionDao, cohortReviewDao, cohortMaterializationService,
         userProvider, CLOCK, cdrVersionService);
+  }
+
+  private JSONObject createDemoCriteria() {
+    JSONObject criteria = new JSONObject();
+    criteria.append("includes", new JSONArray());
+    criteria.append("excludes", new JSONArray());
+    return criteria;
   }
 
   private void stubGetWorkspace(String ns, String name, String creator,
@@ -186,7 +207,9 @@ public class CohortsControllerTest {
 
     List<Cohort> cohorts = cohortsController
         .getCohortsInWorkspace(workspace.getNamespace(), workspace.getId()).getBody().getItems();
-    assertThat(cohorts).containsExactlyElementsIn(ImmutableSet.of(c1, c2));
+    assertThat(cohorts).containsAllOf(c1, c2);
+    // This is because we have a demo cohort in the workspace.
+    assertThat(cohorts.size()).isEqualTo(3);
   }
 
   @Test
