@@ -19,7 +19,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -30,7 +29,6 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortStatus;
@@ -210,11 +208,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     Cohort cohort = cohortReviewService.findCohort(cohortId);
     //this validates that the user is in the proper workspace
-    Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
-      workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
-
-    CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
-
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace,
+        workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
     CohortReview cohortReview = null;
     try {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
@@ -387,9 +382,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReview cohortReview = null;
     Cohort cohort = cohortReviewService.findCohort(cohortId);
 
-    Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceId,
-      cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
-    CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace, workspaceId,
+        cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
     try {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
     } catch (NotFoundException nfe) {
@@ -509,10 +503,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                        WorkspaceAccessLevel level) {
     Cohort cohort = cohortReviewService.findCohort(cohortId);
     //this validates that the user is in the proper workspace
-    Workspace workspace = cohortReviewService.validateMatchingWorkspace(workspaceNamespace,
-      workspaceId, cohort.getWorkspaceId(), level);
-
-    CdrVersionContext.setCdrVersion(workspace.getCdrVersion());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace,
+        workspaceId, cohort.getWorkspaceId(), level);
 
     return cohortReviewService.findCohortReview(cohort.getCohortId(), cdrVersionId);
   }

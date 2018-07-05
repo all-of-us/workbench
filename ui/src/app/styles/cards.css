@@ -119,3 +119,25 @@
   font-weight: 300;
   line-height: 18px;
 }
+
+.help-tip {
+  height: 128px;
+  width: 293px;
+  border: 1px solid #89CBDF;
+  border-radius: 3px;
+  background-color: #E1F1F6;
+  color: #216FB4;
+}
+
+.help-tip .help-tip-title {
+  border: 0px;
+  font-weight: 500;
+  padding-top: 15px;
+  padding-left: 15px;
+}
+
+.help-tip .help-tip-text {
+  border: 0px;
+  font-weight: 300;
+  padding-left: 15px;
+}

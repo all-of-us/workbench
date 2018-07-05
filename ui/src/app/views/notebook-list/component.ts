@@ -11,6 +11,8 @@ import {environment} from 'environments/environment';
 import {
   Cluster,
   ClusterService,
+  Cohort,
+  CohortsService,
   FileDetail,
   Workspace,
   WorkspaceAccessLevel,
@@ -36,6 +38,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   cluster: Cluster;
   notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
   private accessLevel: WorkspaceAccessLevel;
+  cohortList: Cohort[] = [];
+  showTip: boolean;
+  cohortsLoading: boolean;
+  cohortsError: boolean;
 
 
   @ViewChild(BugReportComponent)
@@ -44,6 +50,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private cohortsService: CohortsService,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
   ) {
@@ -52,12 +59,27 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.accessLevel = wsData.accessLevel;
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
+    this.showTip = true;
+    this.cohortsLoading = true;
+    this.cohortsError = false;
   }
 
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.notebooksLoading = true;
+    this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
+      .subscribe(
+        cohortsReceived => {
+          for (const coho of cohortsReceived.items) {
+            this.cohortList.push(coho);
+          }
+          this.cohortsLoading = false;
+        },
+        error => {
+          this.cohortsLoading = false;
+          this.cohortsError = true;
+        });
     this.loadNotebookList();
   }
 
@@ -136,6 +158,14 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.notebookError = false;
     this.bugReportComponent.reportBug();
     this.bugReportComponent.bugReport.shortDescription = 'Could not load notebooks';
+  }
+
+  get noCohorts(): boolean {
+    return this.cohortList.length === 0 && this.showTip;
+  }
+
+  dismissTip(): void {
+    this.showTip = false;
   }
 
   submitNotebookLocalizeBugReport(): void {
