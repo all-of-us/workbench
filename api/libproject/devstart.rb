@@ -1039,6 +1039,7 @@ def deploy_gcs_artifacts(cmd_name, args)
   op.parse.validate
   gcc.validate
   common.run_inline %W{gsutil cp scripts/setup_notebook_cluster.sh gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
+  common.run_inline %W{gsutil cp demos/demo-notebook.ipynb gs://#{gcc.project}-demos/demo-notebook.ipynb}
   # This file must be readable by all AoU researchers and the Leonardo service
   # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make it
   # public since the script's source is public anyways.
