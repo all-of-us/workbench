@@ -285,10 +285,22 @@ public class DataBrowserControllerTest {
     }
 
     @Test
-    public void testConceptSearchWithEmptyQuery() throws Exception{
+    public void testAllConceptSearchEmptyQuery() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")
-        .domain(Domain.CONDITION));
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+        .domain(Domain.CONDITION)
+        .minCount(0));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_1, CONCEPT_5, CONCEPT_6, CONCEPT_7)
+        ;
+    }
+
+    @Test
+    public void testCountConceptSearchEmptyQuery() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+                .domain(Domain.CONDITION));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
                 .containsExactly(CONCEPT_1, CONCEPT_5, CONCEPT_6)
@@ -314,6 +326,27 @@ public class DataBrowserControllerTest {
         List<Concept> standard_concepts = Arrays.asList(CONCEPT_1, CONCEPT_4, CONCEPT_5, CONCEPT_6, CONCEPT_7);
         assertThat(concepts)
                 .doesNotContain(standard_concepts);
+    }
+
+    @Test
+    public void testConceptSearchEmptyQuery() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+                .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        List<Concept> non_standard_concepts = Arrays.asList(CONCEPT_2, CONCEPT_3);
+        assertThat(concepts)
+                .doesNotContain(non_standard_concepts);
+    }
+
+    @Test
+    public void testNonStandardEmptyQuerySearch() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+                .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_2, CONCEPT_3);
     }
 
     @Test

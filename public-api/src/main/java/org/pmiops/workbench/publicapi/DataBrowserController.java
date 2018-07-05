@@ -272,21 +272,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             domainIds = DOMAIN_MAP.get(searchConceptsRequest.getDomain()).asList();
         }
 
-        if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
-            List<Concept> concepts;
-            standardConceptFilter = (standardConceptFilter==StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH ? StandardConceptFilter.STANDARD_CONCEPTS : standardConceptFilter);
-            if(standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS){
-                concepts = conceptDao.findAllStandardConceptsOrderedByCount(maxResults, domainIds);
-            }else if(standardConceptFilter == StandardConceptFilter.NON_STANDARD_CONCEPTS){
-                concepts = conceptDao.findAllNonStandardConceptsOrderedByCount(maxResults, domainIds);
-            }else{
-                concepts = conceptDao.findAllConceptsOrderedByCount(maxResults, domainIds);
-            }
-            ConceptListResponse response = new ConceptListResponse();
-            response.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-            return ResponseEntity.ok(response);
-        }
-
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
         Slice<Concept> concepts =
@@ -317,6 +302,42 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
+    public ResponseEntity<ConceptListResponse> searchConceptsEmptyQuery(SearchConceptsRequest searchConceptsRequest){
+
+        Integer maxResults = searchConceptsRequest.getMaxResults();
+        if(maxResults == null || maxResults == 0){
+            maxResults = Integer.MAX_VALUE;
+        }
+
+        Integer minCount = searchConceptsRequest.getMinCount();
+        if(minCount == null){
+            minCount = 1;
+        }
+
+        StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
+        if(standardConceptFilter == null || standardConceptFilter == StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH){
+            standardConceptFilter = StandardConceptFilter.STANDARD_CONCEPTS;
+        }
+
+        List<String> domainIds = null;
+        if (searchConceptsRequest.getDomain() != null) {
+            domainIds = DOMAIN_MAP.get(searchConceptsRequest.getDomain()).asList();
+        }
+
+        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
+
+        Slice<Concept> concepts =
+                conceptService.searchConcepts(convertedConceptFilter, searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
+        ConceptListResponse response = new ConceptListResponse();
+        List<Concept> matchedConcepts = concepts.getContent();
+
+        response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        return ResponseEntity.ok(response);
+
+    }
+
+
+        @Override
     public ResponseEntity<DbDomainListResponse> getDomainTotals(){
         List<DbDomain> domains = dbDomainDao.findDomainTotals();
         List<Concept> concepts = conceptDao.findDbDomainParticpantCounts();

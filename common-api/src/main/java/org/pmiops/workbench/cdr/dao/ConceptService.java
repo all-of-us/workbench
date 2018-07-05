@@ -127,15 +127,16 @@ public class ConceptService {
                         );
 
                         List<Predicate> standardConceptPredicates = new ArrayList<>();
-                        standardConceptPredicates.add(criteriaBuilder.isNull(root.get("standardConcept")));
                         standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                                 criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
                         standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                                 criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
                         predicates.add(
-                               criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0]))
-                        );
+                                criteriaBuilder.or(
+                                        criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
+                                        criteriaBuilder.and(standardConceptPredicates.toArray(new Predicate[0]))
+                                ));
 
 
                     } else if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
@@ -165,6 +166,64 @@ public class ConceptService {
                         );
                     }
 
+
+                    if (vocabularyIds != null) {
+                        predicates.add(root.get("vocabularyId").in(vocabularyIds));
+                    }
+                    if (domainIds != null) {
+                        predicates.add(root.get("domainId").in(domainIds));
+                    }
+
+                    if(minCount == 1){
+                        List<Predicate> countPredicates = new ArrayList<>();
+                        countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
+                        countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
+
+                        predicates.add(criteriaBuilder.or(
+                                countPredicates.toArray(new Predicate[0])));
+                    }
+
+                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                };
+        // Return up to limit results, sorted in descending count value order.
+        Pageable pageable = new PageRequest(0, limit,
+                new Sort(Direction.DESC, "countValue"));
+        NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
+                entityManager);
+        return conceptDao.findAll(conceptSpecification, pageable);
+    }
+
+    public Slice<Concept> searchConcepts(StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount) {
+        Specification<Concept> conceptSpecification =
+                (root, criteriaQuery, criteriaBuilder) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+
+                    if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
+
+                        List<Predicate> standardConceptPredicates = new ArrayList<>();
+                        standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                                criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+                        standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                                criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
+
+                        predicates.add(
+                                criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0]))
+                        );
+
+                    } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
+
+                        List<Predicate> standardConceptPredicates = new ArrayList<>();
+                        standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
+                                criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+                        standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
+                                criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
+
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
+                                        criteriaBuilder.and(standardConceptPredicates.toArray(new Predicate[0]))
+                                ));
+                    }
 
                     if (vocabularyIds != null) {
                         predicates.add(root.get("vocabularyId").in(vocabularyIds));
