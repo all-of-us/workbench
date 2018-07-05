@@ -357,7 +357,7 @@ public class DataBrowserControllerTest {
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         //Search on concept id fetches the non standard concept
         assertThat(concepts)
-                .contains(CONCEPT_6);
+                .doesNotContain(CONCEPT_6);
     }
 
 
