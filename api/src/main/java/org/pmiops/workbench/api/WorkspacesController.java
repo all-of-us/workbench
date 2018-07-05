@@ -16,12 +16,16 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -51,6 +55,7 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -68,6 +73,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
+  private final CohortDao cohortDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
   private final FireCloudService fireCloudService;
@@ -79,6 +85,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   WorkspacesController(
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
+      CohortDao cohortDao,
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
@@ -87,6 +94,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserService userService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
+    this.cohortDao = cohortDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -390,6 +398,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.addWorkspaceUserRole(permissions);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+
+    JSONObject demoCohort = cloudStorageService.readDemoCohort();
+
+    Cohort dbCohort = new Cohort();
+    dbCohort.setName(demoCohort.getString("name"));
+    dbCohort.setDescription(demoCohort.getString("description"));
+    dbCohort.setCriteria(demoCohort.get("criteria").toString());
+    dbCohort.setType("AoU_Discover");
+    dbCohort.setCreator(userProvider.get());
+    dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    dbCohort.setCreationTime(now);
+    dbCohort.setLastModifiedTime(now);
+    dbCohort.setVersion(1);
+    try {
+      // TODO Make this a pre-check within a transaction?
+      dbCohort = cohortDao.save(dbCohort);
+    } catch (DataIntegrityViolationException e) {
+      // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
+      // client by Spring (the client gets a default reason string).
+      throw new BadRequestException(String.format(
+          "Cohort \"/%s/%s/%d\" already exists.",
+          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
+    }
     return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
   }
 
