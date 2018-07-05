@@ -132,15 +132,28 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchDomain(query: string) {
     let maxResults = 100;
     this.loading = true;
-    if (query.length) { maxResults = null; }
-    this.searchRequest = {
-      query: query,
-      domain: this.dbDomain.domainId.toUpperCase(),
-      standardConceptFilter: StandardConceptFilter.STANDARDORCODEIDMATCH,
-      maxResults: maxResults
-    };
-    this.prevSearchText = query;
-    return this.api.searchConcepts(this.searchRequest);
+    if (query.length) {
+      this.searchRequest = {
+          query: query,
+          domain: this.dbDomain.domainId.toUpperCase(),
+          standardConceptFilter: StandardConceptFilter.STANDARDORCODEIDMATCH,
+          maxResults: null,
+          minCount: 1
+      };
+      this.prevSearchText = query;
+      return this.api.searchConcepts(this.searchRequest);
+    }
+
+      this.searchRequest = {
+          query: query,
+          domain: this.dbDomain.domainId.toUpperCase(),
+          standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
+          maxResults: 100,
+          minCount: 1
+      };
+    this.prevSearchText = '';
+    return this.api.searchConceptsEmptyQuery(this.searchRequest);
+
   }
 
 
