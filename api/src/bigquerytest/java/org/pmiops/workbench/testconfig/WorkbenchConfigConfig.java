@@ -13,6 +13,8 @@ public class WorkbenchConfigConfig {
     WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.cdr = new CdrConfig();
     workbenchConfig.cdr.debugQueries = true;
+    workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
+    workbenchConfig.firecloud.enforceRegistered = false;
     return workbenchConfig;
   }
 }
