@@ -47,8 +47,8 @@ paths:
             $ref: '#/definitions/IssueResponse'
         400:
           description: Bad request, check the summary/description field
-        503:
-          description: Cannot connect to JIRA. Please try again later
+        500:
+          description: JIRA Internal Error
       security:
         - AdminSecurity: []
 

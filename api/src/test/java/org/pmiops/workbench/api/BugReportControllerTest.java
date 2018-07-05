@@ -106,7 +106,7 @@ public class BugReportControllerTest {
     verify(jiraService, times(1)).createIssue(input);
     // No calls should be made for uploads
     verify(jupyterApi, never()).getRootContents(any(), any(), any(), any(), any(), any());
-    verify(jiraService,never()).uploadAttachment(any(), any());
+    verify(jiraService, never()).uploadAttachment(any(), any());
   }
 
   @Test
@@ -126,7 +126,7 @@ public class BugReportControllerTest {
         eq(FC_PROJECT_ID), any(), eq("localization.log"), any(), any(), any());
     verify(jupyterApi).getRootContents(
         eq(FC_PROJECT_ID), any(), eq("jupyter.log"), any(), any(), any());
-    verify(jiraService,times(3)).uploadAttachment(any(), any());
+    verify(jiraService, times(3)).uploadAttachment(any(), any());
   }
 
   @Test
@@ -143,7 +143,7 @@ public class BugReportControllerTest {
     bugReportController.sendBugReport(input);
     verify(jiraService, times(1)).createIssue(input);
     // There should be just 2 calls for uploads
-    verify(jiraService,times(2)).uploadAttachment(any(), any());
+    verify(jiraService, times(2)).uploadAttachment(any(), any());
   }
 
 }

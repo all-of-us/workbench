@@ -79,10 +79,10 @@ public class BugReportController implements BugReportApiDelegate {
             } catch (org.pmiops.workbench.jira.ApiException e) {
               log.severe(String.format("failed to upload attachment '%s', continuing", fileName));
             } finally {
-              if ( tempLogFile != null) {
+              if (tempLogFile != null) {
                 try {
                   tempLogFile.delete();
-                } catch (SecurityException ex){
+                } catch (SecurityException ex) {
                   log.severe(String.format("Error while deleting temporary log file %s", fileName));
                 }
               }
@@ -91,9 +91,9 @@ public class BugReportController implements BugReportApiDelegate {
             log.info(String.format("failed to retrieve notebook log '%s', continuing", fileName));
           }
         }
-     }
+      }
     } catch (org.pmiops.workbench.jira.ApiException e) {
-      log.severe(String.format("Error while connecting to JIRA server %s", e.getMessage() ));
+      log.severe(String.format("Error while connecting to JIRA server %s", e.getMessage()));
       if (e.getCode() == HttpStatus.BAD_REQUEST.value())
         throw new BadRequestException("Bad Request please check the summary or description");
       throw new ServerErrorException("Error while connecting to JIRA server ");
@@ -107,13 +107,13 @@ public class BugReportController implements BugReportApiDelegate {
    * @param content
    * @return temp File
    */
-  private File createTempFile(String name,String content) {
-    try{
+  private File createTempFile(String name, String content) {
+    try {
       File tempFile = File.createTempFile(name, ".log");
       FileOutputStream writer = new FileOutputStream(tempFile);
       writer.write(content.getBytes());
       return tempFile;
-    } catch(IOException e){
+    } catch (IOException e) {
       log.severe(String.format("Error while creating temporary log files %s", name));
     }
     return null;

@@ -56,10 +56,10 @@ public class JiraServiceImplTest {
         Providers.of(workbenchConfig),
         Providers.of(cloudStorageService)
     );
-    doThrow(new  ApiException("Missing the required parameter 'issueKey' when calling addAttachments(Async)"))
+    doThrow(new ApiException("Missing the required parameter 'issueKey' when calling addAttachments(Async)"))
         .when(jiraApi).addAttachments(null, mockFile, "nocheck");
 
-    doThrow(new  ApiException("Missing the required parameter 'file' when calling addAttachments(Async)"))
+    doThrow(new ApiException("Missing the required parameter 'file' when calling addAttachments(Async)"))
         .when(jiraApi).addAttachments("IssueKey", null, "nocheck");
 
     service.setJiraApi(jiraApi);
