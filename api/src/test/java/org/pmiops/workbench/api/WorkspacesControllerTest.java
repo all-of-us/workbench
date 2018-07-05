@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -119,6 +120,7 @@ public class WorkspacesControllerTest {
 
   @TestConfiguration
   @Import({
+    CdrVersionService.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     CohortsController.class,
@@ -614,7 +616,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testCloneWorkspaceWithCohorts() throws Exception {
     Long participantId = 1L;
-    CdrVersionContext.setCdrVersion(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createDefaultWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 

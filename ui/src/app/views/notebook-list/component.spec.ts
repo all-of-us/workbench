@@ -18,11 +18,13 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   BugReportService,
+  CohortsService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
 
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
+import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
@@ -31,6 +33,7 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 class NotebookListPage {
   fixture: ComponentFixture<NotebookListComponent>;
   workspacesService: WorkspacesService;
+  cohortsService: CohortsService;
   route: UrlSegment[];
   workspaceNamespace: string;
   workspaceId: string;
@@ -41,6 +44,7 @@ class NotebookListPage {
     this.fixture = testBed.createComponent(NotebookListComponent);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
+    this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
     this.readPageData();
   }
 
@@ -97,6 +101,7 @@ describe('NotebookListComponent', () => {
         { provide: SignInService, useValue: SignInService },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
+        { provide: CohortsService, useValue: new CohortsServiceStub()},
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
       notebookListPage = new NotebookListPage(TestBed);

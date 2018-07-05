@@ -89,7 +89,8 @@ public class CohortReviewControllerMockTest {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(1, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
+        when(cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId,
+            WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -101,7 +102,8 @@ public class CohortReviewControllerMockTest {
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
-        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        verify(cohortReviewService, times(1))
+            .validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verifyNoMoreMockInteractions();
     }
 
@@ -123,7 +125,8 @@ public class CohortReviewControllerMockTest {
 
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
+        when(cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId,
+            WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
 
         try {
             reviewController.createCohortReview(namespace, name, cohortId, cdrVersionId, new CreateReviewRequest().size(200));
@@ -136,7 +139,8 @@ public class CohortReviewControllerMockTest {
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
-        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        verify(cohortReviewService, times(1))
+            .validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verifyNoMoreMockInteractions();
     }
 
@@ -168,7 +172,7 @@ public class CohortReviewControllerMockTest {
         when(workspaceService.enforceWorkspaceAccessLevel(namespace, name, WorkspaceAccessLevel.READER)).thenReturn(WorkspaceAccessLevel.OWNER);
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, definition));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
+        when(cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(createWorkspace(workspaceId, namespace, name));
         when(participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest), 200, 0L)).thenReturn(null);
         when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
         when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
@@ -189,7 +193,8 @@ public class CohortReviewControllerMockTest {
 
         verify(cohortReviewService, times(1)).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, times(1)).findCohort(cohortId);
-        verify(cohortReviewService, times(1)).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        verify(cohortReviewService, times(1))
+            .validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verify(participantCounter, times(1)).buildParticipantIdQuery(new ParticipantCriteria(searchRequest), 200, 0L);
         verify(bigQueryService, times(1)).filterBigQueryConfig(null);
         verify(bigQueryService, times(1)).executeQuery(null);
@@ -218,7 +223,8 @@ public class CohortReviewControllerMockTest {
     @Test
     public void deleteParticipantCohortAnnotation() throws Exception {
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
+        when(cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId,
+            WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId)).thenReturn(new ParticipantCohortStatus());
         doNothing().when(cohortReviewService).deleteParticipantCohortAnnotation(1L, cohortReviewId, participantId);
@@ -226,7 +232,8 @@ public class CohortReviewControllerMockTest {
         reviewController.deleteParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, 1L);
 
         verify(cohortReviewService).findCohort(cohortId);
-        verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        verify(cohortReviewService)
+            .validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verify(cohortReviewService).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService).findParticipantCohortStatus(cohortReviewId, participantId);
         verify(cohortReviewService).deleteParticipantCohortAnnotation(1L, cohortReviewId, participantId);
@@ -250,14 +257,16 @@ public class CohortReviewControllerMockTest {
         ModifyParticipantCohortAnnotationRequest request = new ModifyParticipantCohortAnnotationRequest();
 
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
+        when(cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId,
+            WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, request)).thenReturn(new org.pmiops.workbench.db.model.ParticipantCohortAnnotation());
 
         reviewController.updateParticipantCohortAnnotation(namespace, name, cohortId, cdrVersionId, participantId, 1L, request);
 
         verify(cohortReviewService).findCohort(cohortId);
-        verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        verify(cohortReviewService).validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId,
+            WorkspaceAccessLevel.WRITER);
         verify(cohortReviewService).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService).updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, request);
         verifyNoMoreMockInteractions();
@@ -268,14 +277,16 @@ public class CohortReviewControllerMockTest {
         long cohortReviewId = 1;
 
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
+        when(cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId,
+            WorkspaceAccessLevel.READER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.findParticipantCohortAnnotations(cohortReviewId, participantId)).thenReturn(new ArrayList<>());
 
         reviewController.getParticipantCohortAnnotations(namespace, name, cohortId, cdrVersionId, participantId);
 
         verify(cohortReviewService).findCohort(cohortId);
-        verify(cohortReviewService).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.READER);
+        verify(cohortReviewService).validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId,
+            WorkspaceAccessLevel.READER);
         verify(cohortReviewService).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService).findParticipantCohortAnnotations(cohortReviewId, participantId);
         verifyNoMoreMockInteractions();
@@ -322,7 +333,8 @@ public class CohortReviewControllerMockTest {
             cohortAnnotationDefinition.setEnumValues(new TreeSet(Arrays.asList(cohortAnnotationEnumValue)));
         }
         when(cohortReviewService.findCohort(cohortId)).thenReturn(createCohort(cohortId, workspaceId, null));
-        when(cohortReviewService.validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
+        when(cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId,
+            WorkspaceAccessLevel.WRITER)).thenReturn(new Workspace());
         when(cohortReviewService.findCohortReview(cohortId, cdrVersionId)).thenReturn(createCohortReview(0, cohortId, cohortReviewId, cdrVersionId, null));
         when(cohortReviewService.saveParticipantCohortAnnotation(isA(Long.class), isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class)))
                 .thenReturn(createParticipantCohortAnnotation(request));
@@ -333,7 +345,8 @@ public class CohortReviewControllerMockTest {
         assertEquals(request, response);
 
         verify(cohortReviewService, atLeastOnce()).findCohort(cohortId);
-        verify(cohortReviewService, atLeastOnce()).validateMatchingWorkspace(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
+        verify(cohortReviewService, atLeastOnce())
+            .validateMatchingWorkspaceAndSetCdrVersion(namespace, name, workspaceId, WorkspaceAccessLevel.WRITER);
         verify(cohortReviewService, atLeastOnce()).findCohortReview(cohortId, cdrVersionId);
         verify(cohortReviewService, atLeastOnce()).saveParticipantCohortAnnotation(isA(Long.class), isA(org.pmiops.workbench.db.model.ParticipantCohortAnnotation.class));
         verifyNoMoreMockInteractions();
