@@ -297,6 +297,17 @@ public class DataBrowserControllerTest {
     }
 
     @Test
+    public void testConceptSearchMaxResults() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+                .domain(Domain.CONDITION)
+                .maxResults(1)
+                .minCount(0));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts.size()).isEqualTo(1);
+    }
+
+    @Test
     public void testCountConceptSearchEmptyQuery() throws Exception{
         saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
