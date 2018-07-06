@@ -138,25 +138,6 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
-  /v1/databrowser/searchConceptsEmptyQuery:
-    post:
-      security: []
-      tags:
-        - dataBrowser
-      description: Gets list of all concepts
-      operationId: "searchConceptsEmptyQuery"
-      parameters:
-        - in: body
-          name: request
-          description: search concept request
-          schema:
-              $ref: "#/definitions/SearchConceptsRequest"
-      responses:
-        200:
-          description: A collection of matched concepts
-          schema:
-            $ref: "#/definitions/ConceptListResponse"
-
   /v1/databrowser/db-domains:
     get:
       security: []
