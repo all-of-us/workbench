@@ -176,7 +176,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .dbType(cdr.getDbType())
                             .domainRoute(cdr.getDomainRoute())
                             .conceptId(cdr.getConceptId())
-                            .countValue(cdr.getCountValue());
+                            .countValue(cdr.getCountValue())
+                            .participantCount(cdr.getParticipantCount());
                 }
             };
 
@@ -257,35 +258,35 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             maxResults = Integer.MAX_VALUE;
         }
 
-        StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
-        if(standardConceptFilter == null){
-            standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
+        Integer minCount = searchConceptsRequest.getMinCount();
+        if(minCount == null){
+            minCount = 1;
         }
+
+        StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
 
         if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
-            List<Concept> concepts;
-            if(standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS){
-                concepts = conceptDao.findAllStandardConceptsOrderedByCount(maxResults);
-            }else if(standardConceptFilter == StandardConceptFilter.NON_STANDARD_CONCEPTS){
-                concepts = conceptDao.findAllNonStandardConceptsOrderedByCount(maxResults);
-            }else{
-                concepts = conceptDao.findAllConceptsOrderedByCount(maxResults);
+            if(standardConceptFilter == null || standardConceptFilter == StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH){
+                standardConceptFilter = StandardConceptFilter.STANDARD_CONCEPTS;
             }
-            ConceptListResponse response = new ConceptListResponse();
-            response.setItems(concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-            return ResponseEntity.ok(response);
+        }else{
+            if(standardConceptFilter == null){
+                standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
+            }
         }
 
-        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
+
 
         List<String> domainIds = null;
         if (searchConceptsRequest.getDomain() != null) {
             domainIds = DOMAIN_MAP.get(searchConceptsRequest.getDomain()).asList();
         }
 
+        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
+
         Slice<Concept> concepts =
                 conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                        searchConceptsRequest.getVocabularyIds(), domainIds, maxResults);
+                        searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
         ConceptListResponse response = new ConceptListResponse();
         List<Concept> matchedConcepts = concepts.getContent();
 
@@ -293,7 +294,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             String conceptCode = con.getConceptCode();
             String conceptId = String.valueOf(con.getConceptId());
 
-            if(!con.getStandardConcept().equals("S") && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
+            if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
                 response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
 
                 List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
@@ -310,9 +311,20 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(response);
     }
 
-    @Override
+
+        @Override
     public ResponseEntity<DbDomainListResponse> getDomainTotals(){
-        List<DbDomain> domains=dbDomainDao.findDomainTotals();
+        List<DbDomain> domains = dbDomainDao.findDomainTotals();
+        List<Concept> concepts = conceptDao.findDbDomainParticpantCounts();
+        DbDomain.mapConceptCounts(concepts);
+        for(DbDomain dbd : domains){
+            if(dbd.getParticipantCount() == 0){
+                Long participantCount = DbDomain.conceptCountMap.get(dbd.getConceptId());
+                if(participantCount != null){
+                    dbd.setParticipantCount(participantCount);
+                }
+            }
+        }
         DbDomainListResponse resp=new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
@@ -398,7 +410,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public ResponseEntity<ConceptListResponse> getSourceConcepts(Long conceptId,Integer minCount) {
         Integer count=minCount;
         if(count == null){
-            count =0;
+            count = 0;
         }
         List<Concept> conceptList = conceptDao.findSourceConcepts(conceptId,count);
         ConceptListResponse resp = new ConceptListResponse();
