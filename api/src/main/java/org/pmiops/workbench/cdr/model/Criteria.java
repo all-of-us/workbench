@@ -2,14 +2,12 @@ package org.pmiops.workbench.cdr.model;
 
 import javax.persistence.GenerationType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.model.Attribute;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.List;
 import java.util.Objects;
 
 
