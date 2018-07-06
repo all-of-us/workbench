@@ -51,7 +51,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.screenWidth = window.innerWidth;
-    console.log('Screen width', this.screenWidth);
 
     // Connect responsize listeners
     /* In progress Testing
@@ -107,6 +106,9 @@ export class EhrViewComponent implements OnInit, OnDestroy {
         .distinctUntilChanged()
         .switchMap((query) => this.searchDomain(query))
         .subscribe(results => this.searchCallback(results)));
+
+      // Set to loading as long as they are typing
+      this.subscriptions.push(this.searchText.valueChanges.subscribe((query) => this.loading = true ));
     }
   }
 
@@ -130,29 +132,18 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
   private searchDomain(query: string) {
-    let maxResults = 100;
+    const maxResults = 100;
     this.loading = true;
-    if (query.length) {
-      this.searchRequest = {
-          query: query,
-          domain: this.dbDomain.domainId.toUpperCase(),
-          standardConceptFilter: StandardConceptFilter.STANDARDORCODEIDMATCH,
-          maxResults: null,
-          minCount: 1
-      };
-      this.prevSearchText = query;
-      return this.api.searchConcepts(this.searchRequest);
-    }
 
-      this.searchRequest = {
-          query: query,
-          domain: this.dbDomain.domainId.toUpperCase(),
-          standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
-          maxResults: 100,
-          minCount: 1
-      };
-    this.prevSearchText = '';
-    return this.api.searchConceptsEmptyQuery(this.searchRequest);
+    this.searchRequest = {
+        query: query,
+        domain: this.dbDomain.domainId.toUpperCase(),
+        standardConceptFilter: StandardConceptFilter.STANDARDORCODEIDMATCH,
+        maxResults: maxResults,
+        minCount: 1
+    };
+    this.prevSearchText = query;
+    return this.api.searchConcepts(this.searchRequest);
 
   }
 

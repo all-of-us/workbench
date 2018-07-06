@@ -15,7 +15,6 @@
             <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -38,10 +37,13 @@
             <div class="card-stat">
               {{r.countValue | number}}
             </div>
-            <p class="card-text bigger">
+            <p *ngIf="searchText.value" class="card-text bigger">
               <em> <b>concepts </b></em> match your search.
             </p>
-            <div>
+            <p *ngIf="!searchText.value" class="card-text bigger">
+              <em> <b>concepts </b></em> in this domain.
+            </p>
+            <div class="go-button">
               <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
             </div>
           </div>

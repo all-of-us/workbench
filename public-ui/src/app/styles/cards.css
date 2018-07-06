@@ -63,14 +63,11 @@
     line-height: 55px;
 }
 
-.search-result p.card-text {
-    height: 3rem;
-}
-
 .card-text.bottom {
     position: absolute;
     bottom: 0px;
 }
+
 
 
 

@@ -103,15 +103,7 @@ label {
     margin-bottom: 1rem;
 }
 
-/* result card */
-.white-card-box.search-result {
-    height: 240px;
-    width: 240px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    padding: 1rem;
-    padding-top: .5rem;
-}
+
 
 /* stat box at tops of pages */
 .white-card-box.top-stat {

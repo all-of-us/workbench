@@ -72,7 +72,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
           return this.searchCallback(data);
         }));
     }
-    // Get domain totalas only once so if they erase search we can load them
+    // Get domain totals only once so if they erase search we can load them
     this.subscriptions.push(
       this.api.getDomainTotals().subscribe((data: DbDomainListResponse) => {
         this.domains = data.items;
@@ -95,6 +95,9 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
           this.searchCallback(data);
         })
     );
+
+    // Set to loading as long as they are typing
+    this.subscriptions.push(this.searchText.valueChanges.subscribe((query) => this.loading = true ));
   }
   ngOnDestroy() {
     for (const s of this.subscriptions){
@@ -113,6 +116,8 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
   public searchDomains(query: string) {
+    this.prevSearchText = query;
+    localStorage.setItem('searchText', query);
     // If query empty reset to already reatrieved domain totals
     if (query.length === 0) {
       const resultsObservable = new Observable((observer) => {
@@ -122,8 +127,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
       });
       return resultsObservable;
     }
-    this.prevSearchText = query;
-    localStorage.setItem('searchText', query);
+
     return this.api.getDomainSearchResults(query);
   }
 

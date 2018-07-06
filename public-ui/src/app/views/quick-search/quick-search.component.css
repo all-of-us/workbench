@@ -4,3 +4,16 @@
 .white-card-box {
     padding: .25rem;
 }
+
+.search-result p.card-text {
+    height: 2rem;
+}
+
+/* result card */
+.white-card-box.search-result {
+    height: 240px;
+    width: 240px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: .5rem 1rem;
+}

@@ -108,6 +108,8 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         .debounceTime(400)
         .distinctUntilChanged()
         .subscribe((query) => { this.filterResults(); } ));
+    // Set to loading as long as they are typing
+    this.subscriptions.push(this.searchText.valueChanges.subscribe((query) => this.loading = true ));
 
   }
 
@@ -157,6 +159,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
 
   public filterResults() {
+    localStorage.setItem('searchText', this.searchText.value);
     this.loading = true;
     this.questions = this.surveyResult.items;
     if (this.searchText.value.length > 0) {
