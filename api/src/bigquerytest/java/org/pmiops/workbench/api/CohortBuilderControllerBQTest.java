@@ -47,6 +47,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private static final String SUBTYPE_NONE = null;
   private static final String TYPE_ICD10 = "ICD10";
   private static final String TYPE_CPT = "CPT";
+  private static final String TYPE_VISIT = "VISIT";
   private static final String SUBTYPE_CPT4 = "CPT4";
   private static final String SUBTYPE_ICD10CM = "ICD10CM";
   private static final String SUBTYPE_ICD10PCS = "ICD10PCS";
@@ -102,7 +103,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       "drug_exposure",
       "phecode_criteria_icd",
       "concept_relationship",
-      "death");
+      "death",
+      "visit_occurrence",
+      "concept_ancestor");
   }
 
   @Override
@@ -546,6 +549,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsCPTDrugExposure() throws Exception {
     SearchParameter cpt = createSearchParameter(cptDrug, "90703");
     SearchRequest searchRequest = createSearchRequests(cptDrug.getType(), Arrays.asList(cpt), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsVisitChild() throws Exception {
+    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("10");
+    SearchParameter visit = createSearchParameter(visitCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsVisitParent() throws Exception {
+    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(true).conceptId("1");
+    SearchParameter visit = createSearchParameter(visitCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
