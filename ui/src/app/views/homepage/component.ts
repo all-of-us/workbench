@@ -18,16 +18,12 @@ import {
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
-  AouLogoFooter = '/assets/images/all-of-us-logo-footer.svg';
   firstTimeUser = false;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
-  colorScheme = {
-    domain: ['#8BC990', '#C7C8C8']
-  };
   spinnerValues = [
     {
       'name': this.completedTasksName,
