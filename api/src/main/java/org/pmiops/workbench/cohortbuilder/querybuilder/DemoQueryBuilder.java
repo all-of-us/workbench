@@ -87,8 +87,9 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
           if (attribute.isPresent() && !CollectionUtils.isEmpty(attribute.get().getOperands())) {
             List<String> operandParts = new ArrayList<>();
             for (String operand : attribute.get().getOperands()) {
-              operandParts.add("@" + namedParameter);
-              queryParams.put(namedParameter, QueryParameterValue.int64(new Long(operand)));
+              String ageNamedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
+              operandParts.add("@" + ageNamedParameter);
+              queryParams.put(ageNamedParameter, QueryParameterValue.int64(new Long(operand)));
             }
             queryParts.add(DEMO_AGE.replace("${operator}", OperatorUtils.getSqlOperator(attribute.get().getOperator()))
               + String.join(" and ", operandParts) + "\n");
