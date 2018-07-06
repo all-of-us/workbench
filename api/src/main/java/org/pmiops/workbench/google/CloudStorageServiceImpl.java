@@ -13,8 +13,11 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,56 +45,25 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   public void copyAllDemoNotebooks(String workspaceBucket)  {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Bucket demoBucket = storage.get(getDemosBucketName());
-    Page<Blob> allBlobs = demoBucket.list();
-    List<Blob> notebookFiles = new ArrayList<>();
-    notebookFiles.addAll(getFileTypeFromPage(allBlobs, ".ipynb"));
-    while (allBlobs.hasNextPage()) {
-      allBlobs = allBlobs.getNextPage();
-      notebookFiles.addAll(getFileTypeFromPage(allBlobs, ".ipynb"));
-    }
-    notebookFiles.forEach((Blob blob) -> {
-      BlobId demoNotebookId = blob.getBlobId();
-      BlobId targetLocation = BlobId.of(workspaceBucket, "notebooks/" + demoNotebookId.getName());
-      copyBlob(demoNotebookId, targetLocation);
-    });
-  }
-
-  private List<Blob> getFileTypeFromPage(Page<Blob> page, String extension) {
-    List<Blob> fileList = new ArrayList<>();
-    Iterable<Blob> iter = page.iterateAll();
-    iter.forEach((Blob blob) -> {
-      if (blob.getBlobId().getName().endsWith(extension)) {
-        fileList.add(blob);
-      }
-    });
-    return fileList;
-  }
-
-  private List<JSONObject> getJsonAndFilterByTypeFromPage(Page<Blob> page, String type) {
-    List<JSONObject> fileList = new ArrayList<>();
-    Iterable<Blob> iter = page.iterateAll();
-    iter.forEach((Blob blob) -> {
-      if (blob.getBlobId().getName().endsWith(".json")) {
-        JSONObject unknownObject = new JSONObject(new String(blob.getContent()).trim());
-        String objectType = unknownObject.getString("type");
-        if (objectType.equalsIgnoreCase(type)) {
-          fileList.add(unknownObject.getJSONObject(objectType));
-        }
-      }
-    });
-    return fileList;
+    StreamSupport
+        .stream(demoBucket.list().getValues().spliterator(), false)
+        .filter(blob -> blob.getBlobId().getName().endsWith(".ipynb"))
+        .map(blob -> ImmutablePair
+            .of(blob.getBlobId(), BlobId.of(workspaceBucket, "notebooks/" + blob.getBlobId().getName())))
+        .forEach(pair -> copyBlob(pair.getLeft(), pair.getRight()));
   }
 
   public List<JSONObject> readAllDemoCohorts() {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Bucket demoBucket = storage.get(getDemosBucketName());
-    Page<Blob> allBlobs = demoBucket.list();
-    List<JSONObject> cohortFiles = new ArrayList<>();
-    cohortFiles.addAll(getJsonAndFilterByTypeFromPage(allBlobs, "cohort"));
-    while (allBlobs.hasNextPage()) {
-      allBlobs = allBlobs.getNextPage();
-      cohortFiles.addAll(getJsonAndFilterByTypeFromPage(allBlobs, "cohort"));
-    }
+
+    List<JSONObject> cohortFiles = StreamSupport
+        .stream(demoBucket.list().getValues().spliterator(), false)
+        .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
+        .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
+        .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase("cohort"))
+        .map(jsonObject -> jsonObject.getJSONObject("cohort"))
+        .collect(Collectors.toList());
     return cohortFiles;
   }
 
