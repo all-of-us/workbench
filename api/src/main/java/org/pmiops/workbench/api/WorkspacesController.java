@@ -405,7 +405,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbCohort.setName(cohort.getString("name"));
       dbCohort.setDescription(cohort.getString("description"));
       dbCohort.setCriteria(cohort.get("criteria").toString());
-      dbCohort.setType("tutorial");
+      dbCohort.setType(cohort.getString("type"));
       dbCohort.setCreator(userProvider.get());
       dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
       dbCohort.setCreationTime(now);
