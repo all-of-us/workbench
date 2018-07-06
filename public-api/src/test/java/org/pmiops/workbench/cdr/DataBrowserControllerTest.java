@@ -67,6 +67,23 @@ public class DataBrowserControllerTest {
                 }
             };
 
+    private static final Function<org.pmiops.workbench.model.DbDomain, DbDomain>
+            TO_CLIENT_DBDOMAIN =
+            new Function<org.pmiops.workbench.model.DbDomain, DbDomain>() {
+                @Override
+                public DbDomain apply(org.pmiops.workbench.model.DbDomain dbDomain) {
+                    return new DbDomain()
+                            .domainId(dbDomain.getDomainId())
+                            .domainDisplay(dbDomain.getDomainDisplay())
+                            .domainDesc(dbDomain.getDomainDesc())
+                            .dbType(dbDomain.getDbType())
+                            .domainRoute(dbDomain.getDomainRoute())
+                            .conceptId(dbDomain.getConceptId())
+                            .countValue(dbDomain.getCountValue())
+                            .participantCount(dbDomain.getParticipantCount());
+                }
+            };
+
     private static final Concept CLIENT_CONCEPT_1 = new Concept()
             .conceptId(123L)
             .conceptName("a concept")
@@ -157,7 +174,8 @@ public class DataBrowserControllerTest {
             .dbType("domain_filter")
             .domainRoute("condition")
             .conceptId(19L)
-            .countValue(0L);
+            .countValue(0L)
+            .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_2 = new DbDomain()
             .domainId("Drug")
@@ -166,7 +184,8 @@ public class DataBrowserControllerTest {
             .dbType("domain_filter")
             .domainRoute("drug")
             .conceptId(13L)
-            .countValue(0L);
+            .countValue(0L)
+            .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_3 = new DbDomain()
             .domainId("Lifestyle")
@@ -175,7 +194,8 @@ public class DataBrowserControllerTest {
             .dbType("survey")
             .domainRoute("ppi")
             .conceptId(1585855L)
-            .countValue(568120L);
+            .countValue(568120L)
+            .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_4 = new DbDomain()
             .domainId("TheBasics")
@@ -184,7 +204,8 @@ public class DataBrowserControllerTest {
             .dbType("survey")
             .domainRoute("ppi")
             .conceptId(1586134L)
-            .countValue(567437L);
+            .countValue(567437L)
+            .participantCount(0L);
 
     private static final Concept CONCEPT_1 =
             makeConcept(CLIENT_CONCEPT_1);
@@ -255,33 +276,34 @@ public class DataBrowserControllerTest {
         ResponseEntity<ConceptListResponse> response = dataBrowserController.getSourceConcepts(7890L, 15);
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
-                .containsExactly(CONCEPT_4, CONCEPT_2)
-        ;
+                .containsExactly(CONCEPT_4, CONCEPT_2);
     }
 
 
     @Test
     public void testGetDomainFilters() throws Exception {
         saveData();
-        assertDomains(
-                dataBrowserController.getDomainFilters(), CLIENT_DB_DOMAIN_1, CLIENT_DB_DOMAIN_2
-        );
+        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getDomainFilters();
+        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
+        assertThat(domains)
+                .containsExactly(DBDOMAIN_1, DBDOMAIN_2);
     }
 
     @Test
     public void testGetSurveyList() throws Exception{
         saveData();
-        assertDomains(
-                dataBrowserController.getSurveyList(), CLIENT_DB_DOMAIN_3, CLIENT_DB_DOMAIN_4
-        );
+        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getSurveyList();
+        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
+        assertThat(domains).containsExactly(DBDOMAIN_3, DBDOMAIN_4);
     }
 
     @Test
     public void testGetDbDomains() throws Exception{
         saveData();
-        assertDomains(
-                dataBrowserController.getDbDomains(), CLIENT_DB_DOMAIN_1, CLIENT_DB_DOMAIN_2, CLIENT_DB_DOMAIN_3, CLIENT_DB_DOMAIN_4
-        );
+        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getDbDomains();
+        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
+        assertThat(domains)
+        .containsExactly(DBDOMAIN_1, DBDOMAIN_2, DBDOMAIN_3, DBDOMAIN_4);
     }
 
     @Test
@@ -484,8 +506,4 @@ public class DataBrowserControllerTest {
         dbDomainDao.save(DBDOMAIN_4);
     }
 
-    private void assertDomains(ResponseEntity<DbDomainListResponse> response,
-                               DbDomain... expectedDomains) {
-        assertThat(response.getBody().getItems().equals(Arrays.asList(expectedDomains)));
-    }
 }
