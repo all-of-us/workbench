@@ -37,13 +37,14 @@
             <div class="card-stat">
               {{r.countValue | number}}
             </div>
-            <p *ngIf="searchText.value" class="card-text bigger">
-              <em> <b>concepts </b></em> match your search.
+            <p class="card-text bigger">
+              <em> <b>concepts </b></em>
+              <span *ngIf="searchText.value"> match your search. </span>
+              <span *ngIf="!searchText.value">in this domain.</span>
+              <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
             </p>
-            <p *ngIf="!searchText.value" class="card-text bigger">
-              <em> <b>concepts </b></em> in this domain.
-            </p>
-            <div class="go-button">
+
+            <div class="card-text bottom">
               <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
             </div>
           </div>
@@ -68,7 +69,7 @@
             There are {{r.countValue }} survey questions on this survey related to your search.
           </p>
 
-          <div>
+          <div class="card-text bottom" >
             <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
           </div>
         </div>

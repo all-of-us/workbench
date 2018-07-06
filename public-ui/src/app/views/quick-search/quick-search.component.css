@@ -6,7 +6,8 @@
 }
 
 .search-result p.card-text {
-    height: 2rem;
+    min-height: 2rem;
+    padding-bottom: .5rem;
 }
 
 /* result card */
@@ -16,4 +17,13 @@
     margin-top: 1rem;
     margin-bottom: 1rem;
     padding: .5rem 1rem;
+}
+
+.card-text.bottom {
+    padding-bottom: 1rem;
+}
+
+.bolder {
+    font-weight: bold;
+    font-size: 16px;
 }
