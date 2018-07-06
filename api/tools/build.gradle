@@ -67,6 +67,7 @@ sourceSets {
       includes = ['org/pmiops/workbench/tools/**/*.java',
                   'org/pmiops/workbench/db/**/*.java',
                   'org/pmiops/workbench/notebooks/**/*.java',
+                  'org/pmiops/workbench/jira/**/*.java',
                   // In general, command-line tools won't need access to
                   // org.pmiops.workbench.model (Swagger-generated classes),
                   // so we selectively whitelist as needed.
@@ -97,6 +98,8 @@ sourceSets {
                   'org/pmiops/workbench/model/Operator.java',
                   'org/pmiops/workbench/model/ParticipantCohortStatusColumns.java',
                   'org/pmiops/workbench/model/SortOrder.java',
+                  'org/pmiops/workbench/jira/JiraService.java',
+                  'org/pmiops/workbench/jira/JiraServiceImpl.java',
                   'org/pmiops/workbench/notebooks/NotebooksService.java',
                   'org/pmiops/workbench/notebooks/NotebooksServiceImpl.java',
                   'org/pmiops/workbench/notebooks/NotebooksConfig.java',
