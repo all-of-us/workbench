@@ -331,7 +331,7 @@ public class DataBrowserControllerTest {
     @Test
     public void testConceptSearchStandardCodeIdMatchFilter() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest().query("")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         List<Concept> standard_concepts = Arrays.asList(CONCEPT_1, CONCEPT_4, CONCEPT_5, CONCEPT_6, CONCEPT_7);
