@@ -3,18 +3,23 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -46,6 +51,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             new Function<Criteria, org.pmiops.workbench.model.Criteria>() {
                 @Override
                 public org.pmiops.workbench.model.Criteria apply(Criteria criteria) {
+                    Type listType = new TypeToken<ArrayList<Attribute>>(){}.getType();
+                    List<Attribute> predefinedAttributes = new Gson().fromJson(criteria.getPredefinedAttributes(), listType);
                     return new org.pmiops.workbench.model.Criteria()
                                 .id(criteria.getId())
                                 .type(criteria.getType())
@@ -56,7 +63,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                 .group(criteria.getGroup())
                                 .selectable(criteria.getSelectable())
                                 .conceptId(StringUtils.isEmpty(criteria.getConceptId()) ? null : new Long(criteria.getConceptId()))
-                                .domainId(criteria.getDomainId());
+                                .domainId(criteria.getDomainId())
+                                .attribute(criteria.getAttribute())
+                                .predefinedAttributes(predefinedAttributes);
                 }
             };
 
@@ -81,7 +90,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     @Override
     public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(Long cdrVersionId, String type, Long parentId) {
         cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-        final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(type, parentId);
+        final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(type, parentId);
 
         CriteriaListResponse criteriaResponse = new CriteriaListResponse();
         criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));

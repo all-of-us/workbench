@@ -196,6 +196,8 @@ definitions:
       - name
       - group
       - selectable
+      - attribute
+      - predefinedAttributes
     properties:
       id:
         description: id of the criteria
@@ -239,6 +241,13 @@ definitions:
           for leaves in the tree. Parents don't have domain ids and concept
           id will be used in the case that a parent is selectable.
         type: string
+      attribute:
+        description: specifies if extra attributes are needed
+        type: boolean
+      predefinedAttributes:
+        type: array
+        items:
+          $ref: "#/definitions/Attribute"
 
   SearchRequest:
     description: >
@@ -343,6 +352,7 @@ definitions:
       - type
       - subtype
       - group
+      - attributes
     properties:
       parameterId:
         description: Unique within the cohort definition
@@ -369,9 +379,11 @@ definitions:
         description: The concept id that maps to concept table.
         type: integer
         format: int64
-      attribute:
+      attributes:
         description: Any applicable arguments that complete the sense of the parameter
-        $ref: "#/definitions/Attribute"
+        type: "array"
+        items:
+          $ref: "#/definitions/Attribute"
     example:
       leafExample:
         value: "E9293"
@@ -388,12 +400,20 @@ definitions:
       - operator
       - operands
     properties:
-      operator:
+      name:
         type: string
+        description: the name of the attribute
+      operator:
+        $ref: "#/definitions/Operator"
       operands:
         type: "array"
         items:
           type: string
+      conceptId:
+        description: The concept id that maps to concept table.
+        type: integer
+        format: int64
+
     example:
       singleValued:
         operator: "GTE"

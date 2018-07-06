@@ -4,7 +4,9 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -29,7 +31,7 @@ public class DemoQueryBuilderTest {
         String raceNamedParameter = "";
         List<SearchParameter> params = new ArrayList<>();
         params.add(new SearchParameter().type("DEMO").subtype("GEN").conceptId(8507L));
-        params.add(new SearchParameter().type("DEMO").subtype("AGE").attribute(new Attribute().operator("=").operands(Arrays.asList("18"))));
+        params.add(new SearchParameter().type("DEMO").subtype("AGE").attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList("18")))));
         params.add(new SearchParameter().type("DEM0").subtype("RACE").conceptId(1234L));
         params.add(new SearchParameter().type("DEM0").subtype("RACE").conceptId(1235L));
 
@@ -80,7 +82,7 @@ public class DemoQueryBuilderTest {
     @Test
     public void buildQueryJobConfig_AttributeWithNoOperands() throws Exception {
         List<SearchParameter> params = new ArrayList<>();
-        params.add(new SearchParameter().domain("DEMO").subtype("AGE").attribute(new Attribute().operator("=")));
+        params.add(new SearchParameter().domain("DEMO").subtype("AGE").attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL))));
 
         try {
             queryBuilder

@@ -2,18 +2,18 @@ package org.pmiops.workbench.cdr.model;
 
 import javax.persistence.GenerationType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.model.Attribute;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.List;
 import java.util.Objects;
 
 
 @Entity
-//TODO need to add a way to dynamically switch between database versions
-//this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "criteria")
 public class Criteria {
 
@@ -28,6 +28,8 @@ public class Criteria {
     private String count;
     private String conceptId;
     private String domainId;
+    private boolean attribute;
+    private String predefinedAttributes;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -185,6 +187,34 @@ public class Criteria {
         return this;
     }
 
+    @Column(name = "has_attribute")
+    public boolean getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(boolean attribute) {
+        this.attribute = attribute;
+    }
+
+    public Criteria attribute(boolean attribute) {
+        this.attribute = attribute;
+        return this;
+    }
+
+    @Column(name = "predefined_attributes")
+    public String getPredefinedAttributes() {
+        return predefinedAttributes;
+    }
+
+    public void setPredefinedAttributes(String predefinedAttributes) {
+        this.predefinedAttributes = predefinedAttributes;
+    }
+
+    public Criteria predefinedAttributes(String predefinedAttributes) {
+        this.predefinedAttributes = predefinedAttributes;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -199,12 +229,14 @@ public class Criteria {
                 Objects.equals(name, criteria.name) &&
                 Objects.equals(count, criteria.count) &&
                 Objects.equals(conceptId, criteria.conceptId) &&
-                Objects.equals(domainId, criteria.domainId);
+                Objects.equals(domainId, criteria.domainId) &&
+                Objects.equals(attribute, criteria.attribute) &&
+                Objects.equals(predefinedAttributes, criteria.predefinedAttributes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId);
+        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId, attribute, predefinedAttributes);
     }
 
     @Override
