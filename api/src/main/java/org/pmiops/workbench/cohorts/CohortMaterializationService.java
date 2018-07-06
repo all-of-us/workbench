@@ -170,6 +170,12 @@ public class CohortMaterializationService {
             String.format("Use of pagination token %s with new parameter values", paginationToken));
       }
     }
+    // Grab the next pagination token here, because searchRequest can be mutated during query
+    // execution, which will make the hash of SearchRequest no longer match; see
+    // [RW-844].
+    // TODO: consider pagination based on cursor / values rather than offset
+    PaginationToken newToken = PaginationToken.of(offset + pageSize, paginationParameters);
+
     int limit = pageSize + 1;
 
     MaterializeCohortResponse response = new MaterializeCohortResponse();
@@ -211,9 +217,7 @@ public class CohortMaterializationService {
     }
     response.setResults(responseResults);
     if (hasMoreResults) {
-      // TODO: consider pagination based on cursor / values rather than offset
-      PaginationToken token = PaginationToken.of(offset + pageSize, paginationParameters);
-      response.setNextPageToken(token.toBase64());
+      response.setNextPageToken(newToken.toBase64());
     }
     return response;
   }
