@@ -21,7 +21,8 @@
     "debugQueries": false
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "all-of-us-workbench-test-credentials"
+    "credentialsBucketName": "all-of-us-workbench-test-credentials",
+    "demosBucketName": "all-of-us-workbench-test-demos"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "fake-research-aou.org"
@@ -31,7 +32,7 @@
     "projectId": "all-of-us-workbench-test"
   },
   "admin": {
-    "adminIdVerification": "stable-environment-manual-id-verification-requests@fake-research-aou.org",
+    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org",
     "supportGroup": "all-of-us-workbench-eng@googlegroups.com",
     "verifiedSendingAddress": "all-of-us-workbench-eng@googlegroups.com"
   },
