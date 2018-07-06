@@ -52,8 +52,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
       {
           position: 'right',
           title: 'Explore Public Work',
-          text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet dolore. ' +
-            'Mirum est notare, quam littera gothica quam nunc.',
+          text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+          'dolore. Mirum est notare, quam littera gothica quam nunc.',
           icon: '/assets/icons/explore.svg'
       }];
   private enforceRegistered: boolean;
