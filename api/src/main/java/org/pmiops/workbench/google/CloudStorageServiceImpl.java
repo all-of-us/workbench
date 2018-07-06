@@ -74,7 +74,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
       if (blob.getBlobId().getName().endsWith(".json")) {
         JSONObject unknownObject = new JSONObject(new String(blob.getContent()).trim());
         String objectType = unknownObject.getString("type");
-        if (objectType.equalsIgnoreCase("cohort")) {
+        if (objectType.equalsIgnoreCase(type)) {
           fileList.add(unknownObject.getJSONObject(objectType));
         }
       }
