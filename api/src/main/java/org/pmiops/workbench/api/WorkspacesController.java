@@ -412,11 +412,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbCohort.setLastModifiedTime(now);
       dbCohort.setVersion(1);
       try {
-        // TODO Make this a pre-check within a transaction?
         dbCohort = cohortDao.save(dbCohort);
       } catch (DataIntegrityViolationException e) {
-        // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
-        // client by Spring (the client gets a default reason string).
         throw new BadRequestException(String.format(
             "Cohort \"/%s/%s/%d\" already exists.",
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
