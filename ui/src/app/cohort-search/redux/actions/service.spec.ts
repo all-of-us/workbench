@@ -49,7 +49,7 @@ const DEMO_crit = fromJS({
   group: false,
   conceptId: 12345,
   domainId: null,
-  attribute: null,
+  attributes: null,
 });
 
 const groups = fromJS({
@@ -306,7 +306,7 @@ describe('CohortSearchActions', () => {
       subtype: 'GEN',
       group: false,
       conceptId: 12345,
-      attribute: null,
+      attributes: null,
     });
   });
 });
