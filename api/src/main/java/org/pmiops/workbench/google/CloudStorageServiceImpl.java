@@ -1,13 +1,17 @@
 package org.pmiops.workbench.google;
 
+import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.StorageOptions;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.common.collect.ImmutableList;
+
+import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Provider;
 
@@ -35,15 +39,60 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return mandrillKeys.getString("api-key");
   }
 
-  public void copyDemoNotebook(String workspaceBucket)  {
+  public void copyAllDemoNotebooks(String workspaceBucket)  {
     Storage storage = StorageOptions.getDefaultInstance().getService();
-    BlobId demoNotebookId = storage.get(getDemosBucketName(), "demo-notebook.ipynb").getBlobId();
-    BlobId targetLocation = BlobId.of(workspaceBucket, "notebooks/demo-notebook.ipynb");
-    copyBlob(demoNotebookId, targetLocation);
+    Bucket demoBucket = storage.get(getDemosBucketName());
+    Page<Blob> allBlobs = demoBucket.list();
+    List<Blob> notebookFiles = new ArrayList<>();
+    notebookFiles.addAll(getFileTypeFromPage(allBlobs, ".ipynb"));
+    while (allBlobs.hasNextPage()) {
+      allBlobs = allBlobs.getNextPage();
+      notebookFiles.addAll(getFileTypeFromPage(allBlobs, ".ipynb"));
+    }
+    notebookFiles.forEach((Blob blob) -> {
+      BlobId demoNotebookId = blob.getBlobId();
+      BlobId targetLocation = BlobId.of(workspaceBucket, "notebooks/" + demoNotebookId.getName());
+      copyBlob(demoNotebookId, targetLocation);
+    });
   }
 
-  public JSONObject readDemoCohort() {
-    return new JSONObject(readToString(getDemosBucketName(), "demo-cohort.json"));
+  private List<Blob> getFileTypeFromPage(Page<Blob> page, String extension) {
+    List<Blob> fileList = new ArrayList<>();
+    Iterable<Blob> iter = page.iterateAll();
+    iter.forEach((Blob blob) -> {
+      if (blob.getBlobId().getName().endsWith(extension)) {
+        fileList.add(blob);
+      }
+    });
+    return fileList;
+  }
+
+  private List<JSONObject> getJsonAndFilterByTypeFromPage(Page<Blob> page, String type) {
+    List<JSONObject> fileList = new ArrayList<>();
+    Iterable<Blob> iter = page.iterateAll();
+    iter.forEach((Blob blob) -> {
+      if (blob.getBlobId().getName().endsWith(".json")) {
+        JSONObject unknownObject = new JSONObject(new String(blob.getContent()).trim());
+        String objectType = unknownObject.getString("type");
+        if (objectType.equalsIgnoreCase("cohort")) {
+          fileList.add(unknownObject.getJSONObject(objectType));
+        }
+      }
+    });
+    return fileList;
+  }
+
+  public List<JSONObject> readAllDemoCohorts() {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    Bucket demoBucket = storage.get(getDemosBucketName());
+    Page<Blob> allBlobs = demoBucket.list();
+    List<JSONObject> cohortFiles = new ArrayList<>();
+    cohortFiles.addAll(getJsonAndFilterByTypeFromPage(allBlobs, "cohort"));
+    while (allBlobs.hasNextPage()) {
+      allBlobs = allBlobs.getNextPage();
+      cohortFiles.addAll(getJsonAndFilterByTypeFromPage(allBlobs, "cohort"));
+    }
+    return cohortFiles;
   }
 
   @Override

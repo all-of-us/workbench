@@ -362,7 +362,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
-    cloudStorageService.copyDemoNotebook(fcWorkspace.getBucketName());
+    cloudStorageService.copyAllDemoNotebooks(fcWorkspace.getBucketName());
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
@@ -398,28 +398,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.addWorkspaceUserRole(permissions);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-
-    JSONObject demoCohort = cloudStorageService.readDemoCohort();
-    // TODO: Make this a service method to avoid duplication with CohortsController
-    Cohort dbCohort = new Cohort();
-    dbCohort.setName(demoCohort.getString("name"));
-    dbCohort.setDescription(demoCohort.getString("description"));
-    dbCohort.setCriteria(demoCohort.get("criteria").toString());
-    dbCohort.setType("AoU_Discover");
-    dbCohort.setCreator(userProvider.get());
-    dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    dbCohort.setCreationTime(now);
-    dbCohort.setLastModifiedTime(now);
-    dbCohort.setVersion(1);
-    try {
-      // TODO Make this a pre-check within a transaction?
-      dbCohort = cohortDao.save(dbCohort);
-    } catch (DataIntegrityViolationException e) {
-      // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
-      // client by Spring (the client gets a default reason string).
-      throw new BadRequestException(String.format(
-          "Cohort \"/%s/%s/%d\" already exists.",
-          dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
+    List<JSONObject> demoCohorts = cloudStorageService.readAllDemoCohorts();
+    for (JSONObject cohort: demoCohorts) {
+      // TODO: Make this a service method to avoid duplication with CohortsController
+      Cohort dbCohort = new Cohort();
+      dbCohort.setName(cohort.getString("name"));
+      dbCohort.setDescription(cohort.getString("description"));
+      dbCohort.setCriteria(cohort.get("criteria").toString());
+      dbCohort.setType("tutorial");
+      dbCohort.setCreator(userProvider.get());
+      dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
+      dbCohort.setCreationTime(now);
+      dbCohort.setLastModifiedTime(now);
+      dbCohort.setVersion(1);
+      try {
+        // TODO Make this a pre-check within a transaction?
+        dbCohort = cohortDao.save(dbCohort);
+      } catch (DataIntegrityViolationException e) {
+        // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
+        // client by Spring (the client gets a default reason string).
+        throw new BadRequestException(String.format(
+            "Cohort \"/%s/%s/%d\" already exists.",
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
+      }
     }
     return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
   }

@@ -208,10 +208,12 @@ public class WorkspacesControllerTest {
     demoCohort.put("name", "demo");
     demoCohort.put("description", "demo");
     demoCohort.put("criteria", createDemoCriteria());
-    when(cloudStorageService.readDemoCohort()).thenReturn(demoCohort);
+    List<JSONObject> demoCohorts = new ArrayList<>();
+    demoCohorts.add(demoCohort);
+    when(cloudStorageService.readAllDemoCohorts()).thenReturn(demoCohorts);
     when(cloudStorageService.readInvitationKey()).thenReturn("Dummy Value");
     when(cloudStorageService.readMandrillApiKey()).thenReturn("Dummy Value");
-    doNothing().when(cloudStorageService).copyDemoNotebook(any());
+    doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     CLOCK.setInstant(NOW);
   }
