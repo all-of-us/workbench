@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -214,8 +215,7 @@ public class WorkspacesControllerTest {
     demoCohort.put("description", "demo");
     demoCohort.put("type", "demo");
     demoCohort.put("criteria", createDemoCriteria());
-    List<JSONObject> demoCohorts = new ArrayList<>();
-    demoCohorts.add(demoCohort);
+    List<JSONObject> demoCohorts = Collections.singletonList(demoCohort);
     when(cloudStorageService.readAllDemoCohorts()).thenReturn(demoCohorts);
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 

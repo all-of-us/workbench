@@ -7,12 +7,11 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.inject.Provider;
 
@@ -155,8 +154,7 @@ public class CohortsControllerTest {
     demoCohort.put("description", "demo");
     demoCohort.put("type", "demo");
     demoCohort.put("criteria", createDemoCriteria());
-    List<JSONObject> demoCohorts = new ArrayList<>();
-    demoCohorts.add(demoCohort);
+    List<JSONObject> demoCohorts = Collections.singletonList(demoCohort);
     when(cloudStorageService.readAllDemoCohorts()).thenReturn(demoCohorts);
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
