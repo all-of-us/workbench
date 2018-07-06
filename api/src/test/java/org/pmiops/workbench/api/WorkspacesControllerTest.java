@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
@@ -211,12 +212,11 @@ public class WorkspacesControllerTest {
     JSONObject demoCohort = new JSONObject();
     demoCohort.put("name", "demo");
     demoCohort.put("description", "demo");
+    demoCohort.put("type", "demo");
     demoCohort.put("criteria", createDemoCriteria());
     List<JSONObject> demoCohorts = new ArrayList<>();
     demoCohorts.add(demoCohort);
     when(cloudStorageService.readAllDemoCohorts()).thenReturn(demoCohorts);
-    when(cloudStorageService.readInvitationKey()).thenReturn("Dummy Value");
-    when(cloudStorageService.readMandrillApiKey()).thenReturn("Dummy Value");
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     CLOCK.setInstant(NOW);

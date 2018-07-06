@@ -153,12 +153,11 @@ public class CohortsControllerTest {
     JSONObject demoCohort = new JSONObject();
     demoCohort.put("name", "demo");
     demoCohort.put("description", "demo");
+    demoCohort.put("type", "demo");
     demoCohort.put("criteria", createDemoCriteria());
     List<JSONObject> demoCohorts = new ArrayList<>();
     demoCohorts.add(demoCohort);
     when(cloudStorageService.readAllDemoCohorts()).thenReturn(demoCohorts);
-    when(cloudStorageService.readInvitationKey()).thenReturn("Dummy Value");
-    when(cloudStorageService.readMandrillApiKey()).thenReturn("Dummy Value");
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
