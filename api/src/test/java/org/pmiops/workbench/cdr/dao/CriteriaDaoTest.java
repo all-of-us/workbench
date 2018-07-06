@@ -28,12 +28,10 @@ public class CriteriaDaoTest {
     private static final String TYPE_ICD10 = "ICD10";
     private static final String TYPE_CPT = "CPT";
     private static final String TYPE_DEMO = "DEMO";
-    private static final String TYPE_PM = "PM";
     private static final String SUBTYPE_NONE = null;
     private static final String SUBTYPE_ICD10PCS = "ICD10PCS";
     private static final String SUBTYPE_RACE = "RACE";
     private static final String SUBTYPE_AGE = "AGE";
-    private static final String SUBTYPE_BP = "BP";
 
     @Autowired
     CriteriaDao criteriaDao;
@@ -51,7 +49,6 @@ public class CriteriaDaoTest {
     private Criteria parentDemo;
     private Criteria parentIcd10;
     private Criteria childIcd10;
-    private Criteria pmCriteria;
 
     @Before
     public void setUp() {
@@ -67,7 +64,6 @@ public class CriteriaDaoTest {
         cptCriteria2 = createCriteria(TYPE_CPT, SUBTYPE_NONE, "0001T", "zzzCPTxxx", 0, false, true);
         parentIcd9 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "003", "name", 0, true, true);
         parentIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003", "name", 0, true, true);
-        pmCriteria = createCriteria(TYPE_PM, SUBTYPE_BP, "<=;90;<=;60", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true);
 
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
@@ -85,7 +81,6 @@ public class CriteriaDaoTest {
         criteriaDao.save(childIcd9);
         childIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003.1", "name", parentIcd10.getId(), false, true);
         criteriaDao.save(childIcd10);
-        criteriaDao.save(pmCriteria);
     }
 
     @After
@@ -104,7 +99,6 @@ public class CriteriaDaoTest {
         criteriaDao.delete(parentDemo);
         criteriaDao.delete(parentIcd10);
         criteriaDao.delete(childIcd10);
-        criteriaDao.delete(pmCriteria);
     }
 
     @Test
@@ -120,9 +114,6 @@ public class CriteriaDaoTest {
         final List<Criteria> cptList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(TYPE_CPT, 0L);
         assertEquals(cptCriteria2, cptList.get(0));
         assertEquals(cptCriteria1, cptList.get(1));
-
-        final List<Criteria> pmList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(TYPE_PM, 0L);
-        assertEquals(pmCriteria, pmList.get(0));
     }
 
     @Test
@@ -160,8 +151,7 @@ public class CriteriaDaoTest {
                 .name(name)
                 .parentId(parentId)
                 .type(type)
-                .subtype(subtype)
-                .attribute(Boolean.FALSE);
+                .subtype(subtype);
     }
 
 }

@@ -61,10 +61,10 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
           .replace("${diastolicValue}", PRE_HYPERTENSIVE_DIASTOLIC_VALUES)
           .replace("${systolicValue}", PRE_HYPERTENSIVE_SYSTOLIC_VALUEs);
       } else if (parameter.getSubtype().equals("BP-User-Defined")) {
-        finalSql = BP_SQL_TEMPLATE.replace("${diastolicOperator}", parameter.getAttribute().getOperator())
-          .replace("${systolicOperator}", parameter.getAttribute().getOperator())
-          .replace("${diastolicValue}", parameter.getAttribute().getOperands().get(0))
-          .replace("${systolicValue}", parameter.getAttribute().getOperands().get(1));
+//        finalSql = BP_SQL_TEMPLATE.replace("${diastolicOperator}", parameter.getAttribute().getOperator())
+//          .replace("${systolicOperator}", parameter.getAttribute().getOperator())
+//          .replace("${diastolicValue}", parameter.getAttribute().getOperands().get(0))
+//          .replace("${systolicValue}", parameter.getAttribute().getOperands().get(1));
       }
     }
     return QueryJobConfiguration

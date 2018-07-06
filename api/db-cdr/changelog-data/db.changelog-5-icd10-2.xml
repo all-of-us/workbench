@@ -23,7 +23,6 @@
       <column name="est_count" type="STRING"/>
       <column name="concept_id" type="STRING"/>
       <column name="domain_id" type="STRING"/>
-      <column name="is_attribute" type="BOOLEAN"/>
     </loadData>
 
   </changeSet>
