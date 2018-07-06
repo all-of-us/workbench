@@ -174,7 +174,7 @@ public class CohortMaterializationService {
     // execution, which will make the hash of SearchRequest no longer match; see
     // [RW-844].
     // TODO: consider pagination based on cursor / values rather than offset
-    PaginationToken newToken = PaginationToken.of(offset + pageSize, paginationParameters);
+    String nextToken = PaginationToken.of(offset + pageSize, paginationParameters).toBase64();
 
     int limit = pageSize + 1;
 
@@ -217,7 +217,7 @@ public class CohortMaterializationService {
     }
     response.setResults(responseResults);
     if (hasMoreResults) {
-      response.setNextPageToken(newToken.toBase64());
+      response.setNextPageToken(nextToken);
     }
     return response;
   }
