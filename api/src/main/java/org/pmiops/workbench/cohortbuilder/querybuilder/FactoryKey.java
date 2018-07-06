@@ -14,7 +14,8 @@ public enum FactoryKey {
     CODES,
     DEMO,
     PHECODE,
-    PM;
+    PM,
+    VISIT;
 
     private static final Map<String, Object> typeMap = Collections.unmodifiableMap(initializeMapping());
 
@@ -42,6 +43,7 @@ public enum FactoryKey {
         tMap.put("CPT", FactoryKey.CODES);
         tMap.put("DEMO", FactoryKey.DEMO);
         tMap.put("PM", FactoryKey.PM);
+        tMap.put("VISIT", FactoryKey.VISIT);
         return tMap;
     }
 }
