@@ -287,7 +287,7 @@ public class DataBrowserControllerTest {
     @Test
     public void testAllConceptSearchEmptyQuery() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
         .domain(Domain.CONDITION)
         .minCount(0));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
@@ -299,7 +299,7 @@ public class DataBrowserControllerTest {
     @Test
     public void testConceptSearchMaxResults() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .domain(Domain.CONDITION)
                 .maxResults(1)
                 .minCount(0));
@@ -310,7 +310,7 @@ public class DataBrowserControllerTest {
     @Test
     public void testCountConceptSearchEmptyQuery() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .domain(Domain.CONDITION));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
@@ -331,7 +331,7 @@ public class DataBrowserControllerTest {
     @Test
     public void testConceptSearchStandardCodeIdMatchFilter() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest().query("")
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         List<Concept> standard_concepts = Arrays.asList(CONCEPT_1, CONCEPT_4, CONCEPT_5, CONCEPT_6, CONCEPT_7);
@@ -342,7 +342,7 @@ public class DataBrowserControllerTest {
     @Test
     public void testConceptSearchEmptyQuery() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         List<Concept> non_standard_concepts = Arrays.asList(CONCEPT_2, CONCEPT_3);
@@ -353,7 +353,8 @@ public class DataBrowserControllerTest {
     @Test
     public void testNonStandardEmptyQuerySearch() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConceptsEmptyQuery(new SearchConceptsRequest()
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
+                .query("")
                 .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
