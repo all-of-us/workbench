@@ -20,6 +20,7 @@
 
 .card.item-card .name {
   cursor: pointer;
+  word-wrap: break-word;
 }
 
 .card-area {

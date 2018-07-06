@@ -20,7 +20,8 @@
     "debugQueries": true
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "all-of-us-rw-stable-credentials"
+    "credentialsBucketName": "all-of-us-rw-stable-credentials",
+    "demosBucketName": "all-of-us-rw-stable-demos"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "stable.fake-research-aou.org"
