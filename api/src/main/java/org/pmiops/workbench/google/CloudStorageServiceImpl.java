@@ -71,4 +71,9 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
     storage.create(blobInfo, bytes);
   }
+
+  @Override
+  public JSONObject getJiraCredentials() {
+    return new JSONObject(readToString(getCredentialsBucketName(), "jira-login.json"));
+  }
 }
