@@ -4,11 +4,8 @@ import com.google.common.collect.ImmutableMultimap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
@@ -73,11 +70,8 @@ public class ConceptsController implements ConceptsApiDelegate {
   @Override
   public ResponseEntity<ConceptListResponse> searchConcepts(String workspaceNamespace,
       String workspaceId, SearchConceptsRequest request) {
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    CdrVersion cdrVersion = workspace.getCdrVersion();
-    CdrVersionContext.setCdrVersion(cdrVersion);
     Integer maxResults = request.getMaxResults();
     if (maxResults == null) {
       maxResults = DEFAULT_MAX_RESULTS;

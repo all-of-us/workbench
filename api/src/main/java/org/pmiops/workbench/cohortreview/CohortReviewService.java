@@ -24,13 +24,14 @@ public interface CohortReviewService {
     Cohort findCohort(long cohortId);
 
     /**
-     * Validate that a workspace exists for the specified workspaceId.
+     * Validate that a workspace exists for the specified workspaceId, and set the workspace's.
+     * CDR version in {@link org.pmiops.workbench.cdr.CdrVersionContext}.
      *
      * @param workspaceNamespace
      * @param workspaceName
      * @param workspaceId
      */
-    Workspace validateMatchingWorkspace(String workspaceNamespace, String workspaceName,
+    Workspace validateMatchingWorkspaceAndSetCdrVersion(String workspaceNamespace, String workspaceName,
         long workspaceId, WorkspaceAccessLevel requiredAccess);
 
     /**

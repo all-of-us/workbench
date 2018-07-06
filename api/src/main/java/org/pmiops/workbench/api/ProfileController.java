@@ -1,10 +1,14 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMap;
-import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,12 +43,12 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
-import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
+import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
@@ -443,31 +447,6 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException(
         "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
-  }
-
-  @Override
-  public ResponseEntity<Void> requestInvitationKey(String email) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    Properties props = new Properties();
-    Session session = Session.getDefaultInstance(props, null);
-    try {
-      Message msg = new MimeMessage(session);
-      msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
-      InternetAddress[] replyTo = new InternetAddress[1];
-      replyTo[0] = new InternetAddress(email);
-      msg.setReplyTo(replyTo);
-      // To test the bug reporting functionality, change the recipient email to your email rather
-      // than the group.
-      // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-          workbenchConfig.admin.supportGroup, "AofU Workbench Engineers"));
-      msg.setSubject("[AofU Invitation Key Request]");
-      msg.setText(email + " is requesting the invitation key.");
-      mailServiceProvider.get().send(msg);
-    } catch (MessagingException | UnsupportedEncodingException e) {
-      throw new EmailException("Error sending invitation key request", e);
-    }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

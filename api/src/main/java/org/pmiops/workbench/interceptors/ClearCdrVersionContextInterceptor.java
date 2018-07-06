@@ -4,13 +4,14 @@ import com.google.api.client.http.HttpMethods;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Clears the CDR version (the controller is expected to
- * then specify it based on the request using {@link CdrVersionContext#setCdrVersion(CdrVersion)
+ * then specify it based on the request using {@link CdrVersionService#setCdrVersion(CdrVersion)
  * if CDR metadata is accessed.)
  */
 @Service
