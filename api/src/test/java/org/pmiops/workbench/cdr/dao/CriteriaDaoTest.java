@@ -28,10 +28,12 @@ public class CriteriaDaoTest {
     private static final String TYPE_ICD10 = "ICD10";
     private static final String TYPE_CPT = "CPT";
     private static final String TYPE_DEMO = "DEMO";
+    private static final String TYPE_PM = "PM";
     private static final String SUBTYPE_NONE = null;
     private static final String SUBTYPE_ICD10PCS = "ICD10PCS";
     private static final String SUBTYPE_RACE = "RACE";
     private static final String SUBTYPE_AGE = "AGE";
+    private static final String SUBTYPE_BP = "BP";
 
     @Autowired
     CriteriaDao criteriaDao;
@@ -49,21 +51,24 @@ public class CriteriaDaoTest {
     private Criteria parentDemo;
     private Criteria parentIcd10;
     private Criteria childIcd10;
+    private Criteria pmCriteria;
 
     @Before
     public void setUp() {
-        icd9Criteria1 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "002", "blah chol", 0, false, true);
-        icd9Criteria2 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "001", "chol blah", 0, false, true);
-        parentDemo = createCriteria(TYPE_DEMO, SUBTYPE_RACE, "Race/Ethnicity", "Race/Ethnicity", 0, true, true);
-        demoCriteria1 = createCriteria(TYPE_DEMO, SUBTYPE_RACE, "AF", "African", parentDemo.getId(), false, true);
-        demoCriteria1a = createCriteria(TYPE_DEMO, SUBTYPE_RACE, "B", "African American", parentDemo.getId(), false, true);
-        demoCriteria2 = createCriteria(TYPE_DEMO, SUBTYPE_AGE, "Age", "demo age", 0, false, true);
-        icd10Criteria1 = createCriteria(TYPE_ICD10, SUBTYPE_NONE, "002", "icd10 test 1", 0, false, true);
-        icd10Criteria2 = createCriteria(TYPE_ICD10, SUBTYPE_NONE, "001", "icd10 test 2", 0, false, true);
-        cptCriteria1 = createCriteria(TYPE_CPT, SUBTYPE_NONE, "0039T", "zzzcptzzz", 0, false, true);
-        cptCriteria2 = createCriteria(TYPE_CPT, SUBTYPE_NONE, "0001T", "zzzCPTxxx", 0, false, true);
-        parentIcd9 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "003", "name", 0, true, true);
-        parentIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003", "name", 0, true, true);
+        icd9Criteria1 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "002", "blah chol", 0, false, true, null);
+        icd9Criteria2 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "001", "chol blah", 0, false, true, null);
+        parentDemo = createCriteria(TYPE_DEMO, SUBTYPE_RACE, "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
+        demoCriteria1 = createCriteria(TYPE_DEMO, SUBTYPE_RACE, "AF", "African", parentDemo.getId(), false, true, null);
+        demoCriteria1a = createCriteria(TYPE_DEMO, SUBTYPE_RACE, "B", "African American", parentDemo.getId(), false, true, null);
+        demoCriteria2 = createCriteria(TYPE_DEMO, SUBTYPE_AGE, "Age", "demo age", 0, false, true, null);
+        icd10Criteria1 = createCriteria(TYPE_ICD10, SUBTYPE_NONE, "002", "icd10 test 1", 0, false, true, null);
+        icd10Criteria2 = createCriteria(TYPE_ICD10, SUBTYPE_NONE, "001", "icd10 test 2", 0, false, true, null);
+        cptCriteria1 = createCriteria(TYPE_CPT, SUBTYPE_NONE, "0039T", "zzzcptzzz", 0, false, true, null);
+        cptCriteria2 = createCriteria(TYPE_CPT, SUBTYPE_NONE, "0001T", "zzzCPTxxx", 0, false, true, null);
+        parentIcd9 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "003", "name", 0, true, true, null);
+        parentIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003", "name", 0, true, true, null);
+        pmCriteria = createCriteria(TYPE_PM, SUBTYPE_BP, "1", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true,
+          "[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['90']},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['60']}]");
 
         criteriaDao.save(icd9Criteria1);
         criteriaDao.save(icd9Criteria2);
@@ -77,10 +82,11 @@ public class CriteriaDaoTest {
         criteriaDao.save(cptCriteria2);
         criteriaDao.save(parentIcd9);
         criteriaDao.save(parentIcd10);
-        childIcd9 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "003.1", "name", parentIcd9.getId(), false, true);
+        childIcd9 = createCriteria(TYPE_ICD9, SUBTYPE_NONE, "003.1", "name", parentIcd9.getId(), false, true, null);
         criteriaDao.save(childIcd9);
-        childIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003.1", "name", parentIcd10.getId(), false, true);
+        childIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003.1", "name", parentIcd10.getId(), false, true, null);
         criteriaDao.save(childIcd10);
+        criteriaDao.save(pmCriteria);
     }
 
     @After
@@ -99,21 +105,25 @@ public class CriteriaDaoTest {
         criteriaDao.delete(parentDemo);
         criteriaDao.delete(parentIcd10);
         criteriaDao.delete(childIcd10);
+        criteriaDao.delete(pmCriteria);
     }
 
     @Test
     public void findCriteriaByParentId() throws Exception {
-        final List<Criteria> icd9List = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(TYPE_ICD9, 0L);
-        assertEquals(icd9Criteria2, icd9List.get(0));
-        assertEquals(icd9Criteria1, icd9List.get(1));
+        final List<Criteria> icd9List = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(TYPE_ICD9, 0L);
+        assertEquals(icd9Criteria1, icd9List.get(0));
+        assertEquals(icd9Criteria2, icd9List.get(1));
 
-        final List<Criteria> icd10List = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(TYPE_ICD10, 0L);
-        assertEquals(icd10Criteria2, icd10List.get(0));
-        assertEquals(icd10Criteria1, icd10List.get(1));
+        final List<Criteria> icd10List = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(TYPE_ICD10, 0L);
+        assertEquals(icd10Criteria1, icd10List.get(0));
+        assertEquals(icd10Criteria2, icd10List.get(1));
 
-        final List<Criteria> cptList = criteriaDao.findCriteriaByTypeAndParentIdOrderByCodeAsc(TYPE_CPT, 0L);
-        assertEquals(cptCriteria2, cptList.get(0));
-        assertEquals(cptCriteria1, cptList.get(1));
+        final List<Criteria> cptList = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(TYPE_CPT, 0L);
+        assertEquals(cptCriteria1, cptList.get(0));
+        assertEquals(cptCriteria2, cptList.get(1));
+
+        final List<Criteria> pmList = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(TYPE_PM, 0L);
+        assertEquals(pmCriteria, pmList.get(0));
     }
 
     @Test
@@ -140,7 +150,14 @@ public class CriteriaDaoTest {
         assertEquals("Condition", icd10DomainList.get(0));
     }
 
-    private Criteria createCriteria(String type, String subtype, String code, String name, long parentId, boolean group, boolean selectable) {
+    private Criteria createCriteria(String type,
+                                    String subtype,
+                                    String code,
+                                    String name,
+                                    long parentId,
+                                    boolean group,
+                                    boolean selectable,
+                                    String predefinedAttributes) {
         return new Criteria()
                 .code(code)
                 .count("10")
@@ -151,7 +168,9 @@ public class CriteriaDaoTest {
                 .name(name)
                 .parentId(parentId)
                 .type(type)
-                .subtype(subtype);
+                .subtype(subtype)
+                .attribute(Boolean.FALSE)
+                .predefinedAttributes(predefinedAttributes);
     }
 
 }
