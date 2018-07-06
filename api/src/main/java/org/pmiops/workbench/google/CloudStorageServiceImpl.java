@@ -55,14 +55,13 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Bucket demoBucket = storage.get(getDemosBucketName());
 
-    List<JSONObject> cohortFiles = StreamSupport
+    return StreamSupport
         .stream(demoBucket.list().getValues().spliterator(), false)
         .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
         .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
         .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase("cohort"))
         .map(jsonObject -> jsonObject.getJSONObject("cohort"))
         .collect(Collectors.toList());
-    return cohortFiles;
   }
 
   @Override
