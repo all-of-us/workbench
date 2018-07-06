@@ -35,7 +35,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   private static final String CONCEPT_ID = "conceptId";
   private static final List<String> PM_TYPES_WITH_ATTR =
     Arrays.asList(BLOOD_PRESSURE, HEART_RATE_DETAIL, HEIGHT, WEIGHT, BMI, WC, HC);
-  ImmutableMap<String, Object> exceptionText = ImmutableMap.<String, Object>builder()
+  ImmutableMap<String, String> exceptionText = ImmutableMap.<String, String>builder()
     .put(HEART_RATE_DETAIL, "Heart Rate")
     .put(HEIGHT, "Height")
     .put(WEIGHT, "Weight")
