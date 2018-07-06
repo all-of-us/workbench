@@ -368,7 +368,9 @@ export class CohortSearchActions {
 
     if (param.type.match(/^DEMO.*/i)) {
       param.conceptId = immParam.get('conceptId');
-      param.attribute = immParam.get('attribute');
+      param.attributes = immParam.get('attributes');
+    } else if (param.type.match(/^PM.*/i)) {
+      param.attributes = immParam.get('attributes');
     } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
       param.domain = immParam.get('domainId');
     }
