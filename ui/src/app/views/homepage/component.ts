@@ -19,13 +19,7 @@ import {
 
 export class HomepageComponent implements OnInit, OnDestroy {
   AouLogoFooter = '/assets/images/all-of-us-logo-footer.svg';
-  tipHeadline = 'Welcome Back to All of Us!';
-  tipSubtitle = 'Thanks for returning.';
-  tipDetail = 'You can use the buttons below to view your workspaces, ' +
-    'or create a new one. Please do not hesitate to use the "Report a Bug" ' +
-    'button below (or found at any time via the Profile menu) ' +
-    'if you experience any difficulties.';
-  tipButton = 'REPORT A BUG';
+  firstTimeUser = false;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -47,6 +41,21 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
+  cardDetails = [
+      {
+          position: 'left',
+          title: 'Browse All of Us Data',
+          text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+          'dolore. Mirum est notare, quam littera gothica quam nunc.',
+          icon: '/assets/icons/browse-data.svg'
+      },
+      {
+          position: 'right',
+          title: 'Explore Public Work',
+          text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet dolore. ' +
+            'Mirum est notare, quam littera gothica quam nunc.',
+          icon: '/assets/icons/explore.svg'
+      }];
   private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -77,12 +86,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
       this.profile = profile;
       this.reloadSpinner();
       if (profile.firstSignInTime === null) {
-        this.tipHeadline = 'Welcome to All of Us';
-        this.tipSubtitle = 'This is your first visit with us!';
-        this.tipDetail = 'We are setting up your account. When this process is ' +
-          'completed you will be able to use the "Create a Workspace" button ' +
-          'below to create a new Workspace.';
-        this.tipButton = '';
+        this.firstTimeUser = true;
       }
     });
     this.profileStorageService.reload();
