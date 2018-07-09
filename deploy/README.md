@@ -2,7 +2,8 @@
 
 This directory contains scripts for deploying the Workbench API/UIs. To deploy
 individual services, see [../api/project.rb](../api/project.rb) `deploy-api` and
-`deploy-public-api` and [../ui/project.rb](../ui/project.rb) `deploy-ui`. Test
+`deploy-public-api` and [../ui/project.rb](../ui/project.rb) `deploy-ui` 
+and [../public-ui/project.rb](../public-ui/project.rb) `deploy-ui`. Test
 and staging are automatically pushed by CircleCI.
 
 - test: pushed by Circle on every master branch merge

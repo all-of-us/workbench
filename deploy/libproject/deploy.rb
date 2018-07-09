@@ -268,6 +268,16 @@ def deploy(cmd_name, args)
       --quiet
   }
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
+  common.run_inline %W{
+    ../public-ui/project.rb deploy-ui
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      --key-file #{op.opts.key_file}
+      --version #{op.opts.app_version}
+                    #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+  }
+  maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
