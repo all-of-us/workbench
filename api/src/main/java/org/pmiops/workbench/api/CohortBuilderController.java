@@ -64,7 +64,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                 .selectable(criteria.getSelectable())
                                 .conceptId(StringUtils.isEmpty(criteria.getConceptId()) ? null : new Long(criteria.getConceptId()))
                                 .domainId(criteria.getDomainId())
-                                .attribute(criteria.getAttribute())
+                                .hasAttributes(criteria.getAttribute())
                                 .predefinedAttributes(predefinedAttributes);
                 }
             };

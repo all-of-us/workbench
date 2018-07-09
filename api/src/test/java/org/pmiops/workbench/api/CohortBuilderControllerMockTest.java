@@ -68,7 +68,7 @@ public class CohortBuilderControllerMockTest {
                         .selectable(false)
                         .count(0L)
                         .conceptId(0L)
-                        .attribute(false));
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
         verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("ICD9", 0L);
@@ -105,7 +105,7 @@ public class CohortBuilderControllerMockTest {
                         .count(0L)
                         .conceptId(12L)
                         .subtype("AGE")
-                        .attribute(false));
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
         verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("DEMO", 0L);
@@ -140,7 +140,7 @@ public class CohortBuilderControllerMockTest {
                         .selectable(true)
                         .count(0L)
                         .conceptId(0L)
-                        .attribute(false));
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
         verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("ICD10", 0L);
@@ -175,7 +175,7 @@ public class CohortBuilderControllerMockTest {
                         .selectable(true)
                         .count(0L)
                         .conceptId(0L)
-                        .attribute(false));
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
         verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("CPT", 0L);
@@ -209,7 +209,7 @@ public class CohortBuilderControllerMockTest {
                         .selectable(true)
                         .count(0L)
                         .conceptId(0L)
-                        .attribute(false)
+                        .hasAttributes(false)
                         .predefinedAttributes(
                           Arrays.asList(
                           new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L),
@@ -251,7 +251,7 @@ public class CohortBuilderControllerMockTest {
                         .selectable(true)
                         .count(100L)
                         .conceptId(0L)
-                        .attribute(false));
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
         verify(mockCriteriaDao).findCriteriaByTypeAndSubtypeOrderByNameAsc("DEMO", "RACE");
@@ -286,7 +286,7 @@ public class CohortBuilderControllerMockTest {
                         .selectable(true)
                         .count(0L)
                         .conceptId(0L)
-                        .attribute(false));
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
         verify(mockCriteriaDao).findCriteriaByTypeAndNameOrCode("PHECODE", "infect*");

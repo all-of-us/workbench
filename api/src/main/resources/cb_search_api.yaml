@@ -196,7 +196,7 @@ definitions:
       - name
       - group
       - selectable
-      - attribute
+      - hasAttribute
       - predefinedAttributes
     properties:
       id:
@@ -241,7 +241,7 @@ definitions:
           for leaves in the tree. Parents don't have domain ids and concept
           id will be used in the case that a parent is selectable.
         type: string
-      attribute:
+      hasAttributes:
         description: specifies if extra attributes are needed
         type: boolean
       predefinedAttributes:
