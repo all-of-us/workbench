@@ -10,7 +10,7 @@ z40=0000000000000000000000000000000000000000
 
 while read local_ref local_sha remote_ref remote_sha
 do
-  echo "Hook inputs: $local_ref $local_sha $remote_ref $remote_sha"
+
   # Lint ui
   cd ui
   has_ts=0
@@ -37,7 +37,6 @@ do
 
   # Lint public-ui
   cd ../public-ui
-  echo "Hook inputs: $local_ref $local_sha $remote_ref $remote_sha"
 
   has_ts=0
   if [ "$local_sha" = $z40 ]; then
@@ -48,7 +47,7 @@ do
       # New remote branch.
       has_ts=1
     else
-      files=`git diff --name-only "$remote_sha..$local_sha" | grep ^public-ui`
+      files=$(git diff --name-only "$remote_sha..$local_sha")
 
       [ -n "`echo $files | grep ^public-ui\/.*\.ts$`" ] && has_ts=1
     fi
@@ -60,6 +59,7 @@ do
       echo "No public-ui files changed to lint."
     fi
   fi
+
 done
 
 
