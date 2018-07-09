@@ -41,8 +41,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute,
               private api: DataBrowserService
-              //public responsiveSizeInfoRx: ResponsiveSizeInfoRx,
-              //public userAgentInfoRx: UserAgentInfoRx
+              // public responsiveSizeInfoRx: ResponsiveSizeInfoRx,
+              // public userAgentInfoRx: UserAgentInfoRx
   ) {
     this.route.params.subscribe(params => {
       this.domainId = params.id;
@@ -96,7 +96,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
 
     if (this.dbDomain) {
-      // Run search initially filter to domain, a empty search returns top ordered by count_value desc
+      // Run search initially filter to domain,
+      // a empty search returns top ordered by count_value desc
       this.subscriptions.push(this.searchDomain(this.prevSearchText).subscribe(results =>
         this.searchCallback(results)));
 
@@ -108,7 +109,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
         .subscribe(results => this.searchCallback(results)));
 
       // Set to loading as long as they are typing
-      this.subscriptions.push(this.searchText.valueChanges.subscribe((query) => this.loading = true ));
+      this.subscriptions.push(this.searchText.valueChanges.subscribe(
+        (query) => this.loading = true ));
     }
   }
 
@@ -127,7 +129,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.standardConcepts = this.searchResult.standardConcepts;
     }
     this.top10Results = this.searchResult.items.slice(0, 10);
-    // Set the localStorage to empty so making a new search here does not follow them if they hit back button
+    // Set the localStorage to empty so making a new search here does not follow to other pages
     localStorage.setItem('searchText', '');
     this.loading = false;
   }

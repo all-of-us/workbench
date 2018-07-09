@@ -1,7 +1,7 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import {Concept} from '../../../publicGenerated/model/concept';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {ISubscription} from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
-import {ISubscription} from "rxjs/Subscription";
+import {Concept} from '../../../publicGenerated/model/concept';
 
 
 @Component({
@@ -41,7 +41,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log("unsubscribing concept-charts");
+    console.log('unsubscribing concept-charts');
     this.subscription.unsubscribe();
     this.subscription2.unsubscribe();
   }

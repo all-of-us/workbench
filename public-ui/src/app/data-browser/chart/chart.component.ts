@@ -36,7 +36,8 @@ const CHART_TITLE_STYLE = {
   'color': '#302C71', 'font-family': 'Gotham HTF',	'font-size': '14px', 'font-weight': '300'
 };
 const DATA_LABEL_STYLE = {
-  'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px', 'font-weight': '300', 'textOutline': 'none'
+  'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px',
+  'font-weight': '300', 'textOutline': 'none'
 };
 
 @Component({
@@ -269,7 +270,9 @@ export class ChartComponent implements OnChanges {
     let data = [];
     let cats = [];
     for (const a  of this.concepts) {
-      data.push({name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ', y: a.countValue});
+      data.push({
+        name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ',
+        y: a.countValue });
       if (!this.sources) {
         cats.push(a.conceptName);
       } else {
@@ -415,7 +418,8 @@ export class ChartComponent implements OnChanges {
     let cats = [];
     for (const a  of results) {
       // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
-      const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] : AGE_COLORS[a.stratum5];
+      const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] :
+        AGE_COLORS[a.stratum5];
       data.push({name: a.analysisStratumName
         , y: a.countValue, color: color});
       cats.push(a.analysisStratumName

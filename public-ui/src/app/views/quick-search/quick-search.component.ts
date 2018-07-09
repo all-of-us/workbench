@@ -9,8 +9,8 @@ import 'rxjs/add/operator/switchMap';
 import { Observable } from 'rxjs/Rx';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
-import {DbDomain} from "../../../publicGenerated/model/dbDomain";
 
 
 @Component({
@@ -21,7 +21,8 @@ import {DbDomain} from "../../../publicGenerated/model/dbDomain";
 export class QuickSearchComponent implements OnInit, OnDestroy {
   pageImage = '/assets/db-images/man-standing.png';
   title = 'Quick Guided Search';
-  subTitle = 'Enter keywords to search EHR data and survey modules. Or click on an EHR domain or survey.';
+  subTitle = 'Enter keywords to search EHR data and survey modules. ' +
+    'Or click on an EHR domain or survey.';
   searchResults = [];
   domainResults = [];
   surveyResults = [];
@@ -49,10 +50,10 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
 
     // Set title based on datatype
     if (this.dataType === this.EHR_DATATYPE) {
-      this.title = "Electronic Health Data"
+      this.title = 'Electronic Health Data';
     }
     if (this.dataType === this.SURVEY_DATATYPE) {
-      this.title = "Participant Survey Data"
+      this.title = 'Participant Survey Data';
     }
     // Get search result from localStorage
     this.prevSearchText = localStorage.getItem('searchText');
@@ -97,19 +98,20 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     );
 
     // Set to loading as long as they are typing
-    this.subscriptions.push(this.searchText.valueChanges.subscribe((query) => this.loading = true ));
+    this.subscriptions.push(this.searchText.valueChanges.subscribe(
+      (query) => this.loading = true ));
   }
   ngOnDestroy() {
-    for (const s of this.subscriptions){
+    for (const s of this.subscriptions) {
       s.unsubscribe();
     }
   }
 
   public showDataType(showType) {
-    return !this.loading && (this.dataType == this.ANY_DATATYPE  || this.dataType === showType);
+    return !this.loading && (this.dataType === this.ANY_DATATYPE  || this.dataType === showType);
   }
 
-  private searchCallback(results:DbDomainListResponse) {
+  private searchCallback(results: DbDomainListResponse) {
     this.searchResults = results.items;
     this.domainResults = results.items.filter(d => d.dbType === 'domain_filter');
     this.surveyResults = results.items.filter(s => s.dbType === 'survey');

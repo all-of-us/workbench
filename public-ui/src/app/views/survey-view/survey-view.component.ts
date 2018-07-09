@@ -28,7 +28,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   resultsComplete = false;
   private subscriptions: ISubscription[] = [];
   loading = false;
-  surveyPdfUrl='/assets/surveys/AoU PPI_Basics_version_2018.06.04.docx';
+  surveyPdfUrl = '/assets/surveys/AoU PPI_Basics_version_2018.06.04.docx';
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -66,11 +66,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
 
         // Add Did not answer to each question
-        for (let q of this.surveyResult.items) {
+        for (const q of this.surveyResult.items) {
           // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
           let didNotAnswerCount  = this.survey.countValue;
-          for (let a of q.countAnalysis.results) {
+          for (const a of q.countAnalysis.results) {
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
 
@@ -78,10 +78,16 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           const result = q.countAnalysis.results[0];
           if (didNotAnswerCount < 0 ) { didNotAnswerCount = 0; }
           const notAnswerPercent = this.countPercentage(didNotAnswerCount);
-          let didNotAnswerResult = {
-            analysisId : result.analysisId, countValue: didNotAnswerCount , countPercent: notAnswerPercent,
-            stratum1: result.stratum1, stratum2: result.stratum2, stratum3: result.stratum3, stratum4: "Did not answer",
-            stratum5: result.stratum5};
+          const didNotAnswerResult = {
+            analysisId : result.analysisId,
+            countValue: didNotAnswerCount ,
+            countPercent: notAnswerPercent,
+            stratum1: result.stratum1,
+            stratum2: result.stratum2,
+            stratum3: result.stratum3,
+            stratum4: 'Did not answer',
+            stratum5: result.stratum5
+          };
           q.countAnalysis.results.push(didNotAnswerResult);
         }
 
@@ -109,8 +115,8 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         .distinctUntilChanged()
         .subscribe((query) => { this.filterResults(); } ));
     // Set to loading as long as they are typing
-    this.subscriptions.push(this.searchText.valueChanges.subscribe((query) => this.loading = true ));
-
+    this.subscriptions.push(this.searchText.valueChanges.subscribe(
+      (query) => this.loading = true ));
   }
 
   ngOnDestroy() {
@@ -131,7 +137,9 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     const text = this.searchText.value;
 
     let words = text.split(new RegExp(',| | and | or '));
-    words = words.filter(w => w.length > 0 && w.toLowerCase() != 'and' && w.toLowerCase() != 'or');
+    words = words.filter(w => w.length > 0
+      && w.toLowerCase() !== 'and'
+      && w.toLowerCase() !== 'or');
     const reString = words.join('|');
     // If doing an and search match all words
     if (this.searchMethod === 'and') {

@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ISubscription } from 'rxjs/Subscription';
+import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 @Component({
   selector: 'app-surveys',
   templateUrl: './surveys.component.html',
@@ -30,8 +30,8 @@ export class SurveysComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
   public viewResults(r) {
-    localStorage.setItem("dbDomain", JSON.stringify(r));
-    localStorage.setItem("searchText", '');
+    localStorage.setItem('dbDomain', JSON.stringify(r));
+    localStorage.setItem('searchText', '');
     this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
   }
 
