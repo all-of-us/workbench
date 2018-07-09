@@ -64,17 +64,12 @@ export class ChartComponent implements OnChanges {
     highcharts.setOptions({
       lang: { thousandsSep: ',' },
     });
-    //Peter Test lint Drilldown removed
   }
 
+  /* Todo -- maybe use this in future
   saveInstance(chartInstance: any) {
     this.chartInstance = chartInstance;
-    if (1 == 2) {
-      //Lint error
-      console.log('lint_error' + "Lint error");
-      console.log('lint_error' + "Lint error");
-    }
-  }
+  }*/
 
   // Render new chart on changes
   ngOnChanges() {
