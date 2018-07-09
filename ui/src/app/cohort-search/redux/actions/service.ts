@@ -364,6 +364,7 @@ export class CohortSearchActions {
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
+      attributes: []
     };
 
     if (param.type.match(/^DEMO.*/i)) {
