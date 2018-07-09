@@ -12,7 +12,7 @@ import {
 } from '../redux';
 import {typeToTitle} from '../utils';
 
-import {CRITERIA_TYPES} from '../constant';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 
 @Component({
   selector: 'app-modal',
@@ -52,7 +52,13 @@ export class ModalComponent implements OnInit, OnDestroy {
       .subscribe(ctype => {
         this.ctype = ctype;
         this.title = 'Codes';
-        for (const crit of CRITERIA_TYPES) {
+        for (const crit of DOMAIN_TYPES) {
+          const regex = new RegExp(`.*${crit.type}.*`, 'i');
+          if (regex.test(this.ctype)) {
+            this.title = crit.name;
+          }
+        }
+        for (const crit of PROGRAM_TYPES) {
           const regex = new RegExp(`.*${crit.type}.*`, 'i');
           if (regex.test(this.ctype)) {
             this.title = crit.name;
