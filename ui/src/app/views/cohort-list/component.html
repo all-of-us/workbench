@@ -5,7 +5,7 @@
 <div class="card-area">
   <div *ngIf="!cohortsLoading">
     <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
-         [class.disabled]="awaitingReview || !writePermission" (click)="buildCohort()">
+         [class.disabled]="awaitingReview || !writePermission" (click)="awaitingReview || !writePermission || buildCohort()">
       <div class="create-text">
         Create a <br/>New Cohort
         <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
