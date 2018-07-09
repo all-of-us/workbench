@@ -1267,6 +1267,8 @@ def deploy(cmd_name, args)
     common.status "Pushing GCS artifacts..."
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
 
+    deploy_gcs_demos(cmd_name, %W{--project #{ctx.project}})
+
     # Keep the cloud proxy context open for the service account credentials.
     deploy_args = %W{
       --project #{gcc.project}
