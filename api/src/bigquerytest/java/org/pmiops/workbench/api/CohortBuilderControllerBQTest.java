@@ -584,6 +584,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsBloodPressureAny() throws Exception {
+    List<Attribute> attributes = Arrays.asList(
+      new Attribute().name("Systolic").operator(Operator.ANY).operands(new ArrayList<>()).conceptId(903118L),
+      new Attribute().name("Diastolic").operator(Operator.ANY).operands(new ArrayList<>()).conceptId(903115L)
+    );
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_BP, "BP Name", attributes);
+    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsBloodPressureOrHeartRateDetailOrHeartRateIrr() throws Exception {
     List<Attribute> bpAttributes = Arrays.asList(
       new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L),
