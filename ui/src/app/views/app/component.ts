@@ -35,6 +35,10 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (1 == 2) {
+      //Lint error
+      console.log('lint_error' + "Lint error");
+    }
     this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
     this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
     window['setAllOfUsApiUrl'] = (url: string) => {
