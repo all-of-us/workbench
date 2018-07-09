@@ -1,3 +1,6 @@
 {
-  "extends": "../common-ui/tslint.json"
+  "extends": "../common-ui/tslint.json",
+  "rulesDirectory": [
+    "../ui/node_modules/codelyzer"
+  ]
 }
