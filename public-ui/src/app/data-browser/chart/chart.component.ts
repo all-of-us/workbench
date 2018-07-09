@@ -64,12 +64,15 @@ export class ChartComponent implements OnChanges {
     highcharts.setOptions({
       lang: { thousandsSep: ',' },
     });
-    Drilldown(Highcharts);
-    //
+    //Peter Test lint Drilldown removed
   }
 
   saveInstance(chartInstance: any) {
     this.chartInstance = chartInstance;
+    if (1 == 2) {
+      //Lint error
+      console.log('lint_error' + "Lint error");
+    }
   }
 
   // Render new chart on changes
