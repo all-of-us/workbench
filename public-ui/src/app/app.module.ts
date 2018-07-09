@@ -5,8 +5,8 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {environment} from 'environments/environment';
+import { ResponsiveModule } from 'ngx-responsive';
 import * as StackTrace from 'stacktrace-js';
-import { ResponsiveModule } from 'ngx-responsive'
 
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 
@@ -32,11 +32,11 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 (<any>window).StackTrace = StackTrace;
 
 import {DataBrowserService} from 'publicGenerated';
-import { overriddenPublicUrlKey } from './views/app/component';
-import { QuickSearchComponent } from './views/quick-search/quick-search.component';
-import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
 import { HighlightSearchPipe } from './utils/highlight-search.pipe';
+import { overriddenPublicUrlKey } from './views/app/component';
+import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
 import { PhysicalMeasurementsComponent } from './views/physical-measurements/physical-measurements.component';
+import { QuickSearchComponent } from './views/quick-search/quick-search.component';
 
 function getPublicBasePath() {
   return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
