@@ -35,7 +35,7 @@ import {DataBrowserService} from 'publicGenerated';
 import { HighlightSearchPipe } from './utils/highlight-search.pipe';
 import { overriddenPublicUrlKey } from './views/app/component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
-import { PhysicalMeasurementsComponent } from './views/physical-measurements/physical-measurements.component';
+import { PhysicalMeasurementsComponent } from './views/pm/pm.component';
 import { QuickSearchComponent } from './views/quick-search/quick-search.component';
 
 function getPublicBasePath() {

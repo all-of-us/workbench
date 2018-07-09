@@ -304,49 +304,8 @@ export class ChartComponent implements OnChanges {
       chart: {
         type: 'column',
         backgroundColor: this.backgroundColor,
-
-        /*drilldown: function (e) {
-          console.log('drilldown ', e);
-          if (!e.seriesOptions) {
-            const chart = this,
-              drilldowns = {
-                'Animals': {
-                  name: 'Animals',
-                  data: [
-                    ['Cows', 2],
-                    ['Sheep', 3]
-                  ]
-                },
-                'Fruits': {
-                  name: 'Fruits',
-                  data: [
-                    ['Apples', 5],
-                    ['Oranges', 7],
-                    ['Bananas', 2]
-                  ]
-                },
-                'Cars': {
-                  name: 'Cars',
-                  data: [
-                    ['Toyota', 1],
-                    ['Volkswagen', 2],
-                    ['Opel', 5]
-                  ]
-                }
-              },
-              series = drilldowns['Cars'];
-            // Show the loading label
-            chart.showLoading('Simulating Ajax ...');
-
-            setTimeout(function () {
-              chart.hideLoading();
-              chart.addSeriesAsDrilldown(e.point, series);
-            }, 1000);
-          }
-
-        }*/
-      }, // '#ECF1F4'
-      title: { text: null, style: CHART_TITLE_STYLE }, // can pass chartTitle input
+      },
+      title: { text: null, style: CHART_TITLE_STYLE },
       series: series,
       categories: cats,
       pointWidth: this.pointWidth

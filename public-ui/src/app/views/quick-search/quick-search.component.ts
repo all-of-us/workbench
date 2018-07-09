@@ -34,7 +34,6 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   dataType = null;
   EHR_DATATYPE = 'ehr';
   SURVEY_DATATYPE = 'surveys';
-  ANY_DATATYPE = null;
 
   private subscriptions: ISubscription[] = [];
 
@@ -77,7 +76,6 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.api.getDomainTotals().subscribe((data: DbDomainListResponse) => {
         this.domains = data.items;
-        console.log(this.domains);
         // Only set results to the totals if we don't have a searchText
         if (!this.prevSearchText) {
           this.searchCallback(data);
@@ -108,7 +106,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   }
 
   public showDataType(showType) {
-    return !this.loading && (this.dataType === this.ANY_DATATYPE  || this.dataType === showType);
+    return !this.loading && (!this.dataType || this.dataType === showType);
   }
 
   private searchCallback(results: DbDomainListResponse) {

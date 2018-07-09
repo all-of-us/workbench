@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PhysicalMeasurementsComponent } from './physical-measurements.component';
+import { PhysicalMeasurementsComponent } from './pm.component';
 
 describe('PhysicalMeasurementsComponent', () => {
   let component: PhysicalMeasurementsComponent;
