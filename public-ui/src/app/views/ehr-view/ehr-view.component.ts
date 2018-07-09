@@ -33,7 +33,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   loading = true;
   minParticipantCount = 0;
   totalParticipants: number;
-  top10Results = [];
+  top10Results = []; // We graph top10 results
   screenWidth: any;
 
   private searchRequest: SearchConceptsRequest;
