@@ -26,7 +26,39 @@ do
     fi
 
     if [[ $has_ts -eq 1 ]]; then
+      echo "Linting ui..."
       ./project.rb lint
+    else
+      echo "No public-ui files changed to lint."
+    fi
+  fi
+done
+
+# Lint public-ui
+cd ../public-ui
+pwd
+
+while read local_ref local_sha remote_ref remote_sha
+do
+  has_ts=1
+  if [ "$local_sha" = $z40 ]; then
+    # branch deleted
+    :
+  else
+    if [ "$remote_sha" = $z40 ]; then
+      # New remote branch.
+      has_ts=1
+    else
+      files=$(git diff --name-only "$remote_sha..$local_sha")
+
+      [ -n "`echo $files | grep \.ts$`" ] && has_ts=1
+    fi
+
+    if [[ $has_ts -eq 1 ]]; then
+      echo "Linting public-ui... "
+      ./project.rb lint
+    else
+      echo "No public-ui files changed to lint."
     fi
   fi
 done
