@@ -1039,8 +1039,6 @@ def deploy_gcs_artifacts(cmd_name, args)
   op.parse.validate
   gcc.validate
   common.run_inline %W{gsutil cp scripts/setup_notebook_cluster.sh gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
-  common.run_inline %W{gsutil rm gs://#{gcc.project}-demos/**}
-  common.run_inline %W{gsutil cp demos/* gs://#{gcc.project}-demos/}
   # This file must be readable by all AoU researchers and the Leonardo service
   # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make it
   # public since the script's source is public anyways.
@@ -1051,6 +1049,24 @@ Common.register_command({
   :invocation => "deploy-gcs-artifacts",
   :description => "Deploys any GCS artifacts associated with this environment.",
   :fn => ->(*args) { deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
+})
+
+def deploy_gcs_demos(cmd_name, args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  common.run_inline %W{gsutil rm gs://#{gcc.project}-demos/**}
+  common.run_inline %W{gsutil cp demos/* gs://#{gcc.project}-demos/}
+end
+
+Common.register_command({
+  :invocation => "deploy-gcs-demos",
+  :description => "Deploys any GCS demos associated with this environment.",
+  :fn => ->(*args) { deploy_gcs_demos("deploy-gcs-demos", args) }
 })
 
 
