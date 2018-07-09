@@ -27,6 +27,7 @@ const zeroCrit = fromJS({
   type: 'icd9',
   group: false,
   domainId: null,
+  attributes: [],
 });
 
 const oneCrit = fromJS({
@@ -37,6 +38,7 @@ const oneCrit = fromJS({
   type: 'icd9',
   group: true,
   domainId: null,
+  attributes: [],
 });
 
 const DEMO_crit = fromJS({
@@ -49,7 +51,7 @@ const DEMO_crit = fromJS({
   group: false,
   conceptId: 12345,
   domainId: null,
-  attributes: null,
+  attributes: [],
 });
 
 const groups = fromJS({
@@ -90,6 +92,7 @@ const expectedSR = {
           subtype: '',
           group: false,
           domain: null,
+          attributes: []
         }, {
           parameterId: 'param1',
           name: 'CodeB',
@@ -98,6 +101,7 @@ const expectedSR = {
           subtype: '',
           group: true,
           domain: null,
+          attributes: []
         }],
       modifiers: [],
     }]
@@ -206,6 +210,7 @@ describe('CohortSearchActions', () => {
               subtype: '',
               group: false,
               domain: null,
+              attributes: []
             }, {
               parameterId: 'param1',
               name: 'CodeB',
@@ -214,6 +219,7 @@ describe('CohortSearchActions', () => {
               subtype: '',
               group: true,
               domain: null,
+              attributes: []
           }],
           modifiers: [],
         }]
@@ -230,6 +236,7 @@ describe('CohortSearchActions', () => {
               subtype: '',
               group: false,
               domain: null,
+              attributes: []
             }, {
               parameterId: 'param1',
               name: 'CodeB',
@@ -238,6 +245,7 @@ describe('CohortSearchActions', () => {
               subtype: '',
               group: true,
               domain: null,
+              attributes: []
           }],
           modifiers: [],
         }]
@@ -295,6 +303,7 @@ describe('CohortSearchActions', () => {
       subtype: '',
       group: false,
       domain: null,
+      attributes: []
     });
     // Demographics
     const demoParam = actions.mapParameter(DEMO_crit);
@@ -306,7 +315,7 @@ describe('CohortSearchActions', () => {
       subtype: 'GEN',
       group: false,
       conceptId: 12345,
-      attributes: null,
+      attributes: DEMO_crit.get('attributes'),
     });
   });
 });
