@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -126,15 +127,15 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     if (parameter.getSubtype().equals(BLOOD_PRESSURE)) {
       List<Attribute> systolicAttrs =
         parameter.getAttributes().stream()
-          .filter(validationUtil.nameIsSystolic()
-              .and(validationUtil.operatorWithCorrectOperands())
-              .and(validationUtil.conceptIdNotNull())::apply)
+          .filter(nameIsSystolic()
+              .and(operatorWithCorrectOperands())
+              .and(conceptIdNotNull())::test)
           .collect(Collectors.toList());
       List<Attribute> diatolicAttrs =
         parameter.getAttributes().stream()
-          .filter(validationUtil.nameIsDiastolic()
-              .and(validationUtil.operatorWithCorrectOperands())
-              .and(validationUtil.conceptIdNotNull())::apply)
+          .filter(nameIsDiastolic()
+              .and(operatorWithCorrectOperands())
+              .and(conceptIdNotNull())::test)
           .collect(Collectors.toList());
       if (systolicAttrs.size() != 1 || diatolicAttrs.size() != 1) {
         throw new BadRequestException("Please provide valid search attributes(name, operator, operands and conceptId) for Systolic and Diastolic.");
@@ -142,8 +143,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     } else if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
       List<Attribute> attrs =
         parameter.getAttributes().stream()
-          .filter(validationUtil.operatorWithCorrectOperands()
-            .and(validationUtil.conceptIdNotNull())::apply)
+          .filter(operatorWithCorrectOperands()
+            .and(conceptIdNotNull())::test)
           .collect(Collectors.toList());
       if (attrs.size() != 1) {
         throw new BadRequestException("Please provide valid search attributes(operator, operands) for "
@@ -164,34 +165,28 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     return FactoryKey.PM;
   }
 
-  interface validationUtil extends Function<Attribute, Boolean> {
-    static validationUtil nameIsSystolic() {
-      return attribute -> "Systolic".equals(attribute.getName());
-    }
+  public static Predicate<Attribute> nameIsSystolic() {
+    return attribute -> "Systolic".equals(attribute.getName());
+  }
 
-    static validationUtil nameIsDiastolic() {
-      return attribute -> "Diastolic".equals(attribute.getName());
-    }
+  public static Predicate<Attribute> nameIsDiastolic() {
+    return attribute -> "Diastolic".equals(attribute.getName());
+  }
 
-    static validationUtil conceptIdNotNull() {
-      return attribute -> attribute.getConceptId() != null;
-    }
+  public static Predicate<Attribute> conceptIdNotNull() {
+    return attribute -> attribute.getConceptId() != null;
+  }
 
-    static validationUtil operatorWithCorrectOperands() {
-      return attribute ->
-        (attribute.getOperator() != null
+  public static Predicate<Attribute> operatorWithCorrectOperands() {
+    return attribute ->
+      (attribute.getOperator() != null
         && !attribute.getOperator().equals(Operator.BETWEEN)
         && attribute.getOperands().size() == 1
         && StringUtils.isNumeric(attribute.getOperands().get(0)))
-          || (attribute.getOperator() != null
+        || (attribute.getOperator() != null
         && attribute.getOperator().equals(Operator.BETWEEN)
         && attribute.getOperands().size() == 2
         && StringUtils.isNumeric(attribute.getOperands().get(0)))
         && StringUtils.isNumeric(attribute.getOperands().get(1));
-    }
-
-    default validationUtil and(validationUtil other) {
-      return attribute -> this.apply(attribute) && other.apply(attribute);
-    }
   }
 }
