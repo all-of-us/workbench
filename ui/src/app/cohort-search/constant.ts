@@ -1,6 +1,6 @@
 export const PROGRAM_TYPES = [
   { name: 'Surveys',    type: 'surveys', children: [], disabled: true },
-  { name: 'Physical Measurements',    type: 'pm' },
+  { name: 'Physical Measurements',    type: 'pm', disabled: true },
 ];
 
 export const DOMAIN_TYPES = [
