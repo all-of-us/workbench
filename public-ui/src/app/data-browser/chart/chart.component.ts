@@ -72,6 +72,7 @@ export class ChartComponent implements OnChanges {
     if (1 == 2) {
       //Lint error
       console.log('lint_error' + "Lint error");
+      console.log('lint_error' + "Lint error");
     }
   }
 

@@ -38,6 +38,7 @@ export class AppComponent implements OnInit {
     if (1 == 2) {
       //Lint error
       console.log('lint_error' + "Lint error");
+      console.log('lint_error' + "Lint error");
     }
     this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
     this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
