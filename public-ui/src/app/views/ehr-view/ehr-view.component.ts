@@ -22,8 +22,8 @@ import { ISubscription } from 'rxjs/Subscription';
 })
 export class EhrViewComponent implements OnInit, OnDestroy {
   domainId: string;
-  title ;
-  subTitle;
+  title: string ;
+  subTitle: string;
   dbDomain;
   searchText: FormControl = new FormControl();
   prevSearchText = '';
@@ -32,7 +32,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   standardConcepts: any[] = [];
   loading = true;
   minParticipantCount = 0;
-  totalParticipants;
+  totalParticipants: number;
   top10Results = [];
   screenWidth: any;
 
