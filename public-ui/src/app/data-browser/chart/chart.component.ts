@@ -52,7 +52,7 @@ export class ChartComponent implements OnChanges {
   // For ppi question answers analysis , we select an answer from the results
   @Input() pointWidth = 10;   // Optional width of bar or point or box plot
   @Input() backgroundColor = '#FFFFFF'; // Optional background color
-  @Input() chartTitle;
+  @Input() chartTitle: string;
   @Input() chartType;
   @Input() sources = false;
   @Output() resultClicked = new EventEmitter<any>();
