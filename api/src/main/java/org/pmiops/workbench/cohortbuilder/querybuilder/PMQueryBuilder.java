@@ -71,9 +71,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
     List<String> queryParts = new ArrayList<String>();
-    List<String> tempQueryParts = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     for (SearchParameter parameter : parameters.getParameters()) {
+      List<String> tempQueryParts = new ArrayList<String>();
       boolean isBP = parameter.getSubtype().equals(BLOOD_PRESSURE);
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
         validateAttributes(parameter);
