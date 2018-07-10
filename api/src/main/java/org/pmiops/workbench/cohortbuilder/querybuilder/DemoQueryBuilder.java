@@ -6,6 +6,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -86,10 +87,11 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
           if (attribute.isPresent() && !CollectionUtils.isEmpty(attribute.get().getOperands())) {
             List<String> operandParts = new ArrayList<>();
             for (String operand : attribute.get().getOperands()) {
-              operandParts.add("@" + namedParameter);
-              queryParams.put(namedParameter, QueryParameterValue.int64(new Long(operand)));
+              String ageNamedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
+              operandParts.add("@" + ageNamedParameter);
+              queryParams.put(ageNamedParameter, QueryParameterValue.int64(new Long(operand)));
             }
-            queryParts.add(DEMO_AGE.replace("${operator}", attribute.get().getOperator())
+            queryParts.add(DEMO_AGE.replace("${operator}", OperatorUtils.getSqlOperator(attribute.get().getOperator()))
               + String.join(" and ", operandParts) + "\n");
           } else {
             throw new IllegalArgumentException("Age must provide an operator and operands.");
@@ -130,7 +132,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     ListMultimap<DemoType, Object> mappedParameters = ArrayListMultimap.create();
     for (SearchParameter parameter : searchParameters)
       if (parameter.getSubtype().equals(DemoType.AGE.name())) {
-        mappedParameters.put(DemoType.AGE, parameter.getAttribute());
+        mappedParameters.put(DemoType.AGE, parameter.getAttributes().isEmpty() ? null : parameter.getAttributes().get(0));
       } else if (parameter.getSubtype().equals(DemoType.DEC.name())) {
         mappedParameters.put(DemoType.DEC, parameter.getValue());
       } else {

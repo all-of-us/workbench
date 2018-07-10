@@ -333,7 +333,7 @@ definitions:
 
   Operator:
     type: string
-    enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN, BETWEEN]
+    enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN, BETWEEN, ANY]
 
   StandardConceptFilter:
     type: string
@@ -427,6 +427,10 @@ definitions:
         type: integer
         format: int32
         description: The maximum number of results returned. Defaults to 20.
+      minCount:
+        type: integer
+        format: int32
+        description: Determines the concepts to be fetched. Gets all the concepts if 0 or gets concepts with counts if 1.
 
   ConceptListResponse:
     type: object

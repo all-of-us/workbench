@@ -487,6 +487,10 @@ definitions:
         description: count value
         type: integer
         format: int64
+      participantCount:
+        description: participant count
+        type: integer
+        format: int64
 
   DbDomainListResponse:
     type: object
@@ -569,3 +573,7 @@ definitions:
         type: integer
         format: int32
         description: The maximum number of results returned. Defaults to 25.
+      minCount:
+        type: integer
+        format: int32
+        description: The minimum count of concepts to be fetched

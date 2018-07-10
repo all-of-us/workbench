@@ -1051,6 +1051,24 @@ Common.register_command({
   :fn => ->(*args) { deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
 })
 
+def deploy_gcs_demos(cmd_name, args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  common.run_inline %W{gsutil rm gs://#{gcc.project}-demos/**}
+  common.run_inline %W{gsutil cp demos/* gs://#{gcc.project}-demos/}
+end
+
+Common.register_command({
+  :invocation => "deploy-gcs-demos",
+  :description => "Deploys any GCS demos associated with this environment.",
+  :fn => ->(*args) { deploy_gcs_demos("deploy-gcs-demos", args) }
+})
+
 
 def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
@@ -1248,6 +1266,8 @@ def deploy(cmd_name, args)
 
     common.status "Pushing GCS artifacts..."
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
+
+    deploy_gcs_demos(cmd_name, %W{--project #{ctx.project}})
 
     # Keep the cloud proxy context open for the service account credentials.
     deploy_args = %W{

@@ -3,14 +3,19 @@ package org.pmiops.workbench.google;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.StorageOptions;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.common.collect.ImmutableList;
+
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +40,30 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return mandrillKeys.getString("api-key");
   }
 
+  public void copyAllDemoNotebooks(String workspaceBucket)  {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    Bucket demoBucket = storage.get(getDemosBucketName());
+    StreamSupport
+        .stream(demoBucket.list().getValues().spliterator(), false)
+        .filter(blob -> blob.getBlobId().getName().endsWith(".ipynb"))
+        .map(blob -> ImmutablePair
+            .of(blob.getBlobId(), BlobId.of(workspaceBucket, "notebooks/" + blob.getBlobId().getName())))
+        .forEach(pair -> copyBlob(pair.getLeft(), pair.getRight()));
+  }
+
+  public List<JSONObject> readAllDemoCohorts() {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    Bucket demoBucket = storage.get(getDemosBucketName());
+
+    return StreamSupport
+        .stream(demoBucket.list().getValues().spliterator(), false)
+        .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
+        .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
+        .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase("cohort"))
+        .map(jsonObject -> jsonObject.getJSONObject("cohort"))
+        .collect(Collectors.toList());
+  }
+
   @Override
   public List<Blob> getBlobList(String bucketName, String directory) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
@@ -43,11 +72,15 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return ImmutableList.copyOf(blobList);
   }
 
-  String getCredentialsBucketName() {
+  private String getCredentialsBucketName() {
     return configProvider.get().googleCloudStorageService.credentialsBucketName;
   }
 
-  String readToString(String bucketName, String objectPath) {
+  private String getDemosBucketName() {
+    return configProvider.get().googleCloudStorageService.demosBucketName;
+  }
+
+  private String readToString(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     return new String(storage.get(bucketName, objectPath).getContent()).trim();
   }
