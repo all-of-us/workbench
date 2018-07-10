@@ -289,7 +289,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       // group; so instead, fetch all the group memberships. (There won't be that many for our
       // users anyway.)
       for (ManagedGroupAccessResponse group : endUserGroupsApiProvider.get().getGroups()) {
-        if (groupName.equals(group.getGroupName()) && MEMBER_ROLE.equals(group.getRole())) {
+        if (groupName.equals(group.getGroupName()) && MEMBER_ROLE.equalsIgnoreCase(group.getRole())) {
           return true;
         }
       }

@@ -4,7 +4,7 @@
 </div>
 <div class="card-area" *ngIf="!notebooksLoading">
   <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
-       [class.disabled]="createDisabled" (click)="newNotebook()">
+       [class.disabled]="createDisabled" (click)="createDisabled || newNotebook()">
     <div class="create-text">
       Create a<br/>New Notebook
       <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
@@ -14,7 +14,7 @@
   </div>
 
   <div class="card item-card notebook-card" *ngFor="let notebook of notebookList">
-    <div class="name" (click)="openNotebook(notebook)">{{notebook.name}}</div>
+    <div class="name" [class.disabled]="createDisabled" (click)="createDisabled || openNotebook(notebook)">{{notebook.name}}</div>
     <div class="footer">
       <div class="last-modified">
         <div>Last Update<br/>{{notebook.lastModifiedTime | date}}</div>

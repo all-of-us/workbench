@@ -236,7 +236,7 @@ public class FireCloudServiceImplTest {
   @Test
   public void testIsUserMemberOfGroup_noNameMatch() throws Exception {
     when(endUserGroupsApi.getGroups()).thenReturn(
-        Lists.newArrayList(new ManagedGroupAccessResponse().groupName("blah").role("member")));
+        Lists.newArrayList(new ManagedGroupAccessResponse().groupName("blah").role("Member")));
     assertThat(service.isUserMemberOfGroup("group")).isFalse();
   }
 

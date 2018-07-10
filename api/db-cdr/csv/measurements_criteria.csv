@@ -1,28 +1,23 @@
-id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,domain_id
-316289,0,PM,,01,Blood Pressure,1,0,,,Measurement
-316290,0,PM,,02,Heart Rate,1,0,,,Measurement
-316291,0,PM,,03,Height,1,0,,,Measurement
-316292,0,PM,,04,Weight,1,0,,,Measurement
-316293,0,PM,,05,BMI,1,0,,,Measurement
-316294,0,PM,,06,Waist Circumference,1,0,,,Measurement
-316295,0,PM,,07,Hip Circumference,1,0,,,Measurement
-316296,0,PM,,08,Pregnancy as observed at enrollments,1,0,0,,Measurement
-316297,0,PM,,09,Wheelchair as observed at enrollments,1,0,0,,Measurement
-316298,316289,PM,,10,Hypotensive (Systolic <= 90 / Diastolic <= 60),0,1,0,,Measurement
-316299,316289,PM,,11,Normal (Systolic <=120 / Diastolic <= 80),0,1,0,,Measurement
-316300,316289,PM,,12,Pre-Hypertensive (Systolic 121-139 / Diastolic 81-89),0,1,0,,Measurement
-316301,316289,PM,,13,Hypertensive (Systolic >= 140 / Diastolic >=90),0,1,0,,Measurement
-316302,316289,PM,,14,Blood Pressure Detail,0,1,0,,Measurement
-316303,316290,PM,,15,Heart Rhythm Status,1,0,,,Measurement
-316304,316290,PM,,16,Heart Rate Detail,0,1,0,,Measurement
-316305,316291,PM,,17,Height Detail,0,1,0,903133,Measurement
-316306,316292,PM,,18,Weight Detail,0,1,0,,Measurement
-316307,316293,PM,,19,BMI Detail,0,1,0,903124,Measurement
-316308,316294,PM,,20,Waist Circumference Detail,0,1,0,,Measurement
-316309,316295,PM,,21,Hip Circumference Detail,0,1,0,,Measurement
-316310,316303,PM,,17,Irregularity detected,0,1,0,,Measurement
-316311,316303,PM,,18,No-irregularity detected,0,1,0,,Measurement
-316312,316296,PM,,19,Yes,0,1,0,,Measurement
-316313,316296,PM,,20,No,0,1,0,,Measurement
-316314,316297,PM,,21,Yes,0,1,0,,Measurement
-316315,316297,PM,,22,No,0,1,0,,Measurement
+id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,domain_id,has_attribute,predefined_attributes
+316289,0,PM,BP,,Blood Pressure,1,0,,,Measurement,0,
+316290,0,PM,HR,,Heart Rate,1,0,,,Measurement,0,
+316305,0,PM,HEIGHT,,Height Detail,0,1,0,903133,Measurement,1,
+316306,0,PM,WEIGHT,,Weight Detail,0,1,0,903121,Measurement,1,
+316307,0,PM,BMI,,BMI Detail,0,1,0,903124,Measurement,1,
+316308,0,PM,WC,,Waist Circumference Detail,0,1,0,903135,Measurement,1,
+316309,0,PM,HC,,Hip Circumference Detail,0,1,0,903136,Measurement,1,
+316310,0,PM,PREG,,Pregnancy as observed at enrollments,1,0,0,,Measurement,0,
+316311,0,PM,WHEEL,,Wheelchair as observed at enrollments,1,0,0,,Measurement,0,
+316312,316289,PM,BP,,Hypotensive (Systolic <= 90 / Diastolic <= 60),0,1,0,,Measurement,0,"[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['90'],'conceptId':'903118'},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['60'],'conceptId':'903115'}]"
+316313,316289,PM,BP,,Normal (Systolic <= 120 / Diastolic <= 80),0,1,0,,Measurement,0,"[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['120'],'conceptId':'903118'},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['80'],'conceptId':'903115'}]"
+316314,316289,PM,BP,,Pre-Hypertensive (Systolic 121-139 / Diastolic 81-89),0,1,0,,Measurement,0,"[{'name':'Systolic','operator':'BETWEEN','operands':['121','139'],'conceptId':'903118'},{'name':'Diastolic','operator':'BETWEEN','operands':['81','89'],'conceptId':'903115'}]"
+316315,316289,PM,BP,,Hypertensive (Systolic >= 140 / Diastolic >= 90),0,1,0,,Measurement,0,"[{'name':'Systolic','operator':'BETWEEN','operands':['121','139'],'conceptId':'903118'},{'name':'Diastolic','operator':'BETWEEN','operands':['81','89'],'conceptId':'903115'}]"
+316316,316289,PM,BP,,Blood Pressure Detail,0,1,0,903115,Measurement,1,"[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['120'],'conceptId':'903118'},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['90'],'conceptId':'903115'}]"
+316317,316290,PM,HR,,Heart Rhythm Status,1,0,,,Measurement,0,
+316318,316290,PM,HR-DETAIL,,Heart Rate Detail,0,1,0,903126,Measurement,1,
+316319,316317,PM,HR,irregularity-detected,Irregularity detected,0,1,0,1586218,Measurement,0,
+316320,316317,PM,HR,no-irregularity-detected,No-irregularity detected,0,1,0,1586218,Measurement,0,
+316321,316310,PM,PREG,pregnant,Yes,0,1,0,903120,Measurement,0,
+316322,316310,PM,PREG,not-pregnant,No,0,1,0,903120,Measurement,0,
+316323,316311,PM,WHEEL,wheelchair-user,Yes,0,1,0,903111,Measurement,0,
+316324,316311,PM,WHEEL,not-wheelchair-user,No,0,1,0,903111,Measurement,0,

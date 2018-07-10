@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 
 import {ServerConfigService} from '../../services/server-config.service';
 import {InvitationKeyComponent} from '../invitation-key/component';
@@ -19,7 +19,7 @@ function isBlank(s: string) {
   styleUrls: ['../../styles/template.css',
               './component.css']
 })
-export class AccountCreationComponent {
+export class AccountCreationComponent implements AfterViewInit {
   profile: Profile = {
     username: '',
     enabledInFireCloud: false,
@@ -35,6 +35,8 @@ export class AccountCreationComponent {
   gsuiteDomain: string;
   usernameOffFocus = true;
   usernameCheckTimeout: NodeJS.Timer;
+
+  @ViewChild('infoIcon') infoIcon: ElementRef;
 
   // TODO: Injecting the parent component is a bad separation of concerns, as
   // well as injecting LoginComponent. Should look at refactoring these
@@ -54,6 +56,12 @@ export class AccountCreationComponent {
           '/assets/images/create-account-male-standing.png';
       this.loginComponent.backgroundImgSrc = '/assets/images/create-account-male.png';
     }, 0);
+  }
+
+  ngAfterViewInit(): void {
+    // This is necessary to avoid clarity, because clarity's tooltip library
+    // automatically sets tabindex to 0.
+    this.infoIcon.nativeElement.tabIndex = -1;
   }
 
   createAccount(): void {
