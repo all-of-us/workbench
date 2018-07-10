@@ -20,6 +20,9 @@ import {
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
+  BEGIN_ATTR_PREVIEW_REQUEST,
+  LOAD_ATTR_PREVIEW_RESULTS,
+  ADD_ATTR_FOR_PREVIEW,
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
@@ -109,6 +112,26 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
           .deleteIn(['entities', action.entityType, action.entityId, 'error'])
           .set('initShowChart', true);
+
+      case BEGIN_ATTR_PREVIEW_REQUEST:
+        return state
+          .deleteIn(['wizard', 'calculate', 'error'])
+          .setIn(['wizard', 'calculate', 'requesting'], true);
+
+      case LOAD_ATTR_PREVIEW_RESULTS:
+        return state
+          .setIn(['wizard', 'calculate', 'count'], action.count)
+          .setIn(['wizard', 'calculate', 'requesting'], false);
+
+      case ADD_ATTR_FOR_PREVIEW:
+        return state
+          .updateIn(
+              ['wizard', 'count', 'parameters'],
+            List(),
+            paramList => paramList.includes(action.parameter)
+              ? paramList
+              : paramList.push(action.parameter)
+          );
 
       case CANCEL_CHARTS_REQUEST:
       case CANCEL_COUNT_REQUEST:

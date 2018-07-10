@@ -50,6 +50,8 @@ export class CohortSearchActions {
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
+  @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
+  @dispatch() addAttributeForPreview = ActionFuncs.addAttributeForPreview;
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
@@ -221,6 +223,30 @@ export class CohortSearchActions {
     });
   }
 
+  requestAttributePreview(): void {
+    const role = activeRole(this.state);
+    const itemId = activeItem(this.state).get('id');
+    const searchParam = this.state
+        .getIn(['wizard', 'count', 'parameters'], Map())
+        .valueSeq()
+        .map(this.mapParameter)
+        .toJS();
+    const groupItem = <SearchGroupItem>{
+      id: itemId,
+      type: 'PM',
+      searchParameters: searchParam,
+      modifiers: [],
+    };
+    const request = <SearchRequest>{
+      includes: [],
+      excludes: [],
+      [role]: [{
+        items: [groupItem],
+      }]
+    };
+    this._requestAttributePreview(this.cdrVersionId, request);
+  }
+
   requestItemCount(role: keyof SearchRequest, itemId: string): void {
     const item = getItem(itemId)(this.state);
     if (item.get('isRequesting', false)) {
@@ -369,11 +395,15 @@ export class CohortSearchActions {
       attributes: []
     };
 
-    if (param.type.match(/^DEMO.*/i)) {
+    if (immParam.get('attribute') || param.type.match(/^DEMO.*/i)) {
+      param.attributes = typeof immParam.get('attributes') !== 'undefined'
+        ? immParam.get('attributes') : [];
+    } else if (immParam.get('predefinedAttributes')) {
+      param.attributes = immParam.get('predefinedAttributes') ;
+    }
+
+    if (param.type.match(/^DEMO|PM.*/i)) {
       param.conceptId = immParam.get('conceptId');
-      param.attributes = immParam.get('attributes');
-    } else if (param.type.match(/^PM.*/i)) {
-      param.attributes = immParam.get('attributes');
     } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
       param.domain = immParam.get('domainId');
     }

@@ -27,7 +27,7 @@ const zeroCrit = fromJS({
   type: 'icd9',
   group: false,
   domainId: null,
-  attributes: [],
+  attributes: []
 });
 
 const oneCrit = fromJS({
@@ -38,7 +38,7 @@ const oneCrit = fromJS({
   type: 'icd9',
   group: true,
   domainId: null,
-  attributes: [],
+  attributes: []
 });
 
 const DEMO_crit = fromJS({

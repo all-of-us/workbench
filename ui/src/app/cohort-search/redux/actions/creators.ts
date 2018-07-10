@@ -6,6 +6,9 @@ import {
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
+  BEGIN_ATTR_PREVIEW_REQUEST,
+  LOAD_ATTR_PREVIEW_RESULTS,
+  ADD_ATTR_FOR_PREVIEW,
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
@@ -74,6 +77,20 @@ export const requestCounts =
   (cdrVersionId: number, entityType: string, entityId: string, request: SearchRequest
   ): ActionTypes[typeof BEGIN_COUNT_REQUEST] =>
   ({type: BEGIN_COUNT_REQUEST, cdrVersionId, entityType, entityId, request});
+
+export const requestAttributePreview =
+  (cdrVersionId: number, request: SearchRequest
+  ): ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST] =>
+  ({type: BEGIN_ATTR_PREVIEW_REQUEST, cdrVersionId, request});
+
+export const loadAttributePreviewRequestResults =
+  (count: number): ActionTypes[typeof LOAD_ATTR_PREVIEW_RESULTS] =>
+  ({type: LOAD_ATTR_PREVIEW_RESULTS, count});
+
+export const addAttributeForPreview =
+  (parameter: any
+  ): ActionTypes[typeof ADD_ATTR_FOR_PREVIEW] =>
+  ({type: ADD_ATTR_FOR_PREVIEW, parameter});
 
 export const loadCountRequestResults =
   (entityType: string, entityId: string, count: number
