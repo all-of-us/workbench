@@ -22,7 +22,7 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  */
 function needsAttributes(node: any) {
   // will change soon to check for attributes property instead of id
-  return node.get('attribute', '') === true;
+  return node.get('hasAttributes', '') === true;
 }
 
 

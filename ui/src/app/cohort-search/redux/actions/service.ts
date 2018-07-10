@@ -395,7 +395,7 @@ export class CohortSearchActions {
       attributes: []
     };
 
-    if (immParam.get('attribute') || param.type.match(/^DEMO.*/i)) {
+    if (immParam.get('hasAttributes') || param.type.match(/^DEMO.*/i)) {
       param.attributes = typeof immParam.get('attributes') !== 'undefined'
         ? immParam.get('attributes') : [];
     } else if (immParam.get('predefinedAttributes')) {
