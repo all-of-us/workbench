@@ -8,10 +8,7 @@ import {environment} from 'environments/environment';
 import { ResponsiveModule } from 'ngx-responsive';
 import * as StackTrace from 'stacktrace-js';
 
-import {AppComponent, overriddenUrlKey} from './views/app/component';
-
-import {RoutingSpinnerComponent} from './views/routing-spinner/component';
-
+import {AppComponent, overriddenUrlKey} from './views/app/app.component';
 
 /* Our Modules */
 import {
@@ -33,7 +30,7 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 
 import {DataBrowserService} from 'publicGenerated';
 import { HighlightSearchPipe } from './utils/highlight-search.pipe';
-import { overriddenPublicUrlKey } from './views/app/component';
+import { overriddenPublicUrlKey } from './views/app/app.component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
 import { PhysicalMeasurementsComponent } from './views/pm/pm.component';
 import { QuickSearchComponent } from './views/quick-search/quick-search.component';
@@ -61,7 +58,6 @@ const DataBrowserServiceFactory = (http: Http) => {
   ],
   declarations: [
     AppComponent,
-    RoutingSpinnerComponent,
     SurveysComponent,
     DbHeaderComponent,
     SurveyViewComponent,

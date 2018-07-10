@@ -24,8 +24,8 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
 @Component({
   selector: 'app-public-aou',
-  styleUrls: ['./component.css'],
-  templateUrl: './component.html'
+  styleUrls: ['./app.component.css'],
+  templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
   overriddenUrl: string = null;
