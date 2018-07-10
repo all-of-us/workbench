@@ -20,6 +20,7 @@
       <column name="stratum_5_name" type="STRING"/>
       <column name="chart_type" type="STRING"/>
       <column name="data_type" type="STRING"/>
+      <column name="has_attribute" type="BOOLEAN"/>
     </loadData>
 
   </changeSet>

@@ -12,6 +12,7 @@
             Criteria Tree
           </button>
           <button type="button" class="btn"
+            *ngIf="ctype !== 'pm'"
             [class.active]="mode === 'modifiers'"
             (click)="mode = 'modifiers'">
             Modifiers
@@ -45,7 +46,7 @@
         </crit-demographics>
 
         <ng-container *ngSwitchDefault>
-          <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers'">
+          <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes'">
             <!-- Tree Page -->
             <div class="panel-left" [class.show]="mode === 'tree'">
               <crit-tree [node]="rootNode"></crit-tree>
@@ -53,6 +54,10 @@
             <!-- Modifiers Page -->
             <div class="panel-left" [class.show]="mode === 'modifiers'">
               <crit-modifier-page></crit-modifier-page>
+            </div>
+            <!-- Attributes Page -->
+            <div class="panel-left" [class.show]="mode === 'attributes'">
+              <crit-attributes-page [node]="attributesNode"></crit-attributes-page>
             </div>
             <div class="panel-right selected">
               <h5 class="selection-title">{{ selectionTitle }}</h5>

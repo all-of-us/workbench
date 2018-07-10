@@ -28,20 +28,24 @@ export function nameDisplay(parameter): string {
 }
 
 export function attributeDisplay(parameter): string {
-  const attr = parameter.get('attribute', '');
+  const attrs = parameter.get('attributes', '');
 
   const kind = `${parameter.get('type', '')}${parameter.get('subtype', '')}`;
   if (kind.match(/^DEMO.*AGE/i)) {
-    const op = {
-      'between': 'In Range',
-      '=': 'Equal To',
-      '>': 'Greater Than',
-      '<': 'Less Than',
-      '>=': 'Greater Than or Equal To',
-      '<=': 'Less Than or Equal To',
-    }[attr.get('operator')];
-    const args = attr.get('operands', List()).join(', ');
-    return `${op} ${args}`;
+    const display = [];
+    attrs.forEach(attr => {
+      const op = {
+        'BETWEEN': 'In Range',
+        'EQUAL': 'Equal To',
+        'GREATER_THAN': 'Greater Than',
+        'LESS_THAN': 'Less Than',
+        'GREATER_THAN_OR_EQUAL_TO': 'Greater Than or Equal To',
+        'LESS_THAN_OR_EQUAL_TO': 'Less Than or Equal To',
+      }[attr.get('operator')];
+      const args = attr.get('operands', List()).join(', ');
+      display.push(`${op} ${args}`);
+    });
+    return display.join(' ');
   } else {
     return '';
   }

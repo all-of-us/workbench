@@ -1,0 +1,50 @@
+<div class="title">
+  {{node.get('name','')}}
+</div>
+<form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
+  <section class="form-block">
+    <div *ngFor="let attr of attrs; let i = index">
+      <div class="form-group">
+        <label>{{attr.name}}</label>
+        <div class="select">
+          <select [name]="'operator'+i" [(ngModel)]="attr.operator" (ngModelChange)="selectChange(i, $event)" required>
+            <option value=""></option>
+            <option value="EQUAL">Equals</option>
+            <option value="GREATER_THAN_OR_EQUAL_TO">Greater than or Equal to</option>
+            <option value="LESS_THAN_OR_EQUAL_TO">Less than or Equal to</option>
+            <option value="BETWEEN">Between</option>
+            <option value="ANY">Any</option>
+          </select>
+        </div>
+      </div>
+      <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group">
+        <input type="number" [name]="'valueA'+i" [ngModel]="attr.operands[0]" required>
+        <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
+      </div>
+      <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
+        <div>and</div>
+      </div>
+      <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
+        <input type="number" [name]="'valueB'+i" [ngModel]="attr.operands[1]" required>
+        <span>{{units[node.get('subtype')]}}</span>
+      </div>
+    </div>
+    <div class="count-preview">
+      <button type="button"
+              class="btn"
+              [disabled]="!attrForm.valid"
+              (click)="requestPreview(attrForm)">
+        Calculate
+      </button>
+      Number Participants:
+      <span *ngIf="!preview.get('requesting')">
+        {{ preview.get('count', 0) }}
+      </span>
+      <span *ngIf="preview.get('requesting')" class="spinner spinner-inline">
+        Loading...
+      </span>
+    </div>
+    <button class="btn btn-link" type="button" (click)="cancel()">Cancel</button>
+    <button class="btn btn-primary" type="submit" [disabled]="!attrForm.valid">Add Item</button>
+  </section>
+</form>

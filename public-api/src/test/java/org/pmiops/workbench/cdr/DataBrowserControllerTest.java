@@ -11,6 +11,7 @@ import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import java.util.List;
+import org.pmiops.workbench.model.Domain;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
@@ -66,6 +67,23 @@ public class DataBrowserControllerTest {
                 }
             };
 
+    private static final Function<org.pmiops.workbench.model.DbDomain, DbDomain>
+            TO_CLIENT_DBDOMAIN =
+            new Function<org.pmiops.workbench.model.DbDomain, DbDomain>() {
+                @Override
+                public DbDomain apply(org.pmiops.workbench.model.DbDomain dbDomain) {
+                    return new DbDomain()
+                            .domainId(dbDomain.getDomainId())
+                            .domainDisplay(dbDomain.getDomainDisplay())
+                            .domainDesc(dbDomain.getDomainDesc())
+                            .dbType(dbDomain.getDbType())
+                            .domainRoute(dbDomain.getDomainRoute())
+                            .conceptId(dbDomain.getConceptId())
+                            .countValue(dbDomain.getCountValue())
+                            .participantCount(dbDomain.getParticipantCount());
+                }
+            };
+
     private static final Concept CLIENT_CONCEPT_1 = new Concept()
             .conceptId(123L)
             .conceptName("a concept")
@@ -81,7 +99,6 @@ public class DataBrowserControllerTest {
     private static final Concept CLIENT_CONCEPT_2 = new Concept()
             .conceptId(456L)
             .conceptName("b concept")
-            .standardConcept("")
             .conceptCode("002")
             .conceptClassId("classId2")
             .vocabularyId("V2")
@@ -157,7 +174,8 @@ public class DataBrowserControllerTest {
             .dbType("domain_filter")
             .domainRoute("condition")
             .conceptId(19L)
-            .countValue(0L);
+            .countValue(0L)
+            .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_2 = new DbDomain()
             .domainId("Drug")
@@ -166,7 +184,8 @@ public class DataBrowserControllerTest {
             .dbType("domain_filter")
             .domainRoute("drug")
             .conceptId(13L)
-            .countValue(0L);
+            .countValue(0L)
+            .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_3 = new DbDomain()
             .domainId("Lifestyle")
@@ -175,7 +194,8 @@ public class DataBrowserControllerTest {
             .dbType("survey")
             .domainRoute("ppi")
             .conceptId(1585855L)
-            .countValue(568120L);
+            .countValue(568120L)
+            .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_4 = new DbDomain()
             .domainId("TheBasics")
@@ -184,7 +204,8 @@ public class DataBrowserControllerTest {
             .dbType("survey")
             .domainRoute("ppi")
             .conceptId(1586134L)
-            .countValue(567437L);
+            .countValue(567437L)
+            .participantCount(0L);
 
     private static final Concept CONCEPT_1 =
             makeConcept(CLIENT_CONCEPT_1);
@@ -255,43 +276,122 @@ public class DataBrowserControllerTest {
         ResponseEntity<ConceptListResponse> response = dataBrowserController.getSourceConcepts(7890L, 15);
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
-                .containsExactly(CONCEPT_4, CONCEPT_2)
-        ;
+                .containsExactly(CONCEPT_4, CONCEPT_2);
     }
 
 
     @Test
     public void testGetDomainFilters() throws Exception {
         saveData();
-        assertDomains(
-                dataBrowserController.getDomainFilters(), CLIENT_DB_DOMAIN_1, CLIENT_DB_DOMAIN_2
-        );
+        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getDomainFilters();
+        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
+        assertThat(domains)
+                .containsExactly(DBDOMAIN_1, DBDOMAIN_2);
     }
 
     @Test
     public void testGetSurveyList() throws Exception{
         saveData();
-        assertDomains(
-                dataBrowserController.getSurveyList(), CLIENT_DB_DOMAIN_3, CLIENT_DB_DOMAIN_4
-        );
+        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getSurveyList();
+        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
+        assertThat(domains).containsExactly(DBDOMAIN_3, DBDOMAIN_4);
     }
 
     @Test
     public void testGetDbDomains() throws Exception{
         saveData();
-        assertDomains(
-                dataBrowserController.getDbDomains(), CLIENT_DB_DOMAIN_1, CLIENT_DB_DOMAIN_2, CLIENT_DB_DOMAIN_3, CLIENT_DB_DOMAIN_4
-        );
+        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getDbDomains();
+        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
+        assertThat(domains)
+        .containsExactly(DBDOMAIN_1, DBDOMAIN_2, DBDOMAIN_3, DBDOMAIN_4);
     }
 
     @Test
-    public void testConceptSearchWithEmptyQuery() throws Exception{
+    public void testAllConceptSearchEmptyQuery() throws Exception{
         saveData();
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query(""));
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
+        .domain(Domain.CONDITION)
+        .minCount(0));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
-                .containsExactly(CONCEPT_1, CONCEPT_2, CONCEPT_3, CONCEPT_4, CONCEPT_5, CONCEPT_6)
+                .containsExactly(CONCEPT_1, CONCEPT_5, CONCEPT_6, CONCEPT_7)
         ;
+    }
+
+    @Test
+    public void testConceptSearchMaxResults() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
+                .domain(Domain.CONDITION)
+                .maxResults(1)
+                .minCount(0));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void testCountConceptSearchEmptyQuery() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
+                .domain(Domain.CONDITION));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_1, CONCEPT_5, CONCEPT_6)
+        ;
+    }
+
+    @Test
+    public void testConceptSearchStandardConcept() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("002")
+        .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .doesNotContain(CONCEPT_2);
+    }
+
+    @Test
+    public void testConceptSearchStandardCodeIdMatchFilter() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")
+                .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        List<Concept> standard_concepts = Arrays.asList(CONCEPT_1, CONCEPT_4, CONCEPT_5, CONCEPT_6, CONCEPT_7);
+        assertThat(concepts)
+                .doesNotContain(standard_concepts);
+    }
+
+    @Test
+    public void testConceptSearchEmptyQuery() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
+                .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        List<Concept> non_standard_concepts = Arrays.asList(CONCEPT_2, CONCEPT_3);
+        assertThat(concepts)
+                .doesNotContain(non_standard_concepts);
+    }
+
+    @Test
+    public void testNonStandardEmptyQuerySearch() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
+                .query("")
+                .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_2, CONCEPT_3);
+    }
+
+    @Test
+    public void testConceptSearchNonStandardConcepts() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("7891")
+                .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        //Search on concept id fetches the non standard concept
+        assertThat(concepts)
+                .doesNotContain(CONCEPT_6);
     }
 
 
@@ -311,13 +411,22 @@ public class DataBrowserControllerTest {
     public void testConceptIdSearch() throws Exception{
         saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("456")
-                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+                .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
                 .containsExactly(CONCEPT_2)
                 .inOrder();
     }
 
+    @Test
+    public void testConceptSearchDomainFilter() throws Exception{
+        saveData();
+        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("004").domain(Domain.CONDITION));
+        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
+        assertThat(concepts)
+                .containsExactly(CONCEPT_6)
+                .inOrder();
+    }
 
 
     @Test
@@ -345,7 +454,7 @@ public class DataBrowserControllerTest {
         result.setConceptId(concept.getConceptId());
         result.setConceptName(concept.getConceptName());
         result.setStandardConcept(concept.getStandardConcept() == null ? null :
-                (concept.getStandardConcept().equals("S") ? "S" : "C"));
+                (concept.getStandardConcept()));
         result.setConceptCode(concept.getConceptCode());
         result.setConceptClassId(concept.getConceptClassId());
         result.setVocabularyId(concept.getVocabularyId());
@@ -397,8 +506,4 @@ public class DataBrowserControllerTest {
         dbDomainDao.save(DBDOMAIN_4);
     }
 
-    private void assertDomains(ResponseEntity<DbDomainListResponse> response,
-                               DbDomain... expectedDomains) {
-        assertThat(response.getBody().getItems().equals(Arrays.asList(expectedDomains)));
-    }
 }

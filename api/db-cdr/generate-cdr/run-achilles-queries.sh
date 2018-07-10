@@ -132,7 +132,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
 select 0, 3000 as analysis_id,
 	CAST(co1.condition_CONCEPT_ID AS STRING) as stratum_1,'Condition' as stratum_3,
-	COUNT(distinct co1.PERSON_ID) as count_value, (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2 where co2.condition_source_concept_id=co1.condition_concept_id) as source_count_value
+	COUNT(distinct co1.PERSON_ID) as count_value, (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2
+	where co2.condition_source_concept_id=co1.condition_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 where co1.condition_concept_id > 0
 group by co1.condition_CONCEPT_ID
@@ -469,8 +470,7 @@ select 0, 3000 as analysis_id,CAST(co1.observation_source_CONCEPT_ID AS STRING) 
 COUNT(distinct co1.PERSON_ID) as count_value,
 COUNT(distinct co1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1 where co1.observation_source_concept_id > 0 and co1.observation_concept_id != co1.observation_source_concept_id
-group by co1.observation_source_CONCEPT_ID
-"
+group by co1.observation_source_CONCEPT_ID"
 
 # Observation 3101 concept by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -791,3 +791,29 @@ group by dbd.concept_id,o.observation_source_concept_id,o.value_as_number,stratu
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
 set concept_id=null where concept_id=0"
+
+# Domain participant counts
+echo "Getting domain participant counts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+ (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+ select 0 as id,3000 as analysis_id,'19' as stratum_1,'Condition' as stratum_3, COUNT(distinct ob.person_id) as count_value, 0 as source_count_value
+ from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+ (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+ select 0 as id,3000 as analysis_id,'13' as stratum_1,'Drug' as stratum_3, COUNT(distinct d.person_id) as count_value, 0 as source_count_value
+ from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` d"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+ (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+ select 0 as id,3000 as analysis_id,'21' as stratum_1,'Measurement' as stratum_3, COUNT(distinct m.person_id) as count_value, 0 as source_count_value
+ from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+ (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+ select 0 as id,3000 as analysis_id,'10' as stratum_1,'Procedure' as stratum_3, COUNT(distinct p.person_id) as count_value, 0 as source_count_value
+ from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` p"
