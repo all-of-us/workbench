@@ -2,8 +2,6 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import {ISubscription} from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {Concept} from '../../../publicGenerated/model/concept';
-import {ChartComponent} from "../chart/chart.component";
-
 
 @Component({
   selector: 'app-concept-charts',

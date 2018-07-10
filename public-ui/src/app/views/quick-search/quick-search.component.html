@@ -41,7 +41,9 @@
               <em> <b>concepts </b></em>
               <span *ngIf="searchText.value"> match your search. </span>
               <span *ngIf="!searchText.value">in this domain.</span>
-              <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
+              <span *ngIf="r.participantCount">
+                <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
+              </span>
             </p>
 
             <div class="card-text bottom">

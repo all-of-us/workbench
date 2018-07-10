@@ -268,11 +268,6 @@ jobs:
           working_directory: ~/workbench/public-ui
           command: yarn run lint
       - run:
-          name: Run Angular tests
-          working_directory: ~/workbench/public-ui
-          command: |
-            yarn test --no-watch --no-progress --browsers=ChromeHeadless
-      - run:
           name: Build with strict compilation
           working_directory: ~/workbench/public-ui
           command: ./project.rb build --environment test
