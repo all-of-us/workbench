@@ -1,8 +1,7 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import * as highcharts from 'highcharts';
 import 'highcharts/adapters/standalone-framework.src';
-import * as Highcharts from 'highcharts/highcharts.src';
-import * as Drilldown from 'highcharts/modules/drilldown.src';
+
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';

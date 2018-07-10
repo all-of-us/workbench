@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { ChartComponent} from '../chart/chart.component';
 import { ConceptChartsComponent } from './concept-charts.component';
 
 describe('ConceptChartsComponent', () => {
@@ -8,7 +9,7 @@ describe('ConceptChartsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ConceptChartsComponent ]
+      declarations: [ ConceptChartsComponent, ChartComponent ]
     })
     .compileComponents();
   }));
