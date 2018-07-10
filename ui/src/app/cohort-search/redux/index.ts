@@ -32,6 +32,7 @@ export class ConfigureStore {
           epics.fetchCount,
           epics.fetchChartData,
           epics.previewCount,
+          epics.attributePreviewCount,
         )
       )
     ];

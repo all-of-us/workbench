@@ -6,6 +6,5 @@ export const environment = {
   clientId: testEnvironmentBase.clientId,
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicApiUrl: 'http://localhost:8083',
-  debug: true,
-  testing: false
+  debug: true
 };

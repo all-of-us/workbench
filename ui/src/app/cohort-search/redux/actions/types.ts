@@ -6,6 +6,9 @@ export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
 
 export const BEGIN_COUNT_REQUEST = 'BEGIN_COUNT_REQUEST';
+export const BEGIN_ATTR_PREVIEW_REQUEST = 'BEGIN_ATTR_PREVIEW_REQUEST';
+export const LOAD_ATTR_PREVIEW_RESULTS = 'LOAD_ATTR_PREVIEW_RESULTS';
+export const ADD_ATTR_FOR_PREVIEW = 'ADD_ATTR_FOR_PREVIEW';
 export const LOAD_COUNT_RESULTS = 'LOAD_COUNT_RESULTS';
 export const CANCEL_COUNT_REQUEST = 'CANCEL_COUNT_REQUEST';
 export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
@@ -28,6 +31,8 @@ export const SET_WIZARD_FOCUS = 'SET_WIZARD_FOCUS';
 export const CLEAR_WIZARD_FOCUS = 'CLEAR_WIZARD_FOCUS';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
+export const SHOW_ATTRIBUTES_PAGE = 'SHOW_ATTRIBUTES_PAGE';
+export const HIDE_ATTRIBUTES_PAGE = 'HIDE_ATTRIBUTES_PAGE';
 
 export const OPEN_WIZARD = 'OPEN_WIZARD';
 export const REOPEN_WIZARD = 'REOPEN_WIZARD';
@@ -76,6 +81,19 @@ export interface ActionTypes {
     entityType: string;
     entityId: string;
     request: SearchRequest;
+  };
+  BEGIN_ATTR_PREVIEW_REQUEST: {
+    type: typeof BEGIN_ATTR_PREVIEW_REQUEST;
+    cdrVersionId: number;
+    request: SearchRequest;
+  };
+  LOAD_ATTR_PREVIEW_RESULTS: {
+    type: typeof LOAD_ATTR_PREVIEW_RESULTS;
+    count: number;
+  };
+  ADD_ATTR_FOR_PREVIEW: {
+    type: typeof ADD_ATTR_FOR_PREVIEW;
+    parameter: any;
   };
   LOAD_COUNT_RESULTS: {
     type: typeof LOAD_COUNT_RESULTS;
@@ -163,6 +181,13 @@ export interface ActionTypes {
   CLEAR_WIZARD_FOCUS: {
     type: typeof CLEAR_WIZARD_FOCUS;
   };
+  SHOW_ATTRIBUTES_PAGE: {
+    type: typeof SHOW_ATTRIBUTES_PAGE;
+    node: any
+  };
+  HIDE_ATTRIBUTES_PAGE: {
+    type: typeof HIDE_ATTRIBUTES_PAGE;
+  };
 
   REMOVE_ITEM: {
     type: typeof REMOVE_ITEM;
@@ -212,6 +237,9 @@ export type RootAction =
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
 
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]
+  | ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST]
+  | ActionTypes[typeof LOAD_ATTR_PREVIEW_RESULTS]
+  | ActionTypes[typeof ADD_ATTR_FOR_PREVIEW]
   | ActionTypes[typeof LOAD_COUNT_RESULTS]
   | ActionTypes[typeof CANCEL_COUNT_REQUEST]
   | ActionTypes[typeof COUNT_REQUEST_ERROR]
@@ -239,6 +267,8 @@ export type RootAction =
   | ActionTypes[typeof WIZARD_FINISH]
   | ActionTypes[typeof WIZARD_CANCEL]
   | ActionTypes[typeof SET_WIZARD_CONTEXT]
+  | ActionTypes[typeof SHOW_ATTRIBUTES_PAGE]
+  | ActionTypes[typeof HIDE_ATTRIBUTES_PAGE]
 
   | ActionTypes[typeof LOAD_ENTITIES]
   | ActionTypes[typeof RESET_STORE]
