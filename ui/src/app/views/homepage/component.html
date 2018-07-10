@@ -71,7 +71,14 @@
                                     workspace</a>
                             </div>
                             <div class="col">
-                                <a class="links" data-toggle="tooltip" title="Coming Soon">See All Notebooks</a>
+                                <a class="links">
+                                    <clr-tooltip>
+                                        <a href="#" class="links" clrTooltipTrigger>See All Notebooks</a>
+                                        <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
+                                            <span>Coming Soon</span>
+                                        </clr-tooltip-content>
+                                    </clr-tooltip>
+                                </a>
                             </div>
                         </div>
                         <div class="row">
@@ -80,7 +87,12 @@
                                     Workspaces</a>
                             </div>
                             <div class="col">
-                                <a class="links" href="#" data-toggle="tooltip" title="Coming Soon">See All Cohorts</a>
+                                <clr-tooltip class="tooltip-bottom-right">
+                                    <a href="#" class="links" clrTooltipTrigger>See All Cohorts</a>
+                                    <clr-tooltip-content *clrIfOpen>
+                                        <span>Coming Soon</span>
+                                    </clr-tooltip-content>
+                                </clr-tooltip>
                             </div>
                         </div>
                     </div>
@@ -108,33 +120,47 @@
         <div class="row textGroup">
             <div class="footerText">
                 <div class="title">Working Within Researcher Workbench</div>
-                <ul class="bullets">
-                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                        Researcher Workbench Mission</a></li>
-                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                        User interface components</a></li>
-                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                        What to do when things go wrong</a></li>
-                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                        Contributing to the Workbench</a></li>
-                </ul>
+                <clr-tooltip>
+                    <ul class="bullets" clrTooltipTrigger>
+                        <li>
+                            <a href="#" class="bullets">
+                                Researcher Workbench Mission</a>
+                         </li>
+                        <li><a href="#" class="bullets">
+                            User interface components</a></li>
+                        <li><a href="#" class="bullets">
+                            What to do when things go wrong</a></li>
+                        <li><a href="#" class="bullets">
+                            Contributing to the Workbench</a></li>
+                    </ul>
+                    <clr-tooltip-content *clrIfOpen>
+                        <span>Coming Soon</span>
+                    </clr-tooltip-content>
+                </clr-tooltip>
+
             </div>
             <div class="footerText">
                 <div class="title">Workspace</div>
-                <ul class="bullet">
-                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                        Workspace interface components</a></li>
-                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                        User interface components</a></li>
-                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                        Collaborating with other researchers</a></li>
-                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                        Sharing and Publishing Workspaces</a></li>
-                </ul>
+                <clr-tooltip>
+                    <ul class="bullet" clrTooltipTrigger>
+                        <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                            Workspace interface components</a></li>
+                        <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                            User interface components</a></li>
+                        <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                            Collaborating with other researchers</a></li>
+                        <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                            Sharing and Publishing Workspaces</a></li>
+                    </ul>
+                    <clr-tooltip-content *clrIfOpen>
+                        <span>Coming Soon</span>
+                    </clr-tooltip-content>
+                </clr-tooltip>
             </div>
             <div class="footerText">
                 <div class="title">Working with Notebooks</div>
-                <ul class="bullet">
+                <clr-tooltip>
+                <ul class="bullet" clrTooltipTrigger>
                     <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
                         Notebook interface components</a></li>
                     <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
@@ -144,6 +170,10 @@
                     <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
                         Sharing and Publishing Notebooks</a></li>
                 </ul>
+                    <clr-tooltip-content *clrIfOpen>
+                        <span>Coming Soon</span>
+                    </clr-tooltip-content>
+                </clr-tooltip>
             </div>
         </div>
     </div>
