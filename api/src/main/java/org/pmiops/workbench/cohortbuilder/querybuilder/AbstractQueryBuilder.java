@@ -26,6 +26,7 @@ public abstract class AbstractQueryBuilder {
       return query.replace("${modifierDistinct}", "")
         .replace("${modifierColumns}", "");
     }
+    return "";
   }
 
   public abstract FactoryKey getType();
