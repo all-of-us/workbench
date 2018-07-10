@@ -5,11 +5,7 @@
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    height: 100%
-}
-
-.card {
-    border-radius: 5px;
+    height: 100%;
 }
 
 .double {
@@ -34,7 +30,7 @@
     border-radius: 5px;
     background-color: rgba(255, 255, 255, 0.15);
     box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
-    margin-left: 301px;
+    margin-left: 18%;
 }
 
 .analyzeSingleHeader {
@@ -45,7 +41,7 @@
     font-size: 28px;
     font-weight: 500;
     line-height: 34px;
-    margin-top: 27px;
+    margin-top: 2%;
     margin-left: 3%;
 }
 
@@ -124,7 +120,7 @@
 .topIcon {
     height: 65px;
     width: 94px;
-    margin-top: 44px;
+    margin-top: 8%;
 }
 
 .singleIcon {
@@ -149,7 +145,7 @@
     border-radius: 5px;
     background-color: #262262;
     box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
-    margin-top: 30px;
+    margin-top: 3%;
 }
 
 .footerTitle {
@@ -160,8 +156,8 @@
     font-size: 28px;
     font-weight: 500;
     line-height: 34px;
-    margin-left: 320px;
-    margin-top: 32px;
+    margin-left: 19%;
+    margin-top: 2%;
 }
 
 .footerSubTitle {
@@ -169,7 +165,7 @@
 }
 
 .textGroup {
-    margin-left: 260px;
+    margin-left: 17%;
 }
 
 .footerText {
@@ -180,16 +176,16 @@
     font-size: 16px;
     font-weight: 300;
     line-height: 30px;
-    margin-left: 50px;
+    margin-left: 2%;
 }
 
 .footerText .title {
     color: white;
-    margin-top: 20px;
+    margin-top: 2%;
 }
 
 .linkGroup {
-    margin-top: 16px;
+    margin-top: 1%;
 }
 
 .links {
@@ -198,7 +194,7 @@
     color: #FFFFFF;
     font-size: 14px;
     line-height: 28px;
-    margin-right: 45px;
+    margin-right: 4%;
 }
 
 .card.add-card {
@@ -233,6 +229,6 @@
 }
 
 .footerLink {
-    margin-left: 63%;
+    margin-left: 74%;
     color: #FFFFFF;
 }
