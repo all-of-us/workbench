@@ -367,7 +367,7 @@ export class CohortSearchActions {
       attributes: []
     };
 
-    if (param.type.match(/^DEMO.*/i)) {
+    if (param.type.match(/^DEMO|VISIT.*/i)) {
       param.conceptId = immParam.get('conceptId');
       param.attributes = immParam.get('attributes');
     } else if (param.type.match(/^PM.*/i)) {

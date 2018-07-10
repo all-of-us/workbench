@@ -14,7 +14,6 @@ public enum FactoryKey {
     CODES,
     DEMO,
     VISIT,
-    PHECODE;
     PHECODE,
     PM;
 
