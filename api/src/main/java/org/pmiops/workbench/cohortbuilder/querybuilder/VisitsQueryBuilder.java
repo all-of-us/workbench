@@ -10,42 +10,64 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * VisitsQueryBuilder is an object that builds {@link QueryJobConfiguration}
+ * for BigQuery for visit criteria types.
+ */
 @Service
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String VISIT_SQL_TEMPLATE =
-    "select person_id\n" +
-      "from `${projectId}.${dataSetId}.visit_occurrence` v\n";
-
+  private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
+    "select person_id \n" +
+      "from `${projectId}.${dataSetId}.visit_occurrence` a\n";
 
   private static final String VISIT_CHILD_CLAUSE_TEMPLATE =
-    "where v.visit_concept_id = ${visitConceptId}\n";
+    "where a.visit_concept_id in unnest(${visitConceptIds})\n";
 
   private static final String VISIT_PARENT_CLAUSE_TEMPLATE =
-    "where v.visit_concept_id in (\n" +
+    "where a.visit_concept_id in (\n" +
       "select descendant_concept_id\n" +
-      "from `${projectId}.${dataSetId}.concept_ancestor` a\n" +
-      "where a.ancestor_concept_id = ${parentId})\n";
+      "from `${projectId}.${dataSetId}.concept_ancestor` \n" +
+      "where ancestor_concept_id in unnest(${parentIds}))\n";
+
+  private static final String UNION_TEMPLATE = " union all\n";
 
   @Override
-  public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
-    List<String> queryParts = new ArrayList<String>();
+  public QueryJobConfiguration buildQueryJobConfig(QueryParameters inputParameters) {
+    List<String> queryParts = new ArrayList<>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
-    String finalSql = "";
 
-    for (SearchParameter parameter : parameters.getParameters()) {
-      String namedParameter = "visit" + getUniqueNamedParameterPostfix();
+    List<Long> parentList = new ArrayList<>();
+    List<Long> childList = new ArrayList<>();
+    for (SearchParameter parameter : inputParameters.getParameters()) {
       if (parameter.getGroup()) {
-        queryParams.put(namedParameter, QueryParameterValue.int64(parameter.getConceptId()));
-        finalSql = VISIT_SQL_TEMPLATE +
-          VISIT_PARENT_CLAUSE_TEMPLATE.replace("${parentId}", "@" + namedParameter);
-
+        parentList.add(parameter.getConceptId());
       } else {
-        queryParams.put(namedParameter, QueryParameterValue.int64(parameter.getConceptId()));
-        finalSql = VISIT_SQL_TEMPLATE +
-          VISIT_CHILD_CLAUSE_TEMPLATE.replace("${visitConceptId}", "@" + namedParameter);
+        childList.add(parameter.getConceptId());
       }
     }
+
+    // Collect all parent type queries to run them together
+    if (!parentList.isEmpty()) {
+      String namedParameter = "visit" + getUniqueNamedParameterPostfix();
+      queryParams.put(namedParameter, QueryParameterValue.array(parentList.toArray(new Long[0]), Long.class));
+      String parentSql = VISIT_SELECT_CLAUSE_TEMPLATE +
+        VISIT_PARENT_CLAUSE_TEMPLATE.replace("${parentIds}", "@" + namedParameter);
+      queryParts.add(parentSql);
+    }
+
+    // Collect all child type queries to run them together
+    if (!childList.isEmpty()) {
+      String namedParameter = "visit" + getUniqueNamedParameterPostfix();
+      queryParams.put(namedParameter, QueryParameterValue.array(childList.toArray(new Long[0]), Long.class));
+      String childSql = VISIT_SELECT_CLAUSE_TEMPLATE +
+        VISIT_CHILD_CLAUSE_TEMPLATE.replace("${visitConceptIds}", "@" + namedParameter);
+      queryParts.add(childSql);
+    }
+
+    // Combine the parent and child queries, or just use the one
+    String finalSql = queryParts.size() > 1 ?
+      String.join(UNION_TEMPLATE, queryParts) : queryParts.get(0);
 
     return QueryJobConfiguration
       .newBuilder(finalSql)
