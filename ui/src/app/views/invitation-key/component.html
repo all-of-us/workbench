@@ -3,7 +3,7 @@
   <div *ngIf="!invitationKeyVerified" class="form-area">
     <div class="form-section">
       <h2>Enter your Invitation Key:</h2>
-      <input autofocus #invitationInput type="text" class="input" [(ngModel)]="invitationKey" placeholder="Invitation Key">
+      <input autofocus #invitationInput type="text" class="input" [(ngModel)]="invitationKey" placeholder="Invitation Key" (keypress.enter)="next()" (keypress.return)="next()">
       <div *ngIf="invitationKeyReq" class="alert alert-danger">
         <strong> Invitation Key is required.</strong>
       </div>
