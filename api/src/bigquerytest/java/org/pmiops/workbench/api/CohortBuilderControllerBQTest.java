@@ -161,14 +161,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEvent() throws Exception {
+  public void countSubjectsICD9ConditionOccurrenceChildrenAgeAtEvent() throws Exception {
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+    SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
     Modifier modifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("25"));
     SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
-      Arrays.asList(icd9), Arrays.asList(modifier));
+      Arrays.asList(icd9, icd9Proc), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
