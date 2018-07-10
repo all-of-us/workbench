@@ -1,6 +1,6 @@
 export const PROGRAM_TYPES = [
   { name: 'Surveys',    type: 'surveys', children: [], disabled: true },
-  { name: 'Physical Measurements',    type: 'pm', disabled: true },
+  { name: 'Physical Measurements',    type: 'pm' },
 ];
 
 export const DOMAIN_TYPES = [
@@ -19,3 +19,13 @@ export const DOMAIN_TYPES = [
     // { name: 'Vitals',       type: 'vitals' },
     // { name: 'Temporal',     type: 'temporal' }
 ];
+
+export const PM_UNITS = {
+    'HEIGHT': 'cm',
+    'WEIGHT': 'kg' ,
+    'BMI': '',
+    'WC': 'cm',
+    'HC': 'cm',
+    'BP': '',
+    'HR-DETAIL': 'beats/min'
+};
