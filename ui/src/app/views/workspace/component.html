@@ -23,15 +23,27 @@
         </div>
       </div>
     </div>
+    <div class="help-tip" style="position: relative; left: 250px; top: -170px" *ngIf="newWorkspace">
+      <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times" size="10px" style="position: absolute; top: 10px; right: 9px"></clr-icon></div>
+      <div class="help-tip-title">Welcome to your workspace!</div>
+      <div class="help-tip-text">One of the first things you may want to do is create a cohort and a notebook</div>
+    </div>
     <div style="padding-top: 1rem;">
       <h4 class="subheader">Research Purpose</h4>
       <div class="description-text">
         {{workspace.description}}
       </div>
-      <div class="help-tip" style="position: relative; left: 250px; top: -260px" *ngIf="newWorkspace">
-        <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times" size="10px" style="position: absolute; top: 10px; right: 9px"></clr-icon></div>
-        <div class="help-tip-title">Welcome to your workspace!</div>
-        <div class="help-tip-text">One of the first things you may want to do is create a cohort and a notebook</div>
+      <div class="research-purpose-items">
+        <div class="column">
+          <div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">
+            {{researchPurposeDescription}}
+          </div>
+        </div>
+        <div class="column">
+          <div class="research-purpose-item" *ngFor="let researchPurposeDescription of rightResearchPurposes">
+            {{researchPurposeDescription}}
+          </div>
+        </div>
       </div>
     </div>
   </div>
