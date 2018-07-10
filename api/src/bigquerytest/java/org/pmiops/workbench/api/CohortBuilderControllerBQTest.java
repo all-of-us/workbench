@@ -336,6 +336,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrencesAndEventDate() throws Exception {
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+    SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
     Modifier modifier1 = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
@@ -349,7 +350,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("2009-12-03"));
     SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
-      Arrays.asList(icd9), Arrays.asList(modifier1, modifier2, modifier3));
+      Arrays.asList(icd9,icd9Proc), Arrays.asList(modifier1, modifier2, modifier3));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
