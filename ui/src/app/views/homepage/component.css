@@ -5,7 +5,7 @@
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    height:100%
+    height: 100%
 }
 
 .card {
@@ -15,24 +15,25 @@
 .double {
     height: 332px;
     width: 548px;
-    background-color: rgba(255,255,255,0.15);
-    box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .left {
-    margin-left: 301px;
+    margin-left: 55%;
+    position: relative;
 }
 
 .right {
-    margin-left: 23px;
+    margin-left: 59%;
 }
 
 .single {
     height: 349px;
     width: 1118px;
     border-radius: 5px;
-    background-color: rgba(255,255,255,0.15);
-    box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
     margin-left: 301px;
 }
 
@@ -45,7 +46,7 @@
     font-weight: 500;
     line-height: 34px;
     margin-top: 27px;
-    margin-left:1%;
+    margin-left: 3%;
 }
 
 .heading {
@@ -53,92 +54,102 @@
     font-size: 28px;
     font-weight: 500;
     line-height: 34px;
-    text-align: center;
-    margin-top: 20px;
-    align-content: center;
-    height: 34px;
-    width: 541px;
-    margin-left: 25%;
+    margin-top: 3%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.learnHeading {
-    margin-left: 8%;
-}
 .analyzeHeading {
-    height: 68px;	width: 65%;
     opacity: 0.87;
     color: #FFFFFF;
     font-size: 28px;
-    font-weight: 500;	line-height: 34px;	text-align: center;
+    font-weight: 500;
+    line-height: 34px;
+    width: 65%;
+    display: flex;
+    text-align: center;
     margin-left: 18%;
+    margin-top: 1%;
 }
-
 
 .text {
-    width: 70%;	color: #FFFFFF;
-    font-size: 14px;	font-weight: 300;
+    width: 70%;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 300;
     line-height: 19px;
     text-align: center;
-    margin-top: 6px;
+    margin-top: 2%;
     align-self: center;
-    margin-left: 20%;
+    margin-left: 16%;
 }
 
+.double .text {
+    margin-left: 15%;
+}
+
+.button {
+    color: #FFFFFF;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 34px;
+    text-align: center;
+    align-content: center;
+    width: 541px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 5%;
+}
 
 .icon {
-    box-sizing: border-box;
-    align-self: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .analyzeIcon {
-    height: 15%;
-    width: 15%;
-    margin-left:40%;
-}
-
-.iconImage {
-    height: 95%;
-    margin-left: 22px;
-    margin-top:10px;
+    height: 18%;
+    width: 18%;
 }
 
 .learnIcon {
     height: 15%;
     width: 15%;
-    margin-left:40%;
-    margin-top:3%;
+    margin-top: 3%;
 }
 
 .topIcon {
     height: 65px;
     width: 94px;
     margin-top: 44px;
-    margin-left: 225px;
-    align-self: center;
 }
 
 .singleIcon {
-    margin-left: 25px;
-    margin-top: 10px;
+    margin-top: 5%;
+    height: 60px;
 }
-
 
 .btn-homepage {
     height: 52px;
-    width: 237px;
     border-radius: 5px;
     background-color: #302C71;
-    margin-top:1%;
     color: white;
-    margin-left:4%;
+    margin-left: 31%;
+    margin-top: 3%;
+    font-weight: 500;
+    font-size: 14px;
 }
-
 
 .footer {
     height: 300px;
-    width: 100%;	border-radius: 5px;	background-color: #262262;
-    box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
-    margin-top:30px;
+    width: 100%;
+    border-radius: 5px;
+    background-color: #262262;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
+    margin-top: 30px;
 }
 
 .footerTitle {
@@ -150,7 +161,11 @@
     font-weight: 500;
     line-height: 34px;
     margin-left: 320px;
-    margin-top:32px;
+    margin-top: 32px;
+}
+
+.footerSubTitle {
+    align-self: right;
 }
 
 .textGroup {
@@ -169,12 +184,12 @@
 }
 
 .footerText .title {
-    color:white;
+    color: white;
     margin-top: 20px;
 }
 
 .linkGroup {
-    margin-top:16px;
+    margin-top: 16px;
 }
 
 .links {
@@ -191,9 +206,9 @@
     width: 300px;
     border-radius: 5px;
     background-color: #FFFFFF;
-    box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
     align-content: left;
-    margin-left:25px;
+    margin-left: 25px;
 }
 
 .card-text {
@@ -204,18 +219,20 @@
     font-weight: 500;
     line-height: 28px;
     margin-top: 20%;
-    margin-left:6%;
+    margin-left: 6%;
 
 }
 
 .plus-circle {
     width: 32px;
-    height:32px;
+    height: 32px;
 }
 
-.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-    text-decoration: none;
+.bullets {
+    color: #83C3EC;
 }
 
+.footerLink {
+    margin-left: 63%;
+    color: #FFFFFF;
+}
