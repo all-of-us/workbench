@@ -402,7 +402,7 @@ export class CohortSearchActions {
       param.attributes = immParam.get('predefinedAttributes') ;
     }
 
-    if (param.type.match(/^DEMO|PM.*/i)) {
+    if (param.type.match(/^DEMO|VISIT|PM.*/i)) {
       param.conceptId = immParam.get('conceptId');
     } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
       param.domain = immParam.get('domainId');
