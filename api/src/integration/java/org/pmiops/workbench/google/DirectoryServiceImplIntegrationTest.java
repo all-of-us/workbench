@@ -68,6 +68,8 @@ public class DirectoryServiceImplIntegrationTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.googleDirectoryService = new WorkbenchConfig.GoogleDirectoryServiceConfig();
     config.googleDirectoryService.gSuiteDomain = "fake-research-aou.org";
+    config.admin = new WorkbenchConfig.AdminConfig();
+    config.admin.verifiedSendingAddress = "test@" + config.googleDirectoryService.gSuiteDomain;
     return config;
   }
 }
