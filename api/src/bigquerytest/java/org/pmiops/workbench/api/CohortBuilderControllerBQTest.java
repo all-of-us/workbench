@@ -592,6 +592,42 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsVisitChildOrParent() throws Exception {
+    Criteria visitChildCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("1");
+    Criteria visitParentCriteria = new Criteria().type(TYPE_VISIT).group(true).conceptId("1");
+    SearchParameter visitChild = createSearchParameter(visitChildCriteria, null);
+    SearchParameter visitParent = createSearchParameter(visitParentCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(visitChild.getType(), Arrays.asList(visitChild, visitParent), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
+  public void countSubjectsVisitChildNullConceptId() throws Exception {
+    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false);
+    SearchParameter visit = createSearchParameter(visitCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException e) {
+      // success
+      assertEquals("Please provide a valid concept Id", e.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsVisitChildModifiers() throws Exception {
+    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("10");
+    SearchParameter visit = createSearchParameter(visitCriteria, null);
+    Modifier modifier2 = new Modifier()
+    .name(ModifierType.NUM_OF_OCCURRENCES)
+    .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+    .operands(Arrays.asList("1"));
+    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), Arrays.asList(modifier2));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsBloodPressure() throws Exception {
     List<Attribute> attributes = Arrays.asList(
       new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L),
@@ -948,42 +984,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsBloodPressureEmptyAttributes() throws Exception {
     assertBadRequestExceptionBloodPressure(new Attribute(), new Attribute());
-  }
-
-  @Test
-  public void countSubjectsVisitChildOrParent() throws Exception {
-    Criteria visitChildCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("1");
-    Criteria visitParentCriteria = new Criteria().type(TYPE_VISIT).group(true).conceptId("1");
-    SearchParameter visitChild = createSearchParameter(visitChildCriteria, null);
-    SearchParameter visitParent = createSearchParameter(visitParentCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(visitChild.getType(), Arrays.asList(visitChild, visitParent), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsVisitChildNullConceptId() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false);
-    SearchParameter visit = createSearchParameter(visitCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException e) {
-      // success
-      assertEquals("Please provide a valid concept Id", e.getMessage());
-    }
-  }
-
-  @Test
-  public void countSubjectsVisitChildModifiers() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("10");
-    SearchParameter visit = createSearchParameter(visitCriteria, null);
-    Modifier modifier2 = new Modifier()
-    .name(ModifierType.NUM_OF_OCCURRENCES)
-    .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-    .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), Arrays.asList(modifier2));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
