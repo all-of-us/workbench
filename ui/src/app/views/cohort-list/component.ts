@@ -42,6 +42,11 @@ export class CohortListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    this.reloadCohorts();
+  }
+
+  reloadCohorts(): void {
+    this.cohortsLoading = true;
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
       .subscribe(
         cohortsReceived => {
@@ -64,6 +69,13 @@ export class CohortListComponent implements OnInit, OnDestroy {
     if (!this.awaitingReview) {
       this.router.navigate(['build'], {relativeTo: this.route});
     }
+  }
+
+  delete(cohort: Cohort): void {
+    this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
+      this.cohortList = this.cohortList.splice(
+        this.cohortList.findIndex((index) => index === cohort) - 1, 1);
+    });
   }
 
   get writePermission(): boolean {
