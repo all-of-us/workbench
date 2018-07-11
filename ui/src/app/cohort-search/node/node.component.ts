@@ -17,7 +17,7 @@ import {
   templateUrl: './node.component.html',
   styleUrls: ['./node.component.css']
 })
-export class NodeComponent implements AfterViewChecked, OnInit, OnDestroy {
+export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
 
   /*
@@ -44,6 +44,9 @@ export class NodeComponent implements AfterViewChecked, OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    if (this.node.get('group')) {
+      setTimeout(this.loadChildren(true), 100);
+    }
     const _type = this.node.get('type').toLowerCase();
     const parentId = this.node.get('id');
     const errorSub = this.ngRedux
@@ -57,23 +60,21 @@ export class NodeComponent implements AfterViewChecked, OnInit, OnDestroy {
 
     const childSub = this.ngRedux
       .select(criteriaChildren(_type, parentId))
-      .subscribe(children => this.children = children);
+      .subscribe(children => {
+        this.children = children;
+        this.children.forEach(child => {
+          if (child.get('group')) {
+              console.log(child.get('name'));
+            const _childType = child.get('type').toLowerCase();
+            const childParentId = child.get('id');
+            this.actions.fetchCriteria(_childType, childParentId);
+          }
+        });
+      });
 
     this.subscription = errorSub;
     this.subscription.add(loadingSub);
     this.subscription.add(childSub);
-
-    if (this.node.get('group') && this.children.size === 0) {
-      setTimeout(() => this.loadChildren(true), 100);
-    } else {
-      console.log(this.node.get('name'));
-    }
-  }
-
-  ngAfterViewChecked() {
-    // if (this.node.get('group') && this.children.size === 0) {
-    //     this.loadChildren(true);
-    // }
   }
 
   ngOnDestroy() {
@@ -81,6 +82,7 @@ export class NodeComponent implements AfterViewChecked, OnInit, OnDestroy {
   }
 
   loadChildren(event) {
+    console.log(this.node.get('name'));
     if (!event) { return ; }
     const _type = this.node.get('type').toLowerCase();
     const parentId = this.node.get('id');
