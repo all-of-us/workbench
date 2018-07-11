@@ -5,8 +5,7 @@
   </div>
 
   <ng-template *ngIf="node.get('group')"
-    [clrIfExpanded]="expanded"
-    (clrIfExpandedChange)="loadChildren($event)">
+    [clrIfExpanded]="expanded">
     <ng-container [clrLoading]="loading">
       <div class="node-list">
         <!-- TODO: This error handling is a stub until we can get a designer to look at it -->
