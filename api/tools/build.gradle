@@ -124,7 +124,7 @@ dependencies {
   compile 'joda-time:joda-time:+'
   compile 'com.github.fge:json-patch:+'
   compile 'io.swagger:swagger-annotations:1.5.9'
-  compile 'com.google.cloud.sql:mysql-socket-factory:1.0.0'
+  compile 'com.google.cloud.sql:mysql-socket-factory:1.0.9'
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.code.gson:gson:+'
   compile 'org.hibernate:hibernate-validator:+'
