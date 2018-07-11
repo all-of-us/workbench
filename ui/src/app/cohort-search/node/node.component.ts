@@ -1,6 +1,7 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewChecked, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {List} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
@@ -16,7 +17,7 @@ import {
   templateUrl: './node.component.html',
   styleUrls: ['./node.component.css']
 })
-export class NodeComponent implements OnInit, OnDestroy {
+export class NodeComponent implements AfterViewChecked, OnInit, OnDestroy {
   @Input() node;
 
   /*
@@ -61,6 +62,18 @@ export class NodeComponent implements OnInit, OnDestroy {
     this.subscription = errorSub;
     this.subscription.add(loadingSub);
     this.subscription.add(childSub);
+
+    if (this.node.get('group') && this.children.size === 0) {
+      setTimeout(() => this.loadChildren(true), 100);
+    } else {
+      console.log(this.node.get('name'));
+    }
+  }
+
+  ngAfterViewChecked() {
+    // if (this.node.get('group') && this.children.size === 0) {
+    //     this.loadChildren(true);
+    // }
   }
 
   ngOnDestroy() {
