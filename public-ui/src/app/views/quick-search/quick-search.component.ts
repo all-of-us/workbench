@@ -9,7 +9,6 @@ import 'rxjs/add/operator/switchMap';
 import { Observable } from 'rxjs/Rx';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
-import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
 
 
