@@ -10,7 +10,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated';
 
-
 @Component({
   styleUrls: ['../../styles/buttons.css',
     '../../styles/cards.css',
@@ -73,8 +72,8 @@ export class CohortListComponent implements OnInit, OnDestroy {
 
   delete(cohort: Cohort): void {
     this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
-      this.cohortList = this.cohortList.splice(
-        this.cohortList.findIndex((index) => index === cohort) - 1, 1);
+      this.cohortList.splice(
+        this.cohortList.indexOf(cohort), 1);
     });
   }
 
