@@ -602,6 +602,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsVisitChildNullConceptId() throws Exception {
+    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false);
+    SearchParameter visit = createSearchParameter(visitCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException e) {
+      // success
+      assertEquals("Please provide a valid concept Id", e.getMessage());
+    }
+  }
+
+  @Test
   public void countSubjectsVisitChildModifiers() throws Exception {
     Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("10");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
