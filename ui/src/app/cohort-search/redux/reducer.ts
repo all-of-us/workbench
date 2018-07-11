@@ -228,7 +228,9 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state.setIn(['wizard', 'focused'], Map());
 
       case SHOW_ATTRIBUTES_PAGE:
-        return state.setIn(['wizard', 'item', 'attributes'], action.node);
+        return state
+          .setIn(['wizard', 'item', 'attributes'], action.node)
+          .deleteIn(['wizard', 'calculate', 'count']);
 
       case HIDE_ATTRIBUTES_PAGE:
         return state.setIn(['wizard', 'item', 'attributes'], Map());
