@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,9 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     List<Long> parentList = new ArrayList<>();
     List<Long> childList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getParameters()) {
+      if (parameter.getConceptId() == null) {
+        throw new BadRequestException("Please provide a valid concept Id");
+      }
       if (parameter.getGroup()) {
         parentList.add(parameter.getConceptId());
       } else {
