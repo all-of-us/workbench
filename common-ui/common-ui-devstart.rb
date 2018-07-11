@@ -12,7 +12,7 @@ end
 
 # Ensure the docker is running what you want by calling the command to run it
 def ensure_docker(cmd_name, args)
-  unless Workbench::in_docker?
+  unless Workbench.in_docker?
     exec *(%W{docker-compose run --rm #{@ui_name} ./project.rb #{cmd_name}} + args)
   end
 end
@@ -106,26 +106,20 @@ class CommonUiDevStart
     Common.new.run_inline %W{docker-compose run --rm #{@ui_name} yarn run lint}
   end
 
-
   def rebuild_image()
     common = Common.new
     common.run_inline %W{docker-compose build}
   end
 
-
-
-  def docker_run(cmd_name, args)
+  def docker_run(_cmd_name, args)
     Common.new.run_inline %W{docker-compose run --rm #{@ui_name}} + args
   end
-
-
 
   def clean_environment()
     common = Common.new
     common.run_inline %W{rm -rf node_modules}
     Common.new.run_inline %W{docker-compose down --volumes --rmi=local}
   end
-
 
   def register_commands
     Common.register_command({
