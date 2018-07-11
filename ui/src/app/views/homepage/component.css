@@ -199,9 +199,7 @@
 .card.add-card {
     height: 223px;
     width: 300px;
-    border-radius: 5px;
     background-color: #FFFFFF;
-    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
     align-content: left;
     margin-left: 25px;
 }
@@ -215,7 +213,6 @@
     line-height: 28px;
     margin-top: 20%;
     margin-left: 6%;
-
 }
 
 .plus-circle {
@@ -231,3 +228,4 @@
     margin-left: 53rem;
     color: #FFFFFF;
 }
+
