@@ -14,7 +14,7 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 
 import {
   simulateEvent,
-  updateAndTickg
+  updateAndTick
 } from '../../../testing/test-helpers';
 
 import {ServerConfigService} from '../../services/server-config.service';
