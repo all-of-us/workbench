@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.IssueResponse;
@@ -54,6 +55,15 @@ public class BugReportControllerTest {
   @Import({BugReportController.class})
   @MockBean({JiraService.class, JupyterApi.class})
   static class Configuration {
+    @Bean
+    WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig config = new WorkbenchConfig();
+      config.admin = new WorkbenchConfig.AdminConfig();
+      config.admin.supportGroup = "support@asdf.com";
+      config.admin.verifiedSendingAddress = "sender@asdf.com";
+      return config;
+    }
+
     @Bean
     User user() {
       // Allows for wiring of the initial Provider<User>; actual mocking of the
