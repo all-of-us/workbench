@@ -1,11 +1,6 @@
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {fromJS, List, Map} from 'immutable';
-=======
-import {NgRedux} from '@angular-redux/store';
-import {AfterViewChecked, Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {List} from 'immutable';
->>>>>>> RW-966 move loading of child nodes into component
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -23,7 +18,7 @@ import {
   templateUrl: './node.component.html',
   styleUrls: ['./node.component.css']
 })
-export class NodeComponent implements AfterViewChecked, OnInit, OnDestroy {
+export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
 
@@ -88,28 +83,10 @@ export class NodeComponent implements AfterViewChecked, OnInit, OnDestroy {
           }
         });
 
-<<<<<<< HEAD
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
     }
-=======
-    this.subscription = errorSub;
-    this.subscription.add(loadingSub);
-    this.subscription.add(childSub);
-
-    if (this.node.get('group') && this.children.size === 0) {
-      setTimeout(() => this.loadChildren(true), 100);
-    } else {
-      console.log(this.node.get('name'));
-    }
-  }
-
-  ngAfterViewChecked() {
-    // if (this.node.get('group') && this.children.size === 0) {
-    //     this.loadChildren(true);
-    // }
->>>>>>> RW-966 move loading of child nodes into component
   }
 
   ngOnDestroy() {
