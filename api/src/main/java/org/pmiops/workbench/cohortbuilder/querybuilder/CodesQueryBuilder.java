@@ -38,7 +38,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   }
 
   private static final String CODES_SQL_TEMPLATE =
-    "select ${modifierDistinct} a.person_id ${modifierColumns}\n" +
+    "select distinct a.person_id, ${modifierColumns}\n" +
       "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n" +
       "where a.${tableId} = b.concept_id\n";
 
@@ -82,13 +82,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
     //do modifier sql
     String codesSql = String.join(UNION_TEMPLATE, queryParts);
-    String finalSql = buildModifierSql(codesSql, params.getModifiers(), getType());
-
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(queryParams)
-      .setUseLegacySql(false)
-      .build();
+    return buildModifierSql(codesSql, queryParams, params.getModifiers(), getType());
   }
 
   private void buildGroupQuery(String type,
@@ -141,6 +135,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       inClauseSql = ICD10_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
       paramNames = new ImmutableMap.Builder<String, String>()
         .put("${tableName}", DomainTableEnum.getTableName(domain))
+        .put("${modifierColumns}", DomainTableEnum.getEntryDate(domain) + " as entry_date, concept_code")
         .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
         .put("${conceptCodes}", "@" + namedParameter)
         .put("${cmOrProc}", "@" + cmOrProcUniqueParam)
@@ -151,6 +146,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       inClauseSql = ICD9_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
       paramNames = new ImmutableMap.Builder<String, String>()
         .put("${tableName}", DomainTableEnum.getTableName(domain))
+        .put("${modifierColumns}", DomainTableEnum.getEntryDate(domain) + " as entry_date, concept_code")
         .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
         .put("${conceptCodes}", "@" + namedParameter)
         .put("${cm}", "@" + cmUniqueParam)
