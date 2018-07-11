@@ -13,9 +13,10 @@ import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
 import {
-  updateAndTick,
   simulateEvent,
+  updateAndTickg
 } from '../../../testing/test-helpers';
+
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 
