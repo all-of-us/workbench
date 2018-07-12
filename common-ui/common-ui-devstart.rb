@@ -13,7 +13,7 @@ end
 # Ensure the docker is running what you want by calling the command to run it
 def ensure_docker(cmd_name, args)
   unless Workbench.in_docker?
-    exec *(%W{docker-compose run --rm #{@ui_name} ./project.rb #{cmd_name}} + args)
+    exec(*(%W{docker-compose run --rm #{@ui_name} ./project.rb #{cmd_name}} + args))
   end
 end
 
