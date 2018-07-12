@@ -44,8 +44,8 @@ export class WorkspacesServiceStub {
       lastModifiedTime: new Date().getTime(),
       researchPurpose: {
         diseaseFocusedResearch: false,
-        methodsDevelopment: false,
-        controlSet: false,
+        methodsDevelopment: true,
+        controlSet: true,
         aggregateAnalysis: false,
         ancestry: false,
         commercialPurpose: false,
