@@ -1,6 +1,7 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_ALL_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   CRITERIA_REQUEST_ERROR,
@@ -54,6 +55,11 @@ export const requestCriteria =
   (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
   ({type: BEGIN_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
+
+export const requestAllCriteria =
+  (cdrVersionId: number, kind: string, parentId: number
+  ): ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST] =>
+  ({type: BEGIN_ALL_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
 
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
