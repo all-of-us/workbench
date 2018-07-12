@@ -3,18 +3,23 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.utils.OperatorUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -74,7 +79,7 @@ public abstract class AbstractQueryBuilder {
         }
         modifierSql = modifierSql +
           OperatorUtils.getSqlOperator(ageAtEvent.getOperator()) + " " +
-          String.join(AND, modifierParamList);
+          String.join(AND, modifierParamList) + "\n";
       }
       if (eventDate != null) {
         List<String> modifierParamList = new ArrayList<>();
@@ -91,10 +96,19 @@ public abstract class AbstractQueryBuilder {
         }
         modifierSql = modifierSql +
           OperatorUtils.getSqlOperator(eventDate.getOperator()) + " " +
-          String.join(AND, modifierParamList);
+          String.join(AND, modifierParamList) + "\n";
       }
       if (occurrences != null) {
-        modifierSql = modifierSql + OCCURRENCES_SQL_TEMPLATE;
+        List<String> modifierParamList = new ArrayList<>();
+        validateOperands(occurrences);
+        for (String operand : occurrences.getOperands()) {
+          String modifierParameter = OCCURRENCES_PREFIX + getUniqueNamedParameterPostfix();
+          modifierParamList.add("@" + modifierParameter);
+          queryParams.put(modifierParameter, QueryParameterValue.int64(new Long(operand)));
+        }
+        modifierSql = modifierSql + OCCURRENCES_SQL_TEMPLATE +
+          OperatorUtils.getSqlOperator(occurrences.getOperator()) + " " +
+          String.join(AND, modifierParamList) + "\n";
       }
     }
     finalSql = MODIFIER_SQL_TEMPLATE.replace("${innerSql}", baseSql) +
@@ -105,26 +119,6 @@ public abstract class AbstractQueryBuilder {
       .setNamedParameters(queryParams)
       .setUseLegacySql(false)
       .build();
-  }
-
-  private void validateOperands(Modifier modifier) {
-    if (modifier.getOperator().equals(Operator.BETWEEN) &&
-      modifier.getOperands().size() != 2) {
-      throw new BadRequestException(String.format(
-        "Modifier: %s can only have 2 operands when using the %s operator",
-        modifier.getName(),
-        modifier.getOperator().name()));
-    }
-    if (modifier.getName().equals(ModifierType.AGE_AT_EVENT) &&
-      modifier.getOperator().equals(Operator.BETWEEN)) {
-      try {
-        modifier.getOperands().stream().map(Long::new);
-      } catch (NumberFormatException nfe) {
-        throw new BadRequestException(String.format(
-          "Please provide valid number for "
-            + exceptionText.get(ModifierType.AGE_AT_EVENT)));
-      }
-    }
   }
 
   public abstract FactoryKey getType();
@@ -142,16 +136,44 @@ public abstract class AbstractQueryBuilder {
     } else if (modifierList.size() == 1){
       return modifierList.get(0);
     }
-    throw new BadRequestException("Please provide one " +
-      exceptionText.get(modifierType) + " modifier.");
+    throw new BadRequestException(String.format("Please provide one %s modifier.",
+      exceptionText.get(modifierType)));
   }
 
-  private void validateOperator(Modifier modifier) {
-    if (modifier.getOperands().size() != 2) {
+  private void validateOperands(Modifier modifier) {
+    if (modifier.getOperator().equals(Operator.BETWEEN) &&
+      modifier.getOperands().size() != 2) {
       throw new BadRequestException(String.format(
         "Modifier: %s can only have 2 operands when using the %s operator",
-        modifier.getName(),
+        exceptionText.get(modifier.getName()),
         modifier.getOperator().name()));
+    } else if (!modifier.getOperator().equals(Operator.BETWEEN) &&
+      modifier.getOperands().size() != 1) {
+      throw new BadRequestException(String.format(
+        "Modifier: %s can only have 1 operand when using the %s operator",
+        exceptionText.get(modifier.getName()),
+        modifier.getOperator().name()));
+    } else if (modifier.getName().equals(ModifierType.AGE_AT_EVENT)
+      || modifier.getName().equals(ModifierType.NUM_OF_OCCURRENCES)) {
+      try {
+        modifier.getOperands().stream()
+          .map(Long::new).collect(Collectors.toList());
+      } catch (NumberFormatException nfe) {
+        throw new BadRequestException(String.format(
+          "Please provide valid number for %s.",
+            exceptionText.get(modifier.getName())));
+      }
+    } else if (modifier.getName().equals(ModifierType.EVENT_DATE)) {
+        modifier.getOperands().stream()
+          .map(date -> {
+            try {
+              return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+            } catch (ParseException pe) {
+              throw new BadRequestException(String.format(
+                "Please provide valid date for %s.",
+                exceptionText.get(modifier.getName())));
+            }
+          }).collect(Collectors.toList());
     }
   }
 
