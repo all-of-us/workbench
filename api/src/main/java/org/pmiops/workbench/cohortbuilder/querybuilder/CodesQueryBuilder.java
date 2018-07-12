@@ -37,6 +37,8 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     GROUP, NOT_GROUP
   }
 
+  //If the querybuilder will use modifiers then this sql statement has to have
+  //the distinct and ${modifierColumns}
   private static final String CODES_SQL_TEMPLATE =
     "select distinct a.person_id, ${modifierColumns}\n" +
       "from `${projectId}.${dataSetId}.${tableName}` a, `${projectId}.${dataSetId}.concept` b\n" +
@@ -80,9 +82,8 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       }
     }
 
-    //do modifier sql
     String codesSql = String.join(UNION_TEMPLATE, queryParts);
-    return buildModifierSql(codesSql, queryParams, params.getModifiers(), getType());
+    return buildAgeAtEventAndEventDateModifierSql(codesSql, queryParams, params.getModifiers());
   }
 
   private void buildGroupQuery(String type,
