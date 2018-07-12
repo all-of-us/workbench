@@ -1,4 +1,4 @@
-# Public UI project management commands and command-line flag definitions.
+# Common UI project management commands and command-line flag definitions.
 
 require "optparse"
 require "set"
@@ -272,10 +272,9 @@ class DeployUI
     build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       common.run_inline %W{gcloud app deploy
-        --project #{@opts.project}
-        --version #{@opts.version}
-                        #{opts.promote ? "--promote" : "--no-promote"}
-                        } + (@opts.quiet ? %W{--quiet} : [])
+       --project #{@opts.project}
+       --version #{@opts.version}
+       #{opts.promote ? "--promote" : "--no-promote"}} + (@opts.quiet ? %W{--quiet} : [])
     end
   end
 end

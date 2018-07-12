@@ -274,7 +274,7 @@ def deploy(cmd_name, args)
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
-                    #{op.opts.promote ? "--promote" : "--no-promote"}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
   }
   maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"

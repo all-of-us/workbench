@@ -36,7 +36,6 @@
 /public-ui/**/*.map
 /public-ui/dist/**
 /public-ui/yarn-error.log
-/public-ui/src/generated/*
 /public-ui/src/publicGenerated/*
 /public-ui/sa-key.json
 cloud_sql_proxy

@@ -265,8 +265,20 @@ export class ChartComponent implements OnChanges {
 
   }
   public makeConceptChartOptions() {
-    let data = [];
-    let cats = [];
+    const data = [];
+    const cats = [];
+
+    // Sort by count value
+    this.concepts  = this.concepts.sort((a, b) => {
+      if (a.countValue < b.countValue) {
+        return 1;
+      }
+      if (a.countValue > b.countValue) {
+        return -1;
+      }
+      return 0; }
+    );
+
     for (const a  of this.concepts) {
       data.push({
         name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ',
@@ -277,22 +289,6 @@ export class ChartComponent implements OnChanges {
         cats.push(a.vocabularyId + '-' + a.conceptCode);
       }
     }
-    data = data.sort((a, b) => {
-      if (a.countValue > b.countValue) {
-        return 1;
-      }
-      if (a.countValue < b.countValue) {
-        return -1;
-      }
-      return 0; }
-    );
-    cats = cats.sort((a, b) => {
-      if (a > b) { return 1; }
-      if (a < b) { return -1; }
-      return 0;
-    });
-
-
 
     // Override tooltip and colors and such
     const series = {

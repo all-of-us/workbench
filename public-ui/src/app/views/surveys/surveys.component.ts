@@ -11,7 +11,7 @@ export class SurveysComponent implements OnInit, OnDestroy {
   title = 'Browse Participant Surveys';
   subTitle = 'Conduct a simple keyword search to quickly identify survey questions ' +
     'related to your area of interest.';
-  pageImage = '/assets/images/create-account-male-standing.png';
+  pageImage = '/assets/db-images/man-vest.png';
   surveys = [];
   private subscription: ISubscription;
 
