@@ -9,7 +9,7 @@ export const DOMAIN_TYPES = [
     { name: 'Procedures',    type: 'procedures', disabled: true },
     { name: 'Drugs',    type: 'drugs', disabled: true },
     { name: 'Measurements',    type: 'measure', disabled: true },
-    { name: 'Visits',    type: 'visit' },
+    { name: 'Visits',    type: 'visit', fullTree: true },
     { name: 'ICD9 Codes',   type: 'icd9' },
     { name: 'ICD10 Codes',  type: 'icd10' },
     // { name: 'PheCodes',     type: 'phecode' },
