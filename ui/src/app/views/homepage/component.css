@@ -10,13 +10,13 @@
 
 .double {
     height: 332px;
-    width: 548px;
+    width: 638px;
     background-color: rgba(255, 255, 255, 0.15);
     box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .left {
-    margin-left: 14.4rem;
+    margin-left: 8rem;
 }
 
 .right {
@@ -24,12 +24,12 @@
 }
 
 .single {
-    height: 349px;
-    width: 1118px;
+    height: 379px;
+    width: 1298px;
     border-radius: 5px;
     background-color: rgba(255, 255, 255, 0.15);
     box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
-    margin-left: 14.4rem;
+    margin-left: 8rem;
 }
 
 .analyzeSingleHeader {
@@ -97,6 +97,7 @@
     justify-content: center;
     text-align: center;
     margin-top: 5%;
+    margin-left:2.5rem;
 }
 
 .icon {
