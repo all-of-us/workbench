@@ -154,34 +154,30 @@ public class ParticipantCounterTest {
         }
 
         final String expectedSql = "select count(*) as count\n" +
-                "from `${projectId}.${dataSetId}.person` person\n" +
-                "where\n" +
-                "person.person_id in (select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select  a.person_id \n" +
-                "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                "where a.condition_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
-                "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
-                ")\n" +
-                ")\n" +
-                "and person.person_id in (select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where\n" +
-                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
-                ")\n" +
-                "and not exists\n" +
-                "(select 'x' from\n" +
-                "(select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select  a.person_id \n" +
-                "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                "where a.procedure_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
-                "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
-                ")\n" +
-                ")\n" +
-                "x where x.person_id = person.person_id)\n";
+          "from `${projectId}.${dataSetId}.person` person\n" +
+          "where\n" +
+          "person.person_id in (select criteria.person_id from (select distinct a.person_id, condition_start_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.condition_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
+          "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
+          ") criteria\n" +
+          ")\n" +
+          "and person.person_id in (select person_id\n" +
+          "from `${projectId}.${dataSetId}.person` p\n" +
+          "where\n" +
+          "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
+          ")\n" +
+          "and not exists\n" +
+          "(select 'x' from\n" +
+          "(select criteria.person_id from (select distinct a.person_id, procedure_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.procedure_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
+          "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
+          ") criteria\n" +
+          ")\n" +
+          "x where x.person_id = person.person_id)\n";
 
         assertEquals(expectedSql, actualRequest.getQuery());
 
@@ -263,36 +259,32 @@ public class ParticipantCounterTest {
         }
 
         final String expectedSql = "select person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
-                "from `${projectId}.${dataSetId}.person` person\n" +
-                "where\n" +
-                "person.person_id in (select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select  a.person_id \n" +
-                "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                "where a.condition_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
-                "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
-                ")\n" +
-                ")\n" +
-                "and person.person_id in (select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where\n" +
-                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
-                ")\n" +
-                "and not exists\n" +
-                "(select 'x' from\n" +
-                "(select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select  a.person_id \n" +
-                "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                "where a.procedure_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
-                "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
-                ")\n" +
-                ")\n" +
-                "x where x.person_id = person.person_id)\n" +
-                "order by person_id\n" +
-                "limit 200";
+          "from `${projectId}.${dataSetId}.person` person\n" +
+          "where\n" +
+          "person.person_id in (select criteria.person_id from (select distinct a.person_id, condition_start_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.condition_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
+          "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
+          ") criteria\n" +
+          ")\n" +
+          "and person.person_id in (select person_id\n" +
+          "from `${projectId}.${dataSetId}.person` p\n" +
+          "where\n" +
+          "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
+          ")\n" +
+          "and not exists\n" +
+          "(select 'x' from\n" +
+          "(select criteria.person_id from (select distinct a.person_id, procedure_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.procedure_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
+          "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
+          ") criteria\n" +
+          ")\n" +
+          "x where x.person_id = person.person_id)\n" +
+          "order by person_id\n" +
+          "limit 200";
 
         assertEquals(expectedSql, actualRequest.getQuery());
 
@@ -373,46 +365,83 @@ public class ParticipantCounterTest {
             }
         }
 
+//        final String expectedSql = "select concept1.concept_code as gender, \n" +
+//                "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
+//                "case when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 0 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 18 then '0-18'\n" +
+//                "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 19 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 44 then '19-44'\n" +
+//                "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 45 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 64 then '45-64'\n" +
+//                "else '> 65'\n" +
+//                "end as ageRange,\n" +
+//                "count(*) as count\n" +
+//                "from `${projectId}.${dataSetId}.person` person\n" +
+//                "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id = 'Gender')\n" +
+//                "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
+//                "where\n" +
+//                "person.person_id in (select person_id\n" +
+//                "from `${projectId}.${dataSetId}.person` p\n" +
+//                "where person_id in (select  a.person_id \n" +
+//                "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+//                "where a.condition_source_concept_id = b.concept_id\n" +
+//                "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
+//                "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
+//                ")\n" +
+//                ")\n" +
+//                "and person.person_id in (select person_id\n" +
+//                "from `${projectId}.${dataSetId}.person` p\n" +
+//                "where\n" +
+//                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
+//                ")\n" +
+//                "and not exists\n" +
+//                "(select 'x' from\n" +
+//                "(select person_id\n" +
+//                "from `${projectId}.${dataSetId}.person` p\n" +
+//                "where person_id in (select  a.person_id \n" +
+//                "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+//                "where a.procedure_source_concept_id = b.concept_id\n" +
+//                "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
+//                "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
+//                ")\n" +
+//                ")\n" +
+//                "x where x.person_id = person.person_id)\n" +
+//                "group by gender, race, ageRange\n" +
+//                "order by gender, race, ageRange\n";
+
         final String expectedSql = "select concept1.concept_code as gender, \n" +
-                "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
-                "case when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 0 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 18 then '0-18'\n" +
-                "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 19 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 44 then '19-44'\n" +
-                "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 45 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 64 then '45-64'\n" +
-                "else '> 65'\n" +
-                "end as ageRange,\n" +
-                "count(*) as count\n" +
-                "from `${projectId}.${dataSetId}.person` person\n" +
-                "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id = 'Gender')\n" +
-                "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
-                "where\n" +
-                "person.person_id in (select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select  a.person_id \n" +
-                "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                "where a.condition_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
-                "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
-                ")\n" +
-                ")\n" +
-                "and person.person_id in (select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where\n" +
-                "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
-                ")\n" +
-                "and not exists\n" +
-                "(select 'x' from\n" +
-                "(select person_id\n" +
-                "from `${projectId}.${dataSetId}.person` p\n" +
-                "where person_id in (select  a.person_id \n" +
-                "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                "where a.procedure_source_concept_id = b.concept_id\n" +
-                "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
-                "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
-                ")\n" +
-                ")\n" +
-                "x where x.person_id = person.person_id)\n" +
-                "group by gender, race, ageRange\n" +
-                "order by gender, race, ageRange\n";
+          "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
+          "case when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 0 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 18 then '0-18'\n" +
+          "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 19 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 44 then '19-44'\n" +
+          "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= 45 and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= 64 then '45-64'\n" +
+          "else '> 65'\n" +
+          "end as ageRange,\n" +
+          "count(*) as count\n" +
+          "from `${projectId}.${dataSetId}.person` person\n" +
+          "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id = 'Gender')\n" +
+          "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
+          "where\n" +
+          "person.person_id in (select criteria.person_id from (select distinct a.person_id, condition_start_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.condition_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
+          "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
+          ") criteria\n" +
+          ")\n" +
+          "and person.person_id in (select person_id\n" +
+          "from `${projectId}.${dataSetId}.person` p\n" +
+          "where\n" +
+          "p.gender_concept_id in unnest(@" + genderNamedParameter + ")\n" +
+          ")\n" +
+          "and not exists\n" +
+          "(select 'x' from\n" +
+          "(select criteria.person_id from (select distinct a.person_id, procedure_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.procedure_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
+          "and b.concept_code in unnest(@" + procedureNamedParameter + ")\n" +
+          ") criteria\n" +
+          ")\n" +
+          "x where x.person_id = person.person_id)\n" +
+          "group by gender, race, ageRange\n" +
+          "order by gender, race, ageRange\n";
 
         assertEquals(expectedSql, actualRequest.getQuery());
 
