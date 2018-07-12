@@ -203,6 +203,7 @@
     background-color: #FFFFFF;
     align-content: left;
     margin-left: 25px;
+    cursor: pointer;
 }
 
 .card-text {
@@ -229,4 +230,3 @@
     margin-left: 53rem;
     color: #FFFFFF;
 }
-
