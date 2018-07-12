@@ -1,19 +1,22 @@
 
 <div style="padding: 3rem 3rem 0 3rem;">
   <div *ngIf="!invitationKeyVerified" class="form-area">
-    <div class="form-section">
+    <form (ngSubmit)="next()" class="form-section">
       <h2>Enter your Invitation Key:</h2>
-      <input autofocus #invitationInput type="text" class="input" [(ngModel)]="invitationKey" placeholder="Invitation Key" (keypress.enter)="next()" (keypress.return)="next()">
+      <input autofocus #invitationInput type="text" class="input" id="invitationKey" name="invitationKey" [(ngModel)]="invitationKey" placeholder="Invitation Key">
       <div *ngIf="invitationKeyReq" class="alert alert-danger">
         <strong> Invitation Key is required.</strong>
       </div>
       <div *ngIf="invitationKeyInvalid" class="alert alert-danger">
         <strong> Invitation Key is not Valid.</strong>
       </div>
-    </div>
-    <button id="next" (click)="next()" class="btn btn-primary" style="width: 10rem; height: 2rem">
-      Next
-    </button>
+      <div>
+        <button id="next" type="submit" class="btn btn-primary" style="width: 10rem; height: 2rem">
+          Next
+        </button>
+      </div>
+    </form>
+
     <!-- 
     TODO: Find a contact person to re-implement
     <h4>Need an invitation key?</h4>
