@@ -1,19 +1,16 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Headers, Http, Response} from '@angular/http';
+import {Http} from '@angular/http';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
-import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {environment} from 'environments/environment';
 
 import {
-  Cluster,
-  ClusterService,
-  ClusterStatus,
   Cohort,
   CohortsService,
   FileDetail,
@@ -21,7 +18,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-
 
 /*
  * Search filters used by the cohort and notebook data tables to
@@ -82,14 +78,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   shareModal: WorkspaceShareComponent;
 
 
-  Tabs = Tabs;
-
-  cohortNameFilter = new CohortNameFilter();
-  cohortDescriptionFilter = new CohortDescriptionFilter();
-  notebookNameFilter = new NotebookNameFilter();
-  cohortNameComparator = new CohortNameComparator();
-  cohortDescriptionComparator = new CohortDescriptionComparator();
-  notebookNameComparator = new NotebookNameComparator();
 
   greeting: string;
   showTip: boolean;
@@ -106,6 +94,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   notebookList: FileDetail[] = [];
   notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
   tabOpen = Tabs.Notebooks;
+  researchPurposeArray: String[] = [];
+  leftResearchPurposes: String[];
+  rightResearchPurposes: String[];
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -123,6 +114,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.accessLevel = wsData.accessLevel;
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
+    Object.keys(ResearchPurposeItems).forEach((key) => {
+      if (this.workspace.researchPurpose[key]) {
+        this.researchPurposeArray.push(ResearchPurposeItems[key].shortDescription);
+      }
+    });
+    this.leftResearchPurposes =
+      this.researchPurposeArray.slice(0, Math.ceil(this.researchPurposeArray.length / 2));
+    this.rightResearchPurposes =
+      this.researchPurposeArray.slice(
+        this.leftResearchPurposes.length,
+        this.researchPurposeArray.length);
     this.showTip = true;
   }
 
