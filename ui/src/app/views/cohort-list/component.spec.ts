@@ -1,20 +1,19 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
+import {By} from '@angular/platform-browser';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
-
-import {
-  updateAndTick
-} from '../../../testing/test-helpers';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-
+import {
+  simulateClick,
+  updateAndTick
+} from 'testing/test-helpers';
 
 import {CohortListComponent} from '../cohort-list/component';
 
@@ -94,8 +93,14 @@ describe('CohortListComponent', () => {
     const fixture = TestBed.createComponent(CohortListComponent);
     const app = fixture.debugElement.componentInstance;
     updateAndTick(fixture);
-    const deletedCohort: Cohort = app.cohortList[0];
-    app.deleteCohort(deletedCohort);
+    updateAndTick(fixture);
+    const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
+    const deletedCohort: Cohort = app.cohortList.find(
+      (cohort: Cohort) => cohort.name === firstCohortName);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.dropdown-toggle')));
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.delete-button')));
     updateAndTick(fixture);
     expect(app).toBeTruthy();
     expect(app.cohortList.length).toBe(1);
