@@ -11,6 +11,8 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
     List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type, @Param("parentId") Long parentId);
 
+    List<Criteria> findCriteriaByType(@Param("type") String type);
+
     @Query(value = "select * from criteria c " +
             "where c.type = :type " +
             "and c.subtype = :subtype " +

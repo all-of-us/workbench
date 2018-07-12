@@ -62,8 +62,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProfileController implements ProfileApiDelegate {
-  private String ID_VERIFICATION_TEXT = "A new user has requested manual ID verification: ";
-
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
       .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
@@ -389,25 +387,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> submitIdVerification() {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     User user = userProvider.get();
     if (user.getRequestedIdVerification() == null || !user.getRequestedIdVerification()) {
-      Properties props = new Properties();
-      Session session = Session.getDefaultInstance(props, null);
       try {
-        Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
-        InternetAddress[] replyTo = new InternetAddress[1];
-        replyTo[0] = new InternetAddress(user.getContactEmail());
-        msg.setReplyTo(replyTo);
-        // To test the bug reporting functionality, change the recipient email to your email rather
-        // than the group.
-        // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
-        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-            workbenchConfig.admin.adminIdVerification));
-        msg.setSubject("[Id Verification Request]: " + user.getEmail());
-        msg.setText(ID_VERIFICATION_TEXT + user.getEmail());
-        mailServiceProvider.get().send(msg);
+        mailServiceProvider.get().sendIdVerificationRequestEmail(user.getEmail());
       } catch (MessagingException e) {
         throw new EmailException("Error submitting id verification", e);
       }
