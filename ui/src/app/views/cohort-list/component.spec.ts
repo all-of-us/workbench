@@ -23,7 +23,6 @@ import {
   CohortsService,
   WorkspaceAccessLevel
 } from 'generated';
-import {deepCopy} from '../../utils/index';
 
 const activatedRouteStub  = {
   snapshot: {
@@ -63,10 +62,8 @@ class CohortListPage {
 
 describe('CohortListComponent', () => {
   let cohortListPage: CohortListPage;
-  let profileServiceStub: ProfileServiceStub;
 
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -102,6 +99,6 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     expect(app).toBeTruthy();
     expect(app.cohortList.length).toBe(1);
-    expect(app.cohortList.indexOf(deletedCohort)).toBe(-1);
+    expect(app.cohortList).not.toContain(deletedCohort);
   }));
 });
