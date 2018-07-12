@@ -18,8 +18,10 @@ import java.util.Map;
 @Service
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
+  //If the querybuilder will use modifiers then this sql statement has to have
+  //the distinct and visit_start_date as entry_date
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
-    "select person_id \n" +
+    "select distinct person_id, visit_start_date as entry_date \n" +
       "from `${projectId}.${dataSetId}.visit_occurrence` a\n";
 
   private static final String VISIT_CHILD_CLAUSE_TEMPLATE =
@@ -73,11 +75,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     String finalSql = queryParts.size() > 1 ?
       String.join(UNION_TEMPLATE, queryParts) : queryParts.get(0);
 
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(queryParams)
-      .setUseLegacySql(false)
-      .build();
+    return buildAgeAtEventAndEventDateModifierSql(finalSql, queryParams, inputParameters.getModifiers());
   }
 
   @Override
