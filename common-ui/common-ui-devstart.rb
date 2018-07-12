@@ -135,7 +135,7 @@ class CommonUiDevStart
     Common.register_command({
                                 :invocation => "build",
                                 :description => "Builds the UI for the given environment.",
-                                :fn => lambda { |*args| build("build", args) }
+                                :fn => ->(*args) { build("build", args) }
                             })
     Common.register_command({
                                 :invocation => "dev-up",
@@ -171,7 +171,7 @@ class CommonUiDevStart
     Common.register_command({
                                 :invocation => "docker-run",
                                 :description => "Runs the specified command in a docker container.",
-                                :fn => lambda { |*args| docker_run("docker-run", args) }
+                                :fn => ->(*args) { docker_run("docker-run", args) }
                             })
   end
 
