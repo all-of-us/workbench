@@ -1,5 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.pmiops.workbench.notebooks.api.StatusApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
 import org.pmiops.workbench.notebooks.model.MachineConfig;
+import org.pmiops.workbench.notebooks.model.UserJupyterExtensionConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,10 @@ public class NotebooksServiceImpl implements NotebooksService {
     return new ClusterRequest()
         .labels(labels)
         .jupyterUserScriptUri(workbenchConfigProvider.get().firecloud.jupyterUserScriptUri)
+        .userJupyterExtensionConfig(new UserJupyterExtensionConfig()
+            .nbExtensions(ImmutableMap.<String, String>of())
+            .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
+            .combinedExtensions(ImmutableMap.<String, String>of()))
         .machineConfig(new MachineConfig()
             .masterDiskSize(20 /* GB */)
             .masterMachineType("n1-standard-1"));
