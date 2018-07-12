@@ -114,31 +114,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.accessLevel = wsData.accessLevel;
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
-    if (this.workspace.researchPurpose.methodsDevelopment) {
-      this.researchPurposeArray.push(ResearchPurposeItems.methodsDevelopment.shortDescription);
-    }
-    if (this.workspace.researchPurpose.diseaseFocusedResearch) {
-      this.researchPurposeArray.push(ResearchPurposeItems.diseaseFocusedResearch.shortDescription);
-    }
-    if (this.workspace.researchPurpose.aggregateAnalysis) {
-      this.researchPurposeArray.push(ResearchPurposeItems.aggregateAnalysis.shortDescription);
-    }
-    if (this.workspace.researchPurpose.ancestry) {
-      this.researchPurposeArray.push(ResearchPurposeItems.ancestry.shortDescription);
-    }
-    if (this.workspace.researchPurpose.controlSet) {
-      this.researchPurposeArray.push(ResearchPurposeItems.controlSet.shortDescription);
-    }
-    if (this.workspace.researchPurpose.commercialPurpose) {
-      this.researchPurposeArray.push(ResearchPurposeItems.commercialPurpose.shortDescription);
-    }
-    if (this.workspace.researchPurpose.population) {
-      this.researchPurposeArray.push(ResearchPurposeItems.population.shortDescription);
-    }
-    if (this.workspace.researchPurpose.containsUnderservedPopulation) {
-      this.researchPurposeArray.push(
-        ResearchPurposeItems.containsUnderservedPopulation.shortDescription);
-    }
+    Object.keys(ResearchPurposeItems).forEach((key) => {
+      if (this.workspace.researchPurpose[key]) {
+        this.researchPurposeArray.push(ResearchPurposeItems[key].shortDescription);
+      }
+    });
     this.leftResearchPurposes =
       this.researchPurposeArray.slice(0, Math.ceil(this.researchPurposeArray.length / 2));
     this.rightResearchPurposes =
