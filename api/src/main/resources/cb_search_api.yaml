@@ -65,6 +65,26 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns builder criteria tree in its entirety with the specified criteria type
+      operationId: "getCriteriaByType"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/subtype/{subtype}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -191,6 +211,7 @@ definitions:
     type: object
     required:
       - id
+      - parentId
       - type
       - code
       - name
@@ -201,6 +222,10 @@ definitions:
     properties:
       id:
         description: id of the criteria
+        type: integer
+        format: int64
+      parentId:
+        description: parent id of the criteria
         type: integer
         format: int64
       type:
