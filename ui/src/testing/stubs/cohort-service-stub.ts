@@ -1,10 +1,11 @@
 import {Observable} from 'rxjs/Observable';
 
-import {Cohort, CohortListResponse, Workspace} from 'generated';
+import {Cohort, CohortListResponse, EmptyResponse, Workspace} from 'generated';
 
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = 1;
+export let DEFAULT_COHORT_ID_2 = 2;
 
 
 class CohortStub implements Cohort {
@@ -61,7 +62,18 @@ export class CohortsServiceStub {
       creationTime: new Date().getTime(),
       lastModifiedTime: new Date().getTime(),
     };
-    this.cohorts = [exampleCohort];
+
+    const exampleCohortTwo: CohortStub = {
+      id: DEFAULT_COHORT_ID_2,
+      name: 'sample name 2',
+      description: 'sample description 2',
+      criteria: '',
+      type: '',
+      workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      creationTime: new Date().getTime(),
+      lastModifiedTime: new Date().getTime(),
+    };
+    this.cohorts = [exampleCohort, exampleCohortTwo];
     this.workspaces = [stubWorkspace];
   }
 
@@ -131,6 +143,20 @@ export class CohortsServiceStub {
           observer.next({items: cohortsInWorkspace});
           observer.complete();
         }
+      }, 0);
+    });
+  }
+
+  deleteCohort(ns: string, wsid: string, id: number): Observable<EmptyResponse> {
+    return new Observable<EmptyResponse>(observer => {
+      setTimeout(() => {
+        const cohortIndex = this.cohorts.findIndex(cohort => cohort.id === id);
+        if (cohortIndex === -1) {
+          observer.error('Cohort not found in workspace.');
+        }
+        this.cohorts.splice(cohortIndex, 1);
+        observer.next({});
+        observer.complete();
       }, 0);
     });
   }

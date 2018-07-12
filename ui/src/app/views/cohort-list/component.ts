@@ -70,7 +70,7 @@ export class CohortListComponent implements OnInit, OnDestroy {
     }
   }
 
-  delete(cohort: Cohort): void {
+  public deleteCohort(cohort: Cohort): void {
     this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
       this.cohortList.splice(
         this.cohortList.indexOf(cohort), 1);
