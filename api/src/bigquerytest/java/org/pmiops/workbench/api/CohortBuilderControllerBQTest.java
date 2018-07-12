@@ -186,9 +186,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Operand has to be convertable to long: %s", operand));
+      assertThat(bre.getMessage()).isEqualTo(
+        "Please provide valid number for age at event.");
     }
   }
 
@@ -206,10 +207,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifier: %s can only have 1 operand when using the %s operator",
-        modifier.getName(),
+        "Modifier: age at event can only have 1 operand when using the %s operator",
         modifier.getOperator().name()));
     }
   }
@@ -250,10 +251,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifier: %s can only have 2 operands when using the %s operator",
-        modifier.getName(),
+        "Modifier: age at event can only have 2 operands when using the %s operator",
         modifier.getOperator().name()));
     }
   }
@@ -271,10 +272,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifier: %s can only have 2 operands when using the %s operator",
-        modifier.getName(),
+        "Modifier: age at event can only have 2 operands when using the %s operator",
         modifier.getOperator().name()));
     }
   }
@@ -294,9 +295,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(String.format(
-        "%s modifier can only be used once.", modifier1.getName()));
+      assertThat(bre.getMessage()).isEqualTo(
+        "Please provide one number of occurrences modifier.");
     }
   }
 
@@ -312,9 +314,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       Arrays.asList(icd9), Arrays.asList(modifier1));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Operand has to be convertable to long: %s", operand));
+      assertThat(bre.getMessage()).isEqualTo(
+        "Please provide valid number for number of occurrences.");
     }
   }
 
@@ -353,6 +356,37 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
       Arrays.asList(icd9,icd9Proc), Arrays.asList(modifier1, modifier2, modifier3));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionOccurrenceChildEventDate() throws Exception {
+    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+    Modifier modifier = new Modifier()
+      .name(ModifierType.EVENT_DATE)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("2009-12-03"));
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+      Arrays.asList(icd9), Arrays.asList(modifier));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionOccurrenceChildEventDateInvalidDate() throws Exception {
+    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+    Modifier modifier = new Modifier()
+      .name(ModifierType.EVENT_DATE)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("c"));
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+      Arrays.asList(icd9), Arrays.asList(modifier));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertThat(bre.getMessage()).isEqualTo(
+        "Please provide valid date for event date.");
+    }
   }
 
   @Test
@@ -992,6 +1026,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjects_EmptyIcludesAndExcludes() throws Exception {
     try {
       controller.countParticipants(1L, new SearchRequest());
+      fail("Should have thrown BadRequestException!");
     } catch (BadRequestException e) {
       assertEquals("Invalid SearchRequest: includes[] and excludes[] cannot both be empty", e.getMessage());
     }
