@@ -13,6 +13,7 @@ import java.util.Map;
 public enum FactoryKey {
     CODES,
     DEMO,
+    VISIT,
     PHECODE,
     PM;
 
@@ -41,6 +42,7 @@ public enum FactoryKey {
         tMap.put("ICD10", FactoryKey.CODES);
         tMap.put("CPT", FactoryKey.CODES);
         tMap.put("DEMO", FactoryKey.DEMO);
+        tMap.put("VISIT", FactoryKey.VISIT);
         tMap.put("PM", FactoryKey.PM);
         return tMap;
     }

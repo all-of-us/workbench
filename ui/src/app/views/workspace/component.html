@@ -5,7 +5,7 @@
       <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
         <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
         <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
-        <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || awaitingReview || buildCohort()">
+        <div class="card add-card" [ngClass]="{'disabled' : !writePermission || awaitingReview}" (click)="!writePermission || awaitingReview || buildCohort()">
           <div class="create-text">
             Create a <br/>New Cohort
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
@@ -15,7 +15,7 @@
       <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
         <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
         <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
-        <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" style="margin-top: 13px;" (click)="!writePermission || awaitingReview || newNotebook()">
+        <div class="card add-card" [ngClass]="{'disabled' : !writePermission || awaitingReview}" style="margin-top: 13px;" (click)="!writePermission || awaitingReview || newNotebook()">
           <div class="create-text">
             Create a<br/>New Notebook
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>

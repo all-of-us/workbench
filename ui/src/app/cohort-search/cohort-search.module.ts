@@ -1,7 +1,7 @@
 import {NgReduxModule} from '@angular-redux/store';
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
@@ -9,6 +9,7 @@ import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
+import {AttributesPageComponent} from './attributes-page/attributes-page.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
@@ -42,6 +43,7 @@ const routes: Routes = [{
   imports: [
     // Angular
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     RouterModule.forChild(routes),
     // 3rd Party
@@ -69,6 +71,7 @@ const routes: Routes = [{
     SearchGroupSelectComponent,
     SelectionInfoComponent,
     TreeComponent,
+    AttributesPageComponent,
   ],
   providers: [
     CohortSearchActions,
