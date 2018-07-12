@@ -4,7 +4,7 @@
     <crit-node-info [node]="node"></crit-node-info>
   </div>
 
-  <ng-template *ngIf="node.get('group')"
+  <ng-template *ngIf="node.get('group') && !fullTree"
     [clrIfExpanded]="expanded"
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
