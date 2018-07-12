@@ -54,7 +54,7 @@ public abstract class AbstractQueryBuilder {
    */
   public abstract QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters);
 
-  public QueryJobConfiguration buildAgeAtEventAndEventDateModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
+  public QueryJobConfiguration buildModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
     String modifierSql = "";
     String finalSql = "";
     if (!modifiers.isEmpty()) {

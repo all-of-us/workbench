@@ -75,7 +75,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     String finalSql = queryParts.size() > 1 ?
       String.join(UNION_TEMPLATE, queryParts) : queryParts.get(0);
 
-    return buildAgeAtEventAndEventDateModifierSql(finalSql, queryParams, inputParameters.getModifiers());
+    return buildModifierSql(finalSql, queryParams, inputParameters.getModifiers());
   }
 
   @Override

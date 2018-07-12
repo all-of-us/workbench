@@ -83,7 +83,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     String codesSql = String.join(UNION_TEMPLATE, queryParts);
-    return buildAgeAtEventAndEventDateModifierSql(codesSql, queryParams, params.getModifiers());
+    return buildModifierSql(codesSql, queryParams, params.getModifiers());
   }
 
   private void buildGroupQuery(String type,
