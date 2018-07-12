@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,9 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     List<Long> parentList = new ArrayList<>();
     List<Long> childList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getParameters()) {
+      if (parameter.getConceptId() == null) {
+        throw new BadRequestException("Please provide a valid concept Id");
+      }
       if (parameter.getGroup()) {
         parentList.add(parameter.getConceptId());
       } else {
@@ -50,7 +54,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     // Collect all parent type queries to run them together
     if (!parentList.isEmpty()) {
       String namedParameter = "visit" + getUniqueNamedParameterPostfix();
-      queryParams.put(namedParameter, QueryParameterValue.array(parentList.toArray(new Long[0]), Long.class));
+      queryParams.put(namedParameter, QueryParameterValue.array(parentList.stream().toArray(Long[]::new), Long.class));
       String parentSql = VISIT_SELECT_CLAUSE_TEMPLATE +
         VISIT_PARENT_CLAUSE_TEMPLATE.replace("${parentIds}", "@" + namedParameter);
       queryParts.add(parentSql);
@@ -59,7 +63,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     // Collect all child type queries to run them together
     if (!childList.isEmpty()) {
       String namedParameter = "visit" + getUniqueNamedParameterPostfix();
-      queryParams.put(namedParameter, QueryParameterValue.array(childList.toArray(new Long[0]), Long.class));
+      queryParams.put(namedParameter, QueryParameterValue.array(childList.stream().toArray(Long[]::new), Long.class));
       String childSql = VISIT_SELECT_CLAUSE_TEMPLATE +
         VISIT_CHILD_CLAUSE_TEMPLATE.replace("${visitConceptIds}", "@" + namedParameter);
       queryParts.add(childSql);
