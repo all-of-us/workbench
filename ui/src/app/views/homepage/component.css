@@ -156,7 +156,7 @@
     font-size: 28px;
     font-weight: 500;
     line-height: 34px;
-    margin-left: 19%;
+    margin-left: 8.8rem;
     margin-top: 2%;
 }
 
@@ -165,7 +165,7 @@
 }
 
 .textGroup {
-    margin-left: 17%;
+    margin-left: 8.8rem;
 }
 
 .footerText {
@@ -176,7 +176,6 @@
     font-size: 16px;
     font-weight: 300;
     line-height: 30px;
-    margin-left: 2%;
 }
 
 .footerText .title {
