@@ -24,18 +24,15 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   domainId: string;
   title: string ;
   subTitle: string;
-  dbDomain;
+  dbDomain: any;
   searchText: FormControl = new FormControl();
   prevSearchText = '';
   searchResult: ConceptListResponse;
   items: any[] = [];
   standardConcepts: any[] = [];
   loading = true;
-  minParticipantCount = 0;
   totalParticipants: number;
-  top10Results = []; // We graph top10 results
-  screenWidth: any;
-
+  top10Results: any[] = []; // We graph top10 results
   private searchRequest: SearchConceptsRequest;
   private subscriptions: ISubscription[] = [];
 
@@ -50,28 +47,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.screenWidth = window.innerWidth;
-
-    // Connect responsize listeners
-    /* In progress Testing
-     this.subscriptions.push(
-      this.responsiveSizeInfoRx.getResponsiveSize.subscribe((data) => {
-        console.log('this.responsiveSizeInfoRx.getResponsiveSize ===>', data);
-      }, (err) => {
-        console.log('Error', err);
-      })
-    );
-    this.subscriptions.push(
-      this.userAgentInfoRx.getUserAgent.subscribe((data) => {
-        console.log('this.userAgentInfoRx.getUserAgent ===>', data);
-      }, (err) => {
-        console.log('Error', err);
-      })
-    );
-    this.responsiveSizeInfoRx.connect();
-    this.userAgentInfoRx.connect();
-    */
-
     this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
     this.items = [];
 
@@ -81,9 +56,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.prevSearchText = '';
     }
     this.searchText.setValue(this.prevSearchText);
-
-
-
     const obj = localStorage.getItem('dbDomain');
     if (obj) {
       this.dbDomain = JSON.parse(obj);
@@ -118,8 +90,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
-    /*this.responsiveSizeInfoRx.disconnect();
-    this.userAgentInfoRx.disconnect();*/
   }
 
   private searchCallback(results: any) {
@@ -152,7 +122,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
 
   public toggleSources(row) {
-    console.log('search result ' , this.searchResult);
     if (row.showSources) {
       row.showSources = false;
     } else {
