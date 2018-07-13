@@ -7,12 +7,13 @@ import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaType,
   activeParameterList,
+  attributesPage,
   CohortSearchActions,
   wizardOpen,
 } from '../redux';
 import {typeToTitle} from '../utils';
 
-import {CRITERIA_TYPES} from '../constant';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 
 @Component({
   selector: 'app-modal',
@@ -26,14 +27,16 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeParameterList) selection$: Observable<any>;
+  @select(attributesPage) attributes$: Observable<any>;
 
   ctype: string;
-  subscription;
+  subscription: Subscription;
+  attributesNode: any;
 
   open = false;
   noSelection = true;
   title = '';
-  mode: 'tree' | 'modifiers' = 'tree'; // default to criteria tree
+  mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -52,7 +55,13 @@ export class ModalComponent implements OnInit, OnDestroy {
       .subscribe(ctype => {
         this.ctype = ctype;
         this.title = 'Codes';
-        for (const crit of CRITERIA_TYPES) {
+        for (const crit of DOMAIN_TYPES) {
+          const regex = new RegExp(`.*${crit.type}.*`, 'i');
+          if (regex.test(this.ctype)) {
+            this.title = crit.name;
+          }
+        }
+        for (const crit of PROGRAM_TYPES) {
           const regex = new RegExp(`.*${crit.type}.*`, 'i');
           if (regex.test(this.ctype)) {
             this.title = crit.name;
@@ -64,6 +73,17 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.selection$
       .map(sel => sel.size === 0)
       .subscribe(sel => this.noSelection = sel)
+    );
+
+    this.subscription.add(this.attributes$
+      .subscribe(node => {
+        this.attributesNode = node;
+        if (node.size === 0) {
+          this.mode = 'tree';
+        } else {
+          this.mode = 'attributes';
+        }
+      })
     );
   }
 

@@ -15,6 +15,7 @@ public class WorkbenchConfig {
   public GoogleDirectoryServiceConfig googleDirectoryService;
   public ServerConfig server;
   public AdminConfig admin;
+  public JiraConfig jira;
   public MandrillConfig mandrill;
 
   public static class FireCloudConfig {
@@ -45,6 +46,7 @@ public class WorkbenchConfig {
   public static class GoogleCloudStorageServiceConfig {
     public String credentialsBucketName;
     public String emailImagesBucketName;
+    public String demosBucketName;
   }
 
   public static class GoogleDirectoryServiceConfig {
@@ -58,9 +60,11 @@ public class WorkbenchConfig {
 
   public static class AdminConfig {
     public String adminIdVerification;
-    public String supportGroup;
-    public String verifiedSendingAddress;
     public String loginUrl;
+  }
+
+  public static class JiraConfig {
+    public String projectKey;
   }
 
   public static class MandrillConfig {

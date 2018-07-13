@@ -120,6 +120,8 @@ paths:
           description: Success message
           schema:
             $ref: "#/definitions/BugReport"
+        500:
+          description: JIRA Internal Error
 
   # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
   # Error. It should respond with 400 Bad Request.
@@ -220,21 +222,6 @@ paths:
           description: Error occurred while verifying Invitation Key.
           schema:
             $ref: "#/definitions/ErrorResponse"
-
-  /v1/request-invitation-key:
-    post:
-      tags:
-        - profile
-      description: Sends support a request for the invitation key.
-      operationId: requestInvitationKey
-      security: []
-      parameters:
-        - in: query
-          name: contactEmail
-          type: string
-      responses:
-        200:
-          description: Request received
 
   /v1/google-account:
     post:

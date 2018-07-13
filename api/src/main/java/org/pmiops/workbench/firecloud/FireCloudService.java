@@ -83,4 +83,6 @@ public interface FireCloudService {
   void addUserToGroup(String email, String groupName);
 
   void removeUserFromGroup(String email, String groupName);
+
+  boolean isUserMemberOfGroup(String groupName);
 }

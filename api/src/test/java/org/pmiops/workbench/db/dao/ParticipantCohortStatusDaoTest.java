@@ -60,7 +60,7 @@ public class ParticipantCohortStatusDaoTest {
 
         CdrVersion cdrVersion = new CdrVersion();
         cdrVersion.setCdrDbName("");
-        CdrVersionContext.setCdrVersion(cdrVersion);
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
         jdbcTemplate.execute("insert into participant_cohort_status" +
                 "(cohort_review_id, participant_id, status, gender_concept_id, birth_date, race_concept_id, ethnicity_concept_id)" +

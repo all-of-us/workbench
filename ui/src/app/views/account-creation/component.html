@@ -20,7 +20,7 @@
         <clr-icon shape="success-standard" class="success-standard is-solid" *ngIf="showUsernameValidationSuccess"></clr-icon>
       </div>
       <clr-tooltip>
-        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+        <clr-icon #infoIcon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
         <clr-tooltip-content clrPosition="top-right" clrSize="lg" *clrIfOpen>
           <div>
             Usernames can contain only letters (a-z), numbers (0-9), dashes (-), underscores (_),

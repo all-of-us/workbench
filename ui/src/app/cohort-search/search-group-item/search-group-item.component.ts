@@ -70,9 +70,12 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   get codes() {
     const _type = this.codeType;
     const formatter = (param) => {
-      const funcs = _type === 'Demographics'
-        ? [typeDisplay, nameDisplay, attributeDisplay]
-        : [typeDisplay, attributeDisplay];
+      let funcs = [typeDisplay, attributeDisplay];
+      if (_type === 'Demographics') {
+        funcs = [typeDisplay, nameDisplay, attributeDisplay];
+      } else if (_type === 'Physical Measurement' || _type === 'Visit') {
+        funcs = [nameDisplay];
+      }
       return funcs.map(f => f(param)).join(' ').trim();
     };
     const sep = _type === 'Demographics' ? '; ' : ', ';

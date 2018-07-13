@@ -21,6 +21,11 @@
   max-height: 1.25rem;
 }
 
+.selection-button.pm {
+  /* Set margin for physical measurements items */
+  margin: 0 6px 0 calc(-1.25rem - 6px);
+}
+
 .selection-icon {
   margin: calc((1.25rem - 20px) / 2);
 }

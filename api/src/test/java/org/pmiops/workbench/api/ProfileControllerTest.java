@@ -125,9 +125,7 @@ public class ProfileControllerTest {
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
     config.admin = new WorkbenchConfig.AdminConfig();
-    config.admin.verifiedSendingAddress = "verifysend@mockemail.mock";
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
-    config.admin.supportGroup = "supportGroup@dummyMockEmail.com";
 
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
@@ -146,7 +144,7 @@ public class ProfileControllerTest {
 
     clock = new FakeClock(NOW);
 
-    Mockito.doNothing().when(mailService).send(Mockito.any());
+    Mockito.doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,

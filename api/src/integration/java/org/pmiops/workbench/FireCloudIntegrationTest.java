@@ -34,6 +34,9 @@ public class FireCloudIntegrationTest {
         Providers.of(createConfig()),
         Providers.of(profileApi),
         Providers.of(billingApi),
+        // All of us groups api
+        Providers.of(groupsApi),
+        // End user groups api.
         Providers.of(groupsApi),
         Providers.of(workspacesApi),
         new FirecloudRetryHandler(new NoBackOffPolicy())

@@ -20,7 +20,15 @@
 
 .card.item-card .name {
   cursor: pointer;
+  word-wrap: break-word;
 }
+
+.card.item-card .name.disabled {
+  cursor: not-allowed;
+  word-wrap: break-word;
+  color: #AAAFB4;
+}
+
 
 .card-area {
   display: flex;

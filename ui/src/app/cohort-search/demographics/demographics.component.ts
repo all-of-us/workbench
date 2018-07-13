@@ -8,7 +8,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {activeParameterList, CohortSearchActions} from '../redux';
 
-import {Attribute, CohortBuilderService} from 'generated';
+import {Attribute, CohortBuilderService, Operator} from 'generated';
 
 /* Demographic Criteria Subtypes and Constants */
 const AGE = 'AGE';
@@ -204,7 +204,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
     const existent = selections.find(s => s.get('subtype') === AGE);
     if (existent) {
-      const range = existent.getIn(['attribute', 'operands']).toArray();
+      const range = existent.getIn(['attributes', '0', 'operands']).toArray();
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
@@ -220,13 +220,15 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       .distinctUntilChanged()
       .map(([lo, hi]) => {
         const attr = fromJS(<Attribute>{
-          operator: 'between',
+          name: 'Age',
+          operator: Operator.BETWEEN,
           operands: [lo, hi],
+          conceptId: this.ageNode.get('conceptId', null)
         });
         const paramId = `age-param${attr.hashCode()}`;
         return this.ageNode
           .set('parameterId', paramId)
-          .set('attribute', attr);
+          .set('attributes', [attr]);
       })
       .withLatestFrom(selectedAge)
       .filter(([newNode, oldNode]) => {

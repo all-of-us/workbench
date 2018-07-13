@@ -4,6 +4,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.*;
 import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 
 
 @Entity
@@ -19,7 +22,9 @@ public class DbDomain {
     private String domainRoute;
     private long conceptId;
     private long countValue;
+    private long participantCount;
 
+    public static Map<Long, Long> conceptCountMap  = new HashMap<Long, Long>();
 
     @Id
     @Column(name = "domain_id")
@@ -120,6 +125,20 @@ public class DbDomain {
         return this;
     }
 
+    @Transient
+    public Long getParticipantCount(){
+        return participantCount;
+    }
+
+    public void setParticipantCount(Long participantCount){
+        this.participantCount = participantCount;
+    }
+
+    public DbDomain participantCount(Long participantCount){
+        this.participantCount = participantCount;
+        return this;
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -146,6 +165,12 @@ public class DbDomain {
 
     }
 
-
+    public static void mapConceptCounts(List<Concept> concepts){
+        for(Concept c: concepts){
+            Long conceptId = c.getConceptId();
+            Long countValue = c.getCountValue();
+            conceptCountMap.put(conceptId, countValue);
+        }
+    }
 
 }

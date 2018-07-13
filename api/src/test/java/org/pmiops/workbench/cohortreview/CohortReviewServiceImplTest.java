@@ -1,5 +1,18 @@
 package org.pmiops.workbench.cohortreview;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.TreeSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,17 +39,6 @@ import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.TreeSet;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CohortReviewServiceImplTest {
@@ -103,19 +105,17 @@ public class CohortReviewServiceImplTest {
         workspace.setWorkspaceId(badWorkspaceId);
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER)).thenReturn(owner);
-        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
+        when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER)).thenReturn(workspace);
 
         try {
-            cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceName, workspaceId, WorkspaceAccessLevel.READER);
+            cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace, workspaceName, workspaceId,
+                WorkspaceAccessLevel.READER);
             fail("Should have thrown NotFoundException!");
         } catch (NotFoundException e) {
             assertEquals("Not Found: No workspace matching workspaceNamespace: "
                     + workspaceNamespace + ", workspaceId: " + workspaceName, e.getMessage());
         }
-        verify(workspaceService).enforceWorkspaceAccessLevel(workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER);
-        verify(workspaceService).getRequired(workspaceNamespace, workspaceName);
-        verifyNoMoreMockInteractions();
     }
 
     @Test
@@ -128,14 +128,11 @@ public class CohortReviewServiceImplTest {
         workspace.setWorkspaceId(workspaceId);
         WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
 
-        when(workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER)).thenReturn(owner);
-        when(workspaceService.getRequired(workspaceNamespace, workspaceName)).thenReturn(workspace);
+        when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER)).thenReturn(workspace);
 
-        cohortReviewService.validateMatchingWorkspace(workspaceNamespace, workspaceName, workspaceId, WorkspaceAccessLevel.READER);
-
-        verify(workspaceService).enforceWorkspaceAccessLevel(workspaceNamespace, workspaceName, WorkspaceAccessLevel.READER);
-        verify(workspaceService).getRequired(workspaceNamespace, workspaceName);
-        verifyNoMoreMockInteractions();
+        cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(workspaceNamespace, workspaceName, workspaceId,
+            WorkspaceAccessLevel.READER);
     }
 
     @Test

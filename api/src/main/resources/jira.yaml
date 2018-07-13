@@ -1,0 +1,141 @@
+#This file provide the end points for jira interactions
+# JIRA REST API information can be found at :
+# https://developer.atlassian.com/cloud/jira/platform/rest/
+
+swagger: '2.0'
+
+info:
+  title: Jira
+  description: |
+    Service for Jira Interactions.
+  version: "0.1"
+
+host: "precisionmedicineinitiative.atlassian.net"
+schemes:
+  - "https"
+basePath: /rest/api/2
+
+produces:
+  - application/json
+
+securityDefinitions:
+  AdminSecurity:
+    type: basic
+
+##########################################################################################
+## PATHS
+##########################################################################################
+
+paths:
+ /issue:
+    post:
+      summary: Create issue in jira.
+      description: "Creates issue in JIRA and return IssueResponse"
+      tags:
+        - Jira
+      operationId: createIssue
+      parameters:
+        - name: fields
+          in: body
+          description: Attributes for creating issue
+          schema:
+            $ref: '#/definitions/IssueRequest'
+      responses:
+        200:
+          description: File saved
+          schema:
+            $ref: '#/definitions/IssueResponse'
+        400:
+          description: Bad request, check the summary/description field
+        500:
+          description: JIRA Internal Error
+      security:
+        - AdminSecurity: []
+
+ /issue/{issueKey}/attachments:
+   post:
+     summary: Add attachment to the jira ticket
+     tags:
+       - Jira
+     operationId: addAttachments
+     consumes:
+       - multipart/form-data
+     parameters:
+       - in: path
+         name: issueKey
+         type: string
+         required: true
+       - name: file
+         in: formData
+         description: Upload file as attachment
+         required: true
+         type: file
+       - in: header
+         name: X-Atlassian-Token
+         type: string
+         default: nocheck
+     responses:
+       200:
+         description: File saved
+       403:
+         description: Attachments are disabled
+       404:
+         description: Issue Not Found/Attachments exceeds the maximum configured attachment size
+       413:
+         description: Attachment is too big
+     security:
+       - AdminSecurity: []
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+  IssueRequest:
+      description: Details required for creating issue project info, summary, description etc
+      required:
+        - fields
+      properties:
+        fields:
+          $ref: '#/definitions/FieldsDetails'
+
+  FieldsDetails:
+      description: Fields information like project id, issue type etc
+      required:
+        - project
+      properties:
+        project:
+          $ref: '#/definitions/ProjectDetails'
+        summary:
+          type: string
+        description:
+          type: string
+        issuetype:
+          $ref: '#/definitions/IssueType'
+
+  ProjectDetails:
+      description: Project information
+      required:
+        - key
+      properties:
+        key:
+          type: string
+
+  IssueType:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+
+  IssueResponse:
+      required:
+        - id
+        - key
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        self:
+          type: string
+

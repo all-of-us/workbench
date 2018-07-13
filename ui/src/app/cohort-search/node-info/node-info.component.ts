@@ -20,8 +20,9 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  * been left intact in order to provide a "hook-in" location for implementing
  * other types of attribute.
  */
-function needsAttributes(node) {
-  return false;
+function needsAttributes(node: any) {
+  // will change soon to check for attributes property instead of id
+  return node.get('hasAttributes', '') === true;
 }
 
 
@@ -43,12 +44,15 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    const noAttr = !needsAttributes(this.node);
+    // set to true so parameters with attrs will show as selected when added
+    const noAttr = true;
 
     this.subscription = this.ngRedux
       .select(isParameterActive(this.paramId))
       .map(val => noAttr && val)
-      .subscribe(val => this.isSelected = val);
+      .subscribe(val => {
+        this.isSelected = val;
+      });
   }
 
   ngOnDestroy() {
@@ -114,9 +118,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      * fire a request for children (if there are any)
      */
     event.stopPropagation();
-
     if (needsAttributes(this.node)) {
-      this.actions.setWizardFocus(this.node);
+      this.actions.showAttributesPage(this.node);
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is

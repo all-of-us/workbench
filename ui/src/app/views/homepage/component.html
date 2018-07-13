@@ -1,80 +1,181 @@
-<div class="front-page">
-    <div class="background-image">
-    <div class="rectangle"></div>
-    <div class="invisible_rectangle">
-        <div class="tip-title">{{tipHeadline}}</div>
-        <div class="tip-title tip-subtitle">{{tipSubtitle}}</div>
-        <div class="tip-title tip-description">{{tipDetail}}</div>
-        <div *ngIf="tipButton" class="learn-more-button" (click)="bugReportComponent.reportBug();">{{tipButton}}</div>
-        <div class="profile-box">
-            <div style="float: left; width: 50%">
-                <div class="profile-title">
-                    COMPLETE YOUR PROFILE
-                </div>
-                <div class="profile-title profile-tips">
-                    You can quickly:
-                    <li>Add your institution</li>
-                    <li>Add your role</li>
-                    <li>Update something else</li>
-                </div>
-                <button class="profile-update-button" (click)="navigateToProfile()">UPDATE</button>
-            </div>
-            <div class="pie-chart-box">
-                <ngx-charts-pie-chart
-                        [scheme]="colorScheme"
-                        [results]="spinnerValues"
-                        [doughnut]="true"
-                        [tooltipDisabled]="true">
-                </ngx-charts-pie-chart>
-                <div class="percent-text">
-                    {{completedTasksAsPercentage}}%
+<div class="background-image">
+    <div class="row">
+        <div *ngFor="let card of cardDetails">
+            <div class="col">
+                <div class="card double {{card.position}}">
+                    <div class="row">
+                        <img class="icon topIcon" src={{card.icon}}>
+                    </div>
+                    <div class="row heading">
+                        {{card.title}}
+                    </div>
+                    <div class="row">
+                        <label class="text">{{card.text}}</label>
+                    </div>
+                    <div class="row button">
+                        COMING SOON...
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <div *ngIf="firstTimeUser">
+        <div class="row">
+            <div class="col">
+                <div class="card double left">
+                    <div class="row">
+                        <img class="icon analyzeIcon" src="/assets/icons/Analyze.svg">
+                    </div>
+                    <div class="row analyzeHeading">Analyze and Publish with Workspaces
+                    </div>
+                    <div class="row">
+                        <label class="text">Dolor sit amet consectetuer adipiscing sed diam
+                            euismod tincidunt ut laoreet dolore.</label>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-homepage" (click)="addWorkspace()">CREATE WORKSPACE</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card double right">
+                    <div class="row">
+                        <img class="icon learnIcon" src="/assets/icons/learn-icon.svg">
+                    </div>
+                    <div class="row heading learnHeading">
+                        Learn Researcher Workbench
+                    </div>
+                    <div class="row">
+                        <label class="text">Dolor sit amet consectetuer adipiscing.</label>
+                    </div>
+                    <div class="row heading">
+                        COMING SOON...
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-<div class="card-area">
-    <div class="card">
-        <div class="title">Create your own workspace</div>
-        <div class="description">Here you can create and name a workspace.
-            Within a workspace you can create notebooks and build cohorts.</div>
-        <button class="button btn btn-primary tooltip" (click)="addWorkspace()"
-            [disabled]="!billingProjectInitialized || !hasCdrAccess()">
-          CREATE WORKSPACE
-          <span *ngIf="!billingProjectInitialized" class="tooltip-content">
-              Your billing project is currently being created, please wait.
-          </span>
-          <span *ngIf="billingProjectInitialized && !hasCdrAccess()" class="tooltip-content">
-              You must complete profile setup before accessing data.
-          </span>
-        </button>
+    <div *ngIf="!firstTimeUser">
+        <div class="row">
+            <div class="card single">
+                <div class="row">
+                    <div class="col">
+                        <img src='/assets/icons/Analyze.svg' class="iconImage">
+                    </div>
+
+                    <div class="col analyzeSingleHeader">Analyze and Publish With Workspaces</div>
+                    <div class="col">
+                        <div class="row linkGroup">
+                            <div class="col">
+                                <a class="links" (click)="addWorkspace()">Create a
+                                    workspace</a>
+                            </div>
+                            <div class="col">
+                                <a class="links">
+                                    <clr-tooltip>
+                                        <a href="#" class="links" clrTooltipTrigger>See All Notebooks</a>
+                                        <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
+                                            <span>Coming Soon</span>
+                                        </clr-tooltip-content>
+                                    </clr-tooltip>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row linkGroup">
+                            <div class="col">
+                                <a class="links" (click)="listWorkspaces()">See All
+                                    Workspaces</a>
+                            </div>
+                            <div class="col">
+                                <clr-tooltip class="tooltip-bottom-right">
+                                    <a href="#" class="links" clrTooltipTrigger>See All Cohorts</a>
+                                    <clr-tooltip-content *clrIfOpen>
+                                        <span>Coming Soon</span>
+                                    </clr-tooltip-content>
+                                </clr-tooltip>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="card add-card" (click)="addWorkspace()">
+                        <div class="card-text">
+                            Create a <br/> New Workspace <br/>
+                            <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-    <div class="card">
-        <div class="title">View your workspaces</div>
-        <div class="description">Here you can view all workspaces you have created, or that have been
-            shared with you.</div>
-        <button class="button btn btn-primary tooltip" (click)="listWorkspaces()"
-            [disabled]="!hasCdrAccess()">
-          GO TO WORKSPACES
-          <span *ngIf="!profile" class="tooltip-content">
-              Your account is being initialized, please wait.
-          </span>
-          <span *ngIf="profile && !hasCdrAccess()" class="tooltip-content">
-              You must complete profile setup before accessing data.
-          </span>
-        </button>
+    <div class="footer">
+        <div class="row">
+            <div class="footerTitle">How to Use the AoU Researcher Workbench</div>
+        </div>
+        <div class="row">
+            <a href="#" class="footerLink" data-toggle="tooltip" title="Coming Soon">
+                See all documentation</a>
+        </div>
+        <div class="row textGroup">
+            <div class="footerText">
+                <div class="title">Working Within Researcher Workbench</div>
+                <clr-tooltip>
+                    <ul class="bullets" clrTooltipTrigger>
+                        <li>
+                            <a href="#" class="bullets">
+                                Researcher Workbench Mission</a>
+                         </li>
+                        <li><a href="#" class="bullets">
+                            User interface components</a></li>
+                        <li><a href="#" class="bullets">
+                            What to do when things go wrong</a></li>
+                        <li><a href="#" class="bullets">
+                            Contributing to the Workbench</a></li>
+                    </ul>
+                    <clr-tooltip-content *clrIfOpen>
+                        <span>Coming Soon</span>
+                    </clr-tooltip-content>
+                </clr-tooltip>
+
+            </div>
+            <div class="footerText">
+                <div class="title">Workspace</div>
+                <clr-tooltip>
+                    <ul class="bullet" clrTooltipTrigger>
+                        <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                            Workspace interface components</a></li>
+                        <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                            User interface components</a></li>
+                        <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                            Collaborating with other researchers</a></li>
+                        <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                            Sharing and Publishing Workspaces</a></li>
+                    </ul>
+                    <clr-tooltip-content *clrIfOpen>
+                        <span>Coming Soon</span>
+                    </clr-tooltip-content>
+                </clr-tooltip>
+            </div>
+            <div class="footerText">
+                <div class="title">Working with Notebooks</div>
+                <clr-tooltip>
+                <ul class="bullet" clrTooltipTrigger>
+                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                        Notebook interface components</a></li>
+                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                        Notebooks and data</a></li>
+                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                        Collaborating with other researchers</a></li>
+                    <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+                        Sharing and Publishing Notebooks</a></li>
+                </ul>
+                    <clr-tooltip-content *clrIfOpen>
+                        <span>Coming Soon</span>
+                    </clr-tooltip-content>
+                </clr-tooltip>
+            </div>
+        </div>
     </div>
 </div>
-<div class="bottom-banner">
-    <div class="logo">
-        <img [src]="AouLogoFooter">
-    </div>
-    <div class="bottom-links">
-        Privacy Policy
-    </div>
-    <div class="bottom-links">
-        Terms of Service
-    </div>
-</div>
-<app-bug-report></app-bug-report>
-</div>
+

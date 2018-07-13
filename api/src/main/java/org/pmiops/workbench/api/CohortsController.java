@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -92,6 +93,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final CohortMaterializationService cohortMaterializationService;
   private final Provider<User> userProvider;
   private final Clock clock;
+  private final CdrVersionService cdrVersionService;
 
   @Autowired
   CohortsController(
@@ -101,7 +103,8 @@ public class CohortsController implements CohortsApiDelegate {
       CohortReviewDao cohortReviewDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
-      Clock clock) {
+      Clock clock,
+      CdrVersionService cdrVersionService) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
@@ -109,6 +112,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
     this.clock = clock;
+    this.cdrVersionService = cdrVersionService;
   }
 
   @Override
@@ -120,6 +124,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Cohort dbCohort = FROM_CLIENT_COHORT.apply(cohort);
+    // TODO: Make this a service method to avoid duplication with WorkspacesController
     dbCohort.setCreator(userProvider.get());
     dbCohort.setWorkspaceId(workspace.getWorkspaceId());
     dbCohort.setCreationTime(now);
@@ -147,7 +152,7 @@ public class CohortsController implements CohortsApiDelegate {
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     cohortDao.delete(dbCohort);
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
@@ -223,11 +228,9 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
       String workspaceId, MaterializeCohortRequest request) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     CdrVersion cdrVersion = workspace.getCdrVersion();
-    CdrVersionContext.setCdrVersion(cdrVersion);
 
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
@@ -235,6 +238,7 @@ public class CohortsController implements CohortsApiDelegate {
         throw new NotFoundException(String.format("Couldn't find CDR version with name %s",
             request.getCdrVersionName()));
       }
+      cdrVersionService.setCdrVersion(cdrVersion);
     }
     String cohortSpec;
     CohortReview cohortReview = null;

@@ -10,7 +10,6 @@ import {
   WorkspaceAccessLevel,
 } from 'generated';
 
-
 @Component({
   styleUrls: ['../../styles/buttons.css',
     '../../styles/cards.css',
@@ -42,6 +41,11 @@ export class CohortListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    this.reloadCohorts();
+  }
+
+  reloadCohorts(): void {
+    this.cohortsLoading = true;
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
       .subscribe(
         cohortsReceived => {
@@ -64,6 +68,13 @@ export class CohortListComponent implements OnInit, OnDestroy {
     if (!this.awaitingReview) {
       this.router.navigate(['build'], {relativeTo: this.route});
     }
+  }
+
+  public deleteCohort(cohort: Cohort): void {
+    this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
+      this.cohortList.splice(
+        this.cohortList.indexOf(cohort), 1);
+    });
   }
 
   get writePermission(): boolean {

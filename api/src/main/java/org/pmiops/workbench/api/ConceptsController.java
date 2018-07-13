@@ -4,11 +4,8 @@ import com.google.common.collect.ImmutableMultimap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
@@ -73,18 +70,19 @@ public class ConceptsController implements ConceptsApiDelegate {
   @Override
   public ResponseEntity<ConceptListResponse> searchConcepts(String workspaceNamespace,
       String workspaceId, SearchConceptsRequest request) {
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    CdrVersion cdrVersion = workspace.getCdrVersion();
-    CdrVersionContext.setCdrVersion(cdrVersion);
     Integer maxResults = request.getMaxResults();
+    Integer minCount = request.getMinCount();
     if (maxResults == null) {
       maxResults = DEFAULT_MAX_RESULTS;
     } else if (maxResults < 1) {
       throw new BadRequestException("Invalid value for maxResults: " + maxResults);
     } else if (maxResults > MAX_MAX_RESULTS) {
       maxResults = MAX_MAX_RESULTS;
+    }
+    if(minCount == null){
+      minCount = 1;
     }
     StandardConceptFilter standardConceptFilter = request.getStandardConceptFilter();
     if (standardConceptFilter == null) {
@@ -103,7 +101,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     // TODO: move Swagger codegen to common-api, pass request with modified values into service
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
         conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
-            request.getVocabularyIds(), domainIds, maxResults);
+            request.getVocabularyIds(), domainIds, maxResults, minCount);
     ConceptListResponse response = new ConceptListResponse();
     response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
         .collect(Collectors.toList()));

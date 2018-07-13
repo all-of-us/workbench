@@ -176,5 +176,7 @@ describe('WorkspaceComponent', () => {
     expect(app.notebookList.length).toEqual(1);
     expect(app.notebookList[0].name).toEqual('FileDetails');
     expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile');
+    expect(workspacePage.fixture.debugElement.queryAll(
+      By.css('.research-purpose-item')).length).toEqual(2);
   }));
 });

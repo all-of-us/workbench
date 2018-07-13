@@ -16,12 +16,16 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -51,6 +55,7 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -68,6 +73,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
+  private final CohortDao cohortDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
   private final FireCloudService fireCloudService;
@@ -79,6 +85,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   WorkspacesController(
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
+      CohortDao cohortDao,
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
@@ -87,6 +94,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserService userService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
+    this.cohortDao = cohortDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -341,7 +349,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = null;
     for (int attemptValue = 0; attemptValue < MAX_FC_CREATION_ATTEMPT_VALUES; attemptValue++) {
       try {
-         fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+        fcWorkspace = attemptFirecloudWorkspaceCreation(fcWorkspaceId);
         break;
       } catch (ConflictException e) {
         if (attemptValue >= 5) {
@@ -353,6 +361,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         }
       }
     }
+
+    cloudStorageService.copyAllDemoNotebooks(fcWorkspace.getBucketName());
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
@@ -388,6 +398,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.addWorkspaceUserRole(permissions);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    List<JSONObject> demoCohorts = cloudStorageService.readAllDemoCohorts();
+    for (JSONObject cohort: demoCohorts) {
+      // TODO: Make this a service method to avoid duplication with CohortsController
+      Cohort dbCohort = new Cohort();
+      dbCohort.setName(cohort.getString("name"));
+      dbCohort.setDescription(cohort.getString("description"));
+      dbCohort.setCriteria(cohort.get("criteria").toString());
+      dbCohort.setType(cohort.getString("type"));
+      dbCohort.setCreator(userProvider.get());
+      dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
+      dbCohort.setCreationTime(now);
+      dbCohort.setLastModifiedTime(now);
+      dbCohort.setVersion(1);
+      try {
+        dbCohort = cohortDao.save(dbCohort);
+      } catch (DataIntegrityViolationException e) {
+        throw new BadRequestException(String.format(
+            "Cohort \"/%s/%s/%d\" already exists.",
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
+      }
+    }
     return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));
   }
 

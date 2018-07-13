@@ -47,12 +47,12 @@ import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
-import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
+import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
@@ -68,8 +68,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProfileController implements ProfileApiDelegate {
-  private String ID_VERIFICATION_TEXT = "A new user has requested manual ID verification: ";
-
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
           .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
@@ -401,25 +399,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> submitIdVerification() {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     User user = userProvider.get();
     if (user.getRequestedIdVerification() == null || !user.getRequestedIdVerification()) {
-      Properties props = new Properties();
-      Session session = Session.getDefaultInstance(props, null);
       try {
-        Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
-        InternetAddress[] replyTo = new InternetAddress[1];
-        replyTo[0] = new InternetAddress(user.getContactEmail());
-        msg.setReplyTo(replyTo);
-        // To test the bug reporting functionality, change the recipient email to your email rather
-        // than the group.
-        // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
-        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-            workbenchConfig.admin.adminIdVerification));
-        msg.setSubject("[Id Verification Request]: " + user.getEmail());
-        msg.setText(ID_VERIFICATION_TEXT + user.getEmail());
-        mailServiceProvider.get().send(msg);
+        mailServiceProvider.get().sendIdVerificationRequestEmail(user.getEmail());
       } catch (MessagingException e) {
         throw new EmailException("Error submitting id verification", e);
       }
@@ -495,31 +478,6 @@ public class ProfileController implements ProfileApiDelegate {
       mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @Override
-  public ResponseEntity<Void> requestInvitationKey(String email) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    Properties props = new Properties();
-    Session session = Session.getDefaultInstance(props, null);
-    try {
-      Message msg = new MimeMessage(session);
-      msg.setFrom(new InternetAddress(workbenchConfig.admin.verifiedSendingAddress));
-      InternetAddress[] replyTo = new InternetAddress[1];
-      replyTo[0] = new InternetAddress(email);
-      msg.setReplyTo(replyTo);
-      // To test the bug reporting functionality, change the recipient email to your email rather
-      // than the group.
-      // https://precisionmedicineinitiative.atlassian.net/browse/RW-40
-      msg.addRecipient(Message.RecipientType.TO, new InternetAddress(
-          workbenchConfig.admin.supportGroup, "AofU Workbench Engineers"));
-      msg.setSubject("[AofU Invitation Key Request]");
-      msg.setText(email + " is requesting the invitation key.");
-      mailServiceProvider.get().send(msg);
-    } catch (MessagingException | UnsupportedEncodingException e) {
-      throw new EmailException("Error sending invitation key request", e);
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

@@ -15,6 +15,7 @@ import {
   CANCEL_CHARTS_REQUEST,
 
   BEGIN_PREVIEW_REQUEST,
+  BEGIN_ATTR_PREVIEW_REQUEST,
 
   RootAction,
   ActionTypes,
@@ -31,6 +32,7 @@ import {
   chartsRequestError,
 
   loadPreviewRequestResults,
+  loadAttributePreviewRequestResults,
   previewRequestError,
 } from './actions/creators';
 
@@ -43,7 +45,8 @@ type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
-type PreviewRequestAction = ActionTypes[typeof BEGIN_PREVIEW_REQUEST];
+type PreviewRequestAction = ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST];
+type AttributePreviewRequestAction = ActionTypes[typeof BEGIN_PREVIEW_REQUEST];
 const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
 
 /**
@@ -95,6 +98,16 @@ export class CohortSearchEpics {
       this.service.countParticipants(cdrVersionId, request)
         .map(response => typeof response === 'number' ? response : 0)
         .map(count => loadPreviewRequestResults(count))
+        .catch(e => Observable.of(previewRequestError(e)))
+    )
+  )
+
+  attributePreviewCount: CSEpic = (action$) => (
+    action$.ofType(BEGIN_ATTR_PREVIEW_REQUEST).switchMap(
+      ({cdrVersionId, request}: AttributePreviewRequestAction) =>
+      this.service.countParticipants(cdrVersionId, request)
+        .map(response => typeof response === 'number' ? response : 0)
+        .map(count => loadAttributePreviewRequestResults(count))
         .catch(e => Observable.of(previewRequestError(e)))
     )
   )

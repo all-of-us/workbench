@@ -113,7 +113,7 @@ public class AnnotationQueryBuilderTest {
   public void setUp() {
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersionDao.save(cdrVersion);
-    CdrVersionContext.setCdrVersion(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);

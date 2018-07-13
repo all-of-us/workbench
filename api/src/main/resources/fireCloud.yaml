@@ -434,6 +434,29 @@ paths:
           500:
             description: Internal server error
 
+  /api/groups:
+      get:
+        responses:
+          200:
+            description: Successfully listed group membership
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/ManagedGroupAccessResponse'
+          500:
+            description: FireCloud Internal Error
+            schema:
+              $ref: '#/definitions/ErrorReport'
+        tags:
+          - Groups
+        summary: get the list of the groups that the caller is a member of
+        operationId: getGroups
+        security:
+          - googleoauth:
+            - openid
+            - email
+            - profile
+
   /api/groups/{groupName}:
     post:
       responses:
@@ -930,6 +953,21 @@ definitions:
         description: the users or groups who were not found
         items:
           $ref: '#/definitions/WorkspaceACLUpdate'
+
+  ManagedGroupAccessResponse:
+    description: an element of a list of groups a user has access to
+    type: object
+    required:
+      - groupName
+      - groupEmail
+      - role
+    properties:
+      groupName:
+        type: string
+      groupEmail:
+        type: string
+      role:
+        type: string
 
   ManagedGroupWithMembers:
     description: a group with all of its members

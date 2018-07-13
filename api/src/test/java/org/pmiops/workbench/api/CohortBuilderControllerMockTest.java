@@ -5,18 +5,23 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.Operator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CohortBuilderControllerMockTest {
@@ -26,6 +31,10 @@ public class CohortBuilderControllerMockTest {
 
     @Mock
     private CdrVersionDao mockCdrVersionDao;
+
+    @SuppressWarnings("unused")
+    @Mock
+    private CdrVersionService mockCdrVersionService;
 
     @InjectMocks
     private CohortBuilderController controller;
@@ -41,27 +50,30 @@ public class CohortBuilderControllerMockTest {
                         .group(false)
                         .selectable(false)
                         .count("0")
-                        .conceptId("0");
+                        .conceptId("0")
+                        .predefinedAttributes("[]");
 
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD9", 0L))
+                .findCriteriaByTypeAndParentIdOrderByIdAsc("ICD9", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
                 controller.getCriteriaByTypeAndParentId(1L,"ICD9", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("ICD9")
                         .code("001-139.99")
                         .name("Infectious and parasitic diseases")
                         .group(false)
                         .selectable(false)
                         .count(0L)
-                        .conceptId(0L));
+                        .conceptId(0L)
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD9", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("ICD9", 0L);
         verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
     }
 
@@ -76,27 +88,30 @@ public class CohortBuilderControllerMockTest {
                         .selectable(true)
                         .count("0")
                         .conceptId("12")
-                        .subtype("AGE");
+                        .subtype("AGE")
+                        .predefinedAttributes("[]");
 
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("DEMO", 0L))
+                .findCriteriaByTypeAndParentIdOrderByIdAsc("DEMO", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
                 controller.getCriteriaByTypeAndParentId(1L,"DEMO", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("DEMO")
                         .name("Age")
                         .group(false)
                         .selectable(true)
                         .count(0L)
                         .conceptId(12L)
-                        .subtype("AGE"));
+                        .subtype("AGE")
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("DEMO", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("DEMO", 0L);
         verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
     }
 
@@ -110,26 +125,29 @@ public class CohortBuilderControllerMockTest {
                         .group(true)
                         .selectable(true)
                         .count("0")
-                        .conceptId("0");
+                        .conceptId("0")
+                        .predefinedAttributes("[]");
 
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD10", 0L))
+                .findCriteriaByTypeAndParentIdOrderByIdAsc("ICD10", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
                 controller.getCriteriaByTypeAndParentId(1L,"ICD10", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("ICD10")
                         .name("DIAGNOSIS CODES")
                         .group(true)
                         .selectable(true)
                         .count(0L)
-                        .conceptId(0L));
+                        .conceptId(0L)
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("ICD10", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("ICD10", 0L);
         verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
     }
 
@@ -143,26 +161,65 @@ public class CohortBuilderControllerMockTest {
                         .group(true)
                         .selectable(true)
                         .count("0")
-                        .conceptId("0");
+                        .conceptId("0")
+                        .predefinedAttributes("[]");
 
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("CPT", 0L))
+                .findCriteriaByTypeAndParentIdOrderByIdAsc("CPT", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
                 controller.getCriteriaByTypeAndParentId(1L,"CPT", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("CPT")
                         .name("DIAGNOSIS CODES")
                         .group(true)
                         .selectable(true)
                         .count(0L)
-                        .conceptId(0L));
+                        .conceptId(0L)
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("CPT", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("CPT", 0L);
+        verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
+    }
+
+    @Test
+    public void getCriteriaByType() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("CPT")
+                        .name("DIAGNOSIS CODES")
+                        .group(true)
+                        .selectable(true)
+                        .count("0")
+                        .conceptId("0")
+                        .predefinedAttributes("[]");
+
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
+        when(mockCriteriaDao
+                .findCriteriaByType("CPT"))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
+        assertCriteria(
+                controller.getCriteriaByType(1L,"CPT"),
+                new Criteria()
+                        .id(1L)
+                        .parentId(0L)
+                        .type("CPT")
+                        .name("DIAGNOSIS CODES")
+                        .group(true)
+                        .selectable(true)
+                        .count(0L)
+                        .conceptId(0L)
+                        .hasAttributes(false));
+
+        verify(mockCdrVersionDao).findOne(1L);
+        verify(mockCriteriaDao).findCriteriaByType("CPT");
         verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
     }
 
@@ -171,30 +228,40 @@ public class CohortBuilderControllerMockTest {
         org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
                 new org.pmiops.workbench.cdr.model.Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("PHECODE")
                         .name("Intestinal infection")
                         .group(true)
                         .selectable(true)
                         .count("0")
-                        .conceptId("0");
+                        .conceptId("0")
+                        .predefinedAttributes("[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['90'],'conceptId':'903118'},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['60'],'conceptId':'903115'}]");
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
-                .findCriteriaByTypeAndParentIdOrderByCodeAsc("PHECODE", 0L))
+                .findCriteriaByTypeAndParentIdOrderByIdAsc("PHECODE", 0L))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
                 controller.getCriteriaByTypeAndParentId(1l,"PHECODE", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("PHECODE")
                         .name("Intestinal infection")
                         .group(true)
                         .selectable(true)
                         .count(0L)
-                        .conceptId(0L));
+                        .conceptId(0L)
+                        .hasAttributes(false)
+                        .predefinedAttributes(
+                          Arrays.asList(
+                          new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L),
+                          new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L)
+                          )
+                        ));
 
         verify(mockCdrVersionDao).findOne(1L);
-        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByCodeAsc("PHECODE", 0L);
+        verify(mockCriteriaDao).findCriteriaByTypeAndParentIdOrderByIdAsc("PHECODE", 0L);
         verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
     }
 
@@ -209,7 +276,8 @@ public class CohortBuilderControllerMockTest {
                         .group(false)
                         .selectable(true)
                         .count("100")
-                        .conceptId("0");
+                        .conceptId("0")
+                        .predefinedAttributes("[]");
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
                 .findCriteriaByTypeAndSubtypeOrderByNameAsc("DEMO", "RACE"))
@@ -219,13 +287,15 @@ public class CohortBuilderControllerMockTest {
                 controller.getCriteriaByTypeAndSubtype(1l,"DEMO", "RACE"),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("DEMO")
                         .subtype("RACE")
                         .name("African American")
                         .group(false)
                         .selectable(true)
                         .count(100L)
-                        .conceptId(0L));
+                        .conceptId(0L)
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
         verify(mockCriteriaDao).findCriteriaByTypeAndSubtypeOrderByNameAsc("DEMO", "RACE");
@@ -242,7 +312,8 @@ public class CohortBuilderControllerMockTest {
                         .group(true)
                         .selectable(true)
                         .count("0")
-                        .conceptId("0");
+                        .conceptId("0")
+                        .predefinedAttributes("[]");
 
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
@@ -253,12 +324,14 @@ public class CohortBuilderControllerMockTest {
                 controller.getCriteriaTreeQuickSearch(1L,"PHECODE", "infect"),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("PHECODE")
                         .name("Intestinal infection")
                         .group(true)
                         .selectable(true)
                         .count(0L)
-                        .conceptId(0L));
+                        .conceptId(0L)
+                        .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
         verify(mockCriteriaDao).findCriteriaByTypeAndNameOrCode("PHECODE", "infect*");

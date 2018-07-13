@@ -5,7 +5,7 @@
       <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
         <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
         <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
-        <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
+        <div class="card add-card" [ngClass]="{'disabled' : !writePermission || awaitingReview}" (click)="!writePermission || awaitingReview || buildCohort()">
           <div class="create-text">
             Create a <br/>New Cohort
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
@@ -15,7 +15,7 @@
       <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
         <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
         <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
-        <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" style="margin-top: 13px;" (click)="!writePermission || newNotebook()">
+        <div class="card add-card" [ngClass]="{'disabled' : !writePermission || awaitingReview}" style="margin-top: 13px;" (click)="!writePermission || awaitingReview || newNotebook()">
           <div class="create-text">
             Create a<br/>New Notebook
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
@@ -23,10 +23,27 @@
         </div>
       </div>
     </div>
+    <div class="help-tip" style="position: relative; left: 250px; top: -170px" *ngIf="newWorkspace">
+      <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times" size="10px" style="position: absolute; top: 10px; right: 9px"></clr-icon></div>
+      <div class="help-tip-title">Welcome to your workspace!</div>
+      <div class="help-tip-text">One of the first things you may want to do is create a cohort and a notebook</div>
+    </div>
     <div style="padding-top: 1rem;">
       <h4 class="subheader">Research Purpose</h4>
       <div class="description-text">
         {{workspace.description}}
+      </div>
+      <div class="research-purpose-items">
+        <div class="column">
+          <div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">
+            {{researchPurposeDescription}}
+          </div>
+        </div>
+        <div class="column">
+          <div class="research-purpose-item" *ngFor="let researchPurposeDescription of rightResearchPurposes">
+            {{researchPurposeDescription}}
+          </div>
+        </div>
       </div>
     </div>
   </div>

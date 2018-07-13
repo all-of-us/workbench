@@ -20,7 +20,7 @@ GSUITE_ADMIN_KEY_PATH = "src/main/webapp/WEB-INF/gsuite-admin-sa.json"
 INSTANCE_NAME = "workbenchmaindb"
 FAILOVER_INSTANCE_NAME = "workbenchbackupdb"
 SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com iam.googleapis.com
-              compute.googleapis.com admin.googleapis.com
+              compute.googleapis.com admin.googleapis.com appengine.googleapis.com
               cloudbilling.googleapis.com sqladmin.googleapis.com sql-component.googleapis.com
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
 
@@ -36,6 +36,10 @@ ENVIRONMENTS = {
   "all-of-us-rw-stable" => {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_stable.json"
+  },
+  "all-of-us-rw-prod" => {
+    :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
+    :config_json => "config_prod.json"
   }
 }
 
@@ -1051,6 +1055,24 @@ Common.register_command({
   :fn => ->(*args) { deploy_gcs_artifacts("deploy-gcs-artifacts", args) }
 })
 
+def deploy_gcs_demos(cmd_name, args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  common.run_inline %W{gsutil rm gs://#{gcc.project}-demos/**}
+  common.run_inline %W{gsutil cp demos/* gs://#{gcc.project}-demos/}
+end
+
+Common.register_command({
+  :invocation => "deploy-gcs-demos",
+  :description => "Deploys any GCS demos associated with this environment.",
+  :fn => ->(*args) { deploy_gcs_demos("deploy-gcs-demos", args) }
+})
+
 
 def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
@@ -1248,6 +1270,8 @@ def deploy(cmd_name, args)
 
     common.status "Pushing GCS artifacts..."
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
+
+    deploy_gcs_demos(cmd_name, %W{--project #{ctx.project}})
 
     # Keep the cloud proxy context open for the service account credentials.
     deploy_args = %W{
