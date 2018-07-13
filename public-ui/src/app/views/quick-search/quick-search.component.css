@@ -1,0 +1,29 @@
+.row.search {
+    margin: .25rem;
+}
+.white-card-box {
+    padding: .25rem;
+}
+
+.search-result p.card-text {
+    min-height: 2rem;
+    padding-bottom: .5rem;
+}
+
+/* result card */
+.white-card-box.search-result {
+    height: 240px;
+    width: 240px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: .5rem 1rem;
+}
+
+.card-text.bottom {
+    padding-bottom: 1rem;
+}
+
+.bolder {
+    font-weight: bold;
+    font-size: 16px;
+}
