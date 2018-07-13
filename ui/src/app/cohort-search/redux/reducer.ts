@@ -278,6 +278,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           item: {
             id: action.itemId,
             type: action.context.criteriaType,
+            fullTree: action.context.fullTree,
             searchParameters: [],
             modifiers: [],
             count: null,

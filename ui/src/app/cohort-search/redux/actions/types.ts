@@ -46,6 +46,7 @@ export const RESET_STORE = 'RESET_STORE';
 
 export interface ActiveContext {
   criteriaType?: string;
+  fullTree?: boolean;
   role?: keyof SearchRequest;
   groupId?: number;
   itemId?: number;
