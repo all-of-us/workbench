@@ -605,11 +605,13 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     user.setFirstSignInTime(new Timestamp(new Date().getTime()));
     UpdateContactEmailRequest request = new UpdateContactEmailRequest();
-    request.setContactEmail(user.getContactEmail());
+    String originalEmail = user.getContactEmail();
+    request.setContactEmail("newcontactEmail@whatever.com");
     request.setUsername(user.getEmail());
 
     ResponseEntity response = profileController.updateContactEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    assertThat(user.getContactEmail()).isEqualTo(originalEmail);
   }
 
   @Test
@@ -618,11 +620,13 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     user.setFirstSignInTime(null);
     UpdateContactEmailRequest request = new UpdateContactEmailRequest();
+    String originalEmail = user.getContactEmail();
     request.setContactEmail("bad email address *(SD&(*D&F&*(DS ");
     request.setUsername(user.getEmail());
 
     ResponseEntity response = profileController.updateContactEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(user.getContactEmail()).isEqualTo(originalEmail);
   }
 
   @Test
@@ -631,11 +635,13 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     user.setFirstSignInTime(null);
     UpdateContactEmailRequest request = new UpdateContactEmailRequest();
-    request.setContactEmail(user.getContactEmail());
+    String originalEmail = user.getContactEmail();
+    request.setContactEmail("newContactEmail@whatever.com");
     request.setUsername(user.getEmail());
 
     ResponseEntity response = profileController.updateContactEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
   }
 
   @Test

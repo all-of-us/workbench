@@ -476,7 +476,7 @@ public class ProfileController implements ProfileApiDelegate {
       InternetAddress email = new InternetAddress(updateContactEmailRequest.getContactEmail());
       email.validate();
     } catch (AddressException e) {
-      throw new BadRequestException("Email is invalid");
+      return ResponseEntity.badRequest().build();
     }
     user.setContactEmail(updateContactEmailRequest.getContactEmail());
     userDao.save(user);

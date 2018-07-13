@@ -99,7 +99,7 @@ public class MailServiceImplTest {
     workbenchConfig.googleCloudStorageService = new WorkbenchConfig.GoogleCloudStorageServiceConfig();
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
     workbenchConfig.admin = new WorkbenchConfig.AdminConfig();
-    workbenchConfig.admin.loginPage = "http://localhost:4200/";
+    workbenchConfig.admin.loginUrl = "http://localhost:4200/";
     return workbenchConfig;
   }
 
