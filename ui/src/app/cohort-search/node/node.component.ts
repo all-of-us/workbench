@@ -77,8 +77,10 @@ export class NodeComponent implements OnInit, OnDestroy {
                 criteriaList = this.findParent(child, criteriaList);
               }
             });
+            console.log(criteriaList);
             this.children = fromJS(criteriaList);
           } else {
+            console.log(children.toJS());
             this.children = children;
           }
         });
