@@ -56,7 +56,6 @@ public abstract class AbstractQueryBuilder {
 
   public String buildModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
     String modifierSql = "";
-    String finalSql = "";
     if (!modifiers.isEmpty()) {
       Modifier ageAtEvent = getModifier(modifiers, ModifierType.AGE_AT_EVENT);
       Modifier eventDate = getModifier(modifiers, ModifierType.EVENT_DATE);
