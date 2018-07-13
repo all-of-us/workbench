@@ -476,7 +476,7 @@ public class ProfileController implements ProfileApiDelegate {
       InternetAddress email = new InternetAddress(updateContactEmailRequest.getContactEmail());
       email.validate();
     } catch (AddressException e) {
-      return ResponseEntity.badRequest().build();
+      throw new BadRequestException("Email is invalid");
     }
     user.setContactEmail(updateContactEmailRequest.getContactEmail());
     userDao.save(user);
@@ -488,6 +488,9 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.admin.directory.model.User googleUser =
         directoryService.resetUserPassword(resendRequest.getUsername());
     User user = userDao.findUserByEmail(googleUser.getPrimaryEmail());
+    if (user.getFirstSignInTime() != null) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
     try {
       mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {

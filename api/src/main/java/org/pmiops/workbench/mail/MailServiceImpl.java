@@ -130,7 +130,7 @@ public class MailServiceImpl implements MailService {
     Map<String, String> replaceMap = new HashMap<>();
     replaceMap.put("USERNAME", user.getPrimaryEmail());
     replaceMap.put("PASSWORD", password);
-    replaceMap.put("URL", workbenchConfigProvider.get().admin.loginPage);
+    replaceMap.put("URL", workbenchConfigProvider.get().admin.loginUrl);
     replaceMap.put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"));
     replaceMap.put("BULLET_1", cloudStorageService.getImageUrl("bullet_1.png"));
     replaceMap.put("BULLET_2", cloudStorageService.getImageUrl("bullet_2.png"));

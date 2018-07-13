@@ -60,7 +60,7 @@ public class WorkbenchConfig {
     public String adminIdVerification;
     public String supportGroup;
     public String verifiedSendingAddress;
-    public String loginPage;
+    public String loginUrl;
   }
 
   public static class MandrillConfig {
