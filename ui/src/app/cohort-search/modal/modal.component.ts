@@ -5,8 +5,8 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
-  activeCriteriaType,
   activeCriteriaTreeType,
+  activeCriteriaType,
   activeParameterList,
   attributesPage,
   CohortSearchActions,
