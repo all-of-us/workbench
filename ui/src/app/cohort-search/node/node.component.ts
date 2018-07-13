@@ -31,8 +31,12 @@ export class NodeComponent implements OnInit, OnDestroy {
    * `error`: was there an error loading the children of this criterion?
    * `children`: when loaded, this node's children are stored here.
    *
-   * The initial load of the children is deferred until the subtree is first
-   * expanded.
+   * If the root criterion has 'fullTree' set to true, the entire tree is
+   * loaded. Otherwise, the initial load of the children is deferred until
+   * the subtree is first expanded.
+   *
+   * In the future, we may want put full trees in a separate component to
+   * make it cleaner.
    */
   expanded = false;
   children: any;
@@ -48,7 +52,6 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
-    console.log(this.node);
     if (!this.fullTree || this.node.get('id') === 0) {
       const _type = this.node.get('type').toLowerCase();
       const parentId = this.node.get('id');
@@ -65,29 +68,16 @@ export class NodeComponent implements OnInit, OnDestroy {
         .select(criteriaChildren(_type, parentId))
         .subscribe(children => {
           if (this.fullTree) {
-            const critList = {};
-            const childrenCopy = children.toJS()
-            childrenCopy.forEach(child => {
-              const parent = child.parentId;
-              console.log(parent);
-              if (critList.hasOwnProperty(parent)) {
-                critList[parent].push(child);
+            let criteriaList = [];
+            children.toJS().forEach(child => {
+              child.children = [];
+              if (child.parentId === 0) {
+                criteriaList.push(child);
               } else {
-                critList[parent] = [child];
+                criteriaList = this.findParent(child, criteriaList);
               }
-              /* if (child.get('group') && child.get('parentId') === 0) {
-                child.set('children', List());
-                critList[child.get('id')] = child;
-              } else {
-                critList.forEach(item => {
-                  if (item.get('id') === child.get('parentId')) {
-
-                  }
-                });
-              } */
             });
-            this.children = fromJS(critList);
-            console.log(this.children.toJS());
+            this.children = fromJS(criteriaList);
           } else {
             this.children = children;
           }
@@ -100,11 +90,29 @@ export class NodeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  findParent(child, itemList) {
+    for (const item of itemList) {
+      if (!item.group) {
+        break;
+      }
+      if (item.id === child.parentId) {
+        item.children.push(child);
+        return itemList;
+      }
+      const childList = this.findParent(child, item.children);
+      if (childList) {
+        item.children = childList;
+        return itemList;
+      }
+    }
   }
 
   loadChildren(event) {
-    console.log(this.node.toJS());
     if (!event) { return ; }
     const _type = this.node.get('type').toLowerCase();
     const parentId = this.node.get('id');

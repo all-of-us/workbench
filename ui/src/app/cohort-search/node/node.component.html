@@ -20,6 +20,7 @@
     </ng-container>
   </ng-template>
 
+  <!-- Loads the entire tree instead of loading children when the parent node is expanded -->
   <ng-template *ngIf="node.get('group') && fullTree"
     [clrIfExpanded]="expanded">
     <ng-container>
@@ -29,8 +30,7 @@
           <clr-icon shape="error-standard"></clr-icon>
           <em>Failed to Load Criteria</em>
         </div>
-
-        <crit-node *ngFor="let item of children.get(node.get('id'))" [node]="item"></crit-node>
+        <crit-node *ngFor="let item of node.get('children')" [node]="item"></crit-node>
       </div>
     </ng-container>
   </ng-template>
