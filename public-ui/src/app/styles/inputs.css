@@ -1,0 +1,71 @@
+input[type=date]:not([readonly]),
+input[type=datetime-local]:not([readonly]),
+input[type=email]:not([readonly]),
+input[type=number]:not([readonly]),
+input[type=password]:not([readonly]),
+input[type=tel]:not([readonly]),
+input[type=text]:not([readonly]),
+input[type=time]:not([readonly]),
+input[type=url]:not([readonly]) {
+  padding: 1rem;
+  border: none;
+  border-bottom: solid 1px;
+  background-color: inherit;
+  width: 80%;
+  background: none;
+}
+
+
+.search-input-big {
+  padding: 0;
+  margin-left:-24px;
+}
+.search-input-full {
+  postion: relative;
+
+}
+.search-wrapper {
+  border-bottom: solid 1px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.search-wrapper input[type="text"]
+{
+  font-size:1rem;
+}
+
+.search-input-full input{
+  border-bottom: none;
+  width: 100%;
+  padding-left: 24px;
+  padding-right: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+
+}
+
+.input-icon {
+  position: relative;
+  left: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.input-icon-absolute {
+  position: absolute;
+  top:12px;
+  left: 12px;
+  width: 24px;
+  height: 24px;
+}
+
+
+/* webkit solution */
+/*
+::-webkit-input-placeholder { text-align:left; padding-left:24px; }
+*/
+/* mozilla solution */
+/*
+input:-moz-placeholder { text-align:left; }
+*/

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12px" height="15px" viewBox="0 0 12 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
+    <title>Trash</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Brand-styles" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(-761.000000, -3353.000000)">
+        <g id="Trash" transform="translate(761.000000, 3353.000000)" fill="#302C71" fill-rule="nonzero">
+            <path d="M12,2.25 L7.83,2.25 L7.83,1.84 C7.7330777,0.92434994 6.96076542,0.229472953 6.04,0.229472953 C5.11923458,0.229472953 4.3469223,0.92434994 4.25,1.84 L4.25,2.25 L0,2.25 L0,3.25 L1.08,3.25 L1.92,13.33 C1.96179703,13.8508219 2.39750629,14.2516745 2.92,14.25 L9.08,14.25 C9.60249371,14.2516745 10.038203,13.8508219 10.08,13.33 L10.92,3.25 L12,3.25 L12,2.25 Z M9.08,13.25 L2.92,13.25 L2.09,3.25 L9.91,3.25 L9.08,13.25 Z M5.21,2 C5.27196803,1.61176361 5.60684923,1.3260952 6,1.3260952 C6.39315077,1.3260952 6.72803197,1.61176361 6.79,2 L6.79,2.3 L5.17,2.3 L5.21,2 Z" id="Shape"></path>
+            <rect id="Rectangle-path" x="4" y="5.25" width="1" height="6"></rect>
+            <rect id="Rectangle-path" x="7" y="5.25" width="1" height="6"></rect>
+        </g>
+    </g>
+</svg>

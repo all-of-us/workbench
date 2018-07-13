@@ -1,0 +1,62 @@
+/* Master Styles */
+/*@font-face {
+    font-family: GothamBook;
+    src: url('/assets/fonts/Gotham Book.otf');
+}
+@font-face {
+    font-family: GothamBold;
+    src: url('/assets/fonts/Gotham Bold.otf');
+}
+@font-face {
+    font-family: GothamLight;
+    src: url('/assets/fonts/Gotham Light.otf');
+}
+@font-face {
+    font-family: GothamMedium;
+    src: url('/assets/fonts/Gotham Medium.otf');
+}
+*/
+
+body {
+  background-color: #E0E0E1;
+}
+
+.main-container {
+    background-color: #E0E0E1;
+}
+
+
+input[type=text], input[type=password] {
+  border: 1px solid #9a9a9a;
+}
+
+input[type=text]:focus, input[type=password]:focus {
+  border: 1px solid #0094d2;
+}
+
+.loading-text {
+  padding-left: 0.3rem;
+  color: #888;
+}
+
+.loading-area {
+  padding-top: 0.3rem;
+}
+
+/* everywhere else */
+* {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.required::after {
+  content: " *";
+  color: red;
+}
+
+
+
+
+/* Must override clarity styles here, globally as angular component styles don't apply to child components used
+ * in the template ie clarity components.
+ */
+

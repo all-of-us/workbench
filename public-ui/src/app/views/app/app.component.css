@@ -1,0 +1,27 @@
+.content-container{
+    padding-left: 3rem;
+    padding-right: 3rem;
+    margin-top: -1.5rem;
+}
+
+@media (max-width: 978px) {
+    .content-container {
+        padding:0;
+        margin:0;
+    }
+
+    body {
+        padding:0;
+    }
+
+    .navbar-fixed-top, .navbar-fixed-bottom, .navbar-static-top {
+        margin-left: 0;
+        margin-right: 0;
+        margin-bottom:0;
+    }
+}
+
+
+
+
+

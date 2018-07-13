@@ -1,0 +1,17 @@
+.standard-chart {
+    display: block;
+    width: auto;
+    height: 100%
+}
+
+.small-chart {
+    display: block;
+    width: 400px;
+    height: 300px;
+}
+
+highcharts-title {
+    fill: #434348;
+    font-weight: 400;
+    font-size: 10px;
+}

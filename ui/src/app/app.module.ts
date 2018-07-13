@@ -49,7 +49,6 @@ import {WorkspaceComponent} from './views/workspace/component';
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
 import {CohortCommonModule} from './cohort-common/module';
-import {DataBrowserModule} from './data-browser/data-browser.module';
 import {IconsModule} from './icons/icons.module';
 
 import {
@@ -107,7 +106,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     IconsModule,
     NgxChartsModule,
     ClarityModule,
-    DataBrowserModule,
   ],
   declarations: [
     AccountCreationComponent,
