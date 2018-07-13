@@ -54,5 +54,8 @@
   </div>
 </form>
 <div *ngIf="accountCreated">
-  <app-account-creation-success [contactEmail]="profile.contactEmail"></app-account-creation-success>
+  <app-account-creation-success
+          [contactEmail]="profile.contactEmail"
+          [nonceCode]="profile.nonceCode">
+  </app-account-creation-success>
 </div>

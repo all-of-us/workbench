@@ -115,13 +115,15 @@ public class UserService {
   public User createUser(String givenName,
       String familyName,
       String email,
-      String contactEmail) {
+      String contactEmail,
+      Integer nonceCode) {
     User user = new User();
     user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
     user.setEmail(email);
     user.setContactEmail(contactEmail);
     user.setFamilyName(familyName);
     user.setGivenName(givenName);
+    user.setNonce(nonceCode);
     user.setDisabled(false);
     user.setAboutYou(null);
     user.setAreaOfResearch(null);

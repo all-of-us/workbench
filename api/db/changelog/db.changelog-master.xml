@@ -50,4 +50,5 @@
   <include file="changelog/db.changelog-40-remove-blockscore.xml"/>
   <include file="changelog/db.changelog-41-billing-project-retry.xml"/>
   <include file="changelog/db.changelog-42-rename-billing-project-retries.xml"/>
+  <include file="changelog/db.changelog-43-add-nonce-to-user.xml"/>
 </databaseChangeLog>
