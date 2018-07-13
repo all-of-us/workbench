@@ -7,7 +7,6 @@ import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaTreeType,
   activeCriteriaType,
-  activeCriteriaTreeType,
   activeParameterList,
   attributesPage,
   CohortSearchActions,
