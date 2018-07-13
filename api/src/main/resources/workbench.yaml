@@ -1291,22 +1291,16 @@ definitions:
     type: object
     required:
       - username
-      - nonce
     properties:
       username:
         type: string
         description: Username of account to resend welcome email to
-      nonce:
-        type: integer
-        format: int64
-        description: Security for resending email
 
   UpdateContactEmailRequest:
     type: object
     required:
       - contactEmail
       - username
-      - nonce
     properties:
       contactEmail:
         type: string
@@ -1314,10 +1308,6 @@ definitions:
       username:
         type: string
         description: Username for account.
-      nonce:
-        type: integer
-        format: int64
-        description: Security for resetting email
 
   BugReport:
     type: object
@@ -1423,10 +1413,6 @@ definitions:
         type: boolean
       twoFactorEnabled:
         type: boolean
-      nonceCode:
-        type: integer
-        format: int64
-        description: Numeric code to help secure account post creation pre first sign in.
 
 
   InstitutionalAffiliation:

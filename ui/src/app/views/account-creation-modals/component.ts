@@ -16,7 +16,6 @@ export class AccountCreationModalsComponent implements OnInit {
   contactEmail: string;
   @Input('username') username: string;
   @Input('gsuiteDomain') gsuiteDomain: string;
-  @Input('nonceCode') nonceCode: string;
 
   @Output() updateEmail = new EventEmitter<string>();
 
@@ -45,8 +44,7 @@ export class AccountCreationModalsComponent implements OnInit {
   sendAndUpdate() {
     const request: UpdateContactEmailRequest = {
       username: this.username + '@' + this.gsuiteDomain,
-      contactEmail: this.contactEmail,
-      nonce: parseInt(this.nonceCode)
+      contactEmail: this.contactEmail
     };
     this.updateEmail.emit(this.contactEmail);
     this.profileService.updateContactEmail(request).subscribe(() => {
@@ -57,8 +55,7 @@ export class AccountCreationModalsComponent implements OnInit {
 
   send() {
     const request: ResendWelcomeEmailRequest = {
-      username: this.username + '@' + this.gsuiteDomain,
-      nonce: parseInt(this.nonceCode)
+      username: this.username + '@' + this.gsuiteDomain
     };
     this.profileService.resendWelcomeEmail(request).subscribe(() => {
       this.resendingEmail = false;

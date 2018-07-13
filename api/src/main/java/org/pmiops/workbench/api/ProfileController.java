@@ -386,7 +386,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     userService.createUser(request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
-        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail(), request.getProfile().getNonce());
+        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
 
     try {
       mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);

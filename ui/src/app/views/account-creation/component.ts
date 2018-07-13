@@ -26,8 +26,7 @@ export class AccountCreationComponent {
     dataAccessLevel: DataAccessLevel.Unregistered,
     givenName: '',
     familyName: '',
-    contactEmail: '',
-    nonceCode: this.createNonce
+    contactEmail: ''
   };
   showAllFieldsRequiredError: boolean;
   creatingAccount: boolean;
@@ -74,7 +73,7 @@ export class AccountCreationComponent {
 
     const request: CreateAccountRequest = {
       profile: this.profile,
-      invitationKey: this.invitationKeyService.invitationKey,
+      invitationKey: this.invitationKeyService.invitationKey
     };
     this.creatingAccount = true;
     this.profileService.createAccount(request).subscribe(() => {
@@ -138,9 +137,5 @@ export class AccountCreationComponent {
       return false;
     }
     return !this.isUsernameValidationError;
-  }
-
-  get createNonce(): integer {
-    return Math.floor(Math.random() * 99999);
   }
 }

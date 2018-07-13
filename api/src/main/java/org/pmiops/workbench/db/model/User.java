@@ -58,7 +58,6 @@ public class User {
   private Boolean twoFactorEnabled = false;
   private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
-  private Integer nonce;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -307,12 +306,5 @@ public class User {
 
   public void setBillingProjectRetries(Integer billingProjectRetries) {
     this.billingProjectRetries = billingProjectRetries;
-  }
-
-  @Column(name = "nonce")
-  public Integer getNonce() { return nonce; }
-
-  public void setNonce(Integer nonce) {
-    this.nonce = nonce;
   }
 }

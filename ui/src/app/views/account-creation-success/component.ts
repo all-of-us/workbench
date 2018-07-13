@@ -19,7 +19,6 @@ import {Subscription} from 'rxjs/Subscription';
 export class AccountCreationSuccessComponent implements OnInit {
   username: string;
   @Input('contactEmail') contactEmail: string;
-  @Input('nonceCode') nonceCode: string;
   gsuiteDomain: string;
   subscription: Subscription;
 
@@ -42,7 +41,6 @@ export class AccountCreationSuccessComponent implements OnInit {
       loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
     }, 0);
     this.username = account.profile.username;
-    console.log(account.profile.nonceCode);
   }
 
   ngOnInit () {
