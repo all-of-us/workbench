@@ -1,7 +1,6 @@
 import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
@@ -14,11 +13,58 @@ import {
   UnderservedPopulationEnum,
   Workspace,
   WorkspaceAccessLevel,
-  WorkspaceResponse,
   WorkspacesService
 } from 'generated';
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
+
+export const ResearchPurposeItems = {
+  methodsDevelopment: {
+    shortDescription: 'Methods development/validation study',
+    longDescription: 'The primary purpose of the research is to develop and/or \
+    validate new methods/tools for analyzing or interpreting data (for example, \
+    developing more powerful methods to detect epistatic, gene-environment, or \
+    other types of complex interactions in genome-wide association studies). \
+    Data will be used for developing and/or validating new methods.'
+  },
+  diseaseFocusedResearch: {
+    shortDescription: 'Disease focused research',
+    longDescription: 'The primary purpose of the research is to learn more about a \
+    particular disease or disorder (for example, type 2 diabetes), a trait \
+    (for example, blood pressure), or a set of related conditions\
+    (for example, autoimmune diseases, psychiatric disorders).'
+  },
+  aggregateAnalysis: {
+    shortDescription: 'Aggregate analysis to understand variation in general population',
+    longDescription: 'The primary purpose of the research is to understand variation in the\
+    general population (for example, genetic substructure of a population).'
+  },
+  controlSet: {
+    shortDescription: 'Control Set',
+    longDescription: 'All of Us data will be used  increase the number of controls available for a\
+    comparison group (for example, a case-control study) to another dataset.'
+  },
+  ancestry: {
+    shortDescription: 'Population origins or ancestry',
+    longDescription: 'The primary purpose of the research is to study the ancestry or origins\
+    of a specific population.'
+  },
+  population: {
+    shortDescription: 'Restricted to a specific population',
+    longDescription: 'This research will focus on a specific population group. For example: a\
+    specific gender, age group or ethnic group.'
+  },
+  commercialPurpose: {
+    shortDescription: 'Commercial Purpose/entity',
+    longDescription: 'The study is conducted by a for-profit entity and/or in\
+    support of a commercial activity.'
+  },
+  containsUnderservedPopulation: {
+    shortDescription: 'Includes an underserved population',
+    longDescription: 'This research will focus on, or include findings on, distinguishing \
+    characteristics related to one or more underserved populations'
+  }
+};
 
 @Component({
   styleUrls: ['./component.css',
@@ -127,6 +173,8 @@ export class WorkspaceEditComponent implements OnInit {
     'Access to Care': this.accessToCareList,
     'Education/Income': this.educationIncomeList
   };
+
+  researchPurposeItems = ResearchPurposeItems;
 
   constructor(
       private locationService: Location,

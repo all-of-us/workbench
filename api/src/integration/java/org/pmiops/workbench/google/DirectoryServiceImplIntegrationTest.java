@@ -29,7 +29,6 @@ public class DirectoryServiceImplIntegrationTest {
   @Before
   public void setUp() throws MessagingException {
     MailService mailService = Mockito.mock(MailServiceImpl.class);
-    Mockito.doNothing().when(mailService).send(Mockito.any());
     service = new DirectoryServiceImpl(
         Providers.of(googleCredential), Providers.of(workbenchConfig),
         Providers.of(mailService), httpTransport,
@@ -68,8 +67,6 @@ public class DirectoryServiceImplIntegrationTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.googleDirectoryService = new WorkbenchConfig.GoogleDirectoryServiceConfig();
     config.googleDirectoryService.gSuiteDomain = "fake-research-aou.org";
-    config.admin = new WorkbenchConfig.AdminConfig();
-    config.admin.verifiedSendingAddress = "test@" + config.googleDirectoryService.gSuiteDomain;
     return config;
   }
 }

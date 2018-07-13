@@ -11,7 +11,7 @@
 
 .description-text {
   color: #333;
-  width: 100ex;
+  width: 40rem;
   padding-top: 0.5rem;
 }
 
@@ -144,4 +144,25 @@ app-workspace-nav-bar {
 .btn-short {
   display: inline-block;
   height: 0.9rem;
+}
+
+.research-purpose-item {
+  line-height: 18px;
+  margin-bottom: 7px;
+}
+
+.research-purpose-items {
+  margin-top: 1rem;
+  width: 50rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  color: #262262;
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.column {
+  width: 45%;
+  padding-right: 5%;
 }

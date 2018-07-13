@@ -53,7 +53,7 @@ Common.register_command({
 
 class BuildOptions
   # Keep in sync with .angular-cli.json.
-  ENV_CHOICES = %W{local-test local test staging stable}
+  ENV_CHOICES = %W{local-test local test staging stable prod}
   attr_accessor :env
 
   def initialize
@@ -138,6 +138,7 @@ class DeployUI
       "all-of-us-workbench-test" => "test",
       "all-of-us-rw-staging" => "staging",
       "all-of-us-rw-stable" => "stable",
+      "all-of-us-rw-prod" => "prod",
     }
     environment_name = environment_names[@opts.project]
 
@@ -166,7 +167,7 @@ def build(cmd_name, args)
   # and also uglifies the source.
   # See https://github.com/angular/angular-cli/wiki/build#--dev-vs---prod-builds.
   optimize = "--aot"
-  if Set['staging', 'stable'].include?(options.env)
+  if Set['staging', 'stable', 'prod'].include?(options.env)
     optimize = "--prod"
   end
   common.run_inline %W{yarn run build
