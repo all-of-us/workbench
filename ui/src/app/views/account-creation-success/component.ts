@@ -16,7 +16,7 @@ import {Subscription} from 'rxjs/Subscription';
               './component.css'],
   templateUrl: './component.html'
 })
-export class AccountCreationSuccessComponent implements OnInit {
+export class AccountCreationSuccessComponent {
   username: string;
   @Input('contactEmail') contactEmail: string;
   gsuiteDomain: string;
@@ -41,9 +41,6 @@ export class AccountCreationSuccessComponent implements OnInit {
       loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
     }, 0);
     this.username = account.profile.username;
-  }
-
-  ngOnInit () {
   }
 
   signIn(): void {

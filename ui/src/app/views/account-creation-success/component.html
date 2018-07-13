@@ -19,7 +19,8 @@
     <h4>Your contact email is: {{contactEmail}}</h4>
   </div>
   <div class="row" style="padding-top:0.5rem;">
-    <button class="button-link" (click)="accountCreationModalsComponent.resendInstructions();">Resend Instructions</button> | <button class="button-link" (click)="accountCreationModalsComponent.updateAndSendEmail();">Change contact email</button>
+    <button class="button-link" (click)="accountCreationModalsComponent.resendInstructions();">Resend Instructions</button>
+    | <button class="button-link" (click)="accountCreationModalsComponent.updateAndSendEmail();">Change contact email</button>
   </div>
 </div>
 <app-account-creation-modals [username]="username" [gsuiteDomain]="gsuiteDomain" (updateEmail)="receiveMessage($event)"></app-account-creation-modals>
