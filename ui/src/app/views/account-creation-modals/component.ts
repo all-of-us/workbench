@@ -10,7 +10,7 @@ import {ServerConfigService} from '../../services/server-config.service';
   styleUrls: ['./component.css',
     '../../styles/buttons.css'],
 })
-export class AccountCreationModalsComponent implements OnInit {
+export class AccountCreationModalsComponent {
   changingEmail = false;
   resendingEmail = false;
   contactEmail: string;
@@ -29,9 +29,6 @@ export class AccountCreationModalsComponent implements OnInit {
     this.contactEmail = '';
   }
 
-  ngOnInit() {
-  }
-
   updateAndSendEmail() {
     this.changingEmail = true;
     this.contactEmail = '';
@@ -41,7 +38,7 @@ export class AccountCreationModalsComponent implements OnInit {
     this.resendingEmail = true;
   }
 
-  sendAndUpdate() {
+  updateAndSend() {
     const request: UpdateContactEmailRequest = {
       username: this.username + '@' + this.gsuiteDomain,
       contactEmail: this.contactEmail

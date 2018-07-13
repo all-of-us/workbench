@@ -7,6 +7,7 @@ import static junit.framework.TestCase.fail;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -655,6 +656,7 @@ public class ProfileControllerTest {
 
     ResponseEntity response = profileController.resendWelcomeEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    verify(mailService, atLeast(1)).sendWelcomeEmail(any(), any(), any());
   }
 
   @Test
@@ -668,6 +670,7 @@ public class ProfileControllerTest {
 
     ResponseEntity response = profileController.resendWelcomeEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    verify(mailService, atLeast(1)).sendWelcomeEmail(any(), any(), any());
   }
 
   private Profile createUser() throws Exception {
