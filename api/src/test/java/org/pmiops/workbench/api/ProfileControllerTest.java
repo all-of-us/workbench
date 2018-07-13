@@ -144,7 +144,7 @@ public class ProfileControllerTest {
 
     clock = new FakeClock(NOW);
 
-    Mockito.doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
+    doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
@@ -634,7 +634,6 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     user.setFirstSignInTime(null);
     UpdateContactEmailRequest request = new UpdateContactEmailRequest();
-    String originalEmail = user.getContactEmail();
     request.setContactEmail("newContactEmail@whatever.com");
     request.setUsername(user.getEmail());
 

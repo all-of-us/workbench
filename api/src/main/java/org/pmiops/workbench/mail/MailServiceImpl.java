@@ -132,22 +132,6 @@ public class MailServiceImpl implements MailService {
     } while (retries > 0);
   }
 
-  private MandrillMessage buildWelcomeMessage(String contactEmail, String password, User user) throws MessagingException{
-    MandrillMessage msg = new MandrillMessage();
-    RecipientAddress toAddress = new RecipientAddress();
-    toAddress.setEmail(contactEmail);
-    msg.setTo(Collections.singletonList(toAddress));
-    try {
-      String msgHtml = buildEmailHtml(password, user);
-      msg.setHtml(msgHtml);
-      msg.setSubject("Your new All of Us Account");
-      msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
-      return msg;
-    } catch (IOException e) {
-      throw new MessagingException("Error reading in email");
-    }
-  }
-
   private String buildEmailHtml(String password, User user) throws IOException {
     CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     StringBuilder contentBuilder = new StringBuilder();
