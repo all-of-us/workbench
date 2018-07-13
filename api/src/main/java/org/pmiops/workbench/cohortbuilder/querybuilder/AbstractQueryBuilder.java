@@ -54,7 +54,7 @@ public abstract class AbstractQueryBuilder {
    */
   public abstract QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters);
 
-  public QueryJobConfiguration buildModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
+  public String buildModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
     String modifierSql = "";
     String finalSql = "";
     if (!modifiers.isEmpty()) {
@@ -65,14 +65,8 @@ public abstract class AbstractQueryBuilder {
       //Number of Occurrences has to be last because of the group by
       modifierSql = modifierSql + buildNumOfOccurrencesModifierSql(queryParams, occurrences);
     }
-    finalSql = MODIFIER_SQL_TEMPLATE.replace("${innerSql}", baseSql) +
+    return MODIFIER_SQL_TEMPLATE.replace("${innerSql}", baseSql) +
       modifierSql;
-
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(queryParams)
-      .setUseLegacySql(false)
-      .build();
   }
 
   public abstract FactoryKey getType();
