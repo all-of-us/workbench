@@ -57,21 +57,18 @@ public class CodesQueryBuilderTest {
             }
         }
 
-        String expected =
-                "select person_id\n" +
-                        "from `${projectId}.${dataSetId}.person` p\n" +
-                        "where person_id in (select  a.person_id \n" +
-                        "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                        "where a.condition_source_concept_id = b.concept_id\n" +
-                        "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
-                        "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
-                        " union all\n" +
-                        "select  a.person_id \n" +
-                        "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
-                        "where a.measurement_source_concept_id = b.concept_id\n" +
-                        "and b.vocabulary_id in (@" + cmMeasurementParameter + ",@" + procMeasurementParameter + ")\n" +
-                        "and b.concept_code in unnest(@" + measurementNamedParameter + ")\n" +
-                        ")\n";
+        String expected = "select criteria.person_id from (select distinct a.person_id, condition_start_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.condition_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
+          "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
+          " union all\n" +
+          "select distinct a.person_id, measurement_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.measurement_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmMeasurementParameter + ",@" + procMeasurementParameter + ")\n" +
+          "and b.concept_code in unnest(@" + measurementNamedParameter + ")\n" +
+          ") criteria\n";
 
         assertEquals(expected, queryJobConfiguration.getQuery());
 
@@ -142,27 +139,24 @@ public class CodesQueryBuilderTest {
             }
         }
 
-        String expected =
-                "select person_id\n" +
-                        "from `${projectId}.${dataSetId}.person` p\n" +
-                        "where person_id in (select  a.person_id \n" +
-                        "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
-                        "where a.measurement_source_concept_id = b.concept_id\n" +
-                        "and b.vocabulary_id in (@" + cmMeasurementParameter + ",@" + procMeasurementParameter + ")\n" +
-                        "and b.concept_code like @" + measurementNamedParameter + "\n" +
-                        " union all\n" +
-                        "select  a.person_id \n" +
-                        "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                        "where a.procedure_source_concept_id = b.concept_id\n" +
-                        "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
-                        "and b.concept_code like @" + procedureNamedParameter + "\n" +
-                        " union all\n" +
-                        "select  a.person_id \n" +
-                        "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
-                        "where a.condition_source_concept_id = b.concept_id\n" +
-                        "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
-                        "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
-                        ")\n";
+        String expected = "select criteria.person_id from (select distinct a.person_id, measurement_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.measurement` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.measurement_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmMeasurementParameter + ",@" + procMeasurementParameter + ")\n" +
+          "and b.concept_code like @" + measurementNamedParameter + "\n" +
+          " union all\n" +
+          "select distinct a.person_id, procedure_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.procedure_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.procedure_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmProcedureParameter + ",@" + procProcedureParameter + ")\n" +
+          "and b.concept_code like @" + procedureNamedParameter + "\n" +
+          " union all\n" +
+          "select distinct a.person_id, condition_start_date as entry_date, concept_code\n" +
+          "from `${projectId}.${dataSetId}.condition_occurrence` a, `${projectId}.${dataSetId}.concept` b\n" +
+          "where a.condition_source_concept_id = b.concept_id\n" +
+          "and b.vocabulary_id in (@" + cmConditionParameter + ",@" + procConditionParameter + ")\n" +
+          "and b.concept_code in unnest(@" + conditionNamedParameter + ")\n" +
+          ") criteria\n";
 
         assertEquals(expected, queryJobConfiguration.getQuery());
 
