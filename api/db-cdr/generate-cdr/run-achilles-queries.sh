@@ -549,7 +549,7 @@ where co1.observation_concept_id > 0 and (extract(year from co1.observation_date
 group by co1.observation_source_concept_id, stratum_2
 "
 
-# 1800 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id
+# 3000 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
@@ -647,29 +647,6 @@ on p1.person_id = co1.person_id
 where co1.measurement_source_concept_id > 0 and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30 and co1.measurement_concept_id!=co1.measurement_source_concept_id
 group by co1.measurement_source_concept_id, stratum_2
 "
-
-
-# Measurement Distributions
-# Don't do these yet
-#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-#"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
-#(id, analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value, p75_value, p90_value)
-#WITH rawdata_1815 AS
-#(SELECT measurement_concept_id as subject_id, unit_concept_id, cast(value_as_number  as float64) as count_value
-#  FROM  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m
-#where m.unit_concept_id is not null
-#	and m.value_as_number is not null),
-#overallstats  as ( select  subject_id  as stratum1_id, unit_concept_id  as stratum2_id, cast(avg(1.0 * count_value)  as float64)  as avg_value, cast(STDDEV(count_value)  as float64)  as stdev_value, min(count_value)  as min_value, max(count_value)  as max_value, COUNT(*)  as total   from  rawdata_1815
-#	 group by  1, 2 ), statsview  as ( select  subject_id  as stratum1_id, unit_concept_id  as stratum2_id, count_value as count_value, COUNT(*)  as total, row_number() over (partition by subject_id, unit_concept_id order by count_value)  as rn   from  rawdata_1815
-#   group by  1, 2, 3 ), priorstats  as ( select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2_id, s.count_value as count_value, s.total as total, sum(p.total)  as accumulated   from  statsview s
-#  join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
-#   group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn
-# )
-#select  0 as id, 1815 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id, o.total as count_value, o.min_value, o.max_value, o.avg_value, o.stdev_value, min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as median_value, min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as p10_value, min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as p25_value, min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as p75_value, min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as p90_value
-#  FROM  priorstats p
-#join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
-# group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
-#
 
 # Set the survey answer count for all the survey questions that belong to each module
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -817,3 +794,203 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
  select 0 as id,3000 as analysis_id,'10' as stratum_1,'Procedure' as stratum_3, COUNT(distinct p.person_id) as count_value, 0 as source_count_value
  from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` p"
+
+
+# 1815 Measurement response distribution
+echo "Getting measurement response distribution"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
+(id, analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value,
+p75_value, p90_value)
+with rawdata_1815 as
+(select measurement_concept_id as subject_id, unit_concept_id, cast(value_as_number as float64) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m where m.unit_concept_id is not null and m.value_as_number is not null
+),
+overallstats as
+(select subject_id as stratum1_id, unit_concept_id as stratum2_id, cast(avg(1.0 * count_value) as float64) as avg_value,
+cast(stddev(count_value) as float64) as stdev_value, min(count_value) as min_value, max(count_value) as max_value,
+count(*) as total from rawdata_1815 group by 1,2
+),
+statsview as
+(select subject_id as stratum1_id, unit_concept_id as stratum2_id, count_value as count_value, count(*) as total, row_number() over
+(partition by subject_id, unit_concept_id order by count_value) as rn from rawdata_1815 group by 1,2,3
+),
+priorstats as
+(select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2_id, s.count_value as count_value, s.total as total, sum(p.total) as accumulated from  statsview s
+  join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
+   group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn
+)
+select 0 as id, 1815 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
+cast(o.total as int64) as count_value, cast(o.min_value as int64), cast(o.max_value as int64), cast(o.avg_value as int64), cast(o.stdev_value as int64),
+cast(min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as int64) as median_value,
+cast(min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as int64) as p10_value,
+cast(min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as int64) as p25_value,
+cast(min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as int64) as p75_value,
+cast(min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as int64) as p90_value
+FROM  priorstats p
+join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
+group by o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
+
+# 1815 Measurement response distribution
+echo "Getting measurement response distribution"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
+(id, analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value,
+p75_value, p90_value)
+with rawdata_1815 as
+(select measurement_source_concept_id as subject_id, unit_concept_id, cast(value_as_number as float64) as count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m where m.unit_concept_id is not null and m.value_as_number is not null
+and m.measurement_concept_id != m.measurement_source_concept_id
+),
+overallstats as
+(select subject_id as stratum1_id, unit_concept_id as stratum2_id, cast(avg(1.0 * count_value) as float64) as avg_value,
+cast(stddev(count_value) as float64) as stdev_value, min(count_value) as min_value, max(count_value) as max_value,
+count(*) as total from rawdata_1815 group by 1,2
+),
+statsview as
+(select subject_id as stratum1_id, unit_concept_id as stratum2_id, count_value as count_value, count(*) as total, row_number() over
+(partition by subject_id, unit_concept_id order by count_value) as rn from rawdata_1815 group by 1,2,3
+),
+priorstats as
+(select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2_id, s.count_value as count_value, s.total as total, sum(p.total) as accumulated from  statsview s
+  join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
+   group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn
+)
+select 0 as id, 1815 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
+cast(o.total as int64) as count_value, cast(o.min_value as int64), cast(o.max_value as int64), cast(o.avg_value as int64), cast(o.stdev_value as int64),
+cast(min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as int64) as median_value,
+cast(min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as int64) as p10_value,
+cast(min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as int64) as p25_value,
+cast(min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as int64) as p75_value,
+cast(min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as int64) as p90_value
+FROM  priorstats p
+join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
+group by o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
+
+# 1806 Measurement response age distribution
+echo "Getting measurement response age distribution"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
+(id,analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value, p75_value, p90_value)
+WITH rawdata_1806 AS
+(SELECT o1.measurement_concept_id as subject_id, p1.gender_concept_id, o1.measurement_start_year - p1.year_of_birth as count_value
+FROM  \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+(select  person_id, measurement_concept_id, min(EXTRACT(YEAR from measurement_date)) as measurement_start_year from  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` group by  1, 2 ) o1
+on p1.person_id = o1.person_id),
+overallstats  as ( select  subject_id  as stratum1_id, gender_concept_id  as stratum2_id, cast(avg(1.0 * count_value)  as float64)  as avg_value, cast(STDDEV(count_value)  as float64)  as stdev_value, min(count_value)  as min_value, max(count_value)  as max_value, COUNT(*)  as total   from  rawdata_1806 group by  1, 2 ),
+statsview  as ( select  subject_id  as stratum1_id, gender_concept_id  as stratum2_id, count_value as count_value, COUNT(*)  as total, row_number() over (partition by subject_id, gender_concept_id order by count_value)  as rn   from  rawdata_1806
+ group by  1, 2, 3 ),
+priorstats  as ( select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2_id, s.count_value as count_value, s.total as total, sum(p.total)  as accumulated   from  statsview s
+join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
+group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn)
+select 0 as id, 1806 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
+cast(o.total as int64) as count_value, cast(o.min_value as int64), cast(o.max_value as int64), cast(o.avg_value as int64), cast(o.stdev_value as int64),
+cast(min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as int64) as median_value,
+cast(min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as int64) as p10_value,
+cast(min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as int64) as p25_value,
+cast(min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as int64) as p75_value,
+cast(min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as int64) as p90_value
+FROM  priorstats p join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
+group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
+
+# 1806 Measurement response age distribution (source concepts)
+echo "Getting measurement response age distribution"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
+(id,analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value, p75_value, p90_value)
+WITH rawdata_1806 AS
+(SELECT o1.measurement_source_concept_id as subject_id, p1.gender_concept_id, o1.measurement_start_year - p1.year_of_birth as count_value
+  FROM  \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1
+inner join
+(select  person_id, measurement_source_concept_id, min(EXTRACT(YEAR from measurement_date)) as measurement_start_year from  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`
+where measurement_concept_id != measurement_source_concept_id group by  1, 2 ) o1
+on p1.person_id = o1.person_id),
+overallstats  as ( select  subject_id  as stratum1_id, gender_concept_id  as stratum2_id, cast(avg(1.0 * count_value)  as float64)  as avg_value, cast(STDDEV(count_value)  as float64)  as stdev_value, min(count_value)  as min_value, max(count_value)  as max_value, COUNT(*)  as total   from  rawdata_1806 group by  1, 2 ),
+statsview  as ( select  subject_id  as stratum1_id, gender_concept_id  as stratum2_id, count_value as count_value, COUNT(*)  as total, row_number() over (partition by subject_id, gender_concept_id order by count_value)  as rn   from  rawdata_1806
+ group by  1, 2, 3 ),
+priorstats  as ( select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2_id, s.count_value as count_value, s.total as total, sum(p.total)  as accumulated   from  statsview s
+join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
+group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn)
+select 0 as id, 1806 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
+cast(o.total as int64) as count_value, cast(o.min_value as int64), cast(o.max_value as int64), cast(o.avg_value as int64), cast(o.stdev_value as int64),
+cast(min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as int64) as median_value,
+cast(min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as int64) as p10_value,
+cast(min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as int64) as p25_value,
+cast(min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as int64) as p75_value,
+cast(min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as int64) as p90_value
+FROM  priorstats p join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
+group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
+
+
+# 1900 Measurement value counts
+echo "Getting measurements value counts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, stratum_5, count_value,source_count_value)
+select 0,1900 as analysis_id,
+CAST(m1.measurement_concept_id AS STRING) as stratum_1,
+CAST(p1.gender_concept_id AS STRING) as stratum_2,
+CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
+CAST(floor(round(m1.value_as_number)/10)*10 as STRING) as stratum_4,
+m1.unit_source_value as stratum_5,
+count(distinct p1.person_id) as count_value,
+(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
+on p1.person_id = m1.person_id
+where m1.measurement_concept_id > 0
+and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
+group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4,stratum_5
+union all
+select 0, 1900 as analysis_id,
+CAST(co1.measurement_source_concept_id AS STRING) as stratum_1,
+CAST(p1.gender_concept_id AS STRING) as stratum_2,
+CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
+CAST(floor(round(m1.value_as_number)/10)*10 as STRING) as stratum_4,
+m1.unit_source_value as stratum_5,
+COUNT(distinct p1.PERSON_ID) as count_value,
+COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
+on p1.person_id = m1.person_id
+where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
+and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
+group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4,stratum_5"
+
+# 1900 Measurement value counts (18-29 yr old decile 2)
+echo "Getting measurements value counts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, stratum_5, count_value,source_count_value)
+select 0,1900 as analysis_id,
+CAST(m1.measurement_concept_id AS STRING) as stratum_1,
+CAST(p1.gender_concept_id AS STRING) as stratum_2,
+'2' as stratum_3,
+CAST(floor(round(m1.value_as_number)/10)*10 as STRING) as stratum_4,
+m1.unit_source_value as stratum_5,
+count(distinct p1.person_id) as count_value,
+(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
+on p1.person_id = m1.person_id
+where m1.measurement_concept_id > 0
+and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30
+group by m1.measurement_concept_id,stratum_2,stratum_4,stratum_5
+union all
+select 0, 1900 as analysis_id,
+CAST(co1.measurement_source_concept_id AS STRING) as stratum_1,
+CAST(p1.gender_concept_id AS STRING) as stratum_2,
+'2' as stratum_3,
+CAST(floor(round(m1.value_as_number)/10)*10 as STRING) as stratum_4,
+m1.unit_source_value as stratum_5,
+COUNT(distinct p1.PERSON_ID) as count_value,
+COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
+on p1.person_id = m1.person_id
+where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
+and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30
+group by m1.measurement_source_concept_id,stratum_2,stratum_4,stratum_5"
+
+
+
