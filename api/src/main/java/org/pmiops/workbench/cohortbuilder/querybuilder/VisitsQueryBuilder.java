@@ -72,10 +72,16 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     }
 
     // Combine the parent and child queries, or just use the one
-    String finalSql = queryParts.size() > 1 ?
+    String visitSql = queryParts.size() > 1 ?
       String.join(UNION_TEMPLATE, queryParts) : queryParts.get(0);
 
-    return buildModifierSql(finalSql, queryParams, inputParameters.getModifiers());
+    String finalSql = buildModifierSql(visitSql, queryParams, inputParameters.getModifiers());
+
+    return QueryJobConfiguration
+      .newBuilder(finalSql)
+      .setNamedParameters(queryParams)
+      .setUseLegacySql(false)
+      .build();
   }
 
   @Override

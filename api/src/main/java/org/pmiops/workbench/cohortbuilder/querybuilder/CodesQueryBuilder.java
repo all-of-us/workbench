@@ -83,7 +83,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
 
     String codesSql = String.join(UNION_TEMPLATE, queryParts);
-    return buildModifierSql(codesSql, queryParams, params.getModifiers());
+    String finalSql = buildModifierSql(codesSql, queryParams, params.getModifiers());
+
+    return QueryJobConfiguration
+      .newBuilder(finalSql)
+      .setNamedParameters(queryParams)
+      .setUseLegacySql(false)
+      .build();
   }
 
   private void buildGroupQuery(String type,
