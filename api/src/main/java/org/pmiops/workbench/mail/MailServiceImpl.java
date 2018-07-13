@@ -76,17 +76,7 @@ public class MailServiceImpl implements MailService {
     } catch (AddressException e) {
       throw new MessagingException("Email: " + contactEmail + " is invalid.");
     }
-
-    MandrillMessage msg = new MandrillMessage();
-    RecipientAddress toAddress = new RecipientAddress();
-    toAddress.setEmail(contactEmail);
-    msg.setTo(Collections.singletonList(toAddress));
-    String msgBody = "Your new account is: " + user.getPrimaryEmail() +
-      "\nThe password for your new account is: " + password;
-    msg.setHtml(msgBody);
-    msg.setSubject("Your new All of Us Account");
-    msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
-
+    MandrillMessage msg = buildWelcomeMessage(contactEmail, password, user);
     sendWithRetries(msg, String.format("Welcome for %s", user.getName()));
   }
 
@@ -103,19 +93,19 @@ public class MailServiceImpl implements MailService {
       switch (status) {
         case API_ERROR:
           log.log(Level.WARNING, String.format(
-              "ApiException: Email '%s' not sent: %s", description, attempt.getRight().toString()));
+            "ApiException: Email '%s' not sent: %s", description, attempt.getRight().toString()));
           if (retries == 0) {
             log.log(Level.SEVERE, String.format(
-                "ApiException: On Last Attempt! Email '%s' not sent: %s",
-                description, attempt.getRight().toString()));
+              "ApiException: On Last Attempt! Email '%s' not sent: %s",
+              description, attempt.getRight().toString()));
             throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
           }
           break;
 
         case REJECTED:
           log.log(Level.SEVERE, String.format(
-              "Messaging Exception: Email '%s' not sent: %s",
-              description, attempt.getRight().toString()));
+            "Messaging Exception: Email '%s' not sent: %s",
+            description, attempt.getRight().toString()));
           throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
 
         case SUCCESSFUL:
@@ -125,20 +115,37 @@ public class MailServiceImpl implements MailService {
         default:
           if (retries == 0) {
             log.log(Level.SEVERE, String.format(
-                "Email '%s' was not sent. Default case.", description));
+              "Email '%s' was not sent. Default case.", description));
             throw new MessagingException("Sending email failed: " + attempt.getRight().toString());
           }
       }
     } while (retries > 0);
   }
 
+  private MandrillMessage buildWelcomeMessage(String contactEmail, String password, User user) throws MessagingException{
+    MandrillMessage msg = new MandrillMessage();
+    RecipientAddress toAddress = new RecipientAddress();
+    toAddress.setEmail(contactEmail);
+    msg.setTo(Collections.singletonList(toAddress));
+    try {
+      String msgHtml = buildEmailHtml(password, user);
+      msg.setHtml(msgHtml);
+      msg.setSubject("Your new All of Us Account");
+      msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+      return msg;
+    } catch (IOException e) {
+      throw new MessagingException("Error reading in email");
+    }
+  }
+
+
   private String buildEmailHtml(String password, User user) throws IOException {
     CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     StringBuilder contentBuilder = new StringBuilder();
     URL emailContent = Resources.getResource(WELCOME_RESOURCE);
     Resources
-        .readLines(emailContent, StandardCharsets.UTF_8)
-        .forEach(s -> contentBuilder.append(s).append("\n"));
+      .readLines(emailContent, StandardCharsets.UTF_8)
+      .forEach(s -> contentBuilder.append(s).append("\n"));
     String string = contentBuilder.toString();
     Map<String, String> replaceMap = new HashMap<>();
     replaceMap.put("USERNAME", user.getPrimaryEmail());
