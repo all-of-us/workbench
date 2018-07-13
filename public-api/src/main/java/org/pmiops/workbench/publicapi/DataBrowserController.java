@@ -311,8 +311,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(response);
     }
 
-
-        @Override
+    @Override
     public ResponseEntity<DbDomainListResponse> getDomainTotals(){
         List<DbDomain> domains = dbDomainDao.findDomainTotals();
         List<Concept> concepts = conceptDao.findDbDomainParticpantCounts();
