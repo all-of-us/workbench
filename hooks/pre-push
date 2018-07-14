@@ -2,7 +2,6 @@
 set -euo pipefail
 
 # Checks to run before pushing to a remote git repo for review/merging.
-cd ui
 
 # Only lint modified files, see https://coderwall.com/p/l5ddcq/lint-code-before-git-pushing
 remote="$1"
@@ -11,6 +10,9 @@ z40=0000000000000000000000000000000000000000
 
 while read local_ref local_sha remote_ref remote_sha
 do
+
+  # Lint ui
+  cd ui
   has_ts=0
   if [ "$local_sha" = $z40 ]; then
     # branch deleted
@@ -22,13 +24,40 @@ do
     else
       files=$(git diff --name-only "$remote_sha..$local_sha")
 
-      [ -n "`echo $files | grep \.ts$`" ] && has_ts=1
+      [ -n "`echo $files | grep ^ui\/.*\.ts$`" ] && has_ts=1
     fi
 
     if [[ $has_ts -eq 1 ]]; then
+      echo "Linting ui..."
       ./project.rb lint
+    else
+      echo "No ui files changed to lint."
     fi
   fi
+
+  # Lint public-ui
+  cd ../public-ui
+
+  has_ts=0
+  if [ "$local_sha" = $z40 ]; then
+    # branch deleted
+    :
+  else
+    if [ "$remote_sha" = $z40 ]; then
+      # New remote branch.
+      has_ts=1
+    else
+      files=$(git diff --name-only "$remote_sha..$local_sha")
+
+      [ -n "`echo $files | grep ^public-ui\/.*\.ts$`" ] && has_ts=1
+    fi
+
+    if [[ $has_ts -eq 1 ]]; then
+      echo "Linting public-ui... "
+      ./project.rb lint
+    else
+      echo "No public-ui files changed to lint."
+    fi
+  fi
+
 done
-
-

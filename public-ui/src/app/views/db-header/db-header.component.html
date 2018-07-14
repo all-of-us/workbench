@@ -1,0 +1,12 @@
+<clr-header class="header db-header">
+  <div class="branding">
+    <a routerLink="/" class="nav-link logo"><img [src]="logo"></a>
+  </div>
+
+  <div  class="header-nav menu" [clr-nav-level]="2">
+    <a class="title nav-link db-logo" routerLink="/"> &nbsp; <img [src]="dbLogo"> &nbsp; </a>
+    <a class="nav-link nav-text" #home routerLinkActive="active" routerLink="/quick-search">Quick Guided Search</a>
+    <a class="nav-link nav-text" routerLinkActive="active" routerLink="/surveys">Survey Instruments</a>
+    <a class="nav-link nav-text" href="https://redcap.vanderbilt.edu/surveys/?s=JE9H4YE9MW" target="_blank" ><clr-icon shape="pop-out"></clr-icon> Give Feedback</a>
+  </div>
+</clr-header>

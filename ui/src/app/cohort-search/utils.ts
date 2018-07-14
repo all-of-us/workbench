@@ -59,6 +59,8 @@ export function typeToTitle(_type: string): string {
     _type = _type.toUpperCase();
   } else if (_type.match(/^PM.*/i)) {
     _type = 'Physical Measurement';
+  } else if (_type.match(/^VISIT.*/i)) {
+    _type = 'Visit';
   }
   return _type;
 }
