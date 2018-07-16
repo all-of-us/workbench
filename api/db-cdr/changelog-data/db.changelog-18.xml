@@ -13,23 +13,6 @@
     <delete tableName="achilles_results_dist"/>
 
     <loadData tableName="achilles_results_dist" file="csv/achilles_results_dist.csv" encoding="UTF-8" quotchar='"'>
-      <column name="id" type="NUMERIC"/>
-      <column name="analysis_id" type="NUMERIC"/>
-      <column name="stratum_1" type="STRING"/>
-      <column name="stratum_2" type="STRING"/>
-      <column name="stratum_3" type="STRING"/>
-      <column name="stratum_4" type="STRING"/>
-      <column name="stratum_5" type="STRING"/>
-      <column name="count_value" type="NUMERIC"/>
-      <column name="min_value" type="NUMERIC" />
-      <column name="max_value" type="NUMERIC" />
-      <column name="avg_value" type="NUMERIC" />
-      <column name="stdev_value" type="NUMERIC" />
-      <column name="median_value" type="NUMERIC" />
-      <column name="p10_value" type="NUMERIC" />
-      <column name="p25_value" type="NUMERIC" />
-      <column name="p75_value" type="NUMERIC" />
-      <column name="p90_value" type="NUMERIC" />
     </loadData>
 
   </changeSet>

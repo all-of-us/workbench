@@ -422,15 +422,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         List<MeasurementAnalysis> measurementAnalysisList = new ArrayList<>();
         AchillesAnalysis achillesAnalysis = achillesAnalysisDao.findConceptAnalysisResults(conceptId, 1900L);
 
-        System.out.println(achillesAnalysis);
-
         MeasurementAnalysis measurementAnalysis = new MeasurementAnalysis();
 
         measurementAnalysis.setConceptId(conceptId);
         org.pmiops.workbench.model.Analysis analysis = TO_CLIENT_ANALYSIS.apply(achillesAnalysis);
         measurementAnalysis.setAnalysis(analysis);
 
+        measurementAnalysisList.add(measurementAnalysis);
+
         resp.setItems(measurementAnalysisList.stream().map(TO_CLIENT_MEASUREMENTANALYSIS).collect(Collectors.toList()));
+
         return ResponseEntity.ok(resp);
     }
 
