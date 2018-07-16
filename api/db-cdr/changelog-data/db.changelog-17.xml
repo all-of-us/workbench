@@ -19,9 +19,10 @@
       <column name="is_group" type="BOOLEAN"/>
       <column name="is_selectable" type="BOOLEAN"/>
       <column name="est_count" type="STRING"/>
-      <column name="concept_id" type="STRING"/>
       <column name="domain_id" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
       <column name="has_attribute" type="BOOLEAN"/>
+      <column name="predefined_attributes" type="STRING"/>
     </loadData>
   </changeSet>
 </databaseChangeLog>
