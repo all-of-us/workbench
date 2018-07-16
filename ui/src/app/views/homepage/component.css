@@ -208,6 +208,7 @@
   align-content: left;
   margin-left: 25px;
   margin-top: 1.3rem;
+  cursor: pointer;
 }
 
 .card-text {
@@ -270,3 +271,4 @@
   position: relative;
   font-weight: 300;
 }
+

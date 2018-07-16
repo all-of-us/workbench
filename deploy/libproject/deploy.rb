@@ -12,7 +12,8 @@ DOCKER_KEY_FILE_PATH = "/creds/sa-key.json"
 
 STAGING_PROJECT = "all-of-us-rw-staging"
 STABLE_PROJECT = "all-of-us-rw-stable"
-RELEASE_MANAGED_PROJECTS = [STAGING_PROJECT, STABLE_PROJECT]
+PROD_PROJECT = "all-of-us-rw-prod"
+RELEASE_MANAGED_PROJECTS = [STAGING_PROJECT, STABLE_PROJECT, PROD_PROJECT]
 
 VERSION_RE = /^v[[:digit:]]+-[[:digit:]]+-rc[[:digit:]]+$/
 
