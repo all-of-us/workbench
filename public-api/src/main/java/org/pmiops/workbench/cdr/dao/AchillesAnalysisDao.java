@@ -18,6 +18,7 @@ public interface AchillesAnalysisDao extends CrudRepository<AchillesAnalysis, Lo
     )
     AchillesAnalysis findConceptAnalysisResults(String concept_id,Long analysisId);
 
+
 }
 
 

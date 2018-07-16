@@ -1,66 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
   <changeSet author="srushtigangireddy" id="changelog-18" runAlways="true" context="local or cloud">
 
     <validCheckSum>ANY</validCheckSum>
 
-    <createTable tableName="achilles_results_dist">
-      <column name="analysis_id" type="BIGINT">
-        <constraints primaryKey="true" nullable="false"/>
-      </column>
-      <column name="stratum_1" type="VARCHAR(255)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="stratum_2" type="VARCHAR(255)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="stratum_3" type="VARCHAR(255)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="stratum_4" type="VARCHAR(255)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="stratum_5" type="VARCHAR(255)">
-        <constraints nullable="true"/>
-      </column>
-      <column name="count_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="min_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="max_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="avg_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="stdev_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="median_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="p10_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="p25_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="p75_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-      <column name="p90_value" type="BIGINT">
-        <constraints nullable="true"/>
-      </column>
-    </createTable>
+    <delete tableName="achilles_results_dist"/>
+
+    <loadData tableName="achilles_results_dist" file="csv/achilles_results_dist.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="analysis_id" type="NUMERIC"/>
+      <column name="stratum_1" type="STRING"/>
+      <column name="stratum_2" type="STRING"/>
+      <column name="stratum_3" type="STRING"/>
+      <column name="stratum_4" type="STRING"/>
+      <column name="stratum_5" type="STRING"/>
+      <column name="count_value" type="NUMERIC"/>
+      <column name="min_value" type="SKIP" />
+      <column name="max_value" type="SKIP" />
+      <column name="avg_value" type="SKIP" />
+      <column name="stdev_value" type="SKIP" />
+      <column name="median_value" type="SKIP" />
+      <column name="p10_value" type="SKIP" />
+      <column name="p25_value" type="SKIP" />
+      <column name="p75_value" type="SKIP" />
+      <column name="p90_value" type="SKIP" />
+    </loadData>
 
   </changeSet>
+
 </databaseChangeLog>
-
-
