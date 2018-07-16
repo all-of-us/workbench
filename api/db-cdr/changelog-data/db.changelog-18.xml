@@ -21,15 +21,15 @@
       <column name="stratum_4" type="STRING"/>
       <column name="stratum_5" type="STRING"/>
       <column name="count_value" type="NUMERIC"/>
-      <column name="min_value" type="SKIP" />
-      <column name="max_value" type="SKIP" />
-      <column name="avg_value" type="SKIP" />
-      <column name="stdev_value" type="SKIP" />
-      <column name="median_value" type="SKIP" />
-      <column name="p10_value" type="SKIP" />
-      <column name="p25_value" type="SKIP" />
-      <column name="p75_value" type="SKIP" />
-      <column name="p90_value" type="SKIP" />
+      <column name="min_value" type="NUMERIC" />
+      <column name="max_value" type="NUMERIC" />
+      <column name="avg_value" type="NUMERIC" />
+      <column name="stdev_value" type="NUMERIC" />
+      <column name="median_value" type="NUMERIC" />
+      <column name="p10_value" type="NUMERIC" />
+      <column name="p25_value" type="NUMERIC" />
+      <column name="p75_value" type="NUMERIC" />
+      <column name="p90_value" type="NUMERIC" />
     </loadData>
 
   </changeSet>

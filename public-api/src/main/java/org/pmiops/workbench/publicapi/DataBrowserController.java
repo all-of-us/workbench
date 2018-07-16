@@ -110,7 +110,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     org.pmiops.workbench.model.Analysis genderAnalysis=null;
                     org.pmiops.workbench.model.Analysis ageAnalysis=null;
                     if(concept.getCountAnalysis() != null){
-                        countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
+
                     }
                     if(concept.getGenderAnalysis() != null){
                         genderAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderAnalysis());
@@ -420,10 +420,15 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public ResponseEntity<MeasurementAnalysisListResponse> getMeasurementAnalysisResults(String conceptId){
         MeasurementAnalysisListResponse resp = new MeasurementAnalysisListResponse();
         List<MeasurementAnalysis> measurementAnalysisList = new ArrayList<>();
+        AchillesAnalysis achillesAnalysis = achillesAnalysisDao.findConceptAnalysisResults(conceptId, 1900L);
 
-        AchillesAnalysis measurementAnalysis = achillesAnalysisDao.findConceptAnalysisResults(conceptId, 1900);
+        System.out.println(achillesAnalysis);
 
-        measurementAnalysisList.add(measurementAnalysis);
+        MeasurementAnalysis measurementAnalysis = new MeasurementAnalysis();
+
+        measurementAnalysis.setConceptId(conceptId);
+        org.pmiops.workbench.model.Analysis analysis = TO_CLIENT_ANALYSIS.apply(achillesAnalysis);
+        measurementAnalysis.setAnalysis(analysis);
 
         resp.setItems(measurementAnalysisList.stream().map(TO_CLIENT_MEASUREMENTANALYSIS).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
