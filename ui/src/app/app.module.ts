@@ -48,7 +48,6 @@ import {WorkspaceComponent} from './views/workspace/component';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
-import {CardComponent} from './views/card/component';
 import {CohortCommonModule} from './cohort-common/module';
 import {IconsModule} from './icons/icons.module';
 
@@ -62,6 +61,8 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
+
+import {CardComponent} from './views/card/component';
 import {ScrollComponent} from './views/scroll/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
