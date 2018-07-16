@@ -69,19 +69,16 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(children => {
           if (this.fullTree) {
             let criteriaList = [];
-            console.log(children.toJS());
             children.toJS().forEach(child => {
               child.children = [];
               if (child.parentId === 0) {
                 criteriaList.push(child);
               } else {
                 criteriaList = this.findParent(child, criteriaList);
-                console.log(criteriaList);
               }
             });
             this.children = fromJS(criteriaList);
           } else {
-            console.log(children.toJS());
             this.children = children;
           }
         });
@@ -100,30 +97,21 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   findParent(child, itemList) {
     for (const item of itemList) {
-      console.log(item.id);
       if (!item.group) {
-        console.log(child.id + ' break');
-        break;
+        continue;
       }
-      console.log(child.id + ' if ' + child.parentId + ' = ' + item.id);
-      console.log(item.id === child.parentId);
       if (item.id === child.parentId) {
-        console.log(child.id + ' level 1');
         item.children.push(child);
         return itemList;
       }
-      console.log(child.id + ' level 2');
       if (item.children.length) {
         const childList = this.findParent(child, item.children);
-        console.log(childList);
         if (childList) {
-          console.log(childList);
           item.children = childList;
           return itemList;
         }
       }
     }
-    // return itemList;
   }
 
   loadChildren(event) {
