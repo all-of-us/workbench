@@ -1,0 +1,58 @@
+<div class="card item-card">
+  <div class="header-area">
+    <clr-dropdown [clrCloseMenuOnItemClick]="false">
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <button class="action-item"
+                [routerLink]="['build']">
+          <clr-icon shape="copy"></clr-icon>
+          Clone
+        </button>
+        <button class="action-item">
+          <clr-icon shape="pencil"></clr-icon>
+          Edit
+        </button>
+        <button class="action-item" *ngIf="card.type === 'cohort'">
+          <clr-icon shape="grid-view"></clr-icon>
+          Review
+        </button>
+        <button class="action-item" *ngIf="card.type === 'notebook'">
+          <clr-icon shape="share"></clr-icon>
+          Share
+        </button>
+        <button class="action-item delete-button">
+          <clr-icon shape="trash"></clr-icon>
+          Delete
+        </button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <h3 class="name">{{card.title}}</h3>
+  </div>
+  <div class=" description">
+    {{card.description}}
+  </div>
+  <div class="footer">
+    <div class="last-modified">
+      <div *ngIf="card.updatedOn">
+        <div class="row">
+          Last Update
+        </div>
+        <div class="row">{{card.updatedOn}}</div>
+      </div>
+      <div *ngIf="!card.updatedOn">
+        <div class="row">Created</div>
+        <div class="row">{{card.createdOn}}</div>
+      </div>
+    </div>
+    <div>
+      <div [ngSwitch]="card.type">
+        <div class="item-type {{card.type}}" *ngSwitchCase="'notebook'">NB</div>
+        <div class="item-type {{card.type}}" *ngSwitchCase="'cohort'">CH</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

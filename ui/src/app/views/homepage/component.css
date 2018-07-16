@@ -6,6 +6,8 @@
   -o-background-size: cover;
   background-size: cover;
   height: 100%;
+  margin-left: -1rem;
+  margin-right: -0.6rem;
 }
 
 .double {
@@ -13,6 +15,7 @@
   width: 638px;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
+  border: none;
 }
 
 .left {
@@ -30,6 +33,7 @@
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
   margin-left: 8rem;
+  border: none;
 }
 
 .analyzeSingleHeader {
@@ -97,7 +101,7 @@
   justify-content: center;
   text-align: center;
   margin-top: 5%;
-  margin-left:2.5rem;
+  margin-left: 2.5rem;
 }
 
 .icon {
@@ -203,6 +207,7 @@
   background-color: #FFFFFF;
   align-content: left;
   margin-left: 25px;
+  margin-top: 1.3rem;
 }
 
 .card-text {
@@ -230,3 +235,38 @@
   color: #FFFFFF;
 }
 
+.bottom-banner {
+  margin-bottom: 0;
+  border-top-color: #5DAEE1;
+  border-style: solid;
+  border-top-width: .3rem;
+  border-bottom-width: 0;
+  border-right-width: 0;
+  border-left-width: 0;
+  width: 100%;
+  display: flex;
+  background-color: #483F4B;
+  height: 5rem;
+  position: absolute;
+}
+
+.logo {
+  top: 1rem;
+  left: 3.25rem;
+  height: 3.5rem;
+  width: 7rem;
+  position: relative;
+  margin-left: 4.5rem;
+  line-height: 65px;
+}
+
+.bottom-links {
+  color: #9B9B9B;
+  font-size: 0.7rem;
+  height: 1rem;
+  left: 2.5rem;
+  top: 2rem;
+  margin-left: 2.5rem;
+  position: relative;
+  font-weight: 300;
+}

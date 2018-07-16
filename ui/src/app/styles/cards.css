@@ -9,13 +9,57 @@
 }
 
 .card.item-card {
-  width: 200px;
+  width: 220px;
   height: 223px;
   margin-right: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   padding: 0.75rem;
+}
+
+.item-card .header {
+  height: 44px;
+  width: 158px;
+  color: #216FB4;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 22px;
+  background-color: transparent;
+  margin-top: 0.8rem;
+}
+
+.item-card .header-area {
+  display: flex;
+  align-items: center;
+}
+
+clr-dropdown-menu {
+  padding: 0;
+}
+
+.dropdown button.dropdown-toggle:not(.btn) {
+  padding: 0;
+}
+
+.ellipsis-vertical {
+  width: 29px;
+  height: 20px;
+  margin-left: -9px;
+  color: #216FB4;
+}
+
+.action-item {
+  text-align: left;
+  color: #4A4A4A;
+  background-color: white;
+  fill: none;
+  cursor: pointer;
+  border: none;
+}
+
+.action-item:hover {
+  background-color: #E0EAF1;
 }
 
 .card.add-card {
@@ -28,7 +72,7 @@
   padding: 0px;
   height: 105px;
   color: #216FB4;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .card.add-card.disabled {
@@ -56,8 +100,8 @@
 .card.item-card .footer {
   display: flex;
   justify-content: space-between;
-  margin-bottom: -0.75rem;
-  margin-right: -0.75rem;
+  margin-right: -0.8rem;
+  margin-top: 3.3rem;
 }
 
 .card.item-card .name {
@@ -71,36 +115,30 @@
   background-color: #F8C954;
   height: 42px;
   width: 42px;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
   border-radius: 5px 0 4px 0;
   box-sizing: border-box;
   border: 2px solid #DCAE3B;
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: 22px;
+  font-weight: bold;
 }
 
 .card.item-card .item-type.cohort {
   background-color: #F8C954;
   border: 2px solid #DCAE3B;
+  color: #FCE6B0;
+
 }
 
 .card.item-card .item-type.notebook {
   background-color: #8BC990;
   border: 2px solid #6EAF73;
-}
-
-.item-type * {
+  color: #CAECCD;
   font-size: 22px;
   font-weight: bold;
-}
-
-.item-type.cohort * {
-  color: #FCE6B0;
-}
-
-.item-type.notebook * {
-  color: #CAECCD;
 }
 
 .card.item-card .last-modified {
@@ -110,10 +148,11 @@
   line-height: 14px;
   font-weight: 300;
   margin-bottom: 0.5rem;
+  margin-left: 0.2rem;
 }
 
 .card.item-card .description {
-  margin-top: 0.5rem;
+  margin-top: 1.5rem;
   font-size: 14px;
   color: #4A4A4A;
   font-weight: 300;

@@ -52,6 +52,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
           'dolore. Mirum est notare, quam littera gothica quam nunc.',
           icon: '/assets/icons/explore.svg'
       }];
+  card: any[] = [];
   private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
