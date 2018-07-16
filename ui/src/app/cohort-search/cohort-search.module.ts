@@ -30,6 +30,7 @@ import {CohortCommonModule} from '../cohort-common/module';
 
 /* Other Objects */
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
+import { SearchBarComponent } from './search-bar/search-bar.component';
 
 
 const routes: Routes = [{
@@ -72,6 +73,7 @@ const routes: Routes = [{
     SelectionInfoComponent,
     TreeComponent,
     AttributesPageComponent,
+    SearchBarComponent,
   ],
   providers: [
     CohortSearchActions,
