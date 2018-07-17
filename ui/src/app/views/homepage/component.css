@@ -26,7 +26,6 @@
   margin-left: 1rem;
 }
 
-
 .single {
   height: 379px;
   width: 1298px;
@@ -188,9 +187,15 @@
   margin-top: 2%;
 }
 
+.linkGroup:first-child {
+  margin-top: 0.8rem;
+}
+
 .linkGroup {
-  margin-top: 1%;
-  margin-left: 9rem;
+  margin-top: 0.2rem;
+  display: flex;
+  justify-content: right;
+  margin-left: 9.7rem;
 }
 
 .links {
@@ -199,7 +204,7 @@
   color: #FFFFFF;
   font-size: 14px;
   line-height: 28px;
-  margin-right: 2rem;
+  margin-right: 1rem;
 }
 
 .card.add-card {
@@ -210,6 +215,7 @@
   margin-left: 25px;
   margin-top: 1.3rem;
   cursor: pointer;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .card-text {
@@ -249,7 +255,6 @@
   display: flex;
   background-color: #483F4B;
   height: 5rem;
-  position: absolute;
 }
 
 .logo {
@@ -275,32 +280,55 @@
 
 @media (max-width: 1490px) {
   .double {
-    width:438px;
+    width: 438px;
   }
+
   .single {
     width: 900px;
   }
+
   .button {
     justify-content: left;
   }
+
   .footer {
-    height:470px;
+    height: 470px;
   }
+
+  .linkGroup {
+    margin-left: 23rem;
+  }
+
+  .card .add-card {
+    margin-top: -0.2rem;
+  }
+
+  .footerLink {
+    margin-left: 39rem;
+  }
+
 }
 
 @media (max-width: 1200px) {
   .right {
     margin-left: 15rem;
   }
+
   .left {
     margin-left: 15rem;
   }
+
+  .single {
+    margin-left: 6rem;
+  }
+
 }
 
 @media (min-width: 1800px) {
   .left {
     margin-left: 13rem;
   }
+
   .single {
     margin-left: 13rem;
   }
