@@ -39,10 +39,12 @@ export class SearchGroupComponent {
     this.actions.removeGroup(this.role, this.groupId);
   }
 
-  launchWizard(criteriaType: string) {
+  launchWizard(criteria: any) {
     const itemId = this.actions.generateId('items');
+    const criteriaType = criteria.type;
+    const fullTree = criteria.fullTree || false;
     const {role, groupId} = this;
-    const context = {criteriaType, role, groupId, itemId};
+    const context = {criteriaType, role, groupId, itemId, fullTree};
     this.actions.openWizard(itemId, context);
   }
 }

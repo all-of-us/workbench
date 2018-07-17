@@ -15,6 +15,7 @@ import {
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_ALL_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   CRITERIA_REQUEST_ERROR,
@@ -67,6 +68,11 @@ export const rootReducer: Reducer<CohortSearchState> =
     switch (action.type) {
 
       case BEGIN_CRITERIA_REQUEST:
+        return state
+          .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
+          .setIn(['criteria', 'requests', action.kind, action.parentId], true);
+
+      case BEGIN_ALL_CRITERIA_REQUEST:
         return state
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
           .setIn(['criteria', 'requests', action.kind, action.parentId], true);
@@ -272,6 +278,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           item: {
             id: action.itemId,
             type: action.context.criteriaType,
+            fullTree: action.context.fullTree,
             searchParameters: [],
             modifiers: [],
             count: null,
