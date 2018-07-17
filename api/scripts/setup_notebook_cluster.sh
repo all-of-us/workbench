@@ -8,10 +8,6 @@
 jupyter kernelspec uninstall -f pyspark2
 jupyter kernelspec uninstall -f pyspark3
 
-# For the time being, disable installation of our client library on clusters, since it
-# causes trouble during cluster initialization.
-# See https://github.com/DataBiosphere/leonardo/issues/417.
-# TODO: uncomment this once Leo is fixed to no longer have this problem.
-#for v in "2.7" "3.4"; do
-#  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-11.zip#egg=aou_workbench_client&subdirectory=py'
-#done
+for v in "2.7" "3.4"; do
+  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-11.zip#egg=aou_workbench_client&subdirectory=py'
+done
