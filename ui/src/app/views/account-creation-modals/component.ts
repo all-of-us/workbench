@@ -22,7 +22,6 @@ export class AccountCreationModalsComponent {
   waiting = false;
   @Input('username') username: string;
   @Input('gsuiteDomain') gsuiteDomain: string;
-  @Input('contactEmail') originalContactEmail: string;
 
   @Output() updateEmail = new EventEmitter<string>();
 
