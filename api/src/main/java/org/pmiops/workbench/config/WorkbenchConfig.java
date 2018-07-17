@@ -59,8 +59,6 @@ public class WorkbenchConfig {
 
   public static class AdminConfig {
     public String adminIdVerification;
-    public String supportGroup;
-    public String verifiedSendingAddress;
   }
 
   public static class JiraConfig {
