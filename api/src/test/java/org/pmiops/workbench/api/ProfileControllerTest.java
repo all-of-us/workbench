@@ -11,6 +11,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
@@ -646,6 +647,7 @@ public class ProfileControllerTest {
   public void resendWelcomeEmail_messagingException() throws Exception {
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    user.setFirstSignInTime(null);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception")).when(mailService).sendWelcomeEmail(any(), any(), any());
     ResendWelcomeEmailRequest request = new ResendWelcomeEmailRequest();
@@ -653,7 +655,9 @@ public class ProfileControllerTest {
 
     ResponseEntity response = profileController.resendWelcomeEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-    verify(mailService, atLeast(1)).sendWelcomeEmail(any(), any(), any());
+    //called twice, once during account creation, once on resend
+    verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(directoryService, times(1)).resetUserPassword(anyString());
   }
 
   @Test
@@ -667,7 +671,9 @@ public class ProfileControllerTest {
 
     ResponseEntity response = profileController.resendWelcomeEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    verify(mailService, atLeast(1)).sendWelcomeEmail(any(), any(), any());
+    //called twice, once during account creation, once on resend
+    verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(directoryService, times(1)).resetUserPassword(anyString());
   }
 
   private Profile createUser() throws Exception {

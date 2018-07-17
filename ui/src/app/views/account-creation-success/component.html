@@ -23,4 +23,8 @@
     | <button class="button-link" (click)="accountCreationModalsComponent.updateAndSendEmail();">Change contact email</button>
   </div>
 </div>
-<app-account-creation-modals [username]="username" [gsuiteDomain]="gsuiteDomain" (updateEmail)="receiveMessage($event)"></app-account-creation-modals>
+<app-account-creation-modals [username]="username"
+                             [gsuiteDomain]="gsuiteDomain"
+                             [contactEmail]="contactEmail"
+                             (updateEmail)="receiveMessage($event)">
+</app-account-creation-modals>

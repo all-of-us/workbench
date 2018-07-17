@@ -4,6 +4,10 @@ import {ProfileService} from 'generated';
 import {ResendWelcomeEmailRequest, UpdateContactEmailRequest} from 'generated';
 import {ServerConfigService} from '../../services/server-config.service';
 
+function isBlank(s: string) {
+  return (!s || /^\s*$/.test(s));
+}
+
 @Component({
   selector: 'app-account-creation-modals',
   templateUrl: './component.html',
@@ -14,8 +18,11 @@ export class AccountCreationModalsComponent {
   changingEmail = false;
   resendingEmail = false;
   contactEmail: string;
+  emailOffFocus = true;
+  waiting = false;
   @Input('username') username: string;
   @Input('gsuiteDomain') gsuiteDomain: string;
+  @Input('contactEmail') originalContactEmail: string;
 
   @Output() updateEmail = new EventEmitter<string>();
 
@@ -27,6 +34,7 @@ export class AccountCreationModalsComponent {
       this.gsuiteDomain = config.gsuiteDomain;
     });
     this.contactEmail = '';
+    this.emailOffFocus = false;
   }
 
   updateAndSendEmail() {
@@ -39,6 +47,10 @@ export class AccountCreationModalsComponent {
   }
 
   updateAndSend() {
+    this.waiting = true;
+    if (this.contactEmailInvalidError) {
+      return;
+    }
     const request: UpdateContactEmailRequest = {
       username: this.username + '@' + this.gsuiteDomain,
       contactEmail: this.contactEmail
@@ -51,11 +63,33 @@ export class AccountCreationModalsComponent {
   }
 
   send() {
+    this.waiting = true;
     const request: ResendWelcomeEmailRequest = {
       username: this.username + '@' + this.gsuiteDomain
     };
     this.profileService.resendWelcomeEmail(request).subscribe(() => {
       this.resendingEmail = false;
+      this.waiting = false;
     });
+  }
+
+  leaveFocusEmail(): void {
+    this.emailOffFocus = true;
+  }
+
+  enterFocusEmail(): void {
+    this.emailOffFocus = false;
+  }
+
+  get contactEmailInvalidError(): boolean {
+    const contactEmail = this.contactEmail;
+    return !(new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/).test(contactEmail));
+  }
+
+  get showEmailValidationError(): boolean {
+    if (isBlank(this.contactEmail) || !this.emailOffFocus) {
+      return false;
+    }
+    return this.contactEmailInvalidError;
   }
 }

@@ -30,7 +30,8 @@
     "projectId": "all-of-us-rw-prod"
   },
   "admin": {
-    "adminIdVerification": "workbench-id-verifications@researchallofus.org"
+    "adminIdVerification": "workbench-id-verifications@researchallofus.org",
+    "loginUrl": "http:\/\/all-of-us-workbench.appspot.com/login"
   },
   "jira": {
     "projectKey": "RW"

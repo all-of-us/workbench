@@ -1,6 +1,7 @@
 package org.pmiops.workbench.mail;
 
 import com.google.api.services.admin.directory.model.User;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -128,7 +129,7 @@ public class MailServiceImpl implements MailService {
     toAddress.setEmail(contactEmail);
     msg.setTo(Collections.singletonList(toAddress));
     try {
-      String msgHtml = buildEmailHtml(password, user);
+      String msgHtml = buildWelcomeEmailHtml(password, user);
       msg.setHtml(msgHtml);
       msg.setSubject("Your new All of Us Account");
       msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
@@ -139,7 +140,7 @@ public class MailServiceImpl implements MailService {
   }
 
 
-  private String buildEmailHtml(String password, User user) throws IOException {
+  private String buildWelcomeEmailHtml(String password, User user) throws IOException {
     CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     StringBuilder contentBuilder = new StringBuilder();
     URL emailContent = Resources.getResource(WELCOME_RESOURCE);
@@ -147,15 +148,15 @@ public class MailServiceImpl implements MailService {
       .readLines(emailContent, StandardCharsets.UTF_8)
       .forEach(s -> contentBuilder.append(s).append("\n"));
     String string = contentBuilder.toString();
-    Map<String, String> replaceMap = new HashMap<>();
-    replaceMap.put("USERNAME", user.getPrimaryEmail());
-    replaceMap.put("PASSWORD", password);
-    replaceMap.put("URL", workbenchConfigProvider.get().admin.loginUrl);
-    replaceMap.put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"));
-    replaceMap.put("BULLET_1", cloudStorageService.getImageUrl("bullet_1.png"));
-    replaceMap.put("BULLET_2", cloudStorageService.getImageUrl("bullet_2.png"));
-    StrSubstitutor email = new StrSubstitutor(replaceMap);
-    return email.replace(string);
+    ImmutableMap<String, String> replaceMap = new ImmutableMap.Builder<String, String>()
+      .put("USERNAME", user.getPrimaryEmail())
+      .put("PASSWORD", password)
+      .put("URL", workbenchConfigProvider.get().admin.loginUrl)
+      .put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"))
+      .put("BULLET_1", cloudStorageService.getImageUrl("bullet_1.png"))
+      .put("BULLET_2", cloudStorageService.getImageUrl("bullet_2.png"))
+      .build();
+    return new StrSubstitutor(replaceMap).replace(string);
   }
 
   private ImmutablePair<Status, String> trySend(MandrillApiKeyAndMessage keyAndMessage) {

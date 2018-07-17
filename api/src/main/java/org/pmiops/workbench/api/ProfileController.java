@@ -460,6 +460,7 @@ public class ProfileController implements ProfileApiDelegate {
       InternetAddress email = new InternetAddress(updateContactEmailRequest.getContactEmail());
       email.validate();
     } catch (AddressException e) {
+      log.log(Level.INFO, "Invalid email entered.");
       return ResponseEntity.badRequest().build();
     }
     user.setContactEmail(updateContactEmailRequest.getContactEmail());
@@ -470,13 +471,15 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     com.google.api.services.admin.directory.model.User googleUser =
-        directoryService.resetUserPassword(resendRequest.getUsername());
+      directoryService.getUser(resendRequest.getUsername());
     User user = userDao.findUserByEmail(googleUser.getPrimaryEmail());
     if (user.getFirstSignInTime() != null) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    com.google.api.services.admin.directory.model.User googleUserPostReset =
+      directoryService.resetUserPassword(resendRequest.getUsername());
     try {
-      mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
+      mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUserPostReset.getPassword(), googleUserPostReset);
     } catch (MessagingException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
