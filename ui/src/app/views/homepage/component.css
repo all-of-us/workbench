@@ -45,7 +45,7 @@
   font-weight: 500;
   line-height: 34px;
   margin-top: 2%;
-  margin-left: 2%;
+  margin-left: 1rem;
 }
 
 .heading {
@@ -130,7 +130,7 @@
 .singleIcon {
   margin-top: 5%;
   height: 3rem;
-  margin-left:0.9rem;
+  margin-left:1.2rem;
 }
 
 .btn-homepage {
@@ -196,7 +196,7 @@
   margin-top: 0.2rem;
   display: flex;
   justify-content: right;
-  margin-left: 9.7rem;
+  margin-left: 9rem;
 }
 
 .links {

@@ -18,7 +18,6 @@ import {
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
-  firstTimeUser = true;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -53,6 +52,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
       icon: '/assets/icons/explore.svg'
     }];
   cards: any[] = [];
+  firstTimeUser: boolean;
   private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -88,16 +88,15 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const currentDate = new Date();
     this.serverConfigService.getConfig().subscribe((config) => {
       this.enforceRegistered = config.enforceRegistered;
     });
     this.profileStorageService.profile$.subscribe((profile) => {
       if (this.firstSignIn === undefined) {
         this.firstSignIn = new Date(profile.firstSignInTime);
+        const dateDiff = (new Date().valueOf() - this.firstSignIn.valueOf());
+        this.firstTimeUser = (dateDiff < 2000).valueOf();
       }
-      this.firstTimeUser = this.firstSignIn && currentDate - this.firstSignIn < 2000;
-
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {
