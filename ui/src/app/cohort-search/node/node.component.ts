@@ -74,7 +74,7 @@ export class NodeComponent implements OnInit, OnDestroy {
               if (child.parentId === 0) {
                 criteriaList.push(child);
               } else {
-                criteriaList = this.findParent(child, criteriaList);
+                criteriaList = this.addChildToParent(child, criteriaList);
               }
             });
             this.children = fromJS(criteriaList);
@@ -95,7 +95,7 @@ export class NodeComponent implements OnInit, OnDestroy {
     }
   }
 
-  findParent(child, itemList) {
+  addChildToParent(child, itemList) {
     for (const item of itemList) {
       if (!item.group) {
         continue;
@@ -105,7 +105,7 @@ export class NodeComponent implements OnInit, OnDestroy {
         return itemList;
       }
       if (item.children.length) {
-        const childList = this.findParent(child, item.children);
+        const childList = this.addChildToParent(child, item.children);
         if (childList) {
           item.children = childList;
           return itemList;
