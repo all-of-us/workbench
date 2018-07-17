@@ -132,6 +132,7 @@ describe('SearchGroupItemComponent', () => {
       role: 'includes',
       groupId: 'include0',
       itemId: 'item001',
+      fullTree: false
     };
 
     const editButton = fixture.debugElement.query(By.css('clr-icon[shape=pencil]')).parent;

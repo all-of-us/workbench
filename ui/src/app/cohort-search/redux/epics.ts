@@ -6,6 +6,7 @@ import {Observable} from 'rxjs/Observable';
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_ALL_CRITERIA_REQUEST,
   CANCEL_CRITERIA_REQUEST,
 
   BEGIN_COUNT_REQUEST,
@@ -68,6 +69,21 @@ export class CohortSearchEpics {
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
         const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
         return this.service.getCriteriaByTypeAndParentId(cdrVersionId, _type, parentId)
+          .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
+          .race(action$
+            .ofType(CANCEL_CRITERIA_REQUEST)
+            .filter(compare({kind, parentId}))
+            .first())
+          .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
+      }
+    )
+  )
+
+  fetchAllCriteria: CSEpic = (action$) => (
+    action$.ofType(BEGIN_ALL_CRITERIA_REQUEST).mergeMap(
+      ({cdrVersionId, kind, parentId}: CritRequestAction) => {
+        const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
+        return this.service.getCriteriaByType(cdrVersionId, _type)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)

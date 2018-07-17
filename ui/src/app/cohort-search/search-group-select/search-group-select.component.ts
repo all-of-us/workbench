@@ -18,12 +18,14 @@ export class SearchGroupSelectComponent {
 
   constructor(private actions: CohortSearchActions) {}
 
-  launchWizard(criteriaType: string) {
+  launchWizard(criteria: any) {
     const itemId = this.actions.generateId('items');
     const groupId = this.actions.generateId(this.role);
+    const criteriaType = criteria.type;
+    const fullTree = criteria.fullTree || false;
     this.actions.initGroup(this.role, groupId);
     const role = this.role;
-    const context = {criteriaType, role, groupId, itemId};
+    const context = {criteriaType, role, groupId, itemId, fullTree};
     this.actions.openWizard(itemId, context);
   }
 }

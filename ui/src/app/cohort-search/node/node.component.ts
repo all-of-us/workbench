@@ -1,9 +1,11 @@
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {List} from 'immutable';
+import {fromJS, List, Map} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
+  activeCriteriaTreeType,
   CohortSearchActions,
   CohortSearchState,
   criteriaChildren,
@@ -18,6 +20,7 @@ import {
 })
 export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
+  @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
 
   /*
    * Each node component represents one criterion.  If that criterion has any
@@ -28,13 +31,18 @@ export class NodeComponent implements OnInit, OnDestroy {
    * `error`: was there an error loading the children of this criterion?
    * `children`: when loaded, this node's children are stored here.
    *
-   * The initial load of the children is deferred until the subtree is first
-   * expanded.
+   * If the root criterion has 'fullTree' set to true, the entire tree is
+   * loaded. Otherwise, the initial load of the children is deferred until
+   * the subtree is first expanded.
+   *
+   * In the future, we may want put full trees in a separate component to
+   * make it cleaner.
    */
   expanded = false;
-  children = List<any>();
+  children: any;
   loading = false;
   error = false;
+  fullTree: boolean;
   subscription: Subscription;
 
   constructor(
@@ -43,28 +51,67 @@ export class NodeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const _type = this.node.get('type').toLowerCase();
-    const parentId = this.node.get('id');
-    const errorSub = this.ngRedux
-      .select(criteriaError(_type, parentId))
-      .map(err => !(err === null || err === undefined))
-      .subscribe(err => this.error = err);
+    this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
+    if (!this.fullTree || this.node.get('id') === 0) {
+      const _type = this.node.get('type').toLowerCase();
+      const parentId = this.node.get('id');
+      const errorSub = this.ngRedux
+        .select(criteriaError(_type, parentId))
+        .map(err => !(err === null || err === undefined))
+        .subscribe(err => this.error = err);
 
-    const loadingSub = this.ngRedux
-      .select(isCriteriaLoading(_type, parentId))
-      .subscribe(loading => this.loading = loading);
+      const loadingSub = this.ngRedux
+        .select(isCriteriaLoading(_type, parentId))
+        .subscribe(loading => this.loading = loading);
 
-    const childSub = this.ngRedux
-      .select(criteriaChildren(_type, parentId))
-      .subscribe(children => this.children = children);
+      const childSub = this.ngRedux
+        .select(criteriaChildren(_type, parentId))
+        .subscribe(children => {
+          if (this.fullTree) {
+            let criteriaList = [];
+            children.toJS().forEach(child => {
+              child.children = [];
+              if (child.parentId === 0) {
+                criteriaList.push(child);
+              } else {
+                criteriaList = this.addChildToParent(child, criteriaList);
+              }
+            });
+            this.children = fromJS(criteriaList);
+          } else {
+            this.children = children;
+          }
+        });
 
-    this.subscription = errorSub;
-    this.subscription.add(loadingSub);
-    this.subscription.add(childSub);
+      this.subscription = errorSub;
+      this.subscription.add(loadingSub);
+      this.subscription.add(childSub);
+    }
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  addChildToParent(child, itemList) {
+    for (const item of itemList) {
+      if (!item.group) {
+        continue;
+      }
+      if (item.id === child.parentId) {
+        item.children.push(child);
+        return itemList;
+      }
+      if (item.children.length) {
+        const childList = this.addChildToParent(child, item.children);
+        if (childList) {
+          item.children = childList;
+          return itemList;
+        }
+      }
+    }
   }
 
   loadChildren(event) {
@@ -74,7 +121,11 @@ export class NodeComponent implements OnInit, OnDestroy {
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops
      */
-    this.actions.fetchCriteria(_type, parentId);
+    if (this.fullTree) {
+      this.actions.fetchAllCriteria(_type, parentId);
+    } else {
+      this.actions.fetchCriteria(_type, parentId);
+    }
   }
 
   toggleExpanded() {
