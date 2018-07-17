@@ -95,6 +95,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.profileStorageService.profile$.subscribe((profile) => {
       if (this.firstSignIn === undefined) {
         this.firstSignIn = new Date(profile.firstSignInTime);
+        this.firstTimeUser = true;
       }
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
@@ -105,9 +106,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
       }
       this.profile = profile;
       this.reloadSpinner();
-      if (profile.firstSignInTime === null) {
-        this.firstTimeUser = true;
-      }
     });
     this.profileStorageService.reload();
   }
