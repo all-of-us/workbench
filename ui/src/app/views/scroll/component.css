@@ -1,0 +1,44 @@
+.btn {
+  background-repeat: no-repeat;
+  margin-top: 3.5rem;
+  transform: scale(0.5, 0.5);
+  border: none;
+  height: 5rem;
+  width: 5rem;
+  background-color: transparent;
+}
+
+.btn-left {
+  background-image: url('/assets/icons/left-scroll@2x.png');
+  margin-right: 0.3rem;
+}
+
+.btn-right {
+  background-image: url('/assets/icons/right-scroll@2x.png');
+  margin-left: -1.7rem;
+}
+
+.btn:hover,
+.btn:focus,
+.btn:active {
+  background-color: transparent;
+  border: none;
+  outline: 0;
+}
+
+.btn:disabled {
+  background-color: transparent;
+}
+
+.btn-right:hover,
+.btn-right:focus,
+.btn-right:active {
+  background-image: url('/assets/icons/right-scroll-hc@2x.png');
+}
+
+.btn-left:hover
+.btn-left:focus {
+  background-image: url('/assets/icons/left-scroll-hc@2x.png');
+}
+
+
