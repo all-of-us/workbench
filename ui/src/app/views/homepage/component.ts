@@ -61,7 +61,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
               private profileService: ProfileService,
               private profileStorageService: ProfileStorageService,
               private route: ActivatedRoute,
-              private router: Router,) {
+              private router: Router
+  ) {
     /*this.cards = [
       {
         title: 'Notebook1',
