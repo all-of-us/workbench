@@ -107,11 +107,10 @@
             </div>
           </div>
           <div class="col-md-9">
-            <div class="row links" *ngIf="card.length>0" style="margin-left:4rem;margin-bottom:-2rem;">
+            <div class="row links" *ngIf="cards.length>0" style="margin-left:4rem;margin-bottom:-2rem;">
               Your recent work
             </div>
-            <app-scroller [cards]=card></app-scroller>
-
+            <app-scroller [cards]=cards></app-scroller>
           </div>
         </div>
       </div>

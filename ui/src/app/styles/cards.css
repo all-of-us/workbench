@@ -130,6 +130,9 @@ clr-dropdown-menu {
   background-color: #F8C954;
   border: 2px solid #DCAE3B;
   color: #FCE6B0;
+  font-size: 22px;
+  font-weight: bold;
+  margin-top:0.5rem;
 }
 
 .card.item-card .item-type.notebook {

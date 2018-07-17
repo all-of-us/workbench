@@ -52,7 +52,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
           'dolore. Mirum est notare, quam littera gothica quam nunc.',
           icon: '/assets/icons/explore.svg'
       }];
-  card: any[] = [];
+  cards: any[] = [];
   private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -63,7 +63,30 @@ export class HomepageComponent implements OnInit, OnDestroy {
     private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
     private router: Router,
-  ) {}
+  ) {
+    /*this.cards = [
+      {
+        title: 'Notebook1',
+        description: 'This is a dummy notebook',
+        type: 'notebook',
+        createdOn: '01/01/2018'
+      },
+      {
+        title: 'Cohort', description: 'This is a dummy cohort', type: 'cohort',
+        updatedOn: '07/01/2018'
+      },
+      {
+        title: 'Notebook2',
+        description: 'This is a dummy notebook',
+        type: 'notebook',
+        createdOn: '01/01/2018',
+        updatedOn: '04/03/2018'
+      },
+      {
+        title: 'Cohort2', description: 'This is a dummy cohort', type: 'cohort',
+        updatedOn: '07/01/2018'
+      }];*/
+  }
 
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
