@@ -4,6 +4,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.ConceptRelationship;
+import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -31,14 +34,24 @@ public class CriteriaDaoTest {
   private static final String TYPE_CPT = "CPT";
   private static final String TYPE_DEMO = "DEMO";
   private static final String TYPE_PM = "PM";
+  private static final String TYPE_DRUG = "DRUG";
   private static final String SUBTYPE_NONE = null;
   private static final String SUBTYPE_ICD10PCS = "ICD10PCS";
   private static final String SUBTYPE_RACE = "RACE";
   private static final String SUBTYPE_AGE = "AGE";
   private static final String SUBTYPE_BP = "BP";
+  private static final String SUBTYPE_ATC = "ATC";
+  private static final String SUBTYPE_BRAND = "BRAND";
 
   @Autowired
-  CriteriaDao criteriaDao;
+  private CriteriaDao criteriaDao;
+
+  @Autowired
+  private ConceptDao conceptDao;
+
+  @Autowired
+  private ConceptRelationshipDao conceptRelationshipDao;
+
   private Criteria icd9Criteria1;
   private Criteria icd9Criteria2;
   private Criteria demoCriteria1;
@@ -54,6 +67,8 @@ public class CriteriaDaoTest {
   private Criteria parentIcd10;
   private Criteria childIcd10;
   private Criteria pmCriteria;
+  private Criteria drugCriteriaIngredient;
+  private Criteria drugCriteriaBrand;
 
   @Before
   public void setUp() {
@@ -71,6 +86,8 @@ public class CriteriaDaoTest {
     parentIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003", "name", 0, true, true, null);
     pmCriteria = createCriteria(TYPE_PM, SUBTYPE_BP, "1", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true,
       "[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['90']},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['60']}]");
+    drugCriteriaIngredient = createCriteria(TYPE_DRUG, SUBTYPE_ATC, "", "ACETAMIN", 0, false, true, "").conceptId("1");
+    drugCriteriaBrand = createCriteria(TYPE_DRUG, SUBTYPE_BRAND, "", "BLAH", 0, false, true, "");
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
@@ -89,6 +106,15 @@ public class CriteriaDaoTest {
     childIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003.1", "name", parentIcd10.getId(), false, true, null);
     criteriaDao.save(childIcd10);
     criteriaDao.save(pmCriteria);
+    criteriaDao.save(drugCriteriaIngredient);
+    criteriaDao.save(drugCriteriaBrand);
+
+    conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
+    conceptRelationshipDao.save(
+      new ConceptRelationship().conceptRelationshipId(
+        new ConceptRelationshipId().relationshipId("1").conceptId1(12345L).conceptId2(1L)
+      )
+    );
   }
 
   @After
@@ -141,6 +167,28 @@ public class CriteriaDaoTest {
     assertEquals(2, demoList.size());
     assertEquals(demoCriteria1, demoList.get(0));
     assertEquals(demoCriteria1a, demoList.get(1));
+  }
+
+  @Test
+  public void findDrugBrandOrIngrediantByName() throws Exception {
+    List<Criteria> drugList = criteriaDao.findDrugBrandOrIngrediantByName("ETAM");
+    assertEquals(1, drugList.size());
+    assertEquals(drugCriteriaIngredient, drugList.get(0));
+
+    drugList = criteriaDao.findDrugBrandOrIngrediantByName("ACE");
+    assertEquals(1, drugList.size());
+    assertEquals(drugCriteriaIngredient, drugList.get(0));
+
+    drugList = criteriaDao.findDrugBrandOrIngrediantByName("BL");
+    assertEquals(1, drugList.size());
+    assertEquals(drugCriteriaBrand, drugList.get(0));
+  }
+
+  @Test
+  public void findDrugIngredientsByConceptId() throws Exception {
+    List<Criteria> drugList = criteriaDao.findDrugIngredientsByConceptId(12345L);
+    assertEquals(1, drugList.size());
+    assertEquals(drugCriteriaIngredient, drugList.get(0));
   }
 
   @Test
