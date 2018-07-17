@@ -48,6 +48,7 @@ public class MailServiceImplTest {
     msgStatuses.add(msgStatus);
     when(mandrillApi.send(any())).thenReturn(msgStatuses);
     when(cloudStorageService.readMandrillApiKey()).thenReturn(API_KEY);
+    when(cloudStorageService.getImageUrl(any())).thenReturn("test_img");
 
     service = new MailServiceImpl(Providers.of(mandrillApi), Providers.of(cloudStorageService),
       Providers.of(createWorkbenchConfig()));
