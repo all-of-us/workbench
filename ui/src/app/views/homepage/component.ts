@@ -18,7 +18,7 @@ import {
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
-  firstTimeUser = false;
+  firstTimeUser = true;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -38,32 +38,30 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
   cardDetails = [
-      {
-          position: 'left',
-          title: 'Browse All of Us Data',
-          text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-          'dolore. Mirum est notare, quam littera gothica quam nunc.',
-          icon: '/assets/icons/browse-data.svg'
-      },
-      {
-          position: 'right',
-          title: 'Explore Public Work',
-          text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-          'dolore. Mirum est notare, quam littera gothica quam nunc.',
-          icon: '/assets/icons/explore.svg'
-      }];
+    {
+      position: 'left',
+      title: 'Browse All of Us Data',
+      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+      'dolore. Mirum est notare, quam littera gothica quam nunc.',
+      icon: '/assets/icons/browse-data.svg'
+    },
+    {
+      position: 'right',
+      title: 'Explore Public Work',
+      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+      'dolore. Mirum est notare, quam littera gothica quam nunc.',
+      icon: '/assets/icons/explore.svg'
+    }];
   cards: any[] = [];
   private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
-  constructor(
-    private serverConfigService: ServerConfigService,
-    private profileService: ProfileService,
-    private profileStorageService: ProfileStorageService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) {
+  constructor(private serverConfigService: ServerConfigService,
+              private profileService: ProfileService,
+              private profileStorageService: ProfileStorageService,
+              private route: ActivatedRoute,
+              private router: Router,) {
     /*this.cards = [
       {
         title: 'Notebook1',
@@ -89,14 +87,16 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const currentDate = new Date();
     this.serverConfigService.getConfig().subscribe((config) => {
       this.enforceRegistered = config.enforceRegistered;
     });
     this.profileStorageService.profile$.subscribe((profile) => {
       if (this.firstSignIn === undefined) {
         this.firstSignIn = new Date(profile.firstSignInTime);
-        this.firstTimeUser = true;
       }
+      this.firstTimeUser = this.firstSignIn && currentDate - this.firstSignIn < 2000;
+
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {
@@ -106,6 +106,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
       }
       this.profile = profile;
       this.reloadSpinner();
+
     });
     this.profileStorageService.reload();
   }
@@ -152,15 +153,15 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspaces/build'], {relativeTo : this.route});
+    this.router.navigate(['workspaces/build'], {relativeTo: this.route});
   }
 
   navigateToProfile(): void {
-   this.router.navigate(['profile']);
+    this.router.navigate(['profile']);
   }
 
   listWorkspaces(): void {
-   this.router.navigate(['workspaces']);
+    this.router.navigate(['workspaces']);
   }
 
   // The user is FC initialized and has access to the CDR, if enforced in this

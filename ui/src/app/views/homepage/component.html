@@ -19,7 +19,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="firstTimeUser">
+  <div *ngIf="firstTimeUser && firstSignIn">
     <div class="row">
       <div class="col">
         <div class="card double left">
@@ -55,7 +55,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="!firstTimeUser">
+  <div *ngIf="!firstTimeUser && firstSignIn">
     <div class="row">
       <div class="card single">
         <div class="row">
