@@ -10,54 +10,30 @@ z40=0000000000000000000000000000000000000000
 
 while read local_ref local_sha remote_ref remote_sha
 do
-
-  # Lint ui
-  cd ui
-  has_ts=0
-  if [ "$local_sha" = $z40 ]; then
+  if [ "${local_sha}" = $z40 ]; then
     # branch deleted
-    :
-  else
-    if [ "$remote_sha" = $z40 ]; then
-      # New remote branch.
-      has_ts=1
-    else
-      files=$(git diff --name-only "$remote_sha..$local_sha")
-
-      [ -n "`echo $files | grep ^ui\/.*\.ts$`" ] && has_ts=1
-    fi
-
-    if [[ $has_ts -eq 1 ]]; then
-      echo "Linting ui..."
-      ./project.rb lint
-    else
-      echo "No ui files changed to lint."
-    fi
+    exit 0
   fi
 
-  # Lint public-ui
-  cd ../public-ui
-
-  has_ts=0
-  if [ "$local_sha" = $z40 ]; then
-    # branch deleted
-    :
-  else
-    if [ "$remote_sha" = $z40 ]; then
-      # New remote branch.
-      has_ts=1
-    else
-      files=$(git diff --name-only "$remote_sha..$local_sha")
-
-      [ -n "`echo $files | grep ^public-ui\/.*\.ts$`" ] && has_ts=1
-    fi
-
-    if [[ $has_ts -eq 1 ]]; then
-      echo "Linting public-ui... "
-      ./project.rb lint
-    else
-      echo "No public-ui files changed to lint."
-    fi
+  baseline="${remote_sha}"
+  if [ "${remote_sha}" = $z40 ]; then
+    # New remote branch. We can't tell for sure whether there are Typescript
+    # changes logically included here, but as a heuristic check against the
+    # local master. If there's no Typescript changes, this allows us to skip
+    # linting for the common case of "pull master, branch, commit, push remote".
+    baseline="master"
   fi
 
+  files=$(git diff --name-only "${baseline}..${local_sha}")
+
+  for dir in "ui" "public-ui"; do
+    pushd "${dir}" > /dev/null
+    if [ -n "`echo ${files} | grep ^${dir}\/.*\.ts$`" ]; then
+      echo "Linting ${dir}..."
+      ./project.rb lint
+    else
+      echo "No ${dir} files changed to lint."
+    fi
+    popd > /dev/null
+  done
 done
