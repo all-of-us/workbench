@@ -450,8 +450,6 @@ public class ProfileController implements ProfileApiDelegate {
    */
   @Override
   public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
-    com.google.api.services.admin.directory.model.User googleUser =
-      directoryService.resetUserPassword(updateContactEmailRequest.getUsername());
     User user = userDao.findUserByEmail(updateContactEmailRequest.getUsername());
     if (user.getFirstSignInTime() != null) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

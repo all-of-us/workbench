@@ -23,8 +23,6 @@ import java.nio.charset.StandardCharsets;
 import com.google.api.services.admin.directory.model.User;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
