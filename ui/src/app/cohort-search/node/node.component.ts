@@ -87,6 +87,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
     }
+    this.expanded = this.node.get('expanded', false);
   }
 
   ngOnDestroy() {
