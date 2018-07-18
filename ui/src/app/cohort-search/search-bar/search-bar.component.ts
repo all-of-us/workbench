@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {CohortSearchActions} from '../redux';
 
 @Component({
@@ -6,13 +6,9 @@ import {CohortSearchActions} from '../redux';
   templateUrl: './search-bar.component.html',
   styleUrls: ['./search-bar.component.css']
 })
-export class SearchBarComponent implements OnInit {
+export class SearchBarComponent {
   searchTerm = '';
   constructor(private actions: CohortSearchActions) { }
-
-  ngOnInit() {
-    // console.log(this.tree);
-  }
 
   inputChange(newVal: string) {
     this.actions.setCriteriaSearchTerms(newVal);
