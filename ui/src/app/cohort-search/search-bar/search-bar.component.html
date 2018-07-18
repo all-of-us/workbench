@@ -4,13 +4,15 @@
    type="text"
    name="searchTerm"
    [(ngModel)]="searchTerm"
-   [disabled]="tree.size === 0" />
+   (input)="inputChange($event.target.value)"/>
+  <!-- <button class="btn btn-warning-outline btn-sm"
+    title="Clear Search"
+    [disabled]="!searchTerm && !filteredTree.size"
+    (click)="clearSearch()">
+    <clr-icon shape="times"></clr-icon>
+  </button>
   <button
     class="btn btn-outline"
     [disabled]="searchTerm.length < 2"
-    (click)="searchTree()">Search</button>
+    (click)="searchTree()">Search</button> -->
 </div>
-
-<ng-container *ngIf="filteredTree.size">
-  <crit-node *ngFor="let item of filteredTree" [node]="item"></crit-node>
-</ng-container>
