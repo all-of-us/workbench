@@ -5,11 +5,12 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
-  activeCriteriaTreeType,
   CohortSearchActions,
   CohortSearchState,
   criteriaChildren,
   criteriaError,
+  criteriaSearchOriginalTree,
+  criteriaSearchTerms,
   isCriteriaLoading,
 } from '../redux';
 
@@ -20,7 +21,6 @@ import {
 })
 export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
-  @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
 
   /*
    * Each node component represents one criterion.  If that criterion has any
@@ -40,6 +40,10 @@ export class NodeComponent implements OnInit, OnDestroy {
    */
   expanded = false;
   children: any;
+  expandedTree: any;
+  originalTree: any;
+  modifiedTree = false;
+  searchTerms: string;
   loading = false;
   error = false;
   fullTree: boolean;
@@ -83,9 +87,21 @@ export class NodeComponent implements OnInit, OnDestroy {
           }
         });
 
+      const searchSub = this.ngRedux
+        .select(criteriaSearchTerms())
+        .subscribe(searchTerms => {
+          this.searchTerms = searchTerms
+          if (searchTerms && searchTerms.length > 2) {
+            this.searchTree();
+          } else {
+            this.clearSearchTree();
+          }
+        });
+
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
+      this.subscription.add(searchSub);
     }
     this.expanded = this.node.get('expanded', false);
   }
@@ -131,5 +147,81 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   toggleExpanded() {
     this.expanded = !this.expanded;
+  }
+
+  searchTree() {
+    if (!this.modifiedTree) {
+      this.modifiedTree = true;
+      this.originalTree = this.children;
+      // this.actions.setCriteriaSearchOriginalTree(this.children);
+    }
+    this.expandedTree = this.originalTree.toJS();
+    const filtered = this.filterTree(this.originalTree.toJS(), []);
+    this.children = fromJS(this.mergeExpanded(filtered, this.expandedTree));
+  }
+
+  clearSearchTree() {
+    // this.searchTerm = '';
+    if (this.modifiedTree) {
+      this.children = this.originalTree;
+      // this.children = this.ngRedux.getState().getIn(['criteria', 'search', 'originalTree']);
+      this.modifiedTree = false;
+    }
+  }
+
+  filterTree(tree: Array<any>, path: Array<number>) {
+    const filtered = tree.map((item, i) => {
+      path.push(i);
+      if (this.matchFound(item)) {
+        const start = item.name.toLowerCase().indexOf(this.searchTerms.toLowerCase());
+        const end = start + this.searchTerms.length;
+        item.name = '<b>' + item.name.slice(0, start) + '<span style="color: #659F3D">'
+          + item.name.slice(start, end) + '</span>'
+          + item.name.slice(end) + '</b>';
+        if (path.length) {
+          this.setExpanded(path, 0);
+        } else {
+          this.expandedTree[i].expanded = true;
+        }
+      }
+      if (item.children.length) {
+        item.children = this.filterTree(item.children, path);
+      }
+      path.pop();
+      return item;
+    });
+    return filtered;
+  }
+
+  matchFound(item: any) {
+    return item.name.toLowerCase().includes(this.searchTerms.toLowerCase())
+      || item.conceptId.toString().includes(this.searchTerms);
+  }
+
+  setExpanded(path: Array<number>, start: number) {
+    let obj = this.expandedTree[path[0]];
+    if (start > 0) {
+      for (let x = 1; x <= start; x++) {
+        obj = obj.children[path[x]];
+      }
+    }
+    if (obj.children.length) {
+      obj.expanded = true;
+    }
+    if (path[start + 1]) {
+      this.setExpanded(path, start + 1);
+    }
+  }
+
+  mergeExpanded(filtered: Array<any>, expanded: Array<any>) {
+    expanded.forEach((item, i) => {
+      if (item.expanded) {
+        filtered[i].expanded = true;
+      }
+      if (filtered[i].children.length) {
+        filtered[i].children = this.mergeExpanded(filtered[i].children, item.children);
+      }
+    });
+    return filtered;
   }
 }
