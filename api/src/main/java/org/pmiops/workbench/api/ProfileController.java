@@ -486,7 +486,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   private boolean userNeverLoggedIn(com.google.api.service.admin.directory.model.User googleUser) {
     User user = userDao.findUserByEmail(googleUser.getPrimaryEmail());
-    return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin()
+    return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
   }
 
   private void resetPasswordAndSendWelcomeEmail(String email) {
