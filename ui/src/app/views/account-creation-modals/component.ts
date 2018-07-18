@@ -56,7 +56,8 @@ export class AccountCreationModalsComponent {
     };
     this.updateEmail.emit(this.contactEmail);
     this.profileService.updateContactEmail(request).subscribe(() => {
-      this.send();
+      this.resendingEmail = false;
+      this.waiting = false;
       this.changingEmail = false;
     });
   }

@@ -450,38 +450,53 @@ public class ProfileController implements ProfileApiDelegate {
    */
   @Override
   public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
-    User user = userDao.findUserByEmail(updateContactEmailRequest.getUsername());
-    if (user.getFirstSignInTime() != null) {
+    String username = updateContactEmailRequest.getUsername();
+    com.google.api.services.admin.directory.model.User googleUser =
+      directoryService.getUser(updateContactEmailRequest.getUsername());
+    User user = userDao.findUserByEmail(username);
+    String newEmail = updateContactEmailRequest.getContactEmail();
+    if (userNeverLoggedIn(googleUser)) {
+      try {
+        new InternetAddress(newEmail).validate();
+      } catch (AddressException e) {
+        log.log(Level.INFO, "Invalid email entered.");
+        return ResponseEntity.badRequest().build();
+      }
+    } else {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-    try {
-      InternetAddress email = new InternetAddress(updateContactEmailRequest.getContactEmail());
-      email.validate();
-    } catch (AddressException e) {
-      log.log(Level.INFO, "Invalid email entered.");
-      return ResponseEntity.badRequest().build();
-    }
-    user.setContactEmail(updateContactEmailRequest.getContactEmail());
-    userDao.save(user);
+    user.setContactEmail(newEmail);
+    resetPasswordAndSendWelcomeEmail(newEmail);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
+    String username = resendRequest.getUsername();
     com.google.api.services.admin.directory.model.User googleUser =
-      directoryService.getUser(resendRequest.getUsername());
-    User user = userDao.findUserByEmail(googleUser.getPrimaryEmail());
-    if (user.getFirstSignInTime() != null) {
+      directoryService.getUser(username);
+    User user = userDao.findUserByEmail(username);
+    if (userNeverLoggedIn(googleUser)) {
+      resetPasswordAndSendWelcomeEmail(user.getContactEmail());
+    } else {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-    com.google.api.services.admin.directory.model.User googleUserPostReset =
-      directoryService.resetUserPassword(resendRequest.getUsername());
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  private boolean userNeverLoggedIn(com.google.api.service.admin.directory.model.User googleUser) {
+    User user = userDao.findUserByEmail(googleUser.getPrimaryEmail());
+    return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin()
+  }
+
+  private void resetPasswordAndSendWelcomeEmail(String email) {
+    User user = userDao.findUserByEmail(email);
+    com.google.api.services.admin.directory.model.User googleUser = directoryService.resetUserPassword(email);
     try {
-      mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUserPostReset.getPassword(), googleUserPostReset);
+      mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
