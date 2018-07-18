@@ -9,7 +9,6 @@ import {
   CohortSearchState,
   criteriaChildren,
   criteriaError,
-  criteriaSearchOriginalTree,
   criteriaSearchTerms,
   isCriteriaLoading,
 } from '../redux';
@@ -153,7 +152,6 @@ export class NodeComponent implements OnInit, OnDestroy {
     if (!this.modifiedTree) {
       this.modifiedTree = true;
       this.originalTree = this.children;
-      // this.actions.setCriteriaSearchOriginalTree(this.children);
     }
     this.expandedTree = this.originalTree.toJS();
     const filtered = this.filterTree(this.originalTree.toJS(), []);
@@ -161,27 +159,29 @@ export class NodeComponent implements OnInit, OnDestroy {
   }
 
   clearSearchTree() {
-    // this.searchTerm = '';
     if (this.modifiedTree) {
       this.children = this.originalTree;
-      // this.children = this.ngRedux.getState().getIn(['criteria', 'search', 'originalTree']);
       this.modifiedTree = false;
     }
   }
 
   filterTree(tree: Array<any>, path: Array<number>) {
-    const filtered = tree.map((item, i) => {
+    return tree.map((item, i) => {
       path.push(i);
       if (this.matchFound(item)) {
+        let name = '<b>';
         const start = item.name.toLowerCase().indexOf(this.searchTerms.toLowerCase());
-        const end = start + this.searchTerms.length;
-        item.name = '<b>' + item.name.slice(0, start) + '<span style="color: #659F3D">'
-          + item.name.slice(start, end) + '</span>'
-          + item.name.slice(end) + '</b>';
-        if (path.length) {
-          this.setExpanded(path, 0);
+        if (start > -1) {
+          const end = start + this.searchTerms.length;
+          name += item.name.slice(0, start) + '<span class="search-keyword" style="color: #659F3D">'
+            + item.name.slice(start, end) + '</span>'
+            + item.name.slice(end);
         } else {
-          this.expandedTree[i].expanded = true;
+          name += item.name;
+        }
+        item.name = name + '</b>';
+        if (path.length > 1) {
+          this.setExpanded(path, 0);
         }
       }
       if (item.children.length) {
@@ -190,7 +190,6 @@ export class NodeComponent implements OnInit, OnDestroy {
       path.pop();
       return item;
     });
-    return filtered;
   }
 
   matchFound(item: any) {
@@ -198,26 +197,22 @@ export class NodeComponent implements OnInit, OnDestroy {
       || item.conceptId.toString().includes(this.searchTerms);
   }
 
-  setExpanded(path: Array<number>, start: number) {
+  setExpanded(path: Array<number>, end: number) {
     let obj = this.expandedTree[path[0]];
-    if (start > 0) {
-      for (let x = 1; x <= start; x++) {
+    for (let x = 1; x < end; x++) {
         obj = obj.children[path[x]];
-      }
     }
     if (obj.children.length) {
       obj.expanded = true;
     }
-    if (path[start + 1]) {
-      this.setExpanded(path, start + 1);
+    if (path[end + 1]) {
+      this.setExpanded(path, end + 1);
     }
   }
 
   mergeExpanded(filtered: Array<any>, expanded: Array<any>) {
     expanded.forEach((item, i) => {
-      if (item.expanded) {
-        filtered[i].expanded = true;
-      }
+      filtered[i].expanded = item.expanded || false;
       if (filtered[i].children.length) {
         filtered[i].children = this.mergeExpanded(filtered[i].children, item.children);
       }
