@@ -77,19 +77,6 @@ export class CohortListComponent implements OnInit, OnDestroy {
     });
   }
 
-  cloneCohort(cohort: Cohort): void {
-    this.router.navigate(['build'], {relativeTo: this.route,
-      queryParams: {criteria: cohort.criteria}});
-  }
-
-  editCohort(cohortId: String): void {
-    this.router.navigate([cohortId, 'edit'], {relativeTo: this.route});
-  }
-
-  reviewCohort(cohortId: String): void {
-    this.router.navigate([cohortId, 'review'], {relativeTo: this.route});
-  }
-
   get writePermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
       || this.accessLevel === WorkspaceAccessLevel.WRITER;

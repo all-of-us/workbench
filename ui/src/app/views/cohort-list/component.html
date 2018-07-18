@@ -23,21 +23,22 @@
           </button>
           <clr-dropdown-menu *clrIfOpen>
             <button class="action-item"
-                    (click)="cloneCohort(cohort)"
+                    [routerLink]="['build']"
+                    [queryParams]="{criteria: cohort.criteria}"
                     [class.disabled]="actionsDisabled"
                     [disabled]="actionsDisabled">
               <clr-icon shape="copy"></clr-icon>
               Clone
             </button>
             <button class="action-item"
-                    (click)="editCohort(cohort.id)"
+                    routerLink="{{cohort.id}}/edit"
                     [class.disabled]="actionsDisabled"
                     [disabled]="actionsDisabled">
               <clr-icon shape="pencil"></clr-icon>
               Edit
             </button>
             <button class="action-item"
-                    (click)="reviewCohort()"
+                    routerLink="{{cohort.id}}/review"
                     [class.disabled]="actionsDisabled"
                     [disabled]="actionsDisabled">
               <clr-icon shape="grid-view"></clr-icon>
