@@ -20,7 +20,8 @@
     "debugQueries": false
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "all-of-us-rw-prod-credentials"
+    "credentialsBucketName": "all-of-us-rw-prod-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "researchallofus.org"
@@ -31,7 +32,7 @@
   },
   "admin": {
     "adminIdVerification": "workbench-id-verifications@researchallofus.org",
-    "loginUrl": "http:\/\/all-of-us-workbench.appspot.com/login"
+    "loginUrl": "http:\/\/all-of-us-rw-prod.appspot.com/login"
   },
   "jira": {
     "projectKey": "RW"
