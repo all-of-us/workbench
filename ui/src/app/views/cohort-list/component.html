@@ -24,25 +24,29 @@
           <clr-dropdown-menu *clrIfOpen>
             <button class="action-item"
                     (click)="cloneCohort(cohort)"
-                    [class.disabled]="awaitingReview || !writePermission">
+                    [class.disabled]="actionsDisabled"
+                    [disabled]="actionsDisabled">
               <clr-icon shape="copy"></clr-icon>
               Clone
             </button>
             <button class="action-item"
                     (click)="editCohort(cohort.id)"
-                    [class.disabled]="awaitingReview || !writePermission">
+                    [class.disabled]="actionsDisabled"
+                    [disabled]="actionsDisabled">
               <clr-icon shape="pencil"></clr-icon>
               Edit
             </button>
             <button class="action-item"
                     (click)="reviewCohort()"
-                    [class.disabled]="awaitingReview || !writePermission">
+                    [class.disabled]="actionsDisabled"
+                    [disabled]="actionsDisabled">
               <clr-icon shape="grid-view"></clr-icon>
               Review
             </button>
             <button class="action-item delete-button"
                     (click)="deleteCohort(cohort)"
-                    [class.disabled]="awaitingReview || !writePermission">
+                    [class.disabled]="actionsDisabled"
+                    [disabled]="actionsDisabled">
               <clr-icon shape="trash"></clr-icon>
               Delete
             </button>
