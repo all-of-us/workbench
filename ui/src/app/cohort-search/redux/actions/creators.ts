@@ -4,6 +4,8 @@ import {
   BEGIN_ALL_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
+  SET_CRITERIA_SEARCH,
+  GET_CRITERIA_SEARCH,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -70,6 +72,15 @@ export const cancelCriteriaRequest =
   (kind: string, parentId: number
   ): ActionTypes[typeof CANCEL_CRITERIA_REQUEST] =>
   ({type: CANCEL_CRITERIA_REQUEST, kind, parentId});
+
+export const setCriteriaSearchTree =
+  (tree: any
+  ): ActionTypes[typeof SET_CRITERIA_SEARCH] =>
+  ({type: SET_CRITERIA_SEARCH, tree});
+
+export const getCriteriaSearchTree =
+  (): ActionTypes[typeof GET_CRITERIA_SEARCH] =>
+  ({type: GET_CRITERIA_SEARCH});
 
 export const criteriaRequestError =
   (kind: string, parentId: number, error?: any

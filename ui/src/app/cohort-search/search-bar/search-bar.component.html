@@ -1,3 +1,16 @@
-<p>
-  search-bar works!
-</p>
+<div class="search-box">
+  <clr-icon shape="search"></clr-icon>
+  <input clrInput
+   type="text"
+   name="searchTerm"
+   [(ngModel)]="searchTerm"
+   [disabled]="tree.size === 0" />
+  <button
+    class="btn btn-outline"
+    [disabled]="searchTerm.length < 2"
+    (click)="searchTree()">Search</button>
+</div>
+
+<ng-container *ngIf="filteredTree.size">
+  <crit-node *ngFor="let item of filteredTree" [node]="item"></crit-node>
+</ng-container>
