@@ -106,10 +106,6 @@ export const criteriaSearchTerms =
   () => (state): string =>
   state.getIn(['criteria', 'search', 'terms'], null);
 
-export const criteriaSearchOriginalTree =
-  () => (state): List<any> =>
-  state.getIn(['criteria', 'search', 'originalTree'], List());
-
 export const isCriteriaLoading =
   (kind: string, parentId: number) =>
   (state): boolean =>
