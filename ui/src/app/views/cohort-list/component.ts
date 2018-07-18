@@ -71,10 +71,35 @@ export class CohortListComponent implements OnInit, OnDestroy {
   }
 
   public deleteCohort(cohort: Cohort): void {
+    if (this.awaitingReview || !this.writePermission) {
+      return;
+    }
     this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
       this.cohortList.splice(
         this.cohortList.indexOf(cohort), 1);
     });
+  }
+
+  cloneCohort(cohort: Cohort): void {
+    if (this.awaitingReview || !this.writePermission) {
+      return;
+    }
+    this.router.navigate(['build'], {relativeTo: this.route,
+      queryParams: {criteria: cohort.criteria}});
+  }
+
+  editCohort(cohortId: String): void {
+    if (this.awaitingReview || !this.writePermission) {
+      return;
+    }
+    this.router.navigate([cohortId, 'edit'], {relativeTo: this.route});
+  }
+
+  reviewCohort(cohortId: String): void {
+    if (this.awaitingReview || !this.writePermission) {
+      return;
+    }
+    this.router.navigate([cohortId, 'review'], {relativeTo: this.route});
   }
 
   get writePermission(): boolean {
