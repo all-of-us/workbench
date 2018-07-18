@@ -19,7 +19,6 @@ import {
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
-  SET_CRITERIA_SEARCH_ORIGINAL,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -89,9 +88,6 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SET_CRITERIA_SEARCH:
         return state.setIn(['criteria', 'search', 'terms'], action.searchTerms);
-
-      case SET_CRITERIA_SEARCH_ORIGINAL:
-        return state.setIn(['criteria', 'search', 'originalTree'], action.tree);
 
       case CRITERIA_REQUEST_ERROR:
         return state
