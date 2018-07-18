@@ -466,8 +466,7 @@ public class ProfileController implements ProfileApiDelegate {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     user.setContactEmail(newEmail);
-    resetPasswordAndSendWelcomeEmail(newEmail);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return resetPasswordAndSendWelcomeEmail(newEmail);
   }
 
   @Override
@@ -477,11 +476,10 @@ public class ProfileController implements ProfileApiDelegate {
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     if (userNeverLoggedIn(googleUser)) {
-      resetPasswordAndSendWelcomeEmail(user.getContactEmail());
+      return resetPasswordAndSendWelcomeEmail(user.getContactEmail());
     } else {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   private boolean userNeverLoggedIn(com.google.api.services.admin.directory.model.User googleUser) {
@@ -489,7 +487,7 @@ public class ProfileController implements ProfileApiDelegate {
     return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
   }
 
-  private void resetPasswordAndSendWelcomeEmail(String email) {
+  private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String email) {
     User user = userDao.findUserByEmail(email);
     com.google.api.services.admin.directory.model.User googleUser = directoryService.resetUserPassword(email);
     try {
@@ -497,6 +495,7 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (MessagingException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
