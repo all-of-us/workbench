@@ -110,7 +110,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{name}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/drugName/{name}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -130,7 +130,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{conceptId}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/conceptid/{conceptId}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
