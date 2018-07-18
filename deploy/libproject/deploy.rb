@@ -3,7 +3,7 @@ require "set"
 require_relative "../../aou-utils/serviceaccounts"
 require_relative "../../aou-utils/utils/common"
 require_relative "../../aou-utils/workbench"
-require_relative "../../api/libproject/devstart"
+require_relative "../../api/libproject/devstart"f
 require_relative "../../api/libproject/gcloudcontext"
 require_relative "../../api/libproject/wboptionsparser"
 
@@ -36,7 +36,7 @@ def get_live_gae_version(project, validate_version=true)
     common.warning "Found 0 active GAE services in project '#{project}'"
     return nil
   elsif services != active_services
-    common.warning "Found active services [#{active_service.to_a.join(',')}], " +
+    common.warning "Found active services [#{active_services.to_a.join(',')}], " +
                    "expected [#{services.to_a.join(', ')}] for project '#{project}'"
     return nil
   end
