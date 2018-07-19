@@ -452,7 +452,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername();
     com.google.api.services.admin.directory.model.User googleUser =
-      directoryService.getUser(updateContactEmailRequest.getUsername());
+      directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     String newEmail = updateContactEmailRequest.getContactEmail();
     if (userNeverLoggedIn(googleUser)) {
@@ -466,7 +466,7 @@ public class ProfileController implements ProfileApiDelegate {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     user.setContactEmail(newEmail);
-    return resetPasswordAndSendWelcomeEmail(newEmail);
+    return resetPasswordAndSendWelcomeEmail(username);
   }
 
   @Override
@@ -476,7 +476,7 @@ public class ProfileController implements ProfileApiDelegate {
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     if (userNeverLoggedIn(googleUser)) {
-      return resetPasswordAndSendWelcomeEmail(user.getContactEmail());
+      return resetPasswordAndSendWelcomeEmail(username);
     } else {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -487,9 +487,9 @@ public class ProfileController implements ProfileApiDelegate {
     return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
   }
 
-  private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String email) {
-    User user = userDao.findUserByEmail(email);
-    com.google.api.services.admin.directory.model.User googleUser = directoryService.resetUserPassword(email);
+  private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username) {
+    User user = userDao.findUserByEmail(username);
+    com.google.api.services.admin.directory.model.User googleUser = directoryService.resetUserPassword(username);
     try {
       mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
     } catch (MessagingException e) {

@@ -141,6 +141,8 @@ public class ProfileControllerTest {
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
+    googleUser.setChangePasswordAtNextLogin(true);
+    googleUser.setPassword("testPassword");
 
     clock = new FakeClock(NOW);
 
@@ -633,6 +635,7 @@ public class ProfileControllerTest {
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
     user.setFirstSignInTime(null);
+    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     UpdateContactEmailRequest request = new UpdateContactEmailRequest();
     request.setContactEmail("newContactEmail@whatever.com");
     request.setUsername(user.getEmail());
