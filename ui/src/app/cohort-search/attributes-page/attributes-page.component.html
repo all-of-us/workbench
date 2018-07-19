@@ -1,6 +1,21 @@
 <div class="title">
   {{node.get('name','')}}
 </div>
+<div *ngIf="alert" class="alert alert-warning alert-sm">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
+      </div>
+      <div class="alert-text">
+        Form cannot accept negative values
+      </div>
+    </div>
+  </div>
+  <button type="button" class="close" aria-label="Close">
+    <clr-icon aria-hidden="true" shape="close"></clr-icon>
+  </button>
+</div>
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
     <div *ngFor="let attr of attrs; let i = index">

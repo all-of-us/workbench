@@ -24,6 +24,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     oldVals = ['', ''];
     preview = Map();
     subscription: Subscription;
+    alert = false;
 
     constructor(private actions: CohortSearchActions) { }
 
@@ -68,10 +69,9 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     }
 
     inputChange(index: number, operand: number) {
-        console.log(this.attrs[index].operands[operand]);
+        this.alert = false;
         if (this.attrs[index].operands[operand] < 0) {
-            this.attrs[index].operands[operand] = 0;
-            console.log(this.attrs[index].operands[operand]);
+            this.alert = true;
         }
     }
 
@@ -81,6 +81,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
 
     getParamWithAttributes(values: any) {
         let name = this.node.get('name', '') + ' (';
+        console.log(values);
         this.attrs.map((attr, i) => {
             if (i > 0) {
                 name += ' / ';
@@ -93,27 +94,41 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
                     name += 'Any';
                     break;
                 case 'BETWEEN':
+                    if (values['valueA' + i] < 0 || values['valueB' + i] < 0) {
+                        return false;
+                    }
                     attr.operator = Operator.BETWEEN;
                     attr.operands = [values['valueA' + i], values['valueB' + i]];
                     name += values['valueA' + i] + '-' + values['valueB' + i];
                     break;
                 case 'EQUAL':
+                    if (values['valueA' + i] < 0) {
+                      console.log('equal neg');
+                        return false;
+                    }
                     attr.operator = Operator.EQUAL;
                     attr.operands = [values['valueA' + i]];
                     name += '= ' + values['valueA' + i];
                     break;
                 case 'LESS_THAN_OR_EQUAL_TO':
+                    if (values['valueA' + i] < 0) {
+                        return false;
+                    }
                     attr.operator = Operator.LESSTHANOREQUALTO;
                     attr.operands = [values['valueA' + i]];
                     name += '<= ' + values['valueA' + i];
                     break;
                 case 'GREATER_THAN_OR_EQUAL_TO':
+                    if (values['valueA' + i] < 0) {
+                        return false;
+                    }
                     attr.operator = Operator.GREATERTHANOREQUALTO;
                     attr.operands = [values['valueA' + i]];
                     name += '>= ' + values['valueA' + i];
                     break;
             }
         });
+        console.log('not returned');
         name += (this.attrs[0].operator !== Operator.ANY
             ? this.units[this.node.get('subtype')]
             : '') + ')';
@@ -124,15 +139,33 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     }
 
     requestPreview(attrform: NgForm) {
-        const param = this.getParamWithAttributes(attrform.value);
-        this.actions.addAttributeForPreview(param);
-        this.actions.requestAttributePreview();
+        if (this.validateValues(attrform.value)) {
+          const param = this.getParamWithAttributes(attrform.value);
+          this.actions.addAttributeForPreview(param);
+          this.actions.requestAttributePreview();
+        } else {
+            this.alert = true;
+        }
     }
 
     addAttrs(attrform: NgForm) {
-        const param = this.getParamWithAttributes(attrform.value);
-        this.actions.addParameter(param);
-        this.actions.hideAttributesPage();
+        if (this.validateValues(attrform.value)) {
+          const param = this.getParamWithAttributes(attrform.value);
+          this.actions.addParameter(param);
+          this.actions.hideAttributesPage();
+        } else {
+          this.alert = true;
+        }
+    }
+
+    validateValues(values: any) {
+      console.log(values);
+      for (const key in values) {
+        if (Number.isInteger(values[key]) && values[key] < 0) {
+          return false;
+        }
+      }
+      return true;
     }
 
     cancel() {
