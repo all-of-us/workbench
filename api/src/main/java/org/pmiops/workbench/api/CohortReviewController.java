@@ -687,18 +687,23 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                       DomainType domain) {
     if (domain.equals(DomainType.DRUG)) {
       return new Drug()
-        .signature(bigQueryService.getString(row, rm.get("signature")))
-        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.DRUG)
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
+        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
+        .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
+        .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
+        .firstMentions(bigQueryService.getDateTime(row, rm.get("numMentions")))
+        .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
+        .quantity(bigQueryService.getLong(row, rm.get("quantity")).intValue())
+        .lastMention(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
+        .;
     } else if (domain.equals(DomainType.CONDITION)) {
       return new Condition()
-        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.CONDITION).itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
@@ -707,7 +712,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
     } else if (domain.equals(DomainType.PROCEDURE)) {
       return new Procedure()
-        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.PROCEDURE)
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
@@ -717,18 +722,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
     } else if (domain.equals(DomainType.OBSERVATION)) {
       return new Observation()
-        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.OBSERVATION).itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-        .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
-        .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
-    } else if (domain.equals(DomainType.VISIT)) {
-      return new Visit()
-        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .endDate(row.get(rm.get("endDate")).isNull() ? "" : bigQueryService.getDateTime(row, rm.get("endDate")))
-        .domainType(DomainType.VISIT).itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
@@ -736,18 +731,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
     } else if (domain.equals(DomainType.MEASUREMENT)) {
       return new Measurement()
-        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.MEASUREMENT)
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-        .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
-        .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
-    } else if (domain.equals(DomainType.DEVICE)) {
-      return new Device()
-        .age(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .domainType(DomainType.DEVICE)
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))

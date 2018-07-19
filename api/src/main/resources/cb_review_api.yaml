@@ -744,25 +744,25 @@ definitions:
           standardCode:
             type: string
             description: The standard code of this data
+          sourceVocubulary:
+            type: string
+            description: The vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data
           sourceCode:
             type: string
             description: The source code of this data
-          vocabularyType:
-            type: string
-            description: The vocabulary type of this data
-          age:
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
-          numberOfMentions:
+            description: The age at event for the participant
+          numMentions:
             type: integer
-            descriptions: The number of mentions of this data
-          dateFirstMention:
+            description: The number of mentions of this data
+          firstMention:
             type: string
             description: The date of first mention of this data
-          dateLastMention:
+          lastMention:
             type: string
             description: The date of last mention of this data
           visitId:
@@ -783,25 +783,25 @@ definitions:
           standardCode:
             type: string
             description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data
           sourceCode:
             type: string
             description: The source code of this data
-          vocabularyType:
-            type: string
-            description: The vocabulary type of this data
-          age:
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
-          numberOfMentions:
+            description: The age at event for the participant
+          numMentions:
             type: integer
-            descriptions: The number of mentions of this data
-          dateFirstMention:
+            description: The number of mentions of this data
+          firstMention:
             type: string
             description: The date of first mention of this data
-          dateLastMention:
+          lastMention:
             type: string
             description: The date of last mention of this data
           visitId:
@@ -813,24 +813,27 @@ definitions:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary type of this data
           standardName:
             type: string
             description: The standard name of this data
           standardCode:
             type: string
             description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data
           sourceCode:
             type: string
             description: The source code of this data
-          vocabularyType:
-            type: string
-            description: The vocabulary type of this data
-          age:
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
+            description: The age at event for the participant
           visitId:
             type: integer
             format: int64
@@ -846,25 +849,25 @@ definitions:
           standardCode:
             type: string
             description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data.
           sourceCode:
             type: string
             description: The source code of this data
-          vocabularyType:
-            type: string
-            description: The vocabulary type of this data
-          age:
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
-          numberOfMentions:
+            description: The age at event for the participant
+          numMentions:
             type: integer
-            descriptions: The number of mentions of this data
-          dateFirstMention:
+            description: The number of mentions of this data
+          firstMention:
             type: string
             description: The date of first mention of this data
-          dateLastMention:
+          lastMention:
             type: string
             description: The date of last mention of this data
           quantity:
@@ -897,12 +900,18 @@ definitions:
           domain:
             type: string
             description: the domain of this data.
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
           standardName:
             type: string
             description: The standard name of this data
           standardCode:
             type: string
             description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data.
@@ -912,79 +921,29 @@ definitions:
           sourceValue:
             type: string
             description: The source value of this data
-          vocabularyType:
-            type: string
-            description: The vocabulary type of this data
-          age:
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
-          numberOfMentions:
+            description: The age at event for the participant
+          numMentions:
             type: integer
-            descriptions: The number of mentions of this data
-          dateFirstMention:
+            description: The number of mentions of this data
+          firstMention:
             type: string
             description: The date of first mention of this data
-          dateLastMention:
+          lastMention:
             type: string
             description: The date of last mention of this data
           visitType:
             type: string
             description: The visit type of this data
 
-
-  Device:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          standardVocabulary:
-            type: string
-            description: The standard vocabulary of this data
-          standardName:
-            type: string
-            description: The standard name of this data
-          sourceVocabulary:
-            type: string
-            description: The source vocabulary of this data
-          sourceValue:
-            type: string
-            description: The source value of this data
-          sourceName:
-            type: string
-            description: The source name of this data.
-          age:
-            type: integer
-            description: The age of event for the participant
-
-  Visit:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          standardVocabulary:
-            type: string
-            description: The standard vocabulary of this data
-          standardName:
-            type: string
-            description: The standard name of this data
-          sourceVocabulary:
-            type: string
-            description: The source vocabulary of this data
-          sourceName:
-            type: string
-            description: The source name of this data
-          sourceValue:
-            type: string
-            description: The source value of this data
-          age:
-            type: integer
-            description: The age of event for the participant
-          endDate:
-            type: string
-            description: The end date of the visit occurrence
-
   Measurement:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
           standardName:
             type: string
             description: The standard name of this data
@@ -997,19 +956,29 @@ definitions:
           sourceCode:
             type: string
             description: The source code of this data
-          vocubularyType:
-            type: string
-            description The vocabulary type of this data
-          age:
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
-          value:
+            description: The age at event for the participant
+          valueConcept:
+            type: string
+            description: The value of this data
+          valueSource:
+            type: string
+            description: The value of this data
+          valueNumber:
             type: number
             format: float
             description: The value of this data
           units:
             type: string
             description: The units of this data
+          labRefRange:
+            type: string
+            description: The lab reference range of this data
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
 
 
   AnnotationType:
