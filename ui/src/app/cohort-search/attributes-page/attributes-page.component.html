@@ -25,7 +25,7 @@
         <div>and</div>
       </div>
       <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
-        <input type="number" [name]="'valueB'+i" [ngModel]="attr.operands[1]" required>
+        <input type="number" min="0" [name]="'valueB'+i" [ngModel]="attr.operands[1]" required>
         <span>{{units[node.get('subtype')]}}</span>
       </div>
     </div>
