@@ -1,6 +1,8 @@
 import {Router} from '@angular/router';
 import {fromJS} from 'immutable';
 
+import {DataAccessLevel} from 'generated';
+
 export const WINDOW_REF = 'window-ref';
 
 export function isBlank(toTest: String): boolean {
@@ -26,4 +28,16 @@ export function navigateLogin(router: Router, fromUrl: string): Promise<boolean>
     params['from'] = fromUrl;
   }
   return router.navigate(['/login', params]);
+}
+
+/**
+ * Determine whether the given access level is >= registered. This is the
+ * minimum required level to do most things in the Workbench app (outside of
+ * local/test development).
+ */
+export function hasRegisteredAccess(access: DataAccessLevel): boolean {
+  return [
+    DataAccessLevel.Registered,
+    DataAccessLevel.Protected
+  ].includes(access);
 }
