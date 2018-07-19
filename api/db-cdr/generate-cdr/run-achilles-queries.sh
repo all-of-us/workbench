@@ -552,21 +552,30 @@ group by co1.observation_source_concept_id, stratum_2
 # 3000 Measurements - Number of persons with at least one measurement occurrence, by measurement_concept_id
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
-select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1, 'Measurement' as stratum_3,
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4,stratum_5, count_value, source_count_value)
+select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
+cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
+'Measurement' as stratum_3,
+cast(floor(min(co1.value_as_number)) AS STRING) as stratum_4,
+cast(ceil(max(co1.value_as_number)) AS STRING) as stratum_5,
 COUNT(distinct co1.person_id) as count_value,
-   (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
-  from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
- where co1.measurement_concept_id > 0
- group by  co1.measurement_concept_id
- union all
- select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1, 'Measurement' as stratum_3,
- COUNT(distinct co1.person_id) as count_value,
- COUNT(distinct co1.person_id) as source_count_value
- from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
-  where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
-  group by  co1.measurement_source_concept_id
- "
+(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+where co1.measurement_concept_id > 0
+and co1.value_as_number is not null
+group by  co1.measurement_concept_id
+union all
+select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
+cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
+'Measurement' as stratum_3,
+cast(floor(min(co1.value_as_number)) AS STRING) as stratum_4,
+cast(ceil(max(co1.value_as_number)) AS STRING) as stratum_5,
+COUNT(distinct co1.person_id) as count_value,
+COUNT(distinct co1.person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
+and co1.value_as_number is not null
+group by  co1.measurement_source_concept_id"
 
 # Measurement concept by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -821,12 +830,13 @@ priorstats as
    group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn
 )
 select 0 as id, 1815 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
-cast(o.total as int64) as count_value, o.min_value as min_value, o.max_value as max_value, o.avg_value as avg_value, o.stdev_value as stdev_value,
-min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as median_value,
-min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as p10_value,
-min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as p25_value,
-min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as p75_value,
-min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as p90_value
+cast(o.total as int64) as count_value, round(o.min_value,2) as min_value, round(o.max_value,2) as max_value, round(o.avg_value,2) as avg_value,
+round(o.stdev_value,2) as stdev_value,
+min(case when p.accumulated >= .50 * o.total then count_value else round(o.max_value,2) end) as median_value,
+min(case when p.accumulated >= .10 * o.total then count_value else round(o.max_value,2) end) as p10_value,
+min(case when p.accumulated >= .25 * o.total then count_value else round(o.max_value,2) end) as p25_value,
+min(case when p.accumulated >= .75 * o.total then count_value else round(o.max_value,2) end) as p75_value,
+min(case when p.accumulated >= .90 * o.total then count_value else round(o.max_value,2) end) as p90_value
 FROM  priorstats p
 join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
 group by o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
@@ -857,12 +867,13 @@ priorstats as
    group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn
 )
 select 0 as id, 1815 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
-cast(o.total as int64) as count_value, o.min_value as min_value, o.max_value as max_value, o.avg_value as avg_value, o.stdev_value as stdev_value,
-min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as median_value,
-min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as p10_value,
-min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as p25_value,
-min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as p75_value,
-min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as p90_value
+cast(o.total as int64) as count_value, round(o.min_value,2) as min_value, round(o.max_value,2) as max_value, round(o.avg_value,2) as avg_value,
+round(o.stdev_value,2) as stdev_value,
+min(case when p.accumulated >= .50 * o.total then count_value else round(o.max_value,2) end) as median_value,
+min(case when p.accumulated >= .10 * o.total then count_value else round(o.max_value,2) end) as p10_value,
+min(case when p.accumulated >= .25 * o.total then count_value else round(o.max_value,2) end) as p25_value,
+min(case when p.accumulated >= .75 * o.total then count_value else round(o.max_value,2) end) as p75_value,
+min(case when p.accumulated >= .90 * o.total then count_value else round(o.max_value,2) end) as p90_value
 FROM  priorstats p
 join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
 group by o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
@@ -889,12 +900,13 @@ priorstats  as
 join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
 group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn)
 select 0 as id, 1806 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
-cast(o.total as int64) as count_value, o.min_value as min_value, o.max_value as max_value, o.avg_value as avg_value, o.stdev_value as stdev_value,
-min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as median_value,
-min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as p10_value,
-min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as p25_value,
-min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as p75_value,
-min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as p90_value
+cast(o.total as int64) as count_value, round(o.min_value,2) as min_value, round(o.max_value,2) as max_value, round(o.avg_value,2) as avg_value,
+round(o.stdev_value,2) as stdev_value,
+min(case when p.accumulated >= .50 * o.total then count_value else round(o.max_value,2) end) as median_value,
+min(case when p.accumulated >= .10 * o.total then count_value else round(o.max_value,2) end) as p10_value,
+min(case when p.accumulated >= .25 * o.total then count_value else round(o.max_value,2) end) as p25_value,
+min(case when p.accumulated >= .75 * o.total then count_value else round(o.max_value,2) end) as p75_value,
+min(case when p.accumulated >= .90 * o.total then count_value else round(o.max_value,2) end) as p90_value
 FROM  priorstats p join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
 group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 
@@ -917,12 +929,13 @@ priorstats  as ( select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2
 join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
 group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn)
 select 0 as id, 1806 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
-cast(o.total as int64) as count_value, o.min_value as min_value, o.max_value as max_value, o.avg_value as avg_value, o.stdev_value as stdev_value,
-min(case when p.accumulated >= .50 * o.total then count_value else o.max_value end) as median_value,
-min(case when p.accumulated >= .10 * o.total then count_value else o.max_value end) as p10_value,
-min(case when p.accumulated >= .25 * o.total then count_value else o.max_value end) as p25_value,
-min(case when p.accumulated >= .75 * o.total then count_value else o.max_value end) as p75_value,
-min(case when p.accumulated >= .90 * o.total then count_value else o.max_value end) as p90_value
+cast(o.total as int64) as count_value, round(o.min_value,2) as min_value, round(o.max_value,2) as max_value, round(o.avg_value,2) as avg_value,
+round(o.stdev_value,2) as stdev_value,
+min(case when p.accumulated >= .50 * o.total then count_value else round(o.max_value,2) end) as median_value,
+min(case when p.accumulated >= .10 * o.total then count_value else round(o.max_value,2) end) as p10_value,
+min(case when p.accumulated >= .25 * o.total then count_value else round(o.max_value,2) end) as p25_value,
+min(case when p.accumulated >= .75 * o.total then count_value else round(o.max_value,2) end) as p75_value,
+min(case when p.accumulated >= .90 * o.total then count_value else round(o.max_value,2) end) as p90_value
 FROM  priorstats p join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
 group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 
@@ -936,15 +949,23 @@ select 0,1900 as analysis_id,
 CAST(m1.measurement_concept_id AS STRING) as stratum_1,
 CAST(p1.gender_concept_id AS STRING) as stratum_2,
 CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
-CAST(floor(round(m1.value_as_number)/10)*10 as STRING) as stratum_4,
+CAST((case when cast(ar.stratum_4 as int64) > 0 then
+(case when m1.value_as_number < cast(ar.stratum_4 as int64) then cast(ar.stratum_4 as int64) else
+cast(ROUND(m1.value_as_number / cast(ar.stratum_4 as int64)) * cast(ar.stratum_4 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
 (select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 on p1.person_id = m1.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on m1.measurement_concept_id = c.concept_id
-where m1.measurement_concept_id > 0 and c.domain_id='Measurement' and c.vocabulary_id='PPI' and c.concept_class_id not in ('Question','Answer')
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on
+m1.measurement_concept_id = c1.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on
+cast(m1.measurement_concept_id AS STRING)=ar.stratum_1
+where m1.measurement_concept_id > 0
+and m1.value_as_number is not null
+and c1.domain_id='Measurement' and c1.vocabulary_id='PPI' and c1.concept_class_id not in ('Question','Answer')
+and ar.analysis_id=3000 and ar.stratum_3='Measurement'
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
 group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4,stratum_5
 union all
@@ -952,18 +973,23 @@ select 0, 1900 as analysis_id,
 CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
 CAST(p1.gender_concept_id AS STRING) as stratum_2,
 CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
-CAST(floor(round(m1.value_as_number)/10)*10 as STRING) as stratum_4,
+CAST((case when cast(ar.stratum_4 as int64) > 0 then
+(case when m1.value_as_number < cast(ar.stratum_4 as int64) then cast(ar.stratum_4 as int64) else
+cast(ROUND(m1.value_as_number / cast(ar.stratum_4 as int64)) * cast(ar.stratum_4 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 COUNT(distinct p1.PERSON_ID) as count_value,
 COUNT(distinct p1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 on p1.person_id = m1.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
-on m1.measurement_source_concept_id = c.concept_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_source_concept_id = c1.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on
+cast(m1.measurement_source_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
-and c.domain_id='Measurement' and c.vocabulary_id='PPI' and c.concept_class_id not in ('Question','Answer')
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
+and m1.value_as_number is not null
+and c1.domain_id = 'Measurement' and c1.vocabulary_id = 'PPI' and c1.concept_class_id not in ('Question','Answer')
+and ar.analysis_id=3000 and ar.stratum_3='Measurement'
 group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4,stratum_5"
 
 # 1900 Measurement value counts (18-29 yr old decile 2)
@@ -975,17 +1001,22 @@ select 0,1900 as analysis_id,
 CAST(m1.measurement_concept_id AS STRING) as stratum_1,
 CAST(p1.gender_concept_id AS STRING) as stratum_2,
 '2' as stratum_3,
-CAST(floor(round(m1.value_as_number)/10)*10 as STRING) as stratum_4,
+CAST((case when cast(ar.stratum_4 as int64) > 0 then
+(case when m1.value_as_number < cast(ar.stratum_4 as int64) then cast(ar.stratum_4 as int64) else
+cast(ROUND(m1.value_as_number / cast(ar.stratum_4 as int64)) * cast(ar.stratum_4 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
 (select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 on p1.person_id = m1.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
-on m1.measurement_concept_id = c.concept_id
-where m1.measurement_concept_id > 0 and c.domain_id='Measurement' and c.vocabulary_id='PPI'
-and c.concept_class_id not in ('Question','Answer')
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on
+m1.measurement_concept_id = c1.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar
+on cast(m1.measurement_concept_id AS STRING)=ar.stratum_1
+and ar.analysis_id=3000 and ar.stratum_3='Measurement'
+and m1.value_as_number is not null
+and c1.domain_id = 'Measurement' and c1.vocabulary_id = 'PPI' and c1.concept_class_id not in ('Question','Answer')
 and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
 group by m1.measurement_concept_id,stratum_2,stratum_4,stratum_5
 union all
@@ -993,20 +1024,126 @@ select 0, 1900 as analysis_id,
 CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
 CAST(p1.gender_concept_id AS STRING) as stratum_2,
 '2' as stratum_3,
-CAST(floor(round(m1.value_as_number)/10)*10 as STRING) as stratum_4,
+CAST((case when cast(ar.stratum_4 as int64) > 0 then
+(case when m1.value_as_number < cast(ar.stratum_4 as int64) then cast(ar.stratum_4 as int64) else
+cast(ROUND(m1.value_as_number / cast(ar.stratum_4 as int64)) * cast(ar.stratum_4 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 COUNT(distinct p1.PERSON_ID) as count_value,
 COUNT(distinct p1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 on p1.person_id = m1.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
-on m1.measurement_source_concept_id = c.concept_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on
+m1.measurement_source_concept_id = c1.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar
+on cast(m1.measurement_source_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
-and c.domain_id='Measurement' and c.vocabulary_id='PPI'
-and c.concept_class_id not in ('Question','Answer')
+and ar.analysis_id=3000 and ar.stratum_3='Measurement'
+and m1.value_as_number is not null
+and c1.domain_id = 'Measurement' and c1.vocabulary_id = 'PPI' and c1.concept_class_id not in ('Question','Answer')
 and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
 group by m1.measurement_source_concept_id,stratum_2,stratum_4,stratum_5"
 
+# 1900 Measurement value counts (String value measurement response distribution)
+echo "Getting measurements value counts for measurements that have string values"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, stratum_5, count_value,source_count_value)
+with concept_with_string_values as
+(select distinct m.measurement_concept_id from
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+on m.measurement_concept_id = c.concept_id
+where c.domain_id = 'Measurement' and c.vocabulary_id = 'PPI'
+and c.concept_class_id not in ('Question','Answer')
+and m.value_as_number is null and m.value_source_value is not null
+and m.measurement_concept_id > 0),
+source_concept_with_string_values as
+(select distinct m.measurement_source_concept_id from
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+on m.measurement_source_concept_id = c.concept_id
+where c.domain_id = 'Measurement' and c.vocabulary_id = 'PPI'
+and c.concept_class_id not in ('Question','Answer')
+and m.measurement_source_concept_id > 0 and m.measurement_concept_id != m.measurement_source_concept_id
+and m.value_as_number is null and m.value_source_value is not null)
+select 0,1900 as analysis_id,
+CAST(m1.measurement_concept_id AS STRING) as stratum_1,
+CAST(p1.gender_concept_id AS STRING) as stratum_2,
+CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
+m1.value_source_value as stratum_4,
+m1.unit_source_value as stratum_5,
+count(distinct p1.person_id) as count_value,
+(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 on p1.person_id = m1.person_id
+join concept_with_string_values cv on m1.measurement_concept_id = cv.measurement_concept_id
+where floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
+and m1.value_source_value is not null
+group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4,stratum_5
+union all
+select 0, 1900 as analysis_id,
+CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
+CAST(p1.gender_concept_id AS STRING) as stratum_2,
+CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
+m1.value_source_value as stratum_4,
+m1.unit_source_value as stratum_5,
+COUNT(distinct p1.PERSON_ID) as count_value,
+COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 on p1.person_id = m1.person_id
+join source_concept_with_string_values scv on m1.measurement_source_concept_id = scv.measurement_source_concept_id
+where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
+and m1.value_source_value is not null
+and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
+group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4,stratum_5"
 
-
+# 1900 Measurement value counts (String value measurement response distribution)
+echo "Getting measurements value counts for measurements that have string values"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, stratum_5, count_value,source_count_value)
+with concept_with_string_values as
+(select distinct m.measurement_concept_id from
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+on m.measurement_concept_id = c.concept_id
+where c.domain_id = 'Measurement' and c.vocabulary_id = 'PPI'
+and c.concept_class_id not in ('Question','Answer')
+and m.value_as_number is null and m.value_source_value is not null
+and m.measurement_concept_id > 0),
+source_concept_with_string_values as
+(select distinct m.measurement_source_concept_id from
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+on m.measurement_source_concept_id = c.concept_id
+where c.domain_id = 'Measurement' and c.vocabulary_id = 'PPI'
+and c.concept_class_id not in ('Question','Answer')
+and m.measurement_source_concept_id > 0 and m.measurement_concept_id != m.measurement_source_concept_id
+and m.value_as_number is null and m.value_source_value is not null)
+select 0,1900 as analysis_id,
+CAST(m1.measurement_concept_id AS STRING) as stratum_1,
+CAST(p1.gender_concept_id AS STRING) as stratum_2,
+'2' as stratum_3,
+m1.value_source_value as stratum_4,
+m1.unit_source_value as stratum_5,
+count(distinct p1.person_id) as count_value,
+(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 on p1.person_id = m1.person_id
+join concept_with_string_values cv on m1.measurement_concept_id = cv.measurement_concept_id
+where (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
+and m1.value_source_value is not null
+group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4,stratum_5
+union all
+select 0, 1900 as analysis_id,
+CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
+CAST(p1.gender_concept_id AS STRING) as stratum_2,
+'2' as stratum_3,
+m1.value_source_value as stratum_4,
+m1.unit_source_value as stratum_5,
+COUNT(distinct p1.PERSON_ID) as count_value,
+COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 on p1.person_id = m1.person_id
+join source_concept_with_string_values scv on m1.measurement_source_concept_id = scv.measurement_source_concept_id
+where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
+and m1.value_source_value is not null
+and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
+group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4,stratum_5"

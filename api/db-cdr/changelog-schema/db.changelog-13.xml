@@ -9,7 +9,7 @@
     <validCheckSum>ANY</validCheckSum>
 
     <createTable tableName="achilles_results_dist">
-      <column name="id" type="BIGINT">
+      <column name="id" type="BIGINT" autoIncrement="true">
         <constraints primaryKey="true" nullable="true"/>
       </column>
       <column name="analysis_id" type="BIGINT">
