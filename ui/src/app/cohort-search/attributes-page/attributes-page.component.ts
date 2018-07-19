@@ -111,7 +111,6 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
                     break;
             }
         });
-        console.log('not returned');
         name += (this.attrs[0].operator !== Operator.ANY
             ? this.units[this.node.get('subtype')]
             : '') + ')';
