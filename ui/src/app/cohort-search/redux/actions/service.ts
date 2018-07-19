@@ -47,6 +47,7 @@ export class CohortSearchActions {
    * (B) can easily perform multi-step, complex actions from this service
    */
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
+  @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
@@ -200,7 +201,18 @@ export class CohortSearchActions {
     if (isLoaded || isLoading) {
       return;
     }
+    const fullTree = this.state.getIn(['wizard', 'fullTree']);
     this.requestCriteria(this.cdrVersionId, kind, parentId);
+  }
+
+  fetchAllCriteria(kind: string, parentId: number): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    const fullTree = this.state.getIn(['wizard', 'fullTree']);
+    this.requestAllCriteria(this.cdrVersionId, kind, parentId);
   }
 
   requestPreview(): void {

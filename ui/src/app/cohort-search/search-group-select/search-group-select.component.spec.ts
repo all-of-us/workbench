@@ -61,7 +61,7 @@ describe('SearchGroupSelectComponent', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
     component.role = 'includes';
     fixture.detectChanges();
-    component.launchWizard('test');
+    component.launchWizard({type: 'test'});
     expect(spy).toHaveBeenCalledWith({
       type: INIT_SEARCH_GROUP,
       role: 'includes',
@@ -74,7 +74,8 @@ describe('SearchGroupSelectComponent', () => {
         criteriaType: 'test',
         role: 'includes',
         groupId: 'Testincludes',
-        itemId: 'Testitems'
+        itemId: 'Testitems',
+        fullTree: false
       },
     });
   });

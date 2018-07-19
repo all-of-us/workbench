@@ -29,14 +29,15 @@ def get_live_gae_version(project, validate_version=true)
     common.error "Failed to get live GAE version for project '#{project}'"
     exit 1
   end
-  services = Set["api", "default", "public-api"]
+  services = Set["api", "default", "public-api", "public-ui"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
+  active_services = actives.map{|v| v["service"]}.to_set
   if actives.empty?
     common.warning "Found 0 active GAE services in project '#{project}'"
     return nil
-  elsif services != actives.map{|v| v["service"]}.to_set
-    common.warning "Found active services #{v}, expected " +
-                   "[#{services.to_a.join(', ')}] for project '#{project}'"
+  elsif services != active_services
+    common.warning "Found active services [#{active_services.to_a.join(',')}], " +
+                   "expected [#{services.to_a.join(', ')}] for project '#{project}'"
     return nil
   end
 
