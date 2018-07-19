@@ -67,6 +67,14 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
         }
     }
 
+    inputChange(index: number, operand: number) {
+        console.log(this.attrs[index].operands[operand]);
+        if (this.attrs[index].operands[operand] < 0) {
+            this.attrs[index].operands[operand] = 0;
+            console.log(this.attrs[index].operands[operand]);
+        }
+    }
+
     get paramId() {
         return `param${this.node.get('id')}`;
     }
