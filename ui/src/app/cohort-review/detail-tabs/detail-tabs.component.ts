@@ -49,9 +49,17 @@ const signature = {
     name: 'signature',
     displayName: 'Signature',
 };
-const sourceValue = {
-  name: 'sourceValue',
+const valueConcept = {
+  name: 'valueConcept',
+  displayName: 'Concept Value',
+};
+const valueSource = {
+  name: 'valueSource',
   displayName: 'Source Value',
+};
+const valueNumber = {
+  name: 'valueNumber',
+  displayName: 'Value As Number',
 };
 const sourceCode = {
   name: 'sourceCode',
@@ -70,16 +78,16 @@ const visitId = {
   name: 'visitId',
   displayName: 'Visit ID',
 };
-const numberOfMentions = {
-  name: 'numberOfMentions',
+const numMentions = {
+  name: 'numMentions',
   displayName: 'Number Of Mentions',
 };
-const dateFirstMention = {
-  name: 'dateFirstMention',
+const firstMention = {
+  name: 'firstMention',
   displayName: 'Date First Mention',
 };
-const dateLastMention = {
-  name: 'dateLastMention',
+const lastMention = {
+  name: 'lastMention',
   displayName: 'Date Last Mention',
 };
 const quantity = {
@@ -94,9 +102,17 @@ const strength = {
   name: 'strength',
   displayName: 'Strength',
 };
-const route = {
+const dataRoute = {
   name: 'route',
   displayName: 'Route',
+};
+const units = {
+  name: 'units',
+  displayName: 'Units',
+};
+const labRefRange = {
+  name: 'labRefRange',
+  displayName: 'Lab Reference Range',
 };
 
 
@@ -108,7 +124,6 @@ const route = {
 export class DetailTabsComponent {
 
   readonly stubs = [
-    'physical-measurements',
     'ppi',
   ];
 
@@ -117,8 +132,8 @@ export class DetailTabsComponent {
     domain: DomainType.Master,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, ageAtEvent, visitType, numberOfMentions,
-        dateFirstMention, dateLastMention, sourceValue, sourceName, sourceCode, sourceVocabulary
+      itemDate, standardName, standardCode, ageAtEvent, visitType, numMentions,
+        firstMention, lastMention, valueSource, sourceName, sourceCode, sourceVocabulary
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -126,10 +141,10 @@ export class DetailTabsComponent {
       standardCode: standardCode,
       age: ageAtEvent,
       visitType: visitType,
-      numberOfMentions: numberOfMentions,
-      dateFirstMention: dateFirstMention,
-      dateLastMention: dateLastMention,
-      sourceValue: sourceValue,
+      numMentions: numMentions,
+      firstMention: firstMention,
+      lastMention: lastMention,
+      valueSource: valueSource,
       sourceName: sourceName,
       sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
@@ -141,8 +156,8 @@ export class DetailTabsComponent {
     domain: DomainType.Condition,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numberOfMentions,
-      dateFirstMention, dateLastMention, standardCode, standardName, standardVocabulary, visitId
+      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
+      firstMention, lastMention, standardCode, standardName, standardVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -150,9 +165,9 @@ export class DetailTabsComponent {
       sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
       age: ageAtEvent,
-      numberOfMentions: numberOfMentions,
-      dateFirstMention: dateFirstMention,
-      dateLastMention: dateLastMention,
+      numMentions: numMentions,
+      firstMention: firstMention,
+      lastMention: lastMention,
       standardCode: standardCode,
       standardName: standardName,
       standardVocabulary: standardVocabulary,
@@ -163,8 +178,8 @@ export class DetailTabsComponent {
     domain: DomainType.Procedure,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numberOfMentions,
-      dateFirstMention, dateLastMention, standardCode, standardName, standardVocabulary, visitId
+      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
+      firstMention, lastMention, standardCode, standardName, standardVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -172,9 +187,9 @@ export class DetailTabsComponent {
       sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
       age: ageAtEvent,
-      numberOfMentions: numberOfMentions,
-      dateFirstMention: dateFirstMention,
-      dateLastMention: dateLastMention,
+      numMentions: numMentions,
+      firstMention: firstMention,
+      lastMention: lastMention,
       standardCode: standardCode,
       standardName: standardName,
       standardVocabulary: standardVocabulary,
@@ -185,84 +200,86 @@ export class DetailTabsComponent {
     domain: DomainType.Drug,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, ageAtEvent, numberOfMentions, dateFirstMention,
-        dateLastMention, quantity, refills, strength, route, sourceName, sourceCode, sourceVocabulary, visitId
+      itemDate, standardName, standardCode, ageAtEvent, numMentions, firstMention,
+        lastMention, quantity, refills, strength, dataRoute, sourceName, sourceCode,
+        sourceVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
       standardName: standardName,
-      sourceValue: sourceValue,
-      sourceVocabulary: sourceVocabulary,
+      standardCode: standardCode,
       age: ageAtEvent,
-      signature: signature,
-    }
-  }, {
-    name: 'Observations',
-    domain: DomainType.Observation,
-    filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue, ageAtEvent,
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceValue: sourceValue,
-      sourceVocabulary: sourceVocabulary,
+      numMentions: numMentions,
+      firstMention: firstMention,
+      lastMention: lastMention,
+      quantity: quantity,
+      refills: refills,
+      strength: strength,
+      route: dataRoute,
       sourceName: sourceName,
-      age: ageAtEvent,
-    }
-  }, {
-    name: 'Visits',
-    domain: DomainType.Visit,
-    filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, endDate, standardVocabulary, standardName, sourceVocabulary,
-      sourceValue, ageAtEvent,
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      endDate: endDate,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceValue: sourceValue,
+      sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
-      sourceName: sourceName,
-      age: ageAtEvent,
-    }
-  }, {
-    name: 'Devices',
-    domain: DomainType.Device,
-    filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary,
-      sourceValue, ageAtEvent,
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceValue: sourceValue,
-      sourceVocabulary: sourceVocabulary,
-      sourceName: sourceName,
-      age: ageAtEvent,
+      visitId: visitId,
     }
   }, {
     name: 'Measurements',
     domain: DomainType.Measurement,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary,
-      sourceValue, ageAtEvent,
+      itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
+      valueSource, units, ageAtEvent, labRefRange, sourceName, sourceCode, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
       standardName: standardName,
-      sourceValue: sourceValue,
-      sourceVocabulary: sourceVocabulary,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      valueConcept: valueConcept,
+      valueNumber: valueNumber,
+      valueSource: valueSource,
+      units: units,
+      age: ageAtEvent,
+      labRefRange: labRefRange,
       sourceName: sourceName,
+      sourceCode: sourceCode,
+      visitId: visitId,
+    }
+  }, {
+    name: 'Observations',
+    domain: DomainType.Observation,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, sourceName,
+        sourceCode, sourceVocabulary, visitId
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      standardName: standardName,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      age: ageAtEvent,
+      sourceName: sourceName,
+      sourceCode: sourceCode,
+      sourceVocabulary: sourceVocabulary,
+      visitId: visitId,
+    }
+  }, {
+    name: 'Physical Measurements',
+    domain: DomainType.PhysicalMeasurement,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
+      valueSource, units, ageAtEvent
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      standardName: standardName,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      valueConcept: valueConcept,
+      valueNumber: valueNumber,
+      valueSource: valueSource,
+      units: units,
       age: ageAtEvent,
     }
   }];
