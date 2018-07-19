@@ -949,9 +949,9 @@ select 0,1900 as analysis_id,
 CAST(m1.measurement_concept_id AS STRING) as stratum_1,
 CAST(p1.gender_concept_id AS STRING) as stratum_2,
 CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
-CAST((case when cast(ar.stratum_4 as int64) > 0 then
-(case when m1.value_as_number < cast(ar.stratum_4 as int64) then cast(ar.stratum_4 as int64) else
-cast(ROUND(m1.value_as_number / cast(ar.stratum_4 as int64)) * cast(ar.stratum_4 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
+CAST((case when cast(ar.stratum_2 as int64) > 0 then
+(case when m1.value_as_number < cast(ar.stratum_2 as int64) then cast(ar.stratum_2 as int64) else
+cast(ROUND(m1.value_as_number / cast(ar.stratum_2 as int64)) * cast(ar.stratum_2 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
 (select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
@@ -973,9 +973,9 @@ select 0, 1900 as analysis_id,
 CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
 CAST(p1.gender_concept_id AS STRING) as stratum_2,
 CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
-CAST((case when cast(ar.stratum_4 as int64) > 0 then
-(case when m1.value_as_number < cast(ar.stratum_4 as int64) then cast(ar.stratum_4 as int64) else
-cast(ROUND(m1.value_as_number / cast(ar.stratum_4 as int64)) * cast(ar.stratum_4 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
+CAST((case when cast(ar.stratum_2 as int64) > 0 then
+(case when m1.value_as_number < cast(ar.stratum_2 as int64) then cast(ar.stratum_2 as int64) else
+cast(ROUND(m1.value_as_number / cast(ar.stratum_2 as int64)) * cast(ar.stratum_2 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 COUNT(distinct p1.PERSON_ID) as count_value,
 COUNT(distinct p1.PERSON_ID) as source_count_value
@@ -1001,9 +1001,9 @@ select 0,1900 as analysis_id,
 CAST(m1.measurement_concept_id AS STRING) as stratum_1,
 CAST(p1.gender_concept_id AS STRING) as stratum_2,
 '2' as stratum_3,
-CAST((case when cast(ar.stratum_4 as int64) > 0 then
-(case when m1.value_as_number < cast(ar.stratum_4 as int64) then cast(ar.stratum_4 as int64) else
-cast(ROUND(m1.value_as_number / cast(ar.stratum_4 as int64)) * cast(ar.stratum_4 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
+CAST((case when cast(ar.stratum_2 as int64) > 0 then
+(case when m1.value_as_number < cast(ar.stratum_2 as int64) then cast(ar.stratum_2 as int64) else
+cast(ROUND(m1.value_as_number / cast(ar.stratum_2 as int64)) * cast(ar.stratum_2 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
 (select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
@@ -1024,9 +1024,9 @@ select 0, 1900 as analysis_id,
 CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
 CAST(p1.gender_concept_id AS STRING) as stratum_2,
 '2' as stratum_3,
-CAST((case when cast(ar.stratum_4 as int64) > 0 then
-(case when m1.value_as_number < cast(ar.stratum_4 as int64) then cast(ar.stratum_4 as int64) else
-cast(ROUND(m1.value_as_number / cast(ar.stratum_4 as int64)) * cast(ar.stratum_4 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
+CAST((case when cast(ar.stratum_2 as int64) > 0 then
+(case when m1.value_as_number < cast(ar.stratum_2 as int64) then cast(ar.stratum_2 as int64) else
+cast(ROUND(m1.value_as_number / cast(ar.stratum_2 as int64)) * cast(ar.stratum_2 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 COUNT(distinct p1.PERSON_ID) as count_value,
 COUNT(distinct p1.PERSON_ID) as source_count_value
