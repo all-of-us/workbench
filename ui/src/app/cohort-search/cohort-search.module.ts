@@ -74,8 +74,6 @@ const routes: Routes = [{
     SelectionInfoComponent,
     TreeComponent,
     AttributesPageComponent,
-    SearchBarComponent,
-    SafeHtmlPipe,
   ],
   providers: [
     CohortSearchActions,

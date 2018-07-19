@@ -20,6 +20,7 @@ import {
 })
 export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
+  @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
 
   /*
    * Each node component represents one criterion.  If that criterion has any
