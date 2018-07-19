@@ -91,7 +91,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       const searchSub = this.ngRedux
         .select(criteriaSearchTerms())
         .subscribe(searchTerms => {
-          this.searchTerms = searchTerms
+          this.searchTerms = searchTerms;
           if (searchTerms && searchTerms.length > 2) {
             this.searchTree();
           } else {
