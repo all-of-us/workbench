@@ -18,8 +18,8 @@
     <div>
       <div class="header-area">
         <clr-dropdown [clrCloseMenuOnItemClick]="false">
-          <button type="button" clrDropdownTrigger>
-            <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+          <button type="button" [disabled]="actionsDisabled" clrDropdownTrigger>
+            <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical" [class.disabled]="actionsDisabled"></clr-icon>
           </button>
           <clr-dropdown-menu *clrIfOpen>
             <button class="action-item"
@@ -55,7 +55,7 @@
         </clr-dropdown>
         <div class="name"
              [class.disabled]="actionsDisabled"
-             (click)="actionsDisabled || openCohort(cohort)">
+             (click)="openCohort(cohort)">
           {{cohort.name}}
         </div>
       </div>

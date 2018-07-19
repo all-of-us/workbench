@@ -47,6 +47,11 @@ clr-dropdown-menu {
   color: #216FB4;
 }
 
+.ellipsis-vertical.disabled {
+  color: #AAAFB4;
+  cursor: not-allowed;
+}
+
 .action-item {
   text-align: left;
   color: #4A4A4A;
