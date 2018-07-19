@@ -1,232 +1,232 @@
 .background-image {
-    background-image: url('/assets/images/AoU-HP-background.jpg');
-    background-repeat: no-repeat;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-    height: 100%;
+  background-image: url('/assets/images/AoU-HP-background.jpg');
+  background-repeat: no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  height: 100%;
 }
 
 .double {
-    height: 332px;
-    width: 638px;
-    background-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
+  height: 332px;
+  width: 638px;
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .left {
-    margin-left: 8rem;
+  margin-left: 8rem;
 }
 
 .right {
-    margin-left: 0.8rem;
+  margin-left: 0.8rem;
 }
 
 .single {
-    height: 379px;
-    width: 1298px;
-    border-radius: 5px;
-    background-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
-    margin-left: 8rem;
+  height: 379px;
+  width: 1298px;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
+  margin-left: 8rem;
 }
 
 .analyzeSingleHeader {
-    height: 34px;
-    width: 631px;
-    opacity: 0.87;
-    color: #FFFFFF;
-    font-size: 28px;
-    font-weight: 500;
-    line-height: 34px;
-    margin-top: 2%;
-    margin-left: 3%;
+  height: 34px;
+  width: 631px;
+  opacity: 0.87;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  margin-top: 2%;
+  margin-left: 3%;
 }
 
 .heading {
-    color: #FFFFFF;
-    font-size: 28px;
-    font-weight: 500;
-    line-height: 34px;
-    margin-top: 3%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  margin-top: 3%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .analyzeHeading {
-    opacity: 0.87;
-    color: #FFFFFF;
-    font-size: 28px;
-    font-weight: 500;
-    line-height: 34px;
-    width: 65%;
-    display: flex;
-    text-align: center;
-    margin-left: 18%;
-    margin-top: 1%;
+  opacity: 0.87;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  width: 65%;
+  display: flex;
+  text-align: center;
+  margin-left: 18%;
+  margin-top: 1%;
 }
 
 .text {
-    width: 70%;
-    color: #FFFFFF;
-    font-size: 14px;
-    font-weight: 300;
-    line-height: 19px;
-    text-align: center;
-    margin-top: 2%;
-    align-self: center;
-    margin-left: 16%;
+  width: 70%;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 19px;
+  text-align: center;
+  margin-top: 2%;
+  align-self: center;
+  margin-left: 16%;
 }
 
 .double .text {
-    margin-left: 15%;
+  margin-left: 15%;
 }
 
 .button {
-    color: #FFFFFF;
-    font-size: 28px;
-    font-weight: 500;
-    line-height: 34px;
-    text-align: center;
-    align-content: center;
-    width: 541px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    margin-top: 5%;
-    margin-left:2.5rem;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  text-align: center;
+  align-content: center;
+  width: 541px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 5%;
+  margin-left:2.5rem;
 }
 
 .icon {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .analyzeIcon {
-    height: 18%;
-    width: 18%;
+  height: 18%;
+  width: 18%;
 }
 
 .learnIcon {
-    height: 15%;
-    width: 15%;
-    margin-top: 3%;
+  height: 15%;
+  width: 15%;
+  margin-top: 3%;
 }
 
 .topIcon {
-    height: 65px;
-    width: 94px;
-    margin-top: 8%;
+  height: 65px;
+  width: 94px;
+  margin-top: 8%;
 }
 
 .singleIcon {
-    margin-top: 5%;
-    height: 60px;
+  margin-top: 5%;
+  height: 60px;
 }
 
 .btn-homepage {
-    height: 52px;
-    border-radius: 5px;
-    background-color: #302C71;
-    color: white;
-    margin-left: 31%;
-    margin-top: 3%;
-    font-weight: 500;
-    font-size: 14px;
+  height: 52px;
+  border-radius: 5px;
+  background-color: #302C71;
+  color: white;
+  margin-left: 31%;
+  margin-top: 3%;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 .footer {
-    height: 300px;
-    width: 100%;
-    border-radius: 5px;
-    background-color: #262262;
-    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
-    margin-top: 3%;
+  height: 300px;
+  width: 100%;
+  border-radius: 5px;
+  background-color: #262262;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
+  margin-top: 3%;
 }
 
 .footerTitle {
-    height: 34px;
-    width: 688.13px;
-    opacity: 0.87;
-    color: #FFFFFF;
-    font-size: 28px;
-    font-weight: 500;
-    line-height: 34px;
-    margin-left: 8.8rem;
-    margin-top: 2%;
+  height: 34px;
+  width: 688.13px;
+  opacity: 0.87;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 34px;
+  margin-left: 8.8rem;
+  margin-top: 2%;
 }
 
 .footerSubTitle {
-    align-self: right;
+  align-self: right;
 }
 
 .textGroup {
-    margin-left: 8.8rem;
+  margin-left: 8.8rem;
 }
 
 .footerText {
-    height: 176px;
-    width: 372px;
-    opacity: 0.87;
-    color: #83C3EC;
-    font-size: 16px;
-    font-weight: 300;
-    line-height: 30px;
+  height: 176px;
+  width: 372px;
+  opacity: 0.87;
+  color: #83C3EC;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 30px;
 }
 
 .footerText .title {
-    color: white;
-    margin-top: 2%;
+  color: white;
+  margin-top: 2%;
 }
 
 .linkGroup {
-    margin-top: 1%;
-    margin-left: 9rem;
+  margin-top: 1%;
+  margin-left: 9rem;
 }
 
 .links {
-    height: 56px;
-    width: 158px;
-    color: #FFFFFF;
-    font-size: 14px;
-    line-height: 28px;
-    margin-right: 2rem;
+  height: 56px;
+  width: 158px;
+  color: #FFFFFF;
+  font-size: 14px;
+  line-height: 28px;
+  margin-right: 2rem;
 }
 
 .card.add-card {
-    height: 223px;
-    width: 300px;
-    background-color: #FFFFFF;
-    align-content: left;
-    margin-left: 25px;
+  height: 223px;
+  width: 300px;
+  background-color: #FFFFFF;
+  align-content: left;
+  margin-left: 25px;
+  cursor: pointer;
 }
 
 .card-text {
-    height: 56px;
-    width: 284px;
-    color: #216FB4;
-    font-size: 20px;
-    font-weight: 500;
-    line-height: 28px;
-    margin-top: 20%;
-    margin-left: 6%;
+  height: 56px;
+  width: 284px;
+  color: #216FB4;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  margin-top: 20%;
+  margin-left: 6%;
 }
 
 .plus-circle {
-    width: 32px;
-    height: 32px;
+  width: 32px;
+  height: 32px;
 }
 
 .bullets {
-    color: #83C3EC;
+  color: #83C3EC;
 }
 
 .footerLink {
-    margin-left: 53rem;
-    color: #FFFFFF;
+  margin-left: 53rem;
+  color: #FFFFFF;
 }
-

@@ -5,6 +5,7 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
+  activeCriteriaTreeType,
   activeCriteriaType,
   activeParameterList,
   attributesPage,
@@ -26,10 +27,12 @@ import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
+  @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
   @select(activeParameterList) selection$: Observable<any>;
   @select(attributesPage) attributes$: Observable<any>;
 
   ctype: string;
+  fullTree: boolean;
   subscription: Subscription;
   attributesNode: any;
 
@@ -68,6 +71,10 @@ export class ModalComponent implements OnInit, OnDestroy {
           }
         }
       })
+    );
+
+    this.subscription.add(this.isFullTree$
+      .subscribe(fullTree => this.fullTree = fullTree)
     );
 
     this.subscription.add(this.selection$
@@ -116,6 +123,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   get rootNode() {
     return Map({
       type: this.ctype,
+      fullTree: this.fullTree,
       id: 0,    // root parent ID is always 0
     });
   }

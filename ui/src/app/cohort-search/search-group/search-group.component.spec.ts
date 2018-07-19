@@ -105,7 +105,7 @@ describe('SearchGroupComponent', () => {
 
   it('Should dispatch WIZARD_OPEN when a Criteria is selected', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.launchWizard('icd9');
+    comp.launchWizard({type: 'icd9'});
     expect(spy).toHaveBeenCalledWith({
       type: OPEN_WIZARD,
       itemId: 'TestId',
@@ -114,6 +114,7 @@ describe('SearchGroupComponent', () => {
         role: 'includes',
         groupId: 'include0',
         itemId: 'TestId',
+        fullTree: false
       }
     });
   });

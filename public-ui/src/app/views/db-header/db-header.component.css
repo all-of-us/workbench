@@ -1,5 +1,3 @@
-
-
 .header {
     height:96px;
     background-color:inherit;
@@ -75,4 +73,9 @@ clr-header .header-nav .nav-link.title {
 
 .header .header-nav .nav-link.active, header .header-nav .nav-link.active {
     background-color: inherit;
+}
+
+.nav-link clr-icon {
+    top: 75%;
+    left: 95%;
 }

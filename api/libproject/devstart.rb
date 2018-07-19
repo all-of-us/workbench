@@ -1063,7 +1063,8 @@ def deploy_gcs_demos(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  common.run_inline %W{gsutil rm gs://#{gcc.project}-demos/**}
+  # Run but ignore failure statuses, as these files may not exist.
+  Process.wait spawn("gsutil", "rm", "gs://#{gcc.project}-demos/**")
   common.run_inline %W{gsutil cp demos/* gs://#{gcc.project}-demos/}
 end
 

@@ -53,5 +53,15 @@
         "mode": "NULLABLE",
         "name": "concept_id",
         "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "has_attribute",
+        "type": "BOOLEAN"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "predefined_attributes",
+        "type": "STRING"
       }
 ]
