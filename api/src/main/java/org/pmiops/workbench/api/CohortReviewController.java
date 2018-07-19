@@ -422,7 +422,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     boolean invalidDomain = true;
     DomainType domain = ((ReviewFilter) request).getDomain();
     for (DomainType domainType : DomainType.values()) {
-      if (domainType.equals(domain)) {
+      if (domainType.name().equals(domain.name())) {
         invalidDomain = false;
       }
     }
