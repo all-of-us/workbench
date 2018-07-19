@@ -66,7 +66,7 @@ const sourceCode = {
   displayName: 'Source Code',
 };
 const ageAtEvent = {
-  name: 'age',
+  name: 'ageAtEvent',
   notField: true,
   displayName: 'Age At Event',
 };
