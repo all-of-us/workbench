@@ -52,7 +52,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
           icon: '/assets/icons/explore.svg'
       }];
   firstTimeUser = false;
-  private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
