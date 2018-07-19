@@ -723,31 +723,11 @@ definitions:
     discriminator: domainType
     required:
       - itemDate
-      - standardVocabulary
-      - standardName
-      - sourceValue
-      - sourceVocabulary
-      - sourceName
       - domainType # required for inheritance to work
     properties:
       itemDate:
         type: string
         description: The date of the data
-      standardVocabulary:
-        type: string
-        description: The standard vocabulary of this data
-      standardName:
-        type: string
-        description: The standard name of this data
-      sourceValue:
-        type: string
-        description: The source value of this data
-      sourceVocabulary:
-        type: string
-        description: The source vocabulary of this data
-      sourceName:
-        type: string
-        description: The source name of this data.
       domainType:
         $ref: "#/definitions/DomainType"
 
@@ -755,36 +735,156 @@ definitions:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceCode:
+            type: string
+            description: The source code of this data
+          vocabularyType:
+            type: string
+            description: The vocabulary type of this data
           age:
             type: integer
             description: The age of event for the participant
+          numberOfMentions:
+            type: integer
+            descriptions: The number of mentions of this data
+          dateFirstMention:
+            type: string
+            description: The date of first mention of this data
+          dateLastMention:
+            type: string
+            description: The date of last mention of this data
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
 
   Procedure:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceCode:
+            type: string
+            description: The source code of this data
+          vocabularyType:
+            type: string
+            description: The vocabulary type of this data
           age:
             type: integer
             description: The age of event for the participant
+          numberOfMentions:
+            type: integer
+            descriptions: The number of mentions of this data
+          dateFirstMention:
+            type: string
+            description: The date of first mention of this data
+          dateLastMention:
+            type: string
+            description: The date of last mention of this data
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
 
   Observation:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceCode:
+            type: string
+            description: The source code of this data
+          vocabularyType:
+            type: string
+            description: The vocabulary type of this data
           age:
             type: integer
             description: The age of event for the participant
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
 
   Drug:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceName:
+            type: string
+            description: The source name of this data.
+          sourceCode:
+            type: string
+            description: The source code of this data
+          vocabularyType:
+            type: string
+            description: The vocabulary type of this data
           age:
             type: integer
             description: The age of event for the participant
-          signature:
+          numberOfMentions:
+            type: integer
+            descriptions: The number of mentions of this data
+          dateFirstMention:
             type: string
-            description: signature of drug
+            description: The date of first mention of this data
+          dateLastMention:
+            type: string
+            description: The date of last mention of this data
+          quantity:
+            type: number
+            format: float
+            description: The quantity of this data
+          refills:
+            type: integer
+            description: The refills of this data
+          strength:
+            type: string
+            description: The strength of this data
+          route:
+            type: string
+            description: The route of this data
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
+
 
   Master:
     allOf:
@@ -797,11 +897,60 @@ definitions:
           domain:
             type: string
             description: the domain of this data.
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceName:
+            type: string
+            description: The source name of this data.
+          sourceCode:
+            type: string
+            description: The source code of this data
+          sourceValue:
+            type: string
+            description: The source value of this data
+          vocabularyType:
+            type: string
+            description: The vocabulary type of this data
+          age:
+            type: integer
+            description: The age of event for the participant
+          numberOfMentions:
+            type: integer
+            descriptions: The number of mentions of this data
+          dateFirstMention:
+            type: string
+            description: The date of first mention of this data
+          dateLastMention:
+            type: string
+            description: The date of last mention of this data
+          visitType:
+            type: string
+            description: The visit type of this data
+
 
   Device:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          sourceVocabulary:
+            type: string
+            description: The source vocabulary of this data
+          sourceValue:
+            type: string
+            description: The source value of this data
+          sourceName:
+            type: string
+            description: The source name of this data.
           age:
             type: integer
             description: The age of event for the participant
@@ -810,6 +959,21 @@ definitions:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          sourceVocabulary:
+            type: string
+            description: The source vocabulary of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceValue:
+            type: string
+            description: The source value of this data
           age:
             type: integer
             description: The age of event for the participant
@@ -821,9 +985,32 @@ definitions:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceCode:
+            type: string
+            description: The source code of this data
+          vocubularyType:
+            type: string
+            description The vocabulary type of this data
           age:
             type: integer
             description: The age of event for the participant
+          value:
+            type: number
+            format: float
+            description: The value of this data
+          units:
+            type: string
+            description: The units of this data
+
 
   AnnotationType:
     type: string
