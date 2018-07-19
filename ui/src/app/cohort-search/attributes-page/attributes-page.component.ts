@@ -68,11 +68,8 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
         }
     }
 
-    inputChange(index: number, operand: number) {
-        this.alert = false;
-        if (this.attrs[index].operands[operand] < 0) {
-            this.alert = true;
-        }
+    inputChange(newValue: number) {
+        this.alert = newValue < 0 ? true : false;
     }
 
     get paramId() {
@@ -81,7 +78,6 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
 
     getParamWithAttributes(values: any) {
         let name = this.node.get('name', '') + ' (';
-        console.log(values);
         this.attrs.map((attr, i) => {
             if (i > 0) {
                 name += ' / ';
@@ -94,34 +90,21 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
                     name += 'Any';
                     break;
                 case 'BETWEEN':
-                    if (values['valueA' + i] < 0 || values['valueB' + i] < 0) {
-                        return false;
-                    }
                     attr.operator = Operator.BETWEEN;
                     attr.operands = [values['valueA' + i], values['valueB' + i]];
                     name += values['valueA' + i] + '-' + values['valueB' + i];
                     break;
                 case 'EQUAL':
-                    if (values['valueA' + i] < 0) {
-                      console.log('equal neg');
-                        return false;
-                    }
                     attr.operator = Operator.EQUAL;
                     attr.operands = [values['valueA' + i]];
                     name += '= ' + values['valueA' + i];
                     break;
                 case 'LESS_THAN_OR_EQUAL_TO':
-                    if (values['valueA' + i] < 0) {
-                        return false;
-                    }
                     attr.operator = Operator.LESSTHANOREQUALTO;
                     attr.operands = [values['valueA' + i]];
                     name += '<= ' + values['valueA' + i];
                     break;
                 case 'GREATER_THAN_OR_EQUAL_TO':
-                    if (values['valueA' + i] < 0) {
-                        return false;
-                    }
                     attr.operator = Operator.GREATERTHANOREQUALTO;
                     attr.operands = [values['valueA' + i]];
                     name += '>= ' + values['valueA' + i];
@@ -159,7 +142,6 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     }
 
     validateValues(values: any) {
-      console.log(values);
       for (const key in values) {
         if (Number.isInteger(values[key]) && values[key] < 0) {
           return false;
