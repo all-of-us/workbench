@@ -11,11 +11,9 @@ export class ProfileStubVariables {
     freeTierBillingProjectName: 'all-of-us-free-abcdefg',
     freeTierBillingProjectStatus: BillingProjectStatus.Ready,
     dataAccessLevel: DataAccessLevel.Registered,
-    fullName:  'Tester MacTesterson><script>alert("hello");</script>',
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
-    invitationKey: 'dummyKey'
   };
 }
 
@@ -61,5 +59,29 @@ export class ProfileServiceStub {
     } else {
       return new Observable(observer => { observer.next(false); });
     }
+  }
+
+  private now(): number {
+    return Math.floor(new Date().getTime() / 1000);
+  }
+
+  public submitIdVerification(extraHttpRequestParams?: any): Observable<Profile> {
+    this.profile.requestedIdVerification = true;
+    return Observable.from([this.profile]);
+  }
+
+  public submitTermsOfService(extraHttpRequestParams?: any): Observable<Profile> {
+    this.profile.termsOfServiceCompletionTime = this.now();
+    return Observable.from([this.profile]);
+  }
+
+  public submitDemographicsSurvey(extraHttpRequestParams?: any): Observable<Profile> {
+    this.profile.demographicSurveyCompletionTime = this.now();
+    return Observable.from([this.profile]);
+  }
+
+  public completeEthicsTraining(extraHttpRequestParams?: any): Observable<Profile> {
+    this.profile.ethicsTrainingCompletionTime = this.now();
+    return Observable.from([this.profile]);
   }
 }
