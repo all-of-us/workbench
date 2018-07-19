@@ -506,7 +506,7 @@ definitions:
 
   DomainType:
     type: string
-    enum: [Condition, Procedure, Observation, Drug, Master, Device, Visit, Measurement, PhysicalMeasurement]
+    enum: [Condition, Procedure, Observation, Drug, Master, Device, Visit, Measurement, Physical_Measure]
 
   SortOrder:
     type: string
@@ -757,7 +757,7 @@ definitions:
             type: integer
             description: The age at event for the participant
           numMentions:
-            type: integer
+            type: string
             description: The number of mentions of this data
           firstMention:
             type: string
@@ -796,7 +796,7 @@ definitions:
             type: integer
             description: The age at event for the participant
           numMentions:
-            type: integer
+            type: string
             description: The number of mentions of this data
           firstMention:
             type: string
@@ -862,7 +862,7 @@ definitions:
             type: integer
             description: The age at event for the participant
           numMentions:
-            type: integer
+            type: string
             description: The number of mentions of this data
           firstMention:
             type: string
@@ -871,11 +871,10 @@ definitions:
             type: string
             description: The date of last mention of this data
           quantity:
-            type: number
-            format: float
+            type: string
             description: The quantity of this data
           refills:
-            type: integer
+            type: string
             description: The refills of this data
           strength:
             type: string
@@ -925,7 +924,7 @@ definitions:
             type: integer
             description: The age at event for the participant
           numMentions:
-            type: integer
+            type: string
             description: The number of mentions of this data
           firstMention:
             type: string
@@ -966,8 +965,7 @@ definitions:
             type: string
             description: The value of this data
           valueNumber:
-            type: number
-            format: float
+            type: string
             description: The value of this data
           units:
             type: string
@@ -1003,8 +1001,7 @@ definitions:
             type: string
             description: The value of this data
           valueNumber:
-            type: number
-            format: float
+            type: string
             description: The value of this data
           units:
             type: string

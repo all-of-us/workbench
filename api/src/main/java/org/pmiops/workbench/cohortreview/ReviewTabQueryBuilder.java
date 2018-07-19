@@ -72,8 +72,8 @@ public class ReviewTabQueryBuilder {
       "value_concept as valueConcept,\n" +
       "value_as_number as valueAsNumber,\n" +
       "value_source_value as valueSourceValue,\n" +
-      "units as units\n" +
-      "ref_range as refRange";
+      "units as units,\n" +
+      "ref_range as refRange\n";
 
   private static final String OBSERVATION_SQL_TEMPLATE =
     "standard_name as standardName,\n" +
@@ -90,13 +90,11 @@ public class ReviewTabQueryBuilder {
     "standard_name as standardName,\n" +
       "standard_code as standardCode,\n" +
       "standard_vocabulary as standardVocabulary,\n" +
-      "visit_id as visitId,\n" +
-      "visit_concept_id as visitConceptId,\n" +
       "age_at_event as ageAtEvent,\n" +
       "value_concept as valueConcept,\n" +
       "value_as_number as valueAsNumber,\n" +
       "value_source_value as valueSourceValue,\n" +
-      "units as units";
+      "units as units\n";
 
   private static final String FROM =
     "from `${projectId}.${dataSetId}.%s`\n";
@@ -110,32 +108,6 @@ public class ReviewTabQueryBuilder {
     "select count(*) as count\n" +
       "from `${projectId}.${dataSetId}.%s`\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
-
-//    private static final ImmutableMap<String, String> EXTRA_COLUMNS =
-//      ImmutableMap.of("Master", ", domain, end_datetime as endDate, signature",
-//        "Drug", ", signature", "Visit", ", end_datetime as endDate");
-//
-//    private static final String NAMED_DATAID_PARAM = "dataId";
-//
-//    private static final String SQL_TEMPLATE =
-//      "select data_id as dataId,\n" +
-//        "     start_datetime as startDate,\n" +
-//        "     standard_vocabulary as standardVocabulary,\n" +
-//        "     standard_name as standardName,\n" +
-//        "     source_value as sourceValue,\n" +
-//        "     source_vocabulary as sourceVocabulary,\n" +
-//        "     source_name as sourceName,\n" +
-//        "     age_at_event as ageAtEvent\n" +
-//        "     %s\n" +
-//        "from `${projectId}.${dataSetId}.%s`\n";
-//
-
-//
-
-//
-//    private static final String DETAILS_WHERE =
-//      "where data_id = @" + NAMED_DATAID_PARAM + "\n";
-
 
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
@@ -155,22 +127,6 @@ public class ReviewTabQueryBuilder {
       .setNamedParameters(params)
       .setUseLegacySql(false)
       .build();
-
-
-//        String tableName = DomainType.MASTER.equals(domain)
-//          ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
-//        String extraColumns = EXTRA_COLUMNS.get(domain.toString()) == null
-//          ? "" : EXTRA_COLUMNS.get(domain.toString());
-//        String finalSql = String.format(SQL_TEMPLATE + WHERE_TEMPLATE,
-//          extraColumns,
-//          tableName,
-//          pageRequest.getSortColumn(),
-//          pageRequest.getSortOrder().toString(),
-//          pageRequest.getPageSize(),
-//          pageRequest.getPage() * pageRequest.getPageSize());
-//
-//        Map<String, QueryParameterValue> params = new HashMap<>();
-//        params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
   }
 
   public QueryJobConfiguration buildCountQuery(Long participantId,

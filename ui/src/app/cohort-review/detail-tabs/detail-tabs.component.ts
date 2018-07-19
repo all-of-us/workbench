@@ -265,7 +265,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Physical Measurements',
-    domain: DomainType.PhysicalMeasurement,
+    domain: DomainType.PhysicalMeasure,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,

@@ -39,6 +39,7 @@ import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ParticipantData;
 import org.pmiops.workbench.model.ParticipantDataListResponse;
+import org.pmiops.workbench.model.PhysicalMeasurement;
 import org.pmiops.workbench.model.Procedure;
 import org.pmiops.workbench.model.ReviewColumns;
 import org.pmiops.workbench.model.ReviewFilter;
@@ -692,11 +693,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
         .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
+        .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
         .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
-        .quantity(bigQueryService.getDouble(row, rm.get("quantity")).floatValue())
-        .refills(bigQueryService.getLong(row, rm.get("refills")).intValue())
+        .quantity(bigQueryService.getString(row, rm.get("quantity")))
+        .refills(bigQueryService.getString(row, rm.get("refills")))
         .strength(bigQueryService.getString(row, rm.get("strength")))
         .route(bigQueryService.getString(row, rm.get("route")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
@@ -712,7 +713,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
         .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
+        .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
         .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
@@ -727,7 +728,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
         .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
+        .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
         .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
@@ -755,10 +756,24 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .valueConcept(bigQueryService.getString(row, rm.get("valueConcept")))
         .valueSource(bigQueryService.getString(row, rm.get("valueSourceValue")))
-        .valueNumber(bigQueryService.getDouble(row, rm.get("valueAsNumber")).floatValue())
+        .valueNumber(bigQueryService.getString(row, rm.get("valueAsNumber")))
+        .units(bigQueryService.getString(row, rm.get("units")))
+        .labRefRange(bigQueryService.getString(row, rm.get("refRange")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.MEASUREMENT);
+    } else if(domain.equals(DomainType.PHYSICAL_MEASURE)) {
+      return new PhysicalMeasurement()
+        .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
+        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .valueConcept(bigQueryService.getString(row, rm.get("valueConcept")))
+        .valueSource(bigQueryService.getString(row, rm.get("valueSourceValue")))
+        .valueNumber(bigQueryService.getString(row, rm.get("valueAsNumber")))
+        .units(bigQueryService.getString(row, rm.get("units")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .domainType(DomainType.MASTER);
     } else {
       return new Master()
         .dataId(bigQueryService.getLong(row, rm.get("dataId")))
@@ -770,9 +785,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
         .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
-        .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
-        .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
+        .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
+        .firstMention(row.get(rm.get("firstMention")).isNull() ? "" : bigQueryService.getDateTime(row, rm.get("firstMention")))
+        .lastMention(row.get(rm.get("lastMention")).isNull() ? "" : bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.MASTER);
