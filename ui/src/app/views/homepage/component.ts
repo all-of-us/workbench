@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {ServerConfigService} from 'app/services/server-config.service';
+import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
@@ -51,13 +51,12 @@ export class HomepageComponent implements OnInit, OnDestroy {
       'dolore. Mirum est notare, quam littera gothica quam nunc.',
       icon: '/assets/icons/explore.svg'
     }];
-  cards: any[] = [];
   firstTimeUser = false;
   private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
-  constructor(private serverConfigService: ServerConfigService,
+  constructor(
               private profileService: ProfileService,
               private profileStorageService: ProfileStorageService,
               private route: ActivatedRoute,
@@ -65,9 +64,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.serverConfigService.getConfig().subscribe((config) => {
-      this.enforceRegistered = config.enforceRegistered;
-    });
     this.profileStorageService.profile$.subscribe((profile) => {
       if (this.firstSignIn === undefined) {
         this.firstSignIn = new Date(profile.firstSignInTime);
@@ -137,21 +133,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
 
   listWorkspaces(): void {
     this.router.navigate(['workspaces']);
-  }
-
-  // The user is FC initialized and has access to the CDR, if enforced in this
-  // environment.
-  hasCdrAccess(): boolean {
-    if (!this.profile) {
-      return false;
-    }
-    if (!this.enforceRegistered) {
-      return true;
-    }
-    return [
-      DataAccessLevel.Registered,
-      DataAccessLevel.Protected
-    ].includes(this.profile.dataAccessLevel);
   }
 
   get twoFactorBannerEnabled() {
