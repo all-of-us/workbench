@@ -56,11 +56,10 @@ export class HomepageComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
-  constructor(
-              private profileService: ProfileService,
-              private profileStorageService: ProfileStorageService,
-              private route: ActivatedRoute,
-              private router: Router
+  constructor(private profileService: ProfileService,
+    private profileStorageService: ProfileStorageService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -77,7 +76,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
       }
       this.profile = profile;
       this.reloadSpinner();
-
     });
     this.profileStorageService.reload();
   }
@@ -124,15 +122,15 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspaces/build'], {relativeTo: this.route});
+    this.router.navigate(['workspaces/build'], {relativeTo : this.route});
   }
 
   navigateToProfile(): void {
-    this.router.navigate(['profile']);
+   this.router.navigate(['profile']);
   }
 
   listWorkspaces(): void {
-    this.router.navigate(['workspaces']);
+   this.router.navigate(['workspaces']);
   }
 
   get twoFactorBannerEnabled() {
