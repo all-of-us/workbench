@@ -22,7 +22,7 @@
           (onRowClick)="detailView($event)"
           >
         </app-detail-all-events>
-        <div class="details">
+        <div *ngIf="false" class="details">
           <h4>Details</h4>
           <div *ngIf="detailsLoading" class="spinner">Loading...</div>
           <div *ngIf="!detailsLoading && !details">No data</div>
