@@ -24,7 +24,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     oldVals = ['', ''];
     preview = Map();
     subscription: Subscription;
-    alert = false;
+    negativeAlert = false;
 
     constructor(private actions: CohortSearchActions) { }
 
@@ -69,7 +69,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     }
 
     inputChange(newValue: number) {
-        this.alert = newValue < 0 ? true : false;
+        this.negativeAlert = newValue < 0 ? true : false;
     }
 
     get paramId() {
@@ -121,32 +121,15 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     }
 
     requestPreview(attrform: NgForm) {
-        if (this.validateValues(attrform.value)) {
-          const param = this.getParamWithAttributes(attrform.value);
-          this.actions.addAttributeForPreview(param);
-          this.actions.requestAttributePreview();
-        } else {
-            this.alert = true;
-        }
+        const param = this.getParamWithAttributes(attrform.value);
+        this.actions.addAttributeForPreview(param);
+        this.actions.requestAttributePreview();
     }
 
     addAttrs(attrform: NgForm) {
-        if (this.validateValues(attrform.value)) {
-          const param = this.getParamWithAttributes(attrform.value);
-          this.actions.addParameter(param);
-          this.actions.hideAttributesPage();
-        } else {
-          this.alert = true;
-        }
-    }
-
-    validateValues(values: any) {
-      for (const key in values) {
-        if (Number.isInteger(values[key]) && values[key] < 0) {
-          return false;
-        }
-      }
-      return true;
+        const param = this.getParamWithAttributes(attrform.value);
+        this.actions.addParameter(param);
+        this.actions.hideAttributesPage();
     }
 
     cancel() {

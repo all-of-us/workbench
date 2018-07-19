@@ -1,7 +1,7 @@
 <div class="title">
   {{node.get('name','')}}
 </div>
-<div *ngIf="alert" class="alert alert-warning alert-sm">
+<div *ngIf="negativeAlert" class="alert alert-warning alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
       <div class="alert-icon-wrapper">
@@ -12,9 +12,6 @@
       </div>
     </div>
   </div>
-  <button type="button" class="close" aria-label="Close">
-    <clr-icon aria-hidden="true" shape="close"></clr-icon>
-  </button>
 </div>
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
@@ -47,7 +44,7 @@
     <div class="count-preview">
       <button type="button"
               class="btn"
-              [disabled]="!attrForm.valid"
+              [disabled]="!attrForm.valid || negativeAlert"
               (click)="requestPreview(attrForm)">
         Calculate
       </button>
@@ -60,6 +57,6 @@
       </span>
     </div>
     <button class="btn btn-link" type="button" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" type="submit" [disabled]="!attrForm.valid">Add Item</button>
+    <button class="btn btn-primary" type="submit" [disabled]="!attrForm.valid || negativeAlert">Add Item</button>
   </section>
 </form>
