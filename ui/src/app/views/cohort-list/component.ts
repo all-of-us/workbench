@@ -70,6 +70,12 @@ export class CohortListComponent implements OnInit, OnDestroy {
     }
   }
 
+  openCohort(cohort: Cohort): void {
+    if (!this.actionsDisabled) {
+      this.router.navigate([cohort.id, 'review'], {relativeTo: this.route});
+    }
+  }
+
   public deleteCohort(cohort: Cohort): void {
     this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
       this.cohortList.splice(

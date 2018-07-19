@@ -80,3 +80,13 @@ clr-dropdown-menu {
 .action-item.disabled {
   outline: none;
 }
+
+.card.item-card .name {
+  cursor: pointer;
+  word-wrap: break-word;
+}
+
+.card.item-card .name.disabled {
+  cursor: not-allowed;
+  color: #AAAFB4;
+}
