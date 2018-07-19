@@ -5,20 +5,6 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -36,7 +22,6 @@ import org.pmiops.workbench.model.CohortSummaryListResponse;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Condition;
 import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.Device;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Drug;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -60,12 +45,26 @@ import org.pmiops.workbench.model.ReviewFilter;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SortOrder;
-import org.pmiops.workbench.model.Visit;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
@@ -687,8 +686,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                       DomainType domain) {
     if (domain.equals(DomainType.DRUG)) {
       return new Drug()
-        .domainType(DomainType.DRUG)
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
@@ -696,60 +693,89 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
-        .firstMentions(bigQueryService.getDateTime(row, rm.get("numMentions")))
+        .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
-        .quantity(bigQueryService.getLong(row, rm.get("quantity")).intValue())
-        .lastMention(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
-        .;
+        .quantity(bigQueryService.getLong(row, rm.get("quantity")).floatValue())
+        .refills(bigQueryService.getLong(row, rm.get("refills")).intValue())
+        .strength(bigQueryService.getString(row, rm.get("strength")))
+        .route(bigQueryService.getString(row, rm.get("route")))
+        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .domainType(DomainType.DRUG)
+        ;
     } else if (domain.equals(DomainType.CONDITION)) {
       return new Condition()
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .domainType(DomainType.CONDITION).itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
+        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
+        .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
+        .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
+        .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
+        .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
+        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .domainType(DomainType.CONDITION);
     } else if (domain.equals(DomainType.PROCEDURE)) {
       return new Procedure()
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .domainType(DomainType.PROCEDURE)
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
+        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
+        .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
+        .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
+        .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
+        .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
+        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .domainType(DomainType.PROCEDURE);
     } else if (domain.equals(DomainType.OBSERVATION)) {
       return new Observation()
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .domainType(DomainType.OBSERVATION).itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
+        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
+        .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
+        .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .domainType(DomainType.OBSERVATION);
     } else if (domain.equals(DomainType.MEASUREMENT)) {
       return new Measurement()
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .domainType(DomainType.MEASUREMENT)
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
-        .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
+        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
+        .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
+        .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .valueConcept(bigQueryService.getString(row, rm.get("valueConcept")))
+        .valueSource(bigQueryService.getString(row, rm.get("valueSourceValue")))
+        .valueNumber(bigQueryService.getLong(row, rm.get("valueAsNumber")).floatValue())
+        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .domainType(DomainType.MEASUREMENT);
     } else {
       return new Master()
         .dataId(bigQueryService.getLong(row, rm.get("dataId")))
         .domain(bigQueryService.getString(row, rm.get("domain")))
-        .domainType(DomainType.MASTER)
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
+        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")));
+        .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
+        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
+        .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
+        .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
+        .visitType(bigQueryService.getString(row, rm.get("visitType")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .domainType(DomainType.MASTER);
     }
   }
 

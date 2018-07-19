@@ -727,7 +727,7 @@ definitions:
     properties:
       itemDate:
         type: string
-        description: The date of the data
+        description: The date of the event
       domainType:
         $ref: "#/definitions/DomainType"
 
@@ -744,9 +744,9 @@ definitions:
           standardCode:
             type: string
             description: The standard code of this data
-          sourceVocubulary:
+          sourceVocabulary:
             type: string
-            description: The vocabulary type of this data
+            description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data
@@ -785,7 +785,7 @@ definitions:
             description: The standard code of this data
           sourceVocabulary:
             type: string
-            description: The vocabulary type of this data
+            description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data
@@ -851,7 +851,7 @@ definitions:
             description: The standard code of this data
           sourceVocabulary:
             type: string
-            description: The vocabulary type of this data
+            description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data.
@@ -911,7 +911,7 @@ definitions:
             description: The standard code of this data
           sourceVocabulary:
             type: string
-            description: The vocabulary type of this data
+            description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data.
