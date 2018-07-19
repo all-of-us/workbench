@@ -37,26 +37,27 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
   cardDetails = [
-    {
-      position: 'left',
-      title: 'Browse All of Us Data',
-      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-      'dolore. Mirum est notare, quam littera gothica quam nunc.',
-      icon: '/assets/icons/browse-data.svg'
-    },
-    {
-      position: 'right',
-      title: 'Explore Public Work',
-      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-      'dolore. Mirum est notare, quam littera gothica quam nunc.',
-      icon: '/assets/icons/explore.svg'
-    }];
+      {
+        position: 'left',
+        title: 'Browse All of Us Data',
+        text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+        'dolore. Mirum est notare, quam littera gothica quam nunc.',
+        icon: '/assets/icons/browse-data.svg'
+      },
+      {
+        position: 'right',
+        title: 'Explore Public Work',
+        text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+        'dolore. Mirum est notare, quam littera gothica quam nunc.',
+        icon: '/assets/icons/explore.svg'
+      }];
   firstTimeUser = false;
   private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
-  constructor(private profileService: ProfileService,
+  constructor(
+    private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
     private router: Router
