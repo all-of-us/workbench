@@ -40,11 +40,6 @@
       }
     }
   ],
-  "e2e": {
-    "protractor": {
-      "config": "./protractor.conf.js"
-    }
-  },
   "lint": [
     {
       "project": "src/tsconfig.app.json",
@@ -63,9 +58,6 @@
         "**/src/publicGenerated/**/*.ts",
         "**/node_modules/**/*"
       ]
-    },
-    {
-      "project": "e2e/tsconfig.e2e.json"
     }
   ],
   "test": {
