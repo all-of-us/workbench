@@ -2,7 +2,7 @@
 	{
 	"mode": "NULLABLE",
 	"name": "person_id",
-	"type": "integer"
+	"type": "INTEGER"
 	}, 
 	{
 	"mode": "NULLABLE",
@@ -28,31 +28,6 @@
 	"mode": "NULLABLE", 
 	"name": "standard_vocabulary",
 	"type": "STRING"
-	}, 
-	{
-	"mode": "NULLABLE", 
-	"name": "source_name",
-	"type": "STRING"
-	},
-	{
-	"mode": "NULLABLE",
-	"name": "source_code",
-	"type": "STRING"
-	},
-	{
-	"mode": "NULLABLE", 
-	"name": "source_vocabulary",
-	"type": "STRING"
-	},
-	{
-	"mode": "NULLABLE", 
-	"name": "visit_id",
-	"type": "INTEGER"
-	},
-	{
-	"mode": "NULLABLE", 
-	"name": "visit_concept_id",
-	"type": "INTEGER"
 	},
 	{
 	"mode": "NULLABLE", 
@@ -61,17 +36,22 @@
 	}, 
 	{
 	"mode": "NULLABLE", 
-	"name": "num_mentions",
-	"type": "INTEGER"
+	"name": "value_concept",
+	"type": "STRING"
 	}, 
 	{
 	"mode": "NULLABLE", 
-	"name": "first_mention",
-	"type": "TIMESTAMP"
+	"name": "value_as_number",
+	"type": "FLOAT"
 	}, 
 	{
 	"mode": "NULLABLE", 
-	"name": "last_mention",
-	"type": "TIMESTAMP"
+	"name": "value_source_value",
+	"type": "STRING"
+	}, 
+	{
+	"mode": "NULLABLE", 
+	"name": "units",
+	"type": "STRING"
 	}
 ]

@@ -95,6 +95,13 @@ public class BigQueryService {
         return row.get(index).getLongValue();
     }
 
+    public Double getDouble(List<FieldValue> row, int index) {
+        if (row.get(index).isNull()) {
+            throw new BigQueryException(500, "FieldValue is null at position: " + index);
+        }
+        return row.get(index).getDoubleValue();
+    }
+
     public boolean isNull(List<FieldValue> row, int index) {
       return row.get(index).isNull();
     }

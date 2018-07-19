@@ -695,12 +695,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .numMentions(bigQueryService.getLong(row, rm.get("numMentions")).intValue())
         .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
-        .quantity(bigQueryService.getLong(row, rm.get("quantity")).floatValue())
+        .quantity(bigQueryService.getDouble(row, rm.get("quantity")).floatValue())
         .refills(bigQueryService.getLong(row, rm.get("refills")).intValue())
         .strength(bigQueryService.getString(row, rm.get("strength")))
         .route(bigQueryService.getString(row, rm.get("route")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.DRUG)
         ;
     } else if (domain.equals(DomainType.CONDITION)) {
@@ -716,7 +716,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.CONDITION);
     } else if (domain.equals(DomainType.PROCEDURE)) {
       return new Procedure()
@@ -731,7 +731,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.PROCEDURE);
     } else if (domain.equals(DomainType.OBSERVATION)) {
       return new Observation()
@@ -743,7 +743,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.OBSERVATION);
     } else if (domain.equals(DomainType.MEASUREMENT)) {
       return new Measurement()
@@ -755,9 +755,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .valueConcept(bigQueryService.getString(row, rm.get("valueConcept")))
         .valueSource(bigQueryService.getString(row, rm.get("valueSourceValue")))
-        .valueNumber(bigQueryService.getLong(row, rm.get("valueAsNumber")).floatValue())
+        .valueNumber(bigQueryService.getDouble(row, rm.get("valueAsNumber")).floatValue())
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.MEASUREMENT);
     } else {
       return new Master()
@@ -774,7 +774,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitType(bigQueryService.getString(row, rm.get("visitType")))
-        .itemDate(bigQueryService.getDateTime(row, rm.get("startDatetime")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.MASTER);
     }
   }
