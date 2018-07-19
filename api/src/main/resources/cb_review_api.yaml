@@ -506,7 +506,7 @@ definitions:
 
   DomainType:
     type: string
-    enum: [Condition, Procedure, Observation, Drug, Master, Device, Visit, Measurement]
+    enum: [Condition, Procedure, Observation, Drug, Master, Device, Visit, Measurement, PhysicalMeasurement]
 
   SortOrder:
     type: string
@@ -979,6 +979,36 @@ definitions:
             type: integer
             format: int64
             description: The visit Id of this data
+
+  PhysicalMeasurement:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          ageAtEvent:
+            type: integer
+            description: The age at event for the participant
+          valueConcept:
+            type: string
+            description: The value of this data
+          valueSource:
+            type: string
+            description: The value of this data
+          valueNumber:
+            type: number
+            format: float
+            description: The value of this data
+          units:
+            type: string
+            description: The units of this data
 
 
   AnnotationType:
