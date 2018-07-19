@@ -6,6 +6,8 @@
   -o-background-size: cover;
   background-size: cover;
   height: 100%;
+  margin-left: -1rem;
+  margin-right: -0.6rem;
 }
 
 .double {
@@ -13,14 +15,15 @@
   width: 638px;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
+  border: none;
 }
 
 .left {
-  margin-left: 8rem;
+  margin-left: 7rem;
 }
 
 .right {
-  margin-left: 0.8rem;
+  margin-left: 1rem;
 }
 
 .single {
@@ -29,7 +32,8 @@
   border-radius: 5px;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
-  margin-left: 8rem;
+  margin-left: 7rem;
+  border: none;
 }
 
 .analyzeSingleHeader {
@@ -41,7 +45,7 @@
   font-weight: 500;
   line-height: 34px;
   margin-top: 2%;
-  margin-left: 3%;
+  margin-left: 0.2rem;
 }
 
 .heading {
@@ -97,7 +101,7 @@
   justify-content: center;
   text-align: center;
   margin-top: 5%;
-  margin-left:2.5rem;
+  margin-left: 2.5rem;
 }
 
 .icon {
@@ -125,7 +129,8 @@
 
 .singleIcon {
   margin-top: 5%;
-  height: 60px;
+  height: 3rem;
+  margin-left: 1.2rem;
 }
 
 .btn-homepage {
@@ -150,14 +155,13 @@
 
 .footerTitle {
   height: 34px;
-  width: 688.13px;
   opacity: 0.87;
   color: #FFFFFF;
   font-size: 28px;
   font-weight: 500;
   line-height: 34px;
-  margin-left: 8.8rem;
-  margin-top: 2%;
+  margin-left: 8rem;
+  margin-top: 1.4rem;
 }
 
 .footerSubTitle {
@@ -165,7 +169,7 @@
 }
 
 .textGroup {
-  margin-left: 8.8rem;
+  margin-left: 8rem;
 }
 
 .footerText {
@@ -183,8 +187,14 @@
   margin-top: 2%;
 }
 
+.linkGroup:first-child {
+  margin-top: 0.8rem;
+}
+
 .linkGroup {
-  margin-top: 1%;
+  margin-top: 0.2rem;
+  display: flex;
+  justify-content: right;
   margin-left: 9rem;
 }
 
@@ -194,7 +204,7 @@
   color: #FFFFFF;
   font-size: 14px;
   line-height: 28px;
-  margin-right: 2rem;
+  margin-right: 1rem;
 }
 
 .card.add-card {
@@ -203,7 +213,9 @@
   background-color: #FFFFFF;
   align-content: left;
   margin-left: 25px;
+  margin-top: 1.3rem;
   cursor: pointer;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 .card-text {
@@ -227,6 +239,126 @@
 }
 
 .footerLink {
-  margin-left: 53rem;
+  margin-left: 55rem;
   color: #FFFFFF;
 }
+
+.bottom-banner {
+  margin-bottom: 0;
+  border-top-color: #5DAEE1;
+  border-style: solid;
+  border-top-width: .3rem;
+  border-bottom-width: 0;
+  border-right-width: 0;
+  border-left-width: 0;
+  width: 100%;
+  display: flex;
+  background-color: #483F4B;
+  height: 5rem;
+}
+
+.logo {
+  top: 1rem;
+  left: 3.25rem;
+  height: 3.5rem;
+  width: 7rem;
+  position: relative;
+  margin-left: 2rem;
+  line-height: 85px;
+}
+
+.bottom-links {
+  color: #9B9B9B;
+  font-size: 0.7rem;
+  height: 1rem;
+  left: 2.5rem;
+  top: 2rem;
+  margin-left: 2.5rem;
+  position: relative;
+  font-weight: 300;
+}
+
+@media (max-width: 1490px) {
+  .double {
+    width: 438px;
+  }
+
+  .single {
+    width: 900px;
+  }
+
+  .button {
+    justify-content: left;
+  }
+
+  .footer {
+    height: 470px;
+  }
+
+  .linkGroup {
+    margin-left: 23rem;
+    margin-top: 0.1rem;
+  }
+
+  .card .add-card {
+    margin-top: -0.6rem;
+  }
+
+  .footerLink {
+    margin-left: 30rem;
+  }
+
+  .footerTitle {
+    margin-left: 10rem;
+  }
+
+  .logo {
+    margin-left: 5rem;
+  }
+
+  .textGroup {
+    margin-left: 10rem;
+  }
+}
+
+@media (max-width: 1280px) {
+  .right {
+    margin-left: 18rem;
+  }
+
+  .left {
+    margin-left: 18rem;
+  }
+
+  .single {
+    margin-left: 8.5rem;
+  }
+
+}
+
+@media (min-width: 1800px) {
+  .left {
+    margin-left: 13rem;
+  }
+
+  .single {
+    margin-left: 13rem;
+  }
+
+  .footerText {
+    margin-left: 3rem;
+  }
+
+  .logo {
+    margin-left: 9rem;
+  }
+
+  .textGroup {
+    margin-left: 11rem;
+  }
+
+  .footerTitle {
+    margin-left: 14rem;
+  }
+}
+

@@ -60,10 +60,10 @@
       <div class="card single">
         <div class="row">
           <div class="col">
-            <img src='/assets/icons/Analyze.svg' class="iconImage">
+            <img src='/assets/icons/Analyze.svg' class="singleIcon">
           </div>
 
-          <div class="col analyzeSingleHeader">Analyze and Publish With Workspaces</div>
+          <div class="col analyzeSingleHeader">Analyze and Publish with Workspaces</div>
           <div class="col">
             <div class="row linkGroup">
               <div class="col">
@@ -98,15 +98,17 @@
           </div>
         </div>
         <div class="row">
-          <div class="card add-card" (click)="addWorkspace()">
-            <div class="card-text">
-              Create a <br/> New Workspace <br/>
-              <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+          <div class="col-md-3" style="margin-bottom: 2rem;">
+            <div class="card add-card" (click)="addWorkspace()">
+              <div class="card-text">
+                Create a <br/> New Workspace <br/>
+                <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
-
     </div>
   </div>
   <div class="footer">
@@ -114,8 +116,13 @@
       <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
     </div>
     <div class="row">
-      <a href="#" class="footerLink" data-toggle="tooltip" title="Coming Soon">
-        See all documentation</a>
+      <clr-tooltip clrPosition="top-right">
+        <a href="#" class="footerLink" clrTooltipTrigger>
+          See all documentation</a>
+        <clr-tooltip-content clrSize="sm" *clrIfOpen>
+          <span>Coming Soon</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
     </div>
     <div class="row textGroup">
       <div class="footerText">
@@ -125,7 +132,7 @@
             <li>
               <a href="#" class="bullets">
                 Researcher Workbench Mission</a>
-             </li>
+            </li>
             <li><a href="#" class="bullets">
               User interface components</a></li>
             <li><a href="#" class="bullets">
@@ -133,7 +140,7 @@
             <li><a href="#" class="bullets">
               Contributing to the Workbench</a></li>
           </ul>
-          <clr-tooltip-content *clrIfOpen>
+          <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
             <span>Coming Soon</span>
           </clr-tooltip-content>
         </clr-tooltip>
@@ -152,7 +159,7 @@
             <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
               Sharing and Publishing Workspaces</a></li>
           </ul>
-          <clr-tooltip-content *clrIfOpen>
+          <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
             <span>Coming Soon</span>
           </clr-tooltip-content>
         </clr-tooltip>
@@ -160,21 +167,32 @@
       <div class="footerText">
         <div class="title">Working with Notebooks</div>
         <clr-tooltip>
-        <ul class="bullet" clrTooltipTrigger>
-          <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-            Notebook interface components</a></li>
-          <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-            Notebooks and data</a></li>
-          <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-            Collaborating with other researchers</a></li>
-          <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-            Sharing and Publishing Notebooks</a></li>
-        </ul>
+          <ul class="bullet" clrTooltipTrigger>
+            <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+              Notebook interface components</a></li>
+            <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+              Notebooks and data</a></li>
+            <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+              Collaborating with other researchers</a></li>
+            <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
+              Sharing and Publishing Notebooks</a></li>
+          </ul>
           <clr-tooltip-content *clrIfOpen>
             <span>Coming Soon</span>
           </clr-tooltip-content>
         </clr-tooltip>
       </div>
+    </div>
+  </div>
+  <div class="bottom-banner">
+    <div class="logo">
+      <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
+    </div>
+    <div class="bottom-links">
+      Privacy Policy
+    </div>
+    <div class="bottom-links">
+      Terms of Service
     </div>
   </div>
 </div>

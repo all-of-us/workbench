@@ -18,7 +18,6 @@ import {
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
-  firstTimeUser = false;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -52,6 +51,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
           'dolore. Mirum est notare, quam littera gothica quam nunc.',
           icon: '/assets/icons/explore.svg'
       }];
+  firstTimeUser = false;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
@@ -76,9 +76,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
       }
       this.profile = profile;
       this.reloadSpinner();
-      if (profile.firstSignInTime === null) {
-        this.firstTimeUser = true;
-      }
     });
     this.profileStorageService.reload();
   }
