@@ -305,9 +305,9 @@ echo "Inserting drug data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.p_all_events\`
  (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_vocabulary, source_name, source_code, 
- source_vocabulary, age_at_event, visit_type, source_value)
+ source_vocabulary, age_at_event, visit_type)
  select person_id, data_id, 'Drug' as domain, start_datetime, standard_name, standard_code, standard_vocabulary, source_name, source_code, 
- source_vocabulary, age_at_event, b.concept_name as visit_type, value_as_number as source_value
+ source_vocabulary, age_at_event, b.concept_name as visit_type
  from \`$BQ_PROJECT.$BQ_DATASET.p_drug\` a
  join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
 
@@ -320,7 +320,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_vocabulary, source_name, source_code, 
  source_vocabulary, age_at_event, visit_type, source_value)
  select person_id, data_id, 'Measurement' as domain, start_datetime, standard_name, standard_code, standard_vocabulary, source_name, source_code, 
- source_vocabulary, age_at_event, b.concept_name as visit_type, value_as_number as source_value
+ source_vocabulary, age_at_event, b.concept_name as visit_type, CAST(value_as_number AS STRING) as source_value
  from \`$BQ_PROJECT.$BQ_DATASET.p_measurement\` a
  join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
 
