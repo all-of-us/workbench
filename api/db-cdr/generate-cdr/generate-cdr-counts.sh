@@ -96,9 +96,6 @@ else
     exit 1
 fi
 
-echo "Finished!"
-exit 1
-
 
 ## Make BigQuery cdr
 echo "Making BigQuery cdr dataset"
