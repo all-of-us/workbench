@@ -52,7 +52,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
       icon: '/assets/icons/explore.svg'
     }];
   cards: any[] = [];
-  firstTimeUser: boolean;
+  firstTimeUser = false;
   private enforceRegistered: boolean;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -62,30 +62,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
               private profileStorageService: ProfileStorageService,
               private route: ActivatedRoute,
               private router: Router
-  ) {
-    /*this.cards = [
-      {
-        title: 'Notebook1',
-        description: 'This is a dummy notebook',
-        type: 'notebook',
-        createdOn: '01/01/2018'
-      },
-      {
-        title: 'Cohort', description: 'This is a dummy cohort', type: 'cohort',
-        updatedOn: '07/01/2018'
-      },
-      {
-        title: 'Notebook2',
-        description: 'This is a dummy notebook',
-        type: 'notebook',
-        createdOn: '01/01/2018',
-        updatedOn: '04/03/2018'
-      },
-      {
-        title: 'Cohort2', description: 'This is a dummy cohort', type: 'cohort',
-        updatedOn: '07/01/2018'
-      }];*/
-  }
+  ) {}
 
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
@@ -94,8 +71,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.profileStorageService.profile$.subscribe((profile) => {
       if (this.firstSignIn === undefined) {
         this.firstSignIn = new Date(profile.firstSignInTime);
-        const dateDiff = (new Date().valueOf() - this.firstSignIn.valueOf());
-        this.firstTimeUser = (dateDiff < 2000).valueOf();
       }
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;

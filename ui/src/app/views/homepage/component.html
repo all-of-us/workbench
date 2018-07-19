@@ -19,7 +19,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="firstTimeUser && firstSignIn">
+  <div *ngIf="firstTimeUser">
     <div class="row">
       <div class="col">
         <div class="card double left">
@@ -55,7 +55,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="!firstTimeUser && firstSignIn">
+  <div *ngIf="!firstTimeUser">
     <div class="row">
       <div class="card single">
         <div class="row">
@@ -106,12 +106,7 @@
               </div>
             </div>
           </div>
-          <div class="col-md-9">
-            <div class="row links" *ngIf="cards.length>0" style="margin-left:4rem;margin-bottom:-2rem;">
-              Your recent work
-            </div>
-            <app-scroller [cards]=cards></app-scroller>
-          </div>
+
         </div>
       </div>
     </div>
@@ -121,8 +116,13 @@
       <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
     </div>
     <div class="row">
-      <a href="#" class="footerLink" data-toggle="tooltip" title="Coming Soon">
-        See all documentation</a>
+      <clr-tooltip clrPosition="top-right">
+        <a href="#" class="footerLink" clrTooltipTrigger>
+          See all documentation</a>
+        <clr-tooltip-content clrSize="sm" *clrIfOpen>
+          <span>Coming Soon</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
     </div>
     <div class="row textGroup">
       <div class="footerText">

@@ -62,9 +62,6 @@ import {
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
 
-import {CardComponent} from './views/card/component';
-import {ScrollComponent} from './views/scroll/component';
-
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
 // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/2
@@ -118,7 +115,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
-    CardComponent,
     CohortEditComponent,
     CohortListComponent,
     ErrorHandlerComponent,
@@ -131,7 +127,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
     RoutingSpinnerComponent,
-    ScrollComponent,
     SettingsComponent,
     SignedInComponent,
     WorkspaceComponent,
