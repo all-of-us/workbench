@@ -77,7 +77,7 @@ export class ChartComponent implements OnChanges {
       (this.concepts && this.concepts.length)) {
         // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
-      if(this.chartOptions.xAxis.categories.length == 0){
+      if(this.chartOptions.xAxis.categories.length === 0){
         this.informationExists = false;
       }else{
         this.informationExists = true;
@@ -203,6 +203,7 @@ export class ChartComponent implements OnChanges {
         results.push(r);
       }
     }
+    console.log(selectedResult.stratum5);
     return results;
   }
 

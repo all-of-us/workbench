@@ -16,3 +16,9 @@ highcharts-title {
     font-size: 10px;
 }
 
+.no_data_chart{
+    display: block;
+    width: auto;
+    height: 100%
+}
+

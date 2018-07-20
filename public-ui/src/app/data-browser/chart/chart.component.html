@@ -1,7 +1,4 @@
-<chart class="standard-chart"  [options]="chartOptions" *ngIf="informationExists; else note"></chart>
-<ng-template #note>
-    <span style="margin: auto; text-align: center; display: block;">No analyses data is available for this answer</span>
-</ng-template>
+<chart class="standard-chart"  [options]="chartOptions" *ngIf="informationExists"></chart>
 <!-- save instance version for fancy highcharts stuff later
 <chart class="standard-chart"  [options]="chartOptions" (load)="saveInstance($event.context )"></chart>
 -->

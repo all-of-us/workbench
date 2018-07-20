@@ -9,6 +9,7 @@ import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.servi
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
+import {Analysis} from '../../../publicGenerated/model/analysis';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 @Component({
   selector: 'app-survey-view',
@@ -86,7 +87,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
             stratum2: result.stratum2,
             stratum3: result.stratum3,
             stratum4: 'Did not answer',
-            stratum5: result.stratum5
+            stratum5: 'NoData'
           };
           q.countAnalysis.results.push(didNotAnswerResult);
         }
@@ -199,5 +200,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
   }
+
 
 }

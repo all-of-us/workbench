@@ -87,6 +87,7 @@
     margin-top: 0;
 }
 
+
 .row.answers .chart-wrapper {
     margin-bottom:0px;
 }
@@ -104,3 +105,9 @@
 .percent-bar {
     padding-right: 1rem;
 }
+
+.no-chart-wrapper{
+    height: 200px;
+    margin-top: 0;
+}
+
