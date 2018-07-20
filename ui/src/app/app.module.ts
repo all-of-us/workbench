@@ -41,6 +41,7 @@ import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
@@ -131,6 +132,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
+    UnregisteredComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceNavBarComponent,
