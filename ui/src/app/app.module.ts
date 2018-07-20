@@ -19,6 +19,7 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {WINDOW_REF} from './utils';
 
+import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
@@ -40,6 +41,7 @@ import {ProfilePageComponent} from './views/profile-page/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
@@ -109,6 +111,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AccountCreationComponent,
+    AccountCreationModalsComponent,
     AccountCreationSuccessComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
@@ -129,6 +132,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
+    UnregisteredComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceNavBarComponent,

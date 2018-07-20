@@ -49,6 +49,7 @@ export class ProfileStorageService {
       this.activeCall = false;
     }, (err) => {
       this.errorHandlingService.profileLoadError = true;
+      this.activeCall = false;
     });
   }
 }

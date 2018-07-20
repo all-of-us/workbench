@@ -161,6 +161,48 @@ paths:
           schema:
             $ref: "#/definitions/ContactEmailTakenResponse"
 
+  /v1/update-contact-email:
+    post:
+      tags:
+        - profile
+      description: Only for accounts that have not logged in yet, update contact email.
+      operationId: updateContactEmail
+      security: []
+      parameters:
+        - in: body
+          name: updateContactEmailRequest
+          schema:
+            $ref: "#/definitions/UpdateContactEmailRequest"
+      responses:
+        200:
+          description: Contact Email Updated
+        400:
+          description: Invalid contact email address
+        403:
+          description: Unable to process this request
+        500:
+          description: Internal Server Error
+
+  /v1/resend-welcome-email:
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Resend welcome email
+      operationId: resendWelcomeEmail
+      security: []
+      parameters:
+        - in: body
+          name: resendWelcomeEmail
+          schema:
+            $ref: "#/definitions/ResendWelcomeEmailRequest"
+      responses:
+        200:
+          description: Welcome Email sent.
+        500:
+          description: Internal Server Error
+
   /v1/invitation-key-verification:
     post:
       tags:
@@ -1231,6 +1273,28 @@ definitions:
       invitationKey:
         type: string
         description: Invitation key for verification
+
+  ResendWelcomeEmailRequest:
+    type: object
+    required:
+      - username
+    properties:
+      username:
+        type: string
+        description: Username of account to resend welcome email to
+
+  UpdateContactEmailRequest:
+    type: object
+    required:
+      - contactEmail
+      - username
+    properties:
+      contactEmail:
+        type: string
+        description: Email to update contact email
+      username:
+        type: string
+        description: Username for account.
 
   BugReport:
     type: object

@@ -23,9 +23,8 @@
     [popperTrigger]="'hover'"
     [popperPlacement]="'bottom'"
     [popperDisabled]="!isTruncated"
-    class="name text-muted">
-    {{ displayName }}
-  </div>
+    class="name text-muted"
+    [innerHTML]="displayName | safeHtml"></div>
 
   <!-- COUNT -->
   <div *ngIf="nonZeroCount" class="count">
