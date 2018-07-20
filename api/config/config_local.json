@@ -22,6 +22,7 @@
   },
   "googleCloudStorageService": {
     "credentialsBucketName": "all-of-us-workbench-test-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
     "demosBucketName": "all-of-us-workbench-test-demos"
   },
   "googleDirectoryService": {
@@ -32,6 +33,7 @@
     "projectId": "all-of-us-workbench-test"
   },
   "admin": {
+    "loginUrl": "http:\/\/localhost:4200/login",
     "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
   },
   "jira": {

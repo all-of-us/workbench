@@ -13,6 +13,7 @@ public interface CloudStorageService {
 
   public String readInvitationKey();
   public String readMandrillApiKey();
+  public String getImageUrl(String image_name);
   public void copyAllDemoNotebooks(String workspaceBucket);
   public List<JSONObject> readAllDemoCohorts();
   public List<Blob> getBlobList(String bucketName, String directory);
