@@ -112,7 +112,7 @@ describe('UnregisteredComponent', () => {
   it('should submit incomplete registration steps', fakeAsync(() => {
     loadProfileWithRegistrationSettings({
       dataAccessLevel: DataAccessLevel.Unregistered,
-      idVerificationStatus: IdVerificationStatus.Unverified,
+      idVerificationStatus: IdVerificationStatus.UNVERIFIED,
       requestedIdVerification: false,
     });
 
