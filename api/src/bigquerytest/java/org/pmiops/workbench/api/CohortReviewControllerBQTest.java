@@ -134,14 +134,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Override
   public List<String> getTableNames() {
     return Arrays.asList(
-      "person_all_events",
-      "person_condition",
-      "person_procedure",
-      "person_observation",
-      "person_measurement",
-      "person_drug",
-      "person_visit",
-      "person_device"
+      "p_all_events",
+      "p_condition",
+      "p_procedure",
+      "p_observation",
+      "p_measurement",
+      "p_drug",
+      "p_physical_measure"
     );
   }
 
@@ -156,156 +155,202 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     expectedMaster1 = new Master()
       .dataId(12751440L)
       .domain("Condition")
-      .itemDate("2008-07-22 05:00:00 UTC")
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
+      .standardCode("code")
       .sourceValue("0020")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
+      .numMentions("11")
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2018-03-22 05:00:00 UTC")
+      .visitType("visitType")
+      .itemDate("2008-07-22 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster2 = new Master()
       .dataId(12751441L)
       .domain("Condition")
-      .itemDate("2008-08-01 05:00:00 UTC")
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
+      .standardCode("code")
       .sourceValue("0021")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
+      .numMentions("11")
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2018-03-22 05:00:00 UTC")
+      .visitType("visitType")
+      .itemDate("2008-08-01 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster3 = new Master()
       .dataId(12751446L)
       .domain("Observation")
-      .itemDate("2009-12-03 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
       .standardName("name")
+      .standardCode("code")
       .sourceValue("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
+      .numMentions("11")
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2018-03-22 05:00:00 UTC")
+      .visitType("visitType")
+      .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster4 = new Master()
       .dataId(12751447L)
       .domain("Observation")
-      .itemDate("2009-12-04 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
       .standardName("name")
+      .standardCode("code")
       .sourceValue("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
+      .numMentions("11")
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2018-03-22 05:00:00 UTC")
+      .visitType("visitType")
+      .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster5 = new Master()
       .dataId(12751444L)
       .domain("Procedure")
-      .itemDate("2009-12-03 05:00:00 UTC")
       .standardVocabulary("ICD10CM")
       .standardName("name")
+      .standardCode("code")
       .sourceValue("val")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
+      .numMentions("11")
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2018-03-22 05:00:00 UTC")
+      .visitType("visitType")
+      .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster6 = new Master()
       .dataId(12751445L)
       .domain("Procedure")
-      .itemDate("2009-12-04 05:00:00 UTC")
       .standardVocabulary("CPT4")
       .standardName("name")
+      .standardCode("code")
       .sourceValue("val")
       .sourceVocabulary("CPT4")
       .sourceName("name")
+      .numMentions("11")
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2018-03-22 05:00:00 UTC")
+      .visitType("visitType")
+      .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster7 = new Master()
       .dataId(12751442L)
       .domain("Drug")
-      .itemDate("2001-12-03 05:00:00 UTC")
       .standardVocabulary("CPT4")
       .standardName("name")
+      .standardCode("code")
       .sourceValue("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
+      .numMentions("11")
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2018-03-22 05:00:00 UTC")
+      .visitType("visitType")
+      .itemDate("2001-12-03 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster8 = new Master()
       .dataId(12751443L)
       .domain("Drug")
-      .itemDate("2001-12-04 05:00:00 UTC")
       .standardVocabulary("CPT4")
       .standardName("name")
+      .standardCode("code")
       .sourceValue("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
+      .numMentions("11")
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2018-03-22 05:00:00 UTC")
+      .visitType("visitType")
+      .itemDate("2001-12-04 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedCondition1 = new Condition()
-      .age(28)
-      .itemDate("2008-07-22 05:00:00 UTC")
+      .ageAtEvent(28)
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
-      .sourceValue("0020")
+      .standardCode("code")
+      .sourceCode("0020")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
+      .itemDate("2008-07-22 05:00:00 UTC")
       .domainType(DomainType.CONDITION);
     expectedCondition2 = new Condition()
-      .age(28)
-      .itemDate("2008-08-01 05:00:00 UTC")
+      .ageAtEvent(28)
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
-      .sourceValue("0021")
+      .standardCode("code")
+      .sourceCode("0021")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
+      .itemDate("2008-08-01 05:00:00 UTC")
       .domainType(DomainType.CONDITION);
     expectedProcedure1 = new Procedure()
-      .age(29)
-      .itemDate("2009-12-03 05:00:00 UTC")
+      .ageAtEvent(29)
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .sourceValue("val")
+      .standardCode("code")
+      .sourceCode("val")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
+      .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.PROCEDURE);
     expectedProcedure2 = new Procedure()
-      .age(29)
-      .itemDate("2009-12-04 05:00:00 UTC")
+      .ageAtEvent(29)
       .standardVocabulary("CPT4")
       .standardName("name")
-      .sourceValue("val")
+      .standardCode("code")
+      .sourceCode("val")
       .sourceVocabulary("CPT4")
       .sourceName("name")
+      .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.PROCEDURE);
     expectedObservation1 = new Observation()
-      .age(29)
-      .itemDate("2009-12-03 05:00:00 UTC")
+      .ageAtEvent(29)
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .sourceValue("sourceValue")
+      .standardCode("code")
+      .sourceCode("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
+      .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.OBSERVATION);
     expectedObservation2 = new Observation()
-      .age(29)
-      .itemDate("2009-12-04 05:00:00 UTC")
+      .ageAtEvent(29)
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .sourceValue("sourceValue")
+      .standardCode("code")
+      .sourceCode("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
+      .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.OBSERVATION);
     expectedDrug1 = new Drug()
-      .age(21)
-      .signature("signature")
-      .itemDate("2001-12-03 05:00:00 UTC")
-      .standardVocabulary("CPT4")
+      .ageAtEvent(21)
+      .sourceVocabulary("CPT4")
       .standardName("name")
-      .sourceValue("Varivax")
+      .standardCode("code")
+      .sourceCode("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
+      .itemDate("2001-12-03 05:00:00 UTC")
       .domainType(DomainType.DRUG);
     expectedDrug2 = new Drug()
-      .age(21)
-      .signature("signature")
-      .itemDate("2001-12-04 05:00:00 UTC")
-      .standardVocabulary("CPT4")
+      .ageAtEvent(21)
+      .sourceVocabulary("CPT4")
       .standardName("name")
-      .sourceValue("Varivax")
+      .standardCode("code")
+      .sourceCode("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
+      .itemDate("2001-12-04 05:00:00 UTC")
       .domainType(DomainType.DRUG);
 
     cdrVersion = new CdrVersion();
@@ -796,24 +841,38 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     for (ParticipantData actualData : data) {
       ParticipantData expected = expectedData.get(i++);
       if (expected instanceof Drug) {
-        assertThat(((Drug) actualData).getAge()).isEqualTo(((Drug) expected).getAge());
-        assertThat(((Drug) actualData).getSignature()).isEqualTo(((Drug) expected).getSignature());
+        assertThat(((Drug) actualData).getAgeAtEvent()).isEqualTo(((Drug) expected).getAgeAtEvent());
+        assertThat(((Drug) actualData).getSourceName()).isEqualTo(((Drug) expected).getSourceName());
+        assertThat(((Drug) actualData).getSourceVocabulary()).isEqualTo(((Drug) expected).getSourceVocabulary());
+        assertThat(((Drug) actualData).getStandardName()).isEqualTo(((Drug) expected).getStandardName());
       } else if (expected instanceof Observation) {
-        assertThat(((Observation) actualData).getAge()).isEqualTo(((Observation) expected).getAge());
+        assertThat(((Observation) actualData).getAgeAtEvent()).isEqualTo(((Observation) expected).getAgeAtEvent());
+        assertThat(((Observation) actualData).getSourceName()).isEqualTo(((Observation) expected).getSourceName());
+        assertThat(((Observation) actualData).getSourceVocabulary()).isEqualTo(((Observation) expected).getSourceVocabulary());
+        assertThat(((Observation) actualData).getStandardName()).isEqualTo(((Observation) expected).getStandardName());
+        assertThat(((Observation) actualData).getStandardVocabulary()).isEqualTo(((Observation) expected).getStandardVocabulary());
       } else if (expected instanceof Condition) {
-        assertThat(((Condition) actualData).getAge()).isEqualTo(((Condition) expected).getAge());
+        assertThat(((Condition) actualData).getAgeAtEvent()).isEqualTo(((Condition) expected).getAgeAtEvent());
+        assertThat(((Condition) actualData).getSourceName()).isEqualTo(((Condition) expected).getSourceName());
+        assertThat(((Condition) actualData).getSourceVocabulary()).isEqualTo(((Condition) expected).getSourceVocabulary());
+        assertThat(((Condition) actualData).getStandardName()).isEqualTo(((Condition) expected).getStandardName());
+        assertThat(((Condition) actualData).getStandardVocabulary()).isEqualTo(((Condition) expected).getStandardVocabulary());
       } else if (expected instanceof Procedure) {
-        assertThat(((Procedure) actualData).getAge()).isEqualTo(((Procedure) expected).getAge());
+        assertThat(((Procedure) actualData).getAgeAtEvent()).isEqualTo(((Procedure) expected).getAgeAtEvent());
+        assertThat(((Procedure) actualData).getSourceName()).isEqualTo(((Procedure) expected).getSourceName());
+        assertThat(((Procedure) actualData).getSourceVocabulary()).isEqualTo(((Procedure) expected).getSourceVocabulary());
+        assertThat(((Procedure) actualData).getStandardName()).isEqualTo(((Procedure) expected).getStandardName());
+        assertThat(((Procedure) actualData).getStandardVocabulary()).isEqualTo(((Procedure) expected).getStandardVocabulary());
       } else if (expected instanceof Master) {
         assertThat(((Master) actualData).getDataId()).isEqualTo(((Master) expected).getDataId());
+        assertThat(((Master) actualData).getSourceName()).isEqualTo(((Master) expected).getSourceName());
+        assertThat(((Master) actualData).getSourceValue()).isEqualTo(((Master) expected).getSourceValue());
+        assertThat(((Master) actualData).getSourceVocabulary()).isEqualTo(((Master) expected).getSourceVocabulary());
+        assertThat(((Master) actualData).getStandardName()).isEqualTo(((Master) expected).getStandardName());
+        assertThat(((Master) actualData).getStandardVocabulary()).isEqualTo(((Master) expected).getStandardVocabulary());
       }
       assertThat(actualData.getDomainType()).isEqualTo(expected.getDomainType());
       assertThat(actualData.getItemDate()).isEqualTo(expected.getItemDate());
-      assertThat(actualData.getSourceName()).isEqualTo(expected.getSourceName());
-      assertThat(actualData.getSourceValue()).isEqualTo(expected.getSourceValue());
-      assertThat(actualData.getSourceVocabulary()).isEqualTo(expected.getSourceVocabulary());
-      assertThat(actualData.getStandardName()).isEqualTo(expected.getStandardName());
-      assertThat(actualData.getStandardVocabulary()).isEqualTo(expected.getStandardVocabulary());
     }
   }
 

@@ -23,8 +23,8 @@
           [popper]="datum.sourceName || ''"
           [popperTrigger]="'hover'"
           [popperPlacement]="'left'"
-          [popperTarget]="sourceValue">
-          <span #sourceValue>{{ datum.sourceVocabulary }}</span>
+          [popperTarget]="valueSource">
+          <span #valueSource>{{ datum.sourceVocabulary }}</span>
         </span>
         <span *ngSwitchDefault >
           {{ datum[col.name] }}

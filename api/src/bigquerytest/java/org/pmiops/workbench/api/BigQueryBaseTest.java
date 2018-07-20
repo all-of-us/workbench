@@ -86,7 +86,7 @@ public abstract class BigQueryBaseTest {
         for (Column column : columns) {
             String typeString = column.getType();
             LegacySQLTypeName fieldType;
-            switch (column.getType()) {
+            switch (column.getType().toLowerCase()) {
                 case "string":
                     fieldType = LegacySQLTypeName.STRING;
                     break;
