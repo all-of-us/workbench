@@ -8,7 +8,8 @@ import { Component, OnInit } from '@angular/core';
 export class DbHomeComponent implements OnInit {
   pageImage = '/assets/db-images/woman-chair.png';
   dbLogo = '/assets/db-images/Data_Browser_Logo.svg';
-  subTitle = 'Interested in browsing the public version of the All of Us Research Program data? Use the tools in the All of Us Data Browser application to explore!';
+  subTitle = 'Interested in browsing the public version of the All of Us Research Program data? ' +
+      'Use the tools in the All of Us Data Browser application to explore!';
 
   constructor() { }
 
