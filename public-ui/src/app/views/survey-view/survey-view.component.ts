@@ -9,7 +9,6 @@ import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.servi
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
-import {Analysis} from '../../../publicGenerated/model/analysis';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 @Component({
   selector: 'app-survey-view',

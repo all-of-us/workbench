@@ -57,7 +57,7 @@ export class ChartComponent implements OnChanges {
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any;
   chartInstance: any;
-  informationExists: boolean = true;
+  informationExists = true;
 
 
   constructor() {
@@ -77,9 +77,9 @@ export class ChartComponent implements OnChanges {
       (this.concepts && this.concepts.length)) {
         // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
-      if(this.chartOptions.xAxis.categories.length === 0){
+      if (this.chartOptions.xAxis.categories.length === 0) {
         this.informationExists = false;
-      }else{
+      } else {
         this.informationExists = true;
       }
         console.log(this.informationExists);
