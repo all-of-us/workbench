@@ -92,7 +92,7 @@ public class MailServiceImpl implements MailService {
       switch (status) {
         case API_ERROR:
           log.log(Level.WARNING, String.format(
-            "ApiException: Email '%s' not sent: %s", description, attempt.getRight().toString()));
+              "ApiException: Email '%s' not sent: %s", description, attempt.getRight().toString()));
           if (retries == 0) {
             log.log(Level.SEVERE, String.format(
               "ApiException: On Last Attempt! Email '%s' not sent: %s",

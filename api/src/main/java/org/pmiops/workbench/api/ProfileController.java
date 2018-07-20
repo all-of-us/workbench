@@ -455,18 +455,17 @@ public class ProfileController implements ProfileApiDelegate {
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     String newEmail = updateContactEmailRequest.getContactEmail();
-    if (userNeverLoggedIn(googleUser)) {
-      try {
-        new InternetAddress(newEmail).validate();
-      } catch (AddressException e) {
-        log.log(Level.INFO, "Invalid email entered.");
-        return ResponseEntity.badRequest().build();
-      }
-    } else {
+    if (!userNeverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    try {
+      new InternetAddress(newEmail).validate();
+    } catch (AddressException e) {
+      log.log(Level.INFO, "Invalid email entered.");
+      return ResponseEntity.badRequest().build();
+    }
     user.setContactEmail(newEmail);
-    return resetPasswordAndSendWelcomeEmail(username);
+    return resetPasswordAndSendWelcomeEmail(username, user);
   }
 
   @Override
@@ -475,20 +474,17 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
-    if (userNeverLoggedIn(googleUser)) {
-      return resetPasswordAndSendWelcomeEmail(username);
-    } else {
+    if (!userNeverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    return resetPasswordAndSendWelcomeEmail(username, user);
   }
 
-  private boolean userNeverLoggedIn(com.google.api.services.admin.directory.model.User googleUser) {
-    User user = userDao.findUserByEmail(googleUser.getPrimaryEmail());
+  private boolean userNeverLoggedIn(com.google.api.services.admin.directory.model.User googleUser, User user) {
     return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
   }
 
-  private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username) {
-    User user = userDao.findUserByEmail(username);
+  private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, User user) {
     com.google.api.services.admin.directory.model.User googleUser = directoryService.resetUserPassword(username);
     try {
       mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);

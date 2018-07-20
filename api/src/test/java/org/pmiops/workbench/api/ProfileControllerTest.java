@@ -619,6 +619,7 @@ public class ProfileControllerTest {
   public void updateContactEmail_badRequest() throws Exception {
     createUser();
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     user.setFirstSignInTime(null);
     UpdateContactEmailRequest request = new UpdateContactEmailRequest();
     String originalEmail = user.getContactEmail();
