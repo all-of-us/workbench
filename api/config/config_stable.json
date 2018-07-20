@@ -32,7 +32,7 @@
     "projectId": "all-of-us-rw-stable"
   },
   "admin": {
-    "loginUrl": "http:\/\/all-of-us-workbench-stable.appspot.com/login",
+    "loginUrl": "http:\/\/all-of-us-rw-stable.appspot.com/login",
     "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
   },
   "jira": {
