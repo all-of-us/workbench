@@ -6,5 +6,5 @@
   <clr-icon shape="error-standard"></clr-icon>
   <em>Failed to Load Criteria</em>
 </div>
-<app-search-bar *ngIf="children"></app-search-bar>
+<app-search-bar *ngIf="children && node.get('type') === 'visit'"></app-search-bar>
 <crit-node *ngFor="let item of children" [node]="item"></crit-node>
