@@ -10,6 +10,7 @@ import {
 } from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
+import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
@@ -27,6 +28,27 @@ import {
 } from 'generated';
 
 
+class FailingProfileStub extends ProfileServiceStub {
+  constructor(private fails: number) {
+    super();
+  }
+
+  submitTermsOfService(extraHttpRequestParams?: any): Observable<Profile> {
+    if (this.fails-- > 0) {
+      throw {status: 409};
+    }
+    return super.submitTermsOfService(extraHttpRequestParams);
+  }
+}
+
+class TrainingCompletesRegistrationStub extends ProfileServiceStub {
+  completeEthicsTraining(extraHttpRequestParams?: any): Observable<Profile> {
+    const obs = super.completeEthicsTraining(extraHttpRequestParams);
+    this.profile.dataAccessLevel = DataAccessLevel.Registered;
+    return obs;
+  }
+}
+
 @Component({
   selector: 'app-test',
   template: '<router-outlet></router-outlet>'
@@ -43,6 +65,7 @@ describe('UnregisteredComponent', () => {
   let fixture: ComponentFixture<FakeAppComponent>;
   let de: DebugElement;
   let router: Router;
+  let unregisteredComponent: UnregisteredComponent;
   let profileStub: ProfileServiceStub;
   let profileStorageStub: ProfileStorageServiceStub;
 
@@ -85,6 +108,8 @@ describe('UnregisteredComponent', () => {
     router.navigateByUrl('/unregistered');
     tick();
     fixture.detectChanges();
+
+    unregisteredComponent = de.children[1].componentInstance;
   }));
 
   const loadProfileWithRegistrationSettings = (p: any) => {
@@ -101,6 +126,13 @@ describe('UnregisteredComponent', () => {
     profileStorageStub.profile.next(profile);
   };
 
+  const expectAllRegistrationSubmitted = (p: Profile) => {
+    expect(p.requestedIdVerification).toBeTruthy();
+    expect(p.termsOfServiceCompletionTime).toBeTruthy();
+    expect(p.ethicsTrainingCompletionTime).toBeTruthy();
+    expect(p.demographicSurveyCompletionTime).toBeTruthy();
+  }
+
   it('should show unregistered for unregistered', fakeAsync(() => {
     loadProfileWithRegistrationSettings({
       dataAccessLevel: DataAccessLevel.Unregistered
@@ -116,11 +148,43 @@ describe('UnregisteredComponent', () => {
       requestedIdVerification: false,
     });
 
+    expectAllRegistrationSubmitted(profileStub.profile);
+  }));
+
+  it('should retry failed registration steps', fakeAsync(() => {
+    profileStub = new FailingProfileStub(2);
+    // Hacky, but unfortunately profileStub does not directly implement ProfileService.
+    (unregisteredComponent as any).profileService = profileStub;
+
+    loadProfileWithRegistrationSettings({
+      dataAccessLevel: DataAccessLevel.Unregistered,
+      idVerificationStatus: IdVerificationStatus.UNVERIFIED,
+      requestedIdVerification: false,
+    });
+
+    // Tick the retry delays.
+    tick(1000);
+    tick(1000);
+
     expect(de.nativeElement.textContent).toContain('Awaiting identity verification');
-    expect(profileStub.profile.requestedIdVerification).toBeTruthy();
-    expect(profileStub.profile.termsOfServiceCompletionTime).toBeTruthy();
-    expect(profileStub.profile.ethicsTrainingCompletionTime).toBeTruthy();
-    expect(profileStub.profile.demographicSurveyCompletionTime).toBeTruthy();
+    expectAllRegistrationSubmitted(profileStub.profile);
+  }));
+
+  fit('should redirect if profile becomes completed', fakeAsync(() => {
+    profileStub = new TrainingCompletesRegistrationStub();
+    // Hacky, but unfortunately profileStub does not directly implement ProfileService.
+    (unregisteredComponent as any).profileService = profileStub;
+
+    loadProfileWithRegistrationSettings({
+      dataAccessLevel: DataAccessLevel.Unregistered,
+      idVerificationStatus: IdVerificationStatus.UNVERIFIED,
+      requestedIdVerification: false,
+    });
+
+    tick();
+    fixture.detectChanges();
+
+    expect(de.queryAll(By.css('app-fake-root')).length).toEqual(1);
   }));
 
   it('should navigate away for registered users', fakeAsync(() => {

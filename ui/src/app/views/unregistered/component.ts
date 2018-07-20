@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationError, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+import {timer} from 'rxjs/observable/timer';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
@@ -44,35 +45,43 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
           }
           this.idvStatus = profile.idVerificationStatus;
 
-          let obs = Observable.from([profile]);
-          // For now, we automatically submit ID verification as there's nothing
-          // else to do in the application and only manual verification is supported.
-          if (!profile.requestedIdVerification) {
-            obs = obs.flatMap((p) => {
-              return this.profileService.submitIdVerification().map((_) => p);
-            });
-          }
-
-          // For now, we automatically submit all placeholder user setup steps.
-          // Per RW-695, ID verification is sufficient for data access for
-          // initial internal data access.
-          if (!profile.termsOfServiceCompletionTime) {
-            obs = obs.flatMap((p) => {
-              return this.profileService.submitTermsOfService().map((_) => p);
-            });
-          }
-          if (!profile.ethicsTrainingCompletionTime) {
-            obs = obs.flatMap((p) => {
-              return this.profileService.completeEthicsTraining().map((_) => p);
-            });
-          }
-          if (!profile.demographicSurveyCompletionTime) {
-            obs = obs.flatMap((p) => {
-              return this.profileService.submitDemographicsSurvey().map((_) => p);
-            });
-          }
-          return obs;
-        })
+          // Start a new retryable sequence of observables here.
+          return Observable.from([profile])
+            // For now, we automatically submit ID verification as there's nothing
+            // else to do in the application and only manual verification is supported.
+            .flatMap((p) => {
+              if (p.requestedIdVerification) {
+                return Observable.from([p]);
+              }
+              return this.profileService.submitIdVerification();
+            })
+            // Per RW-695, ID verification is sufficient for initial internal
+            // data access.
+            .flatMap((p) => {
+              if (p.termsOfServiceCompletionTime) {
+                return Observable.from([p]);
+              }
+              return this.profileService.submitTermsOfService();
+            })
+            .flatMap((p) => {
+              if (p.ethicsTrainingCompletionTime) {
+                return Observable.from([p]);
+              }
+              return this.profileService.completeEthicsTraining();
+            })
+            .flatMap((p) => {
+              if (p.demographicSurveyCompletionTime) {
+                return Observable.from([p]);
+              }
+              return this.profileService.submitDemographicsSurvey();
+            })
+            .do((p) => {
+              if (hasRegisteredAccess(p.dataAccessLevel)) {
+                this.navigateAway();
+              }
+            })
+            .retryWhen(ProfileStorageService.conflictRetryPolicy());
+          })
         .subscribe();
     });
   }
