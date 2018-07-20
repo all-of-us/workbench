@@ -26,7 +26,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and c.is_group = 0 and c.is_selectable = 1 " +
     "and upper(c.name) like %:name% " +
     "order by c.name asc", nativeQuery = true)
-  List<Criteria> findDrugBrandOrIngrediantByName(@Param("name") String name);
+  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name);
 
   @Query(value = "select * from criteria c " +
     "where c.concept_id in ( " +
@@ -34,7 +34,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "join concept c1 on (cr.concept_id_2 = c1.concept_id " +
     "and cr.concept_id_1 = :conceptId " +
     "and c1.concept_class_id = 'Ingredient') )", nativeQuery = true)
-  List<Criteria> findDrugIngredientsByConceptId(@Param("conceptId") Long conceptId);
+  List<Criteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
 
   @Query(value = "select distinct c.domain_id as domainId from criteria c " +
     "where c.parent_id in (" +

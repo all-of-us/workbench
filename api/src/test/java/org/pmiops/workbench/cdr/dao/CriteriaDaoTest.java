@@ -170,23 +170,23 @@ public class CriteriaDaoTest {
   }
 
   @Test
-  public void findDrugBrandOrIngrediantByName() throws Exception {
-    List<Criteria> drugList = criteriaDao.findDrugBrandOrIngrediantByName("ETAM");
+  public void findDrugBrandOrIngredientByName() throws Exception {
+    List<Criteria> drugList = criteriaDao.findDrugBrandOrIngredientByName("ETAM");
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
 
-    drugList = criteriaDao.findDrugBrandOrIngrediantByName("ACE");
+    drugList = criteriaDao.findDrugBrandOrIngredientByName("ACE");
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
 
-    drugList = criteriaDao.findDrugBrandOrIngrediantByName("BL");
+    drugList = criteriaDao.findDrugBrandOrIngredientByName("BL");
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaBrand, drugList.get(0));
   }
 
   @Test
   public void findDrugIngredientsByConceptId() throws Exception {
-    List<Criteria> drugList = criteriaDao.findDrugIngredientsByConceptId(12345L);
+    List<Criteria> drugList = criteriaDao.findDrugIngredientByConceptId(12345L);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
   }
