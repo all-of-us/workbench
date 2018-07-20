@@ -16,8 +16,8 @@ import {
 } from 'publicGenerated';
 
 
-import {AppRoutingModule} from './app-routing.module';
-import {DataBrowserModule} from './data-browser/data-browser.module';
+import { AppRoutingModule } from './app-routing.module';
+import { DataBrowserModule } from './data-browser/data-browser.module';
 import { DbHeaderComponent } from './views/db-header/db-header.component';
 import { DbHomeComponent } from './views/db-home/db-home.component';
 import { SurveyViewComponent } from './views/survey-view/survey-view.component';

@@ -20,7 +20,8 @@ import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListR
 export class QuickSearchComponent implements OnInit, OnDestroy {
   pageImage = '/assets/db-images/man-standing.png';
   title = 'Quick Guided Search';
-  subTitle = 'Enter a keyword or data standards code (eg ICD, SNOMED) in the search bar to search across ' +
+  subTitle = 'Enter a keyword or data standards code (eg ICD, SNOMED) ' +
+      'in the search bar to search across ' +
       'Electronic Health Record (EHR) data and program surveys.';
   searchResults = [];
   domainResults = [];

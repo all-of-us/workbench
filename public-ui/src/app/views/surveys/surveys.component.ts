@@ -9,7 +9,9 @@ import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.servi
 })
 export class SurveysComponent implements OnInit, OnDestroy {
   title = 'Browse Participant Surveys';
-  subTitle = 'View full survey content for each survey questionnaire. Explore aggregate views of All of Us participant responses.';
+  subTitle = 'View full survey content for each survey ' +
+      'questionnaire. Explore aggregate views of ' +
+      'All of Us participant responses.';
   pageImage = '/assets/db-images/man-vest.png';
   surveys = [];
   private subscription: ISubscription;
