@@ -4,5 +4,4 @@ export const environment = {
   ...testEnvironmentBase,
   displayTag: 'Test',
   debug: false,
-  testing: true
 };

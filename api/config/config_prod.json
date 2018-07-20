@@ -20,7 +20,8 @@
     "debugQueries": false
   },
   "googleCloudStorageService": {
-    "credentialsBucketName": "all-of-us-rw-prod-credentials"
+    "credentialsBucketName": "all-of-us-rw-prod-credentials",
+    "demosBucketName": "all-of-us-rw-prod-demos"
   },
   "googleDirectoryService": {
     "gSuiteDomain": "researchallofus.org"

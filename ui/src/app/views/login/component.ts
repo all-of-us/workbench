@@ -15,6 +15,7 @@ import {SignInService} from 'app/services/sign-in.service';
   templateUrl: './component.html'
 })
 export class LoginComponent implements OnInit {
+  showCreateAccount = false;
   currentUrl: string;
   backgroundImgSrc = '/assets/images/login-group.png';
   smallerBackgroundImgSrc = '/assets/images/login-standing.png';

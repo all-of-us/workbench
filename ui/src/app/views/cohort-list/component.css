@@ -47,6 +47,11 @@ clr-dropdown-menu {
   color: #216FB4;
 }
 
+.ellipsis-vertical.disabled {
+  color: #AAAFB4;
+  cursor: not-allowed;
+}
+
 .action-item {
   text-align: left;
   color: #4A4A4A;
@@ -66,4 +71,27 @@ clr-dropdown-menu {
 
 .card.item-card {
   justify-content: space-between;
+}
+
+.action-item.disabled {
+  color: #AAAFB4;
+  cursor: not-allowed;
+}
+
+.action-item.disabled:hover {
+  background-color: white;
+}
+
+.action-item.disabled {
+  outline: none;
+}
+
+.card.item-card .name {
+  cursor: pointer;
+  word-wrap: break-word;
+}
+
+.card.item-card .name.disabled {
+  cursor: not-allowed;
+  color: #AAAFB4;
 }
