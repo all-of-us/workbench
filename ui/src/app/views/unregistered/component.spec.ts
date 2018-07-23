@@ -170,7 +170,7 @@ describe('UnregisteredComponent', () => {
     expectAllRegistrationSubmitted(profileStub.profile);
   }));
 
-  fit('should redirect if profile becomes completed', fakeAsync(() => {
+  it('should redirect if profile becomes completed', fakeAsync(() => {
     profileStub = new TrainingCompletesRegistrationStub();
     // Hacky, but unfortunately profileStub does not directly implement ProfileService.
     (unregisteredComponent as any).profileService = profileStub;
