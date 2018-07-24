@@ -70,6 +70,12 @@ export class CohortListComponent implements OnInit, OnDestroy {
     }
   }
 
+  openCohort(cohort: Cohort): void {
+    if (!this.actionsDisabled) {
+      this.router.navigate([cohort.id, 'review'], {relativeTo: this.route});
+    }
+  }
+
   public deleteCohort(cohort: Cohort): void {
     this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
       this.cohortList.splice(
@@ -80,5 +86,9 @@ export class CohortListComponent implements OnInit, OnDestroy {
   get writePermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
       || this.accessLevel === WorkspaceAccessLevel.WRITER;
+  }
+
+  get actionsDisabled(): boolean {
+    return !this.writePermission || this.awaitingReview;
   }
 }

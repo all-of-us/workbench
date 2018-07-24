@@ -30,8 +30,7 @@ public class DirectoryServiceImplIntegrationTest {
   public void setUp() throws MessagingException {
     MailService mailService = Mockito.mock(MailServiceImpl.class);
     service = new DirectoryServiceImpl(
-        Providers.of(googleCredential), Providers.of(workbenchConfig),
-        Providers.of(mailService), httpTransport,
+        Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport,
         new GoogleRetryHandler(new NoBackOffPolicy()));
   }
 

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMap;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -17,8 +18,10 @@ import javax.inject.Provider;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -52,6 +55,8 @@ import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
+import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,10 +69,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProfileController implements ProfileApiDelegate {
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
       new ImmutableMap.Builder<CreationStatusEnum, BillingProjectStatus>()
-      .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
-      .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
-      .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
-      .build();
+          .put(CreationStatusEnum.CREATING, BillingProjectStatus.PENDING)
+          .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
+          .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
+          .build();
   private static final Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership,
       BillingProjectMembership> TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
       new Function<org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>() {
@@ -256,7 +261,7 @@ public class ProfileController implements ProfileApiDelegate {
     // On subsequent sign-ins to the first, attempt to complete the setup of the FC billing project
     // and mark the Workbench's project setup as completed. FC project creation is asynchronous, so
     // first confirm whether Firecloud claims the project setup is complete.
-    BillingProjectStatus status = null;
+    BillingProjectStatus status;
     try {
       status = fireCloudService.getBillingProjectMemberships().stream()
           .filter(m -> user.getFreeTierBillingProjectName().equals(m.getProjectName()))
@@ -283,7 +288,7 @@ public class ProfileController implements ProfileApiDelegate {
           try {
             fireCloudService.removeUserFromBillingProject(user.getEmail(), user.getFreeTierBillingProjectName());
           } catch (WorkbenchException e) {
-            log.log(Level.INFO, String.format("Failed to remove user from errored billing project"));
+            log.log(Level.INFO, "Failed to remove user from errored billing project");
           }
           String billingProjectName = createFirecloudBillingProject(user);
           return this.userService.setBillingProjectNameAndStatus(billingProjectName, BillingProjectStatus.PENDING);
@@ -380,6 +385,12 @@ public class ProfileController implements ProfileApiDelegate {
         request.getProfile().getFamilyName(),
         googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
 
+    try {
+      mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
+    } catch (MessagingException e) {
+      throw new WorkbenchException(e);
+    }
+
     // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
     // doesn't allow this. Fix.
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -420,16 +431,67 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> invitationKeyVerification(InvitationVerificationRequest invitationVerificationRequest){
+  public ResponseEntity<Void> invitationKeyVerification(InvitationVerificationRequest invitationVerificationRequest) {
     verifyInvitationKey(invitationVerificationRequest.getInvitationKey());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  private void verifyInvitationKey(String invitationKey){
-    if(invitationKey == null || invitationKey.equals("") || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
+  private void verifyInvitationKey(String invitationKey) {
+    if (invitationKey == null || invitationKey.equals("") || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
       throw new BadRequestException(
-        "Missing or incorrect invitationKey (this API is not yet publicly launched)");
+          "Missing or incorrect invitationKey (this API is not yet publicly launched)");
     }
+  }
+
+  /*
+   * This un-authed API method is limited such that we only allow contact email updates before the user has signed in
+   * with the newly created gsuite account. Once the user has logged in, they can change their contact email through
+   * the normal profile update process.
+   */
+  @Override
+  public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
+    String username = updateContactEmailRequest.getUsername();
+    com.google.api.services.admin.directory.model.User googleUser =
+      directoryService.getUser(username);
+    User user = userDao.findUserByEmail(username);
+    String newEmail = updateContactEmailRequest.getContactEmail();
+    if (!userNeverLoggedIn(googleUser, user)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+    try {
+      new InternetAddress(newEmail).validate();
+    } catch (AddressException e) {
+      log.log(Level.INFO, "Invalid email entered.");
+      return ResponseEntity.badRequest().build();
+    }
+    user.setContactEmail(newEmail);
+    return resetPasswordAndSendWelcomeEmail(username, user);
+  }
+
+  @Override
+  public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
+    String username = resendRequest.getUsername();
+    com.google.api.services.admin.directory.model.User googleUser =
+      directoryService.getUser(username);
+    User user = userDao.findUserByEmail(username);
+    if (!userNeverLoggedIn(googleUser, user)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+    return resetPasswordAndSendWelcomeEmail(username, user);
+  }
+
+  private boolean userNeverLoggedIn(com.google.api.services.admin.directory.model.User googleUser, User user) {
+    return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
+  }
+
+  private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, User user) {
+    com.google.api.services.admin.directory.model.User googleUser = directoryService.resetUserPassword(username);
+    try {
+      mailServiceProvider.get().sendWelcomeEmail(user.getContactEmail(), googleUser.getPassword(), googleUser);
+    } catch (MessagingException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
@@ -446,8 +508,8 @@ public class ProfileController implements ProfileApiDelegate {
     }
     List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations()
-        .stream().map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
-        .collect(Collectors.toList());
+            .stream().map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+            .collect(Collectors.toList());
     int i = 0;
     ListIterator<org.pmiops.workbench.db.model.InstitutionalAffiliation> oldAffilations =
         user.getInstitutionalAffiliations().listIterator();
@@ -490,7 +552,7 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
     IdVerificationListResponse response = new IdVerificationListResponse();
-    List<Profile> responseList = new ArrayList<Profile>();
+    List<Profile> responseList = new ArrayList<>();
     for (User user : userService.getNonVerifiedUsers()) {
       responseList.add(profileService.getProfile(user));
     }

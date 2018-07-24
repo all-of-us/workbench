@@ -49,6 +49,7 @@ export class CohortSearchActions {
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
+  @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;

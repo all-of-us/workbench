@@ -22,7 +22,7 @@
           (onRowClick)="detailView($event)"
           >
         </app-detail-all-events>
-        <div class="details">
+        <div *ngIf="false" class="details">
           <h4>Details</h4>
           <div *ngIf="detailsLoading" class="spinner">Loading...</div>
           <div *ngIf="!detailsLoading && !details">No data</div>
@@ -31,7 +31,7 @@
             <div *ngIf="details.dataType == 'ParticipantVisit'"><b>End Date:</b> <small>{{ details.endDate | date:'yyyy-MM-dd HH:mm:ss' }}</small></div>
             <div><b>Standard Vocabulary:</b> <small>{{ details.standardVocabulary }}</small></div>
             <div><b>Standard Name:</b> <small>{{ details.standardName }}</small></div>
-            <div><b>Source Value:</b> <small>{{ details.sourceValue }}</small></div>
+            <div><b>Source Value:</b> <small>{{ details.valueSource }}</small></div>
             <div *ngIf="details.dataType == 'ParticipantDrug'"><b>Signature:</b> <small>{{ details.signature }}</small></div>
             <div><b>Source Vocabulary:</b> <small>{{ details.sourceVocabulary }}</small></div>
             <div><b>Source Name:</b> <small>{{ details.sourceName }}</small></div>

@@ -10,6 +10,7 @@ import {
   CohortSearchState,
   criteriaChildren,
   criteriaError,
+  criteriaSearchTerms,
   isCriteriaLoading,
 } from '../redux';
 
@@ -40,6 +41,10 @@ export class NodeComponent implements OnInit, OnDestroy {
    */
   expanded = false;
   children: any;
+  expandedTree: any;
+  originalTree: any;
+  modifiedTree = false;
+  searchTerms: string;
   loading = false;
   error = false;
   fullTree: boolean;
@@ -83,10 +88,23 @@ export class NodeComponent implements OnInit, OnDestroy {
           }
         });
 
+      const searchSub = this.ngRedux
+        .select(criteriaSearchTerms())
+        .subscribe(searchTerms => {
+          this.searchTerms = searchTerms;
+          if (searchTerms && searchTerms.length > 2) {
+            this.searchTree();
+          } else {
+            this.clearSearchTree();
+          }
+        });
+
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
+      this.subscription.add(searchSub);
     }
+    this.expanded = this.node.get('expanded', false);
   }
 
   ngOnDestroy() {
@@ -130,5 +148,77 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   toggleExpanded() {
     this.expanded = !this.expanded;
+  }
+
+  searchTree() {
+    if (!this.modifiedTree) {
+      this.modifiedTree = true;
+      this.originalTree = this.children;
+    }
+    this.expandedTree = this.originalTree.toJS();
+    const filtered = this.filterTree(this.originalTree.toJS(), []);
+    this.children = fromJS(this.mergeExpanded(filtered, this.expandedTree));
+  }
+
+  clearSearchTree() {
+    if (this.modifiedTree) {
+      this.children = this.originalTree;
+      this.modifiedTree = false;
+    }
+  }
+
+  filterTree(tree: Array<any>, path: Array<number>) {
+    return tree.map((item, i) => {
+      path.push(i);
+      if (this.matchFound(item)) {
+        let name = '<b>';
+        const start = item.name.toLowerCase().indexOf(this.searchTerms.toLowerCase());
+        if (start > -1) {
+          const end = start + this.searchTerms.length;
+          name += item.name.slice(0, start) + '<span class="search-keyword" style="color: #659F3D">'
+            + item.name.slice(start, end) + '</span>'
+            + item.name.slice(end);
+        } else {
+          name += item.name;
+        }
+        item.name = name + '</b>';
+        if (path.length > 1) {
+          this.setExpanded(path, 0);
+        }
+      }
+      if (item.children.length) {
+        item.children = this.filterTree(item.children, path);
+      }
+      path.pop();
+      return item;
+    });
+  }
+
+  matchFound(item: any) {
+    return item.name.toLowerCase().includes(this.searchTerms.toLowerCase())
+      || item.conceptId.toString().includes(this.searchTerms);
+  }
+
+  setExpanded(path: Array<number>, end: number) {
+    let obj = this.expandedTree[path[0]];
+    for (let x = 1; x < end; x++) {
+        obj = obj.children[path[x]];
+    }
+    if (obj.children.length) {
+      obj.expanded = true;
+    }
+    if (path[end + 1]) {
+      this.setExpanded(path, end + 1);
+    }
+  }
+
+  mergeExpanded(filtered: Array<any>, expanded: Array<any>) {
+    expanded.forEach((item, i) => {
+      filtered[i].expanded = item.expanded || false;
+      if (filtered[i].children.length) {
+        filtered[i].children = this.mergeExpanded(filtered[i].children, item.children);
+      }
+    });
+    return filtered;
   }
 }

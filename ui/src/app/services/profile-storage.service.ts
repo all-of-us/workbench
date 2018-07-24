@@ -1,3 +1,5 @@
+import {Observable} from 'rxjs/Observable';
+import {timer} from 'rxjs/observable/timer';
 import 'rxjs/Rx';
 
 import {Injectable} from '@angular/core';
@@ -11,6 +13,8 @@ import {ProfileService} from 'generated';
 
 @Injectable()
 export class ProfileStorageService {
+  private static readonly RETRY_DELAY_MS = 500;
+
   private activeCall = false;
   private profile = new ReplaySubject<Profile>(1);
   public profile$ = this.profile.asObservable();
@@ -21,14 +25,31 @@ export class ProfileStorageService {
   }
 
   reload() {
-    if (!this.activeCall) {
-      this.activeCall = true;
-      this.profileService.getMe().subscribe((profile) => {
-        this.profile.next(profile);
-        this.activeCall = false;
-      }, () => {
-        this.errorHandlingService.profileLoadError = true;
-      });
+    if (this.activeCall) {
+      return;
     }
+    this.activeCall = true;
+
+    // Conflict 409s are not retries automatically. These have a likelihood to
+    // occur on initial user login since we lazily initialize several things via
+    // the /me profile endpoint.
+    let retries = 0;
+    this.profileService.getMe().retryWhen((errs) => {
+      return errs.flatMap((err) => {
+        if (err.status !== 409) {
+          throw err;
+        }
+        if (++retries >= 3) {
+          throw err;
+        }
+        return timer(retries * ProfileStorageService.RETRY_DELAY_MS);
+      });
+    }).subscribe((profile) => {
+      this.profile.next(profile);
+      this.activeCall = false;
+    }, (err) => {
+      this.errorHandlingService.profileLoadError = true;
+      this.activeCall = false;
+    });
   }
 }

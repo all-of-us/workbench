@@ -1,0 +1,8 @@
+<div class="search-box">
+  <clr-icon shape="search"></clr-icon>
+  <input clrInput
+   type="text"
+   name="searchTerm"
+   [(ngModel)]="searchTerm"
+   (input)="inputChange($event.target.value)"/>
+</div>
