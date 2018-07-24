@@ -1,53 +1,80 @@
 <div *ngIf="!notFound else notFoundMessage">
-  <ng-container [ngSwitch]="mode">
-    <div *ngSwitchCase="Mode.Create">
-      <h2>Create a new Workspace</h2>
+  <div class="section name-section">
+    <div class="required-field">
+      <ng-container [ngSwitch]="mode">
+        <div *ngSwitchCase="Mode.Create">
+          <h2 class="page-header">Create a new Workspace</h2>
+        </div>
+        <div *ngSwitchCase="Mode.Edit">
+          <h2 class="page-header">Edit workspace "{{workspace.name}}"</h2>
+        </div>
+        <div *ngSwitchCase="Mode.Clone">
+          <h2 class="page-header">Clone workspace "{{oldWorkspaceName}}"</h2>
+        </div>
+      </ng-container>
+      <div class="required-text">(Required)</div>
     </div>
-    <div *ngSwitchCase="Mode.Edit">
-      <h2>Edit workspace "{{workspace.name}}"</h2>
-    </div>
-    <div *ngSwitchCase="Mode.Clone">
-      <h2>Clone workspace "{{oldWorkspaceName}}"</h2>
-    </div>
-  </ng-container>
-  <div>* is a required field</div>
-  <div>
-    <div class="name-area" [class.validation-error]="nameNotEntered">
+    <div class="name-area required-field" [class.validation-error]="nameNotEntered">
       <input type="text" class="input name" name="workspace-name" autofocus
-          [(ngModel)]="workspace.name" [disabled]="!hasPermission"
-          placeholder="Workspace Name">
-      <span style="display: inline-block; vertical-align: bottom">
-        <div>Billing Account:</div>
-        <div>National Institute of Health</div>
-      </span>
+             [(ngModel)]="workspace.name" [disabled]="!hasPermission"
+             placeholder="Workspace Name">
+    </div>
+  </div>
+  <div>
+
+    <div class="section billing-project-section">
+      <div class="section-header">
+        Billing Account
+      </div>
+      <div class="section-sub-header">
+        National Institutes of Health
+      </div>
+      <div class="section-text">
+        To fulfill program requirements, All of Us requests the following information
+        for each workspace.<!-- If you are not ready to complete this questionnaire, or if-->
+        <!--this is a temporary workspace, please check this box (any entries already made-->
+        <!--will not be saved):-->
+      </div>
+      <!--<clr-checkbox-->
+          <!--name="not-ready"-->
+          <!--id="not-ready"-->
+          <!--[(ngModel)]="workspace.researchPurpose.notReady"-->
+          <!--[clrDisabled]="mode == Mode.Edit">-->
+        <!--<h3>Not Ready</h3>-->
+      <!--</clr-checkbox>-->
     </div>
     <div>
-      <div class="card">
-        <h4>Describe your research purpose:</h4>
+      <div class="section research-purpose-section">
+        <div class="required-field section-header">
+          <div class="section-header">Describe your research purpose</div>
+          <div class="required-text">(Required)</div>
+        </div>
+        <div class="section-text">
+          Please include the research question, the plan for use of the data to answer
+          the research question, and the expected outcome/benefit of the research; this
+          information will be posted publicly on the All of Us website to inform the research
+          participants.
+        </div>
         <textarea class="input description" name="workspace-description"
-            [(ngModel)]="workspace.description" [disabled]="!hasPermission">
+            [(ngModel)]="workspace.description" [disabled]="!hasPermission"
+            [class.validation-error]="descriptionNotEntered">
         </textarea>
       </div>
-      <div class="card">
-        <h4>Please select all data use categories that apply for your current study</h4>
+      <div class="section data-use-categories-section">
+        <h4 class="section-header">Please select all data use categories that apply for your current study</h4>
+        <div class="section-text">
+          These are for informational purposes only and do not affect or configure your new workspace.
+        </div>
         <div class="form-group">
-          <div class="checkbox-group">
-            <clr-checkbox
-                name="disease-focused-research"
-                id="disease-focused-research"
-                [(ngModel)]="workspace.researchPurpose.diseaseFocusedResearch"
-                [clrDisabled]="mode == Mode.Edit">
-              <h3>Disease focused research</h3>
-            </clr-checkbox>
+          <div class="checkbox-group" style="margin-left: 1rem; margin-top: 0.5rem;">
+            <label><h3 class="data-use-label">{{researchPurposeItems.diseaseFocusedResearch.shortDescription}}</h3></label>
+            <div>
+              {{researchPurposeItems.diseaseFocusedResearch.longDescription}}
+            </div>
             <div style="display: flex">
               <input type="text" class="input" name="disease-specification"
                   [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
-                  placeholder="Name of Disease" style="width: calc(50% - 2rem); margin-right: 2rem;">
-              <span style="vertical-align: bottom; padding-right: 2rem; width: 50%">
-                The primary purpose of the research is to learn more about a particular disease or disorder
-                (for example, type 2 diabetes), a trait (for example, blood pressure), or a set of related conditions
-                (for example, autoimmune diseases, psychiatric disorders).
-              </span>
+                  placeholder="Name of Disease" style="width: calc(50% - 2rem); margin-right: 2rem; margin-top: 0.5rem">
             </div>
           </div>
           <div class="row">
@@ -60,7 +87,7 @@
                     [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
-                  <label class="checkbox-label" for="clr-checkbox-methods-development"><h3>{{researchPurposeItems.methodsDevelopment.shortDescription}}</h3></label>
+                  <label class="checkbox-label" for="clr-checkbox-methods-development"><h3 class="data-use-label">{{researchPurposeItems.methodsDevelopment.shortDescription}}</h3></label>
                   <div>
                     {{researchPurposeItems.methodsDevelopment.longDescription}}
                   </div>
@@ -76,7 +103,7 @@
                         [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
-                  <label class="checkbox-label" for="clr-checkbox-aggregate-analysis"><h3>{{researchPurposeItems.aggregateAnalysis.shortDescription}}</h3></label>
+                  <label class="checkbox-label" for="clr-checkbox-aggregate-analysis"><h3 class="data-use-label">{{researchPurposeItems.aggregateAnalysis.shortDescription}}</h3></label>
                   <div>
                     {{researchPurposeItems.aggregateAnalysis.longDescription}}
                   </div>
@@ -94,7 +121,7 @@
                     [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
-                  <label class="checkbox-label" for="clr-checkbox-control-set"><h3>{{researchPurposeItems.controlSet.shortDescription}}</h3></label>
+                  <label class="checkbox-label" for="clr-checkbox-control-set"><h3 class="data-use-label">{{researchPurposeItems.controlSet.shortDescription}}</h3></label>
                   <div>
                     {{researchPurposeItems.controlSet.longDescription}}
                   </div>
@@ -110,7 +137,7 @@
                         [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
-                  <label class="checkbox-label" for="clr-checkbox-ancestry"><h3>{{researchPurposeItems.ancestry.shortDescription}}</h3></label>
+                  <label class="checkbox-label" for="clr-checkbox-ancestry"><h3 class="data-use-label">{{researchPurposeItems.ancestry.shortDescription}}</h3></label>
                   <div>
                     {{researchPurposeItems.ancestry.longDescription}}
                   </div>
@@ -128,7 +155,7 @@
                         [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
-                  <label class="checkbox-label" for="clr-checkbox-population"><h3>{{researchPurposeItems.population.shortDescription}}</h3></label>
+                  <label class="checkbox-label" for="clr-checkbox-population"><h3 class="data-use-label">{{researchPurposeItems.population.shortDescription}}</h3></label>
                   <div>
                     {{researchPurposeItems.population.longDescription}}
                   </div>
@@ -144,7 +171,7 @@
                         [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
-                  <label class="checkbox-label" for="clr-checkbox-commercial-purpose"><h3>{{researchPurposeItems.commercialPurpose.shortDescription}}</h3></label>
+                  <label class="checkbox-label" for="clr-checkbox-commercial-purpose"><h3 class="data-use-label">{{researchPurposeItems.commercialPurpose.shortDescription}}</h3></label>
                   <div>
                     {{researchPurposeItems.commercialPurpose.longDescription}}
                   </div>
@@ -158,12 +185,12 @@
                 <div (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"
                     style="cursor: pointer; padding-right: 6px">
                   <clr-icon *ngIf="workspace.researchPurpose.containsUnderservedPopulation"
-                      shape="minus-circle"></clr-icon>
+                      shape="minus-circle" class="underserved-icon"></clr-icon>
                   <clr-icon *ngIf="!workspace.researchPurpose.containsUnderservedPopulation"
-                      shape="plus-circle"></clr-icon>
+                      shape="plus-circle" class="underserved-icon"></clr-icon>
                 </div>
                 <div>
-                  <label class="checkbox-label" (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"><h3>{{researchPurposeItems.containsUnderservedPopulation.shortDescriptions}}</h3></label>
+                  <label class="checkbox-label" (click)="workspace.researchPurpose.containsUnderservedPopulation = !workspace.researchPurpose.containsUnderservedPopulation"><h3 class="data-use-label">{{researchPurposeItems.containsUnderservedPopulation.shortDescription}}</h3></label>
                   <div>
                     {{researchPurposeItems.containsUnderservedPopulation.longDescription}}
                   </div>
@@ -171,18 +198,15 @@
               </div>
             </div>
           </div>
-
-
-
           <div *ngIf="workspace.researchPurpose.containsUnderservedPopulation === true" style="padding-top: 1rem">
             <h5>Additional information for underserved population</h5>
             <div>Select all that apply. Only options for underserved populations are provided.</div>
             <div *ngFor="let categoryHeader of keys(underservedCategories)">
               <h4 class="underserved-header">{{categoryHeader}}</h4>
               <div class="underservedSection">
-                <div *ngFor="let sublist of bucketAsTwo(keys(underservedCategories[categoryHeader]));">
+                <div *ngFor="let sublist of bucketAsThree(keys(underservedCategories[categoryHeader]));">
                   <div class="row flex-items-xs-left">
-                    <div *ngFor="let item of sublist;" class="col-xs-6">
+                    <div *ngFor="let item of sublist;" class="col-xs-4">
                       <clr-checkbox
                           [clrChecked]="containsUnderserved(underservedCategories[categoryHeader][item])"
                           (click)="switchUnderservedStatus(underservedCategories[categoryHeader][item])"
@@ -200,21 +224,20 @@
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="checkbox-group">
-          <div style="display: flex">
-            <clr-checkbox
-                    name="request-approval"
-                    id="request-approval"
-                    [(ngModel)]="workspace.researchPurpose.reviewRequested"
-                    [clrDisabled]="mode == Mode.Edit">
-            </clr-checkbox>
-            <div>
-              <label class="checkbox-label" for="clr-checkbox-request-approval"><h3>Request a Review of Your Research Purpose</h3></label>
-              <div>
-                I am concerned about potential stigmatization of research participants. I would like
-                the All Of Us Data Access Committee to review my Research Purpose.
-              </div>
+    </div>
+    <div class="section request-review-section">
+      <h3 class="section-header">{{researchPurposeItems.requestReview.shortDescription}}</h3>
+      <div class="checkbox-group" style="padding-top: 0.3rem">
+        <div style="display: flex">
+          <clr-checkbox
+              name="request-approval"
+              id="request-approval"
+              [(ngModel)]="workspace.researchPurpose.reviewRequested"
+              [clrDisabled]="mode == Mode.Edit">
+          </clr-checkbox>
+          <div>
+            <div class="section-text">
+              {{researchPurposeItems.requestReview.longDescription}}
             </div>
           </div>
         </div>
@@ -222,6 +245,7 @@
     </div>
     <div style="display: flex; flex: 0 0 0; padding: 0">
       <div class="button">
+        <button class="btn" (click)="navigateBack()">Cancel</button>
         <ng-container [ngSwitch]="mode">
           <button *ngSwitchCase="Mode.Create" class="btn add-button btn-primary"
               [clrLoading]="savingWorkspace" (click)="addWorkspace()" [disabled]="!allowSave">
@@ -238,9 +262,7 @@
             Clone Workspace
           </button>
         </ng-container>
-        <button class="btn" (click)="navigateBack()">Cancel</button>
       </div>
-      <p *ngIf="valueNotEntered;">* is a required field</p>
     </div>
   </div>
 </div>
