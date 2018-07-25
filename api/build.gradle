@@ -258,7 +258,10 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-
+  compile('org.springframework:spring-webmvc:5.1.+') {
+    exclude module: 'spring-web'
+  }
+  compile 'org.springframework:spring-web:5.1.+'
   compile 'org.springframework.security:spring-security-web:5.0.6.RELEASE'
   compile 'javax.validation:validation-api:2.0.1.Final'
 
