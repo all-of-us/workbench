@@ -50,6 +50,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private static final String TYPE_CPT = "CPT";
   private static final String TYPE_PM = "PM";
   private static final String TYPE_VISIT = "VISIT";
+  private static final String TYPE_DRUG = "DRUG";
   private static final String SUBTYPE_CPT4 = "CPT4";
   private static final String SUBTYPE_ICD10CM = "ICD10CM";
   private static final String SUBTYPE_ICD10PCS = "ICD10PCS";
@@ -655,11 +656,31 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsVisitChildModifiers() throws Exception {
     Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("10");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
-    Modifier modifier2 = new Modifier()
+    Modifier modifier = new Modifier()
     .name(ModifierType.NUM_OF_OCCURRENCES)
     .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
     .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), Arrays.asList(modifier2));
+    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), Arrays.asList(modifier));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDrugChild() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDrugChildModifiers() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    Modifier modifier = new Modifier()
+      .name(ModifierType.AGE_AT_EVENT)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("25"));
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
