@@ -16,20 +16,33 @@ public class ReviewTabQueryBuilder {
   private static final String TABLE_PREFIX = "p_";
   private static final String MASTER_TABLE = "p_all_events";
 
+  private static final String VISIT_COLUMNS =
+    "visit_id as visitId,\n" +
+      "visit_concept_id as visitConceptId,\n";
+
+  private static final String STANDARD_COLUMNS =
+    "standard_name as standardName,\n" +
+      "standard_code as standardCode,\n" +
+      "standard_vocabulary as standardVocabulary,\n";
+
+  private static final String SOURCE_COLUMnS =
+    "source_name as sourceName,\n" +
+      "source_code as sourceCode,\n" +
+      "source_vocabulary as sourceVocabulary,\n";
+
   private static final String BASE_SQL_TEMPLATE =
     "select person_id as personId,\n" +
       "data_id as dataId,\n" +
       "start_datetime as startDate,\n";
 
+  private static final String AGE_AT_EVENT =
+    "age_at_event as ageAtEvent,\n";
+
   private static final String ALL_EVENTS_SQL_TEMPLATE =
     "domain as domain,\n" +
-      "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "source_name as sourceName,\n" +
-      "source_code as sourceCode,\n" +
-      "source_vocabulary as sourceVocabulary,\n" +
-      "age_at_event as ageAtEvent,\n" +
+      STANDARD_COLUMNS +
+      SOURCE_COLUMnS +
+      AGE_AT_EVENT +
       "visit_type as visitType,\n" +
       "source_value as sourceValue,\n" +
       "num_mentions as numMentions,\n" +
@@ -37,15 +50,10 @@ public class ReviewTabQueryBuilder {
       "last_mention as lastMention\n";
 
   private static final String CONDITION_SQL_TEMPLATE =
-    "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "source_name as sourceName,\n" +
-      "source_code as sourceCode,\n" +
-      "source_vocabulary as sourceVocabulary,\n" +
-      "visit_id as visitId,\n" +
-      "visit_concept_id as visitConceptId,\n" +
-      "age_at_event as ageAtEvent,\n" +
+    STANDARD_COLUMNS +
+      SOURCE_COLUMnS +
+      VISIT_COLUMNS +
+      AGE_AT_EVENT +
       "num_mentions as numMentions,\n" +
       "first_mention as firstMention,\n" +
       "last_mention as lastMention\n";
@@ -54,21 +62,17 @@ public class ReviewTabQueryBuilder {
     CONDITION_SQL_TEMPLATE;
 
   private static final String DRUG_SQL_TEMPLATE =
-    CONDITION_SQL_TEMPLATE + ", quantity as quantity,\n" +
+    CONDITION_SQL_TEMPLATE +
+      ", quantity as quantity,\n" +
       "refills as refills,\n" +
       "strength as strength,\n" +
       "route as route\n";
 
   private static final String MEASUREMENT_SQL_TEMPLATE =
-    "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "source_name as sourceName,\n" +
-      "source_code as sourceCode,\n" +
-      "source_vocabulary as sourceVocabulary,\n" +
-      "visit_id as visitId,\n" +
-      "visit_concept_id as visitConceptId,\n" +
-      "age_at_event as ageAtEvent,\n" +
+    STANDARD_COLUMNS +
+      SOURCE_COLUMnS +
+      VISIT_COLUMNS +
+      AGE_AT_EVENT +
       "value_concept as valueConcept,\n" +
       "value_as_number as valueAsNumber,\n" +
       "value_source_value as valueSourceValue,\n" +
@@ -76,21 +80,14 @@ public class ReviewTabQueryBuilder {
       "ref_range as refRange\n";
 
   private static final String OBSERVATION_SQL_TEMPLATE =
-    "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "source_name as sourceName,\n" +
-      "source_code as sourceCode,\n" +
-      "source_vocabulary as sourceVocabulary,\n" +
-      "visit_id as visitId,\n" +
-      "visit_concept_id as visitConceptId,\n" +
-      "age_at_event as ageAtEvent\n";
+    STANDARD_COLUMNS +
+      SOURCE_COLUMnS +
+      VISIT_COLUMNS +
+      AGE_AT_EVENT;
 
   private static final String PHYSICAL_MEASURE_SQL_TEMPLATE =
-    "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "age_at_event as ageAtEvent,\n" +
+    STANDARD_COLUMNS +
+      AGE_AT_EVENT +
       "value_concept as valueConcept,\n" +
       "value_as_number as valueAsNumber,\n" +
       "value_source_value as valueSourceValue,\n" +
