@@ -102,7 +102,7 @@ dependencies {
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
     exclude module: 'spring-webmvc'
     exclude module: 'spring-web'
-    exclude module: 'com.fasterxml.jackson.core:jackson-databind'
+    exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
   }
   compile('org.springframework.boot:spring-boot-starter-data-jpa') {
     exclude module: 'spring-boot-starter-tomcat'

@@ -243,9 +243,12 @@ dependencies {
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
   compile "com.google.appengine:appengine:${GAE_VERSION}"
   compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
-  compile('org.springframework.boot:spring-boot-starter-web') {
+  compile('org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+    exclude module: 'spring-webmvc'
+    exclude module: 'spring-web'
+    exclude group: 'com.fasterxml.jackson.core', module:'jackson-databind'
   }
   compile('org.springframework.boot:spring-boot-starter-data-jpa') {
     exclude module: 'spring-boot-starter-tomcat'
@@ -278,6 +281,7 @@ dependencies {
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.guava:guava:22.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
+  compile 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
