@@ -28,7 +28,7 @@ export const ResearchPurposeItems = {
     methods.'
   },
   diseaseFocusedResearch: {
-    shortDescription: 'Disease focused research',
+    shortDescription: 'Disease-focused research',
     longDescription: 'The primary purpose of the research is to learn more about a particular \
     disease or disorder (for example, type 2 diabetes), a trait (for example, blood pressure), \
     or a set of related conditions (for example, autoimmune diseases, psychiatric disorders).'
@@ -39,7 +39,7 @@ export const ResearchPurposeItems = {
     general population (for example, genetic substructure of a population).'
   },
   controlSet: {
-    shortDescription: 'Control Set',
+    shortDescription: 'Control set',
     longDescription: 'All of Us data will be used to increase the number of controls \
     available for a comparison group (for example, a case-control study) to another \
     dataset.'
@@ -55,7 +55,7 @@ export const ResearchPurposeItems = {
     For example: a specific gender, age group or ethnic group.'
   },
   commercialPurpose: {
-    shortDescription: 'Commercial Purpose/entity',
+    shortDescription: 'Commercial purpose/entity',
     longDescription: 'The study is conducted by a for-profit entity and/or in \
     support of a commercial activity.'
   },
