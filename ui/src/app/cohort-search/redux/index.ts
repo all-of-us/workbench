@@ -30,6 +30,7 @@ export class ConfigureStore {
         combineEpics(
           epics.fetchCriteria,
           epics.fetchAllCriteria,
+          epics.fetchDrugCriteria,
           epics.fetchCount,
           epics.fetchChartData,
           epics.previewCount,

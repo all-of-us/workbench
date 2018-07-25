@@ -91,13 +91,13 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const isPM = this.node.get('type', '') === 'PM';
+    const noCode = this.node.get('type', '') === 'DRUG' || this.node.get('type', '') === 'PM';
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
-    return (isPM || nameIsCode) ? '' : this.node.get('name', '');
+    return (noCode || nameIsCode) ? '' : this.node.get('name', '');
   }
 
   get displayCode() {
-    if (this.node.get('type', '') === 'PM') {
+    if (this.node.get('type', '') === 'DRUG' || this.node.get('type', '') === 'PM') {
       return this.node.get('name', '');
     }
     return this.node.get('code', '');
