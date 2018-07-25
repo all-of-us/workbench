@@ -256,7 +256,7 @@ dependencies {
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
 
-  compile 'org.springframework.security:spring-security-web:4.2.2.RELEASE'
+  compile 'org.springframework.security:spring-security-web:5.0.6.RELEASE'
   compile 'javax.validation:validation-api:2.0.1.Final'
 
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
