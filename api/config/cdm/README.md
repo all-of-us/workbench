@@ -10,6 +10,10 @@
 
 * Add `"foreignKey": "TABLE_NAME"` for each foreign key column.
 
+* Add "domainConcept": "standard" to each primary standard concept column (e.g. observation.observation_concept_id) and
+ "domainConcept": "source" to each primary source concept column (e.g. observation.observation_source_concept_id)
+
+
 * Add the following columns to the observation table configuration (they are not a part of the standard OMOP schema, but were
 added to support AllOfUs):
 
