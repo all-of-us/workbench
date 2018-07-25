@@ -1,8 +1,7 @@
 <div class="background-image">
-  <div class="row">
-    <div *ngFor="let card of cardDetails">
-      <div class="col">
-        <div class="card double {{card.position}}">
+  <div class="row" style="overflow:true ;display:flex;justify-content: center;">
+    <div *ngFor="let card of cardDetails" >
+        <div class="card double">
           <div class="row">
             <img class="icon topIcon" src={{card.icon}}>
           </div>
@@ -16,13 +15,11 @@
             COMING SOON...
           </div>
         </div>
-      </div>
     </div>
   </div>
   <div *ngIf="firstTimeUser">
-    <div class="row">
-      <div class="col">
-        <div class="card double left">
+    <div class="row" style="display:flex;justify-content: center;">
+        <div class="card double">
           <div class="row">
             <img class="icon analyzeIcon" src="/assets/icons/Analyze.svg">
           </div>
@@ -36,9 +33,7 @@
             <button class="btn btn-homepage" (click)="addWorkspace()">CREATE WORKSPACE</button>
           </div>
         </div>
-      </div>
-      <div class="col">
-        <div class="card double right">
+        <div class="card double">
           <div class="row">
             <img class="icon learnIcon" src="/assets/icons/learn-icon.svg">
           </div>
@@ -52,11 +47,10 @@
             COMING SOON...
           </div>
         </div>
-      </div>
     </div>
   </div>
   <div *ngIf="!firstTimeUser">
-    <div class="row">
+    <div class="row" style="display: flex; justify-content: center">
       <div class="card single">
         <div class="row">
           <div class="col">
@@ -64,37 +58,26 @@
           </div>
 
           <div class="col analyzeSingleHeader">Analyze and Publish with Workspaces</div>
-          <div class="col">
-            <div class="row linkGroup">
-              <div class="col">
+          <div class="col" style="display: flex; justify-content: right;width:15%;">
+            <div class="row">
                 <a class="links" (click)="addWorkspace()">Create a
                   workspace</a>
-              </div>
-              <div class="col">
-                <a class="links">
                   <clr-tooltip>
                     <a href="#" class="links" clrTooltipTrigger>See All Notebooks</a>
                     <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
                       <span>Coming Soon</span>
                     </clr-tooltip-content>
                   </clr-tooltip>
-                </a>
-              </div>
             </div>
-            <div class="row linkGroup">
-              <div class="col">
+            <div class="row">
                 <a class="links" (click)="listWorkspaces()">See All
                   Workspaces</a>
-              </div>
-              <div class="col">
                 <clr-tooltip class="tooltip-bottom-right">
                   <a href="#" class="links" clrTooltipTrigger>See All Cohorts</a>
                   <clr-tooltip-content *clrIfOpen>
                     <span>Coming Soon</span>
                   </clr-tooltip-content>
                 </clr-tooltip>
-              </div>
-            </div>
           </div>
         </div>
         <div class="row">
@@ -115,7 +98,7 @@
     <div class="row">
       <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
     </div>
-    <div class="row">
+    <div class="row footerRtLink">
       <clr-tooltip clrPosition="top-right">
         <a href="#" class="footerLink" clrTooltipTrigger>
           See all documentation</a>

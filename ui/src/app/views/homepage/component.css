@@ -10,30 +10,28 @@
   margin-right: -0.6rem;
 }
 
-.double {
+.cont {
+  display: flex;
+  align-content: center;
+}
+
+.card.double {
   height: 332px;
-  width: 638px;
+  width: 21rem;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
   border: none;
-}
-
-.left {
-  margin-left: 7rem;
-}
-
-.right {
   margin-left: 1rem;
 }
 
-.single {
+.card.single {
   height: 379px;
-  width: 1298px;
+  max-width: 43rem;
   border-radius: 5px;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
-  margin-left: 7rem;
   border: none;
+  margin-left: 1rem;
 }
 
 .analyzeSingleHeader {
@@ -93,15 +91,10 @@
   font-size: 28px;
   font-weight: 500;
   line-height: 34px;
-  text-align: center;
-  align-content: center;
   width: 541px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
   margin-top: 5%;
-  margin-left: 2.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 .icon {
@@ -160,7 +153,7 @@
   font-size: 28px;
   font-weight: 500;
   line-height: 34px;
-  margin-left: 8rem;
+  margin-left: 12%;
   margin-top: 1.4rem;
 }
 
@@ -169,12 +162,12 @@
 }
 
 .textGroup {
-  margin-left: 8rem;
+  margin-left: 11.2%;
 }
 
 .footerText {
   height: 176px;
-  width: 372px;
+  width: 33%;
   opacity: 0.87;
   color: #83C3EC;
   font-size: 16px;
@@ -187,24 +180,17 @@
   margin-top: 2%;
 }
 
-.linkGroup:first-child {
-  margin-top: 0.8rem;
-}
-
 .linkGroup {
-  margin-top: 0.2rem;
   display: flex;
   justify-content: right;
-  margin-left: 9rem;
+  width: 10%;
 }
 
 .links {
-  height: 56px;
-  width: 158px;
   color: #FFFFFF;
   font-size: 14px;
-  line-height: 28px;
-  margin-right: 1rem;
+  margin-top: 0.5rem;
+  width: 8rem;
 }
 
 .card.add-card {
@@ -238,8 +224,13 @@
   color: #83C3EC;
 }
 
+.footerRtLink {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 8rem;
+}
+
 .footerLink {
-  margin-left: 55rem;
   color: #FFFFFF;
 }
 
@@ -263,7 +254,6 @@
   height: 3.5rem;
   width: 7rem;
   position: relative;
-  margin-left: 2rem;
   line-height: 85px;
 }
 
@@ -278,87 +268,6 @@
   font-weight: 300;
 }
 
-@media (max-width: 1490px) {
-  .double {
-    width: 438px;
-  }
 
-  .single {
-    width: 900px;
-  }
 
-  .button {
-    justify-content: left;
-  }
-
-  .footer {
-    height: 470px;
-  }
-
-  .linkGroup {
-    margin-left: 23rem;
-    margin-top: 0.1rem;
-  }
-
-  .card .add-card {
-    margin-top: -0.6rem;
-  }
-
-  .footerLink {
-    margin-left: 30rem;
-  }
-
-  .footerTitle {
-    margin-left: 10rem;
-  }
-
-  .logo {
-    margin-left: 5rem;
-  }
-
-  .textGroup {
-    margin-left: 10rem;
-  }
-}
-
-@media (max-width: 1280px) {
-  .right {
-    margin-left: 18rem;
-  }
-
-  .left {
-    margin-left: 18rem;
-  }
-
-  .single {
-    margin-left: 8.5rem;
-  }
-
-}
-
-@media (min-width: 1800px) {
-  .left {
-    margin-left: 13rem;
-  }
-
-  .single {
-    margin-left: 13rem;
-  }
-
-  .footerText {
-    margin-left: 3rem;
-  }
-
-  .logo {
-    margin-left: 9rem;
-  }
-
-  .textGroup {
-    margin-left: 11rem;
-  }
-
-  .footerTitle {
-    margin-left: 14rem;
-  }
-}
 
