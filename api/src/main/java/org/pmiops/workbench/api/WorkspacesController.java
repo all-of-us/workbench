@@ -143,7 +143,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final ResearchPurpose createResearchPurpose(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = new ResearchPurpose()
-        .diseaseFocusedResearch(workspace.getDiseaseOfFocus() != null && !workspace.getDiseaseOfFocus().equals(""))
+        .diseaseFocusedResearch(workspace.getDiseaseOfFocus() != null && !workspace.getDiseaseOfFocus().isEmpty())
         .diseaseOfFocus(workspace.getDiseaseOfFocus())
         .methodsDevelopment(workspace.getMethodsDevelopment())
         .controlSet(workspace.getControlSet())
@@ -283,7 +283,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
    */
   private static void setResearchPurposeDetails(org.pmiops.workbench.db.model.Workspace dbWorkspace,
       ResearchPurpose purpose) {
-    dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseOfFocus() != null && !purpose.getDiseaseOfFocus().equals(""));
+    dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseOfFocus() != null && !purpose.getDiseaseOfFocus().isEmpty());
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
     dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
     dbWorkspace.setControlSet(purpose.getControlSet());
@@ -690,7 +690,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
     for (UserRole user : request.getItems()) {
-      if (user.getRole() == null || user.getRole().toString().trim().equals("")) {
+      if (user.getRole() == null || user.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
       }
       WorkspaceUserRole newUserRole = new WorkspaceUserRole();
