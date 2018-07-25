@@ -139,7 +139,9 @@ export class NodeComponent implements OnInit, OnDestroy {
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops
      */
-    if (this.fullTree) {
+    if (_type === 'drug') {
+      this.actions.fetchDrugCriteria(_type, parentId, 'ATC');
+    } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
