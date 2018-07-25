@@ -7,7 +7,7 @@ export const DOMAIN_TYPES = [
     { name: 'Demographics', type: 'demo' },
     { name: 'Conditions',    type: 'cond', disabled: true },
     { name: 'Procedures',    type: 'procedures', disabled: true },
-    { name: 'Drugs',    type: 'drugs', disabled: true },
+    { name: 'Drugs',    type: 'drug', fullTree: true },
     { name: 'Measurements',    type: 'measure', disabled: true },
     { name: 'Visits',    type: 'visit', fullTree: true },
     { name: 'ICD9 Codes',   type: 'icd9' },

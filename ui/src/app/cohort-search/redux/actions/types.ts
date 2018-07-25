@@ -2,6 +2,7 @@ import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
+export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
@@ -65,6 +66,13 @@ export interface ActionTypes {
     cdrVersionId: number;
     kind: string;
     parentId: number;
+  };
+  BEGIN_DRUG_CRITERIA_REQUEST: {
+    type: typeof BEGIN_DRUG_CRITERIA_REQUEST;
+    cdrVersionId: number;
+    kind: string;
+    parentId: number;
+    subtype: string;
   };
   LOAD_CRITERIA_RESULTS: {
     type: typeof LOAD_CRITERIA_RESULTS;
@@ -246,6 +254,7 @@ export interface ActionTypes {
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
+  | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]

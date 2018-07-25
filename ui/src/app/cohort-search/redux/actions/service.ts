@@ -48,6 +48,7 @@ export class CohortSearchActions {
    */
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
+  @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
 
@@ -202,7 +203,6 @@ export class CohortSearchActions {
     if (isLoaded || isLoading) {
       return;
     }
-    const fullTree = this.state.getIn(['wizard', 'fullTree']);
     this.requestCriteria(this.cdrVersionId, kind, parentId);
   }
 
@@ -212,8 +212,16 @@ export class CohortSearchActions {
     if (isLoaded || isLoading) {
       return;
     }
-    const fullTree = this.state.getIn(['wizard', 'fullTree']);
     this.requestAllCriteria(this.cdrVersionId, kind, parentId);
+  }
+
+  fetchDrugCriteria(kind: string, parentId: number, subtype: string): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
   }
 
   requestPreview(): void {
