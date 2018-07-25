@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationError, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
 import {timer} from 'rxjs/observable/timer';
+import {Subscription} from 'rxjs/Subscription';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
@@ -24,8 +24,8 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
   private profileSub: Subscription;
 
   constructor(
-    private serverConfigService: ServerConfigService,
     private profileService: ProfileService,
+    private serverConfigService: ServerConfigService,
     private profileStorageService: ProfileStorageService,
     private activatedRoute: ActivatedRoute,
     private router: Router) {}
@@ -90,6 +90,11 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
     if (this.profileSub) {
       this.profileSub.unsubscribe();
     }
+  }
+
+  /** Exposed for testing. */
+  setProfileService(svc: ProfileService) {
+    this.profileService = svc;
   }
 
   private navigateAway() {

@@ -34,7 +34,8 @@ class FailingProfileStub extends ProfileServiceStub {
   }
 
   submitTermsOfService(extraHttpRequestParams?: any): Observable<Profile> {
-    if (this.fails-- > 0) {
+    this.fails--;
+    if (this.fails >= 0) {
       throw {status: 409};
     }
     return super.submitTermsOfService(extraHttpRequestParams);
@@ -109,7 +110,9 @@ describe('UnregisteredComponent', () => {
     tick();
     fixture.detectChanges();
 
-    unregisteredComponent = de.children[1].componentInstance;
+    // Grab the rendered component from within the fake app container. We don't
+    // specify a custom selector so it gets rendered as 'ng-component'.
+    unregisteredComponent = de.query(By.css('ng-component')).componentInstance;
   }));
 
   const loadProfileWithRegistrationSettings = (p: any) => {
@@ -131,7 +134,7 @@ describe('UnregisteredComponent', () => {
     expect(p.termsOfServiceCompletionTime).toBeTruthy();
     expect(p.ethicsTrainingCompletionTime).toBeTruthy();
     expect(p.demographicSurveyCompletionTime).toBeTruthy();
-  }
+  };
 
   it('should show unregistered for unregistered', fakeAsync(() => {
     loadProfileWithRegistrationSettings({
@@ -153,8 +156,7 @@ describe('UnregisteredComponent', () => {
 
   it('should retry failed registration steps', fakeAsync(() => {
     profileStub = new FailingProfileStub(2);
-    // Hacky, but unfortunately profileStub does not directly implement ProfileService.
-    (unregisteredComponent as any).profileService = profileStub;
+    unregisteredComponent.setProfileService(profileStub);
 
     loadProfileWithRegistrationSettings({
       dataAccessLevel: DataAccessLevel.Unregistered,
@@ -172,8 +174,7 @@ describe('UnregisteredComponent', () => {
 
   it('should redirect if profile becomes completed', fakeAsync(() => {
     profileStub = new TrainingCompletesRegistrationStub();
-    // Hacky, but unfortunately profileStub does not directly implement ProfileService.
-    (unregisteredComponent as any).profileService = profileStub;
+    unregisteredComponent.setProfileService(profileStub);
 
     loadProfileWithRegistrationSettings({
       dataAccessLevel: DataAccessLevel.Unregistered,
