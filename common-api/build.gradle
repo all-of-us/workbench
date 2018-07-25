@@ -27,11 +27,11 @@ dependencies {
   compile 'com.google.guava:guava:25.1-jre'
   compile 'org.hibernate:hibernate-ehcache:5.0.12.Final'
   compile 'org.apache.commons:commons-lang3:3.0'
-  compile('org.springframework.boot:spring-boot-starter-web:1.5.3.RELEASE') {
+  compile('org.springframework.boot:spring-boot-starter-web') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-data-jpa:1.5.3.RELEASE') {
+  compile('org.springframework.boot:spring-boot-starter-data-jpa') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
