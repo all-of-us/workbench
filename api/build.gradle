@@ -243,14 +243,19 @@ dependencies {
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
   compile "com.google.appengine:appengine:${GAE_VERSION}"
   compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
-  compile('org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE') {
+  compile('org.springframework.boot:spring-boot-starter-web') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-actuator:2.0.3.RELEASE') {
+  compile('org.springframework.boot:spring-boot-starter-data-jpa') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
+  compile('org.springframework.boot:spring-boot-starter-actuator') {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
+
   compile 'org.springframework.security:spring-security-web:5.0.6.RELEASE'
   compile 'javax.validation:validation-api:2.0.1.Final'
 
@@ -278,11 +283,11 @@ dependencies {
   compile 'org.json:json:20160810'
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:2.19.1'
+  testCompile 'org.mockito:mockito-core:1.10.19'
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
-  testCompile 'org.springframework.boot:spring-boot-starter-test:2.0.3.+'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
   testCompile 'com.h2database:h2:1.4.197'
   testCompile 'org.liquibase:liquibase-core:3.6.2'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
@@ -290,7 +295,7 @@ dependencies {
   // For Swagger generation. These should include dependencies found in the Swagger codegen
   // example here:
   // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
-  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest:2.0.3.+'
+  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
   generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
   generatedCompile 'com.squareup.okhttp:okhttp:2.6.0'

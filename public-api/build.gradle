@@ -95,9 +95,9 @@ dependencies {
   compile project(":common-api")
   compile 'mysql:mysql-connector-java:8.0.11'
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
-  //compile 'com.google.appengine:appengine:+'
+  compile 'com.google.appengine:appengine:1.9.64'
   compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.64'
-  compile('org.springframework.boot:spring-boot-starter-web:2.0.3.+') {
+  compile('org.springframework.boot:spring-boot-starter-web') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
@@ -105,7 +105,7 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-actuator:2.0.3.+') {
+  compile('org.springframework.boot:spring-boot-starter-actuator') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
@@ -124,9 +124,9 @@ dependencies {
   compile 'org.json:json:20160810'
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:2.19.1'
+  testCompile 'org.mockito:mockito-core:1.10.19'
   testCompile 'com.google.truth:truth:0.42'
-  testCompile 'org.springframework.boot:spring-boot-starter-test:2.0.3.+'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
   testCompile 'com.h2database:h2:1.4.197'
   testCompile 'org.liquibase:liquibase-core:3.6.2'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
