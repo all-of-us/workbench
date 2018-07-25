@@ -112,6 +112,28 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     return ResponseEntity.ok(criteriaResponse);
   }
 
+  @Override
+  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId, String drugName) {
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName);
+
+    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+
+    return ResponseEntity.ok(criteriaResponse);
+  }
+
+  @Override
+  public ResponseEntity<CriteriaListResponse> getDrugIngredientByConceptId(Long cdrVersionId, Long conceptId) {
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    final List<Criteria> criteriaList = criteriaDao.findDrugIngredientByConceptId(conceptId);
+
+    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+
+    return ResponseEntity.ok(criteriaResponse);
+  }
+
   /**
    * This method will return a count of unique subjects
    * defined by the provided {@link SearchRequest}.
