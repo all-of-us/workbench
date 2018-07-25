@@ -2,6 +2,7 @@
 import {
   BEGIN_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
+  BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
@@ -61,6 +62,11 @@ export const requestAllCriteria =
   (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST] =>
   ({type: BEGIN_ALL_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
+
+export const requestDrugCriteria =
+  (cdrVersionId: number, kind: string, parentId: number, subtype: string
+  ): ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST] =>
+  ({type: BEGIN_DRUG_CRITERIA_REQUEST, cdrVersionId, kind, parentId, subtype});
 
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
