@@ -20,6 +20,9 @@ import {
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
+  BEGIN_AUTOCOMPLETE_REQUEST,
+  LOAD_AUTOCOMPLETE_OPTIONS,
+  AUTOCOMPLETE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -94,6 +97,21 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SET_CRITERIA_SEARCH:
         return state.setIn(['criteria', 'search', 'terms'], action.searchTerms);
+
+      case BEGIN_AUTOCOMPLETE_REQUEST:
+        return state
+          .deleteIn(['criteria', 'search', 'errors'])
+          .setIn(['criteria', 'search', 'autocomplete'], true);
+
+      case LOAD_AUTOCOMPLETE_OPTIONS:
+        return state
+          .setIn(['criteria', 'search', 'options'], fromJS(action.options))
+          .deleteIn(['criteria', 'search', 'autocomplete']);
+
+      case AUTOCOMPLETE_REQUEST_ERROR:
+        return state
+          .deleteIn(['criteria', 'search', 'autocomplete'])
+          .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
 
       case CRITERIA_REQUEST_ERROR:
         return state
