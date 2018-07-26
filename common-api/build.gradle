@@ -37,8 +37,8 @@ dependencies {
   }
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:1.+'
-  testCompile 'com.google.truth:truth:+'
+  testCompile 'org.mockito:mockito-core:1.10.19'
+  testCompile 'com.google.truth:truth:0.42'
   testCompile 'com.h2database:h2:+'
   testCompile 'org.liquibase:liquibase-core:+'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
