@@ -280,7 +280,7 @@ public class CohortBuilderControllerMockTest {
                         .predefinedAttributes("[]");
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
-                .findCriteriaByTypeAndSubtypeOrderByNameAsc("DEMO", "RACE"))
+                .findCriteriaByTypeAndSubtypeOrderByIdAsc("DEMO", "RACE"))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
@@ -298,7 +298,7 @@ public class CohortBuilderControllerMockTest {
                         .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
-        verify(mockCriteriaDao).findCriteriaByTypeAndSubtypeOrderByNameAsc("DEMO", "RACE");
+        verify(mockCriteriaDao).findCriteriaByTypeAndSubtypeOrderByIdAsc("DEMO", "RACE");
         verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
     }
 
