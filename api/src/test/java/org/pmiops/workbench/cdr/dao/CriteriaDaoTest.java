@@ -162,7 +162,7 @@ public class CriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByTypeAndSubtypeOrderByNameAsc() throws Exception {
+  public void findCriteriaByTypeAndSubtypeOrderByIdAsc() throws Exception {
     final List<Criteria> demoList = criteriaDao.findCriteriaByTypeAndSubtypeOrderByIdAsc(TYPE_DEMO, SUBTYPE_RACE);
     assertEquals(3, demoList.size());
     assertEquals(parentDemo, demoList.get(0));
