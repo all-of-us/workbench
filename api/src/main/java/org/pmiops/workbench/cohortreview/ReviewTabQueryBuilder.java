@@ -25,7 +25,7 @@ public class ReviewTabQueryBuilder {
       "standard_code as standardCode,\n" +
       "standard_vocabulary as standardVocabulary,\n";
 
-  private static final String SOURCE_COLUMnS =
+  private static final String SOURCE_COLUMNS =
     "source_name as sourceName,\n" +
       "source_code as sourceCode,\n" +
       "source_vocabulary as sourceVocabulary,\n";
@@ -41,7 +41,7 @@ public class ReviewTabQueryBuilder {
   private static final String ALL_EVENTS_SQL_TEMPLATE =
     "domain as domain,\n" +
       STANDARD_COLUMNS +
-      SOURCE_COLUMnS +
+      SOURCE_COLUMNS +
       AGE_AT_EVENT +
       "visit_type as visitType,\n" +
       "source_value as sourceValue,\n" +
@@ -51,7 +51,7 @@ public class ReviewTabQueryBuilder {
 
   private static final String CONDITION_SQL_TEMPLATE =
     STANDARD_COLUMNS +
-      SOURCE_COLUMnS +
+      SOURCE_COLUMNS +
       VISIT_COLUMNS +
       AGE_AT_EVENT +
       "num_mentions as numMentions,\n" +
@@ -70,7 +70,7 @@ public class ReviewTabQueryBuilder {
 
   private static final String MEASUREMENT_SQL_TEMPLATE =
     STANDARD_COLUMNS +
-      SOURCE_COLUMnS +
+      SOURCE_COLUMNS +
       VISIT_COLUMNS +
       AGE_AT_EVENT +
       "value_concept as valueConcept,\n" +
@@ -81,7 +81,7 @@ public class ReviewTabQueryBuilder {
 
   private static final String OBSERVATION_SQL_TEMPLATE =
     STANDARD_COLUMNS +
-      SOURCE_COLUMnS +
+      SOURCE_COLUMNS +
       VISIT_COLUMNS +
       AGE_AT_EVENT;
 
