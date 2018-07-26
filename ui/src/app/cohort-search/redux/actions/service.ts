@@ -15,6 +15,7 @@ import {
   getSearchRequest,
   groupList,
   includeGroups,
+  isAutocompleteLoading,
   isCriteriaLoading,
   isRequesting,
   SR_ID,
@@ -51,6 +52,7 @@ export class CohortSearchActions {
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
+  @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
@@ -222,6 +224,16 @@ export class CohortSearchActions {
       return;
     }
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
+  }
+
+
+  fetchAutocompleteOptions(terms: string): void {
+    const isLoading = isAutocompleteLoading()(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'search', 'autocomplete']);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    this.requestAutocompleteOptions(this.cdrVersionId, terms);
   }
 
   requestPreview(): void {
