@@ -22,6 +22,7 @@ public class CdrBigQuerySchemaConfig {
     public String description;
     public Boolean primaryKey;
     public String foreignKey;
+    public String domainConcept;
   }
 
   public static enum ColumnMode {

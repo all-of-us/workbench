@@ -333,7 +333,8 @@
           "name": "condition_concept_id",
           "mode": "required",
           "description": "A foreign key that refers to a Standard Condition Concept identifier in the Standardized Vocabularies.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "date",
@@ -396,7 +397,8 @@
           "type": "integer",
           "name": "condition_source_concept_id",
           "mode": "nullable",
-          "description": "A foreign key to a Condition Concept that refers to the code used in the source."
+          "description": "A foreign key to a Condition Concept that refers to the code used in the source.",
+          "domainConcept": "source"
         },
         {
           "type": "string",
@@ -446,7 +448,8 @@
           "name": "cause_concept_id",
           "mode": "nullable",
           "description": "A foreign key referring to a standard concept identifier in the Standardized Vocabularies for conditions.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "string",
@@ -459,7 +462,8 @@
           "name": "cause_source_concept_id",
           "mode": "nullable",
           "description": "A foreign key to the concept that refers to the code used in the source. Note, this variable name is abbreviated to ensure it will be allowable across database platforms.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "source"
         }
       ]
     },
@@ -484,7 +488,8 @@
           "name": "device_concept_id",
           "mode": "required",
           "description": "A foreign key that refers to a Standard Concept identifier in the Standardized Vocabularies for the Device concept.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "date",
@@ -551,7 +556,8 @@
           "type": "integer",
           "name": "device_source_concept_id",
           "mode": "nullable",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "source"
         }
       ]
     },
@@ -576,7 +582,8 @@
           "name": "drug_concept_id",
           "mode": "required",
           "description": "A foreign key that refers to a Standard Concept identifier in the Standardized Vocabularies for the Drug concept.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "date",
@@ -683,7 +690,8 @@
           "name": "drug_source_concept_id",
           "mode": "nullable",
           "description": "A foreign key to a Drug Concept that refers to the code used in the source.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "source"
         },
         {
           "type": "string",
@@ -720,7 +728,8 @@
           "name": "measurement_concept_id",
           "mode": "required",
           "description": "A foreign key to the standard measurement concept identifier in the Standardized Vocabularies.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "date",
@@ -805,7 +814,8 @@
           "name": "measurement_source_concept_id",
           "mode": "nullable",
           "description": "A foreign key to a Concept in the Standard Vocabularies that refers to the code used in the source.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "source"
         },
         {
           "type": "string",
@@ -842,7 +852,8 @@
           "name": "observation_concept_id",
           "mode": "required",
           "description": "A foreign key to the standard observation concept identifier in the Standardized Vocabularies.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "date",
@@ -940,7 +951,8 @@
           "name": "value_source_concept_id",
           "mode": "nullable",
           "description": "A foreign key to a Concept for the value in the source data. This is applicable to observations where the result can be expressed as a non-standard concept.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "source"
         },
         {
           "type": "string",
@@ -1099,7 +1111,8 @@
           "name": "procedure_concept_id",
           "mode": "required",
           "description": "A foreign key that refers to a standard procedure Concept identifier in the Standardized Vocabularies.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "date",
@@ -1158,7 +1171,8 @@
           "name": "procedure_source_concept_id",
           "mode": "nullable",
           "description": "A foreign key to a Procedure Concept that refers to the code used in the source.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "source"
         },
         {
           "type": "string",
@@ -1188,7 +1202,8 @@
           "name": "visit_concept_id",
           "mode": "required",
           "description": "A foreign key that refers to a visit Concept identifier in the Standardized Vocabularies.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "standard"
         },
         {
           "type": "date",
@@ -1246,7 +1261,8 @@
           "name": "visit_source_concept_id",
           "mode": "nullable",
           "description": "A foreign key to a Concept that refers to the code used in the source.",
-          "foreignKey": "concept"
+          "foreignKey": "concept",
+          "domainConcept": "source"
         },
         {
           "type": "integer",
