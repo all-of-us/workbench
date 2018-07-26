@@ -1,0 +1,11 @@
+<div [ngSwitch]="idvStatus">
+  <p *ngSwitchCase="IdVerificationStatus.REJECTED">
+    Identity verification rejected, please create an account with an approved contact email or contact the DRC PI for your institution.
+  </p>
+  <p *ngSwitchCase="IdVerificationStatus.VERIFIED">
+    Identity verified, completing additional researcher registration and redirecting...
+  </p>
+  <p *ngSwitchDefault>
+    Awaiting identity verification, please contact the DRC PI from your institution for approval.
+  </p>
+</div>

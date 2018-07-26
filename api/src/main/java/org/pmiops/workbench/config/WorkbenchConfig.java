@@ -45,6 +45,7 @@ public class WorkbenchConfig {
 
   public static class GoogleCloudStorageServiceConfig {
     public String credentialsBucketName;
+    public String emailImagesBucketName;
     public String demosBucketName;
   }
 
@@ -59,6 +60,7 @@ public class WorkbenchConfig {
 
   public static class AdminConfig {
     public String adminIdVerification;
+    public String loginUrl;
   }
 
   public static class JiraConfig {

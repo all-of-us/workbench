@@ -48,6 +48,7 @@ public class MailServiceImplTest {
     msgStatuses.add(msgStatus);
     when(mandrillApi.send(any())).thenReturn(msgStatuses);
     when(cloudStorageService.readMandrillApiKey()).thenReturn(API_KEY);
+    when(cloudStorageService.getImageUrl(any())).thenReturn("test_img");
 
     service = new MailServiceImpl(Providers.of(mandrillApi), Providers.of(cloudStorageService),
       Providers.of(createWorkbenchConfig()));
@@ -98,6 +99,8 @@ public class MailServiceImplTest {
     workbenchConfig.mandrill.sendRetries = 3;
     workbenchConfig.googleCloudStorageService = new WorkbenchConfig.GoogleCloudStorageServiceConfig();
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
+    workbenchConfig.admin = new WorkbenchConfig.AdminConfig();
+    workbenchConfig.admin.loginUrl = "http://localhost:4200/";
     return workbenchConfig;
   }
 

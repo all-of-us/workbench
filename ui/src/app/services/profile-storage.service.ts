@@ -24,17 +24,14 @@ export class ProfileStorageService {
     this.reload();
   }
 
-  reload() {
-    if (this.activeCall) {
-      return;
-    }
-    this.activeCall = true;
-
-    // Conflict 409s are not retries automatically. These have a likelihood to
-    // occur on initial user login since we lazily initialize several things via
-    // the /me profile endpoint.
+  /**
+   * A retry policy which may be used in combination with Observable.retryWhen()
+   * which retries conflict errors. This may be used with profile related
+   * endpoints.
+   */
+  public static conflictRetryPolicy(): (errors: Observable<any>) => Observable<any> {
     let retries = 0;
-    this.profileService.getMe().retryWhen((errs) => {
+    return (errs) => {
       return errs.flatMap((err) => {
         if (err.status !== 409) {
           throw err;
@@ -44,11 +41,26 @@ export class ProfileStorageService {
         }
         return timer(retries * ProfileStorageService.RETRY_DELAY_MS);
       });
-    }).subscribe((profile) => {
-      this.profile.next(profile);
-      this.activeCall = false;
-    }, (err) => {
-      this.errorHandlingService.profileLoadError = true;
-    });
+    };
+  }
+
+  reload() {
+    if (this.activeCall) {
+      return;
+    }
+    this.activeCall = true;
+
+    // Conflict 409s are not retries automatically. These have a likelihood to
+    // occur on initial user login since we lazily initialize several things via
+    // the /me profile endpoint.
+    this.profileService.getMe()
+      .retryWhen(ProfileStorageService.conflictRetryPolicy())
+      .subscribe((profile) => {
+        this.profile.next(profile);
+        this.activeCall = false;
+      }, (err) => {
+        this.errorHandlingService.profileLoadError = true;
+        this.activeCall = false;
+      });
   }
 }

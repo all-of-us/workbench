@@ -23,7 +23,7 @@ export function nameDisplay(parameter): string {
   if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
     return '';
   } else {
-    return parameter.get('name', '');
+    return parameter.get('name', '').replace(/<(.|\n)*?>/g, '');
   }
 }
 

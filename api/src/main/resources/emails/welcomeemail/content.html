@@ -86,31 +86,33 @@
       background-color: #302C71;
       font-size: 16px;
       font-weight: 500;
-      line-height: 19px;
       color: #FFFFFF;
-      display: flex;
+      display: inline-block;
       justify-content: space-around;
       align-items: center;
+      text-align: center;
+      line-height: 52px;
       text-transform: uppercase;
       text-decoration: none;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <img src="assets/logo-registration-non-signed-in.svg">
+  <img src="${HEADER_IMG}">
   <div class="welcome-message">Welcome to the All of Us Researcher Workbench!</div>
-  <div><div class="text user-field">Your Username: </div><div class="user-info">{{USERNAME-INPUT}}</div></div>
-  <div><div class="text user-field">Your Temporary Password: </div><div class="user-info">{{PASSWORD-INPUT}}</div></div>
+  <div><div class="text user-field">Your Username: </div><div class="user-info">${USERNAME}</div></div>
+  <div><div class="text user-field">Your Temporary Password: </div><div class="user-info">${PASSWORD}</div></div>
   <br>
   <div class="text">Quick guide on how to get started:</div>
   <a class="card" href="https://myaccount.google.com/signinoptions/two-step-verification">
-    <div class="bullet">1</div>
+    <img class="bullet" src="${BULLET_1}">
     <div class="card-text"><div class="link">Sign into Google</div> with your new account, change your password, and set up 2-Step Verification</div>
   </a>
   <a class="card" href="https://myaccount.google.com/intro/recovery/email?hl=en-US">
-    <div class="bullet">2</div>
+    <img class="bullet" src="${BULLET_2}">
     <div class="card-text"><div class="link">Add</div> your recovery email address</div>
   </a>
   <div class="text">After these steps are completed, you are ready to use the Researcher Workbench</div>
-  <a class="button" href="{{URL-INPUT}}">Get Started</a>
+  <a class="button" href="${URL}">Get Started</a>
 </body>
