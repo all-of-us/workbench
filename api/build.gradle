@@ -299,7 +299,7 @@ dependencies {
   generatedCompile 'com.squareup.okhttp:okhttp:2.6.0'
   generatedCompile 'com.squareup.okhttp:logging-interceptor:2.6.0'
   generatedCompile 'com.google.code.gson:gson:+'
-  generatedCompile 'joda-time:joda-time:+'
+  generatedCompile 'joda-time:joda-time:2.10'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:+'
 
 }
