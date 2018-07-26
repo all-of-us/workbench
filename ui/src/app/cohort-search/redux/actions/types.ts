@@ -6,6 +6,9 @@ export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
+export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
+export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
+export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
 
 export const BEGIN_COUNT_REQUEST = 'BEGIN_COUNT_REQUEST';
@@ -88,6 +91,19 @@ export interface ActionTypes {
   SET_CRITERIA_SEARCH: {
     type: typeof SET_CRITERIA_SEARCH;
     searchTerms: string;
+  };
+  BEGIN_AUTOCOMPLETE_REQUEST: {
+    type: typeof BEGIN_AUTOCOMPLETE_REQUEST;
+    cdrVersionId: number;
+    searchTerms: string;
+  };
+  LOAD_AUTOCOMPLETE_OPTIONS: {
+    type: typeof LOAD_AUTOCOMPLETE_OPTIONS;
+    options: any;
+  };
+  AUTOCOMPLETE_REQUEST_ERROR: {
+    type: typeof AUTOCOMPLETE_REQUEST_ERROR;
+    error?: any;
   };
   CRITERIA_REQUEST_ERROR: {
     type: typeof CRITERIA_REQUEST_ERROR;
@@ -258,6 +274,9 @@ export type RootAction =
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]
+  | ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST]
+  | ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS]
+  | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
 
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]

@@ -111,6 +111,18 @@ export const isCriteriaLoading =
   (state): boolean =>
   state.getIn(['criteria', 'requests', kind, parentId], false);
 
+export const autocompleteOptions =
+  () => (state): List<any> =>
+  state.getIn(['criteria', 'search', 'options'], List());
+
+export const isAutocompleteLoading =
+  () => (state): boolean =>
+  state.getIn(['criteria', 'search', 'autocomplete'], false);
+
+export const autocompleteError =
+  () => (state): any =>
+  state.getIn(['criteria', 'search', 'error']);
+
 export const criteriaError =
   (kind: string, parentId: number) =>
   (state): any =>
