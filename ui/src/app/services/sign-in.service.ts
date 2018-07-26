@@ -35,7 +35,11 @@ export class SignInService {
   }
 
   public signIn(): void {
-    gapi.auth2.getAuthInstance().signIn({'prompt': 'select_account'});
+    gapi.auth2.getAuthInstance().signIn({
+      'prompt': 'select_account',
+      'ux_mode': 'redirect',
+      'redirect_uri': `${window.location.protocol}//${window.location.host}`
+    });
   }
 
   public signOut(): void {
@@ -57,15 +61,28 @@ export class SignInService {
     });
   }
 
+  private clearIdToken(): void {
+    // Using the full page redirect puts a long "id_token" parameter in the
+    // window hash; clear this after gapi has consumed it.
+    window.location.hash = '';
+  }
+
   private subscribeToAuth2User(): void {
     // The listen below only fires on changes, so we need an initial
     // check to handle the case where the user is already signed in.
     this.zone.run(() => {
-      this.isSignedIn.next(gapi.auth2.getAuthInstance().isSignedIn.get());
+      const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+      this.isSignedIn.next(isSignedIn);
+      if (isSignedIn) {
+        this.clearIdToken();
+      }
     });
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
       this.zone.run(() => {
         this.isSignedIn.next(isSignedIn);
+        if (isSignedIn) {
+          this.clearIdToken();
+        }
       });
     });
   }
