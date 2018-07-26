@@ -285,7 +285,7 @@ dependencies {
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
-  testCompile 'org.springframework.boot:spring-boot-starter-test:+'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
   testCompile 'com.h2database:h2:+'
   testCompile 'org.liquibase:liquibase-core:+'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
