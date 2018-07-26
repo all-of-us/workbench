@@ -1,7 +1,14 @@
-import {DataAccessLevel} from 'generated';
-import {BillingProjectStatus, Profile} from 'generated';
+import {Http} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 import {InvitationVerificationRequest} from '../../generated/model/invitationVerificationRequest';
+
+import {
+  BillingProjectStatus,
+  DataAccessLevel,
+  Profile,
+  ProfileService,
+  UsernameTakenResponse,
+} from 'generated';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = {
@@ -17,15 +24,20 @@ export class ProfileStubVariables {
   };
 }
 
-export class ProfileServiceStub {
+export class ProfileServiceStub extends ProfileService {
   public profile: Profile;
   public accountCreates = 0;
 
-  constructor() {
+  /**
+   * Http can optionally be provided e.g. with a fake/mock. If not specified,
+   * methods which are not overridden by this stub will throw errors.
+   */
+  constructor(http?: Http) {
+    super(http, null, null);
     this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 
-  getMe(): Observable<Profile> {
+  public getMe(): Observable<Profile> {
     return new Observable<Profile>(observer => {
       setTimeout(() => {
         observer.next(this.profile);
@@ -34,7 +46,7 @@ export class ProfileServiceStub {
     });
   }
 
-  createAccount(): Observable<Profile> {
+  public createAccount(): Observable<Profile> {
     this.accountCreates++;
     return new Observable<Profile>(observer => {
       setTimeout(() => {
@@ -44,7 +56,7 @@ export class ProfileServiceStub {
     });
   }
 
-  invitationKeyVerification(request?: InvitationVerificationRequest): Observable<{}> {
+  public invitationKeyVerification(request?: InvitationVerificationRequest): Observable<{}> {
     if (request.invitationKey === 'dummy') {
       return new Observable(observer => { observer.next(this.profile); });
     } else {
@@ -53,12 +65,13 @@ export class ProfileServiceStub {
     }
   }
 
-  isUsernameTaken(username: string): Observable<boolean> {
-    if (username === ProfileStubVariables.PROFILE_STUB.username) {
-      return new Observable(observer => { observer.next(true); });
-    } else {
-      return new Observable(observer => { observer.next(false); });
-    }
+  public isUsernameTaken(username: string, extraHttpRequestParams?: any):
+      Observable<UsernameTakenResponse> {
+    return new Observable(observer => {
+      observer.next({
+        isTaken: username === ProfileStubVariables.PROFILE_STUB.username
+      });
+    });
   }
 
   private now(): number {
