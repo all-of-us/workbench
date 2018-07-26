@@ -140,7 +140,6 @@ configurations {
 }
 
 project.ext.GAE_VERSION = '1.9.64'
-project.ext.SBF_VERSION = '2.0.3.RELEASE'
 
 buildscript {    // Configuration for building
   repositories {
@@ -244,7 +243,7 @@ dependencies {
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
   compile "com.google.appengine:appengine:${GAE_VERSION}"
   compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
-  compile('org.springframework.boot:spring-boot-starter-web:+') {
+  compile('org.springframework.boot:spring-boot-starter-web') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
@@ -252,7 +251,7 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-actuator:+') {
+  compile('org.springframework.boot:spring-boot-starter-actuator') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
