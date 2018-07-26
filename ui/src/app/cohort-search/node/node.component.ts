@@ -197,8 +197,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   }
 
   matchFound(item: any) {
-    return item.name.toLowerCase().includes(this.searchTerms.toLowerCase())
-      || item.conceptId.toString().includes(this.searchTerms);
+    return item.name.toLowerCase().includes(this.searchTerms.toLowerCase());
   }
 
   setExpanded(path: Array<number>, end: number) {
@@ -209,7 +208,7 @@ export class NodeComponent implements OnInit, OnDestroy {
     if (obj.children.length) {
       obj.expanded = true;
     }
-    if (path[end + 1]) {
+    if (typeof path[end + 1] !== 'undefined') {
       this.setExpanded(path, end + 1);
     }
   }

@@ -9,6 +9,7 @@ import {
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  BEGIN_INGREDIENT_REQUEST,
   CANCEL_CRITERIA_REQUEST,
 
   BEGIN_COUNT_REQUEST,
@@ -40,6 +41,9 @@ import {
 
   loadAutocompleteOptions,
   autocompleteRequestError,
+
+  loadIngredients,
+  ingredientsRequestError,
 } from './actions/creators';
 
 import {CohortSearchState} from './store';
@@ -51,6 +55,7 @@ type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
 type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
+type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
 type PreviewRequestAction = ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST];
@@ -122,6 +127,16 @@ export class CohortSearchEpics {
         return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
           .map(result => loadAutocompleteOptions(result.items))
           .catch(e => Observable.of(autocompleteRequestError(e)));
+      }
+    )
+  )
+
+  fetchIngredientsForBrand: CSEpic = (action$) => (
+    action$.ofType(BEGIN_INGREDIENT_REQUEST).mergeMap(
+      ({cdrVersionId, conceptId}: IngredientRequestAction) => {
+        return this.service.getDrugIngredientByConceptId(cdrVersionId, conceptId)
+          .map(result => loadIngredients(result.items))
+          .catch(e => Observable.of(ingredientsRequestError(e)));
       }
     )
   )

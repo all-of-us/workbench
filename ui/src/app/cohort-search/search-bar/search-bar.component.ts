@@ -41,7 +41,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const optionsSub = this.ngRedux
       .select(autocompleteOptions())
       .subscribe(options => {
-        console.log(options.toJS());
+        this.options = options;
+        console.log(options);
       });
 
     this.subscription = errorSub;
@@ -63,6 +64,19 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       } else {
         this.options = [];
       }
+    }
+  }
+
+  selectOption(option: any) {
+    console.log(option);
+    if (option.group) {
+
+    } else if (option.subtype === 'ATC') {
+      this.actions.setCriteriaSearchTerms(option.name);
+      this.options = [];
+    } else if (option.subtype === 'BRAND') {
+      this.actions.fetchIngredientsForBrand(option.conceptId);
+      this.options = [];
     }
   }
 }

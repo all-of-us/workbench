@@ -7,6 +7,7 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   AUTOCOMPLETE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
@@ -91,12 +92,27 @@ export const requestAutocompleteOptions =
   ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
   ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, searchTerms});
 
+export const requestIngredientsForBrand =
+  (cdrVersionId: number, conceptId: number
+  ): ActionTypes[typeof BEGIN_INGREDIENT_REQUEST] =>
+  ({type: BEGIN_INGREDIENT_REQUEST, cdrVersionId, conceptId});
+
 export const loadAutocompleteOptions =
   (options: any
   ): ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS] =>
   ({type: LOAD_AUTOCOMPLETE_OPTIONS, options});
 
 export const autocompleteRequestError =
+  (error?: any
+  ): ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR] =>
+  ({type: AUTOCOMPLETE_REQUEST_ERROR, error});
+
+export const loadIngredients =
+  (options: any
+  ): ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS] =>
+  ({type: LOAD_AUTOCOMPLETE_OPTIONS, options});
+
+export const ingredientsRequestError =
   (error?: any
   ): ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR] =>
   ({type: AUTOCOMPLETE_REQUEST_ERROR, error});

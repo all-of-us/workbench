@@ -13,7 +13,7 @@
   </button>
 
   <!-- CODE -->
-  <div class="code font-weight-bold">
+  <div class="code font-weight-bold" [innerHTML]="displayCode | safeHtml">
     {{ displayCode }}
   </div>
 
