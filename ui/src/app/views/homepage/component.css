@@ -10,11 +10,6 @@
   margin-right: -0.6rem;
 }
 
-.cont {
-  display: flex;
-  align-content: center;
-}
-
 .card.double {
   height: 332px;
   width: 21rem;
@@ -267,7 +262,4 @@
   position: relative;
   font-weight: 300;
 }
-
-
-
 
