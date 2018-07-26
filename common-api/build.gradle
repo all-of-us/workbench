@@ -22,7 +22,7 @@ repositories {   // repositories for Jar's you access in your code
 dependencies {
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
   compile 'javax.servlet:javax.servlet-api:3.0.1'
-  compile 'joda-time:joda-time:+'
+  compile 'joda-time:joda-time:2.10'
   compile 'javax.inject:javax.inject:1'
   compile 'com.google.guava:guava:25.1-jre'
   compile 'org.hibernate:hibernate-ehcache:5.0.12.Final'

@@ -116,7 +116,7 @@ dependencies {
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
-  compile 'joda-time:joda-time:+'
+  compile 'joda-time:joda-time:2.10'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
