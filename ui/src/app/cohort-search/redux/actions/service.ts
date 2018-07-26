@@ -53,6 +53,7 @@ export class CohortSearchActions {
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
+  @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
@@ -226,7 +227,6 @@ export class CohortSearchActions {
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
   }
 
-
   fetchAutocompleteOptions(terms: string): void {
     const isLoading = isAutocompleteLoading()(this.state);
     const isLoaded = this.state.getIn(['criteria', 'search', 'autocomplete']);
@@ -234,6 +234,15 @@ export class CohortSearchActions {
       return;
     }
     this.requestAutocompleteOptions(this.cdrVersionId, terms);
+  }
+
+  fetchIngredientsForBrand(conceptId: number): void {
+    const isLoading = isAutocompleteLoading()(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'search', 'autocomplete']);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
   requestPreview(): void {
