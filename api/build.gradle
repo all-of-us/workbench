@@ -255,7 +255,7 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile 'org.springframework.security:spring-security-web:+'
+  compile 'org.springframework.security:spring-security-web:4.2.2.RELEASE'
 
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
