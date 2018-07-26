@@ -141,7 +141,7 @@ dependencies {
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
   generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
   generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
-  generatedCompile 'com.google.code.gson:gson:+'
+  generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:+'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:+'
 
