@@ -75,12 +75,27 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
               }
               return this.profileService.submitDemographicsSurvey();
             })
-            .do((p) => {
-              if (hasRegisteredAccess(p.dataAccessLevel)) {
-                this.navigateAway();
+            .retryWhen(ProfileStorageService.conflictRetryPolicy())
+            .flatMap((p) => {
+              if (!hasRegisteredAccess(p.dataAccessLevel)) {
+                return Observable.from([p]);
               }
-            })
-            .retryWhen(ProfileStorageService.conflictRetryPolicy());
+              // The profile just got registered access, so we need to reload
+              // the cached profile before we can navigate away (else we'll hit
+              // the registration guard and be sent back to this page again).
+              // This reload process is clunky and involves an extra request,
+              // RW-1057 tracks improvements to this.
+              this.profileStorageService.reload();
+              return this.profileStorageService.profile$
+                .do(() => {
+                  // Note: We cannot just do a .first() on profile$ because this
+                  // subscription may trigger before or after the above reload()
+                  // takes effect.
+                  if (hasRegisteredAccess(p.dataAccessLevel)) {
+                    this.navigateAway();
+                  }
+                });
+            });
           })
         .subscribe();
     });
