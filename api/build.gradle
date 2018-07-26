@@ -140,6 +140,7 @@ configurations {
 }
 
 project.ext.GAE_VERSION = '1.9.64'
+project.ext.SBF_VERSION = '2.0.3.RELEASE'
 
 buildscript {    // Configuration for building
   repositories {
@@ -239,8 +240,8 @@ dependencies {
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
-  compile 'mysql:mysql-connector-java:+'
-  compile 'com.google.cloud.sql:mysql-socket-factory:+'
+  compile 'mysql:mysql-connector-java:8.0.11'
+  compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
   compile "com.google.appengine:appengine:${GAE_VERSION}"
   compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
   compile('org.springframework.boot:spring-boot-starter-web:+') {
