@@ -156,18 +156,17 @@
   align-self: right;
 }
 
-.textGroup {
-  margin-left: 11.2%;
-}
-
 .footerText {
   height: 176px;
-  width: 33%;
   opacity: 0.87;
   color: #83C3EC;
   font-size: 16px;
   font-weight: 300;
   line-height: 30px;
+}
+
+.textGroup.ng-star-inserted {
+  width: 35%;
 }
 
 .footerText .title {
@@ -261,5 +260,39 @@
   margin-left: 2.5rem;
   position: relative;
   font-weight: 300;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 3px;
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  top: -5px;
+  right: 105%;
+}
+
+.tooltip .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent black;
 }
 

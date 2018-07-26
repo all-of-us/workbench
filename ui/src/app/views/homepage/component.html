@@ -1,5 +1,5 @@
 <div class="background-image">
-  <div class="row" style="overflow:true ;display:flex;justify-content: center;">
+  <div class="row" style="display:flex; justify-content: center;">
     <div *ngFor="let card of cardDetails">
       <div class="card double">
         <div class="row">
@@ -58,7 +58,7 @@
           </div>
 
           <div class="col analyzeSingleHeader">Analyze and Publish with Workspaces</div>
-          <div class="col" style="display: flex; justify-content: right;width:15%;">
+          <div class="col" style="display: flex; justify-content: right; width:15%;">
             <div class="row">
               <a class="links" (click)="addWorkspace()">Create a
                 workspace</a>
@@ -99,71 +99,29 @@
         <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
       </div>
       <div class="row footerRtLink">
-        <clr-tooltip clrPosition="top-right">
+        <clr-tooltip>
           <a href="#" class="footerLink" clrTooltipTrigger>
             See all documentation</a>
-          <clr-tooltip-content clrSize="sm" *clrIfOpen>
+          <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
             <span>Coming Soon</span>
           </clr-tooltip-content>
         </clr-tooltip>
       </div>
-      <div class="row textGroup">
-        <div class="footerText">
-          <div class="title">Working Within Researcher Workbench</div>
-          <clr-tooltip>
-            <ul class="bullets" clrTooltipTrigger>
-              <li>
-                <a href="#" class="bullets">
-                  Researcher Workbench Mission</a>
-              </li>
-              <li><a href="#" class="bullets">
-                User interface components</a></li>
-              <li><a href="#" class="bullets">
-                What to do when things go wrong</a></li>
-              <li><a href="#" class="bullets">
-                Contributing to the Workbench</a></li>
+      <div class="row" style="margin-left:12%">
+        <div *ngFor="let footer of footerLinks" class="row textGroup">
+          <div class="footerText">
+            <div class="title">{{footer.title}}</div>
+            <ul class="bullets">
+              <div *ngFor="let link of footer.links">
+                <div class="tooltip">
+                  <li>
+                    <a href="#" class="bullets">{{link}}</a>
+                  </li>
+                  <span class="tooltiptext">Coming Soon</span>
+                </div>
+              </div>
             </ul>
-            <clr-tooltip-content clrPosition="bottom-left" clrSize="sm" *clrIfOpen>
-              <span>Coming Soon</span>
-            </clr-tooltip-content>
-          </clr-tooltip>
-
-        </div>
-        <div class="footerText">
-          <div class="title">Workspace</div>
-          <clr-tooltip>
-            <ul class="bullet" clrTooltipTrigger>
-              <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                Workspace interface components</a></li>
-              <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                User interface components</a></li>
-              <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                Collaborating with other researchers</a></li>
-              <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                Sharing and Publishing Workspaces</a></li>
-            </ul>
-            <clr-tooltip-content clrPosition="bottom-left" clrSize="sm" *clrIfOpen>
-              <span>Coming Soon</span>
-            </clr-tooltip-content>
-          </clr-tooltip>
-        </div>
-        <div class="footerText">
-          <div class="title">Working with Notebooks</div>
-          <clr-tooltip>
-            <ul class="bullet" clrTooltipTrigger>
-              <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                Notebook interface components</a></li>
-              <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                Notebooks and data</a></li>
-              <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                Collaborating with other researchers</a></li>
-              <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-                Sharing and Publishing Notebooks</a></li>
-            </ul>
-            <clr-tooltip-content clrPosition="bottom-left" clrSize="sm" *clrIfOpen>
-              <span>Coming Soon</span>
-            </clr-tooltip-content>
-          </clr-tooltip>
+          </div>
         </div>
       </div>
     </div>

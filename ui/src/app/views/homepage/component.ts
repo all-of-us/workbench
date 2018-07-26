@@ -37,20 +37,40 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
   cardDetails = [
-      {
-          position: 'left',
-          title: 'Browse All of Us Data',
-          text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-          'dolore. Mirum est notare, quam littera gothica quam nunc.',
-          icon: '/assets/icons/browse-data.svg'
-      },
-      {
-          position: 'right',
-          title: 'Explore Public Work',
-          text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-          'dolore. Mirum est notare, quam littera gothica quam nunc.',
-          icon: '/assets/icons/explore.svg'
-      }];
+    {
+      title: 'Browse All of Us Data',
+      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+      'dolore. Mirum est notare, quam littera gothica quam nunc.',
+      icon: '/assets/icons/browse-data.svg'
+    },
+    {
+      title: 'Explore Public Work',
+      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+      'dolore. Mirum est notare, quam littera gothica quam nunc.',
+      icon: '/assets/icons/explore.svg'
+    }];
+  footerLinks = [
+    {
+      title: 'Working Within Researcher Workbench',
+      links: ['Researcher Workbench Mission',
+        'User interface components',
+        'What to do when things go wrong',
+        'Contributing to the Workbench']
+    },
+    {
+      title: 'Workspace',
+      links: ['Workspace interface components',
+        'User interface components',
+        'Collaborating with other researchers',
+        'Sharing and Publishing Workspaces']
+    },
+    {
+      title: 'Working with Notebooks',
+      links: ['Notebook interface components',
+        'Notebooks and data',
+        'Collaborating with other researchers',
+        'Sharing and Publishing Notebooks']
+    }];
   firstTimeUser = false;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
