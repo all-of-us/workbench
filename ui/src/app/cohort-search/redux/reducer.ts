@@ -167,7 +167,6 @@ export const rootReducer: Reducer<CohortSearchState> =
       case BEGIN_ATTR_PREVIEW_REQUEST:
         return state
           .deleteIn(['wizard', 'calculate', 'error'])
-          .deleteIn(['wizard', 'calculate', 'count'])
           .setIn(['wizard', 'calculate', 'requesting'], true);
 
       case LOAD_ATTR_PREVIEW_RESULTS:
