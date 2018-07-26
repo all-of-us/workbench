@@ -160,6 +160,15 @@ public class ProfileController implements ProfileApiDelegate {
     return createFirecloudBillingProject(user);
   }
 
+  private User saveUserWithConflictHandling(User user) {
+    try {
+      return userDao.save(user);
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for user update", e);
+      throw new ConflictException("Failed due to concurrent modification");
+    }
+  }
+
   private String createFirecloudBillingProject(User user) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     long suffix;
@@ -245,12 +254,7 @@ public class ProfileController implements ProfileApiDelegate {
       // If the user is logged in, then we know that they have followed the account creation instructions sent to
       // their initial contact email address.
       user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
-      try {
-        return userDao.save(user);
-      } catch (ObjectOptimisticLockingFailureException e) {
-        log.log(Level.WARNING, "version conflict for user update", e);
-        throw new ConflictException("Failed due to concurrent modification");
-      }
+      return saveUserWithConflictHandling(user);
     }
 
     // Free tier billing project setup is complete; nothing to do.
@@ -406,7 +410,7 @@ public class ProfileController implements ProfileApiDelegate {
         throw new EmailException("Error submitting id verification", e);
       }
       user.setRequestedIdVerification(true);
-      userDao.save(user);
+      user = saveUserWithConflictHandling(user);
     }
 
     return getProfileResponse(user);
@@ -415,19 +419,19 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> submitDemographicsSurvey() {
     User user = userService.submitDemographicSurvey();
-    return getProfileResponse(user);
+    return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
   @Override
   public ResponseEntity<Profile> completeEthicsTraining() {
     User user = userService.submitEthicsTraining();
-    return getProfileResponse(user);
+    return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
   @Override
   public ResponseEntity<Profile> submitTermsOfService() {
     User user = userService.submitTermsOfService();
-    return getProfileResponse(user);
+    return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
   @Override
