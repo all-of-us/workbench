@@ -6,7 +6,7 @@
     "clusterMaxAgeDays": 14,
     "clusterIdleMaxAgeDays": 7,
     "debugEndpoints": false,
-    "enforceRegistered": false,
+    "enforceRegistered": true,
     "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-stable-scripts/setup_notebook_cluster.sh",
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-stable",
