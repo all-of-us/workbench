@@ -112,7 +112,7 @@ export const isCriteriaLoading =
   state.getIn(['criteria', 'requests', kind, parentId], false);
 
 export const autocompleteOptions =
-  () => (state): List<any> =>
+  () => (state): Array<any> =>
   state.getIn(['criteria', 'search', 'options'], List());
 
 export const isAutocompleteLoading =

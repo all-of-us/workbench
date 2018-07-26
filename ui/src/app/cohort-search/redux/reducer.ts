@@ -21,8 +21,11 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
+  LOAD_INGREDIENT_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
+  INGREDIENT_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -103,12 +106,27 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
 
+      case BEGIN_INGREDIENT_REQUEST:
+        return state
+          .deleteIn(['criteria', 'search', 'errors'])
+          .setIn(['criteria', 'search', 'autocomplete'], true);
+
       case LOAD_AUTOCOMPLETE_OPTIONS:
         return state
-          .setIn(['criteria', 'search', 'options'], fromJS(action.options))
+          .setIn(['criteria', 'search', 'options'], action.options)
+          .deleteIn(['criteria', 'search', 'autocomplete']);
+
+      case LOAD_INGREDIENT_LIST:
+        return state
+          .setIn(['criteria', 'search', 'options'], action.ingredients)
           .deleteIn(['criteria', 'search', 'autocomplete']);
 
       case AUTOCOMPLETE_REQUEST_ERROR:
+        return state
+          .deleteIn(['criteria', 'search', 'autocomplete'])
+          .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
+
+      case INGREDIENT_REQUEST_ERROR:
         return state
           .deleteIn(['criteria', 'search', 'autocomplete'])
           .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
