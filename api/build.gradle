@@ -286,8 +286,8 @@ dependencies {
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
   testCompile 'org.springframework.boot:spring-boot-starter-test'
-  testCompile 'com.h2database:h2:+'
-  testCompile 'org.liquibase:liquibase-core:+'
+  testCompile 'com.h2database:h2:1.4.194'
+  testCompile 'org.liquibase:liquibase-core:3.5.3'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
   // For Swagger generation. These should include dependencies found in the Swagger codegen
