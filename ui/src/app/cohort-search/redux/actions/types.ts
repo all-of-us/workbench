@@ -7,6 +7,9 @@ export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
 export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
+export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
+export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
+export const INGREDIENT_REQUEST_ERROR = 'INGREDIENT_REQUEST_ERROR';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
 export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
@@ -97,12 +100,25 @@ export interface ActionTypes {
     cdrVersionId: number;
     searchTerms: string;
   };
+  BEGIN_INGREDIENT_REQUEST: {
+    type: typeof BEGIN_INGREDIENT_REQUEST;
+    cdrVersionId: number;
+    conceptId: number;
+  };
   LOAD_AUTOCOMPLETE_OPTIONS: {
     type: typeof LOAD_AUTOCOMPLETE_OPTIONS;
     options: any;
   };
   AUTOCOMPLETE_REQUEST_ERROR: {
     type: typeof AUTOCOMPLETE_REQUEST_ERROR;
+    error?: any;
+  };
+  LOAD_INGREDIENT_LIST: {
+    type: typeof LOAD_INGREDIENT_LIST;
+    ingredients: any;
+  };
+  INGREDIENT_REQUEST_ERROR: {
+    type: typeof INGREDIENT_REQUEST_ERROR;
     error?: any;
   };
   CRITERIA_REQUEST_ERROR: {
@@ -275,9 +291,12 @@ export type RootAction =
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]
   | ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST]
+  | ActionTypes[typeof BEGIN_INGREDIENT_REQUEST]
   | ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS]
+  | ActionTypes[typeof LOAD_INGREDIENT_LIST]
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
+  | ActionTypes[typeof INGREDIENT_REQUEST_ERROR]
 
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]
   | ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST]
