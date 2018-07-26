@@ -143,7 +143,7 @@ dependencies {
   generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:2.10'
-  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:+'
+  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
 
 }
 
