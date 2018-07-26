@@ -18,7 +18,7 @@
     </div>
   </div>
   <div *ngIf="firstTimeUser">
-    <div class="row" style="display:flex;justify-content: center;">
+    <div class="row" style="display:flex; justify-content:center;">
       <div class="card double">
         <div class="row">
           <img class="icon analyzeIcon" src="/assets/icons/Analyze.svg">
@@ -50,7 +50,7 @@
     </div>
   </div>
   <div *ngIf="!firstTimeUser">
-    <div class="row" style="display: flex; justify-content: center">
+    <div class="row" style="display:flex; justify-content:center">
       <div class="card single">
         <div class="row">
           <div class="col">
@@ -62,22 +62,18 @@
             <div class="row">
               <a class="links" (click)="addWorkspace()">Create a
                 workspace</a>
-              <clr-tooltip>
-                <a href="#" class="links" clrTooltipTrigger>See All Notebooks</a>
-                <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
-                  <span>Coming Soon</span>
-                </clr-tooltip-content>
-              </clr-tooltip>
+              <div class="tooltip">
+                <a href="#" class="links">See All Notebooks</a>
+                <span class="tooltiptext">Coming Soon</span>
+              </div>
             </div>
             <div class="row">
               <a class="links" (click)="listWorkspaces()">See All
                 Workspaces</a>
-              <clr-tooltip class="tooltip-bottom-right">
-                <a href="#" class="links" clrTooltipTrigger>See All Cohorts</a>
-                <clr-tooltip-content *clrIfOpen>
-                  <span>Coming Soon</span>
-                </clr-tooltip-content>
-              </clr-tooltip>
+              <div class="tooltip">
+                <a href="#" class="links">See All Cohorts</a>
+                <span class="tooltiptext">Coming Soon</span>
+              </div>
             </div>
           </div>
           <div class="row">
@@ -99,13 +95,11 @@
         <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
       </div>
       <div class="row footerRtLink">
-        <clr-tooltip>
-          <a href="#" class="footerLink" clrTooltipTrigger>
+        <div class="tooltip">
+          <a href="#" class="footerLink">
             See all documentation</a>
-          <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
-            <span>Coming Soon</span>
-          </clr-tooltip-content>
-        </clr-tooltip>
+          <span class="tooltiptext">Coming Soon</span>
+        </div>
       </div>
       <div class="row" style="margin-left:12%">
         <div *ngFor="let footer of footerLinks" class="row textGroup">
