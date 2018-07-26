@@ -6,6 +6,9 @@ import {
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
+  BEGIN_AUTOCOMPLETE_REQUEST,
+  LOAD_AUTOCOMPLETE_OPTIONS,
+  AUTOCOMPLETE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -82,6 +85,21 @@ export const setCriteriaSearchTerms =
   (searchTerms: string
   ): ActionTypes[typeof SET_CRITERIA_SEARCH] =>
   ({type: SET_CRITERIA_SEARCH, searchTerms});
+
+export const requestAutocompleteOptions =
+  (cdrVersionId: number, searchTerms: string
+  ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
+  ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, searchTerms});
+
+export const loadAutocompleteOptions =
+  (options: any
+  ): ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS] =>
+  ({type: LOAD_AUTOCOMPLETE_OPTIONS, options});
+
+export const autocompleteRequestError =
+  (error?: any
+  ): ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR] =>
+  ({type: AUTOCOMPLETE_REQUEST_ERROR, error});
 
 export const criteriaRequestError =
   (kind: string, parentId: number, error?: any
