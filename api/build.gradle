@@ -239,11 +239,11 @@ dependencies {
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
-  compile 'mysql:mysql-connector-java:+'
-  compile 'com.google.cloud.sql:mysql-socket-factory:+'
+  compile 'mysql:mysql-connector-java:8.0.11'
+  compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
   compile "com.google.appengine:appengine:${GAE_VERSION}"
   compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
-  compile('org.springframework.boot:spring-boot-starter-web:+') {
+  compile('org.springframework.boot:spring-boot-starter-web') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
@@ -251,26 +251,26 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-actuator:+') {
+  compile('org.springframework.boot:spring-boot-starter-actuator') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile 'org.springframework.security:spring-security-web:+'
+  compile 'org.springframework.security:spring-security-web:4.2.2.RELEASE'
 
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
-  compile 'com.google.apis:google-api-services-oauth2:+'
+  compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
   compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
   compile ('com.google.cloud:google-cloud-storage:1.8.0') {
     exclude group: 'com.google.guava', module:'guava-jdk5'
   }
-  compile 'com.google.code.gson:gson:+'
+  compile 'com.google.code.gson:gson:2.8.5'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
-  compile 'com.squareup.okhttp:okhttp:2.6.0'
-  compile 'com.squareup.okhttp:logging-interceptor:2.6.0'
-  compile 'joda-time:joda-time:+'
+  compile 'com.squareup.okhttp:okhttp:2.7.4'
+  compile 'com.squareup.okhttp:logging-interceptor:2.7.4'
+  compile 'joda-time:joda-time:2.10'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
@@ -281,13 +281,13 @@ dependencies {
   compile 'org.json:json:20160810'
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:1.+'
+  testCompile 'org.mockito:mockito-core:1.10.19'
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
-  testCompile 'com.google.truth:truth:+'
-  testCompile 'org.springframework.boot:spring-boot-starter-test:+'
-  testCompile 'com.h2database:h2:+'
-  testCompile 'org.liquibase:liquibase-core:+'
+  testCompile 'com.google.truth:truth:0.42'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
+  testCompile 'com.h2database:h2:1.4.194'
+  testCompile 'org.liquibase:liquibase-core:3.5.3'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
   // For Swagger generation. These should include dependencies found in the Swagger codegen
@@ -298,9 +298,9 @@ dependencies {
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
   generatedCompile 'com.squareup.okhttp:okhttp:2.6.0'
   generatedCompile 'com.squareup.okhttp:logging-interceptor:2.6.0'
-  generatedCompile 'com.google.code.gson:gson:+'
-  generatedCompile 'joda-time:joda-time:+'
-  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:+'
+  generatedCompile 'com.google.code.gson:gson:2.8.5'
+  generatedCompile 'joda-time:joda-time:2.10'
+  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
 
 }
 
