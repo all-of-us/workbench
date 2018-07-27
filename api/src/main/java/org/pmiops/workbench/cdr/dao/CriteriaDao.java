@@ -22,7 +22,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
   @Query(value = "select * from criteria c " +
     "where c.type = 'DRUG' " +
     "and c.subtype in ('ATC', 'BRAND') " +
-    "and c.is_group = 0 and c.is_selectable = 1 " +
+    "and c.is_selectable = 1 " +
     "and upper(c.name) like %:name% " +
     "order by c.name asc", nativeQuery = true)
   List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name);

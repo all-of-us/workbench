@@ -1,6 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationError, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
+import {timer} from 'rxjs/observable/timer';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
@@ -23,8 +24,8 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
   private profileSub: Subscription;
 
   constructor(
-    private serverConfigService: ServerConfigService,
     private profileService: ProfileService,
+    private serverConfigService: ServerConfigService,
     private profileStorageService: ProfileStorageService,
     private activatedRoute: ActivatedRoute,
     private router: Router) {}
@@ -44,35 +45,58 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
           }
           this.idvStatus = profile.idVerificationStatus;
 
-          let obs = Observable.from([profile]);
-          // For now, we automatically submit ID verification as there's nothing
-          // else to do in the application and only manual verification is supported.
-          if (!profile.requestedIdVerification) {
-            obs = obs.flatMap((p) => {
-              return this.profileService.submitIdVerification().map((_) => p);
+          // Start a new retryable sequence of observables here.
+          return Observable.from([profile])
+            // For now, we automatically submit ID verification as there's nothing
+            // else to do in the application and only manual verification is supported.
+            .flatMap((p) => {
+              if (p.requestedIdVerification) {
+                return Observable.from([p]);
+              }
+              return this.profileService.submitIdVerification();
+            })
+            // Per RW-695, ID verification is sufficient for initial internal
+            // data access.
+            .flatMap((p) => {
+              if (p.termsOfServiceCompletionTime) {
+                return Observable.from([p]);
+              }
+              return this.profileService.submitTermsOfService();
+            })
+            .flatMap((p) => {
+              if (p.ethicsTrainingCompletionTime) {
+                return Observable.from([p]);
+              }
+              return this.profileService.completeEthicsTraining();
+            })
+            .flatMap((p) => {
+              if (p.demographicSurveyCompletionTime) {
+                return Observable.from([p]);
+              }
+              return this.profileService.submitDemographicsSurvey();
+            })
+            .retryWhen(ProfileStorageService.conflictRetryPolicy())
+            .flatMap((p) => {
+              if (!hasRegisteredAccess(p.dataAccessLevel)) {
+                return Observable.from([p]);
+              }
+              // The profile just got registered access, so we need to reload
+              // the cached profile before we can navigate away (else we'll hit
+              // the registration guard and be sent back to this page again).
+              // This reload process is clunky and involves an extra request,
+              // RW-1057 tracks improvements to this.
+              this.profileStorageService.reload();
+              return this.profileStorageService.profile$
+                .do(() => {
+                  // Note: We cannot just do a .first() on profile$ because this
+                  // subscription may trigger before or after the above reload()
+                  // takes effect.
+                  if (hasRegisteredAccess(p.dataAccessLevel)) {
+                    this.navigateAway();
+                  }
+                });
             });
-          }
-
-          // For now, we automatically submit all placeholder user setup steps.
-          // Per RW-695, ID verification is sufficient for data access for
-          // initial internal data access.
-          if (!profile.termsOfServiceCompletionTime) {
-            obs = obs.flatMap((p) => {
-              return this.profileService.submitTermsOfService().map((_) => p);
-            });
-          }
-          if (!profile.ethicsTrainingCompletionTime) {
-            obs = obs.flatMap((p) => {
-              return this.profileService.completeEthicsTraining().map((_) => p);
-            });
-          }
-          if (!profile.demographicSurveyCompletionTime) {
-            obs = obs.flatMap((p) => {
-              return this.profileService.submitDemographicsSurvey().map((_) => p);
-            });
-          }
-          return obs;
-        })
+          })
         .subscribe();
     });
   }
@@ -81,6 +105,11 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
     if (this.profileSub) {
       this.profileSub.unsubscribe();
     }
+  }
+
+  /** Exposed for testing. */
+  setProfileService(svc: ProfileService) {
+    this.profileService = svc;
   }
 
   private navigateAway() {
