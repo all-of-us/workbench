@@ -7,7 +7,6 @@
   background-size: cover;
   height: 100%;
   margin-left: -1rem;
-  margin-right: -0.6rem;
 }
 
 .card.double {
@@ -184,7 +183,7 @@
   color: #FFFFFF;
   font-size: 14px;
   margin-top: 0.5rem;
-  width: 8rem;
+  width: 7.5rem;
 }
 
 .card.add-card {
@@ -220,8 +219,8 @@
 
 .footerRtLink {
   display: flex;
-  justify-content: flex-end;
-  margin-right: 6%;
+  justify-content: space-evenly;
+  margin-left: 64%;
 }
 
 .footerLink {
@@ -244,7 +243,7 @@
 
 .logo {
   top: 1rem;
-  left: 5.25rem;
+  left: 6.25rem;
   height: 3.5rem;
   width: 7rem;
   position: relative;
@@ -255,7 +254,7 @@
   color: #9B9B9B;
   font-size: 0.7rem;
   height: 1rem;
-  left: 4.5rem;
+  left: 5.5rem;
   top: 2rem;
   margin-left: 2.5rem;
   position: relative;
@@ -296,3 +295,8 @@
   border-color: transparent transparent transparent black;
 }
 
+@media (min-width: 1200px) {
+  .row {
+    margin-right: 0rem;
+  }
+}
