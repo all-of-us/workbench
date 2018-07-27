@@ -118,6 +118,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      * fire a request for children (if there are any)
      */
     event.stopPropagation();
+    console.log(this.node.toJS());
     if (needsAttributes(this.node)) {
       this.actions.showAttributesPage(this.node);
     } else {
@@ -127,8 +128,15 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        * not require attributes.  Criterion which require attributes in order
        * to have a complete sense are given a unique ID based on the attribute
        */
+
       const param = this.node.set('parameterId', this.paramId);
       this.actions.addParameter(param);
+      if (this.node.get('type') === 'DRUG' && this.node.get('group')) {
+        this.node.get('children').forEach(child => {
+          const childParam = child.set('parameterId', `param${child.get('id')}`);
+          this.actions.addParameter(childParam);
+        });
+      }
     }
   }
 }

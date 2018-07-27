@@ -43,7 +43,6 @@ import {
   autocompleteRequestError,
 
   loadIngredients,
-  ingredientsRequestError,
 } from './actions/creators';
 
 import {CohortSearchState} from './store';
@@ -136,7 +135,7 @@ export class CohortSearchEpics {
       ({cdrVersionId, conceptId}: IngredientRequestAction) => {
         return this.service.getDrugIngredientByConceptId(cdrVersionId, conceptId)
           .map(result => loadIngredients(result.items))
-          .catch(e => Observable.of(ingredientsRequestError(e)));
+          .catch(e => Observable.of(autocompleteRequestError(e)));
       }
     )
   )
