@@ -8,6 +8,10 @@
   cursor: pointer;
 }
 
+.header-image:focus {
+  outline: none;
+}
+
 .header-container {
   display: flex;
   justify-content: flex-start;
