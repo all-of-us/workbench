@@ -22,6 +22,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   ingredients: any;
   loading = false;
   noResults = false;
+  optionSelected = false;
   error = false;
   subscription: Subscription;
 
@@ -44,7 +45,22 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .select(autocompleteOptions())
       .subscribe(options => {
         this.options = options;
+        this.options.forEach(option => {
+          option.displayName = option.name;
+          const start = option.name.toLowerCase().indexOf(this.searchTerm.toLowerCase());
+          if (start > -1) {
+            const end = start + this.searchTerm.length;
+            option.displayName = option.name.slice(0, start)
+              + '<span style="color: #659F3D;'
+              + 'font-weight: bolder;'
+              + 'background-color: rgba(101,159,61,0.2);'
+              + 'padding: 2px 0;">'
+              + option.name.slice(start, end) + '</span>'
+              + option.name.slice(end);
+          }
+        });
         this.noResults = this._type === 'drug'
+          && !this.optionSelected
           && !this.options.length
           && this.searchTerm.length >= 4;
       });
@@ -82,6 +98,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       }
     }
     if (this._type === 'drug') {
+      this.optionSelected = false;
       if (newVal.length >= 4) {
         this.actions.fetchAutocompleteOptions(newVal);
       } else {
@@ -92,6 +109,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   selectOption(option: any) {
+    this.optionSelected = true;
     this.actions.clearAutocompleteOptions();
     this.searchTerm = option.name;
     if (option.subtype === 'BRAND') {
