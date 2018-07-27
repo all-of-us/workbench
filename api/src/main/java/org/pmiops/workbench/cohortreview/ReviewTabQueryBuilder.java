@@ -14,7 +14,7 @@ public class ReviewTabQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String TABLE_PREFIX = "p_";
-  private static final String MASTER_TABLE = "p_all_events";
+  private static final String ALL_EVENTS_TABLE = "p_all_events";
 
   private static final String VISIT_COLUMNS =
     ", visit_id as visitId\n" +
@@ -112,7 +112,7 @@ public class ReviewTabQueryBuilder {
                                           DomainType domain,
                                           PageRequest pageRequest) {
     String tableName = DomainType.ALLEVENTS.equals(domain)
-      ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+      ? ALL_EVENTS_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(BASE_SQL_TEMPLATE + getSqlTemplate(domain) + FROM + WHERE_TEMPLATE,
       tableName,
       pageRequest.getSortColumn(),
@@ -131,7 +131,7 @@ public class ReviewTabQueryBuilder {
   public QueryJobConfiguration buildCountQuery(Long participantId,
                                                DomainType domain) {
     String tableName = DomainType.ALLEVENTS.equals(domain)
-      ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+      ? ALL_EVENTS_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(COUNT_TEMPLATE, tableName);
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
