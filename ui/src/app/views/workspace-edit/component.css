@@ -1,3 +1,10 @@
+.page-header {
+  font-weight: 500;
+  line-height: 24px;
+  font-size: 20px;
+  color: #262262;
+}
+
 .text-label {
   display: block;
   padding: 0 0 0.4rem 0;
@@ -9,7 +16,8 @@
 }
 
 .input.description {
-  width: 600px;
+  margin-top: 0.5rem;
+  width: 100%;
 }
 
 .checkbox-group {
@@ -31,12 +39,27 @@
 
 .underserved-header {
   padding-top: 1rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid #4356a7;
   margin-bottom: 0.6rem;
+  color: #262262;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 19px;
+}
+
+.underserved-icon {
+  width: 18px;
+  height: 18px;
+  fill: #302C71;
 }
 
 .underserved-checkbox {
   padding-bottom: 0.6rem;
+  color: #333333;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 30px;
 }
 
 .checkbox-inline input[type=checkbox], .checkbox input[type=checkbox] {
@@ -63,11 +86,73 @@
   min-width: 835px;
 }
 
+.section {
+  width: 60%;
+  min-width: 835px;
+  margin-top: 1rem;
+}
+
+.section-header {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #262262;
+}
+
+.section-sub-header {
+  color: #4A4A4A;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.section-text {
+  font-size: 13px;
+  color: #4A4A4A;
+  font-weight: 300;
+  line-height: 24px;
+}
+
 .col-xs-6 {
   padding: 0;
+}
+
+:host ::ng-deep input[type=checkbox]+label:before {
+  background-color: white;
+}
+
+:host ::ng-deep input[type=checkbox]:checked+label:before {
+  background-color: #7CC79B;
+}
+
+:host ::ng-deep input[type=checkbox]:focus+label:before {
+  box-shadow: 0 0 2px 2px #7CC79B
 }
 
 .button {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.required-field * {
+  display: inline-block;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+.data-use-label {
+  color: #262262;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.required-text {
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 16px;
+  color: #4A4A4A;
 }
