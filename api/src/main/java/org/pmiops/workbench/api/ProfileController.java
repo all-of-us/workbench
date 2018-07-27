@@ -237,7 +237,7 @@ public class ProfileController implements ProfileApiDelegate {
     Boolean twoFactorEnabled = Optional.ofNullable(user.getTwoFactorEnabled()).orElse(false);
     if (!twoFactorEnabled) {
       user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
-      userDao.save(user);
+      saveUserWithConflictHandling(user);
     }
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
@@ -549,9 +549,8 @@ public class ProfileController implements ProfileApiDelegate {
       }
     }
 
-
     // This does not update the name in Google.
-    userDao.save(user);
+    saveUserWithConflictHandling(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
