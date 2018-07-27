@@ -7,23 +7,25 @@
         <h4 class="view-sub-title">{{subtitle}} </h4>
       </div>
     </div>
-  </div>g
+  </div>
 
 </div>
 
 
 <div class="row">
-  <div *ngFor="let item of measurements" class="col-md-4 col-sm-6 col-xs-12">
-    <button (click)="showMeasurment(item)" class="btn btn-primary">{{item.button_text}}</button>
+  <div *ngFor="let item of concepts" class="button-item">
+    <button (click)="showMeasurement(item)" class="btn btn-primary">{{item.conceptName}}</button>
   </div>
 </div>
 
-<div class="row white-card-box">
+<div class="row measurement white-card-box ">
 
-  </div><h1> Todo Physical Measurements Page </h1>
-<p>
-  <a target="_blank" href="https://projects.invisionapp.com/d/main/default/#/console/13577480/306624424/preview" >
+</div>
+
+<div class="row">
+  <p>
+    <a target="_blank" href="https://projects.invisionapp.com/d/main/default/#/console/13577480/306624424/preview" >
     Link to Mock Up
-  </a>
-
-</p>
+    </a>
+  </p>
+</div>

@@ -119,7 +119,7 @@
             </div>
         </div>
 
-        <div class="row flex-items-xs-middle answers" [hidden]="!showAnswer[q.conceptId]">
+        <div class="row  answers" [hidden]="!showAnswer[q.conceptId]">
           <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
             <div  class="row"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
               <div class="answer-text col-sm-6 col-xs-12" >
