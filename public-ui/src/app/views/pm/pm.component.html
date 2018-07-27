@@ -19,7 +19,10 @@
 </div>
 
 <div class="row measurement white-card-box ">
-
+  <div class="row box-title"> {{selectedConcept.conceptName}}</div>
+  <div *ngIf="selectedConcept.analyses" class="chart-wrapper">
+    <app-chart [chartTitle]="'Female ' + selectedConcept.conceptAnalyses.genderAnalysis.results[0].countValue " [chartType]="'histogram'" [analysis]="selectedConcept.analyses.femaleAnalysis"></app-chart>
+  </div>
 </div>
 
 <div class="row">

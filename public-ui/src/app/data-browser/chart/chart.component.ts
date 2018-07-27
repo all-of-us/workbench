@@ -72,11 +72,13 @@ export class ChartComponent implements OnChanges {
 
   // Render new chart on changes
   ngOnChanges() {
+    console.log(this.chartType, this.analysis);
     if ((this.analysis && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {
         // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
     }
+
   }
 
   public chartClick(e) {
@@ -141,9 +143,14 @@ export class ChartComponent implements OnChanges {
                   dataLabels: {
                       enabled: false,
                   },
-                events: {
+                  events: {
 
-                }
+                  },
+                  // Histogram options
+                  pointPadding: 0,
+                  borderWidth: 0,
+
+
               },
               bar: {
                 shadow: false,
@@ -167,10 +174,9 @@ export class ChartComponent implements OnChanges {
           },
           xAxis: {
             categories: options.categories,
-            type: 'category',
+            //type: 'category',
             labels: {
                 style: {
-
                     whiteSpace: 'nowrap',
                 }
             },
@@ -215,6 +221,14 @@ export class ChartComponent implements OnChanges {
       this.analysis.analysisId === SURVEY_AGE_ANALYSIS_ID) {
       return this.makeAgeChartOptions();
     }
+    if (this.chartType === 'histogram') {
+      // our data is already binned so we use a column. So set the chartType to column
+      this.chartType = 'column';
+      console.log('Making histogram opts');
+      return this.makeHistogramChartOptions();
+    }
+
+
   }
   seriesClick(event) {
     console.log('Global series clicked ' , this.analysis, 'Clicked analysis', event.point);
@@ -403,6 +417,69 @@ export class ChartComponent implements OnChanges {
       categories: cats,
       pointWidth: this.pointWidth,
     };
+  }
+
+  // Histogram data analyses come already binned
+  // The value is in stratum 4, the unit in stratum5, the countValue in the bin is countValue and we also have
+  // sourceCountValue
+  public makeHistogramChartOptions() {
+    let data = [];
+    const cats = [];
+
+    for (const a  of this.analysis.results) {
+      data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});
+    }
+    data = data.sort((a, b) => {
+      let aVal: any = a.name;
+      let bVal: any = b.name;
+      // Sort  numeric data as number
+      if ( isNaN(Number(a.name)) ) {
+        console.log(a.name + 'is not a number');
+      } else {
+        aVal = Number(aVal);
+        bVal = Number(b.name);
+      }
+
+      if (aVal  > bVal) {
+        return 1;
+      }
+      if (aVal < bVal) {
+        return -1;
+      }
+      return 0;
+    });
+    for (const d of data) {
+      cats.push(d.name);
+    }
+
+
+    const seriesClick = function(event) {
+      const thisCtrl = event.point.options.thisCtrl;
+      console.log('Histogram plot Clicked point :',  event.point);
+      thisCtrl.resultClicked.emit(event.point.result);
+    };
+    // Override tooltip and colors and such
+    const series = {
+      name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
+      tooltip: {pointFormat: '<b>{point.y} </b>'},
+      events: {
+        click: seriesClick
+      },
+      // Make column a histogram with these options
+      pointPadding: 0,
+      borderWidth: 0,
+      groupPadding: 0,
+      shadow: false
+    };
+
+    return {
+      chart: {type: 'column', backgroundColor: this.backgroundColor},
+      title: { text: this.chartTitle },
+      series: series,
+      categories: cats,
+      pointWidth: this.pointWidth
+    };
+
   }
 
 }

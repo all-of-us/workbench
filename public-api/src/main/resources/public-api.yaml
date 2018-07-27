@@ -72,6 +72,27 @@ paths:
           schema:
             $ref: "#/definitions/ConceptAnalysisListResponse"
 
+  /v1/databrowser/measurement-analysis-results:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+      description: Gets analysis results for measurement
+      operationId: "getMeasurementAnalysisResults"
+      parameters:
+        - in: query
+          name: concept-ids
+          type: array
+          items:
+            type: string
+          required: true
+          description: concept id
+      responses:
+        200:
+          description: A collection of analysis for measurement
+          schema:
+            $ref: "#/definitions/MeasurementAnalysisListResponse"
+
   /v1/databrowser/participant-count:
     get:
       security: []
@@ -675,6 +696,38 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/ConceptAnalysis"
+
+  MeasurementAnalysis:
+    type: object
+    required:
+      - conceptId
+    properties:
+      conceptId:
+        description: concept id
+        type: string
+      maleAnalysis:
+        description: measurement male analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      femaleAnalysis:
+        description: measurement female analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      ageAnalysis:
+        description: measurement age analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+
+  MeasurementAnalysisListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/MeasurementAnalysis"
+
 
   StandardConceptFilter:
     type: string
