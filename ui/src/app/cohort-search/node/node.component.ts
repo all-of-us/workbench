@@ -44,7 +44,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   expandedTree: any;
   originalTree: any;
   modifiedTree = false;
-  searchTerms: string;
+  searchTerms: Array<string>;
   loading = false;
   error = false;
   fullTree: boolean;
@@ -92,7 +92,7 @@ export class NodeComponent implements OnInit, OnDestroy {
         .select(criteriaSearchTerms())
         .subscribe(searchTerms => {
           this.searchTerms = searchTerms;
-          if (searchTerms && searchTerms.length > 2) {
+          if (searchTerms && searchTerms.length) {
             this.searchTree();
           } else {
             this.clearSearchTree();
@@ -172,18 +172,9 @@ export class NodeComponent implements OnInit, OnDestroy {
   filterTree(tree: Array<any>, path: Array<number>) {
     return tree.map((item, i) => {
       path.push(i);
-      if (this.matchFound(item)) {
-        let name = '<b>';
-        const start = item.name.toLowerCase().indexOf(this.searchTerms.toLowerCase());
-        if (start > -1) {
-          const end = start + this.searchTerms.length;
-          name += item.name.slice(0, start) + '<span class="search-keyword" style="color: #659F3D">'
-            + item.name.slice(start, end) + '</span>'
-            + item.name.slice(end);
-        } else {
-          name += item.name;
-        }
-        item.name = name + '</b>';
+      const matches = this.matchFound(item);
+      if (matches.length) {
+        item.name = this.highlightMatches(matches, item.name);
         if (path.length > 1) {
           this.setExpanded(path, 0);
         }
@@ -197,7 +188,23 @@ export class NodeComponent implements OnInit, OnDestroy {
   }
 
   matchFound(item: any) {
-    return item.name.toLowerCase().includes(this.searchTerms.toLowerCase());
+    return this.searchTerms.filter(term => {
+      return item.name.toLowerCase().includes(term.toLowerCase());
+    });
+  }
+
+  highlightMatches(terms: Array<string>, name: string) {
+    terms.forEach(term => {
+      const start = name.toLowerCase().indexOf(term.toLowerCase());
+      if (start > -1) {
+        const end = start + term.length;
+        name = name.slice(0, start)
+          + '<b class="search-keyword" style="color: #659F3D">'
+          + name.slice(start, end) + '</b>'
+          + name.slice(end);
+      }
+    });
+    return name;
   }
 
   setExpanded(path: Array<number>, end: number) {
