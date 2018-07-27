@@ -6,30 +6,27 @@
   -o-background-size: cover;
   background-size: cover;
   height: 100%;
+  margin-left: -1rem;
+  margin-right: -0.6rem;
 }
 
-.double {
+.card.double {
   height: 332px;
-  width: 638px;
+  width: 22rem;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
+  border: none;
+  margin-left: 1rem;
 }
 
-.left {
-  margin-left: 8rem;
-}
-
-.right {
-  margin-left: 0.8rem;
-}
-
-.single {
+.card.single {
   height: 379px;
-  width: 1298px;
+  max-width: 45rem;
   border-radius: 5px;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
-  margin-left: 8rem;
+  border: none;
+  margin-left: 1rem;
 }
 
 .analyzeSingleHeader {
@@ -41,7 +38,7 @@
   font-weight: 500;
   line-height: 34px;
   margin-top: 2%;
-  margin-left: 3%;
+  margin-left: 0.2rem;
 }
 
 .heading {
@@ -89,15 +86,10 @@
   font-size: 28px;
   font-weight: 500;
   line-height: 34px;
-  text-align: center;
-  align-content: center;
   width: 541px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
   margin-top: 5%;
-  margin-left:2.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 .icon {
@@ -125,7 +117,8 @@
 
 .singleIcon {
   margin-top: 5%;
-  height: 60px;
+  height: 3rem;
+  margin-left: 1.2rem;
 }
 
 .btn-homepage {
@@ -150,32 +143,30 @@
 
 .footerTitle {
   height: 34px;
-  width: 688.13px;
   opacity: 0.87;
   color: #FFFFFF;
   font-size: 28px;
   font-weight: 500;
   line-height: 34px;
-  margin-left: 8.8rem;
-  margin-top: 2%;
+  margin-left: 12%;
+  margin-top: 1.4rem;
 }
 
 .footerSubTitle {
   align-self: right;
 }
 
-.textGroup {
-  margin-left: 8.8rem;
-}
-
 .footerText {
   height: 176px;
-  width: 372px;
   opacity: 0.87;
   color: #83C3EC;
   font-size: 16px;
   font-weight: 300;
   line-height: 30px;
+}
+
+.textGroup.ng-star-inserted {
+  width: 33%;
 }
 
 .footerText .title {
@@ -184,17 +175,16 @@
 }
 
 .linkGroup {
-  margin-top: 1%;
-  margin-left: 9rem;
+  display: flex;
+  justify-content: right;
+  width: 10%;
 }
 
 .links {
-  height: 56px;
-  width: 158px;
   color: #FFFFFF;
   font-size: 14px;
-  line-height: 28px;
-  margin-right: 2rem;
+  margin-top: 0.5rem;
+  width: 7.5rem;
 }
 
 .card.add-card {
@@ -203,7 +193,10 @@
   background-color: #FFFFFF;
   align-content: left;
   margin-left: 25px;
+  margin-top: 1.3rem;
   cursor: pointer;
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
+  border-radius: 5px;
 }
 
 .card-text {
@@ -226,7 +219,86 @@
   color: #83C3EC;
 }
 
+.footerRtLink {
+  display: flex;
+  justify-content: space-evenly;
+  margin-left: 75%;
+}
+
 .footerLink {
-  margin-left: 53rem;
   color: #FFFFFF;
+}
+
+.bottom-banner {
+  margin-bottom: 0;
+  border-top-color: #5DAEE1;
+  border-style: solid;
+  border-top-width: .3rem;
+  border-bottom-width: 0;
+  border-right-width: 0;
+  border-left-width: 0;
+  width: 100%;
+  display: flex;
+  background-color: #483F4B;
+  height: 5rem;
+}
+
+.logo {
+  top: 1rem;
+  left: 6.25rem;
+  height: 3.5rem;
+  width: 7rem;
+  position: relative;
+  line-height: 85px;
+}
+
+.bottom-links {
+  color: #9B9B9B;
+  font-size: 0.7rem;
+  height: 1rem;
+  left: 5.5rem;
+  top: 2rem;
+  margin-left: 2.5rem;
+  position: relative;
+  font-weight: 300;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 3px;
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  top: -5px;
+  right: 105%;
+}
+
+.tooltip .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent black;
+}
+
+@media (min-width: 1200px) {
+  .row {
+    margin: 0rem;
+  }
 }
