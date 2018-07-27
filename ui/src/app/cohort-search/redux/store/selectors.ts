@@ -103,7 +103,7 @@ export const criteriaChildren =
   state.getIn(['criteria', 'tree', kind, parentId], List());
 
 export const criteriaSearchTerms =
-  () => (state): string =>
+  () => (state): Array<string> =>
   state.getIn(['criteria', 'search', 'terms'], null);
 
 export const isCriteriaLoading =
@@ -113,7 +113,11 @@ export const isCriteriaLoading =
 
 export const autocompleteOptions =
   () => (state): Array<any> =>
-  state.getIn(['criteria', 'search', 'options'], List());
+  state.getIn(['criteria', 'search', 'options'], []);
+
+export const ingredientsForBrand =
+  () => (state): Array<any> =>
+  state.getIn(['criteria', 'search', 'ingredients'], []);
 
 export const isAutocompleteLoading =
   () => (state): boolean =>

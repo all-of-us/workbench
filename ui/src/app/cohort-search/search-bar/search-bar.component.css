@@ -28,5 +28,16 @@ input {
     min-width: auto;
 }
 .dropdown {
+    width: 100%;
     margin-top: 0;
+}
+.dropdown-menu {
+    display: block;
+    max-height: 15rem;
+    min-height: 30px;
+    overflow-y: auto;
+}
+.dropdown-item {
+    height: 25px;
+    line-height: 0px;
 }

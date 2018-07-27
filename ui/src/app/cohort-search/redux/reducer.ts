@@ -23,9 +23,9 @@ import {
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
+  CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
-  INGREDIENT_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -116,17 +116,16 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['criteria', 'search', 'options'], action.options)
           .deleteIn(['criteria', 'search', 'autocomplete']);
 
+      case CLEAR_AUTOCOMPLETE_OPTIONS:
+        return state
+          .deleteIn(['criteria', 'search', 'options']);
+
       case LOAD_INGREDIENT_LIST:
         return state
-          .setIn(['criteria', 'search', 'options'], action.ingredients)
+          .setIn(['criteria', 'search', 'ingredients'], action.ingredients)
           .deleteIn(['criteria', 'search', 'autocomplete']);
 
       case AUTOCOMPLETE_REQUEST_ERROR:
-        return state
-          .deleteIn(['criteria', 'search', 'autocomplete'])
-          .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
-
-      case INGREDIENT_REQUEST_ERROR:
         return state
           .deleteIn(['criteria', 'search', 'autocomplete'])
           .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
@@ -373,7 +372,9 @@ export const rootReducer: Reducer<CohortSearchState> =
           .updateIn(groupItems, List(), setUnique(itemId))
           .setIn(['entities', 'items', itemId], item)
           .updateIn(['entities', 'parameters'], Map(), mergeParams)
-          .set('wizard', Map({open: false}));
+          .set('wizard', Map({open: false}))
+          .deleteIn(['criteria', 'search', 'terms'])
+          .deleteIn(['criteria', 'search', 'options']);
       }
 
       case WIZARD_CANCEL: {
@@ -388,7 +389,10 @@ export const rootReducer: Reducer<CohortSearchState> =
             state = state.deleteIn(['entities', 'searchRequests', SR_ID, role, index]);
           }
         }
-        return state.set('wizard', Map({open: false}));
+        return state
+          .set('wizard', Map({open: false}))
+          .deleteIn(['criteria', 'search', 'terms'])
+          .deleteIn(['criteria', 'search', 'options']);
       }
 
       case SET_WIZARD_CONTEXT:

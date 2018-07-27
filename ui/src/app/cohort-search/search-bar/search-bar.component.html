@@ -7,6 +7,10 @@
      [(ngModel)]="searchTerm"
      (input)="inputChange($event.target.value)"/>
     <span *ngIf="loading" class="spinner spinner-inline"></span>
+    <span *ngIf="noResults">
+      <clr-icon shape="times" class="is-error"></clr-icon>
+      No Results found
+    </span>
   </div>
   <div *ngIf="options.length" class="dropdown-menu">
     <button
