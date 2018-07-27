@@ -157,6 +157,18 @@ else
     exit 1
 fi
 
+####################
+# measurement queries #
+####################
+# Run measurement achilles count queries to fill achilles_results
+if ./generate-cdr/run-measurement-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET
+then
+    echo "Measurement achilles queries ran"
+else
+    echo "FAILED To run measurement achilles queries for CDR $CDR_VERSION"
+    exit 1
+fi
+
 ###########################
 # concept with count cols #
 ###########################

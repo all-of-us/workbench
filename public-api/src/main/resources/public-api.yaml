@@ -80,9 +80,11 @@ paths:
       description: Gets analysis results for measurement
       operationId: "getMeasurementAnalysisResults"
       parameters:
-        - in : query
-          name: concept-id
-          type: string
+        - in: query
+          name: concept-ids
+          type: array
+          items:
+            type: string
           required: true
           description: concept id
       responses:
@@ -556,8 +558,16 @@ definitions:
       conceptId:
         description: concept id
         type: string
-      analysis:
-        description: measurement analysis
+      maleAnalysis:
+        description: measurement male analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      femaleAnalysis:
+        description: measurement female analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      ageAnalysis:
+        description: measurement age analysis
         type: object
         $ref: "#/definitions/Analysis"
 
