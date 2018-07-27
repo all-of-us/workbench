@@ -29,9 +29,11 @@
       <div class="section-sub-header">
         National Institutes of Health
       </div>
-      <div class="section-text">
+    </div>
+    <div class="section">
+      <div class="section-header">
         To fulfill program requirements, All of Us requests the following information
-        for each workspace.
+        for each workspace:
       </div>
     </div>
     <div>
@@ -57,15 +59,25 @@
           These are for informational purposes only and do not affect or configure your new workspace.
         </div>
         <div class="form-group">
-          <div class="checkbox-group" style="margin-left: 1rem; margin-top: 0.5rem;">
-            <label><h3 class="data-use-label">{{researchPurposeItems.diseaseFocusedResearch.shortDescription}}</h3></label>
-            <div>
-              {{researchPurposeItems.diseaseFocusedResearch.longDescription}}
-            </div>
+          <div class="checkbox-group" style="margin-top: 0.5rem;">
             <div style="display: flex">
-              <input type="text" class="input" name="disease-specification"
-                  [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
-                  placeholder="Name of Disease" style="width: calc(50% - 2rem); margin-right: 2rem; margin-top: 0.5rem">
+              <clr-checkbox
+                  name="disease-focused-research"
+                  id="disease-focused-research"
+                  [(ngModel)]="workspace.researchPurpose.diseaseFocusedResearch"
+                  [clrDisabled]="mode == Mode.Edit">
+              </clr-checkbox>
+              <div>
+                <label class="checkbox-label" for="clr-checkbox-disease-focused-research"><h3 class="data-use-label">{{researchPurposeItems.diseaseFocusedResearch.shortDescription}}</h3></label>
+                <div>
+                  {{researchPurposeItems.diseaseFocusedResearch.longDescription}}
+                </div>
+                <div style="display: flex">
+                  <input type="text" class="input" name="disease-specification"
+                      [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
+                      placeholder="Name of Disease" style="width: calc(50% - 2rem); margin-right: 2rem; margin-to`p: 0.5rem">
+                </div>
+              </div>
             </div>
           </div>
           <div class="row">

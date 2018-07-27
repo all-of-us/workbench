@@ -391,6 +391,6 @@ export class WorkspaceEditComponent implements OnInit {
     if (this.savingWorkspace) {
       return false;
     }
-    return !isBlank(this.workspace.name);
+    return !isBlank(this.workspace.name) && !isBlank(this.workspace.description);
   }
 }

@@ -143,7 +143,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private static final ResearchPurpose createResearchPurpose(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = new ResearchPurpose()
-        .diseaseFocusedResearch(workspace.getDiseaseOfFocus() != null && !workspace.getDiseaseOfFocus().trim().isEmpty())
+        .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
         .diseaseOfFocus(workspace.getDiseaseOfFocus())
         .methodsDevelopment(workspace.getMethodsDevelopment())
         .controlSet(workspace.getControlSet())
@@ -283,7 +283,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
    */
   private static void setResearchPurposeDetails(org.pmiops.workbench.db.model.Workspace dbWorkspace,
       ResearchPurpose purpose) {
-    dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseOfFocus() != null && !purpose.getDiseaseOfFocus().trim().isEmpty());
+    dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
     dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
     dbWorkspace.setControlSet(purpose.getControlSet());
