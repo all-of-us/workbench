@@ -120,14 +120,14 @@ repositories {   // repositories for Jar's you access in your code
 
 dependencies {
   compile 'org.springframework.boot:spring-boot-starter-data-jpa'
-  compile 'commons-io:commons-io:+'
-  compile 'joda-time:joda-time:+'
-  compile 'com.github.fge:json-patch:+'
+  compile 'commons-io:commons-io:2.6'
+  compile 'joda-time:joda-time:2.10'
+  compile 'com.github.fge:json-patch:1.9'
   compile 'io.swagger:swagger-annotations:1.5.9'
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.9'
   compile 'org.apache.commons:commons-lang3:3.0'
-  compile 'com.google.code.gson:gson:+'
-  compile 'org.hibernate:hibernate-validator:+'
+  compile 'com.google.code.gson:gson:2.8.5'
+  compile 'org.hibernate:hibernate-validator:5.3.5.Final'
   compile 'com.squareup.okhttp:okhttp:2.6.0'
   compile 'com.squareup.okhttp:logging-interceptor:2.6.0'
 }
