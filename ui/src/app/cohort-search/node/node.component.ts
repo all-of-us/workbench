@@ -199,8 +199,11 @@ export class NodeComponent implements OnInit, OnDestroy {
       if (start > -1) {
         const end = start + term.length;
         name = name.slice(0, start)
-          + '<b class="search-keyword" style="color: #659F3D">'
-          + name.slice(start, end) + '</b>'
+          + '<span style="color: #659F3D;'
+          + 'font-weight: bolder;'
+          + 'background-color: rgba(101,159,61,0.2);'
+          + 'padding: 2px 0;">'
+          + name.slice(start, end) + '</span>'
           + name.slice(end);
       }
     });
