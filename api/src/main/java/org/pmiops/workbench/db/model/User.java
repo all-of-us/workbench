@@ -50,6 +50,7 @@ public class User {
   private boolean disabled;
   private EmailVerificationStatus emailVerificationStatus;
   private Boolean requestedIdVerification;
+  private Set<PageVisit> pageVisits = new HashSet<PageVisit>();
 
   private List<InstitutionalAffiliation> institutionalAffiliations =
       new ArrayList<InstitutionalAffiliation>();
@@ -168,6 +169,17 @@ public class User {
 
   public void setAuthorities(Set<Authority> newAuthorities) {
     this.authorities = newAuthorities;
+  }
+
+  @ElementCollection
+  @CollectionTable(name = "PageVisit", joinColumns=@JoinColumn(name="user_id"))
+  @Column(name="page_id")
+  public Set<PageVisit> getPageVisits() {
+    return pageVisits;
+  }
+
+  public void setPageVisits(Set<PageVisit> pageVisits) {
+    this.pageVisits = pageVisits;
   }
 
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")

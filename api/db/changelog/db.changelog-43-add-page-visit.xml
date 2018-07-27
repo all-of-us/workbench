@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    <changeSet author="ursas" id="changelog-43-add-user-visited-page">
+        <createTable tableName="page_visit">
+            <column name="page_visit_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="page_id" type="varchar(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_visit" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_visit" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="page_visit"
+                                 constraintName="fk_page_visit_user"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user"/>
+    </changeSet>
+</databaseChangeLog>
