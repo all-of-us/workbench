@@ -13,28 +13,24 @@ export class PhysicalMeasurementsComponent implements OnInit {
   title = 'Browse Program Physical Measurements';
   private subscriptions: ISubscription[] = [];
   concepts = [
-    {conceptId: '903118', conceptName: 'Systlic mean bp', analyses: null},
-    {conceptId: '903115', conceptName: 'Diastolic mean bp', analyses: null },
-    {conceptId: '903133', conceptName: 'Height', analyses: null },
-    {conceptId: '903121', conceptName: 'Weight', analyses: null },
-    {conceptId: '903135', conceptName: 'Mean waist circumference', analyses: null },
-    {conceptId: '903136', conceptName: 'Mean hip circumference', analyses: null },
-    {conceptId: '903126', conceptName: 'Mean heart rate', analyses: null },
-    {conceptId: '903111', conceptName: 'wheel chair use', analyses: null },
-    {conceptId: '903120', conceptName: 'Pregnancy', analyses: null }
+    {conceptId: '903118', conceptName: 'Systolic ', boxTitle: 'Mean Blood Pressure', analyses: null,
+      conceptAnalyses: null},
+    {conceptId: '903115', conceptName: 'Diastolic', boxTitle: 'Mean Blood Pressure', analyses: null, conceptAnalyses: null},
+    {conceptId: '903133', conceptName: 'Height', analyses: null, conceptAnalyses: null },
+    {conceptId: '903121', conceptName: 'Weight', analyses: null, conceptAnalyses: null },
+    {conceptId: '903135', conceptName: 'Mean waist circumference', analyses: null, conceptAnalyses: null },
+    {conceptId: '903136', conceptName: 'Mean hip circumference', analyses: null, conceptAnalyses: null },
+    {conceptId: '903126', conceptName: 'Mean heart rate', analyses: null, conceptAnalyses: null },
+    {conceptId: '903111', conceptName: 'wheel chair use', analyses: null, conceptAnalyses: null },
+    {conceptId: '903120', conceptName: 'Pregnancy', analyses: null, conceptAnalyses: null }
   ];
   selectedConcept = this.concepts[0];
-
-  measurement: MeasurementAnalysisListResponse;
-
+  femaleCount = 0;
+  maleCount = 0;
   constructor(private api: DataBrowserService) { }
 
   ngOnInit() {
-    this.subscriptions.push(this.api.getMeasurementAnalysisResults(this.selectedConcept.conceptId)
-      .subscribe( result => {
-        this.selectedConcept.analyses = result;
-        console.log(result);
-      }));
+    this.showMeasurement(this.selectedConcept);
   }
 
   ngOnDestroy() {
@@ -46,11 +42,18 @@ export class PhysicalMeasurementsComponent implements OnInit {
   showMeasurement(concept:any) {
     this.selectedConcept = concept;
     if (!this.selectedConcept.analyses) {
-      this.subscriptions.push(this.api.getMeasurementAnalysisResults(this.selectedConcept.conceptId)
+      this.subscriptions.push(this.api.getMeasurementAnalysisResults([this.selectedConcept.conceptId])
         .subscribe(result => {
-          this.selectedConcept.analyses = result;
+          this.selectedConcept.analyses = result.items[0];
           console.log(result);
       }));
+    }
+    if (!this.selectedConcept.conceptAnalyses) {
+      this.subscriptions.push(this.api.getConceptAnalysisResults([this.selectedConcept.conceptId])
+        .subscribe( result => {
+          this.selectedConcept.conceptAnalyses = result.items[0];
+          console.log(this.selectedConcept);
+        }));
     }
 
   }
