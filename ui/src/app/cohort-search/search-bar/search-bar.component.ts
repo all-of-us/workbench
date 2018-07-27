@@ -6,9 +6,9 @@ import {
   autocompleteOptions,
   CohortSearchActions,
   CohortSearchState,
+  ingredientsForBrand,
   isAutocompleteLoading,
 } from '../redux';
-import {fromJS} from 'immutable';
 
 @Component({
   selector: 'app-search-bar',
@@ -19,7 +19,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   @Input() _type;
   searchTerm = '';
   options = [];
+  ingredients: any;
   loading = false;
+  noResults = false;
   error = false;
   subscription: Subscription;
 
@@ -42,41 +44,60 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .select(autocompleteOptions())
       .subscribe(options => {
         this.options = options;
-        console.log(options);
+        this.noResults = this._type === 'drug'
+          && !this.options.length
+          && this.searchTerm.length >= 4;
+      });
+
+    const ingredientSub = this.ngRedux
+      .select(ingredientsForBrand())
+      .subscribe(ingredients => {
+        this.ingredients = ingredients;
+        const ingredientList = [];
+        this.ingredients.forEach(item => {
+          ingredientList.push(item.name);
+        });
+        if (ingredientList.length) {
+          this.actions.setCriteriaSearchTerms(ingredientList);
+        }
       });
 
     this.subscription = errorSub;
     this.subscription.add(loadingSub);
     this.subscription.add(optionsSub);
+    this.subscription.add(ingredientSub);
   }
 
   ngOnDestroy() {
+    this.options = [];
     this.subscription.unsubscribe();
   }
 
   inputChange(newVal: string) {
     if (this._type === 'visit') {
-      this.actions.setCriteriaSearchTerms(newVal);
+      if (newVal.length > 2) {
+        this.actions.setCriteriaSearchTerms([newVal]);
+      } else {
+        this.actions.setCriteriaSearchTerms([]);
+      }
     }
     if (this._type === 'drug') {
       if (newVal.length >= 4) {
         this.actions.fetchAutocompleteOptions(newVal);
       } else {
+        this.actions.setCriteriaSearchTerms([]);
         this.options = [];
       }
     }
   }
 
   selectOption(option: any) {
-    console.log(option);
-    if (option.group) {
-
-    } else if (option.subtype === 'ATC') {
-      this.actions.setCriteriaSearchTerms(option.name);
-      this.options = [];
-    } else if (option.subtype === 'BRAND') {
+    this.actions.clearAutocompleteOptions();
+    this.searchTerm = option.name;
+    if (option.subtype === 'BRAND') {
       this.actions.fetchIngredientsForBrand(option.conceptId);
-      this.options = [];
+    } else if (option.subtype === 'ATC') {
+      this.actions.setCriteriaSearchTerms([option.name]);
     }
   }
 }

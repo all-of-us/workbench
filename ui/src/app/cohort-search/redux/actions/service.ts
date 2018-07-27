@@ -53,6 +53,7 @@ export class CohortSearchActions {
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
+  @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
@@ -228,11 +229,6 @@ export class CohortSearchActions {
   }
 
   fetchAutocompleteOptions(terms: string): void {
-    const isLoading = isAutocompleteLoading()(this.state);
-    const isLoaded = this.state.getIn(['criteria', 'search', 'autocomplete']);
-    if (isLoaded || isLoading) {
-      return;
-    }
     this.requestAutocompleteOptions(this.cdrVersionId, terms);
   }
 
@@ -444,7 +440,7 @@ export class CohortSearchActions {
       param.attributes = immParam.get('predefinedAttributes') ;
     }
 
-    if (param.type.match(/^DEMO|VISIT|PM.*/i)) {
+    if (param.type.match(/^DEMO|VISIT|PM|DRUG.*/i)) {
       param.conceptId = immParam.get('conceptId');
     } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
       param.domain = immParam.get('domainId');
