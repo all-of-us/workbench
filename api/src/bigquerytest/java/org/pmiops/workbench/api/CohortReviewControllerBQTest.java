@@ -67,14 +67,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private ParticipantData expectedObservation2;
   private ParticipantData expectedDrug1;
   private ParticipantData expectedDrug2;
-  private ParticipantData expectedMaster1;
-  private ParticipantData expectedMaster2;
-  private ParticipantData expectedMaster3;
-  private ParticipantData expectedMaster4;
-  private ParticipantData expectedMaster5;
-  private ParticipantData expectedMaster6;
-  private ParticipantData expectedMaster7;
-  private ParticipantData expectedMaster8;
+  private ParticipantData expectedAllEvents1;
+  private ParticipantData expectedAllEvents2;
+  private ParticipantData expectedAllEvents3;
+  private ParticipantData expectedAllEvents4;
+  private ParticipantData expectedAllEvents5;
+  private ParticipantData expectedAllEvents6;
+  private ParticipantData expectedAllEvents7;
+  private ParticipantData expectedAllEvents8;
   private CdrVersion cdrVersion;
   private Workspace workspace;
 
@@ -156,7 +156,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Before
   public void setUp() {
 
-    expectedMaster1 = new Master()
+    expectedAllEvents1 = new AllEvents()
       .dataId(12751440L)
       .domain("Condition")
       .standardVocabulary("SNOMED")
@@ -171,8 +171,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-07-22 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2008-07-22 05:00:00 UTC")
-      .domainType(DomainType.MASTER);
-    expectedMaster2 = new Master()
+      .domainType(DomainType.ALLEVENTS);
+    expectedAllEvents2 = new AllEvents()
       .dataId(12751441L)
       .domain("Condition")
       .standardVocabulary("SNOMED")
@@ -187,8 +187,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2008-08-01 05:00:00 UTC")
-      .domainType(DomainType.MASTER);
-    expectedMaster3 = new Master()
+      .domainType(DomainType.ALLEVENTS);
+    expectedAllEvents3 = new AllEvents()
       .dataId(12751446L)
       .domain("Observation")
       .standardVocabulary("ICD10CM")
@@ -203,8 +203,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2009-12-03 05:00:00 UTC")
-      .domainType(DomainType.MASTER);
-    expectedMaster4 = new Master()
+      .domainType(DomainType.ALLEVENTS);
+    expectedAllEvents4 = new AllEvents()
       .dataId(12751447L)
       .domain("Observation")
       .standardVocabulary("ICD10CM")
@@ -219,8 +219,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2009-12-04 05:00:00 UTC")
-      .domainType(DomainType.MASTER);
-    expectedMaster5 = new Master()
+      .domainType(DomainType.ALLEVENTS);
+    expectedAllEvents5 = new AllEvents()
       .dataId(12751444L)
       .domain("Procedure")
       .standardVocabulary("ICD10CM")
@@ -235,8 +235,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2009-12-03 05:00:00 UTC")
-      .domainType(DomainType.MASTER);
-    expectedMaster6 = new Master()
+      .domainType(DomainType.ALLEVENTS);
+    expectedAllEvents6 = new AllEvents()
       .dataId(12751445L)
       .domain("Procedure")
       .standardVocabulary("CPT4")
@@ -251,8 +251,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2009-12-04 05:00:00 UTC")
-      .domainType(DomainType.MASTER);
-    expectedMaster7 = new Master()
+      .domainType(DomainType.ALLEVENTS);
+    expectedAllEvents7 = new AllEvents()
       .dataId(12751442L)
       .domain("Condition")
       .standardVocabulary("CPT4")
@@ -267,8 +267,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2001-12-03 05:00:00 UTC")
-      .domainType(DomainType.MASTER);
-    expectedMaster8 = new Master()
+      .domainType(DomainType.ALLEVENTS);
+    expectedAllEvents8 = new AllEvents()
       .dataId(12751443L)
       .domain("Drug")
       .standardVocabulary("CPT4")
@@ -283,7 +283,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2001-12-04 05:00:00 UTC")
-      .domainType(DomainType.MASTER);
+      .domainType(DomainType.ALLEVENTS);
     expectedCondition1 = new Condition()
       .visitId(1L)
       .firstMention("2008-07-22 05:00:00 UTC")
@@ -1000,7 +1000,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantMasterPagination() throws Exception {
+  public void getParticipantAllEventsPagination() throws Exception {
     PageRequest expectedPageRequest = new PageRequest()
       .page(0)
       .pageSize(1)
@@ -1009,7 +1009,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.MASTER);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALLEVENTS);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
@@ -1025,7 +1025,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMaster7), 8);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedAllEvents7), 8);
 
     //page 2 should have 1 item
     testFilter.page(1);
@@ -1040,11 +1040,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMaster8), 8);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedAllEvents8), 8);
   }
 
   @Test
-  public void getParticipantMasterSorting() throws Exception {
+  public void getParticipantAllEventsSorting() throws Exception {
     PageRequest expectedPageRequest = new PageRequest()
       .page(0)
       .pageSize(25)
@@ -1053,7 +1053,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.MASTER);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALLEVENTS);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
@@ -1068,14 +1068,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .getBody();
 
     assertResponse(response, expectedPageRequest,
-      Arrays.asList(expectedMaster7,
-        expectedMaster8,
-        expectedMaster1,
-        expectedMaster2,
-        expectedMaster5,
-        expectedMaster3,
-        expectedMaster6,
-        expectedMaster4), 8);
+      Arrays.asList(expectedAllEvents7,
+        expectedAllEvents8,
+        expectedAllEvents1,
+        expectedAllEvents2,
+        expectedAllEvents5,
+        expectedAllEvents3,
+        expectedAllEvents6,
+        expectedAllEvents4), 8);
 
     //added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -1091,14 +1091,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .getBody();
 
     assertResponse(response, expectedPageRequest,
-      Arrays.asList(expectedMaster6,
-        expectedMaster4,
-        expectedMaster5,
-        expectedMaster3,
-        expectedMaster2,
-        expectedMaster1,
-        expectedMaster8,
-        expectedMaster7), 8);
+      Arrays.asList(expectedAllEvents6,
+        expectedAllEvents4,
+        expectedAllEvents5,
+        expectedAllEvents3,
+        expectedAllEvents2,
+        expectedAllEvents1,
+        expectedAllEvents8,
+        expectedAllEvents7), 8);
   }
 
   private void assertResponse(ParticipantDataListResponse response, PageRequest expectedPageRequest, List<ParticipantData> expectedData, int totalCount) {
@@ -1117,8 +1117,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         assertThat((Condition) actualData).isEqualTo((Condition) expected);
       } else if (expected instanceof Procedure) {
         assertThat((Procedure) actualData).isEqualTo((Procedure) expected);
-      } else if (expected instanceof Master) {
-        assertThat((Master) actualData).isEqualTo((Master) expected);
+      } else if (expected instanceof AllEvents) {
+        assertThat((AllEvents) actualData).isEqualTo((AllEvents) expected);
       } else if (expected instanceof Measurement) {
         assertThat((Measurement) actualData).isEqualTo((Measurement) expected);
       } else if (expected instanceof PhysicalMeasurement) {

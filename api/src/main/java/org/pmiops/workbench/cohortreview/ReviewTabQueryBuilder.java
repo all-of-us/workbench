@@ -111,7 +111,7 @@ public class ReviewTabQueryBuilder {
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
                                           PageRequest pageRequest) {
-    String tableName = DomainType.MASTER.equals(domain)
+    String tableName = DomainType.ALLEVENTS.equals(domain)
       ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(BASE_SQL_TEMPLATE + getSqlTemplate(domain) + FROM + WHERE_TEMPLATE,
       tableName,
@@ -130,7 +130,7 @@ public class ReviewTabQueryBuilder {
 
   public QueryJobConfiguration buildCountQuery(Long participantId,
                                                DomainType domain) {
-    String tableName = DomainType.MASTER.equals(domain)
+    String tableName = DomainType.ALLEVENTS.equals(domain)
       ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(COUNT_TEMPLATE, tableName);
     Map<String, QueryParameterValue> params = new HashMap<>();
@@ -151,7 +151,7 @@ public class ReviewTabQueryBuilder {
 
   private String getSqlTemplate(DomainType domainType) {
     switch (domainType) {
-      case MASTER:
+      case ALLEVENTS:
         return ALL_EVENTS_SQL_TEMPLATE;
       case DRUG:
         return DRUG_SQL_TEMPLATE;
