@@ -702,8 +702,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .route(bigQueryService.getString(row, rm.get("route")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .domainType(DomainType.DRUG)
-        ;
+        .domainType(DomainType.DRUG);
     } else if (domain.equals(DomainType.CONDITION)) {
       return new Condition()
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
@@ -773,7 +772,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .valueNumber(bigQueryService.getString(row, rm.get("valueAsNumber")))
         .units(bigQueryService.getString(row, rm.get("units")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .domainType(DomainType.MASTER);
+        .domainType(DomainType.PHYSICAL_MEASURE);
     } else {
       return new Master()
         .dataId(bigQueryService.getLong(row, rm.get("dataId")))

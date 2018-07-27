@@ -57,6 +57,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private ParticipantData expectedCondition1;
   private ParticipantData expectedCondition2;
+  private ParticipantData expectedPhysicalMeasure1;
+  private ParticipantData expectedPhysicalMeasure2;
+  private ParticipantData expectedMeasurement1;
+  private ParticipantData expectedMeasurement2;
   private ParticipantData expectedProcedure1;
   private ParticipantData expectedProcedure2;
   private ParticipantData expectedObservation1;
@@ -157,14 +161,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .domain("Condition")
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
-      .standardCode("code")
+      .standardCode("002")
       .sourceValue("0020")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
-      .numMentions("11")
+      .numMentions("2")
+      .ageAtEvent(28)
       .firstMention("2008-07-22 05:00:00 UTC")
-      .lastMention("2018-03-22 05:00:00 UTC")
-      .visitType("visitType")
+      .lastMention("2008-07-22 05:00:00 UTC")
+      .visitType("visit")
       .itemDate("2008-07-22 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster2 = new Master()
@@ -172,14 +177,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .domain("Condition")
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
-      .standardCode("code")
+      .standardCode("002")
       .sourceValue("0021")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
-      .numMentions("11")
-      .firstMention("2008-07-22 05:00:00 UTC")
-      .lastMention("2018-03-22 05:00:00 UTC")
-      .visitType("visitType")
+      .ageAtEvent(28)
+      .numMentions("2")
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
+      .visitType("visit")
       .itemDate("2008-08-01 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster3 = new Master()
@@ -187,14 +193,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .domain("Observation")
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .standardCode("code")
+      .standardCode("002")
       .sourceValue("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
-      .numMentions("11")
-      .firstMention("2008-07-22 05:00:00 UTC")
-      .lastMention("2018-03-22 05:00:00 UTC")
-      .visitType("visitType")
+      .numMentions("2")
+      .ageAtEvent(29)
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
+      .visitType("visit")
       .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster4 = new Master()
@@ -202,14 +209,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .domain("Observation")
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .standardCode("code")
+      .standardCode("002")
       .sourceValue("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
-      .numMentions("11")
-      .firstMention("2008-07-22 05:00:00 UTC")
-      .lastMention("2018-03-22 05:00:00 UTC")
-      .visitType("visitType")
+      .numMentions("2")
+      .ageAtEvent(29)
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
+      .visitType("visit")
       .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster5 = new Master()
@@ -217,14 +225,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .domain("Procedure")
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .standardCode("code")
+      .standardCode("002")
       .sourceValue("val")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
-      .numMentions("11")
-      .firstMention("2008-07-22 05:00:00 UTC")
-      .lastMention("2018-03-22 05:00:00 UTC")
-      .visitType("visitType")
+      .numMentions("2")
+      .ageAtEvent(29)
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
+      .visitType("visit")
       .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster6 = new Master()
@@ -232,29 +241,31 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .domain("Procedure")
       .standardVocabulary("CPT4")
       .standardName("name")
-      .standardCode("code")
+      .standardCode("002")
       .sourceValue("val")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .numMentions("11")
-      .firstMention("2008-07-22 05:00:00 UTC")
-      .lastMention("2018-03-22 05:00:00 UTC")
-      .visitType("visitType")
+      .numMentions("2")
+      .ageAtEvent(29)
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
+      .visitType("visit")
       .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster7 = new Master()
       .dataId(12751442L)
-      .domain("Drug")
+      .domain("Condition")
       .standardVocabulary("CPT4")
       .standardName("name")
-      .standardCode("code")
+      .standardCode("002")
       .sourceValue("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .numMentions("11")
-      .firstMention("2008-07-22 05:00:00 UTC")
-      .lastMention("2018-03-22 05:00:00 UTC")
-      .visitType("visitType")
+      .numMentions("2")
+      .ageAtEvent(21)
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
+      .visitType("visit")
       .itemDate("2001-12-03 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedMaster8 = new Master()
@@ -262,92 +273,180 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .domain("Drug")
       .standardVocabulary("CPT4")
       .standardName("name")
-      .standardCode("code")
+      .standardCode("002")
       .sourceValue("Varivax")
       .sourceVocabulary("CPT4")
       .sourceName("name")
-      .numMentions("11")
-      .firstMention("2008-07-22 05:00:00 UTC")
-      .lastMention("2018-03-22 05:00:00 UTC")
-      .visitType("visitType")
+      .numMentions("2")
+      .ageAtEvent(21)
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
+      .visitType("visit")
       .itemDate("2001-12-04 05:00:00 UTC")
       .domainType(DomainType.MASTER);
     expectedCondition1 = new Condition()
+      .visitId(1L)
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2008-07-22 05:00:00 UTC")
+      .numMentions("1")
       .ageAtEvent(28)
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
-      .standardCode("code")
-      .sourceCode("0020")
+      .standardCode("002")
+      .sourceCode("004")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
       .itemDate("2008-07-22 05:00:00 UTC")
       .domainType(DomainType.CONDITION);
     expectedCondition2 = new Condition()
+      .visitId(1L)
+      .firstMention("2008-07-22 05:00:00 UTC")
+      .lastMention("2008-07-22 05:00:00 UTC")
+      .numMentions("1")
       .ageAtEvent(28)
       .standardVocabulary("SNOMED")
       .standardName("SNOMED")
-      .standardCode("code")
-      .sourceCode("0021")
+      .standardCode("002")
+      .sourceCode("004")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
       .itemDate("2008-08-01 05:00:00 UTC")
       .domainType(DomainType.CONDITION);
-    expectedProcedure1 = new Procedure()
+    expectedPhysicalMeasure1 = new PhysicalMeasurement()
+      .valueConcept("val")
+      .valueSource("val")
+      .valueNumber("1.0")
+      .units("nits")
+      .ageAtEvent(28)
+      .standardVocabulary("SNOMED")
+      .standardName("SNOMED")
+      .standardCode("002")
+      .itemDate("2008-07-22 05:00:00 UTC")
+      .domainType(DomainType.PHYSICAL_MEASURE);
+    expectedPhysicalMeasure2 = new PhysicalMeasurement()
+      .valueConcept("val")
+      .valueSource("val")
+      .valueNumber("1.0")
+      .units("nits")
+      .ageAtEvent(28)
+      .standardVocabulary("SNOMED")
+      .standardName("SNOMED")
+      .standardCode("002")
+      .itemDate("2008-08-01 05:00:00 UTC")
+      .domainType(DomainType.PHYSICAL_MEASURE);
+    expectedMeasurement1 = new Measurement()
+      .valueConcept("val")
+      .valueSource("val")
+      .valueNumber("1.0")
+      .units("units")
+      .labRefRange("range")
+      .visitId(1L)
       .ageAtEvent(29)
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .standardCode("code")
-      .sourceCode("val")
+      .standardCode("002")
+      .sourceCode("004")
+      .sourceName("name")
+      .itemDate("2009-12-03 05:00:00 UTC")
+      .domainType(DomainType.MEASUREMENT);
+    expectedMeasurement2 = new Measurement()
+      .valueConcept("val")
+      .valueSource("val")
+      .valueNumber("1.0")
+      .units("units")
+      .labRefRange("range")
+      .visitId(1L)
+      .visitId(1L)
+      .ageAtEvent(29)
+      .standardVocabulary("CPT4")
+      .standardName("name")
+      .standardCode("002")
+      .sourceCode("004")
+      .sourceName("name")
+      .itemDate("2009-12-04 05:00:00 UTC")
+      .domainType(DomainType.MEASUREMENT);
+    expectedProcedure1 = new Procedure()
+      .visitId(1L)
+      .firstMention("2009-12-03 05:00:00 UTC")
+      .lastMention("2009-12-03 05:00:00 UTC")
+      .numMentions("2")
+      .ageAtEvent(29)
+      .standardVocabulary("ICD10CM")
+      .standardName("name")
+      .standardCode("002")
+      .sourceCode("004")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.PROCEDURE);
     expectedProcedure2 = new Procedure()
+      .visitId(1L)
+      .firstMention("2009-12-03 05:00:00 UTC")
+      .lastMention("2009-12-03 05:00:00 UTC")
+      .numMentions("2")
       .ageAtEvent(29)
       .standardVocabulary("CPT4")
       .standardName("name")
-      .standardCode("code")
-      .sourceCode("val")
+      .standardCode("002")
+      .sourceCode("004")
       .sourceVocabulary("CPT4")
       .sourceName("name")
       .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.PROCEDURE);
     expectedObservation1 = new Observation()
+      .visitId(1L)
       .ageAtEvent(29)
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .standardCode("code")
-      .sourceCode("sourceValue")
+      .standardCode("002")
+      .sourceCode("004")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.OBSERVATION);
     expectedObservation2 = new Observation()
+      .visitId(1L)
       .ageAtEvent(29)
       .standardVocabulary("ICD10CM")
       .standardName("name")
-      .standardCode("code")
-      .sourceCode("sourceValue")
+      .standardCode("002")
+      .sourceCode("004")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.OBSERVATION);
     expectedDrug1 = new Drug()
+      .visitId(1L)
+      .route("route")
+      .strength("str")
+      .refills("1")
+      .quantity("1.0")
+      .numMentions("2")
+      .firstMention("2001-12-03 05:00:00 UTC")
+      .lastMention("2001-12-03 05:00:00 UTC")
       .ageAtEvent(21)
       .sourceVocabulary("CPT4")
       .standardName("name")
-      .standardCode("code")
-      .sourceCode("Varivax")
+      .standardCode("002")
+      .sourceCode("004")
       .sourceVocabulary("CPT4")
       .sourceName("name")
       .itemDate("2001-12-03 05:00:00 UTC")
       .domainType(DomainType.DRUG);
     expectedDrug2 = new Drug()
+      .visitId(1L)
+      .route("route")
+      .strength("str")
+      .refills("1")
+      .quantity("1.0")
+      .numMentions("2")
+      .firstMention("2001-12-03 05:00:00 UTC")
+      .lastMention("2001-12-03 05:00:00 UTC")
       .ageAtEvent(21)
       .sourceVocabulary("CPT4")
       .standardName("name")
-      .standardCode("code")
-      .sourceCode("Varivax")
+      .standardCode("002")
+      .sourceCode("004")
       .sourceVocabulary("CPT4")
       .sourceName("name")
       .itemDate("2001-12-04 05:00:00 UTC")
@@ -470,6 +569,176 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
     assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition2), 2);
+  }
+
+  @Test
+  public void getParticipantPhysicalMeasureSorting() throws Exception {
+    PageRequest expectedPageRequest = new PageRequest()
+      .page(0)
+      .pageSize(25)
+      .sortOrder(SortOrder.ASC)
+      .sortColumn("startDate");
+
+    stubMockFirecloudGetWorkspace();
+
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASURE);
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
+
+    //no sort order or column
+    ParticipantDataListResponse response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedPhysicalMeasure1, expectedPhysicalMeasure2), 2);
+
+    //added sort order
+    testFilter.sortOrder(SortOrder.DESC);
+    expectedPageRequest.sortOrder(SortOrder.DESC);
+    response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedPhysicalMeasure2, expectedPhysicalMeasure1), 2);
+  }
+
+  @Test
+  public void getParticipantPhysicalMeasurePagination() throws Exception {
+    PageRequest expectedPageRequest = new PageRequest()
+      .page(0)
+      .pageSize(1)
+      .sortOrder(SortOrder.ASC)
+      .sortColumn("startDate");
+
+    stubMockFirecloudGetWorkspace();
+
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASURE);
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
+    testFilter.page(0);
+    testFilter.pageSize(1);
+
+    //page 1 should have 1 item
+    ParticipantDataListResponse response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedPhysicalMeasure1), 2);
+
+    //page 2 should have 1 item
+    testFilter.page(1);
+    expectedPageRequest.page(1);
+    response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedPhysicalMeasure2), 2);
+  }
+
+  @Test
+  public void getParticipantMeasurementsSorting() throws Exception {
+    PageRequest expectedPageRequest = new PageRequest()
+      .page(0)
+      .pageSize(25)
+      .sortOrder(SortOrder.ASC)
+      .sortColumn("startDate");
+
+    stubMockFirecloudGetWorkspace();
+
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.MEASUREMENT);
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
+
+    //no sort order or column
+    ParticipantDataListResponse response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMeasurement1, expectedMeasurement2), 2);
+
+    //added sort order
+    testFilter.sortOrder(SortOrder.DESC);
+    expectedPageRequest.sortOrder(SortOrder.DESC);
+    response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMeasurement2, expectedMeasurement1), 2);
+  }
+
+  @Test
+  public void getParticipantMeasurementsPagination() throws Exception {
+    PageRequest expectedPageRequest = new PageRequest()
+      .page(0)
+      .pageSize(1)
+      .sortOrder(SortOrder.ASC)
+      .sortColumn("startDate");
+
+    stubMockFirecloudGetWorkspace();
+
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.MEASUREMENT);
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
+    testFilter.page(0);
+    testFilter.pageSize(1);
+
+    //page 1 should have 1 item
+    ParticipantDataListResponse response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMeasurement1), 2);
+
+    //page 2 should have 1 item
+    testFilter.page(1);
+    expectedPageRequest.page(1);
+    response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMeasurement2), 2);
   }
 
   @Test
@@ -841,35 +1110,19 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     for (ParticipantData actualData : data) {
       ParticipantData expected = expectedData.get(i++);
       if (expected instanceof Drug) {
-        assertThat(((Drug) actualData).getAgeAtEvent()).isEqualTo(((Drug) expected).getAgeAtEvent());
-        assertThat(((Drug) actualData).getSourceName()).isEqualTo(((Drug) expected).getSourceName());
-        assertThat(((Drug) actualData).getSourceVocabulary()).isEqualTo(((Drug) expected).getSourceVocabulary());
-        assertThat(((Drug) actualData).getStandardName()).isEqualTo(((Drug) expected).getStandardName());
+        assertThat((Drug) actualData).isEqualTo((Drug) expected);
       } else if (expected instanceof Observation) {
-        assertThat(((Observation) actualData).getAgeAtEvent()).isEqualTo(((Observation) expected).getAgeAtEvent());
-        assertThat(((Observation) actualData).getSourceName()).isEqualTo(((Observation) expected).getSourceName());
-        assertThat(((Observation) actualData).getSourceVocabulary()).isEqualTo(((Observation) expected).getSourceVocabulary());
-        assertThat(((Observation) actualData).getStandardName()).isEqualTo(((Observation) expected).getStandardName());
-        assertThat(((Observation) actualData).getStandardVocabulary()).isEqualTo(((Observation) expected).getStandardVocabulary());
+        assertThat((Observation) actualData).isEqualTo((Observation) expected);
       } else if (expected instanceof Condition) {
-        assertThat(((Condition) actualData).getAgeAtEvent()).isEqualTo(((Condition) expected).getAgeAtEvent());
-        assertThat(((Condition) actualData).getSourceName()).isEqualTo(((Condition) expected).getSourceName());
-        assertThat(((Condition) actualData).getSourceVocabulary()).isEqualTo(((Condition) expected).getSourceVocabulary());
-        assertThat(((Condition) actualData).getStandardName()).isEqualTo(((Condition) expected).getStandardName());
-        assertThat(((Condition) actualData).getStandardVocabulary()).isEqualTo(((Condition) expected).getStandardVocabulary());
+        assertThat((Condition) actualData).isEqualTo((Condition) expected);
       } else if (expected instanceof Procedure) {
-        assertThat(((Procedure) actualData).getAgeAtEvent()).isEqualTo(((Procedure) expected).getAgeAtEvent());
-        assertThat(((Procedure) actualData).getSourceName()).isEqualTo(((Procedure) expected).getSourceName());
-        assertThat(((Procedure) actualData).getSourceVocabulary()).isEqualTo(((Procedure) expected).getSourceVocabulary());
-        assertThat(((Procedure) actualData).getStandardName()).isEqualTo(((Procedure) expected).getStandardName());
-        assertThat(((Procedure) actualData).getStandardVocabulary()).isEqualTo(((Procedure) expected).getStandardVocabulary());
+        assertThat((Procedure) actualData).isEqualTo((Procedure) expected);
       } else if (expected instanceof Master) {
-        assertThat(((Master) actualData).getDataId()).isEqualTo(((Master) expected).getDataId());
-        assertThat(((Master) actualData).getSourceName()).isEqualTo(((Master) expected).getSourceName());
-        assertThat(((Master) actualData).getSourceValue()).isEqualTo(((Master) expected).getSourceValue());
-        assertThat(((Master) actualData).getSourceVocabulary()).isEqualTo(((Master) expected).getSourceVocabulary());
-        assertThat(((Master) actualData).getStandardName()).isEqualTo(((Master) expected).getStandardName());
-        assertThat(((Master) actualData).getStandardVocabulary()).isEqualTo(((Master) expected).getStandardVocabulary());
+        assertThat((Master) actualData).isEqualTo((Master) expected);
+      } else if (expected instanceof Measurement) {
+        assertThat((Measurement) actualData).isEqualTo((Measurement) expected);
+      } else if (expected instanceof PhysicalMeasurement) {
+        assertThat((PhysicalMeasurement) actualData).isEqualTo((PhysicalMeasurement) expected);
       }
       assertThat(actualData.getDomainType()).isEqualTo(expected.getDomainType());
       assertThat(actualData.getItemDate()).isEqualTo(expected.getItemDate());
