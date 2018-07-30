@@ -14,87 +14,86 @@ public class ReviewTabQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String TABLE_PREFIX = "p_";
-  private static final String MASTER_TABLE = "p_all_events";
+  private static final String ALL_EVENTS_TABLE = "p_all_events";
+
+  private static final String VISIT_COLUMNS =
+    ", visit_id as visitId\n" +
+      ", visit_concept_id as visitConceptId\n";
+
+  private static final String STANDARD_COLUMNS =
+    ", standard_name as standardName\n" +
+      ", standard_code as standardCode\n" +
+      ", standard_vocabulary as standardVocabulary\n";
+
+  private static final String SOURCE_COLUMNS =
+    ", source_name as sourceName\n" +
+      ", source_code as sourceCode\n" +
+      ", source_vocabulary as sourceVocabulary\n";
+
+  private static final String AGE_AT_EVENT =
+    ", age_at_event as ageAtEvent\n";
+
+  private static final String MENTION_COLUMNS =
+    ", num_mentions as numMentions\n" +
+      ", first_mention as firstMention\n" +
+      ", last_mention as lastMention\n";
+
+  private static final String VALUE_COLUMNS =
+    ", value_concept as valueConcept\n" +
+      ", value_as_number as valueAsNumber\n" +
+      ", value_source_value as valueSourceValue\n";
 
   private static final String BASE_SQL_TEMPLATE =
-    "select person_id as personId,\n" +
-      "data_id as dataId,\n" +
-      "start_datetime as startDate,\n";
+    "select person_id as personId\n" +
+      ", data_id as dataId\n" +
+      ", start_datetime as startDate\n";
 
   private static final String ALL_EVENTS_SQL_TEMPLATE =
-    "domain as domain,\n" +
-      "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "source_name as sourceName,\n" +
-      "source_code as sourceCode,\n" +
-      "source_vocabulary as sourceVocabulary,\n" +
-      "age_at_event as ageAtEvent,\n" +
-      "visit_type as visitType,\n" +
-      "source_value as sourceValue,\n" +
-      "num_mentions as numMentions,\n" +
-      "first_mention as firstMention,\n" +
-      "last_mention as lastMention\n";
+    ", domain as domain\n" +
+      STANDARD_COLUMNS +
+      SOURCE_COLUMNS +
+      AGE_AT_EVENT +
+      ", visit_type as visitType\n" +
+      ", source_value as sourceValue\n" +
+      MENTION_COLUMNS;
 
   private static final String CONDITION_SQL_TEMPLATE =
-    "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "source_name as sourceName,\n" +
-      "source_code as sourceCode,\n" +
-      "source_vocabulary as sourceVocabulary,\n" +
-      "visit_id as visitId,\n" +
-      "visit_concept_id as visitConceptId,\n" +
-      "age_at_event as ageAtEvent,\n" +
-      "num_mentions as numMentions,\n" +
-      "first_mention as firstMention,\n" +
-      "last_mention as lastMention\n";
+    STANDARD_COLUMNS +
+      SOURCE_COLUMNS +
+      VISIT_COLUMNS +
+      AGE_AT_EVENT +
+      MENTION_COLUMNS;
 
   private static final String PROCEDURE_SQL_TEMPLATE =
     CONDITION_SQL_TEMPLATE;
 
   private static final String DRUG_SQL_TEMPLATE =
-    CONDITION_SQL_TEMPLATE + ", quantity as quantity,\n" +
-      "refills as refills,\n" +
-      "strength as strength,\n" +
-      "route as route\n";
+    CONDITION_SQL_TEMPLATE +
+      ", quantity as quantity\n" +
+      ", refills as refills\n" +
+      ", strength as strength\n" +
+      ", route as route\n";
 
   private static final String MEASUREMENT_SQL_TEMPLATE =
-    "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "source_name as sourceName,\n" +
-      "source_code as sourceCode,\n" +
-      "source_vocabulary as sourceVocabulary,\n" +
-      "visit_id as visitId,\n" +
-      "visit_concept_id as visitConceptId,\n" +
-      "age_at_event as ageAtEvent,\n" +
-      "value_concept as valueConcept,\n" +
-      "value_as_number as valueAsNumber,\n" +
-      "value_source_value as valueSourceValue,\n" +
-      "units as units,\n" +
-      "ref_range as refRange\n";
+    STANDARD_COLUMNS +
+      SOURCE_COLUMNS +
+      VISIT_COLUMNS +
+      AGE_AT_EVENT +
+      VALUE_COLUMNS +
+      ", units as units\n" +
+      ", ref_range as refRange\n";
 
   private static final String OBSERVATION_SQL_TEMPLATE =
-    "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "source_name as sourceName,\n" +
-      "source_code as sourceCode,\n" +
-      "source_vocabulary as sourceVocabulary,\n" +
-      "visit_id as visitId,\n" +
-      "visit_concept_id as visitConceptId,\n" +
-      "age_at_event as ageAtEvent\n";
+    STANDARD_COLUMNS +
+      SOURCE_COLUMNS +
+      VISIT_COLUMNS +
+      AGE_AT_EVENT;
 
   private static final String PHYSICAL_MEASURE_SQL_TEMPLATE =
-    "standard_name as standardName,\n" +
-      "standard_code as standardCode,\n" +
-      "standard_vocabulary as standardVocabulary,\n" +
-      "age_at_event as ageAtEvent,\n" +
-      "value_concept as valueConcept,\n" +
-      "value_as_number as valueAsNumber,\n" +
-      "value_source_value as valueSourceValue,\n" +
-      "units as units\n";
+    STANDARD_COLUMNS +
+      AGE_AT_EVENT +
+      VALUE_COLUMNS +
+      ", units as units\n";
 
   private static final String FROM =
     "from `${projectId}.${dataSetId}.%s`\n";
@@ -112,8 +111,8 @@ public class ReviewTabQueryBuilder {
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
                                           PageRequest pageRequest) {
-    String tableName = DomainType.MASTER.equals(domain)
-      ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+    String tableName = DomainType.ALLEVENTS.equals(domain)
+      ? ALL_EVENTS_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(BASE_SQL_TEMPLATE + getSqlTemplate(domain) + FROM + WHERE_TEMPLATE,
       tableName,
       pageRequest.getSortColumn(),
@@ -131,8 +130,8 @@ public class ReviewTabQueryBuilder {
 
   public QueryJobConfiguration buildCountQuery(Long participantId,
                                                DomainType domain) {
-    String tableName = DomainType.MASTER.equals(domain)
-      ? MASTER_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+    String tableName = DomainType.ALLEVENTS.equals(domain)
+      ? ALL_EVENTS_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(COUNT_TEMPLATE, tableName);
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
@@ -152,7 +151,7 @@ public class ReviewTabQueryBuilder {
 
   private String getSqlTemplate(DomainType domainType) {
     switch (domainType) {
-      case MASTER:
+      case ALLEVENTS:
         return ALL_EVENTS_SQL_TEMPLATE;
       case DRUG:
         return DRUG_SQL_TEMPLATE;

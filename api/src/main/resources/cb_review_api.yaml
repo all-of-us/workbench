@@ -506,7 +506,7 @@ definitions:
 
   DomainType:
     type: string
-    enum: [Condition, Procedure, Observation, Drug, Master, Device, Visit, Measurement, Physical_Measure]
+    enum: [Condition, Procedure, Observation, Drug, AllEvents, Device, Visit, Measurement, Physical_Measure]
 
   SortOrder:
     type: string
@@ -888,7 +888,7 @@ definitions:
             description: The visit Id of this data
 
 
-  Master:
+  AllEvents:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
