@@ -27,14 +27,14 @@
         </div>
       </div>
       <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group">
-        <input type="number" min="0" [name]="'valueA'+i" [ngModel]="attr.operands[0]" (ngModelChange)="inputChange($event)" required>
+        <input type="number" min="0" [name]="'valueA'+i" [(ngModel)]="attr.operands[0]" (ngModelChange)="inputChange()" required>
         <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
       </div>
       <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
         <div>and</div>
       </div>
       <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
-        <input type="number" min="0" [name]="'valueB'+i" [ngModel]="attr.operands[1]" (ngModelChange)="inputChange($event)" required>
+        <input type="number" min="0" [name]="'valueB'+i" [(ngModel)]="attr.operands[1]" (ngModelChange)="inputChange()" required>
         <span>{{units[node.get('subtype')]}}</span>
       </div>
     </div>
