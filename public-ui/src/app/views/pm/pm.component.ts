@@ -9,7 +9,7 @@ import {MeasurementAnalysisListResponse} from '../../../publicGenerated/model/me
   templateUrl: './pm.component.html',
   styleUrls: ['../../styles/template.css', '../../styles/cards.css', './pm.component.css']
 })
-export class PhysicalMeasurementsComponent implements OnInit {
+export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   title = 'Browse Program Physical Measurements';
   private subscriptions: ISubscription[] = [];
   conceptGroups = [
@@ -72,7 +72,8 @@ export class PhysicalMeasurementsComponent implements OnInit {
     this.selectedConcept = concept;
     if (!this.selectedConcept.analyses) {
       this.loading = true;
-      this.subscriptions.push(this.api.getMeasurementAnalysisResults([this.selectedConcept.conceptId])
+      this.subscriptions.push(this.api.getMeasurementAnalysisResults(
+        [this.selectedConcept.conceptId])
         .subscribe(result => {
           this.selectedConcept.analyses = result.items[0];
           console.log(result);
