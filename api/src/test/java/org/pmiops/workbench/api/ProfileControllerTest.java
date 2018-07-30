@@ -19,8 +19,12 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.inject.Provider;
 import javax.mail.MessagingException;
@@ -315,6 +319,31 @@ public class ProfileControllerTest {
     org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
         new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
     membership.setCreationStatus(CreationStatusEnum.ERROR);
+    membership.setProjectName(profile.getFreeTierBillingProjectName());
+    when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
+  }
+
+  @Test
+  public void testMe_invalidBillingProjectError() throws Exception {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new FireCloudConfig();
+    config.firecloud.billingRetryCount = 2;
+    when(configProvider.get()).thenReturn(config);
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    // Simulate FC "Error" with null creation status and null project name.
+    org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
+        new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
+    membership.setCreationStatus(null);
+    membership.setProjectName(null);
     membership.setProjectName(profile.getFreeTierBillingProjectName());
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();

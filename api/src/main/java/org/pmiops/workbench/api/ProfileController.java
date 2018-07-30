@@ -268,6 +268,8 @@ public class ProfileController implements ProfileApiDelegate {
     BillingProjectStatus status;
     try {
       status = fireCloudService.getBillingProjectMemberships().stream()
+          .filter(m -> m.getProjectName() != null)
+          .filter(m -> m.getCreationStatus() != null)
           .filter(m -> user.getFreeTierBillingProjectName().equals(m.getProjectName()))
           .map(m -> fcToWorkbenchBillingMap.get(m.getCreationStatus()))
           // Should be at most one matching billing project; though we're not asserting this.
