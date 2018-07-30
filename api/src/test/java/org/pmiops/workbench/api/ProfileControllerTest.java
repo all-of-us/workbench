@@ -340,7 +340,6 @@ public class ProfileControllerTest {
         new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
     membership.setCreationStatus(null);
     membership.setProjectName(null);
-    membership.setProjectName(profile.getFreeTierBillingProjectName());
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
