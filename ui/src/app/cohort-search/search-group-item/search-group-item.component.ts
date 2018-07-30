@@ -73,7 +73,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
       let funcs = [typeDisplay, attributeDisplay];
       if (_type === 'Demographics') {
         funcs = [typeDisplay, nameDisplay, attributeDisplay];
-      } else if (_type === 'Physical Measurement') {
+      } else if (_type === 'Physical Measurement' || _type === 'Visit') {
         funcs = [nameDisplay];
       }
       return funcs.map(f => f(param)).join(' ').trim();
@@ -88,8 +88,9 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   launchWizard() {
     const criteriaType = this.item.get('type');
+    const fullTree = this.item.get('fullTree', false);
     const {role, groupId, itemId} = this;
-    const context = {criteriaType, role, groupId, itemId};
+    const context = {criteriaType, role, groupId, itemId, fullTree};
     const item = this.item;
     this.actions.reOpenWizard(item, context);
   }

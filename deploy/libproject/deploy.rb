@@ -12,7 +12,8 @@ DOCKER_KEY_FILE_PATH = "/creds/sa-key.json"
 
 STAGING_PROJECT = "all-of-us-rw-staging"
 STABLE_PROJECT = "all-of-us-rw-stable"
-RELEASE_MANAGED_PROJECTS = [STAGING_PROJECT, STABLE_PROJECT]
+PROD_PROJECT = "all-of-us-rw-prod"
+RELEASE_MANAGED_PROJECTS = [STAGING_PROJECT, STABLE_PROJECT, PROD_PROJECT]
 
 VERSION_RE = /^v[[:digit:]]+-[[:digit:]]+-rc[[:digit:]]+$/
 
@@ -28,14 +29,15 @@ def get_live_gae_version(project, validate_version=true)
     common.error "Failed to get live GAE version for project '#{project}'"
     exit 1
   end
-  services = Set["api", "default", "public-api"]
+  services = Set["api", "default", "public-api", "public-ui"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
+  active_services = actives.map{|v| v["service"]}.to_set
   if actives.empty?
     common.warning "Found 0 active GAE services in project '#{project}'"
     return nil
-  elsif services != actives.map{|v| v["service"]}.to_set
-    common.warning "Found active services #{v}, expected " +
-                   "[#{services.to_a.join(', ')}] for project '#{project}'"
+  elsif services != active_services
+    common.warning "Found active services [#{active_services.to_a.join(',')}], " +
+                   "expected [#{services.to_a.join(', ')}] for project '#{project}'"
     return nil
   end
 
@@ -268,6 +270,16 @@ def deploy(cmd_name, args)
       --quiet
   }
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
+  common.run_inline %W{
+    ../public-ui/project.rb deploy-ui
+      --project #{op.opts.project}
+      --account #{op.opts.account}
+      --key-file #{op.opts.key_file}
+      --version #{op.opts.app_version}
+      #{op.opts.promote ? "--promote" : "--no-promote"}
+      --quiet
+  }
+  maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,

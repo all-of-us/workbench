@@ -1,11 +1,5 @@
 package org.pmiops.workbench.api;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,6 +15,13 @@ import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.Operator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Arrays;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CohortBuilderControllerMockTest {
@@ -61,6 +62,7 @@ public class CohortBuilderControllerMockTest {
                 controller.getCriteriaByTypeAndParentId(1L,"ICD9", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("ICD9")
                         .code("001-139.99")
                         .name("Infectious and parasitic diseases")
@@ -98,6 +100,7 @@ public class CohortBuilderControllerMockTest {
                 controller.getCriteriaByTypeAndParentId(1L,"DEMO", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("DEMO")
                         .name("Age")
                         .group(false)
@@ -134,6 +137,7 @@ public class CohortBuilderControllerMockTest {
                 controller.getCriteriaByTypeAndParentId(1L,"ICD10", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("ICD10")
                         .name("DIAGNOSIS CODES")
                         .group(true)
@@ -169,6 +173,7 @@ public class CohortBuilderControllerMockTest {
                 controller.getCriteriaByTypeAndParentId(1L,"CPT", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("CPT")
                         .name("DIAGNOSIS CODES")
                         .group(true)
@@ -183,10 +188,47 @@ public class CohortBuilderControllerMockTest {
     }
 
     @Test
+    public void getCriteriaByType() throws Exception {
+        org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
+                new org.pmiops.workbench.cdr.model.Criteria()
+                        .id(1L)
+                        .type("CPT")
+                        .name("DIAGNOSIS CODES")
+                        .group(true)
+                        .selectable(true)
+                        .count("0")
+                        .conceptId("0")
+                        .predefinedAttributes("[]");
+
+        when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
+        when(mockCriteriaDao
+                .findCriteriaByType("CPT"))
+                .thenReturn(Arrays.asList(expectedCriteria));
+
+        assertCriteria(
+                controller.getCriteriaByType(1L,"CPT"),
+                new Criteria()
+                        .id(1L)
+                        .parentId(0L)
+                        .type("CPT")
+                        .name("DIAGNOSIS CODES")
+                        .group(true)
+                        .selectable(true)
+                        .count(0L)
+                        .conceptId(0L)
+                        .hasAttributes(false));
+
+        verify(mockCdrVersionDao).findOne(1L);
+        verify(mockCriteriaDao).findCriteriaByType("CPT");
+        verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
+    }
+
+    @Test
     public void getCriteriaByTypeAndParentIdPhecodes() throws Exception {
         org.pmiops.workbench.cdr.model.Criteria expectedCriteria =
                 new org.pmiops.workbench.cdr.model.Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("PHECODE")
                         .name("Intestinal infection")
                         .group(true)
@@ -203,6 +245,7 @@ public class CohortBuilderControllerMockTest {
                 controller.getCriteriaByTypeAndParentId(1l,"PHECODE", 0L),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("PHECODE")
                         .name("Intestinal infection")
                         .group(true)
@@ -237,13 +280,14 @@ public class CohortBuilderControllerMockTest {
                         .predefinedAttributes("[]");
         when(mockCdrVersionDao.findOne(1L)).thenReturn(new CdrVersion());
         when(mockCriteriaDao
-                .findCriteriaByTypeAndSubtypeOrderByNameAsc("DEMO", "RACE"))
+                .findCriteriaByTypeAndSubtypeOrderByIdAsc("DEMO", "RACE"))
                 .thenReturn(Arrays.asList(expectedCriteria));
 
         assertCriteria(
                 controller.getCriteriaByTypeAndSubtype(1l,"DEMO", "RACE"),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("DEMO")
                         .subtype("RACE")
                         .name("African American")
@@ -254,7 +298,7 @@ public class CohortBuilderControllerMockTest {
                         .hasAttributes(false));
 
         verify(mockCdrVersionDao).findOne(1L);
-        verify(mockCriteriaDao).findCriteriaByTypeAndSubtypeOrderByNameAsc("DEMO", "RACE");
+        verify(mockCriteriaDao).findCriteriaByTypeAndSubtypeOrderByIdAsc("DEMO", "RACE");
         verifyNoMoreInteractions(mockCriteriaDao, mockCdrVersionDao);
     }
 
@@ -280,6 +324,7 @@ public class CohortBuilderControllerMockTest {
                 controller.getCriteriaTreeQuickSearch(1L,"PHECODE", "infect"),
                 new Criteria()
                         .id(1L)
+                        .parentId(0L)
                         .type("PHECODE")
                         .name("Intestinal infection")
                         .group(true)

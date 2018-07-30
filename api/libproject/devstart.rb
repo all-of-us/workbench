@@ -20,7 +20,7 @@ GSUITE_ADMIN_KEY_PATH = "src/main/webapp/WEB-INF/gsuite-admin-sa.json"
 INSTANCE_NAME = "workbenchmaindb"
 FAILOVER_INSTANCE_NAME = "workbenchbackupdb"
 SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com iam.googleapis.com
-              compute.googleapis.com admin.googleapis.com
+              compute.googleapis.com admin.googleapis.com appengine.googleapis.com
               cloudbilling.googleapis.com sqladmin.googleapis.com sql-component.googleapis.com
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
 
@@ -36,6 +36,10 @@ ENVIRONMENTS = {
   "all-of-us-rw-stable" => {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_stable.json"
+  },
+  "all-of-us-rw-prod" => {
+    :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
+    :config_json => "config_prod.json"
   }
 }
 
@@ -1059,7 +1063,8 @@ def deploy_gcs_demos(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  common.run_inline %W{gsutil rm gs://#{gcc.project}-demos/**}
+  # Run but ignore failure statuses, as these files may not exist.
+  Process.wait spawn("gsutil", "rm", "gs://#{gcc.project}-demos/**")
   common.run_inline %W{gsutil cp demos/* gs://#{gcc.project}-demos/}
 end
 

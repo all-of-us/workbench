@@ -1,0 +1,81 @@
+.header {
+    height:96px;
+    background-color:inherit;
+    padding-top:24px;
+    margin-bottom: 24px;
+}
+
+.branding {
+    /* Show full logo on small screen */
+    min-width:10rem !important;
+   /* margin-right: 12px;
+    padding-right: 0;*/
+}
+.branding .logo {
+    padding-right: 0px;
+    padding-top: 12px;
+}
+.branding .logo img {
+    width: 231px;
+}
+
+
+span.title-data {
+    color: #6CACE4;
+    font-weight:bold;
+}
+span.title-browser {
+    color: #262262;
+    font-weight:bold;
+}
+
+
+@media (max-width: 544px) {
+
+    .main-container .header.db-header .branding {
+        max-width: 8rem !important;
+        min-width: 0;
+        overflow: hidden;
+    }
+}
+
+.header-nav {
+    font-family: "Gotham HTF",open-sans,sans-serif;
+    border-bottom: solid 1px #000000;
+    margin-top:-.25rem;
+}
+
+clr-header .header-nav .nav-link {
+    color: #302C71;;
+    font-size:14px;
+    /*font-weight: 300;*/
+    line-height: 3.75rem;
+}
+
+clr-header .header-nav .nav-link.title {
+    font-size:20px;
+    font-family: "Gotham HTF",open-sans,sans-serif;
+    font-weight: bold;
+}
+/*
+.header-nav.menu {
+
+    width:60%;
+    height: 29px
+}
+*/
+
+.db-logo {
+    height: 1rem; /* 24px */
+    width: 7rem;
+    margin-right: 2rem;
+}
+
+.header .header-nav .nav-link.active, header .header-nav .nav-link.active {
+    background-color: inherit;
+}
+
+.nav-link clr-icon {
+    top: 75%;
+    left: 95%;
+}

@@ -1,0 +1,92 @@
+<div class="row">
+
+  <div class="col-xs-12 col-sm-12 col-md-9">
+
+    <div class="page-header">
+      <h2> {{title}} </h2>
+      <p class="view-sub-title">{{subTitle}} </p>
+    </div>
+
+    <div class="white-card-box flex-items-xs-middle" >
+      <div class="row search flex-items-xs-between">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 flex-xs-middle search-input-full">
+          <div class="search-wrapper">
+            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
+            <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="loading" >
+      <div class="col-xs-12 flex-xs-middle" style="text-align: center" >
+        <span  class="spinner">
+        Loading...
+      </span>
+      </div>
+    </div>
+
+
+    <h5 class="box-heading" style="display:block" *ngIf="showDataType(EHR_DATATYPE)" > EHR Domains: </h5>
+    <div class="row" *ngIf="showDataType(EHR_DATATYPE)" >
+      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
+          <div class="white-card-box search-result">
+            <h5 class="box-title">
+              {{r.domainDisplay}}
+            </h5>
+            <div class="card-stat">
+              {{r.countValue | number}}
+            </div>
+            <p class="card-text bigger">
+              <em> <b>concepts </b></em>
+              <span *ngIf="searchText.value"> match your search. </span>
+              <span *ngIf="!searchText.value">in this domain.</span>
+              <span *ngIf="r.participantCount">
+                <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
+              </span>
+            </p>
+
+            <div class="card-text bottom">
+              <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
+            </div>
+          </div>
+      </div>
+      <div class="col-xs-12" *ngIf="! domainResults || domainResults.length === 0">
+        <h6> No EHR Data Results.</h6>
+      </div>
+
+    </div>
+
+    <h5 class="box-heading" *ngIf="showDataType(SURVEY_DATATYPE)"> Surveys:  </h5>
+    <div class="row" *ngIf="showDataType(SURVEY_DATATYPE)">
+      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
+        <div class="white-card-box search-result">
+          <h5 class="box-title">
+            {{r.domainDisplay}}
+          </h5>
+          <div class="card-stat">
+            {{r.countValue | number}}
+          </div>
+          <p class="card-text bigger">
+            There are {{r.countValue }} survey questions on this survey related to your search.
+          </p>
+
+          <div class="card-text bottom" >
+            <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xs-12" *ngIf="! surveyResults || surveyResults.length === 0">
+        <h6> No Survey Results.</h6>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="col-xs-12 col-sm-12 col-md-3">
+    <img [src]="pageImage" />
+  </div>
+
+</div>

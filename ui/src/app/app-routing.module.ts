@@ -1,9 +1,7 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
-import {HomeComponent} from './data-browser/home/home.component';
-import {SearchComponent} from './data-browser/search/search.component';
-
+import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
@@ -17,6 +15,7 @@ import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
@@ -30,14 +29,6 @@ declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
-    path: 'data-browser/home',
-    component: HomeComponent,
-    data: {title: 'Data Browser'}
-  }, {
-    path: 'data-browser/browse',
-    component: SearchComponent,
-    data: {title: 'Browse'}
-  }, {
     path: 'login',
     component: LoginComponent,
     data: {title: 'Sign In'}
@@ -45,13 +36,19 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard],
+    canActivateChild: [SignInGuard, RegistrationGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',
         component: HomepageComponent,
         data: {title: 'Homepage'},
+      }, {
+        path: 'unregistered',
+        component: UnregisteredComponent,
+        data: {
+          title: 'Awaiting ID Verification'
+        }
       }, {
       path: 'workspaces',
       data: {breadcrumb: 'Workspaces'},
@@ -187,6 +184,7 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
+    RegistrationGuard,
     SignInGuard,
     WorkspaceResolver,
   ]

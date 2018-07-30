@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {ServerConfigService} from 'app/services/server-config.service';
+import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {
@@ -18,22 +18,11 @@ import {
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
-  AouLogoFooter = '/assets/images/all-of-us-logo-footer.svg';
-  tipHeadline = 'Welcome Back to All of Us!';
-  tipSubtitle = 'Thanks for returning.';
-  tipDetail = 'You can use the buttons below to view your workspaces, ' +
-    'or create a new one. Please do not hesitate to use the "Report a Bug" ' +
-    'button below (or found at any time via the Profile menu) ' +
-    'if you experience any difficulties.';
-  tipButton = 'REPORT A BUG';
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
-  colorScheme = {
-    domain: ['#8BC990', '#C7C8C8']
-  };
   spinnerValues = [
     {
       'name': this.completedTasksName,
@@ -47,12 +36,46 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
-  private enforceRegistered: boolean;
+  cardDetails = [
+    {
+      title: 'Browse All of Us Data',
+      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+      'dolore. Mirum est notare, quam littera gothica quam nunc.',
+      icon: '/assets/icons/browse-data.svg'
+    },
+    {
+      title: 'Explore Public Work',
+      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
+      'dolore. Mirum est notare, quam littera gothica quam nunc.',
+      icon: '/assets/icons/explore.svg'
+    }];
+  footerLinks = [
+    {
+      title: 'Working Within Researcher Workbench',
+      links: ['Researcher Workbench Mission',
+        'User interface components',
+        'What to do when things go wrong',
+        'Contributing to the Workbench']
+    },
+    {
+      title: 'Workspace',
+      links: ['Workspace interface components',
+        'User interface components',
+        'Collaborating with other researchers',
+        'Sharing and Publishing Workspaces']
+    },
+    {
+      title: 'Working with Notebooks',
+      links: ['Notebook interface components',
+        'Notebooks and data',
+        'Collaborating with other researchers',
+        'Sharing and Publishing Notebooks']
+    }];
+  firstTimeUser = false;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
   constructor(
-    private serverConfigService: ServerConfigService,
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
@@ -60,9 +83,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.serverConfigService.getConfig().subscribe((config) => {
-      this.enforceRegistered = config.enforceRegistered;
-    });
     this.profileStorageService.profile$.subscribe((profile) => {
       if (this.firstSignIn === undefined) {
         this.firstSignIn = new Date(profile.firstSignInTime);
@@ -76,14 +96,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
       }
       this.profile = profile;
       this.reloadSpinner();
-      if (profile.firstSignInTime === null) {
-        this.tipHeadline = 'Welcome to All of Us';
-        this.tipSubtitle = 'This is your first visit with us!';
-        this.tipDetail = 'We are setting up your account. When this process is ' +
-          'completed you will be able to use the "Create a Workspace" button ' +
-          'below to create a new Workspace.';
-        this.tipButton = '';
-      }
     });
     this.profileStorageService.reload();
   }
@@ -139,21 +151,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
 
   listWorkspaces(): void {
    this.router.navigate(['workspaces']);
-  }
-
-  // The user is FC initialized and has access to the CDR, if enforced in this
-  // environment.
-  hasCdrAccess(): boolean {
-    if (!this.profile) {
-      return false;
-    }
-    if (!this.enforceRegistered) {
-      return true;
-    }
-    return [
-      DataAccessLevel.Registered,
-      DataAccessLevel.Protected
-    ].includes(this.profile.dataAccessLevel);
   }
 
   get twoFactorBannerEnabled() {

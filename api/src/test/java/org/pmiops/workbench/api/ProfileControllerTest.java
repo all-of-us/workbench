@@ -7,16 +7,19 @@ import static junit.framework.TestCase.fail;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.ImmutableList;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Provider;
@@ -56,6 +59,8 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
+import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
@@ -64,6 +69,8 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -118,9 +125,7 @@ public class ProfileControllerTest {
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
     config.admin = new WorkbenchConfig.AdminConfig();
-    config.admin.verifiedSendingAddress = "verifysend@mockemail.mock";
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
-    config.admin.supportGroup = "supportGroup@dummyMockEmail.com";
 
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
@@ -136,10 +141,12 @@ public class ProfileControllerTest {
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
     googleUser = new com.google.api.services.admin.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
+    googleUser.setChangePasswordAtNextLogin(true);
+    googleUser.setPassword("testPassword");
 
     clock = new FakeClock(NOW);
 
-    Mockito.doNothing().when(mailService).send(Mockito.any());
+    doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
     ProfileService profileService = new ProfileService(fireCloudService, userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
@@ -309,6 +316,30 @@ public class ProfileControllerTest {
         new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
     membership.setCreationStatus(CreationStatusEnum.ERROR);
     membership.setProjectName(profile.getFreeTierBillingProjectName());
+    when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
+  }
+
+  @Test
+  public void testMe_invalidBillingProjectError() throws Exception {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new FireCloudConfig();
+    config.firecloud.billingRetryCount = 2;
+    when(configProvider.get()).thenReturn(config);
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    // Simulate FC "Error" with null creation status and null project name.
+    org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
+        new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
+    membership.setCreationStatus(null);
+    membership.setProjectName(null);
     when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
     profile = profileController.getMe().getBody();
     assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
@@ -591,6 +622,85 @@ public class ProfileControllerTest {
     profileController.updateProfile(profile);
     Profile result = profileController.getMe().getBody();
     assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(0);
+  }
+
+  @Test
+  public void updateContactEmail_forbidden() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    user.setFirstSignInTime(new Timestamp(new Date().getTime()));
+    UpdateContactEmailRequest request = new UpdateContactEmailRequest();
+    String originalEmail = user.getContactEmail();
+    request.setContactEmail("newcontactEmail@whatever.com");
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.updateContactEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    assertThat(user.getContactEmail()).isEqualTo(originalEmail);
+  }
+
+  @Test
+  public void updateContactEmail_badRequest() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    user.setFirstSignInTime(null);
+    UpdateContactEmailRequest request = new UpdateContactEmailRequest();
+    String originalEmail = user.getContactEmail();
+    request.setContactEmail("bad email address *(SD&(*D&F&*(DS ");
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.updateContactEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(user.getContactEmail()).isEqualTo(originalEmail);
+  }
+
+  @Test
+  public void updateContactEmail_OK() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    user.setFirstSignInTime(null);
+    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    UpdateContactEmailRequest request = new UpdateContactEmailRequest();
+    request.setContactEmail("newContactEmail@whatever.com");
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.updateContactEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
+  }
+
+  @Test
+  public void resendWelcomeEmail_messagingException() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    user.setFirstSignInTime(null);
+    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    doThrow(new MessagingException("exception")).when(mailService).sendWelcomeEmail(any(), any(), any());
+    ResendWelcomeEmailRequest request = new ResendWelcomeEmailRequest();
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.resendWelcomeEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    //called twice, once during account creation, once on resend
+    verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(directoryService, times(1)).resetUserPassword(anyString());
+  }
+
+  @Test
+  public void resendWelcomeEmail_OK() throws Exception {
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+    when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
+    doNothing().when(mailService).sendWelcomeEmail(any(), any(), any());
+    ResendWelcomeEmailRequest request = new ResendWelcomeEmailRequest();
+    request.setUsername(user.getEmail());
+
+    ResponseEntity response = profileController.resendWelcomeEmail(request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    //called twice, once during account creation, once on resend
+    verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
+    verify(directoryService, times(1)).resetUserPassword(anyString());
   }
 
   private Profile createUser() throws Exception {

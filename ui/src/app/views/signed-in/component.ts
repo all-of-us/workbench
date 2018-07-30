@@ -6,8 +6,9 @@ import {
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
-import {navigateLogin} from 'app/utils';
+import {hasRegisteredAccess, navigateLogin} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {Authority} from 'generated';
@@ -20,6 +21,7 @@ import {Authority} from 'generated';
   templateUrl: './component.html'
 })
 export class SignedInComponent implements OnInit {
+  hasDataAccess = true;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
   headerImg = '/assets/images/all-of-us-logo.svg';
@@ -47,6 +49,7 @@ export class SignedInComponent implements OnInit {
     /* Ours */
     public errorHandlingService: ErrorHandlingService,
     private signInService: SignInService,
+    private serverConfigService: ServerConfigService,
     private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
@@ -54,21 +57,25 @@ export class SignedInComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.serverConfigService.getConfig().subscribe((config) => {
+      this.profileStorageService.profile$.subscribe((profile) => {
+        this.hasDataAccess =
+          !config.enforceRegistered || hasRegisteredAccess(profile.dataAccessLevel);
 
-    this.profileStorageService.profile$.subscribe((profile) => {
-      this.hasReviewResearchPurpose =
-        profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-      this.hasReviewIdVerification =
-        profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
-      this.givenName = profile.givenName;
-      this.familyName = profile.familyName;
+        this.hasReviewResearchPurpose =
+          profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
+        this.hasReviewIdVerification =
+          profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
+        this.givenName = profile.givenName;
+        this.familyName = profile.familyName;
+      });
     });
 
+    // TODO: Remove or move into CSS.
     document.body.style.backgroundColor = '#f1f2f2';
     this.signInService.isSignedIn$.subscribe(signedIn => {
       if (signedIn) {
         this.profileImage = this.signInService.profileImage;
-        this.profileStorageService.reload();
       } else {
         navigateLogin(this.router, this.router.routerState.snapshot.url);
       }

@@ -28,6 +28,16 @@
 /ui/src/generated/*
 /ui/src/notebooks-generated/*
 /ui/src/publicGenerated/*
+/public-ui/package-lock.json
+/public-ui/coverage
+/public-ui/ui.iml
+/public-ui/.idea/*
+/public-ui/**/*.js
+/public-ui/**/*.map
+/public-ui/dist/**
+/public-ui/yarn-error.log
+/public-ui/src/publicGenerated/*
+/public-ui/sa-key.json
 cloud_sql_proxy
 node_modules
 npm-debug.log

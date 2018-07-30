@@ -13,12 +13,14 @@ import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
 import {
-    simulateClick,
-    updateAndTick
+  simulateEvent,
+  updateAndTick
 } from '../../../testing/test-helpers';
+
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 
+import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 import {AccountCreationSuccessComponent} from '../account-creation-success/component';
 import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
@@ -29,7 +31,7 @@ import {RoutingSpinnerComponent} from '../routing-spinner/component';
 class InvitationKeyPage {
   fixture: ComponentFixture<InvitationKeyComponent>;
   route: UrlSegment[];
-  nextButton: DebugElement;
+  form: DebugElement;
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(InvitationKeyComponent);
@@ -39,7 +41,7 @@ class InvitationKeyPage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.nextButton = this.fixture.debugElement.query(By.css('#next'));
+    this.form = this.fixture.debugElement.query(By.css('form'));
   }
 }
 
@@ -58,6 +60,7 @@ describe('InvitationKeyComponent', () => {
       declarations: [
         LoginComponent,
         AccountCreationComponent,
+        AccountCreationModalsComponent,
         AccountCreationSuccessComponent,
         InvitationKeyComponent,
         PageTemplateSignedOutComponent,
@@ -95,7 +98,8 @@ describe('InvitationKeyComponent', () => {
 
   it('should not accept blank invitation code', fakeAsync(() => {
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
-    simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
+    simulateEvent(invitationKeyPage.fixture, invitationKeyPage.form, 'submit');
+    updateAndTick(invitationKeyPage.fixture);
     updateAndTick(invitationKeyPage.fixture);
     expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeTruthy();
@@ -109,7 +113,7 @@ describe('InvitationKeyComponent', () => {
     app.invitationKey = 'invalid';
     spyOn(app.invitationInput.first.nativeElement, 'focus');
     updateAndTick(invitationKeyPage.fixture);
-    simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
+    simulateEvent(invitationKeyPage.fixture, invitationKeyPage.form, 'submit');
     expect(app.invitationKeyVerified).toBeFalsy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeTruthy();
@@ -120,7 +124,7 @@ describe('InvitationKeyComponent', () => {
     const app = invitationKeyPage.fixture.debugElement.componentInstance;
     app.invitationKey = 'dummy';
     updateAndTick(invitationKeyPage.fixture);
-    simulateClick(invitationKeyPage.fixture, invitationKeyPage.nextButton);
+    simulateEvent(invitationKeyPage.fixture, invitationKeyPage.form, 'submit');
     expect(app.invitationKeyVerified).toBeTruthy();
     expect(app.invitationKeyReq).toBeFalsy();
     expect(app.invitationKeyInvalid).toBeFalsy();
@@ -130,7 +134,7 @@ describe('InvitationKeyComponent', () => {
     const fixture = invitationKeyPage.fixture;
     fixture.debugElement.componentInstance.invitationKey = 'dummy';
     updateAndTick(fixture);
-    simulateClick(fixture, invitationKeyPage.nextButton);
+    simulateEvent(fixture, invitationKeyPage.form, 'submit');
     const createDebugEl = fixture.debugElement.query(
       By.css('app-account-creation'));
     const createComponent = createDebugEl.componentInstance;

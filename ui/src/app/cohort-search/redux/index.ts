@@ -29,6 +29,7 @@ export class ConfigureStore {
       createEpicMiddleware(
         combineEpics(
           epics.fetchCriteria,
+          epics.fetchAllCriteria,
           epics.fetchCount,
           epics.fetchChartData,
           epics.previewCount,

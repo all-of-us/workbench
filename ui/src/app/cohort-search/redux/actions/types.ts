@@ -1,8 +1,10 @@
 import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
+export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
+export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
 
 export const BEGIN_COUNT_REQUEST = 'BEGIN_COUNT_REQUEST';
@@ -45,6 +47,7 @@ export const RESET_STORE = 'RESET_STORE';
 
 export interface ActiveContext {
   criteriaType?: string;
+  fullTree?: boolean;
   role?: keyof SearchRequest;
   groupId?: number;
   itemId?: number;
@@ -53,6 +56,12 @@ export interface ActiveContext {
 export interface ActionTypes {
   BEGIN_CRITERIA_REQUEST: {
     type: typeof BEGIN_CRITERIA_REQUEST;
+    cdrVersionId: number;
+    kind: string;
+    parentId: number;
+  };
+  BEGIN_ALL_CRITERIA_REQUEST: {
+    type: typeof BEGIN_ALL_CRITERIA_REQUEST;
     cdrVersionId: number;
     kind: string;
     parentId: number;
@@ -67,6 +76,10 @@ export interface ActionTypes {
     type: typeof CANCEL_CRITERIA_REQUEST;
     kind: string;
     parentId: number;
+  };
+  SET_CRITERIA_SEARCH: {
+    type: typeof SET_CRITERIA_SEARCH;
+    searchTerms: string;
   };
   CRITERIA_REQUEST_ERROR: {
     type: typeof CRITERIA_REQUEST_ERROR;
@@ -232,8 +245,10 @@ export interface ActionTypes {
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
+  | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
+  | ActionTypes[typeof SET_CRITERIA_SEARCH]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
 
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]

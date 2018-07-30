@@ -56,6 +56,9 @@ export const wizardOpen = (state): boolean =>
 export const activeCriteriaType = (state): string =>
   state.getIn(['wizard', 'criteriaType']);
 
+export const activeCriteriaTreeType = (state): string =>
+state.getIn(['wizard', 'fullTree']);
+
 export const activeRole = (state): keyof SearchRequest =>
   state.getIn(['wizard', 'role']);
 
@@ -98,6 +101,10 @@ export const criteriaChildren =
   (kind: string, parentId: number) =>
   (state): List<any> =>
   state.getIn(['criteria', 'tree', kind, parentId], List());
+
+export const criteriaSearchTerms =
+  () => (state): string =>
+  state.getIn(['criteria', 'search', 'terms'], null);
 
 export const isCriteriaLoading =
   (kind: string, parentId: number) =>

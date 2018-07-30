@@ -1,8 +1,10 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_ALL_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
+  SET_CRITERIA_SEARCH,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -55,6 +57,11 @@ export const requestCriteria =
   ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
   ({type: BEGIN_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
 
+export const requestAllCriteria =
+  (cdrVersionId: number, kind: string, parentId: number
+  ): ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST] =>
+  ({type: BEGIN_ALL_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
+
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
@@ -64,6 +71,11 @@ export const cancelCriteriaRequest =
   (kind: string, parentId: number
   ): ActionTypes[typeof CANCEL_CRITERIA_REQUEST] =>
   ({type: CANCEL_CRITERIA_REQUEST, kind, parentId});
+
+export const setCriteriaSearchTerms =
+  (searchTerms: string
+  ): ActionTypes[typeof SET_CRITERIA_SEARCH] =>
+  ({type: SET_CRITERIA_SEARCH, searchTerms});
 
 export const criteriaRequestError =
   (kind: string, parentId: number, error?: any

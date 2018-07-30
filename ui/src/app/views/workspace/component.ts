@@ -116,7 +116,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.awaitingReview = reviewRequested && !approved;
     Object.keys(ResearchPurposeItems).forEach((key) => {
       if (this.workspace.researchPurpose[key]) {
-        this.researchPurposeArray.push(ResearchPurposeItems[key].shortDescription);
+        let shortDescription = ResearchPurposeItems[key].shortDescription;
+        if (key === 'diseaseFocusedResearch') {
+          shortDescription += ': ' + this.workspace.researchPurpose.diseaseOfFocus;
+        }
+        this.researchPurposeArray.push(shortDescription);
       }
     });
     this.leftResearchPurposes =

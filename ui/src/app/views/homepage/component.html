@@ -1,80 +1,134 @@
-<div class="front-page">
-    <div class="background-image">
-    <div class="rectangle"></div>
-    <div class="invisible_rectangle">
-        <div class="tip-title">{{tipHeadline}}</div>
-        <div class="tip-title tip-subtitle">{{tipSubtitle}}</div>
-        <div class="tip-title tip-description">{{tipDetail}}</div>
-        <div *ngIf="tipButton" class="learn-more-button" (click)="bugReportComponent.reportBug();">{{tipButton}}</div>
-        <div class="profile-box">
-            <div style="float: left; width: 50%">
-                <div class="profile-title">
-                    COMPLETE YOUR PROFILE
-                </div>
-                <div class="profile-title profile-tips">
-                    You can quickly:
-                    <li>Add your institution</li>
-                    <li>Add your role</li>
-                    <li>Update something else</li>
-                </div>
-                <button class="profile-update-button" (click)="navigateToProfile()">UPDATE</button>
-            </div>
-            <div class="pie-chart-box">
-                <ngx-charts-pie-chart
-                        [scheme]="colorScheme"
-                        [results]="spinnerValues"
-                        [doughnut]="true"
-                        [tooltipDisabled]="true">
-                </ngx-charts-pie-chart>
-                <div class="percent-text">
-                    {{completedTasksAsPercentage}}%
-                </div>
-            </div>
+<div class="background-image">
+  <div class="row" style="display:flex; justify-content: center;flex-wrap: nowrap">
+    <div *ngFor="let card of cardDetails">
+      <div class="card double">
+        <div class="row">
+          <img class="icon topIcon" src={{card.icon}}>
         </div>
+        <div class="row heading">
+          {{card.title}}
+        </div>
+        <div class="row">
+          <label class="text">{{card.text}}</label>
+        </div>
+        <div class="row button">
+          COMING SOON...
+        </div>
+      </div>
     </div>
+  </div>
+  <div *ngIf="firstTimeUser">
+    <div class="row" style="display:flex; justify-content:center;">
+      <div class="card double">
+        <div class="row">
+          <img class="icon analyzeIcon" src="/assets/icons/Analyze.svg">
+        </div>
+        <div class="row analyzeHeading">Analyze and Publish with Workspaces
+        </div>
+        <div class="row">
+          <label class="text">Dolor sit amet consectetuer adipiscing sed diam
+            euismod tincidunt ut laoreet dolore.</label>
+        </div>
+        <div class="row">
+          <button class="btn btn-homepage" (click)="addWorkspace()">CREATE WORKSPACE</button>
+        </div>
+      </div>
+      <div class="card double">
+        <div class="row">
+          <img class="icon learnIcon" src="/assets/icons/learn-icon.svg">
+        </div>
+        <div class="row heading learnHeading">
+          Learn Researcher Workbench
+        </div>
+        <div class="row">
+          <label class="text">Dolor sit amet consectetuer adipiscing.</label>
+        </div>
+        <div class="row heading">
+          COMING SOON...
+        </div>
+      </div>
     </div>
-<div class="card-area">
-    <div class="card">
-        <div class="title">Create your own workspace</div>
-        <div class="description">Here you can create and name a workspace.
-            Within a workspace you can create notebooks and build cohorts.</div>
-        <button class="button btn btn-primary tooltip" (click)="addWorkspace()"
-            [disabled]="!billingProjectInitialized || !hasCdrAccess()">
-          CREATE WORKSPACE
-          <span *ngIf="!billingProjectInitialized" class="tooltip-content">
-              Your billing project is currently being created, please wait.
-          </span>
-          <span *ngIf="billingProjectInitialized && !hasCdrAccess()" class="tooltip-content">
-              You must complete profile setup before accessing data.
-          </span>
-        </button>
+  </div>
+  <div *ngIf="!firstTimeUser">
+    <div class="row" style="display:flex; justify-content:center">
+      <div class="card single">
+        <div class="row">
+          <div class="col">
+            <img src='/assets/icons/Analyze.svg' class="singleIcon">
+          </div>
+
+          <div class="col analyzeSingleHeader">Analyze and Publish with Workspaces</div>
+          <div class="col" style="display: flex; justify-content: right; width:15%;">
+            <div class="row">
+              <a class="links" (click)="addWorkspace()">Create a
+                workspace</a>
+              <div class="tooltip">
+                <a href="#" class="links">See All Notebooks</a>
+                <span class="tooltiptext">Coming Soon</span>
+              </div>
+            </div>
+            <div class="row">
+              <a class="links" (click)="listWorkspaces()">See All
+                Workspaces</a>
+              <div class="tooltip">
+                <a href="#" class="links">See All Cohorts</a>
+                <span class="tooltiptext">Coming Soon</span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3" style="margin-bottom: 2rem;">
+              <div class="card add-card" (click)="addWorkspace()">
+                <div class="card-text">
+                  Create a <br/> New Workspace <br/>
+                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="card">
-        <div class="title">View your workspaces</div>
-        <div class="description">Here you can view all workspaces you have created, or that have been
-            shared with you.</div>
-        <button class="button btn btn-primary tooltip" (click)="listWorkspaces()"
-            [disabled]="!hasCdrAccess()">
-          GO TO WORKSPACES
-          <span *ngIf="!profile" class="tooltip-content">
-              Your account is being initialized, please wait.
-          </span>
-          <span *ngIf="profile && !hasCdrAccess()" class="tooltip-content">
-              You must complete profile setup before accessing data.
-          </span>
-        </button>
+    <div class="footer">
+      <div class="row">
+        <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
+      </div>
+      <div class="footerRtLink">
+        <div class="tooltip">
+          <a href="#" class="footerLink">
+            See all documentation</a>
+          <span class="tooltiptext">Coming Soon</span>
+        </div>
+      </div>
+      <div class="row" style="margin-left:12%">
+        <div *ngFor="let footer of footerLinks" class="row textGroup">
+          <div class="footerText">
+            <div class="title">{{footer.title}}</div>
+            <ul class="bullets">
+              <div *ngFor="let link of footer.links">
+                <div class="tooltip">
+                  <li>
+                    <a href="#" class="bullets">{{link}}</a>
+                  </li>
+                  <span class="tooltiptext">Coming Soon</span>
+                </div>
+              </div>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
-<div class="bottom-banner">
-    <div class="logo">
-        <img [src]="AouLogoFooter">
-    </div>
-    <div class="bottom-links">
+    <div class="bottom-banner">
+      <div class="logo">
+        <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
+      </div>
+      <div class="bottom-links">
         Privacy Policy
-    </div>
-    <div class="bottom-links">
+      </div>
+      <div class="bottom-links">
         Terms of Service
+      </div>
     </div>
-</div>
-<app-bug-report></app-bug-report>
-</div>
+  </div>
+

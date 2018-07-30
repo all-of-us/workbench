@@ -152,7 +152,7 @@ public class CohortsController implements CohortsApiDelegate {
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
     cohortDao.delete(dbCohort);
-    return ResponseEntity.ok(null);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override

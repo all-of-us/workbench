@@ -65,13 +65,33 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns builder criteria tree in its entirety with the specified criteria type
+      operationId: "getCriteriaByType"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/subtype/{subtype}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
-      description: Returns builder criteria tree with the specified criteria type and parentId
+      description: Returns builder criteria tree with the specified criteria type and subtype
       operationId: "getCriteriaByTypeAndSubtype"
       parameters:
         - in: path
@@ -84,6 +104,47 @@ paths:
           type: string
           required: true
           description: the specific subtype of criteria to get
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/drug/{name}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns criteria tree with the specified name
+      operationId: "getDrugBrandOrIngredientByName"
+      parameters:
+        - in: path
+          name: name
+          type: string
+          required: true
+          description: name of ingredient or brand
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/drug/ingredient/{conceptId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns criteria tree with the specified name
+      operationId: "getDrugIngredientByConceptId"
+      parameters:
+        - in: path
+          name: conceptId
+          type: integer
+          format: int64
+          required: true
+          description: conceptId of brand
       responses:
         200:
           description: A collection of criteria
@@ -191,6 +252,7 @@ definitions:
     type: object
     required:
       - id
+      - parentId
       - type
       - code
       - name
@@ -201,6 +263,10 @@ definitions:
     properties:
       id:
         description: id of the criteria
+        type: integer
+        format: int64
+      parentId:
+        description: parent id of the criteria
         type: integer
         format: int64
       type:

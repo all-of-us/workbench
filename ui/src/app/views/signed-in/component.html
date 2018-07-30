@@ -38,6 +38,7 @@
       <button class="btn btn-primary nav-link"
           [class.active]="workspacesActive"
           routerLink="/workspaces"
+          [attr.disabled]="hasDataAccess ? null : true"
           (click)="sidenavToggle = false">My Workspaces</button>
       <button class="btn btn-primary nav-link"
           [class.active]="reviewWorkspaceActive"

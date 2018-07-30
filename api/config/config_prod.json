@@ -1,0 +1,45 @@
+{
+  "firecloud": {
+    "baseUrl": "https:\/\/api.firecloud.org",
+    "billingAccountId": "015EAA-E95687-1F8614",
+    "billingProjectPrefix": "aou-rw-",
+    "clusterMaxAgeDays": 14,
+    "clusterIdleMaxAgeDays": 7,
+    "debugEndpoints": false,
+    "enforceRegistered": true,
+    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-prod-scripts/setup_notebook_cluster.sh",
+    "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
+    "registeredDomainName": "all-of-us-registered-prod",
+    "billingRetryCount": 2
+  },
+  "auth": {
+    "serviceAccountApiUsers": [ "all-of-us-rw-prod@appspot.gserviceaccount.com" ]
+  },
+  "cdr": {
+    "defaultCdrVersion": "Test Registered CDR",
+    "debugQueries": false
+  },
+  "googleCloudStorageService": {
+    "credentialsBucketName": "all-of-us-rw-prod-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
+    "demosBucketName": "all-of-us-rw-prod-demos"
+  },
+  "googleDirectoryService": {
+    "gSuiteDomain": "researchallofus.org"
+  },
+  "server": {
+    "publicApiKeyForErrorReports": "AIzaSyBSPcQ0FcR99GLXaqX4Ujpoj3JUDSP689g",
+    "projectId": "all-of-us-rw-prod"
+  },
+  "admin": {
+    "adminIdVerification": "workbench-id-verifications@researchallofus.org",
+    "loginUrl": "http:\/\/all-of-us-rw-prod.appspot.com/login"
+  },
+  "jira": {
+    "projectKey": "RW"
+  },
+  "mandrill": {
+    "fromEmail": "donotreply@researchallofus.org",
+    "sendRetries": 3
+  }
+}
