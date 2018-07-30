@@ -189,6 +189,26 @@ paths:
           schema:
             $ref: "#/definitions/DbDomainListResponse"
 
+  /v1/databrowser/survey-demographics:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets survey demographic analyses objects
+      operationId: "getSurveyDemographicAnalyses"
+      parameters:
+        - in: query
+          name: surveyConceptId
+          type: string
+          description: survey concept id
+          required: true
+      responses:
+        200:
+          description: A collection of survey demographic analyses
+          schema:
+            $ref: "#/definitions/SurveyDemographicAnalysis"
+
   /v1/databrowser/survey-list:
     get:
       security: []
@@ -549,6 +569,28 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/ConceptAnalysis"
+
+  SurveyDemographicAnalysis:
+    type: object
+    required:
+      - items
+    properties:
+      genderAnalysis:
+        description: gender analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      ageAnalysis:
+        description: age analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      raceAnalysis:
+        description: race analysis
+        type: object
+        $ref: "#/definitions/Analysis"
+      ethnicityAnalysis:
+        description: ethnicity analysis
+        type: object
+        $ref: "#/definitions/Analysis"
 
   MeasurementAnalysis:
     type: object

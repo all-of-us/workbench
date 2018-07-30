@@ -869,3 +869,38 @@ where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0
 and (extract(year from ob1.observation_date) - p1.year_of_birth) >= 18 and (extract(year from ob1.observation_date) - p1.year_of_birth) < 30
 group by dbd.concept_id, stratum_2"
 
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id,analysis_id,stratum_1,stratum_2,stratum_3,count_value,source_count_value)
+select 0, 3103 as analysis_id,
+CAST(dbd.concept_id AS STRING) as stratum_1,
+CAST(p1.race_concept_id as string) as stratum_2,
+  'Survey' as stratum_3,
+COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
+on p1.person_id = ob1.person_id
+join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
+where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0) and (dbd.db_type = 'survey' and dbd.concept_id <> 0)
+and p1.race_concept_id > 0
+group by dbd.concept_id, stratum_2"
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id,analysis_id,stratum_1,stratum_2,stratum_3,count_value,source_count_value)
+select 0, 3104 as analysis_id,
+CAST(dbd.concept_id AS STRING) as stratum_1,
+CAST(p1.ethnicity_concept_id as string) as stratum_2,
+  'Survey' as stratum_3,
+COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
+\`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
+on p1.person_id = ob1.person_id
+join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
+where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0) and (dbd.db_type = 'survey' and dbd.concept_id <> 0)
+group by dbd.concept_id, stratum_2"
+
