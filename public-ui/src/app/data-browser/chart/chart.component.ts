@@ -169,7 +169,7 @@ export class ChartComponent implements OnChanges {
           },
           xAxis: {
             categories: options.categories,
-            //type: 'category',
+            // type: 'category',
             labels: {
                 style: {
                     whiteSpace: 'nowrap',
@@ -415,7 +415,8 @@ export class ChartComponent implements OnChanges {
   }
 
   // Histogram data analyses come already binned
-  // The value is in stratum 4, the unit in stratum5, the countValue in the bin is countValue and we also have
+  // The value is in stratum 4, the unit in stratum5, the countValue in the bin is countValue
+  // and we also have
   // sourceCountValue
   public makeHistogramChartOptions() {
     let data = [];
