@@ -68,8 +68,15 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
         }
     }
 
-    inputChange(newValue: number) {
-        this.negativeAlert = newValue < 0 ? true : false;
+    inputChange() {
+      this.negativeAlert = false;
+        this.attrs.forEach(attr => {
+            attr.operands.forEach(operand => {
+                if (operand < 0) {
+                  this.negativeAlert = true;
+                }
+            });
+        });
     }
 
     get paramId() {
