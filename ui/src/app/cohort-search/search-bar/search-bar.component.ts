@@ -23,6 +23,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   loading = false;
   noResults = false;
   optionSelected = false;
+  multiIngredient = false;
   error = false;
   subscription: Subscription;
 
@@ -44,25 +45,31 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const optionsSub = this.ngRedux
       .select(autocompleteOptions())
       .subscribe(options => {
-        this.options = options;
-        this.options.forEach(option => {
-          option.displayName = option.name;
-          const start = option.name.toLowerCase().indexOf(this.searchTerm.toLowerCase());
-          if (start > -1) {
-            const end = start + this.searchTerm.length;
-            option.displayName = option.name.slice(0, start)
-              + '<span style="color: #659F3D;'
-              + 'font-weight: bolder;'
-              + 'background-color: rgba(101,159,61,0.2);'
-              + 'padding: 2px 0;">'
-              + option.name.slice(start, end) + '</span>'
-              + option.name.slice(end);
-          }
-        });
-        this.noResults = this._type === 'drug'
-          && !this.optionSelected
-          && !this.options.length
-          && this.searchTerm.length >= 4;
+        if (this.searchTerm.length >= 4) {
+          this.options = [];
+          const optionNames = [];
+          options.forEach(option => {
+            if (optionNames.indexOf(option.name) === -1) {
+              optionNames.push(option.name);
+              option.displayName = option.name;
+              const start = option.name.toLowerCase().indexOf(this.searchTerm.toLowerCase());
+              if (start > -1) {
+                const end = start + this.searchTerm.length;
+                option.displayName = option.name.slice(0, start)
+                  + '<span style="color: #659F3D;'
+                  + 'font-weight: bolder;'
+                  + 'background-color: rgba(101,159,61,0.2);'
+                  + 'padding: 2px 0;">'
+                  + option.name.slice(start, end) + '</span>'
+                  + option.name.slice(end);
+              }
+              this.options.push(option);
+            }
+          });
+          this.noResults = this._type === 'drug'
+            && !this.optionSelected
+            && !this.options.length;
+        }
       });
 
     const ingredientSub = this.ngRedux
@@ -70,12 +77,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .subscribe(ingredients => {
         this.ingredients = ingredients;
         const ingredientList = [];
+        console.log(ingredients);
         this.ingredients.forEach(item => {
           ingredientList.push(item.name);
         });
         if (ingredientList.length) {
           this.actions.setCriteriaSearchTerms(ingredientList);
         }
+        this.multiIngredient = ingredientList.length > 1;
       });
 
     this.subscription = errorSub;
@@ -99,6 +108,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
     if (this._type === 'drug') {
       this.optionSelected = false;
+      this.multiIngredient = false;
+      this.noResults = false;
       if (newVal.length >= 4) {
         this.actions.fetchAutocompleteOptions(newVal);
       } else {
