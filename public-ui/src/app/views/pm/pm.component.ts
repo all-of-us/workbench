@@ -75,9 +75,8 @@ export class PhysicalMeasurementsComponent implements OnInit {
           console.log(result);
           this.loading = false;
       }));
-    }
-    else {
-      console.log("already have analyses ", this.selectedConcept.analyses);
+    } else {
+      console.log('already have analyses ', this.selectedConcept.analyses);
     }
     if (!this.selectedConcept.conceptAnalyses) {
       this.loading = true;
@@ -86,9 +85,8 @@ export class PhysicalMeasurementsComponent implements OnInit {
           this.selectedConcept.conceptAnalyses = result.items[0];
           this.loading = false;
         }));
-    }
-    else {
-      console.log("already have concept analyses ", this.selectedConcept.conceptAnalyses);
+    } else {
+      console.log('already have concept analyses ', this.selectedConcept.conceptAnalyses);
     }
 
   }
