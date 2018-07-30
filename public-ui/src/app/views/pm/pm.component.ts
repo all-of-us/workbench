@@ -12,25 +12,49 @@ import {MeasurementAnalysisListResponse} from '../../../publicGenerated/model/me
 export class PhysicalMeasurementsComponent implements OnInit {
   title = 'Browse Program Physical Measurements';
   private subscriptions: ISubscription[] = [];
-  concepts = [
-    {conceptId: '903118', conceptName: 'Systolic ', boxTitle: 'Mean Blood Pressure', analyses: null,
-      conceptAnalyses: null},
-    {conceptId: '903115', conceptName: 'Diastolic', boxTitle: 'Mean Blood Pressure', analyses: null, conceptAnalyses: null},
-    {conceptId: '903133', conceptName: 'Height', analyses: null, conceptAnalyses: null },
-    {conceptId: '903121', conceptName: 'Weight', analyses: null, conceptAnalyses: null },
-    {conceptId: '903135', conceptName: 'Mean waist circumference', analyses: null, conceptAnalyses: null },
-    {conceptId: '903136', conceptName: 'Mean hip circumference', analyses: null, conceptAnalyses: null },
-    {conceptId: '903126', conceptName: 'Mean heart rate', analyses: null, conceptAnalyses: null },
-    {conceptId: '903111', conceptName: 'wheel chair use', analyses: null, conceptAnalyses: null },
-    {conceptId: '903120', conceptName: 'Pregnancy', analyses: null, conceptAnalyses: null }
+  conceptGroups = [
+    { group: 'blood-pressure', groupName: 'Mean Blood Pressure', concepts: [
+      {conceptId: '903118', conceptName: 'Systolic ', boxTitle: 'Mean Blood Pressure', analyses: null,
+        conceptAnalyses: null},
+      {conceptId: '903115', conceptName: 'Diastolic', boxTitle: 'Mean Blood Pressure', analyses: null,
+        conceptAnalyses: null},
+    ]},
+    { group: 'height', groupName: 'Height', concepts: [
+      {conceptId: '903133', conceptName: 'Height', analyses: null, conceptAnalyses: null }
+    ]},
+    { group: 'weight', groupName 'Weight', concepts: [
+      {conceptId: '903121', conceptName: 'Weight', analyses: null, conceptAnalyses: null },
+    ]},
+    { group: 'mean-waist', groupName 'Mean waist circumference', concepts: [
+      { conceptId: '903135', conceptName: 'Mean waist circumference', analyses: null, conceptAnalyses: null },
+    ]},
+    { group: 'mean-waist', groupName 'Mean hip circumference', concepts: [
+      {conceptId: '903136', conceptName: 'Mean hip circumference', analyses: null, conceptAnalyses: null },
+    ]},
+    { group: 'mean-waist', groupName 'Mean heart rate', concepts: [
+      {conceptId: '903126', conceptName: 'Mean heart rate', analyses: null, conceptAnalyses: null },
+    ]},
+    { group: 'mean-waist', groupName 'Wheel chair use', concepts: [
+      {conceptId: '903111', conceptName: 'wheel chair use', analyses: null, conceptAnalyses: null },
+    ]},
+    { group: 'mean-waist', groupName 'Pregnancy', concepts: [
+      {conceptId: '903120', conceptName: 'Pregnancy', analyses: null, conceptAnalyses: null },
+    ]}
   ];
-  selectedConcept = this.concepts[0];
-  femaleCount = 0;
-  maleCount = 0;
+
+  loading = false;
+
+  // Initialize to first group and concept, adjust order in groups array above
+  selectedGroup = this.conceptGroups[0];
+  selectedConcept = this.selectedGroup.concepts[0];
+
+
+  selectedFemaleCount = 0;
+  selectedMaleCount = 0;
   constructor(private api: DataBrowserService) { }
 
   ngOnInit() {
-    this.showMeasurement(this.selectedConcept);
+    this.showMeasurement(this.selectedGroup, this.selectedConcept);
   }
 
   ngOnDestroy() {
@@ -39,21 +63,32 @@ export class PhysicalMeasurementsComponent implements OnInit {
     }
   }
 
-  showMeasurement(concept:any) {
+  showMeasurement(group: any, concept: any) {
+    console.log(group, concept);
+    this.selectedGroup = group;
     this.selectedConcept = concept;
     if (!this.selectedConcept.analyses) {
+      this.loading = true;
       this.subscriptions.push(this.api.getMeasurementAnalysisResults([this.selectedConcept.conceptId])
         .subscribe(result => {
           this.selectedConcept.analyses = result.items[0];
           console.log(result);
+          this.loading = false;
       }));
     }
+    else {
+      console.log("already have analyses ", this.selectedConcept.analyses);
+    }
     if (!this.selectedConcept.conceptAnalyses) {
+      this.loading = true;
       this.subscriptions.push(this.api.getConceptAnalysisResults([this.selectedConcept.conceptId])
         .subscribe( result => {
           this.selectedConcept.conceptAnalyses = result.items[0];
-          console.log(this.selectedConcept);
+          this.loading = false;
         }));
+    }
+    else {
+      console.log("already have concept analyses ", this.selectedConcept.conceptAnalyses);
     }
 
   }

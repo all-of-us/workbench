@@ -146,11 +146,6 @@ export class ChartComponent implements OnChanges {
                   events: {
 
                   },
-                  // Histogram options
-                  pointPadding: 0,
-                  borderWidth: 0,
-
-
               },
               bar: {
                 shadow: false,
@@ -221,7 +216,7 @@ export class ChartComponent implements OnChanges {
       this.analysis.analysisId === SURVEY_AGE_ANALYSIS_ID) {
       return this.makeAgeChartOptions();
     }
-    if (this.chartType === 'histogram') {
+    if (this.chartType === 'histogram' || this.analysisId === 1912) {
       // our data is already binned so we use a column. So set the chartType to column
       this.chartType = 'column';
       console.log('Making histogram opts');
@@ -434,8 +429,9 @@ export class ChartComponent implements OnChanges {
       let bVal: any = b.name;
       // Sort  numeric data as number
       if ( isNaN(Number(a.name)) ) {
-        console.log(a.name + 'is not a number');
+        // Don't do anything
       } else {
+        // Make a number so sort works
         aVal = Number(aVal);
         bVal = Number(b.name);
       }
@@ -469,6 +465,7 @@ export class ChartComponent implements OnChanges {
       pointPadding: 0,
       borderWidth: 0,
       groupPadding: 0,
+      pointWidth: null,
       shadow: false
     };
 

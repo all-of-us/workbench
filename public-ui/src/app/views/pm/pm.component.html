@@ -13,15 +13,27 @@
 
 
 <div class="row">
-  <div *ngFor="let item of concepts" class="button-item">
-    <button (click)="showMeasurement(item)" class="btn btn-primary">{{item.conceptName}}</button>
+  <div *ngFor="let item of conceptGroups" class="button-item">
+    <button (click)="showMeasurement(item, item.concepts[0])" class="btn btn-primary">{{item.groupName}}</button>
   </div>
 </div>
 
-<div class="row measurement white-card-box ">
-  <div class="row box-title"> {{selectedConcept.conceptName}}</div>
-  <div *ngIf="selectedConcept.analyses" class="chart-wrapper">
-    <app-chart [chartTitle]="'Female ' + selectedConcept.conceptAnalyses.genderAnalysis.results[0].countValue " [chartType]="'histogram'" [analysis]="selectedConcept.analyses.femaleAnalysis"></app-chart>
+<div *ngIf="!loading" class="measurement white-card-box ">
+  <div class="row box-title">
+    <div class="col-md-6">
+      <h5 class="box-title"> {{selectedGroup.groupName}}</h5>
+    </div>
+    <div *ngIf="selectedGroup.concepts.length > 1" class="col-md-6 btn-group btn-link">
+      <button *ngFor="let c of selectedGroup.concepts" (click)="showMeasurement(selectedGroup, c)" class="btn">{{c.conceptName}}</button>
+    </div>
+  </div>
+  <div class="row">
+    <div *ngIf="selectedConcept.conceptAnalyses && selectedConcept.analyses" class="col-md-4 col-xs-12 chart-wrapper">
+      <app-chart [chartTitle]="'Male ' + selectedConcept.conceptAnalyses.genderAnalysis.results[0].countValue " [chartType]="'histogram'" [analysis]="selectedConcept.analyses.maleAnalysis"></app-chart>
+    </div>
+    <div *ngIf="selectedConcept.conceptAnalyses && selectedConcept.analyses" class="col-md-4 col-xs-12 chart-wrapper">
+      <app-chart [chartTitle]="'Female ' + selectedConcept.conceptAnalyses.genderAnalysis.results[0].countValue " [chartType]="'histogram'" [analysis]="selectedConcept.analyses.femaleAnalysis"></app-chart>
+    </div>
   </div>
 </div>
 
