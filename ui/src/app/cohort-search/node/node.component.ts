@@ -45,6 +45,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   originalTree: any;
   modifiedTree = false;
   searchTerms: Array<string>;
+  numMatches = 0;
   loading = false;
   error = false;
   fullTree: boolean;
@@ -92,6 +93,7 @@ export class NodeComponent implements OnInit, OnDestroy {
         .select(criteriaSearchTerms())
         .subscribe(searchTerms => {
           this.searchTerms = searchTerms;
+          this.numMatches = 0;
           if (searchTerms && searchTerms.length) {
             this.searchTree();
           } else {
@@ -177,6 +179,9 @@ export class NodeComponent implements OnInit, OnDestroy {
         item.name = this.highlightMatches(matches, item.name);
         if (path.length > 1) {
           this.setExpanded(path, 0);
+        }
+        if (this.searchTerms.length === 1) {
+          this.numMatches++;
         }
       }
       if (item.children.length) {

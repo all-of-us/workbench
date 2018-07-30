@@ -26,6 +26,12 @@
           -->
         </ng-container>
       </div>
+      <div *ngIf="ctype === 'drug'">
+        <a href="https://rxnav.nlm.nih.gov/" target="_blank">
+          Explore
+        </a>
+        drugs by brand names outside of AoU
+      </div>
       <button
         (click)="cancel()"
         class="btn btn-link btn-icon">

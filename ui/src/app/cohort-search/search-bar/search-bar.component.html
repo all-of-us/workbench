@@ -12,6 +12,9 @@
     <clr-icon shape="error-standard"></clr-icon>
     <em>No Results Found</em>
   </div>
+  <div *ngIf="multiIngredient">
+    <b>Note:</b> This drug is multi-ingredient
+  </div>
   <div *ngIf="options.length" class="dropdown-menu">
     <button
       *ngFor="let option of options"

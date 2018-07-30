@@ -58,9 +58,11 @@ export function typeToTitle(_type: string): string {
   } else if (_type.match(/^(ICD|CPT).*/i)) {
     _type = _type.toUpperCase();
   } else if (_type.match(/^PM.*/i)) {
-    _type = 'Physical Measurement';
+    _type = 'Physical Measurements';
   } else if (_type.match(/^VISIT.*/i)) {
     _type = 'Visit';
+  } else if (_type.match(/^DRUG.*/i)) {
+    _type = 'Drug';
   }
   return _type;
 }
