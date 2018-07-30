@@ -71,11 +71,11 @@ export class SignedInComponent implements OnInit {
       });
     });
 
+    // TODO: Remove or move into CSS.
     document.body.style.backgroundColor = '#f1f2f2';
     this.signInService.isSignedIn$.subscribe(signedIn => {
       if (signedIn) {
         this.profileImage = this.signInService.profileImage;
-        this.profileStorageService.reload();
       } else {
         navigateLogin(this.router, this.router.routerState.snapshot.url);
       }
