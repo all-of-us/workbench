@@ -14,31 +14,34 @@ export class PhysicalMeasurementsComponent implements OnInit {
   private subscriptions: ISubscription[] = [];
   conceptGroups = [
     { group: 'blood-pressure', groupName: 'Mean Blood Pressure', concepts: [
-      {conceptId: '903118', conceptName: 'Systolic ', boxTitle: 'Mean Blood Pressure', analyses: null,
-        conceptAnalyses: null},
-      {conceptId: '903115', conceptName: 'Diastolic', boxTitle: 'Mean Blood Pressure', analyses: null,
-        conceptAnalyses: null},
+      {conceptId: '903118', conceptName: 'Systolic ', analyses: null, conceptAnalyses: null},
+      {conceptId: '903115', conceptName: 'Diastolic', analyses: null, conceptAnalyses: null},
     ]},
     { group: 'height', groupName: 'Height', concepts: [
       {conceptId: '903133', conceptName: 'Height', analyses: null, conceptAnalyses: null }
     ]},
-    { group: 'weight', groupName 'Weight', concepts: [
+    { group: 'weight', groupName: 'Weight', concepts: [
       {conceptId: '903121', conceptName: 'Weight', analyses: null, conceptAnalyses: null },
     ]},
-    { group: 'mean-waist', groupName 'Mean waist circumference', concepts: [
-      { conceptId: '903135', conceptName: 'Mean waist circumference', analyses: null, conceptAnalyses: null },
+    { group: 'mean-waist', groupName: 'Mean waist circumference', concepts: [
+      { conceptId: '903135', conceptName: 'Mean waist circumference', analyses: null,
+        conceptAnalyses: null },
     ]},
-    { group: 'mean-waist', groupName 'Mean hip circumference', concepts: [
-      {conceptId: '903136', conceptName: 'Mean hip circumference', analyses: null, conceptAnalyses: null },
+    { group: 'mean-waist', groupName: 'Mean hip circumference', concepts: [
+      {conceptId: '903136', conceptName: 'Mean hip circumference', analyses: null,
+        conceptAnalyses: null },
     ]},
-    { group: 'mean-waist', groupName 'Mean heart rate', concepts: [
-      {conceptId: '903126', conceptName: 'Mean heart rate', analyses: null, conceptAnalyses: null },
+    { group: 'mean-waist', groupName: 'Mean heart rate', concepts: [
+      {conceptId: '903126', conceptName: 'Mean heart rate', analyses: null,
+        conceptAnalyses: null },
     ]},
-    { group: 'mean-waist', groupName 'Wheel chair use', concepts: [
-      {conceptId: '903111', conceptName: 'wheel chair use', analyses: null, conceptAnalyses: null },
+    { group: 'mean-waist', groupName: 'Wheel chair use', concepts: [
+      {conceptId: '903111', conceptName: 'wheel chair use', analyses: null,
+        conceptAnalyses: null },
     ]},
-    { group: 'mean-waist', groupName 'Pregnancy', concepts: [
-      {conceptId: '903120', conceptName: 'Pregnancy', analyses: null, conceptAnalyses: null },
+    { group: 'mean-waist', groupName: 'Pregnancy', concepts: [
+      {conceptId: '903120', conceptName: 'Pregnancy', analyses: null,
+        conceptAnalyses: null },
     ]}
   ];
 
