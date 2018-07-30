@@ -21,6 +21,7 @@
   },
   "googleCloudStorageService": {
     "credentialsBucketName": "all-of-us-rw-prod-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
     "demosBucketName": "all-of-us-rw-prod-demos"
   },
   "googleDirectoryService": {
@@ -31,7 +32,8 @@
     "projectId": "all-of-us-rw-prod"
   },
   "admin": {
-    "adminIdVerification": "workbench-id-verifications@researchallofus.org"
+    "adminIdVerification": "workbench-id-verifications@researchallofus.org",
+    "loginUrl": "http:\/\/all-of-us-rw-prod.appspot.com/login"
   },
   "jira": {
     "projectKey": "RW"

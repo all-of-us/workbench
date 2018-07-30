@@ -112,6 +112,7 @@ describe('WorkspaceEditComponent', () => {
     testComponent.workspace.namespace = 'foo';
     testComponent.workspace.name = 'created';
     testComponent.workspace.id = 'created';
+    testComponent.workspace.description = 'description';
     fixture.detectChanges();
 
     fixture.debugElement.query(By.css('.add-button'))

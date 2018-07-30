@@ -129,7 +129,7 @@ export class DetailTabsComponent {
 
   readonly allEvents = {
     name: 'All Events',
-    domain: DomainType.Master,
+    domain: DomainType.AllEvents,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, ageAtEvent, visitType, numMentions,

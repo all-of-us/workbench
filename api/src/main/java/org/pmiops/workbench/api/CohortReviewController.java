@@ -17,6 +17,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.AllEvents;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CohortSummaryListResponse;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -26,7 +27,6 @@ import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Drug;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Filter;
-import org.pmiops.workbench.model.Master;
 import org.pmiops.workbench.model.Measurement;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
@@ -702,8 +702,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .route(bigQueryService.getString(row, rm.get("route")))
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .domainType(DomainType.DRUG)
-        ;
+        .domainType(DomainType.DRUG);
     } else if (domain.equals(DomainType.CONDITION)) {
       return new Condition()
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
@@ -773,9 +772,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .valueNumber(bigQueryService.getString(row, rm.get("valueAsNumber")))
         .units(bigQueryService.getString(row, rm.get("units")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .domainType(DomainType.MASTER);
+        .domainType(DomainType.PHYSICAL_MEASURE);
     } else {
-      return new Master()
+      return new AllEvents()
         .dataId(bigQueryService.getLong(row, rm.get("dataId")))
         .domain(bigQueryService.getString(row, rm.get("domain")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
@@ -790,7 +789,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .lastMention(row.get(rm.get("lastMention")).isNull() ? "" : bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .domainType(DomainType.MASTER);
+        .domainType(DomainType.ALLEVENTS);
     }
   }
 

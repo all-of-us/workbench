@@ -1,181 +1,134 @@
 <div class="background-image">
-  <div class="row">
+  <div class="row" style="display:flex; justify-content: center;flex-wrap: nowrap">
     <div *ngFor="let card of cardDetails">
-      <div class="col">
-        <div class="card double {{card.position}}">
-          <div class="row">
-            <img class="icon topIcon" src={{card.icon}}>
-          </div>
-          <div class="row heading">
-            {{card.title}}
-          </div>
-          <div class="row">
-            <label class="text">{{card.text}}</label>
-          </div>
-          <div class="row button">
-            COMING SOON...
-          </div>
+      <div class="card double">
+        <div class="row">
+          <img class="icon topIcon" src={{card.icon}}>
+        </div>
+        <div class="row heading">
+          {{card.title}}
+        </div>
+        <div class="row">
+          <label class="text">{{card.text}}</label>
+        </div>
+        <div class="row button">
+          COMING SOON...
         </div>
       </div>
     </div>
   </div>
   <div *ngIf="firstTimeUser">
-    <div class="row">
-      <div class="col">
-        <div class="card double left">
-          <div class="row">
-            <img class="icon analyzeIcon" src="/assets/icons/Analyze.svg">
-          </div>
-          <div class="row analyzeHeading">Analyze and Publish with Workspaces
-          </div>
-          <div class="row">
-            <label class="text">Dolor sit amet consectetuer adipiscing sed diam
-              euismod tincidunt ut laoreet dolore.</label>
-          </div>
-          <div class="row">
-            <button class="btn btn-homepage" (click)="addWorkspace()">CREATE WORKSPACE</button>
-          </div>
+    <div class="row" style="display:flex; justify-content:center;">
+      <div class="card double">
+        <div class="row">
+          <img class="icon analyzeIcon" src="/assets/icons/Analyze.svg">
+        </div>
+        <div class="row analyzeHeading">Analyze and Publish with Workspaces
+        </div>
+        <div class="row">
+          <label class="text">Dolor sit amet consectetuer adipiscing sed diam
+            euismod tincidunt ut laoreet dolore.</label>
+        </div>
+        <div class="row">
+          <button class="btn btn-homepage" (click)="addWorkspace()">CREATE WORKSPACE</button>
         </div>
       </div>
-      <div class="col">
-        <div class="card double right">
-          <div class="row">
-            <img class="icon learnIcon" src="/assets/icons/learn-icon.svg">
-          </div>
-          <div class="row heading learnHeading">
-            Learn Researcher Workbench
-          </div>
-          <div class="row">
-            <label class="text">Dolor sit amet consectetuer adipiscing.</label>
-          </div>
-          <div class="row heading">
-            COMING SOON...
-          </div>
+      <div class="card double">
+        <div class="row">
+          <img class="icon learnIcon" src="/assets/icons/learn-icon.svg">
+        </div>
+        <div class="row heading learnHeading">
+          Learn Researcher Workbench
+        </div>
+        <div class="row">
+          <label class="text">Dolor sit amet consectetuer adipiscing.</label>
+        </div>
+        <div class="row heading">
+          COMING SOON...
         </div>
       </div>
     </div>
   </div>
   <div *ngIf="!firstTimeUser">
-    <div class="row">
+    <div class="row" style="display:flex; justify-content:center">
       <div class="card single">
         <div class="row">
           <div class="col">
-            <img src='/assets/icons/Analyze.svg' class="iconImage">
+            <img src='/assets/icons/Analyze.svg' class="singleIcon">
           </div>
 
-          <div class="col analyzeSingleHeader">Analyze and Publish With Workspaces</div>
-          <div class="col">
-            <div class="row linkGroup">
-              <div class="col">
-                <a class="links" (click)="addWorkspace()">Create a
-                  workspace</a>
-              </div>
-              <div class="col">
-                <a class="links">
-                  <clr-tooltip>
-                    <a href="#" class="links" clrTooltipTrigger>See All Notebooks</a>
-                    <clr-tooltip-content clrPosition="top-left" clrSize="sm" *clrIfOpen>
-                      <span>Coming Soon</span>
-                    </clr-tooltip-content>
-                  </clr-tooltip>
-                </a>
+          <div class="col analyzeSingleHeader">Analyze and Publish with Workspaces</div>
+          <div class="col" style="display: flex; justify-content: right; width:15%;">
+            <div class="row">
+              <a class="links" (click)="addWorkspace()">Create a
+                workspace</a>
+              <div class="tooltip">
+                <a href="#" class="links">See All Notebooks</a>
+                <span class="tooltiptext">Coming Soon</span>
               </div>
             </div>
-            <div class="row linkGroup">
-              <div class="col">
-                <a class="links" (click)="listWorkspaces()">See All
-                  Workspaces</a>
-              </div>
-              <div class="col">
-                <clr-tooltip class="tooltip-bottom-right">
-                  <a href="#" class="links" clrTooltipTrigger>See All Cohorts</a>
-                  <clr-tooltip-content *clrIfOpen>
-                    <span>Coming Soon</span>
-                  </clr-tooltip-content>
-                </clr-tooltip>
+            <div class="row">
+              <a class="links" (click)="listWorkspaces()">See All
+                Workspaces</a>
+              <div class="tooltip">
+                <a href="#" class="links">See All Cohorts</a>
+                <span class="tooltiptext">Coming Soon</span>
               </div>
             </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="card add-card" (click)="addWorkspace()">
-            <div class="card-text">
-              Create a <br/> New Workspace <br/>
-              <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+          <div class="row">
+            <div class="col-md-3" style="margin-bottom: 2rem;">
+              <div class="card add-card" (click)="addWorkspace()">
+                <div class="card-text">
+                  Create a <br/> New Workspace <br/>
+                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
       </div>
-
     </div>
-  </div>
-  <div class="footer">
-    <div class="row">
-      <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
-    </div>
-    <div class="row">
-      <a href="#" class="footerLink" data-toggle="tooltip" title="Coming Soon">
-        See all documentation</a>
-    </div>
-    <div class="row textGroup">
-      <div class="footerText">
-        <div class="title">Working Within Researcher Workbench</div>
-        <clr-tooltip>
-          <ul class="bullets" clrTooltipTrigger>
-            <li>
-              <a href="#" class="bullets">
-                Researcher Workbench Mission</a>
-             </li>
-            <li><a href="#" class="bullets">
-              User interface components</a></li>
-            <li><a href="#" class="bullets">
-              What to do when things go wrong</a></li>
-            <li><a href="#" class="bullets">
-              Contributing to the Workbench</a></li>
-          </ul>
-          <clr-tooltip-content *clrIfOpen>
-            <span>Coming Soon</span>
-          </clr-tooltip-content>
-        </clr-tooltip>
-
+    <div class="footer">
+      <div class="row">
+        <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
       </div>
-      <div class="footerText">
-        <div class="title">Workspace</div>
-        <clr-tooltip>
-          <ul class="bullet" clrTooltipTrigger>
-            <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-              Workspace interface components</a></li>
-            <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-              User interface components</a></li>
-            <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-              Collaborating with other researchers</a></li>
-            <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-              Sharing and Publishing Workspaces</a></li>
-          </ul>
-          <clr-tooltip-content *clrIfOpen>
-            <span>Coming Soon</span>
-          </clr-tooltip-content>
-        </clr-tooltip>
+      <div class="footerRtLink">
+        <div class="tooltip">
+          <a href="#" class="footerLink">
+            See all documentation</a>
+          <span class="tooltiptext">Coming Soon</span>
+        </div>
       </div>
-      <div class="footerText">
-        <div class="title">Working with Notebooks</div>
-        <clr-tooltip>
-        <ul class="bullet" clrTooltipTrigger>
-          <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-            Notebook interface components</a></li>
-          <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-            Notebooks and data</a></li>
-          <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-            Collaborating with other researchers</a></li>
-          <li><a href="#" class="bullets" data-toggle="tooltip" title="Coming Soon">
-            Sharing and Publishing Notebooks</a></li>
-        </ul>
-          <clr-tooltip-content *clrIfOpen>
-            <span>Coming Soon</span>
-          </clr-tooltip-content>
-        </clr-tooltip>
+      <div class="row" style="margin-left:12%">
+        <div *ngFor="let footer of footerLinks" class="row textGroup">
+          <div class="footerText">
+            <div class="title">{{footer.title}}</div>
+            <ul class="bullets">
+              <div *ngFor="let link of footer.links">
+                <div class="tooltip">
+                  <li>
+                    <a href="#" class="bullets">{{link}}</a>
+                  </li>
+                  <span class="tooltiptext">Coming Soon</span>
+                </div>
+              </div>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-banner">
+      <div class="logo">
+        <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
+      </div>
+      <div class="bottom-links">
+        Privacy Policy
+      </div>
+      <div class="bottom-links">
+        Terms of Service
       </div>
     </div>
   </div>
-</div>
 

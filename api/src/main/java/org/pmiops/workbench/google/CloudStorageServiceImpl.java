@@ -40,6 +40,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return mandrillKeys.getString("api-key");
   }
 
+  public String getImageUrl(String image_name) {
+    return "http://storage.googleapis.com/" + getImagesBucketName() + "/" + image_name;
+  }
+
   public void copyAllDemoNotebooks(String workspaceBucket)  {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Bucket demoBucket = storage.get(getDemosBucketName());
@@ -74,6 +78,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   private String getCredentialsBucketName() {
     return configProvider.get().googleCloudStorageService.credentialsBucketName;
+  }
+
+  String getImagesBucketName() {
+    return configProvider.get().googleCloudStorageService.emailImagesBucketName;
   }
 
   private String getDemosBucketName() {
