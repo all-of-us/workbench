@@ -237,7 +237,7 @@ public class ProfileController implements ProfileApiDelegate {
     Boolean twoFactorEnabled = Optional.ofNullable(user.getTwoFactorEnabled()).orElse(false);
     if (!twoFactorEnabled) {
       user.setTwoFactorEnabled(directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv());
-      userDao.save(user);
+      user = saveUserWithConflictHandling(user);
     }
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
@@ -267,11 +267,12 @@ public class ProfileController implements ProfileApiDelegate {
     // first confirm whether Firecloud claims the project setup is complete.
     BillingProjectStatus status;
     try {
+      String billingProjectName = user.getFreeTierBillingProjectName();
       status = fireCloudService.getBillingProjectMemberships().stream()
           .filter(m -> m.getProjectName() != null)
           .filter(m -> m.getCreationStatus() != null)
           .filter(m -> fcToWorkbenchBillingMap.containsKey(m.getCreationStatus()))
-          .filter(m -> user.getFreeTierBillingProjectName().equals(m.getProjectName()))
+          .filter(m -> billingProjectName.equals(m.getProjectName()))
           .map(m -> fcToWorkbenchBillingMap.get(m.getCreationStatus()))
           // Should be at most one matching billing project; though we're not asserting this.
           .findFirst()
@@ -549,9 +550,8 @@ public class ProfileController implements ProfileApiDelegate {
       }
     }
 
-
     // This does not update the name in Google.
-    userDao.save(user);
+    saveUserWithConflictHandling(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
