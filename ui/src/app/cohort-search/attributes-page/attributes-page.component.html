@@ -1,12 +1,9 @@
 <div class="title">
   {{node.get('name','')}}
 </div>
-<div *ngIf="negativeAlert" class="alert alert-warning alert-sm">
+<div *ngIf="negativeAlert" class="alert alert-danger alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
-      <div class="alert-icon-wrapper">
-        <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
-      </div>
       <div class="alert-text">
         Form cannot accept negative values
       </div>
