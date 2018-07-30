@@ -324,6 +324,30 @@ public class ProfileControllerTest {
   }
 
   @Test
+  public void testMe_invalidBillingProjectError() throws Exception {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new FireCloudConfig();
+    config.firecloud.billingRetryCount = 2;
+    when(configProvider.get()).thenReturn(config);
+    createUser();
+    when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(true);
+
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    // Simulate FC "Error" with null creation status and null project name.
+    org.pmiops.workbench.firecloud.model.BillingProjectMembership membership =
+        new org.pmiops.workbench.firecloud.model.BillingProjectMembership();
+    membership.setCreationStatus(null);
+    membership.setProjectName(null);
+    when(fireCloudService.getBillingProjectMemberships()).thenReturn(ImmutableList.of(membership));
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getFreeTierBillingProjectStatus()).isEqualTo(BillingProjectStatus.PENDING);
+
+    verify(fireCloudService, never()).grantGoogleRoleToUser(any(), any(), any());
+  }
+
+  @Test
   public void testMe_errorsAfterFourProjectFailures() throws Exception {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();
