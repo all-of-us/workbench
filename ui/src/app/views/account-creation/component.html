@@ -33,17 +33,19 @@
           </div>
         </clr-tooltip-content>
       </clr-tooltip>
-      <div *ngIf="usernameConflictError && usernameOffFocus" class="error" id="username-taken-error">
-        Username is already taken.
-      </div>
-      <div *ngIf="usernameInvalidError && usernameOffFocus" class="error" id="username-invalid-error">
-        Username is not a valid username.
+      <div style="height: 1.5rem;">
+        <div *ngIf="usernameConflictError" class="error" id="username-taken-error">
+          Username is already taken.
+        </div>
+        <div *ngIf="usernameInvalidError" class="error" id="username-invalid-error">
+          Username is not a valid username.
+        </div>
       </div>
     </div>
     <div class="form-section">
       <button type="submit"
           class="btn btn-primary short-button"
-          [disabled]="creatingAccount || usernameCheckInProgress || usernameConflictError"
+          [disabled]="creatingAccount || usernameCheckInProgress || isUsernameValidationError"
           [clrLoading]="creatingAccount">
         Next
       </button>
