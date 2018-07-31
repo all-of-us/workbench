@@ -138,14 +138,14 @@ export class AccountCreationComponent implements AfterViewInit {
   }
 
   get showUsernameValidationError(): boolean {
-    if (isBlank(this.profile.username)) {
+    if (isBlank(this.profile.username) || this.usernameCheckInProgress) {
       return false;
     }
     return this.isUsernameValidationError;
   }
 
   get showUsernameValidationSuccess(): boolean {
-    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+    if (isBlank(this.profile.username) || !this.usernameOffFocus || this.usernameCheckInProgress) {
       return false;
     }
     return !this.isUsernameValidationError;
