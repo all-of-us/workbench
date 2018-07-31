@@ -12,7 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="page_visit")
+@Table(name = "page_visit")
 public class PageVisit {
 
   private long pageVisitId;

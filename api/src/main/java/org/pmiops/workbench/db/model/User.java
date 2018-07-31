@@ -171,15 +171,16 @@ public class User {
     this.authorities = newAuthorities;
   }
 
-  @ElementCollection
-  @CollectionTable(name = "PageVisit", joinColumns=@JoinColumn(name="user_id"))
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "page_visit", joinColumns=@JoinColumn(name="user_id"))
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "user")
   @Column(name="page_id")
   public Set<PageVisit> getPageVisits() {
     return pageVisits;
   }
 
-  public void setPageVisits(Set<PageVisit> pageVisits) {
-    this.pageVisits = pageVisits;
+  public void setPageVisits(Set<PageVisit> newPageVisits) {
+    this.pageVisits = newPageVisits;
   }
 
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")

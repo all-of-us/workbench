@@ -5,11 +5,13 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,6 +56,7 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
+import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
@@ -100,6 +103,18 @@ public class ProfileController implements ProfileApiDelegate {
           return result;
         }
       };
+
+  private static final Function<org.pmiops.workbench.db.model.PageVisit, PageVisit> TO_CLIENT_PAGE_VISIT =
+    new Function<org.pmiops.workbench.db.model.PageVisit, PageVisit>() {
+    @Override
+    public PageVisit apply(org.pmiops.workbench.db.model.PageVisit pageVisit) {
+      PageVisit result = new PageVisit();
+      result.setPage(pageVisit.getPageId());
+      result.setFirstVisit(pageVisit.getFirstVisit().getTime());
+      result.setLastVisit(pageVisit.getLastVisit().getTime());
+      return result;
+      }
+    };
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
@@ -500,6 +515,44 @@ public class ProfileController implements ProfileApiDelegate {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<Void> updatePageVisits(PageVisit newPageVisit) {
+    User user = userProvider.get();
+    boolean shouldAdd = true;
+    List<org.pmiops.workbench.db.model.PageVisit> oldPageVisits =
+      new ArrayList<>(user.getPageVisits());
+    List<org.pmiops.workbench.db.model.PageVisit> newPageVisits = new ArrayList<>();
+    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    for (org.pmiops.workbench.db.model.PageVisit pageVisit : oldPageVisits) {
+      if (pageVisit.getPageId().equals(newPageVisit.getPage())) {
+        pageVisit.setLastVisit(timestamp);
+        shouldAdd = false;
+      }
+      newPageVisits.add(pageVisit);
+    }
+    if (shouldAdd) {
+      org.pmiops.workbench.db.model.PageVisit firstPageVisit =
+        new org.pmiops.workbench.db.model.PageVisit();
+      firstPageVisit.setPageId(newPageVisit.getPage());
+      firstPageVisit.setUser(user);
+      firstPageVisit.setFirstVisit(timestamp);
+      firstPageVisit.setLastVisit(timestamp);
+      newPageVisits.add(firstPageVisit);
+    }
+    user.setPageVisits(new HashSet<>(newPageVisits));
+    userDao.save(user);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<List<PageVisit>> getPageVisits() {
+    User user = userProvider.get();
+    Set<org.pmiops.workbench.db.model.PageVisit> pageVisits =
+      user.getPageVisits();
+    return ResponseEntity.ok(pageVisits.stream().map(TO_CLIENT_PAGE_VISIT)
+      .collect(Collectors.toList()));
   }
 
   @Override

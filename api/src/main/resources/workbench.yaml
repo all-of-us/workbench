@@ -277,6 +277,44 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /v1/update-page-visits:
+    post:
+      tags:
+      - profile
+      description: Updates a users page visits
+      operationId: updatePageVisits
+      parameters:
+        - in: body
+          name: pageVisit
+          description: the new pageVisit to add or update
+          schema:
+            $ref: "#/definitions/PageVisit"
+      responses:
+        204:
+          description: Request receieved.
+        400:
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /v1/get-page-visits:
+    get:
+      tags:
+      - profile
+      description: Gets a users page visits
+      operationId: getPageVisits
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PageVisit'
+        404:
+          description: User Not Found
+        500:
+          description: Internal Server Error
+
   # TODO: add signature / other state?
   /v1/account/accept-terms-of-service:
     post:

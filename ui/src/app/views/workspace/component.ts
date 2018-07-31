@@ -4,6 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
@@ -11,12 +12,15 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {environment} from 'environments/environment';
 
 import {
-  Cohort,
-  CohortsService,
-  FileDetail,
-  Workspace,
-  WorkspaceAccessLevel,
-  WorkspacesService,
+Cohort,
+CohortsService,
+ErrorResponse,
+FileDetail,
+PageVisit,
+ProfileService,
+Workspace,
+WorkspaceAccessLevel,
+WorkspacesService,
 } from 'generated';
 
 /*
@@ -77,9 +81,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
 
-
-
-  greeting: string;
   showTip: boolean;
   workspace: Workspace;
   wsId: string;
@@ -97,6 +98,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   researchPurposeArray: String[] = [];
   leftResearchPurposes: String[];
   rightResearchPurposes: String[];
+  pageId: string;
+  newPageVisit: PageVisit;
+  pageVisitsError = false;
+  firstVisit = true;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -108,6 +113,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
+    private profileService: ProfileService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
@@ -129,12 +135,30 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.researchPurposeArray.slice(
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
-    this.showTip = true;
+    this.showTip = false;
+    this.pageId = "workspace";
+    const pageVisit: PageVisit = { page: this.pageId };
+    this.newPageVisit = pageVisit;
   }
 
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    this.profileService.getPageVisits().subscribe(
+      pageVisitsReceived => {
+        for (const pageVisit of pageVisitsReceived) {
+          if (pageVisit.page == this.pageId) {
+            this.firstVisit = false;
+          }
+        }
+      },
+      error => {
+        this.pageVisitsError = true;
+      },
+      () => {
+        if(this.firstVisit) { this.showTip = true; }
+        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
+      });
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
       .subscribe(
         cohortsReceived => {
@@ -148,12 +172,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
-
-    if (this.newWorkspace) {
-      this.greeting = 'Get Started';
-    } else {
-      this.greeting = 'Recent Work';
-    }
   }
 
   private loadNotebookList() {
@@ -240,7 +258,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   get newWorkspace(): boolean {
-    return this.cohortList.length === 0 && this.notebookList.length === 0 && this.showTip;
+    return this.showTip;
   }
 
   share(): void {
@@ -249,6 +267,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   dismissTip(): void {
     this.showTip = false;
+  }
+
+  toggleTip(): void {
+    this.showTip = !this.showTip;
   }
 
   submitNotebooksLoadBugReport(): void {
