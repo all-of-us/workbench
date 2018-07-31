@@ -6,7 +6,7 @@ import {
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
-  BEGIN_AUTOCOMPLETE_REQUEST,
+  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
@@ -91,8 +91,8 @@ export const setCriteriaSearchTerms =
 
 export const requestAutocompleteOptions =
   (cdrVersionId: number, searchTerms: string
-  ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
-  ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, searchTerms});
+  ): ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST] =>
+  ({type: BEGIN_DRUG_AUTOCOMPLETE_REQUEST, cdrVersionId, searchTerms});
 
 export const requestIngredientsForBrand =
   (cdrVersionId: number, conceptId: number

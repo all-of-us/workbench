@@ -1,6 +1,8 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {DomainType} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
+import {CRITERIA_SUBTYPES} from '../constant';
 import {
   autocompleteError,
   autocompleteOptions,
@@ -9,6 +11,8 @@ import {
   ingredientsForBrand,
   isAutocompleteLoading,
 } from '../redux';
+
+import {highlightMatches} from '../utils';
 
 @Component({
   selector: 'app-search-bar',
@@ -51,22 +55,11 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           options.forEach(option => {
             if (optionNames.indexOf(option.name) === -1) {
               optionNames.push(option.name);
-              option.displayName = option.name;
-              const start = option.name.toLowerCase().indexOf(this.searchTerm.toLowerCase());
-              if (start > -1) {
-                const end = start + this.searchTerm.length;
-                option.displayName = option.name.slice(0, start)
-                  + '<span style="color: #659F3D;'
-                  + 'font-weight: bolder;'
-                  + 'background-color: rgba(101,159,61,0.2);'
-                  + 'padding: 2px 0;">'
-                  + option.name.slice(start, end) + '</span>'
-                  + option.name.slice(end);
-              }
+              option.displayName = highlightMatches([this.searchTerm], option.name);
               this.options.push(option);
             }
           });
-          this.noResults = this._type === 'drug'
+          this.noResults = this._type === DomainType.DRUG
             && !this.optionSelected
             && !this.options.length;
         }
@@ -77,7 +70,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .subscribe(ingredients => {
         this.ingredients = ingredients;
         const ingredientList = [];
-        console.log(ingredients);
         this.ingredients.forEach(item => {
           ingredientList.push(item.name);
         });
@@ -99,14 +91,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   inputChange(newVal: string) {
-    if (this._type === 'visit') {
+    if (this._type === DomainType.VISIT) {
       if (newVal.length > 2) {
         this.actions.setCriteriaSearchTerms([newVal]);
       } else {
         this.actions.setCriteriaSearchTerms([]);
       }
     }
-    if (this._type === 'drug') {
+    if (this._type === DomainType.DRUG) {
       this.optionSelected = false;
       this.multiIngredient = false;
       this.noResults = false;
@@ -123,9 +115,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.optionSelected = true;
     this.actions.clearAutocompleteOptions();
     this.searchTerm = option.name;
-    if (option.subtype === 'BRAND') {
+    if (option.subtype === CRITERIA_SUBTYPES.BRAND) {
       this.actions.fetchIngredientsForBrand(option.conceptId);
-    } else if (option.subtype === 'ATC') {
+    } else if (option.subtype === CRITERIA_SUBTYPES.ATC) {
       this.actions.setCriteriaSearchTerms([option.name]);
     }
   }

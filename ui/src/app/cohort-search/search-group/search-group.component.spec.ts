@@ -23,7 +23,7 @@ const itemA = fromJS({
   id: 'itemA',
   count: null,
   isRequesting: false,
-  type: 'icd9',
+  type: 'ICD9',
   searchParameters: [],
   modifiers: [],
 });
@@ -32,7 +32,7 @@ const itemB = fromJS({
   id: 'itemB',
   count: null,
   isRequesting: false,
-  type: 'icd9',
+  type: 'ICD9',
   searchParameters: [],
   modifiers: [],
 });
@@ -105,12 +105,12 @@ describe('SearchGroupComponent', () => {
 
   it('Should dispatch WIZARD_OPEN when a Criteria is selected', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.launchWizard({type: 'icd9'});
+    comp.launchWizard({type: 'ICD9'});
     expect(spy).toHaveBeenCalledWith({
       type: OPEN_WIZARD,
       itemId: 'TestId',
       context: {
-        criteriaType: 'icd9',
+        criteriaType: 'ICD9',
         role: 'includes',
         groupId: 'include0',
         itemId: 'TestId',

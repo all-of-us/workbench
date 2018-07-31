@@ -8,7 +8,7 @@ import {
   BEGIN_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
-  BEGIN_AUTOCOMPLETE_REQUEST,
+  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   CANCEL_CRITERIA_REQUEST,
 
@@ -53,7 +53,7 @@ import {CohortBuilderService} from 'generated';
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
-type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
+type AutocompleteRequestAction = ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
@@ -78,8 +78,7 @@ export class CohortSearchEpics {
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
-        return this.service.getCriteriaByTypeAndParentId(cdrVersionId, _type, parentId)
+        return this.service.getCriteriaByTypeAndParentId(cdrVersionId, kind, parentId)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -93,8 +92,7 @@ export class CohortSearchEpics {
   fetchAllCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_ALL_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
-        return this.service.getCriteriaByType(cdrVersionId, _type)
+        return this.service.getCriteriaByType(cdrVersionId, kind)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -108,8 +106,7 @@ export class CohortSearchEpics {
   fetchDrugCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_DRUG_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId, subtype}: DrugCritRequestAction) => {
-        const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
-        return this.service.getCriteriaByTypeAndSubtype(cdrVersionId, _type, subtype)
+        return this.service.getCriteriaByTypeAndSubtype(cdrVersionId, kind, subtype)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -121,7 +118,7 @@ export class CohortSearchEpics {
   )
 
   fetchAutocompleteOptions: CSEpic = (action$) => (
-    action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
+    action$.ofType(BEGIN_DRUG_AUTOCOMPLETE_REQUEST).mergeMap(
       ({cdrVersionId, searchTerms}: AutocompleteRequestAction) => {
         return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
           .map(result => loadAutocompleteOptions(result.items))

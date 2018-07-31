@@ -1,8 +1,10 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
+import {DomainType} from 'generated';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
+import {CRITERIA_TYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -28,6 +30,7 @@ import {
   SearchParameter,
   SearchRequest,
 } from 'generated';
+import {CR} from '@angular/compiler/src/i18n/serializers/xml_helper';
 
 
 @Injectable()
@@ -433,17 +436,23 @@ export class CohortSearchActions {
       attributes: []
     };
 
-    if (immParam.get('hasAttributes') || param.type.match(/^DEMO.*/i)) {
+    if (immParam.get('hasAttributes') || param.type === CRITERIA_TYPES.DEMO) {
       param.attributes = typeof immParam.get('attributes') !== 'undefined'
         ? immParam.get('attributes') : [];
     } else if (immParam.get('predefinedAttributes')) {
       param.attributes = immParam.get('predefinedAttributes') ;
     }
 
-    if (param.type.match(/^DEMO|VISIT|PM|DRUG.*/i)) {
-      param.conceptId = immParam.get('conceptId');
-    } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
-      param.domain = immParam.get('domainId');
+    if (param.type === CRITERIA_TYPES.DEMO
+      || param.type === DomainType[DomainType.VISIT]
+      || param.type === CRITERIA_TYPES.PM
+      || param.type === DomainType[DomainType.DRUG]) {
+        param.conceptId = immParam.get('conceptId');
+    } else if (param.type === CRITERIA_TYPES.ICD9
+      || param.type === CRITERIA_TYPES.ICD10
+      || param.type === CRITERIA_TYPES.CPT
+      || param.type === CRITERIA_TYPES.PHECODE) {
+        param.domain = immParam.get('domainId');
     }
 
     return param;

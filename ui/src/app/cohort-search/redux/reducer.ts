@@ -20,7 +20,7 @@ import {
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
-  BEGIN_AUTOCOMPLETE_REQUEST,
+  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
@@ -101,7 +101,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       case SET_CRITERIA_SEARCH:
         return state.setIn(['criteria', 'search', 'terms'], action.searchTerms);
 
-      case BEGIN_AUTOCOMPLETE_REQUEST:
+      case BEGIN_DRUG_AUTOCOMPLETE_REQUEST:
         return state
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
