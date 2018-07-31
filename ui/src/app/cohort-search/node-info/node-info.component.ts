@@ -34,6 +34,8 @@ function needsAttributes(node: any) {
 })
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() node;
+  readonly domainType = DomainType;
+  readonly criteriaTypes = CRITERIA_TYPES;
   private isSelected: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
