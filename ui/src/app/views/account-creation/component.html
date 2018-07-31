@@ -43,7 +43,7 @@
     <div class="form-section">
       <button type="submit"
           class="btn btn-primary short-button"
-          [disabled]="creatingAccount"
+          [disabled]="creatingAccount || usernameCheckInProgress || usernameConflictError"
           [clrLoading]="creatingAccount">
         Next
       </button>

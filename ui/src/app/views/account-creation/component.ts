@@ -35,6 +35,7 @@ export class AccountCreationComponent implements AfterViewInit {
   gsuiteDomain: string;
   usernameOffFocus = true;
   usernameCheckTimeout: NodeJS.Timer;
+  usernameCheckInProgress = false;
 
   @ViewChild('infoIcon') infoIcon: ElementRef;
 
@@ -111,11 +112,14 @@ export class AccountCreationComponent implements AfterViewInit {
     this.usernameConflictError = false;
     // TODO: This should use a debounce, rather than manual setTimeout()s.
     clearTimeout(this.usernameCheckTimeout);
+    this.usernameCheckInProgress = true;
     this.usernameCheckTimeout = setTimeout(() => {
       if (!this.profile.username.trim()) {
+        this.usernameCheckInProgress = false;
         return;
       }
       this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
+        this.usernameCheckInProgress = false;
         this.usernameConflictError = response.isTaken;
       });
     }, 300);
