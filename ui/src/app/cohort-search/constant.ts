@@ -19,7 +19,7 @@ export const CRITERIA_SUBTYPES = {
   'AGE': 'AGE',
   'DEC': 'DEC',
   'BP': 'BP'
-}
+};
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys',    type: CRITERIA_TYPES.SURVEY, children: [], disabled: true },
