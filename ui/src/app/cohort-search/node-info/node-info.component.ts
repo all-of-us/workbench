@@ -9,8 +9,9 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
+import { DomainType } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-
+import {CRITERIA_TYPES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
 
 /*
@@ -33,6 +34,8 @@ function needsAttributes(node: any) {
 })
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() node;
+  readonly domainType = DomainType;
+  readonly criteriaTypes = CRITERIA_TYPES;
   private isSelected: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
@@ -91,13 +94,15 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const noCode = this.node.get('type', '') === 'DRUG' || this.node.get('type', '') === 'PM';
+    const noCode = this.node.get('type', '') === DomainType.DRUG
+      || this.node.get('type', '') === CRITERIA_TYPES.PM;
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
     return (noCode || nameIsCode) ? '' : this.node.get('name', '');
   }
 
   get displayCode() {
-    if (this.node.get('type', '') === 'DRUG' || this.node.get('type', '') === 'PM') {
+    if (this.node.get('type', '') === DomainType.DRUG
+      || this.node.get('type', '') === CRITERIA_TYPES.PM) {
       return this.node.get('name', '');
     }
     return this.node.get('code', '');
@@ -118,7 +123,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      * fire a request for children (if there are any)
      */
     event.stopPropagation();
-    console.log(this.node.toJS());
     if (needsAttributes(this.node)) {
       this.actions.showAttributesPage(this.node);
     } else {
@@ -131,7 +135,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
 
       const param = this.node.set('parameterId', this.paramId);
       this.actions.addParameter(param);
-      if (this.node.get('type') === 'DRUG' && this.node.get('group')) {
+      if (this.node.get('type') === DomainType.DRUG && this.node.get('group')) {
         this.node.get('children').forEach(child => {
           const childParam = child.set('parameterId', `param${child.get('id')}`);
           this.actions.addParameter(childParam);

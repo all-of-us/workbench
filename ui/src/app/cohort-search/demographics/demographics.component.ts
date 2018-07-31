@@ -5,21 +5,12 @@ import {ActivatedRoute} from '@angular/router';
 import {fromJS, List} from 'immutable';
 import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
 
 import {activeParameterList, CohortSearchActions} from '../redux';
 
 import {Attribute, CohortBuilderService, Operator} from 'generated';
 
-/* Demographic Criteria Subtypes and Constants */
-const AGE = 'AGE';
-const DEC = 'DEC';
-const GEN = 'GEN';
-const RACE = 'RACE';
-/* NOTE / TODO: 'ETHN' is not an actual subtype.  At this point in time there
- * is not actually any subtype corresponding to ethnicity.  When that subtype
- * is added, we should be able to just plug it in here and everything should
- * work */
-const ETHNICITY = 'ETH';
 const minAge = 0;
 const maxAge = 120;
 
@@ -99,9 +90,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
        * criteria already in the state (i.e. if we're editing a search group
        * item).  Finally we load the relevant criteria from the API.
        */
-      this.initialGenders = selections.filter(s => s.get('subtype') === GEN);
-      this.initialRaces = selections.filter(s => s.get('subtype') === RACE);
-      this.initialEthnicities = selections.filter(s => s.get('subtype') === ETHNICITY);
+      this.initialGenders = selections.filter(s => s.get('subtype') === CRITERIA_SUBTYPES.GEN);
+      this.initialRaces = selections.filter(s => s.get('subtype') === CRITERIA_SUBTYPES.RACE);
+      this.initialEthnicities = selections.filter(s => s.get('subtype') === CRITERIA_SUBTYPES.ETH);
       this.initDeceased(selections);
       this.initAgeRange(selections);
       this.loadNodesFromApi();
@@ -122,13 +113,19 @@ export class DemographicsComponent implements OnInit, OnDestroy {
      * objects complete with deterministically generated `parameterId`s and
      * sort them by count, then by name.
      */
-    const calls = [AGE, DEC, GEN, RACE, ETHNICITY].map(code => this.api
-      .getCriteriaByTypeAndSubtype(cdrid, 'DEMO', code)
+    const calls = [
+      CRITERIA_SUBTYPES.AGE,
+      CRITERIA_SUBTYPES.DEC,
+      CRITERIA_SUBTYPES.GEN,
+      CRITERIA_SUBTYPES.RACE,
+      CRITERIA_SUBTYPES.ETH
+      ].map(code => this.api
+      .getCriteriaByTypeAndSubtype(cdrid, CRITERIA_TYPES.DEMO, code)
       .map(response => {
         const items = response.items;
         items.sort(sortByCountThenName);
         const nodes = fromJS(items).map(node => {
-          if (node.get('subtype') !== AGE) {
+          if (node.get('subtype') !== CRITERIA_SUBTYPES.AGE) {
             const paramId = `param${node.get('id', node.get('code'))}`;
             node = node.set('parameterId', paramId);
           }
@@ -202,7 +199,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     const min = this.demoForm.get('ageMin');
     const max = this.demoForm.get('ageMax');
 
-    const existent = selections.find(s => s.get('subtype') === AGE);
+    const existent = selections.find(s => s.get('subtype') === CRITERIA_SUBTYPES.AGE);
     if (existent) {
       const range = existent.getIn(['attributes', '0', 'operands']).toArray();
       this.ageRange.setValue(range);
@@ -212,7 +209,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
     const selectedAge = this.selection$
       .map(selectedNodes => selectedNodes
-        .find(node => node.get('subtype') === AGE)
+        .find(node => node.get('subtype') === CRITERIA_SUBTYPES.AGE)
       );
 
     const ageDiff = this.ageRange.valueChanges
@@ -246,7 +243,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   initDeceased(selections) {
-    const existent = selections.find(s => s.get('subtype') === DEC);
+    const existent = selections.find(s => s.get('subtype') === CRITERIA_SUBTYPES.DEC);
     if (existent !== undefined) {
       this.deceased.setValue(true);
     }
