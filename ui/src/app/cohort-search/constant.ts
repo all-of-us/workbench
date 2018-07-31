@@ -52,3 +52,4 @@ export const PM_UNITS = {
     'BP': '',
     'HR-DETAIL': 'beats/min'
 };
+
