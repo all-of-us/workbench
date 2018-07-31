@@ -186,7 +186,7 @@ app-workspace-nav-bar {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #AAAFB4;
+  background-color: #9A9A9A;
   -webkit-transition: .4s;
   transition: .4s;
 }
@@ -227,7 +227,7 @@ input:checked + .slider:before {
 
 .slider-text {
   font-size: .3rem;
-  color: #2F2E7E;
+  color: #4a4a4a;
   position: absolute;
   bottom: -4px;
   right: 6px;
@@ -235,4 +235,5 @@ input:checked + .slider:before {
 
 input:checked ~ * .slider-text {
   left: 6px;
+  color: #2F2E7E;
 }
