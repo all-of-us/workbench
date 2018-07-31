@@ -1,8 +1,10 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+import {CRITERIA_SUBTYPES} from '../constant';
 
 import {
   activeCriteriaTreeType,
@@ -13,6 +15,8 @@ import {
   criteriaSearchTerms,
   isCriteriaLoading,
 } from '../redux';
+
+import {highlightMatches} from '../utils';
 
 @Component({
   selector: 'crit-node',
@@ -59,7 +63,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
     if (!this.fullTree || this.node.get('id') === 0) {
-      const _type = this.node.get('type').toLowerCase();
+      const _type = this.node.get('type');
       const parentId = this.node.get('id');
       const errorSub = this.ngRedux
         .select(criteriaError(_type, parentId))
@@ -136,13 +140,13 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   loadChildren(event) {
     if (!event) { return ; }
-    const _type = this.node.get('type').toLowerCase();
+    const _type = this.node.get('type');
     const parentId = this.node.get('id');
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops
      */
-    if (_type === 'drug') {
-      this.actions.fetchDrugCriteria(_type, parentId, 'ATC');
+    if (_type === DomainType.DRUG) {
+      this.actions.fetchDrugCriteria(_type, parentId, CRITERIA_SUBTYPES.ATC);
     } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
     } else {
@@ -176,7 +180,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       path.push(i);
       const matches = this.matchFound(item);
       if (matches.length) {
-        item.name = this.highlightMatches(matches, item.name);
+        item.name = highlightMatches(matches, item.name);
         if (path.length > 1) {
           this.setExpanded(path, 0);
         }
@@ -196,23 +200,6 @@ export class NodeComponent implements OnInit, OnDestroy {
     return this.searchTerms.filter(term => {
       return item.name.toLowerCase().includes(term.toLowerCase());
     });
-  }
-
-  highlightMatches(terms: Array<string>, name: string) {
-    terms.forEach(term => {
-      const start = name.toLowerCase().indexOf(term.toLowerCase());
-      if (start > -1) {
-        const end = start + term.length;
-        name = name.slice(0, start)
-          + '<span style="color: #659F3D;'
-          + 'font-weight: bolder;'
-          + 'background-color: rgba(101,159,61,0.2);'
-          + 'padding: 2px 0;">'
-          + name.slice(start, end) + '</span>'
-          + name.slice(end);
-      }
-    });
-    return name;
   }
 
   setExpanded(path: Array<number>, end: number) {
