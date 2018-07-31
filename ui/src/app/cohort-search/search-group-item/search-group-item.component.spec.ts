@@ -19,7 +19,7 @@ import {CohortBuilderService} from 'generated';
 
 const baseItem = fromJS({
   id: 'item001',
-  type: 'icd9',
+  type: 'ICD9',
   searchParameters: [0, 1],
   modifiers: [],
   count: null,
@@ -28,13 +28,13 @@ const baseItem = fromJS({
 
 const zeroCrit = fromJS({
   id: 0,
-  type: 'icd9',
+  type: 'ICD9',
   code: 'CodeA',
 });
 
 const oneCrit = fromJS({
   id: 1,
-  type: 'icd9',
+  type: 'ICD9',
   code: 'CodeB',
 });
 
@@ -128,7 +128,7 @@ describe('SearchGroupItemComponent', () => {
     fixture.detectChanges();
 
     const expectedContext = {
-      criteriaType: 'icd9',
+      criteriaType: 'ICD9',
       role: 'includes',
       groupId: 'include0',
       itemId: 'item001',

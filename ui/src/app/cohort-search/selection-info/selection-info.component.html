@@ -10,7 +10,7 @@
     <small *ngIf="index > 0" class="font-weight-bold">OR</small>
     <small *ngIf="parameter.get('group')" class="text-muted">Group</small>
     <small class="name">
-      <strong *ngIf="parameter.get('type') !== 'PM' && parameter.get('type') !== 'DRUG'">{{ _type }}</strong>
+      <strong *ngIf="parameter.get('type') !== criteriaTypes.PM && parameter.get('type') !== domainType.DRUG">{{ _type }}</strong>
       <span class="text-muted">{{ name }}</span>
       <span class="text-muted">{{ attribute }}</span>
     </small>

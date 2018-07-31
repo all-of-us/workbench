@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-
+import {DomainType} from 'generated';
 import {NodeComponent} from '../node/node.component';
 
 /*
@@ -22,6 +22,6 @@ export class TreeComponent extends NodeComponent implements OnInit {
   }
 
   showSearch() {
-    return this.node.get('type') === 'visit' || this.node.get('type') === 'drug';
+    return this.node.get('type') === DomainType.VISIT || this.node.get('type') === DomainType.DRUG;
   }
 }
