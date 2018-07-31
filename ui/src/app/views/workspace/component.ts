@@ -136,7 +136,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
     this.showTip = false;
-    this.pageId = "workspace";
+    this.pageId = 'workspace';
     const pageVisit: PageVisit = { page: this.pageId };
     this.newPageVisit = pageVisit;
   }
@@ -147,7 +147,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.profileService.getPageVisits().subscribe(
       pageVisitsReceived => {
         for (const pageVisit of pageVisitsReceived) {
-          if (pageVisit.page == this.pageId) {
+          if (pageVisit.page === this.pageId) {
             this.firstVisit = false;
           }
         }
@@ -156,7 +156,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.pageVisitsError = true;
       },
       () => {
-        if(this.firstVisit) { this.showTip = true; }
+        if (this.firstVisit) { this.showTip = true; }
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
       });
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
