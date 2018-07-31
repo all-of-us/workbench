@@ -5,6 +5,7 @@ import {By} from '@angular/platform-browser';
 import {ClarityModule} from '@clr/angular';
 import {fromJS, List} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
+import {CRITERIA_TYPES} from '../constant';
 
 import {
   CohortSearchActions,
@@ -19,7 +20,7 @@ import {CohortBuilderService} from 'generated';
 
 const baseItem = fromJS({
   id: 'item001',
-  type: 'ICD9',
+  type: CRITERIA_TYPES.ICD9,
   searchParameters: [0, 1],
   modifiers: [],
   count: null,
@@ -28,13 +29,13 @@ const baseItem = fromJS({
 
 const zeroCrit = fromJS({
   id: 0,
-  type: 'ICD9',
+  type: CRITERIA_TYPES.ICD9,
   code: 'CodeA',
 });
 
 const oneCrit = fromJS({
   id: 1,
-  type: 'ICD9',
+  type: CRITERIA_TYPES.ICD9,
   code: 'CodeB',
 });
 
@@ -128,7 +129,7 @@ describe('SearchGroupItemComponent', () => {
     fixture.detectChanges();
 
     const expectedContext = {
-      criteriaType: 'ICD9',
+      criteriaType: CRITERIA_TYPES.ICD9,
       role: 'includes',
       groupId: 'include0',
       itemId: 'item001',
