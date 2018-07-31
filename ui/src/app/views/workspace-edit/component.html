@@ -249,22 +249,33 @@
     <div style="display: flex; flex: 0 0 0; padding: 0">
       <div class="button">
         <button class="btn" (click)="navigateBack()">Cancel</button>
-        <ng-container [ngSwitch]="mode">
-          <button *ngSwitchCase="Mode.Create" class="btn add-button btn-primary"
-              [clrLoading]="savingWorkspace" (click)="addWorkspace()" [disabled]="!allowSave">
-            Create Workspace
-          </button>
-          <button *ngSwitchCase="Mode.Edit" class="btn add-button btn-primary"
-              [clrLoading]="savingWorkspace" (click)="updateWorkspace()"
-              [disabled]="!hasPermission || !allowSave">
-            Update Workspace
-          </button>
-          <button *ngSwitchCase="Mode.Clone" class="btn add-button btn-primary"
-              [clrLoading]="savingWorkspace" (click)="cloneWorkspace()"
-              [disabled]="!allowSave">
-            Clone Workspace
-          </button>
-        </ng-container>
+        <div class="tooltip">
+          <div class="tooltip-content-wrapper">
+            <ng-container [ngSwitch]="mode">
+              <button *ngSwitchCase="Mode.Create" class="btn add-button btn-primary"
+                  [clrLoading]="savingWorkspace" (click)="addWorkspace()" [disabled]="!allowSave">
+                Create Workspace
+              </button>
+              <button *ngSwitchCase="Mode.Edit" class="btn add-button btn-primary"
+                  [clrLoading]="savingWorkspace" (click)="updateWorkspace()"
+                  [disabled]="!hasPermission || !allowSave">
+                Update Workspace
+              </button>
+              <button *ngSwitchCase="Mode.Clone" class="btn add-button btn-primary"
+                  [clrLoading]="savingWorkspace" (click)="cloneWorkspace()"
+                  [disabled]="!allowSave">
+                Clone Workspace
+              </button>
+            </ng-container>
+            <div *ngIf="!allowSave" class="tooltip-text">
+              Missing Required Fields:
+              <ul>
+                <li *ngIf="isBlank(workspace.name)">Name</li>
+                <li *ngIf="isBlank(workspace.description)">Description</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -156,3 +156,40 @@ h3 {
   line-height: 16px;
   color: #4A4A4A;
 }
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-content-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 3px;
+  position: absolute;
+  z-index: 1;
+  left: 100%;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+}
+
+.tooltip .tooltip-text::after {
+  content: " ";
+  position: absolute;
+  top: 50%;
+  right: 200px;
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent black transparent transparent;
+}
