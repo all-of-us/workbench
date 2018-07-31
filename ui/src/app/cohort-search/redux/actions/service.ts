@@ -30,7 +30,6 @@ import {
   SearchParameter,
   SearchRequest,
 } from 'generated';
-import {CR} from '@angular/compiler/src/i18n/serializers/xml_helper';
 
 
 @Injectable()
