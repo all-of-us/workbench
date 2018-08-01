@@ -59,6 +59,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               this.options.push(option);
             }
           });
+
           this.noResults = this._type === DomainType.DRUG
             && !this.optionSelected
             && !this.options.length;

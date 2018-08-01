@@ -133,14 +133,25 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        * to have a complete sense are given a unique ID based on the attribute
        */
 
-      const param = this.node.set('parameterId', this.paramId);
-      this.actions.addParameter(param);
       if (this.node.get('type') === DomainType.DRUG && this.node.get('group')) {
         this.node.get('children').forEach(child => {
-          const childParam = child.set('parameterId', `param${child.get('id')}`);
-          this.actions.addParameter(childParam);
+          this.selectChildren(child);
         });
+      } else {
+        const param = this.node.set('parameterId', this.paramId);
+        this.actions.addParameter(param);
       }
+    }
+  }
+
+  selectChildren(node) {
+    if (node.get('group')) {
+      node.get('children').forEach(child => {
+        this.selectChildren(child);
+      });
+    } else {
+      const param = node.set('parameterId', `param${node.get('id')}`);
+      this.actions.addParameter(param);
     }
   }
 }
