@@ -603,11 +603,11 @@ definitions:
       maleAnalysis:
         description: measurement male analysis
         type: object
-        $ref: "#/definitions/Analysis"
+        $ref: "#/definitions/AchillesResultListResponse"
       femaleAnalysis:
         description: measurement female analysis
         type: object
-        $ref: "#/definitions/Analysis"
+        $ref: "#/definitions/AchillesResultListResponse"
       ageAnalysis:
         description: measurement age analysis
         type: object

@@ -10,6 +10,7 @@ import org.pmiops.workbench.model.MeasurementAnalysisListResponse;
 import org.pmiops.workbench.model.DbDomainListResponse;
 import org.pmiops.workbench.model.SurveyDemographicAnalysis;
 import org.pmiops.workbench.model.QuestionConceptListResponse;
+import org.pmiops.workbench.model.AchillesResultListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.pmiops.workbench.model.Domain;
@@ -43,10 +44,12 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private ConceptService conceptService;
 
     @Autowired
-    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao) {
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
         this.dbDomainDao = dbDomainDao;
+        this.achillesResultDao = achillesResultDao;
+        this.achillesAnalysisDao = achillesAnalysisDao;
     }
 
 
@@ -81,9 +84,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     public static final long MEASUREMENT_GENDER_ANALYSIS_ID = 1900;
     public static final long MEASUREMENT_AGE_ANALYSIS_ID = 1901;
-
-    public static final long MEASUREMENT_MALE_ANALYSIS_ID = 1911;
-    public static final long MEASUREMENT_FEMALE_ANALYSIS_ID = 1912;
 
     public static final String MALE_CONCEPT_ID = "8507";
     public static final String FEMALE_CONCEPT_ID = "8532";
@@ -488,9 +488,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             AchillesAnalysis measurementGenderAnalysis = achillesAnalysisDao.findConceptAnalysisResults(conceptId,MEASUREMENT_GENDER_ANALYSIS_ID);
             AchillesAnalysis measurementAgeAnalysis = achillesAnalysisDao.findConceptAnalysisResults(conceptId,MEASUREMENT_AGE_ANALYSIS_ID);
 
-            AchillesAnalysis maleAnalysis = achillesAnalysisDao.findAnalysisById(MEASUREMENT_MALE_ANALYSIS_ID);
-            AchillesAnalysis femaleAnalysis = achillesAnalysisDao.findAnalysisById(MEASUREMENT_FEMALE_ANALYSIS_ID);
-
             measurementAnalysis.setConceptId(conceptId);
 
             List<AchillesResult> maleResults = new ArrayList<>();
@@ -503,18 +500,20 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     if (stratum5_name == null || stratum5_name.equals("")) {
                         ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
                         if(stratum2.equals(MALE_CONCEPT_ID)){
-                                ar.setAnalysisId(MEASUREMENT_MALE_ANALYSIS_ID);
-                                maleResults.add(ar);
+                            maleResults.add(ar);
                         }else if(stratum2.equals(FEMALE_CONCEPT_ID)){
-                            ar.setAnalysisId(MEASUREMENT_FEMALE_ANALYSIS_ID);
                             femaleResults.add(ar);
                         }
                     }
                 }
-                maleAnalysis.setResults(maleResults);
-                femaleAnalysis.setResults(femaleResults);
-                measurementAnalysis.setMaleAnalysis(TO_CLIENT_ANALYSIS.apply(maleAnalysis));
-                measurementAnalysis.setFemaleAnalysis(TO_CLIENT_ANALYSIS.apply(femaleAnalysis));
+
+                AchillesResultListResponse maleResultResponse = new AchillesResultListResponse();
+                maleResultResponse.setItems(maleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
+                AchillesResultListResponse femaleResultResponse = new AchillesResultListResponse();
+                femaleResultResponse.setItems(femaleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
+
+                measurementAnalysis.setMaleAnalysis(maleResultResponse);
+                measurementAnalysis.setFemaleAnalysis(femaleResultResponse);
             }
 
             if(measurementAgeAnalysis != null){
