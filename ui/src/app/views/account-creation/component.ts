@@ -33,8 +33,9 @@ export class AccountCreationComponent implements AfterViewInit {
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
-  usernameOffFocus = true;
+  usernameFocused = false;
   usernameCheckTimeout: NodeJS.Timer;
+  usernameCheckInProgress = false;
 
   @ViewChild('infoIcon') infoIcon: ElementRef;
 
@@ -111,22 +112,27 @@ export class AccountCreationComponent implements AfterViewInit {
     this.usernameConflictError = false;
     // TODO: This should use a debounce, rather than manual setTimeout()s.
     clearTimeout(this.usernameCheckTimeout);
+    this.usernameCheckInProgress = true;
     this.usernameCheckTimeout = setTimeout(() => {
       if (!this.profile.username.trim()) {
+        this.usernameCheckInProgress = false;
         return;
       }
       this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
+        this.usernameCheckInProgress = false;
         this.usernameConflictError = response.isTaken;
+      }, () => {
+        this.usernameCheckInProgress = false;
       });
     }, 300);
   }
 
   leaveFocusUsername(): void {
-    this.usernameOffFocus = true;
+    this.usernameFocused = false;
   }
 
   enterFocusUsername(): void {
-    this.usernameOffFocus = false;
+    this.usernameFocused = true;
   }
 
   get isUsernameValidationError(): boolean {
@@ -134,14 +140,14 @@ export class AccountCreationComponent implements AfterViewInit {
   }
 
   get showUsernameValidationError(): boolean {
-    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+    if (isBlank(this.profile.username) || this.usernameCheckInProgress) {
       return false;
     }
     return this.isUsernameValidationError;
   }
 
   get showUsernameValidationSuccess(): boolean {
-    if (isBlank(this.profile.username) || !this.usernameOffFocus) {
+    if (isBlank(this.profile.username) || this.usernameFocused || this.usernameCheckInProgress) {
       return false;
     }
     return !this.isUsernameValidationError;
