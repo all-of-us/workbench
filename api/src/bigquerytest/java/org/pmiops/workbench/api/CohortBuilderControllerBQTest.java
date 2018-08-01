@@ -471,7 +471,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter demo = createSearchParameter(demoAge, null);
     demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
   }
 
   @Test
