@@ -82,11 +82,11 @@ describe('AccountCreationComponent', () => {
 
   it('handles selecting username', fakeAsync(() => {
     page.readPageData();
-    expect(page.component.usernameOffFocus).toBeTruthy();
+    expect(page.component.usernameFocused).toBeFalsy();
     simulateEvent(page.fixture, page.usernameField, 'focus');
-    expect(page.component.usernameOffFocus).toBeFalsy();
+    expect(page.component.usernameFocused).toBeTruthy();
     simulateEvent(page.fixture, page.usernameField, 'blur');
-    expect(page.component.usernameOffFocus).toBeTruthy();
+    expect(page.component.usernameFocused).toBeFalsy();
   }));
 
   it('handles each username invalidity', fakeAsync(() => {

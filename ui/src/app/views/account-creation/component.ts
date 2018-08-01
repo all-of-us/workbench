@@ -33,7 +33,7 @@ export class AccountCreationComponent implements AfterViewInit {
   accountCreated: boolean;
   usernameConflictError = false;
   gsuiteDomain: string;
-  usernameOffFocus = true;
+  usernameFocused = false;
   usernameCheckTimeout: NodeJS.Timer;
   usernameCheckInProgress = false;
 
@@ -128,11 +128,11 @@ export class AccountCreationComponent implements AfterViewInit {
   }
 
   leaveFocusUsername(): void {
-    this.usernameOffFocus = true;
+    this.usernameFocused = false;
   }
 
   enterFocusUsername(): void {
-    this.usernameOffFocus = false;
+    this.usernameFocused = true;
   }
 
   get isUsernameValidationError(): boolean {
@@ -147,7 +147,7 @@ export class AccountCreationComponent implements AfterViewInit {
   }
 
   get showUsernameValidationSuccess(): boolean {
-    if (isBlank(this.profile.username) || !this.usernameOffFocus || this.usernameCheckInProgress) {
+    if (isBlank(this.profile.username) || this.usernameFocused || this.usernameCheckInProgress) {
       return false;
     }
     return !this.isUsernameValidationError;
