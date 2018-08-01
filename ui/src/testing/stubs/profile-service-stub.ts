@@ -22,6 +22,7 @@ export class ProfileStubVariables {
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
+    pageVisit: new PageVisit(),
   };
 }
 
@@ -88,6 +89,10 @@ export class ProfileServiceStub extends ProfileService {
         observer.complete();
       }, 0);
     });
+  }
+
+  public updatePageVisits(pageVisit: PageVisit, extraHttpRequestParams?: any): Observable<{}> {
+    return new Observable(observer => { observer.next(this.profile); });
   }
 
   private now(): number {
