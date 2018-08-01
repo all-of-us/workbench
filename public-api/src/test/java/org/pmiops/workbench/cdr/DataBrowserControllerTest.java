@@ -33,8 +33,6 @@ import org.pmiops.workbench.cdr.model.AchillesResult;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.ConceptAnalysisListResponse;
 import org.pmiops.workbench.model.ConceptAnalysis;
-import org.pmiops.workbench.model.MeasurementAnalysisListResponse;
-import org.pmiops.workbench.model.MeasurementAnalysis;
 import org.pmiops.workbench.model.DbDomainListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
