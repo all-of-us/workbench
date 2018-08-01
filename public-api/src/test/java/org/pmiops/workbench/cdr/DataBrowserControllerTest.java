@@ -605,9 +605,9 @@ public class DataBrowserControllerTest {
     public void testGetMeasurementAnalysisOneMatch() throws Exception{
         ArrayList<String> queryConceptIds = new ArrayList<String>();
         queryConceptIds.add("137989");
-        ResponseEntity<MeasurementAnalysisListResponse> response = dataBrowserController.getMeasurementAnalysisResults(queryConceptIds);
-        List<MeasurementAnalysis> measurementAnalysisList = response.getBody().getItems();
-        Analysis ageAnalysis = measurementAnalysisList.get(0).getAgeAnalysis();
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(queryConceptIds);
+        List<ConceptAnalysis> conceptAnalysisList = response.getBody().getItems();
+        Analysis ageAnalysis = conceptAnalysisList.get(0).getMeasurementValueAgeAnalysis();
         assertThat(ageAnalysis).isNotEqualTo(null);
     }
 
@@ -615,9 +615,9 @@ public class DataBrowserControllerTest {
     public void testGetMeasurementAnalysisNoMatch() throws Exception{
         ArrayList<String> queryConceptIds = new ArrayList<String>();
         queryConceptIds.add("137990");
-        ResponseEntity<MeasurementAnalysisListResponse> response = dataBrowserController.getMeasurementAnalysisResults(queryConceptIds);
-        List<MeasurementAnalysis> measurementAnalysisList = response.getBody().getItems();
-        Analysis ageAnalysis = measurementAnalysisList.get(0).getAgeAnalysis();
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(queryConceptIds);
+        List<ConceptAnalysis> conceptAnalysisList = response.getBody().getItems();
+        Analysis ageAnalysis = conceptAnalysisList.get(0).getMeasurementValueAgeAnalysis();
         assertThat(ageAnalysis).isEqualTo(null);
     }
 
