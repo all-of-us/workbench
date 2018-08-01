@@ -89,10 +89,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.get('selectable', false);
   }
 
-  get nonZeroCount() {
-    return this.node.get('count', 0) > 0;
-  }
-
   get displayName() {
     const noCode = this.node.get('type', '') === DomainType.DRUG
       || this.node.get('type', '') === CRITERIA_TYPES.PM;
