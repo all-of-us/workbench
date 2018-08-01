@@ -21,6 +21,7 @@ import {
   BugReportService,
   ClusterService,
   CohortsService,
+  ProfileService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
