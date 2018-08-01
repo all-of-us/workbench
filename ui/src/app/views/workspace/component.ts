@@ -269,10 +269,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.showTip = false;
   }
 
-  toggleTip(): void {
-    this.showTip = !this.showTip;
-  }
-
   submitNotebooksLoadBugReport(): void {
     this.notebookError = false;
     this.bugReportComponent.reportBug();

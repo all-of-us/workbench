@@ -14,6 +14,8 @@ import {
   Cohort,
   CohortsService,
   FileDetail,
+  PageVisit,
+  ProfileService,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService
@@ -42,6 +44,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   showTip: boolean;
   cohortsLoading: boolean;
   cohortsError: boolean;
+  pageId: string;
+  newPageVisit: PageVisit;
+  pageVisitsError: boolean;
+  firstVisit = true;
 
 
   @ViewChild(BugReportComponent)
@@ -51,6 +57,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
+    private profileService: ProfileService,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
   ) {
@@ -59,7 +66,11 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.accessLevel = wsData.accessLevel;
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
-    this.showTip = true;
+    this.showTip = false;
+    this.pageId = 'notebook';
+    const pageVisit: PageVisit = { page: this.pageId };
+    this.newPageVisit = pageVisit;
+    this.pageVisitsError = false;
     this.cohortsLoading = true;
     this.cohortsError = false;
   }
@@ -81,6 +92,21 @@ export class NotebookListComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
+    this.profileService.getPageVisits().subscribe(
+      pageVisitsReceived => {
+        for (const pageVisit of pageVisitsReceived) {
+          if (pageVisit.page === this.pageId) {
+            this.firstVisit = false;
+          }
+        }
+      },
+      error => {
+        this.pageVisitsError = true;
+      },
+      () => {
+        if (this.firstVisit) { this.showTip = true; }
+        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
+      });
   }
 
   private loadNotebookList() {
@@ -152,6 +178,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   get createDisabled(): boolean {
     return this.awaitingReview || !this.writePermission;
+  }
+
+  get helpTip(): boolean {
+    return this.showTip;
   }
 
   submitNotebooksLoadBugReport(): void {
