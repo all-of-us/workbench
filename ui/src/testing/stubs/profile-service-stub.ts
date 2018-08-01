@@ -5,6 +5,7 @@ import {InvitationVerificationRequest} from '../../generated/model/invitationVer
 import {
   BillingProjectStatus,
   DataAccessLevel,
+  PageVisit,
   Profile,
   ProfileService,
   UsernameTakenResponse,
@@ -71,6 +72,21 @@ export class ProfileServiceStub extends ProfileService {
       observer.next({
         isTaken: username === ProfileStubVariables.PROFILE_STUB.username
       });
+    });
+  }
+
+  public getPageVisits(extraHttpRequestParams?: any): Observable<Array<PageVisit>> {
+    return new Observable<Array<PageVisit>>(observer => {
+      setTimeout(() => {
+        const pageVisitList =
+          [
+            {
+              'page': 'test'
+            }
+          ];
+        observer.next(pageVisitList);
+        observer.complete();
+      }, 0);
     });
   }
 
