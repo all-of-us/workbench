@@ -35,6 +35,7 @@ import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
 import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
@@ -126,6 +127,7 @@ describe('WorkspaceComponent', () => {
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
