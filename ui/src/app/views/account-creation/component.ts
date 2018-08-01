@@ -121,6 +121,8 @@ export class AccountCreationComponent implements AfterViewInit {
       this.profileService.isUsernameTaken(this.profile.username).subscribe((response) => {
         this.usernameCheckInProgress = false;
         this.usernameConflictError = response.isTaken;
+      }, () => {
+        this.usernameCheckInProgress = false;
       });
     }, 300);
   }

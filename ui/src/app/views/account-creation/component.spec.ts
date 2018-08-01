@@ -2,7 +2,6 @@ import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
-import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
@@ -96,29 +95,28 @@ describe('AccountCreationComponent', () => {
     simulateEvent(page.fixture, page.usernameField, 'focus');
     simulateInput(page.fixture, page.usernameField, '.username');
     tick(300);
-    tick();
-    simulateEvent(page.fixture, page.usernameField, 'blur');
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // End with a period
     simulateInput(page.fixture, page.usernameField, 'username.');
     tick(300);
-    tick();
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // Contains special characters
     simulateInput(page.fixture, page.usernameField, 'user@name');
     tick(300);
-    tick();
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
 
     simulateInput(page.fixture, page.usernameField, 'blah');
     tick(300);
-    tick();
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeFalsy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeFalsy();
   }));
@@ -129,7 +127,7 @@ describe('AccountCreationComponent', () => {
     simulateInput(
       page.fixture, page.usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
     tick(300);
-    tick();
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
   }));
