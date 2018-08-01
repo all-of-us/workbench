@@ -14,19 +14,12 @@ public interface AchillesAnalysisDao extends CrudRepository<AchillesAnalysis, Lo
     List<AchillesAnalysis> findSurveyAnalysisResults(String survey_concept_id, List<String> question_concept_ids);
 
     @Query(value = "select a from AchillesAnalysis a left join FETCH a.results as r " +
-            "where r.stratum1=?1 and a.analysisId=?2"
+            "where r.stratum1=?1 and a.analysisId in (?2)"
     )
-    AchillesAnalysis findConceptAnalysisResults(String concept_id,Long analysisId);
+    List<AchillesAnalysis> findConceptAnalysisResults(String concept_id,List<Long> analysisIds);
 
     @Query(value = "select a from AchillesAnalysis a where a.analysisId=?1")
     AchillesAnalysis findAnalysisById(Long analysisId);
-
-    @Query(value = "select distinct a from AchillesAnalysis a left join FETCH a.results as r " +
-            "where r.stratum1 = ?1 and a.analysisId in (3101,3102,3103,3104) order by a.analysisId"
-    )
-    List<AchillesAnalysis> findSurveyDemographicAnalyses(String survey_concept_id);
-
-
 
 }
 

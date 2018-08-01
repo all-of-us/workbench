@@ -31,7 +31,8 @@ import org.pmiops.workbench.cdr.model.DbDomain;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
 import org.pmiops.workbench.cdr.model.AchillesResult;
 import org.pmiops.workbench.model.ConceptListResponse;
-import org.pmiops.workbench.model.SurveyDemographicAnalysis;
+import org.pmiops.workbench.model.ConceptAnalysisListResponse;
+import org.pmiops.workbench.model.ConceptAnalysis;
 import org.pmiops.workbench.model.MeasurementAnalysisListResponse;
 import org.pmiops.workbench.model.MeasurementAnalysis;
 import org.pmiops.workbench.model.DbDomainListResponse;
@@ -622,20 +623,24 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testGetSurveyDemographicAnalysesMatch() throws Exception{
-        ResponseEntity<SurveyDemographicAnalysis> response = dataBrowserController.getSurveyDemographicAnalyses("1586134");
-        SurveyDemographicAnalysis surveyDemographicAnalysis = response.getBody();
-        Analysis ageAnalysis = surveyDemographicAnalysis.getAgeAnalysis();
-        Analysis genderAnalysis = surveyDemographicAnalysis.getGenderAnalysis();
+        List<String> conceptsIds = new ArrayList<>();
+        conceptsIds.add("1586134");
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(conceptsIds);
+        List<ConceptAnalysis> conceptAnalysis = response.getBody().getItems();
+        Analysis ageAnalysis = conceptAnalysis.get(0).getAgeAnalysis();
+        Analysis genderAnalysis = conceptAnalysis.get(0).getGenderAnalysis();
         assertThat(ageAnalysis).isNotEqualTo(null);
         assertThat(genderAnalysis).isNotEqualTo(null);
     }
 
     @Test
     public void testGetSurveyDemographicAnalysesNoMatch() throws Exception{
-        ResponseEntity<SurveyDemographicAnalysis> response = dataBrowserController.getSurveyDemographicAnalyses("1585855");
-        SurveyDemographicAnalysis surveyDemographicAnalysis = response.getBody();
-        Analysis ageAnalysis = surveyDemographicAnalysis.getAgeAnalysis();
-        Analysis genderAnalysis = surveyDemographicAnalysis.getGenderAnalysis();
+        List<String> conceptsIds = new ArrayList<>();
+        conceptsIds.add("1585855");
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(conceptsIds);
+        List<ConceptAnalysis> conceptAnalysis = response.getBody().getItems();
+        Analysis ageAnalysis = conceptAnalysis.get(0).getAgeAnalysis();
+        Analysis genderAnalysis = conceptAnalysis.get(0).getGenderAnalysis();
         assertThat(ageAnalysis).isEqualTo(null);
         assertThat(genderAnalysis).isEqualTo(null);
     }

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Runs achilles queries to populate count db for cloudsql in BigQuery
+# Runs measurement queries to populate count db of measurement data for cloudsql in BigQuery
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./generate-clousql-cdr/run-achilles-queries.sh --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
+USAGE="./generate-clousql-cdr/run-measurement-queries.sh --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
 USAGE="$USAGE --cdr-version=YYYYMMDD"
 
 while [ $# -gt 0 ]; do
@@ -45,6 +45,56 @@ fi
 
 # TODO Next Populate achilles_results
 echo "Running measurement queries..."
+
+# 3000 Measurements that have numeric values - Number of persons with at least one measurement occurrence by measurement_concept_id, bin size of the measurement value for 10 bins, maximum and minimum from measurement value
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4,stratum_5, count_value, source_count_value)
+select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
+cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
+'Measurement' as stratum_3,
+cast(floor(min(co1.value_as_number)) AS STRING) as stratum_4,
+cast(ceil(max(co1.value_as_number)) AS STRING) as stratum_5,
+COUNT(distinct co1.person_id) as count_value,
+(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+where co1.measurement_concept_id > 0
+and co1.value_as_number is not null
+group by  co1.measurement_concept_id
+union all
+select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
+cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
+'Measurement' as stratum_3,
+cast(floor(min(co1.value_as_number)) AS STRING) as stratum_4,
+cast(ceil(max(co1.value_as_number)) AS STRING) as stratum_5,
+COUNT(distinct co1.person_id) as count_value,
+COUNT(distinct co1.person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
+and co1.value_as_number is not null
+group by  co1.measurement_source_concept_id"
+
+# 3000 Measurements that have string values - Number of persons with at least one measurement occurrence by measurement_concept_id
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
+'Measurement' as stratum_3,
+COUNT(distinct co1.person_id) as count_value,
+(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+where co1.measurement_concept_id > 0
+and co1.value_as_number is null and co1.value_source_value is not null
+group by  co1.measurement_concept_id
+union all
+select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
+'Measurement' as stratum_3,
+COUNT(distinct co1.person_id) as count_value,
+COUNT(distinct co1.person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
+and co1.value_as_number is null and co1.value_source_value is not null
+group by  co1.measurement_source_concept_id"
 
 
 # 1815 Measurement response distribution
@@ -182,7 +232,7 @@ FROM  priorstats p join overallstats o on p.stratum1_id = o.stratum1_id and p.st
 group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 
 
-# 1900 Measurement value counts
+# 1900 Measurement numeric value counts (This query generates counts, source counts of the binned value and gender combination. It gets bin size from joining the achilles_results)
 echo "Getting measurements value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -225,7 +275,7 @@ and m1.value_as_number is not null
 and ar.analysis_id=3000 and ar.stratum_3='Measurement'
 group by m1.measurement_source_concept_id,stratum_2,stratum_4,stratum_5"
 
-# 1900 Measurement value counts
+# 1900 Measurement string value counts (This query generates counts, source counts of the value and gender combination. It gets bin size from joining the achilles_results)
 echo "Getting measurements value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -256,7 +306,7 @@ and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id !=
 group by m1.measurement_source_concept_id,m1.value_source_value,p1.gender_concept_id,m1.unit_source_value"
 
 
-# 1901 Measurement value counts
+# 1901 Measurement numeric value counts (This query generates counts, source counts of the binned value and (age decile > 2) combination. It gets bin size from joining the achilles_results)
 echo "Getting measurements value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -302,7 +352,7 @@ and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
 group by m1.measurement_source_concept_id,stratum_2,stratum_4,stratum_5"
 
 
-# 1901 Measurement value counts
+# 1901 Measurement numeric value counts (This query generates counts, source counts of the binned value and age decile 2. It gets bin size from joining the achilles_results)
 echo "Getting measurements value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -347,7 +397,7 @@ and ar.analysis_id=3000 and ar.stratum_3='Measurement'
 and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
 group by m1.measurement_source_concept_id,stratum_2,stratum_4,stratum_5"
 
-#1901 age decile > 2 measurement counts
+#1901 Measurement string value counts (This query generates counts, source counts of the value and age decile > 2 combination. It gets bin size from joining the achilles_results)
 echo "Getting measurements value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -379,7 +429,7 @@ and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
 and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id != m1.measurement_concept_id
 group by m1.measurement_source_concept_id,m1.value_source_value,stratum_2,m1.unit_source_value"
 
-#1901 age decile 2 measurement counts
+#1901 Measurement string value counts (This query generates counts, source counts of the value and age decile 2. It gets bin size from joining the achilles_results)
 echo "Getting measurements value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
