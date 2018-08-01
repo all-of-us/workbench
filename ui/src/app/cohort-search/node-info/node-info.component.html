@@ -27,10 +27,10 @@
     [innerHTML]="displayName | safeHtml"></div>
 
   <!-- COUNT -->
-  <div *ngIf="nonZeroCount" class="count">
+  <div *ngIf="node.get('selectable')" class="count">
     <span class="text-muted">&#124;</span>
     <span class="badge badge-info">
-      {{ node.get('count') }}
+      {{ node.get('count', 0) }}
     </span>
   </div>
 </div>
