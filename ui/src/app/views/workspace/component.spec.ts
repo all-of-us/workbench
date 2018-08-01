@@ -56,14 +56,12 @@ class WorkspacePage {
   workspaceDescription: DebugElement;
   loggedOutMessage: DebugElement;
   createAndLaunch: DebugElement;
-  profileService: ProfileService;
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(WorkspaceComponent);
     this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
-    this.profileService = this.fixture.debugElement.injector.get(ProfileService);
     this.readPageData();
   }
 
@@ -104,7 +102,9 @@ const activatedRouteStub  = {
 
 describe('WorkspaceComponent', () => {
   let workspacePage: WorkspacePage;
+  let profileServiceStub: ProfileServiceStub;
   beforeEach(fakeAsync(() => {
+    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
