@@ -1,4 +1,4 @@
-<div class="dropdown" [class.open]="options.length">
+<div class="dropdown" [class.open]="options.length || noResults">
   <div class="search-box">
     <clr-icon shape="search"></clr-icon>
     <input clrInput
@@ -8,9 +8,11 @@
      (input)="inputChange($event.target.value)"/>
     <span *ngIf="loading" class="spinner spinner-inline"></span>
   </div>
-  <div *ngIf="noResults" class="error">
-    <clr-icon shape="error-standard"></clr-icon>
-    <em>No Results Found</em>
+  <div *ngIf="noResults" class="dropdown-menu">
+    <button class="dropdown-item">{{searchTerm}}</button>
+    <button class="dropdown-item disabled">
+      <em>No results based on your search</em>
+    </button>
   </div>
   <div *ngIf="noResults" class="error">
     <clr-icon shape="error-standard"></clr-icon>
