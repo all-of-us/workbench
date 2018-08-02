@@ -27,12 +27,12 @@
       <button *ngFor="let c of selectedGroup.concepts" (click)="showMeasurement(selectedGroup, c)" class="btn">{{c.conceptName}}</button>
     </div>
   </div>
-  <div class="row">
-    <div *ngIf="selectedConcept.conceptAnalyses && selectedConcept.analyses" class="col-md-4 col-xs-12 chart-wrapper">
-      <app-chart [chartTitle]="'Male ' + selectedConcept.conceptAnalyses.genderAnalysis.results[0].countValue " [chartType]="'histogram'" [analysis]="selectedConcept.analyses.maleAnalysis"></app-chart>
+  <div class="row" >
+    <div *ngIf="selectedConcept.analyses && selectedConcept.analyses.measurementValueMaleAnalysis" class="col-md-4 col-xs-12 chart-wrapper">
+      <app-chart [chartTitle]="'Male '" [chartType]="'histogram'" [analysis]="selectedConcept.analyses.measurementValueMaleAnalysis"></app-chart>
     </div>
-    <div *ngIf="selectedConcept.conceptAnalyses && selectedConcept.analyses" class="col-md-4 col-xs-12 chart-wrapper">
-      <app-chart [chartTitle]="'Female ' + selectedConcept.conceptAnalyses.genderAnalysis.results[0].countValue " [chartType]="'histogram'" [analysis]="selectedConcept.analyses.femaleAnalysis"></app-chart>
+    <div *ngIf="selectedConcept.analyses && selectedConcept.analyses.measurementValueFemaleAnalysis" class="col-md-4 col-xs-12 chart-wrapper">
+      <app-chart [chartTitle]="'Female ' " [chartType]="selectedConcept.chartType" [analysis]="selectedConcept.analyses.measurementValueFemaleAnalysis"></app-chart>
     </div>
   </div>
 </div>
