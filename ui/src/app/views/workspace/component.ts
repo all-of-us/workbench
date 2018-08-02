@@ -147,7 +147,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.profileService.getPageVisits().subscribe(
       pageVisitsReceived => {
         this.firstVisit = !pageVisitsReceived.some(v =>
-          v.page == this.pageId);
+          v.page === this.pageId);
       },
       error => {
         this.pageVisitsError = true;
