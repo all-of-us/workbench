@@ -171,7 +171,7 @@ public class User {
     this.authorities = newAuthorities;
   }
 
-  @ElementCollection(fetch = FetchType.EAGER)
+  @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "page_visit", joinColumns=@JoinColumn(name="user_id"))
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "user")
   @Column(name="page_id")

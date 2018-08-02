@@ -520,18 +520,11 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> updatePageVisits(PageVisit newPageVisit) {
     User user = userProvider.get();
-    boolean shouldAdd = true;
     List<org.pmiops.workbench.db.model.PageVisit> oldPageVisits =
       new ArrayList<>(user.getPageVisits());
     List<org.pmiops.workbench.db.model.PageVisit> newPageVisits = new ArrayList<>();
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    for (org.pmiops.workbench.db.model.PageVisit pageVisit : oldPageVisits) {
-      if (pageVisit.getPageId().equals(newPageVisit.getPage())) {
-        pageVisit.setLastVisit(timestamp);
-        shouldAdd = false;
-      }
-      newPageVisits.add(pageVisit);
-    }
+    boolean shouldAdd = oldPageVisits.stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
       org.pmiops.workbench.db.model.PageVisit firstPageVisit =
         new org.pmiops.workbench.db.model.PageVisit();
@@ -539,9 +532,13 @@ public class ProfileController implements ProfileApiDelegate {
       firstPageVisit.setUser(user);
       firstPageVisit.setFirstVisit(timestamp);
       firstPageVisit.setLastVisit(timestamp);
-      newPageVisits.add(firstPageVisit);
+      oldPageVisits.add(firstPageVisit);
+    } else {
+      oldPageVisits.stream()
+        .filter(v -> v.getPageId().equals(newPageVisit.getPage()))
+        .forEach(v -> v.setLastVisit(timestamp));
     }
-    user.setPageVisits(new HashSet<>(newPageVisits));
+    user.setPageVisits(new HashSet<>(oldPageVisits));
     userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

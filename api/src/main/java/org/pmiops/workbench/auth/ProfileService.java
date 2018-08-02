@@ -102,8 +102,8 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
     }
-    if (userWithPageVisits.getPageVisits() != null) {
-      profile.setPageVisits(user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
+    if (userWithPageVisits.getPageVisits() != null && !userWithPageVisits.getPageVisits().isEmpty()) {
+      profile.setPageVisits(userWithPageVisits.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
         .collect(Collectors.toList()));
     }
     profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
