@@ -211,6 +211,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .measurementValueGenderAnalysis(ca.getMeasurementValueGenderAnalysis())
                             .measurementValueMaleAnalysis(ca.getMeasurementValueMaleAnalysis())
                             .measurementValueFemaleAnalysis(ca.getMeasurementValueFemaleAnalysis())
+                            .measurementValueOtherGenderAnalysis(ca.getMeasurementValueOtherGenderAnalysis())
                             .measurementValueAgeAnalysis(ca.getMeasurementValueAgeAnalysis());
                 }
             };
@@ -452,20 +453,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                         AchillesAnalysis maleAnalysis = new AchillesAnalysis(aa);
                         AchillesAnalysis femaleAnalysis = new AchillesAnalysis(aa);
+                        AchillesAnalysis otherAnalysis = new AchillesAnalysis(aa);
 
                         maleAnalysis.setResults(maleResults);
                         femaleAnalysis.setResults(femaleResults);
-
-                        //AchillesResultListResponse maleResultResponse = new AchillesResultListResponse();
-                        //maleResultResponse.setItems(maleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
-                        //AchillesResultListResponse femaleResultResponse = new AchillesResultListResponse();
-                        //femaleResultResponse.setItems(femaleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
+                        otherAnalysis.setResults(otherResults);
 
                         conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                         conceptAnalysis.setMeasurementValueMaleAnalysis(TO_CLIENT_ANALYSIS.apply(maleAnalysis));
                         conceptAnalysis.setMeasurementValueFemaleAnalysis(TO_CLIENT_ANALYSIS.apply(femaleAnalysis));
-
-                        System.out.println(otherResults);
+                        conceptAnalysis.setMeasurementValueOtherGenderAnalysis(TO_CLIENT_ANALYSIS.apply(otherAnalysis));
 
                     }else if(aa.getAnalysisId() == MEASUREMENT_AGE_ANALYSIS_ID){
 

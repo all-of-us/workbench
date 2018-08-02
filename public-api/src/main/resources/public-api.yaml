@@ -539,6 +539,10 @@ definitions:
         description: female analysis for measurement values
         type: object
         $ref: "#/definitions/Analysis"
+      measurementValueOtherGenderAnalysis:
+        description: other gender analysis for measurement values
+        type: object
+        $ref: "#/definitions/Analysis"
       measurementValueAgeAnalysis:
         description: age analysis for measurement values
         type: object
