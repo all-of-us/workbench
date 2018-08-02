@@ -446,14 +446,19 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             }
                         }
 
-                        AchillesResultListResponse maleResultResponse = new AchillesResultListResponse();
-                        maleResultResponse.setItems(maleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
-                        AchillesResultListResponse femaleResultResponse = new AchillesResultListResponse();
-                        femaleResultResponse.setItems(femaleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
+                        AchillesAnalysis maleAnalysis = new AchillesAnalysis(aa);
+                        AchillesAnalysis femaleAnalysis = new AchillesAnalysis(aa);
 
+                        maleAnalysis.setResults(maleResults);
+                        femaleAnalysis.setResults(femaleResults);
 
-                        conceptAnalysis.setMeasurementValueMaleAnalysis(maleResultResponse);
-                        conceptAnalysis.setMeasurementValueFemaleAnalysis(femaleResultResponse);
+                        //AchillesResultListResponse maleResultResponse = new AchillesResultListResponse();
+                        //maleResultResponse.setItems(maleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
+                        //AchillesResultListResponse femaleResultResponse = new AchillesResultListResponse();
+                        //femaleResultResponse.setItems(femaleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
+
+                        conceptAnalysis.setMeasurementValueMaleAnalysis(TO_CLIENT_ANALYSIS.apply(maleAnalysis));
+                        conceptAnalysis.setMeasurementValueFemaleAnalysis(TO_CLIENT_ANALYSIS.apply(femaleAnalysis));
 
                     }else if(aa.getAnalysisId() == MEASUREMENT_AGE_ANALYSIS_ID){
 
