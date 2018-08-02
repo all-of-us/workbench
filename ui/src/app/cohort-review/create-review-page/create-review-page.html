@@ -3,8 +3,8 @@
 <div>
   <p>
     Cohort {{ cohort.name }} has {{ review.matchedParticipantCount }}
-    participants for possible review.  How many would you like to review?  (max
-    10000)
+    participants for possible review.  How many would you like to review?
+    <span *ngIf="review.matchedParticipantCount > 10000">(max 10000)</span>
   </p>
   <form [formGroup]="reviewParamForm" (ngSubmit)="createReview()">
     <label>Cohort Review Parameters</label>
