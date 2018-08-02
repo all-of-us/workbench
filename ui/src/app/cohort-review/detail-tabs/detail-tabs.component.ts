@@ -124,7 +124,7 @@ const labRefRange = {
 export class DetailTabsComponent {
 
   readonly stubs = [
-    'ppi',
+    'survey',
   ];
 
   readonly allEvents = {
