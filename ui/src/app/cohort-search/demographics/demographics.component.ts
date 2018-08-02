@@ -20,7 +20,7 @@ const RACE = 'RACE';
  * is added, we should be able to just plug it in here and everything should
  * work */
 const ETHNICITY = 'ETH';
-const minAge = 0;
+const minAge = 18;
 const maxAge = 120;
 
 /*
@@ -57,7 +57,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
   /* The Demographics form controls and associated convenience lenses */
   demoForm = new FormGroup({
-    ageMin: new FormControl(0),
+    ageMin: new FormControl(18),
     ageMax: new FormControl(120),
     ageRange: new FormControl([this.minAge, this.maxAge]),
     deceased: new FormControl(),
