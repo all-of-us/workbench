@@ -208,6 +208,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .ageAnalysis(ca.getAgeAnalysis())
                             .raceAnalysis(ca.getRaceAnalysis())
                             .ethnicityAnalysis(ca.getEthnicityAnalysis())
+                            .measurementValueGenderAnalysis(ca.getMeasurementValueGenderAnalysis())
                             .measurementValueMaleAnalysis(ca.getMeasurementValueMaleAnalysis())
                             .measurementValueFemaleAnalysis(ca.getMeasurementValueFemaleAnalysis())
                             .measurementValueAgeAnalysis(ca.getMeasurementValueAgeAnalysis());
@@ -432,6 +433,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                         List<AchillesResult> maleResults = new ArrayList<>();
                         List<AchillesResult> femaleResults = new ArrayList<>();
+                        List<AchillesResult> otherResults = new ArrayList<>();
 
                         for(AchillesResult ar: aa.getResults()){
                             String analysisStratumName=ar.getAnalysisStratumName();
@@ -442,6 +444,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                     maleResults.add(ar);
                                 }else if(stratum2.equals(FEMALE_CONCEPT_ID)){
                                     femaleResults.add(ar);
+                                }else{
+                                    otherResults.add(ar);
                                 }
                             }
                         }
@@ -457,8 +461,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         //AchillesResultListResponse femaleResultResponse = new AchillesResultListResponse();
                         //femaleResultResponse.setItems(femaleResults.stream().map(TO_CLIENT_ACHILLES_RESULT).collect(Collectors.toList()));
 
+                        conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                         conceptAnalysis.setMeasurementValueMaleAnalysis(TO_CLIENT_ANALYSIS.apply(maleAnalysis));
                         conceptAnalysis.setMeasurementValueFemaleAnalysis(TO_CLIENT_ANALYSIS.apply(femaleAnalysis));
+
+                        System.out.println(otherResults);
 
                     }else if(aa.getAnalysisId() == MEASUREMENT_AGE_ANALYSIS_ID){
 
