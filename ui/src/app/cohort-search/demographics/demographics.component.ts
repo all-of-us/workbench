@@ -165,12 +165,34 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     }));
     this.subscription.add(min.valueChanges.subscribe(value => {
       const [_, hi] = [...this.ageRange.value];
-      this.ageRange.setValue([value, hi], {emitEvent: false});
+      if (value <= hi && value >= this.minAge) {
+        this.ageRange.setValue([value, hi], {emitEvent: false});
+      }
     }));
     this.subscription.add(max.valueChanges.subscribe(value => {
       const [lo, _] = [...this.ageRange.value];
-      this.ageRange.setValue([lo, value], {emitEvent: false});
+      if (value >= lo) {
+        this.ageRange.setValue([lo, value], {emitEvent: false});
+      }
     }));
+  }
+
+  checkMax() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    if (max.value < min.value) {
+      max.setValue(min.value);
+    }
+  }
+
+  checkMin() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    if (min.value > max.value) {
+      min.setValue(max.value);
+    } else if (min.value < this.minAge) {
+      min.setValue(this.minAge);
+    }
   }
 
   /*
