@@ -1,0 +1,43 @@
+{
+  "type": "cohort",
+  "cohort": {
+    "name": "28-30-Females",
+    "description": "demo",
+    "type": "demo",
+    "criteria": {
+      "includes":[{
+          "id":"includes_45ablm7un",
+          "items":[{
+              "id":"items_0al3whsxb",
+              "type":"DEMO",
+              "searchParameters":[{
+                  "parameterId":"param23673",
+                  "name":"Female",
+                  "value":"F",
+                  "type":"DEMO",
+                  "subtype":"GEN",
+                  "group":false,
+                  "attributes":[],
+                  "conceptId":8532
+                },
+                {
+                  "parameterId":"age-param753430853",
+                  "name":"Age",
+                  "value":"Age",
+                  "type":"DEMO",
+                  "subtype":"AGE",
+                  "group":false,
+                  "attributes":[{
+                      "name":"Age",
+                      "operator":"BETWEEN",
+                      "operands":[28,30],
+                      "conceptId":null
+                  }],"conceptId":null
+              }],
+              "modifiers":[]
+          }]
+      }],
+      "excludes":[]
+    }
+  }
+}
