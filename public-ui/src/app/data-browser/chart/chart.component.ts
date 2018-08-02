@@ -13,6 +13,7 @@ const AGE_ANALYSIS_ID = 3102;
 const SURVEY_COUNT_ANALYSIS_ID = 3110;
 const SURVEY_GENDER_ANALYSIS_ID = 3111;
 const SURVEY_AGE_ANALYSIS_ID = 3112;
+const MEASUREMENT_AGE_ANALYSIS_ID = 3112;
 const GENDER_COLORS = {
   '8507': '#8DC892',
   '8532': '#6CAEE3'
@@ -61,7 +62,7 @@ export class ChartComponent implements OnChanges {
 
   constructor() {
     highcharts.setOptions({
-      lang: { thousandsSep: ',' },
+      lang: {thousandsSep: ','},
     });
   }
 
@@ -75,7 +76,7 @@ export class ChartComponent implements OnChanges {
     console.log(this.chartType, this.analysis);
     if ((this.analysis && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {
-        // HC automatically redraws when changing chart options
+      // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
     }
 
@@ -85,112 +86,106 @@ export class ChartComponent implements OnChanges {
     console.log('Chart clicked ', e);
   }
 
-  columnClick = function(e) {
+  columnClick = function (e) {
     console.log('Column clicked ', e);
   };
 
   public hcChartOptions(): any {
-      const options = this.makeChartOptions();
-      // Override title if they passed one
-      if (this.chartTitle ) {
-        options.title.text = this.chartTitle;
-      }
-      // Override chart type if we have it
-      if (this.chartType) {
-        options.chart.type = this.chartType;
-      }
+    const options = this.makeChartOptions();
+    // Override title if they passed one
+    if (this.chartTitle) {
+      options.title.text = this.chartTitle;
+    }
+    // Override chart type if we have it
+    if (this.chartType) {
+      options.chart.type = this.chartType;
+    }
 
-      return {
-          chart: options.chart,
-          credits: {
-
-              enabled: false
+    return {
+      chart: options.chart,
+      credits: {
+        enabled: false
+      },
+      title: options.title,
+      subtitle: {},
+      tooltip: {
+        pointFormat: '<b>{point.y} </b><br>{series.name}'
+      },
+      plotOptions: {
+        series: {
+          animation: {
+            duration: 100,
           },
-          title: options.title,
-          subtitle: {
+          pointWidth: options.pointWidth ? options.pointWidth : null,
+          minPointLength: 3,
+          events: {
+            click: function (event) {
+              console.log('plot options clicked ', event.point);
+            }
+          }
+        },
+        pie: {
+          borderColor: null,
+          slicedOffset: 4,
+          dataLabels: {
+            enabled: true,
+            style: DATA_LABEL_STYLE,
+            distance: -30,
+            format: '{point.name} {point.percentage:.0f}%'
+          }
+        },
+        column: {
+          shadow: false,
+          borderColor: null,
+          colorByPoint: true,
+          groupPadding: 0,
+          dataLabels: {
+            enabled: false,
           },
-          tooltip: {
-            pointFormat: '<b>{point.y} </b><br>{series.name}'
+          events: {},
+        },
+        bar: {
+          shadow: false,
+          borderColor: null,
+          colorByPoint: true,
+          groupPadding: 0,
+          dataLabels: {
+            enabled: false,
           },
-          plotOptions: {
-              series: {
-                  animation: {
-                      duration: 100,
-                  },
-                  pointWidth: options.pointWidth ? options.pointWidth : null,
-                  minPointLength: 3,
-                  events: {
-                    click: function (event) {
-                      console.log('plot options clicked ',  event.point);
-                    }
-                  }
-              },
-              pie: {
-                  borderColor: null,
-                  slicedOffset: 4,
-                  dataLabels: {
-                      enabled: true,
-                      style: DATA_LABEL_STYLE,
-                      distance: -30,
-                      format: '{point.name} {point.percentage:.0f}%'
-                  }
-              },
-              column: {
-                  shadow: false,
-                  borderColor: null,
-                  colorByPoint: true,
-                  groupPadding: 0,
-                  dataLabels: {
-                      enabled: false,
-                  },
-                  events: {
-
-                  },
-              },
-              bar: {
-                shadow: false,
-                borderColor: null,
-                colorByPoint: true,
-                groupPadding: 0,
-                dataLabels: {
-                  enabled: false,
-                },
-                events: {
-                }
-              }
-          },
-          yAxis: {
-            title: {
-              text: null
-            },
-            lineWidth: 1,
-            lineColor: '#979797',
-            gridLineColor: this.backgroundColor
-          },
-          xAxis: {
-            categories: options.categories,
-            // type: 'category',
-            labels: {
-                style: {
-                    whiteSpace: 'nowrap',
-                }
-            },
-            lineWidth: 1,
-            lineColor: '#979797'
-          },
-          zAxis: {
-          },
-          legend: {
-              enabled: false // this.seriesLegend()
-          },
-          series: [ options.series ],
-      };
+          events: {}
+        }
+      },
+      yAxis: {
+        title: {
+          text: null
+        },
+        lineWidth: 1,
+        lineColor: '#979797',
+        gridLineColor: this.backgroundColor
+      },
+      xAxis: {
+        categories: options.categories,
+        // type: 'category',
+        labels: {
+          style: {
+            whiteSpace: 'nowrap',
+          }
+        },
+        lineWidth: 1,
+        lineColor: '#979797'
+      },
+      zAxis: {},
+      legend: {
+        enabled: false // this.seriesLegend()
+      },
+      series: [options.series],
+    };
   }
 
   /* For ppi answers we have to filter the results to that answer because all answers
    * for each question come in the analyses results
   */
-  public getSelectedResults (selectedResult: any) {
+  public getSelectedResults(selectedResult: any) {
     const results = [];
     for (const r of this.analysis.results) {
       if (r.stratum4 === selectedResult.stratum4) {
@@ -205,18 +200,19 @@ export class ChartComponent implements OnChanges {
       return this.makeConceptChartOptions();
     }
     if (this.analysis.analysisId === COUNT_ANALYSIS_ID ||
-        this.analysis.analysisId === SURVEY_COUNT_ANALYSIS_ID) {
+      this.analysis.analysisId === SURVEY_COUNT_ANALYSIS_ID) {
       return this.makeCountChartOptions();
     }
     if (this.analysis.analysisId === GENDER_ANALYSIS_ID ||
-        this.analysis.analysisId === SURVEY_GENDER_ANALYSIS_ID) {
+      this.analysis.analysisId === SURVEY_GENDER_ANALYSIS_ID) {
       return this.makeGenderChartOptions();
     }
     if (this.analysis.analysisId === AGE_ANALYSIS_ID ||
       this.analysis.analysisId === SURVEY_AGE_ANALYSIS_ID) {
       return this.makeAgeChartOptions();
     }
-    if (this.chartType === 'histogram' || this.analysisId === 1912) {
+    console.log(this.analysis);
+    if (this.analysis.analysisId === 1900) {
       // our data is already binned so we use a column. So set the chartType to column
       this.chartType = 'column';
       console.log('Making histogram opts');
@@ -225,34 +221,41 @@ export class ChartComponent implements OnChanges {
 
 
   }
+
   seriesClick(event) {
-    console.log('Global series clicked ' , this.analysis, 'Clicked analysis', event.point);
+    console.log('Global series clicked ', this.analysis, 'Clicked analysis', event.point);
   }
+
   public makeCountChartOptions() {
     let data = [];
     let cats = [];
     for (const a  of this.analysis.results) {
-        data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});
-        cats.push(a.stratum4);
+      data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});
+      cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
-      if (a.name > b.name) {
-        return 1;
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+        return 0;
       }
-      if (a.name < b.name) {
-        return -1;
-      }
-      return 0; }
     );
     cats = cats.sort((a, b) => {
-      if (a > b) { return 1; }
-      if (a < b) { return -1; }
+      if (a > b) {
+        return 1;
+      }
+      if (a < b) {
+        return -1;
+      }
       return 0;
     });
 
-    const seriesClick = function(event) {
+    const seriesClick = function (event) {
       const thisCtrl = event.point.options.thisCtrl;
-      console.log('Count plot Clicked point :',  event.point);
+      console.log('Count plot Clicked point :', event.point);
       thisCtrl.resultClicked.emit(event.point.result);
     };
     // Override tooltip and colors and such
@@ -266,32 +269,35 @@ export class ChartComponent implements OnChanges {
     };
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
-      title: { text: null },
+      title: {text: null},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth
     };
 
   }
+
   public makeConceptChartOptions() {
     const data = [];
     const cats = [];
 
     // Sort by count value
-    this.concepts  = this.concepts.sort((a, b) => {
-      if (a.countValue < b.countValue) {
-        return 1;
+    this.concepts = this.concepts.sort((a, b) => {
+        if (a.countValue < b.countValue) {
+          return 1;
+        }
+        if (a.countValue > b.countValue) {
+          return -1;
+        }
+        return 0;
       }
-      if (a.countValue > b.countValue) {
-        return -1;
-      }
-      return 0; }
     );
 
     for (const a  of this.concepts) {
       data.push({
         name: a.conceptName + ' (' + a.vocabularyId + '-' + a.conceptCode + ') ',
-        y: a.countValue });
+        y: a.countValue
+      });
       if (!this.sources) {
         cats.push(a.conceptName);
       } else {
@@ -309,13 +315,14 @@ export class ChartComponent implements OnChanges {
         type: 'column',
         backgroundColor: this.backgroundColor,
       },
-      title: { text: null, style: CHART_TITLE_STYLE },
+      title: {text: null, style: CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth
     };
 
   }
+
   public makeGenderChartOptions() {
     // For ppi we need to filter the results to the particular answer that the user selected
     // because we only show the breakdown for one answer on this chart
@@ -335,28 +342,35 @@ export class ChartComponent implements OnChanges {
       // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
       const color = a.analysisId === GENDER_ANALYSIS_ID ?
         GENDER_COLORS[a.stratum2] : GENDER_COLORS[a.stratum5];
-      data.push({name: a.analysisStratumName
-        , y: a.countValue, color: color, sliced: true});
+      data.push({
+        name: a.analysisStratumName
+        , y: a.countValue, color: color, sliced: true
+      });
       cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
-      if (a.name > b.name) {
-        return 1;
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+        return 0;
       }
-      if (a.name < b.name) {
-        return -1;
-      }
-      return 0; }
     );
     cats = cats.sort((a, b) => {
-      if (a > b) { return 1; }
-      if (a < b) { return -1; }
+      if (a > b) {
+        return 1;
+      }
+      if (a < b) {
+        return -1;
+      }
       return 0;
     });
-    const series = { name: seriesName, colorByPoint: true, data: data };
+    const series = {name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'pie', backgroundColor: this.backgroundColor}, // '#D9E4EA'
-      title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
+      title: {text: this.analysis.analysisName, style: CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: null
@@ -382,36 +396,54 @@ export class ChartComponent implements OnChanges {
       // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
       const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] :
         AGE_COLORS[a.stratum5];
-      data.push({name: a.analysisStratumName
-        , y: a.countValue, color: color});
+      data.push({
+        name: a.analysisStratumName
+        , y: a.countValue, color: color
+      });
       cats.push(a.analysisStratumName
       );
     }
 
     data = data.sort((a, b) => {
-      if (a.name > b.name) {
-        return 1;
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+        return 0;
       }
-      if (a.name < b.name) {
-        return -1;
-      }
-      return 0; }
     );
     cats = cats.sort((a, b) => {
-      if (a > b) { return 1; }
-      if (a < b) { return -1; }
+      if (a > b) {
+        return 1;
+      }
+      if (a < b) {
+        return -1;
+      }
       return 0;
     });
 
 
-    const series = { name: seriesName, colorByPoint: true, data: data};
+    const series = {name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
-      title: { text: this.analysis.analysisName, style: CHART_TITLE_STYLE },
+      title: {text: this.analysis.analysisName, style: CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
     };
+  }
+
+  // Todo maybe use something like this
+  public makeMeasurementChartOptions() {
+    if (this.analysis.chartType === 'histogram') {
+      return this.makeHistogramChartOptions();
+    }
+    if (this.analysis.chartType === 'column') {
+      return this.makeCountChartOptions();
+    }
+
   }
 
   // Histogram data analyses come already binned
@@ -422,6 +454,7 @@ export class ChartComponent implements OnChanges {
     let data = [];
     const cats = [];
 
+    console.log('histo analysis');
     for (const a  of this.analysis.results) {
       data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});
     }
@@ -449,12 +482,12 @@ export class ChartComponent implements OnChanges {
       cats.push(d.name);
     }
 
-
     const seriesClick = function(event) {
       const thisCtrl = event.point.options.thisCtrl;
       console.log('Histogram plot Clicked point :',  event.point);
       thisCtrl.resultClicked.emit(event.point.result);
     };
+
     // Override tooltip and colors and such
     const series = {
       name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
