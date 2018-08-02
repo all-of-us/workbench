@@ -126,6 +126,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       case BEGIN_ATTR_PREVIEW_REQUEST:
         return state
           .deleteIn(['wizard', 'calculate', 'error'])
+          .deleteIn(['wizard', 'calculate', 'count'])
           .setIn(['wizard', 'calculate', 'requesting'], true);
 
       case LOAD_ATTR_PREVIEW_RESULTS:
@@ -134,14 +135,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['wizard', 'calculate', 'requesting'], false);
 
       case ADD_ATTR_FOR_PREVIEW:
-        return state
-          .updateIn(
-              ['wizard', 'count', 'parameters'],
-            List(),
-            paramList => paramList.includes(action.parameter)
-              ? paramList
-              : paramList.push(action.parameter)
-          );
+        return state.setIn(['wizard', 'count', 'parameters'], fromJS([action.parameter]));
 
       case CANCEL_CHARTS_REQUEST:
       case CANCEL_COUNT_REQUEST:
