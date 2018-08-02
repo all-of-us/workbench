@@ -522,7 +522,6 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     List<org.pmiops.workbench.db.model.PageVisit> oldPageVisits =
       new ArrayList<>(user.getPageVisits());
-    List<org.pmiops.workbench.db.model.PageVisit> newPageVisits = new ArrayList<>();
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     boolean shouldAdd = oldPageVisits.stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
