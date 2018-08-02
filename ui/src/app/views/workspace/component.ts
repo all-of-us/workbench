@@ -146,11 +146,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.wsId = this.route.snapshot.params['wsid'];
     this.profileService.getPageVisits().subscribe(
       pageVisitsReceived => {
-        for (const pageVisit of pageVisitsReceived) {
-          if (pageVisit.page === this.pageId) {
-            this.firstVisit = false;
-          }
-        }
+        this.firstVisit = !pageVisitsReceived.some(v =>
+          v.page == this.pageId);
       },
       error => {
         this.pageVisitsError = true;
