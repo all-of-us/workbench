@@ -129,6 +129,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
 
     requestPreview(attrform: NgForm) {
         const param = this.getParamWithAttributes(attrform.value);
+        console.log(param.toJS())
         this.actions.addAttributeForPreview(param);
         this.actions.requestAttributePreview();
     }
