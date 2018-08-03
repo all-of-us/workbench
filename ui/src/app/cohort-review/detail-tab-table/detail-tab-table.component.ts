@@ -57,7 +57,12 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
           }
       ))
       .subscribe(resp => {
-        this.data = resp.items;
+        this.data = resp.items.map(item => {
+          if (item.numMentions) {
+            item.numMentionsInt = parseInt(item.numMentions, 10);
+          }
+          return item;
+        });
         this.totalCount = resp.count;
         this.loading = false;
       });

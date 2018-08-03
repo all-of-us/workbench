@@ -728,6 +728,12 @@ definitions:
       itemDate:
         type: string
         description: The date of the event
+      numMentions:
+        type: string
+        description: Number of mentions in string format
+      numMentionsInt:
+        type: integer
+        description: Number of mentions in number format
       domainType:
         $ref: "#/definitions/DomainType"
 
