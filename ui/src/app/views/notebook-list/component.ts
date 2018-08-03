@@ -97,7 +97,9 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       },
       error => {},
       () => {
-        if (this.firstVisit) { this.showTip = true; }
+        if (this.firstVisit) {
+          this.showTip = true;
+        }
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
       });
   }
