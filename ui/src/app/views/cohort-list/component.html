@@ -45,7 +45,7 @@
               Review
             </button>
             <button class="action-item delete-button"
-                    (click)="deleteCohort(cohort)"
+                    (click)="confirmDelete(cohort)"
                     [class.disabled]="actionsDisabled"
                     [disabled]="actionsDisabled">
               <clr-icon shape="trash"></clr-icon>
@@ -67,3 +67,5 @@
     </div>
   </div>
 </div>
+
+<app-confirm-delete-modal [resourceType]="'cohort'" [resource]="cohortInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>

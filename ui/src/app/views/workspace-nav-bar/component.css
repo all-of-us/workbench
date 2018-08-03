@@ -1,5 +1,8 @@
-/*ng-deep plumbs the styling down into the clarity objects. Necessary for the overflow dropdown*/
-::ng-deep #workspace-top-nav-bar .btn.btn-primary.btn-top {
+/*
+ * ng-deep plumbs the styling down into the clarity objects. Necessary for the overflow dropdown
+ * Adding host keeps it constrained to within the parent.
+ */
+:host::ng-deep #workspace-top-nav-bar .btn.btn-primary.btn-top {
   height: 100%;
   width: 8rem;
   background-color: transparent;
@@ -41,13 +44,29 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-::ng-deep #workspace-top-nav-bar .btn-group-overflow .btn-top.btn-overflow {
+:host::ng-deep #workspace-top-nav-bar .btn.btn-primary.btn-top.btn-dropdown {
   color: white;
   width: 2rem;
   border: none;
   height: 100%;
   position: absolute;
   right: 0;
+  padding: 0;
+  overflow: visible;
+  outline: none;
+}
+
+:host::ng-deep .dropdown .dropdown-toggle:not(.btn) {
+  color: white;
+  padding: 0;
+  outline: none;
+  height: 100%;
+  width: 100%;
+}
+
+:host::ng-deep clr-dropdown.dropdown {
+  height: 100%;
+  width: 100%;
 }
 
 ::ng-deep #workspace-top-nav-bar .btn-top.btn-overflow:hover {
@@ -66,8 +85,10 @@
 }
 
 ::ng-deep #workspace-top-nav-bar .dropdown-menu {
+  width: 8rem;
+  position: absolute;
   right: 0;
-  width: 2rem;
+  top: 55px;
 }
 
 .btn-group {
