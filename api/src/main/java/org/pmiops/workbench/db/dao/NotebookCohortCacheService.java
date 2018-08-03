@@ -10,9 +10,9 @@ public interface NotebookCohortCacheService {
 
   NotebookCohortCacheDao getDao();
 
-  void updateNotebook(Workspace workspace, User user, String notebookName, Timestamp lastModifiedDate);
+  void updateNotebook(Workspace workspace, User user, String notebookName, Timestamp lastAccessDateTime);
 
-  void updateCohort(Workspace workspace, User user, long cohortId, Timestamp lastModifiedDate);
+  void updateCohort(Workspace workspace, User user, long cohortId, Timestamp lastAccessDateTime);
 
   void deleteNotebook(Workspace workspace, User user, String notebookName);
 }

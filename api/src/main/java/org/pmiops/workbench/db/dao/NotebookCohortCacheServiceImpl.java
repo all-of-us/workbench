@@ -44,11 +44,11 @@ public class NotebookCohortCacheServiceImpl implements NotebookCohortCacheServic
    * @param workspace
    * @param user
    * @param notebookName
-   * @param lastAccessDate
+   * @param lastAccessDateTime
    */
   @Override
   public void updateNotebook(Workspace workspace, User user, String notebookName,
-      Timestamp lastAccessDate) {
+      Timestamp lastAccessDateTime) {
     WorkspaceUserRole workspaceUserRole =
         getworkspaceUserRoleDao().findWorkspaceUserRolesByWorkspaceAndUser(workspace, user);
     if (workspaceUserRole == null) {
@@ -62,10 +62,9 @@ public class NotebookCohortCacheServiceImpl implements NotebookCohortCacheServic
       cache = new NotebookCohortCache();
       cache.setUserWorkspaceId(workspaceUserRole);
       cache.setCohortId(null);
-      cache.setLastAccessTime(lastAccessDate);
       cache.setNotebookName(notebookName);
     }
-    cache.setLastAccessTime(lastAccessDate);
+    cache.setLastAccessTime(lastAccessDateTime);
     getDao().save(cache);
   }
 
@@ -77,11 +76,11 @@ public class NotebookCohortCacheServiceImpl implements NotebookCohortCacheServic
    * @param workspace
    * @param user
    * @param cohortId
-   * @param lastAccessDate
+   * @param lastAccessDateTime
    */
   @Override
   public void updateCohort(Workspace workspace, User user, long cohortId,
-      Timestamp lastAccessDate) {
+      Timestamp lastAccessDateTime) {
     WorkspaceUserRole workspaceUserRole =
         getworkspaceUserRoleDao().findWorkspaceUserRolesByWorkspaceAndUser(workspace, user);
     if (workspaceUserRole == null) {
@@ -94,10 +93,9 @@ public class NotebookCohortCacheServiceImpl implements NotebookCohortCacheServic
       cache = new NotebookCohortCache();
       cache.setUserWorkspaceId(workspaceUserRole);
       cache.setCohortId(cohortId);
-      cache.setLastAccessTime(lastAccessDate);
       cache.setNotebookName(null);
     }
-    cache.setLastAccessTime(lastAccessDate);
+    cache.setLastAccessTime(lastAccessDateTime);
     getDao().save(cache);
   }
 

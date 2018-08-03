@@ -16,7 +16,6 @@
             </column>
             <column name="notebook_name" type="varchar(255)">
             </column>
-
             <column name="lastAccessDate" type="timestamp">
                 <constraints nullable="false"/>
             </column>

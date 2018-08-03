@@ -20,6 +20,7 @@ import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.NotebookCohortCacheService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -94,6 +95,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final Provider<User> userProvider;
   private final Clock clock;
   private final CdrVersionService cdrVersionService;
+  private final NotebookCohortCacheService cacheService;
 
   @Autowired
   CohortsController(
@@ -104,7 +106,8 @@ public class CohortsController implements CohortsApiDelegate {
       CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
       Clock clock,
-      CdrVersionService cdrVersionService) {
+      CdrVersionService cdrVersionService,
+      NotebookCohortCacheService cacheService) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
@@ -113,6 +116,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.userProvider = userProvider;
     this.clock = clock;
     this.cdrVersionService = cdrVersionService;
+    this.cacheService = cacheService;
   }
 
   @Override
@@ -140,6 +144,8 @@ public class CohortsController implements CohortsApiDelegate {
           "Cohort \"/%s/%s/%d\" already exists.",
           workspaceNamespace, workspaceId, dbCohort.getCohortId()));
     }
+    cacheService.updateCohort(workspace, userProvider.get(),
+        dbCohort.getCohortId(), now);
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
@@ -163,6 +169,10 @@ public class CohortsController implements CohortsApiDelegate {
 
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
+
+    cacheService.updateCohort( workspaceService.getRequired(workspaceNamespace, workspaceId)
+        , userProvider.get(), dbCohort.getCohortId(), new Timestamp(clock.instant().toEpochMilli()));
+
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
@@ -265,9 +275,9 @@ public class CohortsController implements CohortsApiDelegate {
     if (pageSize == null || pageSize == 0) {
       request.setPageSize(DEFAULT_PAGE_SIZE);
     } else if (pageSize < 0) {
-        throw new BadRequestException(
-            String.format("Invalid page size: %s; must be between 1 and %d", pageSize,
-                MAX_PAGE_SIZE));
+      throw new BadRequestException(
+          String.format("Invalid page size: %s; must be between 1 and %d", pageSize,
+              MAX_PAGE_SIZE));
     } else if (pageSize > MAX_PAGE_SIZE) {
       request.setPageSize(MAX_PAGE_SIZE);
     }
