@@ -109,8 +109,6 @@ public class CohortsControllerTest {
   CloudStorageService cloudStorageService;
   @Mock
   CdrVersionService cdrVersionService;
-  @Mock
-  NotebookCohortCacheService notebookCohortCacheService;
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
@@ -164,7 +162,7 @@ public class CohortsControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, cdrVersionDao, cohortReviewDao, cohortMaterializationService,
-        userProvider, CLOCK, cdrVersionService, notebookCohortCacheService);
+        userProvider, CLOCK, cdrVersionService);
   }
 
   private JSONObject createDemoCriteria() {
