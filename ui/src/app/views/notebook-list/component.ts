@@ -29,6 +29,7 @@ import {
 })
 export class NotebookListComponent implements OnInit, OnDestroy {
 
+  private static PAGE_ID = 'notebook';
   awaitingReview: boolean;
   notebooksLoading: boolean;
   notebookList: FileDetail[] = [];
@@ -44,9 +45,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   showTip: boolean;
   cohortsLoading: boolean;
   cohortsError: boolean;
-  pageId: string;
   newPageVisit: PageVisit;
-  pageVisitsError: boolean;
   firstVisit = true;
 
 
@@ -67,10 +66,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
     this.showTip = false;
-    this.pageId = 'notebook';
-    const pageVisit: PageVisit = { page: this.pageId };
-    this.newPageVisit = pageVisit;
-    this.pageVisitsError = false;
+    this.newPageVisit.page = NotebookListComponent.PAGE_ID;
     this.cohortsLoading = true;
     this.cohortsError = false;
   }
@@ -96,12 +92,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       profile => {
         if (profile.pageVisits) {
           this.firstVisit = !profile.pageVisits.some(v =>
-            v.page === this.pageId);
+            v.page === NotebookListComponent.PAGE_ID);
         }
       },
-      error => {
-        this.pageVisitsError = true;
-      },
+      error => {},
       () => {
         if (this.firstVisit) { this.showTip = true; }
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
