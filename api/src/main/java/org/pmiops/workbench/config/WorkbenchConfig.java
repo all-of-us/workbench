@@ -17,6 +17,7 @@ public class WorkbenchConfig {
   public AdminConfig admin;
   public JiraConfig jira;
   public MandrillConfig mandrill;
+  public NotebookCohortCacheConfig notebookCohortCacheConfig;
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
@@ -70,5 +71,8 @@ public class WorkbenchConfig {
   public static class MandrillConfig {
     public String fromEmail;
     public int sendRetries;
+  }
+  public static class NotebookCohortCacheConfig {
+    public int count;
   }
 }

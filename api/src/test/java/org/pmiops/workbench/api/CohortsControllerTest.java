@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.NotebookCohortCacheService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -108,6 +109,8 @@ public class CohortsControllerTest {
   CloudStorageService cloudStorageService;
   @Mock
   CdrVersionService cdrVersionService;
+  @Mock
+  NotebookCohortCacheService notebookCohortCacheService;
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
@@ -161,7 +164,7 @@ public class CohortsControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, cdrVersionDao, cohortReviewDao, cohortMaterializationService,
-        userProvider, CLOCK, cdrVersionService);
+        userProvider, CLOCK, cdrVersionService, notebookCohortCacheService);
   }
 
   private JSONObject createDemoCriteria() {

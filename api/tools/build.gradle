@@ -93,6 +93,7 @@ sourceSets {
                   'org/pmiops/workbench/db/dao/WorkspaceServiceImpl.java',
                   'org/pmiops/workbench/db/dao/ParticipantCohortStatusDao.java',
                   'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoImpl.java',
+                  'org/pmiops/workbench/db/dao/NotebookCohortCacheServiceImpl.java',
                   'org/pmiops/workbench/cohortreview/util/*.java',
                   'org/pmiops/workbench/model/Filter.java',
                   'org/pmiops/workbench/model/Operator.java',

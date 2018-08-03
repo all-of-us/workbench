@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    <changeSet author="nehasaxena" id="db.changelog-44-cacheTable">
+        <createTable tableName="notebook_cohort_cache">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_workspace_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cohort_id" type="bigint">
+            </column>
+            <column name="notebook_name" type="varchar(255)">
+            </column>
+
+            <column name="lastAccessDate" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="user_workspace_id"
+                                 baseTableName="notebook_cohort_cache"
+                                 constraintName="fk_user_id_workspace_id"
+                                 referencedColumnNames="user_workspace_id"
+                                 referencedTableName="user_workspace" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="notebook_cohort_cache"
+                                 baseColumnNames="cohort_id"
+                                 constraintName="fk_cache_cohort_id"
+                                 referencedTableName="cohort"
+                                 referencedColumnNames="cohort_id" onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>
+
