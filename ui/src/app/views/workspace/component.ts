@@ -4,7 +4,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
@@ -12,15 +11,14 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {environment} from 'environments/environment';
 
 import {
-Cohort,
-CohortsService,
-ErrorResponse,
-FileDetail,
-PageVisit,
-ProfileService,
-Workspace,
-WorkspaceAccessLevel,
-WorkspacesService,
+  Cohort,
+  CohortsService,
+  FileDetail,
+  PageVisit,
+  ProfileService,
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspacesService,
 } from 'generated';
 
 /*
@@ -81,6 +79,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
 
+  private static PAGE_ID = 'workspace';
   showTip: boolean;
   workspace: Workspace;
   wsId: string;
@@ -100,7 +99,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   rightResearchPurposes: String[];
   pageId: string;
   newPageVisit: PageVisit;
-  pageVisitsError = false;
   firstVisit = true;
 
   @ViewChild(BugReportComponent)
@@ -136,9 +134,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
     this.showTip = false;
-    this.pageId = 'workspace';
-    const pageVisit: PageVisit = { page: this.pageId };
-    this.newPageVisit = pageVisit;
+    this.newPageVisit.page = WorkspaceComponent.PAGE_ID;
   }
 
   ngOnInit(): void {
@@ -147,13 +143,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.profileService.getMe().subscribe(
       profile => {
         this.firstVisit = !profile.pageVisits.some(v =>
-          v.page === this.pageId);
+          v.page === WorkspaceComponent.PAGE_ID);
       },
-      error => {
-        this.pageVisitsError = true;
-      },
+      error => {},
       () => {
-        if (this.firstVisit) { this.showTip = true; }
+        if (this.firstVisit) {
+          this.showTip = true;
+        }
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
       });
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
@@ -252,10 +248,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   get ownerPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
-  }
-
-  get newWorkspace(): boolean {
-    return this.showTip;
   }
 
   share(): void {

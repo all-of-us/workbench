@@ -102,9 +102,7 @@ const activatedRouteStub  = {
 
 describe('WorkspaceComponent', () => {
   let workspacePage: WorkspacePage;
-  let profileServiceStub: ProfileServiceStub;
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
