@@ -14,16 +14,6 @@
       <em>No results based on your search</em>
     </button>
   </div>
-  <div *ngIf="noResults" class="error">
-    <clr-icon shape="error-standard"></clr-icon>
-    <em>No Results Found</em>
-  </div>
-  <div *ngIf="noResults" class="dropdown-menu">
-    <button class="dropdown-item">{{searchTerm}}</button>
-    <button class="dropdown-item disabled">
-      <em>No results based on your search</em>
-    </button>
-  </div>
   <div *ngIf="multiIngredient">
     <b>Note:</b> This drug is multi-ingredient
   </div>
