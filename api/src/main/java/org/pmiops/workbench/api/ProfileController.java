@@ -10,19 +10,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
@@ -103,17 +98,6 @@ public class ProfileController implements ProfileApiDelegate {
           return result;
         }
       };
-
-  private static final Function<org.pmiops.workbench.db.model.PageVisit, PageVisit> TO_CLIENT_PAGE_VISIT =
-    new Function<org.pmiops.workbench.db.model.PageVisit, PageVisit>() {
-    @Override
-    public PageVisit apply(org.pmiops.workbench.db.model.PageVisit pageVisit) {
-      PageVisit result = new PageVisit();
-      result.setPage(pageVisit.getPageId());
-      result.setFirstVisit(pageVisit.getFirstVisit().getTime());
-      return result;
-      }
-    };
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 

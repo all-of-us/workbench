@@ -18,7 +18,6 @@ public class PageVisit {
   private long pageVisitId;
   private String pageId;
   private Timestamp firstVisit;
-  private Timestamp lastVisit;
   private User user;
 
   @Id
