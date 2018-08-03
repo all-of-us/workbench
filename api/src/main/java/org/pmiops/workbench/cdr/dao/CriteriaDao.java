@@ -28,11 +28,11 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
   List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name);
 
   @Query(value = "select * from criteria c " +
-    "where c.concept_id in ( " +
+    "inner join ( " +
     "select cr.concept_id_2 from concept_relationship cr " +
     "join concept c1 on (cr.concept_id_2 = c1.concept_id " +
     "and cr.concept_id_1 = :conceptId " +
-    "and c1.concept_class_id = 'Ingredient') )", nativeQuery = true)
+    "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2", nativeQuery = true)
   List<Criteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
 
   @Query(value = "select distinct c.domain_id as domainId from criteria c " +
