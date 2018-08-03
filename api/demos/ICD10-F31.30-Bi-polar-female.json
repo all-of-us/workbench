@@ -1,0 +1,44 @@
+{
+  "type": "cohort",
+  "cohort": {
+    "name": "ICD10-F31.30-Bi-polar-female",
+    "description": "demo",
+    "type": "demo",
+    "criteria": {
+      "includes":[{
+          "id":"includes_laksnttbw",
+          "items":[{
+              "id":"items_2669as58j",
+              "type":"ICD10",
+              "searchParameters":[{
+                  "parameterId":"param29136",
+                  "name":"Bipolar disorder, current episode depressed, mild or moderate severity, unspecified",
+                  "value":"F31.30",
+                  "type":"ICD10",
+                  "subtype":"ICD10CM",
+                  "group":false,
+                  "domain":"Condition"
+              }],
+              "modifiers":[]
+          }]
+      }],
+      "excludes":[{
+          "id":"excludes_3yrcis7hn",
+          "items":[{
+              "id":"items_s4qkqbq4k",
+              "type":"DEMO",
+              "searchParameters":[{
+                  "parameterId":"param23672",
+                  "name":"Male",
+                  "value":"M",
+                  "type":"DEMO",
+                  "subtype":"GEN",
+                  "group":false,
+                  "conceptId":8507
+              }],
+              "modifiers":[]
+          }]
+      }]
+    }
+  }
+}
