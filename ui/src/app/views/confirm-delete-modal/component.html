@@ -6,6 +6,6 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="deleting=false">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="this.receiveDelete.emit(resource);">Delete {{resourceType}}</button>
+    <button type="button" class="btn btn-primary confirm-delete-btn" (click)="this.receiveDelete.emit(resource);">Delete {{resourceType}}</button>
   </div>
 </clr-modal>

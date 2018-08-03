@@ -92,6 +92,13 @@
   top: 55px !important;
 }
 
+label.dropdown-header {
+  font-size: 14px;
+  color: #262262;
+  font-weight: 500;
+  text-transform: none;
+}
+
 .btn-group {
   /*Account for margins.*/
   width: calc(100% + 1.6rem);
