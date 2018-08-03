@@ -4,7 +4,7 @@
     <div class="title-bar">
       <div class="btn-group btn-link">
         <div class="title">{{ title }}</div>
-        <ng-container *ngIf="ctype !== 'demo'">
+        <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
           <div class="vbar"></div>
           <button type="button" class="btn"
             [class.active]="mode === 'tree'"
@@ -12,7 +12,7 @@
             Criteria Tree
           </button>
           <button type="button" class="btn"
-            *ngIf="ctype !== 'pm'"
+            *ngIf="ctype !== criteriaTypes.PM"
             [class.active]="mode === 'modifiers'"
             (click)="mode = 'modifiers'">
             Modifiers
@@ -25,6 +25,12 @@
           </button>
           -->
         </ng-container>
+      </div>
+      <div *ngIf="ctype === domainType[domainType.DRUG]">
+        <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank">
+          Explore
+        </a>
+        drugs by brand names outside of AoU
       </div>
       <button
         (click)="cancel()"
@@ -40,7 +46,7 @@
     -->
     <div class="content" *ngIf="open">
       <ng-container [ngSwitch]="ctype">
-        <crit-demographics *ngSwitchCase="'demo'"
+        <crit-demographics *ngSwitchCase="criteriaTypes.DEMO"
           (cancel)="cancel()"
           (finish)="finish()">
         </crit-demographics>
@@ -79,7 +85,7 @@
       </ng-container>
     </div>
 
-    <div *ngIf="ctype !== 'demo'" class="footer">
+    <div *ngIf="ctype !== criteriaTypes.DEMO" class="footer">
       <button type="button"
         (click)="cancel()"
         class="btn btn-link">

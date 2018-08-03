@@ -171,7 +171,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-07-22 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2008-07-22 05:00:00 UTC")
-      .domainType(DomainType.ALLEVENTS);
+      .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents2 = new AllEvents()
       .dataId(12751441L)
       .domain("Condition")
@@ -187,7 +187,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2008-08-01 05:00:00 UTC")
-      .domainType(DomainType.ALLEVENTS);
+      .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents3 = new AllEvents()
       .dataId(12751446L)
       .domain("Observation")
@@ -203,7 +203,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2009-12-03 05:00:00 UTC")
-      .domainType(DomainType.ALLEVENTS);
+      .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents4 = new AllEvents()
       .dataId(12751447L)
       .domain("Observation")
@@ -219,7 +219,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2009-12-04 05:00:00 UTC")
-      .domainType(DomainType.ALLEVENTS);
+      .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents5 = new AllEvents()
       .dataId(12751444L)
       .domain("Procedure")
@@ -235,7 +235,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2009-12-03 05:00:00 UTC")
-      .domainType(DomainType.ALLEVENTS);
+      .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents6 = new AllEvents()
       .dataId(12751445L)
       .domain("Procedure")
@@ -251,7 +251,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2009-12-04 05:00:00 UTC")
-      .domainType(DomainType.ALLEVENTS);
+      .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents7 = new AllEvents()
       .dataId(12751442L)
       .domain("Condition")
@@ -267,7 +267,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2001-12-03 05:00:00 UTC")
-      .domainType(DomainType.ALLEVENTS);
+      .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents8 = new AllEvents()
       .dataId(12751443L)
       .domain("Drug")
@@ -283,7 +283,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
       .itemDate("2001-12-04 05:00:00 UTC")
-      .domainType(DomainType.ALLEVENTS);
+      .domainType(DomainType.ALL_EVENTS);
     expectedCondition1 = new Condition()
       .visitId(1L)
       .firstMention("2008-07-22 05:00:00 UTC")
@@ -1009,7 +1009,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALLEVENTS);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALL_EVENTS);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
@@ -1053,7 +1053,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALLEVENTS);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALL_EVENTS);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
