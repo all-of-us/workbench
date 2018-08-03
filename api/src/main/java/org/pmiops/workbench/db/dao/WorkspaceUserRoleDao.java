@@ -7,5 +7,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface WorkspaceUserRoleDao extends CrudRepository<WorkspaceUserRole, Long> {
    WorkspaceUserRole findWorkspaceUserRolesByWorkspaceAndUser(Workspace workspace, User user);
-
 }
+
