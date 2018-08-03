@@ -87,8 +87,8 @@
 ::ng-deep #workspace-top-nav-bar .dropdown-menu {
   width: 8rem;
   position: absolute;
-  right: 0;
-  top: 55px;
+  left: -120px !important;
+  top: 55px !important;
 }
 
 .btn-group {
