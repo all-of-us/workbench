@@ -18,9 +18,6 @@
             <column name="first_visit" type="datetime">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_visit" type="datetime">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="page_visit"

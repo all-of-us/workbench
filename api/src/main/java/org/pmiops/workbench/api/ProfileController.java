@@ -111,7 +111,6 @@ public class ProfileController implements ProfileApiDelegate {
       PageVisit result = new PageVisit();
       result.setPage(pageVisit.getPageId());
       result.setFirstVisit(pageVisit.getFirstVisit().getTime());
-      result.setLastVisit(pageVisit.getLastVisit().getTime());
       return result;
       }
     };
@@ -530,25 +529,11 @@ public class ProfileController implements ProfileApiDelegate {
       firstPageVisit.setPageId(newPageVisit.getPage());
       firstPageVisit.setUser(user);
       firstPageVisit.setFirstVisit(timestamp);
-      firstPageVisit.setLastVisit(timestamp);
       oldPageVisits.add(firstPageVisit);
-    } else {
-      oldPageVisits.stream()
-        .filter(v -> v.getPageId().equals(newPageVisit.getPage()))
-        .forEach(v -> v.setLastVisit(timestamp));
+      user.setPageVisits(new HashSet<>(oldPageVisits));
+      userDao.save(user);
     }
-    user.setPageVisits(new HashSet<>(oldPageVisits));
-    userDao.save(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  @Override
-  public ResponseEntity<List<PageVisit>> getPageVisits() {
-    User user = userProvider.get();
-    Set<org.pmiops.workbench.db.model.PageVisit> pageVisits =
-      user.getPageVisits();
-    return ResponseEntity.ok(pageVisits.stream().map(TO_CLIENT_PAGE_VISIT)
-      .collect(Collectors.toList()));
   }
 
   @Override

@@ -48,8 +48,4 @@ public class PageVisit {
 
   public void setFirstVisit(Timestamp firstVisit) { this.firstVisit = firstVisit; }
 
-  @Column(name = "last_visit")
-  public Timestamp getLastVisit() { return lastVisit; }
-
-  public void setLastVisit(Timestamp lastVisit) { this.lastVisit = lastVisit; }
 }

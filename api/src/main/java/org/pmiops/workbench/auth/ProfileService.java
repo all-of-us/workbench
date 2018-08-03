@@ -37,7 +37,6 @@ public class ProfileService {
         PageVisit result = new PageVisit();
         result.setPage(pageVisit.getPageId());
         result.setFirstVisit(pageVisit.getFirstVisit().getTime());
-        result.setLastVisit(pageVisit.getLastVisit().getTime());
         return result;
       }
     };
@@ -53,12 +52,11 @@ public class ProfileService {
 
   public Profile getProfile(User user) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
-    User userWithAuthorities = userDao.findUserWithAuthorities(user.getUserId());
-    if (userWithAuthorities != null) {
-      // If the user is already written to the database, use it and whatever authorities are there.
-      user = userWithAuthorities;
+    User userWithAuthoritiesAndPageVisits = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
+    if (userWithAuthoritiesAndPageVisits != null) {
+      // If the user is already written to the database, use it and whatever authorities and page visits are there.
+      user = userWithAuthoritiesAndPageVisits;
     }
-    User userWithPageVisits = userDao.findUserWithPageVisits(user.getUserId());
 
     boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
@@ -102,8 +100,8 @@ public class ProfileService {
     if (user.getAuthorities() != null) {
       profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
     }
-    if (userWithPageVisits.getPageVisits() != null && !userWithPageVisits.getPageVisits().isEmpty()) {
-      profile.setPageVisits(userWithPageVisits.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
+    if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
+      profile.setPageVisits(user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
         .collect(Collectors.toList()));
     }
     profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()

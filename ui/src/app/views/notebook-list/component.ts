@@ -92,13 +92,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
-    this.profileService.getPageVisits().subscribe(
-      pageVisitsReceived => {
-        for (const pageVisit of pageVisitsReceived) {
-          if (pageVisit.page === this.pageId) {
-            this.firstVisit = false;
-          }
-        }
+    this.profileService.getMe().subscribe(
+      profile => {
+        this.firstVisit = !profile.pageVisits.some(v =>
+          v.page === this.pageId);
       },
       error => {
         this.pageVisitsError = true;

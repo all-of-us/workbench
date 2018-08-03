@@ -32,8 +32,9 @@ public interface UserDao extends CrudRepository<User, Long> {
   Set<String> getAllUserProjects();
 
   /**
-   * Returns the user with their page visits loaded.
+   * Returns the user with the page visits and authorities loaded.
    */
-  @Query("SELECT user FROM User user LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
-  User findUserWithPageVisits(@Param("id") long id);
+
+  @Query("Select user FROM User user LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
+  User findUserWithAuthoritiesAndPageVisits(@Param("id") long id);
 }
