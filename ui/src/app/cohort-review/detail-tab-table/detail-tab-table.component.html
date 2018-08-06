@@ -12,7 +12,7 @@
 
   <clr-dg-row *clrDgItems="let datum of data">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
-      <ng-container [ngSwitch]="col">
+      <ng-container [ngSwitch]="true">
         <span *ngSwitchCase="col.name === 'itemDate'
           || col.name === 'endDate'
           || col.name === 'firstMention'
