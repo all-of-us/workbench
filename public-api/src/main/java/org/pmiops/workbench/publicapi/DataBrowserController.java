@@ -302,7 +302,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
 
-        List<Concept> conceptSynonymList;
+        List<Concept> conceptSynonymList = null;
         if(searchConceptsRequest.getQuery() != null){
             conceptSynonymList = conceptDao.findConceptSynonyms("%"+searchConceptsRequest.getQuery()+"%",domainIds,minCount,maxResults);
         }
