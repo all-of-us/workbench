@@ -25,5 +25,24 @@
 
   </changeSet>
 
+
+  <changeSet id="add concept_synonym_name_index full_text" author="srushtigangireddy" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="concept_synonym_name_index"/>
+      </not>
+    </preConditions>
+    <sql dbms="mysql">
+      ALTER TABLE concept_synonym
+      ADD FULLTEXT INDEX concept_synonym_name_index
+      (concept_synonym_name);
+    </sql>
+
+    <createIndex tableName="concept_synonym" indexName="idx_concept_synonym_1">
+      <column name="concept_id" type="bigint"></column>
+    </createIndex>
+  </changeSet>
+
 </databaseChangeLog>
 
