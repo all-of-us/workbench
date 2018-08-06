@@ -4,6 +4,7 @@
 
   <clr-dg-column *ngFor="let col of columns"
     [clrDgField]="col.notField ? null : col.name"
+    [clrDgSortBy]="col.name === 'numMentions' ? stringToIntComparator : null"
     [ngClass]="col.classNames"
     >
     {{ col.displayName }}
