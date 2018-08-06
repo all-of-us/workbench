@@ -1,7 +1,8 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 
 import {
   Cohort,
@@ -25,6 +26,11 @@ export class CohortListComponent implements OnInit, OnDestroy {
   cohortsError = false;
   wsNamespace: string;
   wsId: string;
+  cohortInFocus: Cohort;
+
+
+  @ViewChild(ConfirmDeleteModalComponent)
+  deleteModal: ConfirmDeleteModalComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -80,7 +86,17 @@ export class CohortListComponent implements OnInit, OnDestroy {
     this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
       this.cohortList.splice(
         this.cohortList.indexOf(cohort), 1);
+      this.deleteModal.close();
     });
+  }
+
+  confirmDelete(cohort: Cohort): void {
+    this.cohortInFocus = cohort;
+    this.deleteModal.open();
+  }
+
+  receiveDelete($event): void {
+    this.deleteCohort($event);
   }
 
   get writePermission(): boolean {
