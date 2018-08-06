@@ -105,7 +105,6 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('.delete-button')));
     updateAndTick(fixture);
-    console.log(fixture.debugElement);
     simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-delete-btn')));
     updateAndTick(fixture);
     expect(app).toBeTruthy();
