@@ -301,31 +301,42 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
-        Slice<Concept> concepts =
-                conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                        searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
-        ConceptListResponse response = new ConceptListResponse();
-        List<Concept> matchedConcepts = concepts.getContent();
 
-        for(Concept con : matchedConcepts){
-            String conceptCode = con.getConceptCode();
-            String conceptId = String.valueOf(con.getConceptId());
+        List<Concept> conceptSynonymList = conceptDao.findConceptSynonyms("%"+searchConceptsRequest.getQuery()+"%",domainIds,minCount,maxResults);
 
-            if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
-                response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
+        if(conceptSynonymList.size() == 0){
+            Slice<Concept> concepts =
+                    conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
+                            searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
+            ConceptListResponse response = new ConceptListResponse();
+            List<Concept> matchedConcepts = concepts.getContent();
 
-                List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
-                response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+            for(Concept con : matchedConcepts){
+                String conceptCode = con.getConceptCode();
+                String conceptId = String.valueOf(con.getConceptId());
+
+                if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
+                    response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
+
+                    List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
+                    response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+                }
+
             }
 
-        }
+            if(response.getMatchType() == null && response.getStandardConcepts() == null){
+                response.setMatchType(MatchType.NAME);
+            }
 
-        if(response.getMatchType() == null && response.getStandardConcepts() == null){
-            response.setMatchType(MatchType.NAME);
-        }
+            response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+            return ResponseEntity.ok(response);
+        }else{
 
-        response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-        return ResponseEntity.ok(response);
+            ConceptListResponse response = new ConceptListResponse();
+            response.setSynonymConcepts(conceptSynonymList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+            return ResponseEntity.ok(response);
+
+        }
     }
 
     @Override

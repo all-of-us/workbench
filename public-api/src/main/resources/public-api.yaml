@@ -303,6 +303,11 @@ definitions:
           items:
             $ref: "#/definitions/Concept"
           description: standard concepts associated with the matched concept
+        synonymConcepts:
+          type: "array"
+          items:
+            $ref: "#/definitions/Concept"
+          description: synonym concepts associated with the search query
 
   QuestionConcept:
     type: object
@@ -540,7 +545,7 @@ definitions:
         type: object
         $ref: "#/definitions/Analysis"
       measurementValueOtherGenderAnalysis:
-        description: other gender analysis for measurement values
+        description: other  analysis for measurement values
         type: object
         $ref: "#/definitions/Analysis"
       measurementValueAgeAnalysis:
