@@ -505,7 +505,6 @@ export class CohortSearchActions {
    * Loads a JSONified SearchRequest into the store
    */
   loadFromJSON(json: string): void {
-    console.log(JSON.parse(json));
     this.idsInUse = Set<string>();
     const entities = this.deserializeEntities(json);
     this.loadEntities(entities);
