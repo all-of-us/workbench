@@ -11,6 +11,7 @@ import {IconsModule} from 'app/icons/icons.module';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {NotebookListComponent} from 'app/views/notebook-list/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -92,6 +93,7 @@ describe('NotebookListComponent', () => {
       ],
       declarations: [
         BugReportComponent,
+        ConfirmDeleteModalComponent,
         NotebookListComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
