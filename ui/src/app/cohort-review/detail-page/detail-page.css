@@ -1,6 +1,6 @@
 .detail-sidebar {
   position: absolute;
-  top: 0;
+  top: 1px;
   right: 0px;
   border: 1px solid rgb(86, 86, 86);
   border-radius: 2px;

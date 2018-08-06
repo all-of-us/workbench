@@ -16,9 +16,16 @@ import {
 import {
   BEGIN_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
+  BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
+  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_INGREDIENT_REQUEST,
+  LOAD_AUTOCOMPLETE_OPTIONS,
+  CLEAR_AUTOCOMPLETE_OPTIONS,
+  LOAD_INGREDIENT_LIST,
+  AUTOCOMPLETE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -78,6 +85,11 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
           .setIn(['criteria', 'requests', action.kind, action.parentId], true);
 
+      case BEGIN_DRUG_CRITERIA_REQUEST:
+        return state
+          .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
+          .setIn(['criteria', 'requests', action.kind, action.parentId], true);
+
       case LOAD_CRITERIA_RESULTS:
         return state
           .setIn(['criteria', 'tree', action.kind, action.parentId], fromJS(action.results))
@@ -88,6 +100,35 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SET_CRITERIA_SEARCH:
         return state.setIn(['criteria', 'search', 'terms'], action.searchTerms);
+
+      case BEGIN_DRUG_AUTOCOMPLETE_REQUEST:
+        return state
+          .deleteIn(['criteria', 'search', 'errors'])
+          .setIn(['criteria', 'search', 'autocomplete'], true);
+
+      case BEGIN_INGREDIENT_REQUEST:
+        return state
+          .deleteIn(['criteria', 'search', 'errors'])
+          .setIn(['criteria', 'search', 'autocomplete'], true);
+
+      case LOAD_AUTOCOMPLETE_OPTIONS:
+        return state
+          .setIn(['criteria', 'search', 'options'], action.options)
+          .deleteIn(['criteria', 'search', 'autocomplete']);
+
+      case CLEAR_AUTOCOMPLETE_OPTIONS:
+        return state
+          .deleteIn(['criteria', 'search', 'options']);
+
+      case LOAD_INGREDIENT_LIST:
+        return state
+          .setIn(['criteria', 'search', 'ingredients'], action.ingredients)
+          .deleteIn(['criteria', 'search', 'autocomplete']);
+
+      case AUTOCOMPLETE_REQUEST_ERROR:
+        return state
+          .deleteIn(['criteria', 'search', 'autocomplete'])
+          .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
 
       case CRITERIA_REQUEST_ERROR:
         return state
@@ -126,7 +167,6 @@ export const rootReducer: Reducer<CohortSearchState> =
       case BEGIN_ATTR_PREVIEW_REQUEST:
         return state
           .deleteIn(['wizard', 'calculate', 'error'])
-          .deleteIn(['wizard', 'calculate', 'count'])
           .setIn(['wizard', 'calculate', 'requesting'], true);
 
       case LOAD_ATTR_PREVIEW_RESULTS:
@@ -325,7 +365,10 @@ export const rootReducer: Reducer<CohortSearchState> =
           .updateIn(groupItems, List(), setUnique(itemId))
           .setIn(['entities', 'items', itemId], item)
           .updateIn(['entities', 'parameters'], Map(), mergeParams)
-          .set('wizard', Map({open: false}));
+          .set('wizard', Map({open: false}))
+          .deleteIn(['criteria', 'search', 'terms'])
+          .deleteIn(['criteria', 'search', 'options'])
+          .deleteIn(['criteria', 'search', 'ingredients']);
       }
 
       case WIZARD_CANCEL: {
@@ -340,7 +383,11 @@ export const rootReducer: Reducer<CohortSearchState> =
             state = state.deleteIn(['entities', 'searchRequests', SR_ID, role, index]);
           }
         }
-        return state.set('wizard', Map({open: false}));
+        return state
+          .set('wizard', Map({open: false}))
+          .deleteIn(['criteria', 'search', 'terms'])
+          .deleteIn(['criteria', 'search', 'options'])
+          .deleteIn(['criteria', 'search', 'ingredients']);
       }
 
       case SET_WIZARD_CONTEXT:

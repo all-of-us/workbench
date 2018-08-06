@@ -1,8 +1,10 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+import {CRITERIA_SUBTYPES} from '../constant';
 
 import {
   activeCriteriaTreeType,
@@ -13,6 +15,8 @@ import {
   criteriaSearchTerms,
   isCriteriaLoading,
 } from '../redux';
+
+import {highlightMatches} from '../utils';
 
 @Component({
   selector: 'crit-node',
@@ -44,7 +48,8 @@ export class NodeComponent implements OnInit, OnDestroy {
   expandedTree: any;
   originalTree: any;
   modifiedTree = false;
-  searchTerms: string;
+  searchTerms: Array<string>;
+  numMatches = 0;
   loading = false;
   error = false;
   fullTree: boolean;
@@ -58,7 +63,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
     if (!this.fullTree || this.node.get('id') === 0) {
-      const _type = this.node.get('type').toLowerCase();
+      const _type = this.node.get('type');
       const parentId = this.node.get('id');
       const errorSub = this.ngRedux
         .select(criteriaError(_type, parentId))
@@ -92,7 +97,8 @@ export class NodeComponent implements OnInit, OnDestroy {
         .select(criteriaSearchTerms())
         .subscribe(searchTerms => {
           this.searchTerms = searchTerms;
-          if (searchTerms && searchTerms.length > 2) {
+          this.numMatches = 0;
+          if (searchTerms && searchTerms.length) {
             this.searchTree();
           } else {
             this.clearSearchTree();
@@ -134,12 +140,14 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   loadChildren(event) {
     if (!event) { return ; }
-    const _type = this.node.get('type').toLowerCase();
+    const _type = this.node.get('type');
     const parentId = this.node.get('id');
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops
      */
-    if (this.fullTree) {
+    if (_type === DomainType.DRUG) {
+      this.actions.fetchDrugCriteria(_type, parentId, CRITERIA_SUBTYPES.ATC);
+    } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
@@ -170,20 +178,14 @@ export class NodeComponent implements OnInit, OnDestroy {
   filterTree(tree: Array<any>, path: Array<number>) {
     return tree.map((item, i) => {
       path.push(i);
-      if (this.matchFound(item)) {
-        let name = '<b>';
-        const start = item.name.toLowerCase().indexOf(this.searchTerms.toLowerCase());
-        if (start > -1) {
-          const end = start + this.searchTerms.length;
-          name += item.name.slice(0, start) + '<span class="search-keyword" style="color: #659F3D">'
-            + item.name.slice(start, end) + '</span>'
-            + item.name.slice(end);
-        } else {
-          name += item.name;
-        }
-        item.name = name + '</b>';
+      const matches = this.matchFound(item);
+      if (matches.length) {
+        item.name = highlightMatches(matches, item.name);
         if (path.length > 1) {
           this.setExpanded(path, 0);
+        }
+        if (this.searchTerms.length === 1) {
+          this.numMatches++;
         }
       }
       if (item.children.length) {
@@ -195,8 +197,9 @@ export class NodeComponent implements OnInit, OnDestroy {
   }
 
   matchFound(item: any) {
-    return item.name.toLowerCase().includes(this.searchTerms.toLowerCase())
-      || item.conceptId.toString().includes(this.searchTerms);
+    return this.searchTerms.filter(term => {
+      return item.name.toLowerCase().includes(term.toLowerCase());
+    });
   }
 
   setExpanded(path: Array<number>, end: number) {
@@ -207,7 +210,7 @@ export class NodeComponent implements OnInit, OnDestroy {
     if (obj.children.length) {
       obj.expanded = true;
     }
-    if (path[end + 1]) {
+    if (typeof path[end + 1] !== 'undefined') {
       this.setExpanded(path, end + 1);
     }
   }
