@@ -302,9 +302,12 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
 
-        List<Concept> conceptSynonymList = conceptDao.findConceptSynonyms("%"+searchConceptsRequest.getQuery()+"%",domainIds,minCount,maxResults);
+        List<Concept> conceptSynonymList;
+        if(searchConceptsRequest.getQuery() != null){
+            conceptSynonymList = conceptDao.findConceptSynonyms("%"+searchConceptsRequest.getQuery()+"%",domainIds,minCount,maxResults);
+        }
 
-        if(conceptSynonymList.size() == 0){
+        if(conceptSynonymList == null || conceptSynonymList.size() == 0){
             Slice<Concept> concepts =
                     conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                             searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
