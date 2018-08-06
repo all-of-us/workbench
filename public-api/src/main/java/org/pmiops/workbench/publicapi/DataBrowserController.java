@@ -7,7 +7,6 @@ import org.pmiops.workbench.model.ConceptAnalysisListResponse;
 import org.pmiops.workbench.model.ConceptAnalysis;
 import org.pmiops.workbench.model.DbDomainListResponse;
 import org.pmiops.workbench.model.QuestionConceptListResponse;
-import org.pmiops.workbench.model.AchillesResultListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.pmiops.workbench.model.Domain;
