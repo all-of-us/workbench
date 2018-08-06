@@ -15,7 +15,7 @@
       <column name="concept_id" type="INTEGER">
         <constraints nullable="false"/>
       </column>
-      <column name="concept_synonym_name" type="VARCHAR(500)">
+      <column name="concept_synonym_name" type="VARCHAR(1000)">
         <constraints nullable="false"/>
       </column>
       <column name="language_concept_id" type="INTEGER">
