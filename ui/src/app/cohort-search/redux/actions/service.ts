@@ -479,6 +479,7 @@ export class CohortSearchActions {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
             param.code = param.value;
+            param.hasAttributes = param.attributes.length > 0;
             entities.parameters[param.parameterId] = param;
             this.addId(param.parameterId);
             return param.parameterId;
@@ -496,7 +497,6 @@ export class CohortSearchActions {
         return group.id;
       });
     }
-
     return fromJS(entities);
   }
 
