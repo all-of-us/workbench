@@ -14,11 +14,14 @@
     (click)="onClick(datum)"
     [style.cursor]="'pointer'">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
-      <ng-container [ngSwitch]="col.name">
-        <span *ngSwitchCase="'itemDate'">
-          {{ datum.itemDate | date:'yyyy-MM-dd HH:mm:ss' }}
+      <ng-container [ngSwitch]="true">
+        <span *ngSwitchCase="col.name === 'itemDate'
+          || col.name === 'endDate'
+          || col.name === 'firstMention'
+          || col.name === 'lastMention'">
+          {{ datum[col.name] | date: 'yyyy-MM-dd HH:mm' }}
         </span>
-        <span *ngSwitchCase="'sourceVocabulary'"
+        <span *ngSwitchCase="col.name === 'sourceVocabulary'"
           [style.width.%]="100"
           [style.height.%]="100"
           [popper]="datum.sourceName || ''"
