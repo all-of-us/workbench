@@ -1,11 +1,18 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {ClrDatagridStateInterface} from '@clr/angular';
+import {ClrDatagridComparatorInterface} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortReviewService, PageFilterRequest, SortOrder} from 'generated';
+import {CohortReviewService, PageFilterRequest, ParticipantData, SortOrder} from 'generated';
+
+class StringToIntComparator implements ClrDatagridComparatorInterface<ParticipantData> {
+  compare(a: ParticipantData, b: ParticipantData) {
+    return (a.numMentions === null ? 0 : parseInt(a.numMentions, 10))
+      - (b.numMentions === null ? 0 : parseInt(b.numMentions, 10));
+  }
+}
 
 @Component({
   selector: 'app-detail-tab-table',
@@ -25,6 +32,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   subscription: Subscription;
 
   readonly pageSize = 25;
+  stringToIntComparator = new StringToIntComparator();
 
   constructor(
     private route: ActivatedRoute,
@@ -57,12 +65,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
           }
       ))
       .subscribe(resp => {
-        this.data = resp.items.map(item => {
-          if (item.numMentions) {
-            item.numMentionsInt = parseInt(item.numMentions, 10);
-          }
-          return item;
-        });
+        this.data = resp.items;
         this.totalCount = resp.count;
         this.loading = false;
       });

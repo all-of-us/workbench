@@ -3,13 +3,14 @@
   <clr-dg-placeholder>No {{ tabname }} Data</clr-dg-placeholder>
 
   <clr-dg-column *ngFor="let col of columns"
-    [clrDgField]="col.notField ? null : (col.name === 'numMentions' ? 'numMentionsInt' : col.name)"
+    [clrDgField]="col.notField ? null : col.name"
+    [clrDgSortBy]="col.name === 'numMentions' ? stringToIntComparator : null"
     [ngClass]="col.classNames"
     >
     {{ col.displayName }}
   </clr-dg-column>
 
-  <clr-dg-row *clrDgItems="let datum of data; let i = index">
+  <clr-dg-row *clrDgItems="let datum of data">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
       <ng-container [ngSwitch]="col">
         <span *ngSwitchCase="col.name === 'itemDate'
