@@ -1,13 +1,14 @@
 import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
+export const BEGIN_CRITERIA_SUBTREE_REQUEST = 'BEGIN_CRITERIA_SUBTREE_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
-export const BEGIN_DRUG_AUTOCOMPLETE_REQUEST = 'BEGIN_DRUG_AUTOCOMPLETE_REQUEST';
+export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
 export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
 export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
@@ -68,6 +69,12 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
   };
+  BEGIN_CRITERIA_SUBTREE_REQUEST: {
+    type: typeof BEGIN_CRITERIA_SUBTREE_REQUEST;
+    cdrVersionId: number;
+    kind: string;
+    id: number;
+  };
   BEGIN_ALL_CRITERIA_REQUEST: {
     type: typeof BEGIN_ALL_CRITERIA_REQUEST;
     cdrVersionId: number;
@@ -102,9 +109,10 @@ export interface ActionTypes {
     type: typeof SET_CRITERIA_SEARCH;
     searchTerms: Array<string>;
   };
-  BEGIN_DRUG_AUTOCOMPLETE_REQUEST: {
-    type: typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST;
+  BEGIN_AUTOCOMPLETE_REQUEST: {
+    type: typeof BEGIN_AUTOCOMPLETE_REQUEST;
     cdrVersionId: number;
+    kind: string;
     searchTerms: string;
   };
   BEGIN_INGREDIENT_REQUEST: {
@@ -291,13 +299,14 @@ export interface ActionTypes {
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
+  | ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
   | ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]
-  | ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST]
+  | ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST]
   | ActionTypes[typeof BEGIN_INGREDIENT_REQUEST]
   | ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS]

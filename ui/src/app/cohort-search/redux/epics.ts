@@ -1,4 +1,5 @@
 import {Injectable} from '@angular/core';
+import {DomainType} from 'generated';
 import {Map} from 'immutable';
 import {Epic} from 'redux-observable';
 import {Observable} from 'rxjs/Observable';
@@ -8,7 +9,7 @@ import {
   BEGIN_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
-  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   CANCEL_CRITERIA_REQUEST,
 
@@ -22,7 +23,7 @@ import {
   BEGIN_ATTR_PREVIEW_REQUEST,
 
   RootAction,
-  ActionTypes,
+  ActionTypes, BEGIN_CRITERIA_SUBTREE_REQUEST,
 } from './actions/types';
 
 import {
@@ -52,8 +53,9 @@ import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
+type CritSubRequestAction = ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
-type AutocompleteRequestAction = ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST];
+type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
@@ -89,6 +91,20 @@ export class CohortSearchEpics {
     )
   )
 
+  fetchCriteriaSubtree: CSEpic = (action$) => (
+    action$.ofType(BEGIN_CRITERIA_SUBTREE_REQUEST).mergeMap(
+      ({cdrVersionId, kind, id}: CritSubRequestAction) => {
+        return this.service.getCriteriaById(cdrVersionId, id)
+          .map(result => loadCriteriaRequestResults(kind, id, result.items))
+          .race(action$
+            .ofType(CANCEL_CRITERIA_REQUEST)
+            .filter(compare({kind, id}))
+            .first())
+          .catch(e => Observable.of(criteriaRequestError(kind, id, e)));
+      }
+    )
+  )
+
   fetchAllCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_ALL_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
@@ -118,11 +134,17 @@ export class CohortSearchEpics {
   )
 
   fetchAutocompleteOptions: CSEpic = (action$) => (
-    action$.ofType(BEGIN_DRUG_AUTOCOMPLETE_REQUEST).mergeMap(
-      ({cdrVersionId, searchTerms}: AutocompleteRequestAction) => {
-        return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
-          .map(result => loadAutocompleteOptions(result.items))
-          .catch(e => Observable.of(autocompleteRequestError(e)));
+    action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
+      ({cdrVersionId, kind, searchTerms}: AutocompleteRequestAction) => {
+        if (kind === DomainType[DomainType.DRUG]) {
+          return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
+            .map(result => loadAutocompleteOptions(result.items))
+            .catch(e => Observable.of(autocompleteRequestError(e)));
+        } else {
+          return this.service.getCriteriaByTypeForCodeOrName(cdrVersionId, kind, searchTerms)
+            .map(result => loadAutocompleteOptions(result.items))
+            .catch(e => Observable.of(autocompleteRequestError(e)));
+        }
       }
     )
   )
