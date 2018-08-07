@@ -101,3 +101,7 @@
   position: absolute;
   height: 90%;
 }
+
+button.btn:focus {
+  outline: none;
+}

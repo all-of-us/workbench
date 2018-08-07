@@ -85,6 +85,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.attributes$
       .subscribe(node => {
         this.attributesNode = node;
+        console.log(this.attributesNode.size)
         if (node.size === 0) {
           this.mode = 'tree';
         } else {
@@ -101,6 +102,11 @@ export class ModalComponent implements OnInit, OnDestroy {
   cancel() {
     this.open = false;
     this.actions.cancelWizard();
+  }
+
+  back(){
+    this.mode = 'tree';
+    this.attributesNode.size = 0;
   }
 
   finish() {
@@ -131,7 +137,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
     return title
-      ? `Selected ${title} Codes`
+      ? `Add Selected ${title} Criteria to Cohort`
       : 'No Selection';
   }
 }

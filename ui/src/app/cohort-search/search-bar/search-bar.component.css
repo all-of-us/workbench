@@ -27,3 +27,8 @@ input {
     padding: 0;
     min-width: auto;
 }
+
+.no-border{
+    border:none!important;
+    background: none!important;
+}

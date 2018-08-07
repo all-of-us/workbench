@@ -109,6 +109,10 @@
   flex-grow: 1;
 }
 
+button.btn:focus {
+  outline: none;
+}
+
 .background-image {
   background-image: url('/assets/images/hex-background@2x.png');
   background-repeat: no-repeat;

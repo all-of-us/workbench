@@ -1,0 +1,84 @@
+
+.dropdown-container{
+    border: 1px solid grey;
+    border-radius: .2rem;
+    padding-top: 0.4rem;
+    /*width:8rem;*/
+    /* background: white; */
+    /*background-color: white;*/
+    margin-top:-0.2rem;
+}
+
+.select select{
+    height: 1.5rem;
+}
+.count-preview {
+    background-color: #E4F3FC;
+    padding:0.5rem;
+    margin-top: 1rem;
+}
+.count-preview  .calculate-btn{
+    background-color: #2691D0;
+    color: white;
+}
+
+.count-preview  .disable-link {
+    pointer-events: none;
+    opavity: 0.3;
+}
+.count-preview  .add-button {
+    border-color:transparent;
+    outline: none;
+    background-color: transparent;
+    font-weight: 500;
+    color: #2691D0;
+}
+.count-preview .text-bold {
+    font-weight: bold;
+    color: #4A4A4A;
+}
+
+.count-preview .result-text {
+    font-weight: bold;
+    color: #4A4A4A;
+}
+
+.count-preview .result-text{
+    color: #262262;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 17px;
+
+}
+
+button.btn:focus {
+    outline: none;
+}
+
+.number-container{
+    border:1px solid grey;
+    width: 3rem;
+    height: 1.4rem;
+    text-align:center;
+}
+
+.range-container {
+   padding-left: 0.2rem;
+    margin-top: -0.4rem;
+}
+
+.range-container .number-container {
+    border-radius: 0.2rem
+}
+
+.text-padding {
+    padding-top:0.3rem;
+}
+
+.spin-top-padding {
+    padding-top:0.5rem;
+}
+
+.attr-name-color {
+    color: #262262;
+}
