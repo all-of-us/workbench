@@ -104,7 +104,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .countValue(concept.getCountValue())
                             .sourceCountValue(concept.getSourceCountValue())
                             .prevalence(concept.getPrevalence())
-                            .conceptSynonyms(concept.getConceptSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
+                            .conceptSynonyms(concept.getConceptSynonyms().stream().distinct().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
                 }
             };
 

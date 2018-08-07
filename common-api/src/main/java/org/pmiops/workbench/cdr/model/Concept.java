@@ -200,7 +200,9 @@ public class Concept {
         return this;
     }
     public void addConceptSynonym(ConceptSynonym conceptSynonym) {
-        this.conceptSynonyms.add(conceptSynonym);
+        if(!conceptSynonyms.contains(conceptSynonym)){
+            this.conceptSynonyms.add(conceptSynonym);
+        }
     }
 
 
