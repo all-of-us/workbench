@@ -85,6 +85,52 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/search/{value}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns matches on criteria table by code or name
+      operationId: "getCriteriaByTypeForCodeOrName"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: value
+          type: string
+          required: true
+          description: the value to search for
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/subtree/{id}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns matches on criteria table by code or name
+      operationId: "getCriteriaById"
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          format: int64
+          required: true
+          description: the id of the subtree to find
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/subtype/{subtype}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
