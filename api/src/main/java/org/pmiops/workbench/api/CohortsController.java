@@ -163,7 +163,6 @@ public class CohortsController implements CohortsApiDelegate {
 
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
-
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
@@ -266,9 +265,9 @@ public class CohortsController implements CohortsApiDelegate {
     if (pageSize == null || pageSize == 0) {
       request.setPageSize(DEFAULT_PAGE_SIZE);
     } else if (pageSize < 0) {
-      throw new BadRequestException(
-          String.format("Invalid page size: %s; must be between 1 and %d", pageSize,
-              MAX_PAGE_SIZE));
+        throw new BadRequestException(
+            String.format("Invalid page size: %s; must be between 1 and %d", pageSize,
+                MAX_PAGE_SIZE));
     } else if (pageSize > MAX_PAGE_SIZE) {
       request.setPageSize(MAX_PAGE_SIZE);
     }
