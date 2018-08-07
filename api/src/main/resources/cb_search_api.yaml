@@ -116,7 +116,7 @@ paths:
     get:
       tags:
         - cohortBuilder
-      description: Returns matches on criteria table by code or name
+      description: Returns subtree for the specified id.
       operationId: "getCriteriaById"
       parameters:
         - in: path
