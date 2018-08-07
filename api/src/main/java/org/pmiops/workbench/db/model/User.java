@@ -173,7 +173,7 @@ public class User {
 
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "page_visit", joinColumns=@JoinColumn(name="user_id"))
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "user")
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "user")
   @Column(name="page_id")
   public Set<PageVisit> getPageVisits() {
     return pageVisits;

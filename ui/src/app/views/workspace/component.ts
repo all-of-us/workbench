@@ -76,10 +76,10 @@ enum Tabs {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
+  private static PAGE_ID = 'workspace';
+
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
-
-  private static PAGE_ID = 'workspace';
   showTip: boolean;
   workspace: Workspace;
   wsId: string;
@@ -97,8 +97,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   researchPurposeArray: String[] = [];
   leftResearchPurposes: String[];
   rightResearchPurposes: String[];
-  pageId: string;
-  newPageVisit: PageVisit;
+  newPageVisit: PageVisit = { page: WorkspaceComponent.PAGE_ID};
   firstVisit = true;
 
   @ViewChild(BugReportComponent)
@@ -134,7 +133,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
     this.showTip = false;
-    this.newPageVisit.page = WorkspaceComponent.PAGE_ID;
   }
 
   ngOnInit(): void {
@@ -142,8 +140,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.wsId = this.route.snapshot.params['wsid'];
     this.profileService.getMe().subscribe(
       profile => {
-        this.firstVisit = !profile.pageVisits.some(v =>
-          v.page === WorkspaceComponent.PAGE_ID);
+        if (profile.pageVisits) {
+          this.firstVisit = !profile.pageVisits.some(v =>
+            v.page === WorkspaceComponent.PAGE_ID);
+        }
       },
       error => {},
       () => {
