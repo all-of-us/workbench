@@ -388,10 +388,14 @@ export class WorkspaceEditComponent implements OnInit {
     return this.workspace.researchPurpose.underservedPopulationDetails;
   }
 
+  get isValidWorkspace() {
+    return !isBlank(this.workspace.name) && !isBlank(this.workspace.description);
+  }
+
   get allowSave() {
     if (this.savingWorkspace) {
       return false;
     }
-    return !isBlank(this.workspace.name) && !isBlank(this.workspace.description);
+    return this.isValidWorkspace;
   }
 }

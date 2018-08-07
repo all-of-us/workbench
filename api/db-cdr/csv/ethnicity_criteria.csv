@@ -1,4 +1,0 @@
-id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,domain_id,concept_id,has_attribute,predefined_attributes
-306783,0,DEMO,ETH,Ethnicity,Ethnicity,1,0,,,,0,
-306784,306783,DEMO,ETH,Hispanic or Latino,Hispanic or Latino,0,1,26082,,38003563,0,
-306785,306783,DEMO,ETH,Not Hispanic or Latino,Not Hispanic or Latino,0,1,794520,,38003564,0,
