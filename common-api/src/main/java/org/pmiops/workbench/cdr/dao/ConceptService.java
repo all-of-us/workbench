@@ -87,7 +87,7 @@ public class ConceptService {
                         Expression<Long> conceptIdCheck = root.get("conceptId");
                         synonymConceptPredicate.add(conceptIdCheck.in(synonymConceptIds));
 
-                        if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
+                        if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS) || standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
 
                                 predicates.add(
                                         criteriaBuilder.or(
@@ -126,26 +126,7 @@ public class ConceptService {
                                     ));
 
 
-                        } else if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
-
-                            predicates.add(
-                                    criteriaBuilder.or(
-                                            synonymConceptPredicate.toArray(new Predicate[0])
-                                    )
-                            );
-
-                            List<Predicate> standardConceptPredicates = new ArrayList<>();
-                            standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
-                                    criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-                            standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
-                                    criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
-
-                            predicates.add(
-                                    criteriaBuilder.or(
-                                           standardConceptPredicates.toArray(new Predicate[0])
-                                    ));
-                        }
-                        else {
+                        }else {
 
                             predicates.add(
                                     criteriaBuilder.or(
