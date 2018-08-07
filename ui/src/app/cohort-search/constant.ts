@@ -2,6 +2,7 @@ import { DomainType } from 'generated';
 
 export const CRITERIA_TYPES = {
   'PM': 'PM',
+  'MEAS': 'MEAS',
   'ICD9': 'ICD9',
   'ICD10': 'ICD10',
   'CPT': 'CPT',
@@ -31,7 +32,7 @@ export const DOMAIN_TYPES = [
     { name: 'Conditions',    type: DomainType.CONDITION, disabled: true },
     { name: 'Procedures',    type: DomainType.PROCEDURE, disabled: true },
     { name: 'Drugs',    type: DomainType.DRUG, fullTree: true },
-    { name: 'Measurements',    type: DomainType.MEASUREMENT, disabled: true },
+    { name: 'Measurements',    type: CRITERIA_TYPES.MEAS},
     { name: 'Visits',    type: DomainType.VISIT, fullTree: true },
     { name: 'ICD9 Codes',   type: CRITERIA_TYPES.ICD9 },
     { name: 'ICD10 Codes',  type: CRITERIA_TYPES.ICD10 },
@@ -52,4 +53,3 @@ export const PM_UNITS = {
     'BP': '',
     'HR-DETAIL': 'beats/min'
 };
-

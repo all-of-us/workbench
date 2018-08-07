@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {DomainType} from 'generated';
 import {NodeComponent} from '../node/node.component';
+import {CRITERIA_TYPES} from '../constant';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -22,6 +23,8 @@ export class TreeComponent extends NodeComponent implements OnInit {
   }
 
   showSearch() {
-    return this.node.get('type') === DomainType.VISIT || this.node.get('type') === DomainType.DRUG;
+    return this.node.get('type') === DomainType.VISIT
+      || this.node.get('type') === DomainType.DRUG
+      || this.node.get('type') === CRITERIA_TYPES.MEAS;
   }
 }

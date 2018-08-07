@@ -1,12 +1,13 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
-  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
@@ -64,6 +65,11 @@ export const requestCriteria =
   ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
   ({type: BEGIN_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
 
+export const requestCriteriaSubtree =
+  (cdrVersionId: number, kind: string, id: number
+  ): ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST] =>
+  ({type: BEGIN_CRITERIA_SUBTREE_REQUEST, cdrVersionId, kind, id});
+
 export const requestAllCriteria =
   (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST] =>
@@ -90,9 +96,9 @@ export const setCriteriaSearchTerms =
   ({type: SET_CRITERIA_SEARCH, searchTerms});
 
 export const requestAutocompleteOptions =
-  (cdrVersionId: number, searchTerms: string
-  ): ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST] =>
-  ({type: BEGIN_DRUG_AUTOCOMPLETE_REQUEST, cdrVersionId, searchTerms});
+  (cdrVersionId: number, kind: string, searchTerms: string
+  ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
+  ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, searchTerms});
 
 export const requestIngredientsForBrand =
   (cdrVersionId: number, conceptId: number
