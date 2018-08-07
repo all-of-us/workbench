@@ -39,7 +39,7 @@
       (concept_synonym_name);
     </sql>
 
-    <createIndex tableName="concept_synonym" indexName="idx_concept_synonym_1">
+    <createIndex tableName="concept_synonym" indexName="idx_concept_id">
       <column name="concept_id" type="bigint"></column>
     </createIndex>
   </changeSet>

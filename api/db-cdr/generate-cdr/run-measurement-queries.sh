@@ -245,7 +245,7 @@ CAST((case when cast(ar.stratum_2 as int64) > 0 then
 cast(ROUND(m1.value_as_number / cast(ar.stratum_2 as int64)) * cast(ar.stratum_2 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
-(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 on p1.person_id = m1.person_id
@@ -285,7 +285,7 @@ cast(m1.measurement_concept_id as string) as stratum_1,CAST(p1.gender_concept_id
 m1.value_source_value as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
-(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on m1.measurement_concept_id = c.concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
@@ -319,7 +319,7 @@ CAST((case when cast(ar.stratum_2 as int64) > 0 then
 cast(ROUND(m1.value_as_number / cast(ar.stratum_2 as int64)) * cast(ar.stratum_2 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
-(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 on p1.person_id = m1.person_id
@@ -365,7 +365,7 @@ CAST((case when cast(ar.stratum_2 as int64) > 0 then
 cast(ROUND(m1.value_as_number / cast(ar.stratum_2 as int64)) * cast(ar.stratum_2 as int64) as int64) end) else m1.value_as_number end) as STRING) as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
-(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 on p1.person_id = m1.person_id
@@ -407,7 +407,7 @@ cast(m1.measurement_concept_id as string) as stratum_1,CAST(floor((extract(year 
 m1.value_source_value as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
-(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on m1.measurement_concept_id = c.concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
@@ -439,7 +439,7 @@ cast(m1.measurement_concept_id as string) as stratum_1,'2' as stratum_2,'Measure
 m1.value_source_value as stratum_4,
 m1.unit_source_value as stratum_5,
 count(distinct p1.person_id) as count_value,
-(select COUNT(distinct m2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m2 where m2.measurement_source_concept_id=m1.measurement_concept_id) as source_count_value
+0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on m1.measurement_concept_id = c.concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id

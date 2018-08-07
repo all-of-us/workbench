@@ -151,7 +151,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select 0, 3101 as analysis_id,
 	CAST(co1.condition_concept_id AS STRING) as stratum_1,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,'Condition' as stratum_3,
-	COUNT(distinct p1.PERSON_ID) as count_value,(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2 on p2.person_id=co2.person_id where co2.condition_source_concept_id=co1.condition_concept_id) as source_count_value
+	COUNT(distinct p1.PERSON_ID) as count_value,
+	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2 on p2.person_id=co2.person_id where co2.condition_source_concept_id=co1.condition_concept_id and p2.gender_concept_id = p1.gender_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 on p1.person_id = co1.person_id
@@ -176,8 +177,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select 0, 3102 as analysis_id,
 CAST(co1.condition_concept_id AS STRING) as stratum_1,
 CAST(floor((extract(year from condition_start_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'Condition' as stratum_3,
-count(distinct p1.person_id) as count_value,(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2
-on p2.person_id=co2.person_id where co2.condition_source_concept_id=co1.condition_concept_id) as source_count_value
+count(distinct p1.person_id) as count_value,
+(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2
+on p2.person_id=co2.person_id where co2.condition_source_concept_id=co1.condition_concept_id and floor((extract(year from co2.condition_start_date) - p2.year_of_birth)/10) >=3) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 on p1.person_id = co1.person_id
@@ -200,7 +202,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select 0, 3102 as analysis_id,
 	CAST(co1.condition_concept_id AS STRING) as stratum_1,
 	'2' as stratum_2,'Condition' as stratum_3,
-  count(distinct p1.person_id) as count_value,(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2 on p2.person_id=co2.person_id where co2.condition_source_concept_id=co1.condition_concept_id) as source_count_value
+  count(distinct p1.person_id) as count_value,(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2 on p2.person_id=co2.person_id where co2.condition_source_concept_id=co1.condition_concept_id
+  and (extract(year from co2.condition_start_date) - p2.year_of_birth) > 18 and (extract(year from co2.condition_start_date) - p2.year_of_birth) < 30) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 on p1.person_id = co1.person_id
@@ -296,7 +299,7 @@ select 0, 3101 as analysis_id,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,'Procedure' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
 	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2
-	on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id) as source_count_value
+	on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id and p2.gender_concept_id=p1.gender_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
 on p1.person_id = co1.person_id
@@ -320,7 +323,8 @@ select 0, 3102 as analysis_id,
 	CAST(co1.procedure_concept_id AS STRING) as stratum_1,
 	CAST(floor((extract(year from co1.procedure_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'Procedure' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2 on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id) as source_count_value
+	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2 on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id
+	and floor((extract(year from co2.procedure_date) - p2.year_of_birth)/10) >=3) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
 on p1.person_id = co1.person_id
@@ -344,7 +348,9 @@ select 0, 3102 as analysis_id,
 	CAST(co1.procedure_concept_id AS STRING) as stratum_1,
 	'2' as stratum_2,'Procedure' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2 on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id) as source_count_value
+	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co2 on p2.person_id = co2.person_id where co2.procedure_source_concept_id=co1.procedure_concept_id
+	and (extract(year from co2.procedure_date) - p2.year_of_birth) >= 18 and
+        (extract(year from co2.procedure_date) - p2.year_of_birth) < 30) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co1
 on p1.person_id = co1.person_id
@@ -388,7 +394,7 @@ select 0, 3101 as analysis_id,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,'Drug' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
 	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co2
-	on p2.person_id = co2.person_id where co2.drug_source_concept_id=co1.drug_concept_id) as source_count_value
+	on p2.person_id = co2.person_id where co2.drug_source_concept_id=co1.drug_concept_id and p2.gender_concept_id = p1.gender_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
 on p1.person_id = co1.person_id
@@ -411,7 +417,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select 0, 3102 as analysis_id,CAST(co1.drug_concept_id AS STRING) as stratum_1,
 	CAST(floor((extract(year from co1.drug_exposure_start_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'Drug' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co2 on p2.person_id = co2.person_id where co2.drug_source_concept_id=co1.drug_concept_id) as source_count_value
+	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co2 on p2.person_id = co2.person_id where co2.drug_source_concept_id=co1.drug_concept_id
+	and floor((extract(year from co2.drug_exposure_start_date) - p2.year_of_birth)/10) >=3 ) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
 on p1.person_id = co1.person_id
@@ -435,7 +442,9 @@ select 0, 3102 as analysis_id,
 	CAST(co1.drug_concept_id AS STRING) as stratum_1,
 	'2' as stratum_2,'Drug' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co2 on p2.person_id = co2.person_id where co2.drug_source_concept_id=co1.drug_concept_id) as source_count_value
+	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co2 on p2.person_id = co2.person_id where co2.drug_source_concept_id=co1.drug_concept_id
+	and (extract(year from co2.drug_exposure_start_date) - p2.year_of_birth) >= 18 and
+        (extract(year from co2.drug_exposure_start_date) - p2.year_of_birth) < 30) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co1
 on p1.person_id = co1.person_id
@@ -480,7 +489,7 @@ select 0, 3101 as analysis_id,
 	CAST(co1.observation_concept_id AS STRING) as stratum_1,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,'Observation' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct co2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co2 where co2.observation_source_concept_id=co1.observation_concept_id) as source_count_value
+	(select COUNT(distinct co2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 on p2.person_id=co2.person_id where co2.observation_source_concept_id=co1.observation_concept_id and p2.gender_concept_id = p1.gender_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
 on p1.person_id = co1.person_id
@@ -506,7 +515,9 @@ select 0, 3102 as analysis_id,
 	CAST(co1.observation_concept_id AS STRING) as stratum_1,
 	CAST(floor((extract(year from co1.observation_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'Observation' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct co2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co2 where co2.observation_source_concept_id=co1.observation_concept_id) as source_count_value
+	(select COUNT(distinct co2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 on p2.person_id=co2.person_id
+	where co2.observation_source_concept_id=co1.observation_concept_id
+	and floor((extract(year from co2.observation_date) - p2.year_of_birth)/10) >=3 ) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
 on p1.person_id = co1.person_id
@@ -532,7 +543,8 @@ select 0, 3102 as analysis_id,
 	CAST(co1.observation_concept_id AS STRING) as stratum_1,
 	'2' as stratum_2,'Observation' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct co2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co2 where co2.observation_source_concept_id=co1.observation_concept_id) as source_count_value
+	(select COUNT(distinct co2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 on p2.person_id=co2.person_id where co2.observation_source_concept_id=co1.observation_concept_id
+	and (extract(year from co2.observation_date) - p2.year_of_birth) >= 18 and (extract(year from co2.observation_date) - p2.year_of_birth) < 30) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` co1
 on p1.person_id = co1.person_id
@@ -557,7 +569,8 @@ select 0, 3101 as analysis_id,
 	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,'Measurement' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
+	(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 on p2.person_id=co2.person_id
+	where co2.measurement_source_concept_id=co1.measurement_concept_id and p2.gender_concept_id=p1.gender_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
 on p1.person_id = co1.person_id
@@ -573,8 +586,7 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
 on p1.person_id = co1.person_id
 where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id!=co1.measurement_source_concept_id
-group by co1.measurement_source_concept_id, p1.gender_concept_id
-"
+group by co1.measurement_source_concept_id, p1.gender_concept_id"
 
 # Measurement by age deciles
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -584,7 +596,8 @@ select 0, 3102 as analysis_id,
 	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
 	CAST(floor((extract(year from co1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'Measurement' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
+	(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 on p2.person_id=co2.person_id where co2.measurement_source_concept_id=co1.measurement_concept_id
+	and floor((extract(year from co2.measurement_date) - p2.year_of_birth)/10) >=3 ) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
 on p1.person_id = co1.person_id
@@ -610,7 +623,8 @@ select 0, 3102 as analysis_id,
 	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
 	'2' as stratum_2,'Measurement' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
+	(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 on p2.person_id=co2.person_id where co2.measurement_source_concept_id=co1.measurement_concept_id
+	and (extract(year from co2.measurement_date) - p2.year_of_birth) >= 18 and (extract(year from co2.measurement_date) - p2.year_of_birth) < 30 ) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
 on p1.person_id = co1.person_id

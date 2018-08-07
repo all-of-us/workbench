@@ -303,20 +303,28 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
 
         List<Concept> conceptSynonymList = null;
-        if(searchConceptsRequest.getQuery() != null){
-            conceptSynonymList = conceptDao.findConceptSynonyms("%"+searchConceptsRequest.getQuery()+"%",domainIds,minCount,maxResults);
+        List<Long> synonymConceptIds = new ArrayList<>();
+        if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
+            conceptSynonymList = conceptDao.findConceptSynonyms("%"+searchConceptsRequest.getQuery()+"%",domainIds);
+            for(Concept c:conceptSynonymList){
+                synonymConceptIds.add(c.getConceptId());
+            }
         }
 
-        if(conceptSynonymList == null || conceptSynonymList.size() == 0){
-            Slice<Concept> concepts =
+        Slice<Concept> concepts =
                     conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                            searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
+                            searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
             ConceptListResponse response = new ConceptListResponse();
             List<Concept> matchedConcepts = concepts.getContent();
 
             for(Concept con : matchedConcepts){
                 String conceptCode = con.getConceptCode();
                 String conceptId = String.valueOf(con.getConceptId());
+
+                if(con.getConceptSynonyms() != null){
+                    response.setMatchType(MatchType.SYNONYM);
+                    System.out.println(con.getConceptSynonyms());
+                }
 
                 if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
                     response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
@@ -333,13 +341,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
             response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
             return ResponseEntity.ok(response);
-        }else{
-
-            ConceptListResponse response = new ConceptListResponse();
-            response.setSynonymConcepts(conceptSynonymList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-            return ResponseEntity.ok(response);
-
-        }
     }
 
     @Override

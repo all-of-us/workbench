@@ -98,10 +98,19 @@ public class ConceptsController implements ConceptsApiDelegate {
       throw new BadRequestException("Query must be non-whitespace");
     }
 
+    List<Concept> conceptSynonymList = null;
+    List<Long> synonymConceptIds = new ArrayList<>();
+    if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
+      conceptSynonymList = conceptDao.findConceptSynonyms("%"+searchConceptsRequest.getQuery()+"%",domainIds);
+      for(Concept c:conceptSynonymList){
+        synonymConceptIds.add(c.getConceptId());
+      }
+    }
+
     // TODO: move Swagger codegen to common-api, pass request with modified values into service
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
         conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
-            request.getVocabularyIds(), domainIds, maxResults, minCount);
+            request.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
     ConceptListResponse response = new ConceptListResponse();
     response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
         .collect(Collectors.toList()));
