@@ -764,7 +764,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\`
 set concept_id=null where concept_id=0"
 
-# Domain participant counts
+# Condition Domain participant counts
 echo "Getting domain participant counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -772,25 +772,28 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  select 0 as id,3000 as analysis_id,'19' as stratum_1,'Condition' as stratum_3, COUNT(distinct ob.person_id) as count_value, 0 as source_count_value
  from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob"
 
+# Drug Exposure Domain participant counts
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
  (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
  select 0 as id,3000 as analysis_id,'13' as stratum_1,'Drug' as stratum_3, COUNT(distinct d.person_id) as count_value, 0 as source_count_value
  from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` d"
 
+# Measurement domain participant counts
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
  (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
  select 0 as id,3000 as analysis_id,'21' as stratum_1,'Measurement' as stratum_3, COUNT(distinct m.person_id) as count_value, 0 as source_count_value
  from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m"
 
+#Procedure domain participant counts
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
  (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
  select 0 as id,3000 as analysis_id,'10' as stratum_1,'Procedure' as stratum_3, COUNT(distinct p.person_id) as count_value, 0 as source_count_value
  from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` p"
 
-#Survey response, gender and age counts
+# Count of people who took each survey
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_3,count_value,source_count_value)
@@ -803,6 +806,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_i
 Where (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0) and (dbd.db_type = 'survey' and dbd.concept_id <> 0)
 Group by dbd.concept_id"
 
+# Gender breakdown of people who took each survey (Row for combinations of each survey and gender)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_2,stratum_3,count_value,source_count_value)
@@ -819,6 +823,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_i
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0) and (dbd.db_type = 'survey' and dbd.concept_id <> 0)
 group by dbd.concept_id, p1.gender_concept_id"
 
+# Age breakdown of people who took each survey (Row for combinations of each survey and age decile)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_2,stratum_3,count_value,source_count_value)
@@ -837,6 +842,7 @@ where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0
 and floor((extract(year from ob1.observation_date) - p1.year_of_birth)/10) >=3
 group by dbd.concept_id, stratum_2"
 
+# Age breakdown of people who took each survey (Row for combinations of each survey and age decile 2)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_2,stratum_3,count_value,source_count_value)
@@ -855,6 +861,7 @@ where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0
 and (extract(year from ob1.observation_date) - p1.year_of_birth) >= 18 and (extract(year from ob1.observation_date) - p1.year_of_birth) < 30
 group by dbd.concept_id, stratum_2"
 
+# Race breakdown of people who took each survey (Row for combinations of each survey and race)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_2,stratum_3,count_value,source_count_value)
@@ -873,6 +880,7 @@ where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0
 and p1.race_concept_id > 0
 group by dbd.concept_id, stratum_2"
 
+# Ethnicity breakdown of people who took each survey (Row for combinations of each survey and ethnicity)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_2,stratum_3,count_value,source_count_value)

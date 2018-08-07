@@ -307,7 +307,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         List<Concept> conceptSynonymList = null;
         List<Long> synonymConceptIds = new ArrayList<>();
         if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
-            conceptSynonymList = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()),domainIds);
+            conceptSynonymList = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
             for(Concept c:conceptSynonymList){
                 synonymConceptIds.add(c.getConceptId());
             }

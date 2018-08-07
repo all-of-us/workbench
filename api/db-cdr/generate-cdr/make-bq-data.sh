@@ -249,4 +249,16 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT c.concept_id_1, c.concept_id_2, c.relationship_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
 
+########################
+# concept_synonym #
+########################
+echo "Inserting concept_relationship"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\`
+ (concept_id, concept_synonym_name, language_concept_id)
+SELECT c.concept_id, c.concept_synonym_name, c.language_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
+
+
+
 
