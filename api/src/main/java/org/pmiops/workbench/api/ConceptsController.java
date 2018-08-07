@@ -106,7 +106,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     List<Concept> conceptSynonymList = null;
     List<Long> synonymConceptIds = new ArrayList<>();
     if(request.getQuery() != null && !request.getQuery().isEmpty()){
-      conceptSynonymList = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(request.getQuery()),domainIds);
+      conceptSynonymList = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(request.getQuery()));
       for(Concept c:conceptSynonymList){
         synonymConceptIds.add(c.getConceptId());
       }

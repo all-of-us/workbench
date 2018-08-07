@@ -298,7 +298,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }
 
 
-
         List<String> domainIds = null;
         if (searchConceptsRequest.getDomain() != null) {
             domainIds = DOMAIN_MAP.get(searchConceptsRequest.getDomain()).asList();
