@@ -79,7 +79,7 @@ public class ConceptService {
                 (root, criteriaQuery, criteriaBuilder) -> {
                     List<Predicate> predicates = new ArrayList<>();
 
-                    // Check that the concept name, code, or ID matches the query string.
+                    // Fetch the concept synonyms
 
                     if(synonymConceptIds.size() > 0){
 
@@ -124,7 +124,6 @@ public class ConceptService {
                                             criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
                                             criteriaBuilder.and(standardConceptPredicates.toArray(new Predicate[0]))
                                     ));
-
 
                         }else {
 
