@@ -129,7 +129,7 @@ export class DetailTabsComponent {
 
   readonly allEvents = {
     name: 'All Events',
-    domain: DomainType.AllEvents,
+    domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, ageAtEvent, visitType, numMentions,
@@ -153,7 +153,7 @@ export class DetailTabsComponent {
 
   readonly tabs = [{
     name: 'Conditions',
-    domain: DomainType.Condition,
+    domain: DomainType.CONDITION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
@@ -175,7 +175,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Procedures',
-    domain: DomainType.Procedure,
+    domain: DomainType.PROCEDURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
@@ -197,7 +197,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Drugs',
-    domain: DomainType.Drug,
+    domain: DomainType.DRUG,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, ageAtEvent, numMentions, firstMention,
@@ -223,7 +223,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Measurements',
-    domain: DomainType.Measurement,
+    domain: DomainType.MEASUREMENT,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
@@ -246,7 +246,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Observations',
-    domain: DomainType.Observation,
+    domain: DomainType.OBSERVATION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, sourceName,
@@ -265,7 +265,7 @@ export class DetailTabsComponent {
     }
   }, {
     name: 'Physical Measurements',
-    domain: DomainType.PhysicalMeasure,
+    domain: DomainType.PHYSICALMEASURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,

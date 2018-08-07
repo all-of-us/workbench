@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-
+import {DomainType} from 'generated';
 import {NodeComponent} from '../node/node.component';
 
 /*
@@ -13,8 +13,15 @@ import {NodeComponent} from '../node/node.component';
   styleUrls: ['./tree.component.css']
 })
 export class TreeComponent extends NodeComponent implements OnInit {
+  _type: string;
+
   ngOnInit() {
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
+    this._type = this.node.get('type', '');
+  }
+
+  showSearch() {
+    return this.node.get('type') === DomainType.VISIT || this.node.get('type') === DomainType.DRUG;
   }
 }

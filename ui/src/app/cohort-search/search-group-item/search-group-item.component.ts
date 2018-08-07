@@ -1,7 +1,9 @@
 import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {DomainType} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
+import {CRITERIA_TYPES} from '../constant';
 
 import {
   CohortSearchActions,
@@ -68,17 +70,19 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   get codes() {
-    const _type = this.codeType;
+    const _type = this.item.get('type', '');
     const formatter = (param) => {
       let funcs = [typeDisplay, attributeDisplay];
-      if (_type === 'Demographics') {
+      if (_type === CRITERIA_TYPES.DEMO) {
         funcs = [typeDisplay, nameDisplay, attributeDisplay];
-      } else if (_type === 'Physical Measurement' || _type === 'Visit') {
+      } else if (_type === CRITERIA_TYPES.PM
+        || _type === DomainType.VISIT
+        || _type === DomainType.DRUG) {
         funcs = [nameDisplay];
       }
       return funcs.map(f => f(param)).join(' ').trim();
     };
-    const sep = _type === 'Demographics' ? '; ' : ', ';
+    const sep = _type === CRITERIA_TYPES.DEMO ? '; ' : ', ';
     return this.rawCodes.map(formatter).join(sep);
   }
 
