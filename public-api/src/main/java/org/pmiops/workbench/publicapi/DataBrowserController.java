@@ -104,7 +104,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .countValue(concept.getCountValue())
                             .sourceCountValue(concept.getSourceCountValue())
                             .prevalence(concept.getPrevalence())
-                            .conceptSynonyms(concept.getConceptSynonyms().stream().distinct().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
+                            .conceptSynonyms(concept.getSynonyms().stream().distinct().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
                 }
             };
 
@@ -324,14 +324,15 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 String conceptCode = con.getConceptCode();
                 String conceptId = String.valueOf(con.getConceptId());
 
-                if(con.getConceptSynonyms() != null){
+                if(con.getSynonyms() != null){
                     response.setMatchType(MatchType.SYNONYM);
-                    for(ConceptSynonym conceptSynonym:con.getConceptSynonyms()){
+                    for(ConceptSynonym conceptSynonym:con.getSynonyms()){
                         if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName())){
                             conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
                         }
                     }
                 }
+
 
                 if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
                     response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );

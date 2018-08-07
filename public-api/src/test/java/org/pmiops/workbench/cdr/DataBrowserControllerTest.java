@@ -24,6 +24,7 @@ import org.pmiops.workbench.cdr.dao.AchillesResultDao;
 import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
 import org.pmiops.workbench.model.SearchConceptsRequest;
@@ -172,6 +173,21 @@ public class DataBrowserControllerTest {
             .count(0L)
             .sourceCountValue(0L)
             .prevalence(0.0F);
+
+    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_1 = new ConceptSynonym()
+            .conceptId(7892L)
+            .conceptSynonymName("cs 1")
+            .languageConceptId(0L);
+
+    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_2 = new ConceptSynonym()
+            .conceptId(7892L)
+            .conceptSynonymName("cs 2")
+            .languageConceptId(0L);
+
+    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_3 = new ConceptSynonym()
+            .conceptId(7892L)
+            .conceptSynonymName("cs 3")
+            .languageConceptId(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_1 = new DbDomain()
             .domainId("Condition")
@@ -390,6 +406,10 @@ public class DataBrowserControllerTest {
             makeConcept(CLIENT_CONCEPT_6);
     private static final Concept CONCEPT_7 =
             makeConcept(CLIENT_CONCEPT_7);
+
+    private static final ConceptSynonym CONCEPT_SYNONYM_1 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_1);
+    private static final ConceptSynonym CONCEPT_SYNONYM_2 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_2);
+    private static final ConceptSynonym CONCEPT_SYNONYM_3 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_3);
 
     private static final DbDomain DBDOMAIN_1 =
             makeDbDomain(CLIENT_DB_DOMAIN_1);
@@ -695,6 +715,14 @@ public class DataBrowserControllerTest {
         aa.setChartType(achillesAnalysis.getChartType());
         aa.setDataType(achillesAnalysis.getDataType());
         return aa;
+    }
+
+    private static ConceptSynonym makeConceptSynonym(ConceptSynonym conceptSynonym){
+        ConceptSynonym cs = new ConceptSynonym();
+        cs.setConceptId(conceptSynonym.getConceptId());
+        cs.setConceptSynonymName(conceptSynonym.getConceptSynonymName());
+        cs.setLanguageConceptId(conceptSynonym.getLanguageConceptId());
+        return cs;
     }
 
     private static AchillesResult makeAchillesResult(AchillesResult achillesResult){

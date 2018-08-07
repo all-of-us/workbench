@@ -47,7 +47,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
     @Query(value = "select c.* from concept c join db_domain d on c.concept_id=d.concept_id", nativeQuery = true)
     List<Concept> findDbDomainParticpantCounts();
 
-    @Query(value = "select distinct c from Concept c left join FETCH c.conceptSynonyms as cs where match(cs.conceptSynonymName,?1) > 0")
+    @Query(value = "select distinct c from Concept c left join FETCH c.synonyms as cs where match(cs.conceptSynonymName,?1) > 0")
     List<Concept> findConceptSynonyms(String query);
 
 }

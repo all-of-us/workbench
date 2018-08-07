@@ -12,12 +12,24 @@ import java.util.Objects;
 @Table(name = "concept_synonym")
 public class ConceptSynonym {
 
+    private long id;
     private long conceptId;
+    private Concept concept;
     private String conceptSynonymName;
     private long languageConceptId;
-    private Concept concept;
 
     @Id
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public ConceptSynonym id(Long val) {
+        this.id = val;
+        return this;
+    }
+
     @Column(name = "concept_id")
     public long getConceptId() {
         return conceptId;
@@ -40,7 +52,7 @@ public class ConceptSynonym {
     public void setConcept(Concept concept) {
         this.concept = concept;
     }
-    public ConceptSynonym concept(Concept concept) {
+    public ConceptSynonym conceptSynonym(Concept concept) {
         this.concept = concept;
         return this;
     }
@@ -85,7 +97,7 @@ public class ConceptSynonym {
 
     @Override
     public int hashCode() {
-        return Objects.hash(conceptId, conceptSynonymName, languageConceptId, concept);
+        return Objects.hash(conceptId, concept, conceptSynonymName, languageConceptId);
     }
 
     @Override
