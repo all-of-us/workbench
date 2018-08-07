@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Analysis;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.DbDomainDao;
 import org.pmiops.workbench.model.StandardConceptFilter;
@@ -176,17 +178,17 @@ public class DataBrowserControllerTest {
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_1 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cs 1")
+            .conceptSynonymName("cstest 1")
             .languageConceptId(0L);
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_2 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cs 2")
+            .conceptSynonymName("cstest 2")
             .languageConceptId(0L);
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_3 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cs 3")
+            .conceptSynonymName("cstest 3")
             .languageConceptId(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_1 = new DbDomain()
@@ -432,6 +434,8 @@ public class DataBrowserControllerTest {
     private AchillesAnalysisDao achillesAnalysisDao;
     @Autowired
     private AchillesResultDao achillesResultDao;
+    @Autowired
+    private ConceptSynonymDao conceptSynonymDao;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -443,7 +447,7 @@ public class DataBrowserControllerTest {
     public void setUp() {
         saveData();
         ConceptService conceptService = new ConceptService(entityManager);
-        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao);
+        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao, conceptSynonymDao);
     }
 
 
@@ -527,6 +531,13 @@ public class DataBrowserControllerTest {
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
                 .doesNotContain(CONCEPT_2);
+    }
+
+    @Test
+    public void testConceptSynonymSearch() throws Exception{
+        assertResults(
+                dataBrowserController.searchConcepts(new SearchConceptsRequest().domain(Domain.CONDITION).query("cstest")
+                        .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)),CLIENT_CONCEPT_7);
     }
 
     @Test
@@ -771,6 +782,15 @@ public class DataBrowserControllerTest {
         achillesResultDao.save(ACHILLES_RESULT_7);
         achillesResultDao.save(ACHILLES_RESULT_8);
         achillesResultDao.save(ACHILLES_RESULT_9);
+
+        conceptSynonymDao.save(CONCEPT_SYNONYM_1);
+        conceptSynonymDao.save(CONCEPT_SYNONYM_2);
+        conceptSynonymDao.save(CONCEPT_SYNONYM_3);
+    }
+
+    private void assertResults(ResponseEntity<ConceptListResponse> response,
+                               Concept... expectedConcepts) {
+        assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
     }
 
 }

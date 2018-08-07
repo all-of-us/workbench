@@ -36,16 +36,19 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private AchillesResultDao achillesResultDao;
     @Autowired
     private DbDomainDao dbDomainDao;
+    @Autowired
+    private ConceptSynonymDao conceptSynonymDao;
 
     private ConceptService conceptService;
 
     @Autowired
-    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao) {
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, ConceptSynonymDao conceptSynonymDao) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
         this.dbDomainDao = dbDomainDao;
         this.achillesResultDao = achillesResultDao;
         this.achillesAnalysisDao = achillesAnalysisDao;
+        this.conceptSynonymDao = conceptSynonymDao;
     }
 
 
