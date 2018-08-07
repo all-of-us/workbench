@@ -43,7 +43,7 @@
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
   },
-  "notebookCohortCacheConfig": {
-    "count":10
+  "userRecentResourceConfig": {
+    "userEntrycount":10
   }
 }

@@ -1,35 +1,22 @@
 package org.pmiops.workbench.db.model;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.annotation.ReadOnlyProperty;
-
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "notebook_cohort_cache")
-public class NotebookCohortCache {
+@Table(name = "user_recent_resource")
+public class UserRecentResource {
   private Timestamp lastAccessDate;
   private int id;
   private Long cohortId;
   private String notebookName;
-  private WorkspaceUserRole workspaceUser;
+  private Long userId;
+  private Long workspaceId;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,18 +28,18 @@ public class NotebookCohortCache {
     this.id = id;
   }
 
-  @ManyToOne
-  @JoinColumn(name = "user_workspace_id")
-  public WorkspaceUserRole getUserWorkspaceId() {
-    return workspaceUser;
-  }
+  @Column(name = "user_id")
+  public long getUserId() {return userId;}
 
-  public void setUserWorkspaceId(WorkspaceUserRole workspaceUser) {
-    this.workspaceUser = workspaceUser;
-  }
+  public void setUserId(Long userId ) {this.userId = userId;}
+
+  @Column(name = "workspace_id")
+  public long getWorkspaceId() { return workspaceId; }
+
+  public void setWorkspaceId(long workspaceId ) {this.workspaceId = workspaceId;}
 
   @Column(name = "cohort_id")
-  public long getCohortId() {
+  public Long getCohortId() {
     return cohortId;
   }
 
