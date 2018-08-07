@@ -1,11 +1,18 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {ClrDatagridStateInterface} from '@clr/angular';
+import {ClrDatagridComparatorInterface} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortReviewService, PageFilterRequest, SortOrder} from 'generated';
+import {CohortReviewService, PageFilterRequest, ParticipantData, SortOrder} from 'generated';
+
+class SortByColumn implements ClrDatagridComparatorInterface<ParticipantData> {
+  compare(a: ParticipantData, b: ParticipantData) {
+    return (a.numMentions === null ? 0 : parseInt(a.numMentions, 10))
+        - (b.numMentions === null ? 0 : parseInt(b.numMentions, 10));
+  }
+}
 
 @Component({
   selector: 'app-detail-tab-table',
@@ -25,6 +32,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   subscription: Subscription;
 
   readonly pageSize = 25;
+  numMentionsSort = new SortByColumn();
 
   constructor(
     private route: ActivatedRoute,
@@ -40,8 +48,9 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
       )
       .distinctUntilChanged()
       .do(_ => this.loading = true)
-      .switchMap(([participant, cohort, workspace]) =>
-        this.reviewApi.getParticipantData(
+      .switchMap(([participant, cohort, workspace]) => {
+        this.data = [];
+        return this.reviewApi.getParticipantData(
           workspace.namespace,
           workspace.id,
           cohort.id,
@@ -55,7 +64,8 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
             pageFilterType: this.filterType,
             domain: this.domain,
           }
-      ))
+        );
+      })
       .subscribe(resp => {
         this.data = resp.items;
         this.totalCount = resp.count;
@@ -65,5 +75,14 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  sortByColumn(column: string) {
+    switch (column) {
+      case 'numMentions':
+        return this.numMentionsSort;
+      default:
+        return null;
+    }
   }
 }

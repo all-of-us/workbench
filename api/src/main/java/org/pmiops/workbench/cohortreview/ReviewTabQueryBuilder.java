@@ -14,7 +14,6 @@ public class ReviewTabQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String TABLE_PREFIX = "p_";
-  private static final String ALL_EVENTS_TABLE = "p_all_events";
 
   private static final String VISIT_COLUMNS =
     ", visit_id as visitId\n" +
@@ -111,8 +110,7 @@ public class ReviewTabQueryBuilder {
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
                                           PageRequest pageRequest) {
-    String tableName = DomainType.ALLEVENTS.equals(domain)
-      ? ALL_EVENTS_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+    String tableName = TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(BASE_SQL_TEMPLATE + getSqlTemplate(domain) + FROM + WHERE_TEMPLATE,
       tableName,
       pageRequest.getSortColumn(),
@@ -130,8 +128,7 @@ public class ReviewTabQueryBuilder {
 
   public QueryJobConfiguration buildCountQuery(Long participantId,
                                                DomainType domain) {
-    String tableName = DomainType.ALLEVENTS.equals(domain)
-      ? ALL_EVENTS_TABLE : TABLE_PREFIX + domain.toString().toLowerCase();
+    String tableName = TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(COUNT_TEMPLATE, tableName);
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
@@ -151,7 +148,7 @@ public class ReviewTabQueryBuilder {
 
   private String getSqlTemplate(DomainType domainType) {
     switch (domainType) {
-      case ALLEVENTS:
+      case ALL_EVENTS:
         return ALL_EVENTS_SQL_TEMPLATE;
       case DRUG:
         return DRUG_SQL_TEMPLATE;

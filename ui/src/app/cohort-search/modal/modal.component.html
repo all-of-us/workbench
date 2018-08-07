@@ -19,10 +19,10 @@
                 <button clrTabLink *ngIf="attributesNode.size > 0">{{attributesNode.get('name')}}</button>
               </clr-tab>
               <!--<div class="vbar"></div>-->
-              <div *ngIf="ctype !== 'demo'">
-                <clr-tab  *ngIf="ctype !== 'pm'">
+              <div *ngIf="ctype !== criteriaTypes.DEMO">
+                <clr-tab  *ngIf="ctype !== criteriaTypes.PM">
                   <button (click)="mode = 'modifiers'" clrTabLink>Modifiers</button>
-                  <ng-template *ngIf="ctype !== 'pm'" [(clrIfActive)]="modifiers" ></ng-template>
+                  <ng-template *ngIf="ctype !== criteriaTypes.PM" [(clrIfActive)]="modifiers" ></ng-template>
                 </clr-tab>
 
               </div>
@@ -40,6 +40,12 @@
               <!--</ng-template>-->
               <!--</clr-tab>-->
             </clr-tabs>
+              <div *ngIf="ctype === domainType[domainType.DRUG]">
+                  <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank">
+                      Explore
+                  </a>
+                  drugs by brand names outside of AoU
+              </div>
             <!--<div class="btn-group btn-link">-->
               <!--<div class="title">{{ title }}</div>-->
                 <!--<ng-container *ngIf="ctype !== 'demo'">-->
@@ -72,7 +78,7 @@
           </div>
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
-              <crit-demographics *ngSwitchCase="'demo'"
+              <crit-demographics *ngSwitchCase="criteriaTypes.DEMO"
                                  (cancel)="cancel()"
                                  (finish)="finish()">
               </crit-demographics>
@@ -103,7 +109,7 @@
             </ng-container>
           </div>
         </div>
-        <div class="col col-lg-3 padding-zero" *ngIf="ctype !== 'demo'">
+        <div class="col col-lg-3 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO"">
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>
@@ -116,7 +122,7 @@
                             [parameter]="parameter">
                     </crit-selection-info>
                   </div>
-                  <div *ngIf="ctype !== 'demo'" class="footer">
+                  <div *ngIf="ctype !== criteriaTypes.DEMO" class="footer">
                     <button type="button"
                             (click)="cancel()"
                             class="btn btn-link">

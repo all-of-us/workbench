@@ -789,7 +789,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .lastMention(row.get(rm.get("lastMention")).isNull() ? "" : bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .domainType(DomainType.ALLEVENTS);
+        .domainType(DomainType.ALL_EVENTS);
     }
   }
 

@@ -1,9 +1,30 @@
-<div class="search-box">
-  <clr-icon shape="search"></clr-icon>
-  <input clrInput
-         class="no-border"
-   type="text"
-   name="searchTerm"
-   [(ngModel)]="searchTerm"
-   (input)="inputChange($event.target.value)"/>
+<div class="dropdown" [class.open]="options.length || noResults">
+  <div class="search-box">
+    <clr-icon shape="search"></clr-icon>
+    <input clrInput
+     class="no-border"
+     type="text"
+     name="searchTerm"
+     [(ngModel)]="searchTerm"
+     (input)="inputChange($event.target.value)"/>
+    <span *ngIf="loading" class="spinner spinner-inline"></span>
+  </div>
+  <div *ngIf="noResults" class="dropdown-menu">
+    <button class="dropdown-item">{{searchTerm}}</button>
+    <button class="dropdown-item disabled">
+      <em>No results based on your search</em>
+    </button>
+  </div>
+  <div *ngIf="multiIngredient">
+    <b>Note:</b> This drug is multi-ingredient
+  </div>
+  <div *ngIf="options.length" class="dropdown-menu">
+    <button
+      *ngFor="let option of options"
+      class="dropdown-item"
+      type="button"
+      (click)="selectOption(option)"
+      [innerHTML]="option.displayName | safeHtml">
+    </button>
+  </div>
 </div>

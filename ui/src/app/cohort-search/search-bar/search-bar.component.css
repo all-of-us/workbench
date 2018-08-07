@@ -32,3 +32,22 @@ input {
     border:none!important;
     background: none!important;
 }
+.dropdown {
+    width: 100%;
+    margin-top: 0;
+}
+.dropdown-menu {
+    display: block;
+    max-height: 15rem;
+    min-height: 30px;
+    overflow-y: auto;
+}
+.dropdown-item {
+    height: 25px;
+    line-height: 0px;
+}
+.search-keyword {
+    color: #659F3D;
+    font-weight: bolder;
+    background-color: rgba(101,159,61,0.2);
+}
