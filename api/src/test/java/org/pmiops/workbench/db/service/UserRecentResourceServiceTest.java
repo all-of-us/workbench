@@ -56,22 +56,18 @@ public class UserRecentResourceServiceTest {
   private long userId = 1l;
 
   @Before
-  public void setup() {
-    try {
-      newUser.setUserId(userId);
-      userDao.save(newUser);
-      newWorkspace.setWorkspaceId(workspaceId);
-      workspaceDao.save(newWorkspace);
-      Cohort cohort = new Cohort();
-      cohort.setWorkspaceId(workspaceId);
-      cohortId = cohortDao.save(cohort).getCohortId();
-      config.userRecentResourceConfig = new WorkbenchConfig.UserRecentResourceConfig();
-      config.userRecentResourceConfig.userEntrycount = 3;
-      userRecentResourceService = new UserRecentResourceServiceImpl(Providers.of(config));
-      userRecentResourceService.setDao(notebookCohortCacheDao);
-    } catch (Exception ex) {
-      System.out.println(ex.getLocalizedMessage());
-    }
+  public void setUp() {
+    newUser.setUserId(userId);
+    userDao.save(newUser);
+    newWorkspace.setWorkspaceId(workspaceId);
+    workspaceDao.save(newWorkspace);
+    Cohort cohort = new Cohort();
+    cohort.setWorkspaceId(workspaceId);
+    cohortId = cohortDao.save(cohort).getCohortId();
+    config.userRecentResourceConfig = new WorkbenchConfig.UserRecentResourceConfig();
+    config.userRecentResourceConfig.userEntrycount = 3;
+    userRecentResourceService = new UserRecentResourceServiceImpl(Providers.of(config));
+    userRecentResourceService.setDao(notebookCohortCacheDao);
   }
 
 
