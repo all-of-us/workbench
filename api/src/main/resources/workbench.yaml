@@ -290,8 +290,10 @@ paths:
           schema:
             $ref: "#/definitions/PageVisit"
       responses:
-        204:
-          description: Request receieved.
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
         400:
           description: Bad request
           schema:

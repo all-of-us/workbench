@@ -76,23 +76,8 @@ export class ProfileServiceStub extends ProfileService {
     });
   }
 
-  public getPageVisits(extraHttpRequestParams?: any): Observable<Array<PageVisit>> {
-    return new Observable<Array<PageVisit>>(observer => {
-      setTimeout(() => {
-        const pageVisitList =
-          [
-            {
-              'page': 'test'
-            }
-          ];
-        observer.next(pageVisitList);
-        observer.complete();
-      }, 0);
-    });
-  }
-
-  public updatePageVisits(pageVisit: PageVisit, extraHttpRequestParams?: any): Observable<{}> {
-    return new Observable(observer => { observer.next(this.profile); });
+  public updatePageVisits(pageVisit: PageVisit, extraHttpRequestParams?: any): Observable<Profile> {
+    return Observable.from([this.profile]);
   }
 
   private now(): number {

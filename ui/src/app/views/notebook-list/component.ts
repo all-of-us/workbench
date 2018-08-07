@@ -94,8 +94,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.loadNotebookList();
     this.profileService.getMe().subscribe(
       profile => {
-        this.firstVisit = !profile.pageVisits.some(v =>
-          v.page === this.pageId);
+        if (profile.pageVisits) {
+          this.firstVisit = !profile.pageVisits.some(v =>
+            v.page === this.pageId);
+        }
       },
       error => {
         this.pageVisitsError = true;
@@ -175,10 +177,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   get createDisabled(): boolean {
     return this.awaitingReview || !this.writePermission;
-  }
-
-  get helpTip(): boolean {
-    return this.showTip;
   }
 
   submitNotebooksLoadBugReport(): void {

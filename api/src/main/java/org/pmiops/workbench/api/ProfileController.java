@@ -517,20 +517,17 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> updatePageVisits(PageVisit newPageVisit) {
+  public ResponseEntity<Profile> updatePageVisits(PageVisit newPageVisit) {
     User user = userProvider.get();
-    List<org.pmiops.workbench.db.model.PageVisit> oldPageVisits =
-      new ArrayList<>(user.getPageVisits());
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    boolean shouldAdd = oldPageVisits.stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
+    boolean shouldAdd = user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
       org.pmiops.workbench.db.model.PageVisit firstPageVisit =
         new org.pmiops.workbench.db.model.PageVisit();
       firstPageVisit.setPageId(newPageVisit.getPage());
       firstPageVisit.setUser(user);
       firstPageVisit.setFirstVisit(timestamp);
-      oldPageVisits.add(firstPageVisit);
-      user.setPageVisits(new HashSet<>(oldPageVisits));
+      user.getPageVisits().add(firstPageVisit);
       userDao.save(user);
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
