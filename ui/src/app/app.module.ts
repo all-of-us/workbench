@@ -29,6 +29,7 @@ import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditComponent} from './views/cohort-edit/component';
 import {CohortListComponent} from './views/cohort-list/component';
+import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
@@ -120,6 +121,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     BugReportComponent,
     CohortEditComponent,
     CohortListComponent,
+    ConfirmDeleteModalComponent,
     ErrorHandlerComponent,
     WorkspaceListComponent,
     InitialErrorComponent,

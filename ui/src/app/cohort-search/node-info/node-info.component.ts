@@ -9,8 +9,9 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
+import { DomainType } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-
+import {CRITERIA_TYPES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
 
 /*
@@ -33,6 +34,8 @@ function needsAttributes(node: any) {
 })
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() node;
+  readonly domainType = DomainType;
+  readonly criteriaTypes = CRITERIA_TYPES;
   private isSelected: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
@@ -86,18 +89,16 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.get('selectable', false);
   }
 
-  get nonZeroCount() {
-    return this.node.get('count', 0) > 0;
-  }
-
   get displayName() {
-    const isPM = this.node.get('type', '') === 'PM';
+    const noCode = this.node.get('type', '') === DomainType.DRUG
+      || this.node.get('type', '') === CRITERIA_TYPES.PM;
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
-    return (isPM || nameIsCode) ? '' : this.node.get('name', '');
+    return (noCode || nameIsCode) ? '' : this.node.get('name', '');
   }
 
   get displayCode() {
-    if (this.node.get('type', '') === 'PM') {
+    if (this.node.get('type', '') === DomainType.DRUG
+      || this.node.get('type', '') === CRITERIA_TYPES.PM) {
       return this.node.get('name', '');
     }
     return this.node.get('code', '');
@@ -127,7 +128,25 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        * not require attributes.  Criterion which require attributes in order
        * to have a complete sense are given a unique ID based on the attribute
        */
-      const param = this.node.set('parameterId', this.paramId);
+
+      if (this.node.get('type') === DomainType.DRUG && this.node.get('group')) {
+        this.node.get('children').forEach(child => {
+          this.selectChildren(child);
+        });
+      } else {
+        const param = this.node.set('parameterId', this.paramId);
+        this.actions.addParameter(param);
+      }
+    }
+  }
+
+  selectChildren(node) {
+    if (node.get('group')) {
+      node.get('children').forEach(child => {
+        this.selectChildren(child);
+      });
+    } else {
+      const param = node.set('parameterId', `param${node.get('id')}`);
       this.actions.addParameter(param);
     }
   }

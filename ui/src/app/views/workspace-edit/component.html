@@ -267,7 +267,7 @@
                 Clone Workspace
               </button>
             </ng-container>
-            <div *ngIf="!allowSave" class="tooltip-text">
+            <div *ngIf="!isValidWorkspace" class="tooltip-text">
               Missing Required Fields:
               <ul>
                 <li *ngIf="isBlank(workspace.name)">Name</li>
