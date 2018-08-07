@@ -284,7 +284,11 @@ definitions:
         description: prevalence among participants percent count divided num participants
         type: number
         format: float
-
+      conceptSynonyms:
+        description: concept synonym names
+        type: "array"
+        items:
+          type: "string"
 
   ConceptListResponse:
       type: object
