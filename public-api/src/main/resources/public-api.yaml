@@ -307,11 +307,6 @@ definitions:
           items:
             $ref: "#/definitions/Concept"
           description: standard concepts associated with the matched concept
-        synonymConcepts:
-          type: "array"
-          items:
-            $ref: "#/definitions/Concept"
-          description: synonym concepts associated with the search query
 
   QuestionConcept:
     type: object
