@@ -44,17 +44,17 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void updateNotebookEntry(long workspaceId, long userId, String notebookName,
       Timestamp lastAccessDateTime) {
-    UserRecentResource cache = getDao().findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookName);
-    if (cache == null) {
+    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookName);
+    if (resource == null) {
       handleUserLimit(userId);
-      cache = new UserRecentResource();
-      cache.setUserId(userId);
-      cache.setWorkspaceId(workspaceId);
-      cache.setCohortId(null);
-      cache.setNotebookName(notebookName);
+      resource = new UserRecentResource();
+      resource.setUserId(userId);
+      resource.setWorkspaceId(workspaceId);
+      resource.setCohortId(null);
+      resource.setNotebookName(notebookName);
     }
-    cache.setLastAccessTime(lastAccessDateTime);
-    getDao().save(cache);
+    resource.setLastAccessTime(lastAccessDateTime);
+    getDao().save(resource);
   }
 
   /**
@@ -71,17 +71,17 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void updateCohortEntry(long workspaceId, long userId, long cohortId,
       Timestamp lastAccessDateTime) {
-    UserRecentResource cache = getDao().findByUserIdAndWorkspaceIdAndCohortId(userId, workspaceId, cohortId);
-    if (cache == null) {
+    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndCohortId(userId, workspaceId, cohortId);
+    if (resource == null) {
       handleUserLimit(userId);
-      cache = new UserRecentResource();
-      cache.setUserId(userId);
-      cache.setWorkspaceId(workspaceId);
-      cache.setCohortId(cohortId);
-      cache.setNotebookName(null);
+      resource = new UserRecentResource();
+      resource.setUserId(userId);
+      resource.setWorkspaceId(workspaceId);
+      resource.setCohortId(cohortId);
+      resource.setNotebookName(null);
     }
-    cache.setLastAccessTime(lastAccessDateTime);
-    getDao().save(cache);
+    resource.setLastAccessTime(lastAccessDateTime);
+    getDao().save(resource);
   }
 
   /**
@@ -101,8 +101,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   private void handleUserLimit(long userId) {
     long count = getDao().countUserRecentResourceByUserId(userId);
     while (count-- >= configProvider.get().userRecentResourceConfig.userEntrycount) {
-      UserRecentResource cache = getDao().findTopByUserIdOrderByLastAccessTime(userId);
-      getDao().delete(cache);
+      UserRecentResource resource = getDao().findTopByUserIdOrderByLastAccessTime(userId);
+      getDao().delete(resource);
     }
   }
 }

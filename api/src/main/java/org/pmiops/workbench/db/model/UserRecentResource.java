@@ -47,7 +47,6 @@ public class UserRecentResource {
     this.cohortId = cohortId;
   }
 
-
   @Column(name = "notebook_name")
   public String getNotebookName() {
     return this.notebookName;
