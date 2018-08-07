@@ -305,7 +305,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         List<Concept> conceptSynonymList = null;
         List<Long> synonymConceptIds = new ArrayList<>();
         if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
-            conceptSynonymList = conceptDao.findConceptSynonyms("%"+searchConceptsRequest.getQuery()+"%",domainIds);
+            conceptSynonymList = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()),domainIds);
             for(Concept c:conceptSynonymList){
                 synonymConceptIds.add(c.getConceptId());
             }
@@ -323,7 +323,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                 if(con.getConceptSynonyms() != null){
                     response.setMatchType(MatchType.SYNONYM);
-                    System.out.println(con.getConceptSynonyms());
                 }
 
                 if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
