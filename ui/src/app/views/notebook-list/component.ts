@@ -45,7 +45,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   showTip: boolean;
   cohortsLoading: boolean;
   cohortsError: boolean;
-  newPageVisit: PageVisit;
+  newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
   firstVisit = true;
 
 
@@ -66,7 +66,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.awaitingReview = reviewRequested && !approved;
     this.showTip = false;
-    this.newPageVisit.page = NotebookListComponent.PAGE_ID;
     this.cohortsLoading = true;
     this.cohortsError = false;
   }
