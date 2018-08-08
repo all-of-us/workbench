@@ -152,7 +152,7 @@ public class UserRecentResourceServiceTest {
   }
 
   @Test
-  public void testDeleteNonExistantNotebookEntry() {
+  public void testDeleteNonExistentNotebookEntry() {
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 0);
     userRecentResourceService.deleteNotebookEntry(workspaceId, userId, "notebook");
