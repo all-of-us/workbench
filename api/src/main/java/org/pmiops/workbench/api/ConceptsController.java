@@ -103,7 +103,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       throw new BadRequestException("Query must be non-whitespace");
     }
 
-    List<org.pmiops.workbench.model.Concept> conceptSynonymList = null;
+    List<org.pmiops.workbench.cdr.model.Concept> conceptSynonymList = null;
     List<Long> synonymConceptIds = new ArrayList<>();
     if(request.getQuery() != null && !request.getQuery().isEmpty()){
       conceptSynonymList = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(request.getQuery()));
