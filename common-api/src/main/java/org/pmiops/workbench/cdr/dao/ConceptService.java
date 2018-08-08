@@ -78,6 +78,19 @@ public class ConceptService {
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
                     List<Predicate> predicates = new ArrayList<>();
+                    List<Predicate> standardConceptPredicates = new ArrayList<>();
+                    standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                            criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+                    standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
+                            criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
+
+                    List<Predicate> nonStandardConceptPredicates = new ArrayList<>();
+                    nonStandardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
+                            criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
+                    nonStandardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
+                            criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
+
+
 
                     // Fetch the concept synonyms
 
@@ -89,49 +102,20 @@ public class ConceptService {
 
                         if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS) || standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
 
-                                predicates.add(
-                                        criteriaBuilder.or(
-                                                synonymConceptPredicate.toArray(new Predicate[0])
-                                        )
-                                );
-
-                            List<Predicate> standardConceptPredicates = new ArrayList<>();
-                            standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
-                                    criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-                            standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
-                                    criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
-
-                            predicates.add(
-                                    criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0]))
-                            );
+                                predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
+                                predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
 
                         } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
 
-                            predicates.add(
-                                    criteriaBuilder.or(
-                                            synonymConceptPredicate.toArray(new Predicate[0])
-                                    )
-                            );
+                            predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
 
-                            List<Predicate> standardConceptPredicates = new ArrayList<>();
-                            standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
-                                    criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-                            standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
-                                    criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
-
-                            predicates.add(
-                                    criteriaBuilder.or(
+                            predicates.add(criteriaBuilder.or(
                                             criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
-                                            criteriaBuilder.and(standardConceptPredicates.toArray(new Predicate[0]))
-                                    ));
+                                            criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))));
 
                         }else {
 
-                            predicates.add(
-                                    criteriaBuilder.or(
-                                            synonymConceptPredicate.toArray(new Predicate[0])
-                                    )
-                            );
+                            predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
                         }
 
                     }else{
@@ -165,45 +149,25 @@ public class ConceptService {
 
                             if(!Strings.isNullOrEmpty(query)) {
                                 conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                                predicates.add(
-                                        criteriaBuilder.or(
-                                                conceptCodeIDName.toArray(new Predicate[0])
-                                        )
-                                );
+                                predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
                             }
 
-                            List<Predicate> standardConceptPredicates = new ArrayList<>();
-                            standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
-                                    criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-                            standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
-                                    criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
-                            predicates.add(
-                                    criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0]))
-                            );
+                            predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
 
                         } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
 
                             if(!Strings.isNullOrEmpty(query)) {
 
                                 conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                                predicates.add(
-                                        criteriaBuilder.or(
-                                                conceptCodeIDName.toArray(new Predicate[0])
-                                        )
-                                );
+                                predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
                             }
 
-                            List<Predicate> standardConceptPredicates = new ArrayList<>();
-                            standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
-                                    criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-                            standardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
-                                    criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
                             predicates.add(
                                     criteriaBuilder.or(
                                             criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
-                                            criteriaBuilder.and(standardConceptPredicates.toArray(new Predicate[0]))
+                                            criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))
                                     ));
 
 
@@ -212,11 +176,6 @@ public class ConceptService {
                             List<Predicate> conceptNameFilter = new ArrayList<>();
                             conceptNameFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
 
-                            List<Predicate> standardConceptPredicates = new ArrayList<>();
-                            standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
-                                    criteriaBuilder.literal(STANDARD_CONCEPT_CODE)));
-                            standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
-                                    criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
                             conceptNameFilter.add(criteriaBuilder.or(
                                     standardConceptPredicates.toArray(new Predicate[0])));
 
@@ -231,11 +190,7 @@ public class ConceptService {
                             if (!Strings.isNullOrEmpty(query)) {
 
                                 conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                                predicates.add(
-                                        criteriaBuilder.or(
-                                                conceptCodeIDName.toArray(new Predicate[0])
-                                        )
-                                );
+                                predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
                             }
                         }
                     }
