@@ -59,6 +59,14 @@ form {
   border-radius: 6px;
 }
 
+.name-area .control {
+  margin-bottom: 0;
+}
+
+.name-area {
+  margin-bottom: 0.75rem;
+}
+
 label[for="name"] {
   opacity: 0;
   transition: opacity 0.2s;
@@ -98,5 +106,26 @@ label[for="name"].show {
 }
 
 div.error {
-  height: 36px;
+  padding: 0;
+  font-weight: 500;
+  color: #2F2E7E;
+  margin-top: 0.2rem;
+  height: auto;
+  background-color: white;
+}
+
+input.alreadyTaken {
+  background-color: #FCEFEC;
+  border-color: #F68D76;
+  display: inline-block;
+}
+
+.warning-standard {
+  display: inline-block;
+  position: absolute;
+  color: #F68D76;
+  right: 16px;
+  top: 16px;
+  width: 0.8rem;
+  height: 0.8rem;
 }
