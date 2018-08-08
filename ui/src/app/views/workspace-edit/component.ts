@@ -67,12 +67,12 @@ export const ResearchPurposeItems = {
   },
   requestReview: {
     shortDescription: 'Request a review of your research purpose',
-    longDescription: 'I am concerned about potential \
-    <a onclick="openStigmatizationLink()">stigmatization</a>\
-    of research participants. I would like the All of Us \
-    Resource Access Board (RAB) to review my Research Purpose. \
-    (This will not prevent you from creating a workspace and \
-    proceeding.)'
+    /*
+     * The request review description includes a hyperlink, so needs to be coded
+     * inside the html, rather than as text here. There are ways to have it render
+     * html, but it strips out unsafe content, so was removing the click behavior
+     */
+    longDescription: 'SEE HTML'
   }
 };
 
@@ -404,7 +404,6 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   openStigmatizationLink() {
-    console.log('hello world');
     const stigmatizationURL = `/definitions/stigmatization`;
     const stigmatizationPage = window.open(stigmatizationURL, '_blank');
   }
