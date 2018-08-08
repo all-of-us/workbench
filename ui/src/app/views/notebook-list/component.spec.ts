@@ -20,12 +20,14 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {
   BugReportService,
   CohortsService,
+  ProfileService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
 
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
@@ -102,6 +104,7 @@ describe('NotebookListComponent', () => {
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub()},
         { provide: ActivatedRoute, useValue: activatedRouteStub }

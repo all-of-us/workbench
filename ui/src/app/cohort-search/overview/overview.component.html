@@ -72,15 +72,23 @@
         [class.show]="(name.dirty || name.touched) && cohortForm.invalid">
         <em>*A Cohort Name is Required</em>
       </label>
-      <input
-        name="name"
-        id="name-control"
-        class="control"
-        placeholder="Cohort Name"
-        formControlName="name"
-        type="text"
-        [class.invalid]="(name.dirty || name.touched) && cohortForm.invalid"
-        autofocus>
+      <div class="name-area">
+        <input
+          name="name"
+          id="name-control"
+          class="control"
+          placeholder="Cohort Name"
+          formControlName="name"
+          type="text"
+          [class.invalid]="(name.dirty || name.touched) && cohortForm.invalid"
+          (input)="showConflictError = false"
+          [class.alreadyTaken]="showConflictError"
+          autofocus>
+        <clr-icon shape="warning-standard" class="warning-standard is-solid" *ngIf="showConflictError"></clr-icon>
+        <div *ngIf="showConflictError" class="error">
+          {{name.value}} already exists. Please choose another name.
+        </div>
+      </div>
       <textarea
         name="description"
         id="description-control"

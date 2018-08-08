@@ -15,6 +15,7 @@ import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {StigmatizationPageComponent} from './views/stigmatization-page/component';
 import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
@@ -48,6 +49,12 @@ const routes: Routes = [
         component: UnregisteredComponent,
         data: {
           title: 'Awaiting ID Verification'
+        }
+      }, {
+        path: 'definitions/stigmatization',
+        component: StigmatizationPageComponent,
+        data: {
+          title: 'Stigmatization Definition'
         }
       }, {
       path: 'workspaces',
