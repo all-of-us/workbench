@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
@@ -202,6 +203,19 @@ public class CohortReviewControllerTest {
 
     participantCohortStatusDao.save(participantCohortStatus1);
     participantCohortStatusDao.save(participantCohortStatus2);
+  }
+
+  @Test
+  public void createCohortReview() throws Exception {
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    cohortReviewController.createCohortReview(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME,
+      COHORT_ID,
+      CDR_VERSION_ID,
+      new CreateReviewRequest()
+        .size(10)).getBody();
   }
 
   @Test
