@@ -65,7 +65,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "where c.type = 'DRUG' " +
     "and c.subtype in ('ATC', 'BRAND') " +
     "and c.is_selectable = 1 " +
-    "and upper(c.name) like upper('%' || :name || '%') " +
+    "and upper(c.name) like upper(concat('%',:name,'%')) " +
     "order by c.name asc", nativeQuery = true)
   List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name);
 
