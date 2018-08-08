@@ -14,6 +14,7 @@ const SURVEY_COUNT_ANALYSIS_ID = 3110;
 const SURVEY_GENDER_ANALYSIS_ID = 3111;
 const SURVEY_AGE_ANALYSIS_ID = 3112;
 const MEASUREMENT_AGE_ANALYSIS_ID = 3112;
+const MEASUREMENT_VALUE_ANALYSIS_ID = 1900;
 const GENDER_COLORS = {
   '8507': '#8DC892',
   '8532': '#6CAEE3'
@@ -97,9 +98,10 @@ export class ChartComponent implements OnChanges {
       options.title.text = this.chartTitle;
     }
     // Override chart type if we have it
-    if (this.chartType) {
+    // todo  -- check we don't need this. too hacky
+    /*if (this.chartType) {
       options.chart.type = this.chartType;
-    }
+    }*/
 
     return {
       chart: options.chart,
@@ -164,6 +166,9 @@ export class ChartComponent implements OnChanges {
         gridLineColor: this.backgroundColor
       },
       xAxis: {
+        title: {
+          text: options.xAxisTitle ? options.xAxisTitle : null
+        },
         categories: options.categories,
         // type: 'category',
         labels: {
@@ -211,12 +216,10 @@ export class ChartComponent implements OnChanges {
       this.analysis.analysisId === SURVEY_AGE_ANALYSIS_ID) {
       return this.makeAgeChartOptions();
     }
-    console.log(this.analysis);
-    if (this.analysis.analysisId === 1900) {
-      // our data is already binned so we use a column. So set the chartType to column
-      this.chartType = 'column';
+    if (this.analysis.analysisId === MEASUREMENT_VALUE_ANALYSIS_ID) {
       console.log('Making histogram opts');
-      return this.makeHistogramChartOptions();
+      const options =  this.makeMeasurementChartOptions();
+      return options;
     }
 
 
@@ -272,7 +275,8 @@ export class ChartComponent implements OnChanges {
       title: {text: null},
       series: series,
       categories: cats,
-      pointWidth: this.pointWidth
+      pointWidth: this.pointWidth,
+      xAxisTitle: null
     };
 
   }
@@ -318,7 +322,8 @@ export class ChartComponent implements OnChanges {
       title: {text: null, style: CHART_TITLE_STYLE},
       series: series,
       categories: cats,
-      pointWidth: this.pointWidth
+      pointWidth: this.pointWidth,
+      xAxisTitle: null
     };
 
   }
@@ -373,7 +378,8 @@ export class ChartComponent implements OnChanges {
       title: {text: this.analysis.analysisName, style: CHART_TITLE_STYLE},
       series: series,
       categories: cats,
-      pointWidth: null
+      pointWidth: null,
+      xAxisTitle: null
     };
 
   }
@@ -432,11 +438,12 @@ export class ChartComponent implements OnChanges {
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
+      xAxisTitle: null
     };
   }
 
   // Todo maybe use something like this
-  public makeMeasurementChartOptions() {
+ /* public makeMeasurementChartOptions() {
     if (this.analysis.chartType === 'histogram') {
       return this.makeHistogramChartOptions();
     }
@@ -445,16 +452,15 @@ export class ChartComponent implements OnChanges {
     }
 
   }
-
+*/
   // Histogram data analyses come already binned
   // The value is in stratum 4, the unit in stratum5, the countValue in the bin is countValue
   // and we also have
   // sourceCountValue
-  public makeHistogramChartOptions() {
+  public makeMeasurementChartOptions() {
     let data = [];
     const cats = [];
 
-    console.log('histo analysis');
     for (const a  of this.analysis.results) {
       data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});
     }
@@ -488,27 +494,35 @@ export class ChartComponent implements OnChanges {
       thisCtrl.resultClicked.emit(event.point.result);
     };
 
+    // Unit is in stratum5
+    const unit: string = this.analysis.results[0].stratum5;
     // Override tooltip and colors and such
-    const series = {
+    const series: any = {
       name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
-      tooltip: {pointFormat: '<b>{point.y} </b>'},
+      tooltip: {pointFormat: '<b>{point.y} </b>' + unit },
       events: {
         click: seriesClick
-      },
-      // Make column a histogram with these options
-      pointPadding: 0,
-      borderWidth: 0,
-      groupPadding: 0,
-      pointWidth: null,
-      shadow: false
-    };
+      }};
+
+    // Note that our data is binned already so we use a column chart to show histogram.
+    // How ever some boolean measurements like pregnancy but two bins , Yes and No. So
+    // they will pass the chartType="column" to this component
+    if (this.chartType === 'histogram') {
+      // Make column chart look like  a histogram with these options
+      series.pointPadding = 0;
+      series.borderWidth = 0;
+      series.groupPadding = 0;
+      series.pointWidth = null;
+      series.shadow = false;
+    }
 
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
       title: { text: this.chartTitle },
       series: series,
       categories: cats,
-      pointWidth: this.pointWidth
+      pointWidth: this.pointWidth,
+      xAxisTitle: unit
     };
 
   }
