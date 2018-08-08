@@ -1,12 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Provider;
 import java.sql.Timestamp;
 
 @Service
@@ -16,8 +14,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   @Autowired
   UserRecentResourceDao userRecentResourceDao;
-
-  public UserRecentResourceServiceImpl() {}
 
   public UserRecentResourceDao getDao() {
     return userRecentResourceDao;
