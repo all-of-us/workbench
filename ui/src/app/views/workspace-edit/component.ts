@@ -1,5 +1,6 @@
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Pipe} from '@angular/core';
+import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
@@ -66,9 +67,12 @@ export const ResearchPurposeItems = {
   },
   requestReview: {
     shortDescription: 'Request a review of your research purpose',
-    longDescription: 'I am concerned about potential stigmatization of research participants.\
-    I would like the All of Us Resource Access Board (RAB) to review my Research Purpose. \
-    (This will not prevent you from creating a workspace and proceeding.)'
+    longDescription: 'I am concerned about potential \
+    <a onclick="openStigmatizationLink()">stigmatization</a>\
+    of research participants. I would like the All of Us \
+    Resource Access Board (RAB) to review my Research Purpose. \
+    (This will not prevent you from creating a workspace and \
+    proceeding.)'
   }
 };
 
@@ -397,5 +401,11 @@ export class WorkspaceEditComponent implements OnInit {
       return false;
     }
     return this.isValidWorkspace;
+  }
+
+  openStigmatizationLink() {
+    console.log('hello world');
+    const stigmatizationURL = `/definitions/stigmatization`;
+    const stigmatizationPage = window.open(stigmatizationURL, '_blank');
   }
 }
