@@ -25,10 +25,16 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     preview = Map();
     subscription: Subscription;
     negativeAlert = false;
-   options:any;
+    options: any;
 
     constructor(private actions: CohortSearchActions) {
-        this.options = ['EQUAL', 'GREATER_THAN_OR_EQUAL_TO', 'LESS_THAN_OR_EQUAL_TO', 'BETWEEN', 'ANY'];
+      this.options = [
+        'EQUAL',
+        'GREATER_THAN_OR_EQUAL_TO',
+        'LESS_THAN_OR_EQUAL_TO',
+        'BETWEEN',
+        'ANY'
+      ];
     }
 
     ngOnInit() {
