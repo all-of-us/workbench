@@ -67,9 +67,10 @@ public class ConceptsController implements ConceptsApiDelegate {
             .vocabularyId(concept.getVocabularyId());
 
   @Autowired
-  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService) {
+  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,ConceptDao conceptDao) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
+    this.conceptDao = conceptDao;
   }
 
   @Override
@@ -106,11 +107,8 @@ public class ConceptsController implements ConceptsApiDelegate {
     List<Concept> conceptSynonymList = null;
     List<Long> synonymConceptIds = new ArrayList<>();
     if(request.getQuery() != null && !request.getQuery().isEmpty()){
-      System.out.println(conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(request.getQuery())));
       List<org.pmiops.workbench.cdr.model.Concept> temp = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(request.getQuery()));
-      if(temp != null){
-        conceptSynonymList = temp.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-      }
+      conceptSynonymList = temp.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
       for(Concept c:conceptSynonymList){
         synonymConceptIds.add(c.getConceptId());
       }
