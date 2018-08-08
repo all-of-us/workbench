@@ -113,17 +113,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.actions.finishWizard();
   }
 
-  get hasNextPage() {
-    if (this.ctype !== CRITERIA_TYPES.DEMO && this.mode === 'tree') {
-      return true;
-    }
-    return false;
-  }
-
-  nextPage() {
-    this.mode = 'modifiers';
-  }
-
   /* Used to bootstrap the criteria tree */
   get rootNode() {
     return Map({

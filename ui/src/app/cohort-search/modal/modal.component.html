@@ -4,20 +4,20 @@
       <div class="row">
         <div class="col col-lg-9 padding-zero" [ngClass]="{'col col-lg-12': ctype === criteriaTypes.DEMO}">
           <div class="title-bar">
-            <clr-tabs class="test">
+            <clr-tabs class="test" style="display:flex ">
               <clr-tab *ngIf="title !=='Physical Measurements' ">
-                <button clrTabLink (click)="mode = 'tree'">{{ title }}</button>
+                <button class="btn-color" clrTabLink (click)="mode = 'tree'">{{ title }}</button>
                 <ng-template clrIfActive="{{title}}"></ng-template>
               </clr-tab>
               <clr-tab *ngIf="title ==='Physical Measurements' ">
-                <button clrTabLink *ngIf="attributesNode.size === 0" (click)="mode = 'tree'">{{ title }}</button>
+                <button class="btn-color" clrTabLink *ngIf="attributesNode.size === 0" (click)="mode = 'tree'">{{ title }}</button>
                 <ng-template clrIfActive="{{title}}"></ng-template>
-                <button clrTabLink *ngIf="attributesNode.size > 0">{{attributesNode.get('name')}}</button>
+                <button class="btn-color" clrTabLink *ngIf="attributesNode.size > 0">{{attributesNode.get('name')}}</button>
               </clr-tab>
               <!--<div class="vbar"></div>-->
               <div *ngIf="ctype !== criteriaTypes.DEMO">
                 <clr-tab  *ngIf="ctype !== criteriaTypes.PM">
-                  <button (click)="mode = 'modifiers'" clrTabLink>Modifiers</button>
+                  <button class="btn-color" (click)="mode = 'modifiers'" clrTabLink>Modifiers</button>
                   <ng-template *ngIf="ctype !== criteriaTypes.PM" [(clrIfActive)]="modifiers" ></ng-template>
                 </clr-tab>
               </div>
@@ -31,7 +31,7 @@
             <button *ngIf="attributesNode.size > 0"
                     (click)="back()"
                     class="btn btn-link btn-icon">
-              <clr-icon class="close-button" size="24" shape="close"></clr-icon>
+              <clr-icon size="24" shape="close"></clr-icon>
             </button>
           </div>
           <div class="content" *ngIf="open">
@@ -80,13 +80,6 @@
                             class="btn btn-link">
                       Cancel
                     </button>
-                    <!--<button *ngIf="hasNextPage"-->
-                    <!--[disabled]="noSelection"-->
-                    <!--(click)="nextPage()"-->
-                    <!--type="button"-->
-                    <!--class="btn btn-secondary">-->
-                    <!--Next-->
-                    <!--</button>-->
                     <button type="button"
                             [disabled]="noSelection"
                             (click)="finish()"
