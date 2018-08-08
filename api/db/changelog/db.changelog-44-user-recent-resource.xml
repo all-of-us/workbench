@@ -18,7 +18,7 @@
             <column name="cohort_id" type="bigint">
                 <constraints nullable="true"/>
             </column>
-            <column name="notebook_name" type="varchar(255)">
+            <column name="notebook_name" type="varchar(1024)">
                 <constraints nullable="true"/>
             </column>
             <column name="lastAccessDate" type="timestamp">

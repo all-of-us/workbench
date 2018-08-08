@@ -12,14 +12,12 @@ import java.sql.Timestamp;
 @Service
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
 
-  private Provider<WorkbenchConfig> configProvider;
+  private  final static int USER_ENTRY_COUNT = 10;
 
   @Autowired
   UserRecentResourceDao userRecentResourceDao;
 
-  public UserRecentResourceServiceImpl(Provider<WorkbenchConfig> configProvider) {
-    this.configProvider = configProvider;
-  }
+  public UserRecentResourceServiceImpl() {}
 
   public UserRecentResourceDao getDao() {
     return userRecentResourceDao;
@@ -30,16 +28,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     this.userRecentResourceDao = dao;
   }
 
+  @VisibleForTesting
+  public int getUserEntryCount() {return USER_ENTRY_COUNT;}
+
   /**
    * Checks if notebook for given workspace and user is already in  table user_recent_resource
-   * if yes, update the lastmodified time only
+   * if yes, update the lastAccessDateTime only
    * If no, check the number of resource entries for given  user
    * if it is above config userEntrycount, delete the row(s) with least lastAccessTime and add a new entry
-   *
-   * @param workspaceId
-   * @param userId
-   * @param notebookName
-   * @param lastAccessDateTime
    */
   @Override
   public void updateNotebookEntry(long workspaceId, long userId, String notebookName,
@@ -59,14 +55,9 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   /**
    * Checks if cohort for given workspace and user is already in table user_recent_resource
-   * if yes, update the lastmodified time only
+   * if yes, update the lastAccessDateTime only
    * If no, check the number of resource entries for given  user
    * if it is above config userEntrycount, delete the row(s) with least lastAccessTime and add a new entry
-   *
-   * @param workspaceId
-   * @param userId
-   * @param cohortId
-   * @param lastAccessDateTime
    */
   @Override
   public void updateCohortEntry(long workspaceId, long userId, long cohortId,
@@ -86,21 +77,19 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   /**
    * Deletes notebook entry from user_recent_resource
-   *
-   * @param workspaceId
-   * @param userId
-   * @param notebookName
    */
   @Override
   public void deleteNotebookEntry(long workspaceId, long userId, String notebookName) {
     getDao().deleteUserRecentResourceByUserIdAndWorkspaceIdAndNotebookName(workspaceId, userId, notebookName);
   }
 
-  //Check number of entries in user_recent_resource for user, delete entries with least
-  // lastAccessTime if count exceeds config entry userLimit
+  /**
+   * Check number of entries in user_recent_resource for user,
+   * If it exceeds USER_ENTRY_COUNT, delete the one with earliest lastAccessTime
+   */
   private void handleUserLimit(long userId) {
     long count = getDao().countUserRecentResourceByUserId(userId);
-    while (count-- >= configProvider.get().userRecentResourceConfig.userEntrycount) {
+    while (count-- >= USER_ENTRY_COUNT) {
       UserRecentResource resource = getDao().findTopByUserIdOrderByLastAccessTime(userId);
       getDao().delete(resource);
     }

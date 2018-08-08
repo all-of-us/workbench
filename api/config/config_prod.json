@@ -41,8 +41,5 @@
   "mandrill": {
     "fromEmail": "donotreply@researchallofus.org",
     "sendRetries": 3
-  },
-  "userRecentResourceConfig": {
-    "userEntrycount":10
   }
 }

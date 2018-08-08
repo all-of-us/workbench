@@ -42,8 +42,5 @@
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
-  },
-  "userRecentResourceConfig": {
-    "userEntrycount":10
   }
 }
