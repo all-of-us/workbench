@@ -277,6 +277,28 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /v1/page-visits:
+    post:
+      tags:
+      - profile
+      description: Updates a users page visits
+      operationId: updatePageVisits
+      parameters:
+        - in: body
+          name: pageVisit
+          description: the users pageVisits
+          schema:
+            $ref: "#/definitions/PageVisit"
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        400:
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
   # TODO: add signature / other state?
   /v1/account/accept-terms-of-service:
     post:
@@ -950,6 +972,18 @@ definitions:
         REVIEW_ID_VERIFICATION
     ]
 
+  PageVisit:
+    type: object
+    properties:
+      userId:
+        type: integer
+        format: int64
+      page:
+        type: string
+      firstVisit:
+        type: integer
+        format: int64
+
   WorkspaceListResponse:
     type: object
     required:
@@ -1369,6 +1403,11 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Authority"
+      pageVisits:
+        description: pages user has visited
+        type: "array"
+        items:
+          $ref: "#/definitions/PageVisit"
       idVerificationStatus:
         $ref: "#/definitions/IdVerificationStatus"
         description: Status of ID verification
