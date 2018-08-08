@@ -83,7 +83,9 @@ const activatedRouteStub  = {
 
 describe('NotebookListComponent', () => {
   let notebookListPage: NotebookListPage;
+  let profileServiceStub: ProfileServiceStub;
   beforeEach(fakeAsync(() => {
+    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         BrowserAnimationsModule,
