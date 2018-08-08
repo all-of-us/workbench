@@ -121,7 +121,8 @@
 }
 
 .help-tip {
-  height: 3.25rem;
+  overflow: auto;
+  padding-bottom: .25rem;
   border: 1px solid #89CBDF;
   margin-left: -1rem;
   margin-right: -1rem;
@@ -135,16 +136,16 @@
 
 .help-tip .help-tip-title {
   border: 0px;
-  height: 1.375rem;
+  /*height: 1.375rem;*/
   font-weight: 500;
-  padding-top: 1.2rem;
+  padding-top: .2rem;
 }
 
 .help-tip .help-tip-text {
   border: 0px;
-  height: 1.375rem;
+  /*height: 1.375rem;*/
   font-weight: 300;
-  padding-top: 1.2rem;
+  padding-top: .2rem;
   padding-left: .75rem;
 }
 

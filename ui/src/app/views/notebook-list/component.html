@@ -1,7 +1,7 @@
 <div class="help-tip" *ngIf="showTip">
   <div class="help-tip-title">Help Tip</div>
   <div class="help-tip-text">After creating a cohort, create a notebook to import and analyze the data from the cohort.</div>
-  <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times-circle" size="32px" style="position: absolute; top: 1.35rem; right: 1rem;height: 32px; width: 32px"></clr-icon></div>
+  <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times-circle" size="32px" style="position: absolute; top: .25rem; right: 1rem;height: 32px; width: 32px"></clr-icon></div>
 </div>
 <h3 class="notebooks-header">Notebooks</h3>
 <div *ngIf="notebooksLoading" class="spinner-container">

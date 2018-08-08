@@ -138,6 +138,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    //TODO: RW-1057
     this.profileService.getMe().subscribe(
       profile => {
         if (profile.pageVisits) {

@@ -983,9 +983,6 @@ definitions:
       firstVisit:
         type: integer
         format: int64
-      lastVisit:
-        type: integer
-        format: int64
 
   WorkspaceListResponse:
     type: object

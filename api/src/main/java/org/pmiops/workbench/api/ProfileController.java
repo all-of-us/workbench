@@ -502,6 +502,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> updatePageVisits(PageVisit newPageVisit) {
     User user = userProvider.get();
+    user = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     boolean shouldAdd = user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
@@ -513,7 +514,7 @@ public class ProfileController implements ProfileApiDelegate {
       user.getPageVisits().add(firstPageVisit);
       userDao.save(user);
     }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
   @Override
