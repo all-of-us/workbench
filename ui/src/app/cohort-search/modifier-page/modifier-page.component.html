@@ -11,7 +11,6 @@
               <div class="">
                 <clr-dropdown >
                   <button type="button" class="btn btn-outline" clrDropdownTrigger>
-                   hi {{i}}
                     <span *ngIf = "dropdownOption.selected[i] !== ''; else elseBlock">{{dropdownOption.selected[i]}}</span>
                     <ng-template #elseBlock>
                       <span>Select Operator</span>
