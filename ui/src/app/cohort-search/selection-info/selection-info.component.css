@@ -29,3 +29,8 @@
   white-space: normal;
   text-align: justify;
 }
+
+.text-size{
+  font-size: 0.49rem;
+  color: #4A4A4A;
+}
