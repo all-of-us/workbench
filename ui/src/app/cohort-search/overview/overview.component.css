@@ -96,3 +96,7 @@ label[for="name"].show {
   font-size: 0.5rem;
   font-weight: bold;
 }
+
+div.error {
+  height: 36px;
+}

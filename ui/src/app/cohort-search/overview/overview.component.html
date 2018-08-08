@@ -80,6 +80,7 @@
         formControlName="name"
         type="text"
         [class.invalid]="(name.dirty || name.touched) && cohortForm.invalid"
+        (input)="showConflictError = false"
         autofocus>
       <textarea
         name="description"
@@ -93,6 +94,9 @@
   </div>
 
   <div class="modal-footer">
+    <div *ngIf="showConflictError" class="error">
+      {{name.value}} already exists
+    </div>
     <button
       type="button"
       class="btn btn-link"
