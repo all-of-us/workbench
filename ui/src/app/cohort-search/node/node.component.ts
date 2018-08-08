@@ -1,6 +1,6 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DomainType} from 'generated';
+import {Criteria, DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -13,8 +13,11 @@ import {
   criteriaChildren,
   criteriaError,
   criteriaSearchTerms,
+  criteriaSubtree,
   isCriteriaLoading,
 } from '../redux';
+
+import {loadSubtreeItems} from '../redux/actions/creators';
 
 import {highlightMatches} from '../utils';
 
@@ -109,6 +112,33 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
+
+      if (this.node.get('id') === 0) {
+        const subtreeSub = this.ngRedux
+          .select(criteriaSubtree(_type))
+          .subscribe(subtree => {
+            this.actions.loadCriteriaSubtreeTest(_type, subtree.toJS());
+            const subtreeObj = {};
+            subtree.toJS().forEach(criterion => {
+              if (criterion.parentId !== 0) {
+                // criterion = <Criteria>criterion;
+                if (subtreeObj[criterion.parentId]) {
+                  subtreeObj[criterion.parentId].push(criterion);
+                } else {
+                  subtreeObj[criterion.parentId] = [criterion];
+                }
+              }
+            });
+            for (const subParentId in subtreeObj) {
+              if (subtreeObj.hasOwnProperty(subParentId)) {
+                loadSubtreeItems(
+                  _type, parseInt(subParentId, 10), subtreeObj[subParentId]
+                );
+              }
+            }
+          });
+        this.subscription.add(subtreeSub);
+      }
     }
     this.expanded = this.node.get('expanded', false);
   }

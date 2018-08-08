@@ -5,6 +5,8 @@ import {
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
+  LOAD_SUBTREE_RESULTS,
+  LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
@@ -84,6 +86,16 @@ export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
   ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
+
+export const loadSubtreeItems =
+  (kind: string, parentId: number, results: any
+  ): ActionTypes[typeof LOAD_SUBTREE_RESULTS] =>
+  ({type: LOAD_SUBTREE_RESULTS, kind, parentId, results});
+
+export const loadCriteriaSubtree =
+  (kind: string, results: Criteria[]
+  ): ActionTypes[typeof LOAD_CRITERIA_SUBTREE] =>
+  ({type: LOAD_CRITERIA_SUBTREE, kind, results});
 
 export const cancelCriteriaRequest =
   (kind: string, parentId: number

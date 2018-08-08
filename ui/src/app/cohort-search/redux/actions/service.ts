@@ -30,6 +30,7 @@ import {
   SearchParameter,
   SearchRequest,
 } from 'generated';
+import {loadSubtreeItems} from './creators';
 
 
 @Injectable()
@@ -237,8 +238,7 @@ export class CohortSearchActions {
 
   fetchIngredientsForBrand(conceptId: number): void {
     const isLoading = isAutocompleteLoading()(this.state);
-    const isLoaded = this.state.getIn(['criteria', 'search', 'autocomplete']);
-    if (isLoaded || isLoading) {
+    if (isLoading) {
       return;
     }
     this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
@@ -246,11 +246,35 @@ export class CohortSearchActions {
 
   fetchCriteriaSubtree(kind: string, id: number): void {
     const isLoading = isAutocompleteLoading()(this.state);
-    const isLoaded = this.state.getIn(['criteria', 'search', 'autocomplete']);
+    const isLoaded = this.state.getIn(['criteria', 'subtree', kind, id]);
     if (isLoaded || isLoading) {
+      console.log('return');
       return;
     }
+    console.log('request');
     this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
+  }
+
+  loadCriteriaSubtreeTest(kind: string, subtree: Array<any>): void {
+    console.log(subtree);
+    const subtreeObj = {};
+    subtree.forEach(criterion => {
+      if (criterion.parentId !== 0) {
+        // criterion = <Criteria>criterion;
+        if (subtreeObj[criterion.parentId]) {
+          subtreeObj[criterion.parentId].push(criterion);
+        } else {
+          subtreeObj[criterion.parentId] = [criterion];
+        }
+      }
+    });
+    for (const subParentId in subtreeObj) {
+      if (subtreeObj.hasOwnProperty(subParentId)) {
+        loadSubtreeItems(
+          kind, parseInt(subParentId, 10), subtreeObj[subParentId]
+        );
+      }
+    }
   }
 
   requestPreview(): void {

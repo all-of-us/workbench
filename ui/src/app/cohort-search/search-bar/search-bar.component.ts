@@ -126,6 +126,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         }
         break;
       default:
+        console.log('default');
         this.actions.fetchCriteriaSubtree(this._type, option.id);
     }
   }
