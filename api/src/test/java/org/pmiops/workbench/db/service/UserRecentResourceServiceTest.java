@@ -73,7 +73,7 @@ public class UserRecentResourceServiceTest {
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 1);
     Cohort cohort = new Cohort();
-    cohort.setWorkspaceId(1l);
+    cohort.setWorkspaceId(workspaceId);
     cohortId = cohortDao.save(cohort).getCohortId();
     userRecentResourceService.updateCohortEntry(workspaceId, userId, cohortId, new Timestamp(clock.millis()));
     rowsCount = userRecentResourceService.getDao().count();
