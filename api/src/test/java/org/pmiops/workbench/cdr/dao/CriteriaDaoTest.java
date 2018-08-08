@@ -35,6 +35,7 @@ public class CriteriaDaoTest {
   private static final String TYPE_DEMO = "DEMO";
   private static final String TYPE_PM = "PM";
   private static final String TYPE_DRUG = "DRUG";
+  private static final String TYPE_MEASUREMENT = "MEAS";
   private static final String SUBTYPE_NONE = null;
   private static final String SUBTYPE_ICD10PCS = "ICD10PCS";
   private static final String SUBTYPE_RACE = "RACE";
@@ -42,6 +43,7 @@ public class CriteriaDaoTest {
   private static final String SUBTYPE_BP = "BP";
   private static final String SUBTYPE_ATC = "ATC";
   private static final String SUBTYPE_BRAND = "BRAND";
+  private static final String SUBTYPE_LAB = "LAB";
 
   @Autowired
   private CriteriaDao criteriaDao;
@@ -69,6 +71,7 @@ public class CriteriaDaoTest {
   private Criteria pmCriteria;
   private Criteria drugCriteriaIngredient;
   private Criteria drugCriteriaBrand;
+  private Criteria labCriteria;
 
   @Before
   public void setUp() {
@@ -88,6 +91,7 @@ public class CriteriaDaoTest {
       "[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['90']},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['60']}]");
     drugCriteriaIngredient = createCriteria(TYPE_DRUG, SUBTYPE_ATC, "", "ACETAMIN", 0, false, true, "").conceptId("1");
     drugCriteriaBrand = createCriteria(TYPE_DRUG, SUBTYPE_BRAND, "", "BLAH", 0, false, true, "");
+    labCriteria = createCriteria(TYPE_MEASUREMENT, SUBTYPE_LAB, "LP1234", "mysearchname", 0, false, false, "").conceptId("123");
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
@@ -108,6 +112,7 @@ public class CriteriaDaoTest {
     criteriaDao.save(pmCriteria);
     criteriaDao.save(drugCriteriaIngredient);
     criteriaDao.save(drugCriteriaBrand);
+    criteriaDao.save(labCriteria);
 
     conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
@@ -134,6 +139,9 @@ public class CriteriaDaoTest {
     criteriaDao.delete(parentIcd10);
     criteriaDao.delete(childIcd10);
     criteriaDao.delete(pmCriteria);
+    criteriaDao.delete(drugCriteriaIngredient);
+    criteriaDao.delete(drugCriteriaBrand);
+    criteriaDao.delete(labCriteria);
   }
 
   @Test
@@ -158,7 +166,20 @@ public class CriteriaDaoTest {
   public void findCriteriaByType() throws Exception {
     final List<Criteria> icd9List = criteriaDao.findCriteriaByType(TYPE_ICD9);
     final Set<String> typeList = icd9List.stream().map(Criteria::getType).collect(Collectors.toSet());
-    assertEquals(typeList.size(), 1);
+    assertEquals(1, typeList.size());
+  }
+
+  @Test
+  public void findCriteriaByTypeForCodeOrName() throws Exception {
+    //match on code
+    List<Criteria> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TYPE_MEASUREMENT, "LP123");
+    assertEquals(1, labs.size());
+    assertEquals(labCriteria, labs.get(0));
+
+    //match on name
+    labs = criteriaDao.findCriteriaByTypeForCodeOrName(TYPE_MEASUREMENT, "Mysearch");
+    assertEquals(1, labs.size());
+    assertEquals(labCriteria, labs.get(0));
   }
 
   @Test

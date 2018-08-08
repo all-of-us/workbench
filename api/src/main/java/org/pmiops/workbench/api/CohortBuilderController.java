@@ -116,9 +116,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> getCriteriaByTypeForCodeOrName(Long cdrVersionId,
                                                                              String type,
                                                                              String value) {
-    //TODO: really implement this
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaByType("demo");
+    final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, value);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -187,10 +186,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaById(Long cdrVersionId, Long id) {
-
-    //TODO: really implement this
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaByType("demo");
+    final List<Criteria> criteriaList = criteriaDao.findCriteriaById(id);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
