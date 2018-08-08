@@ -253,7 +253,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on
 cast(m1.measurement_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_concept_id > 0
 and m1.value_as_number is not null
-and ar.analysis_id=3000 and ar.stratum_3='Measurement'
+and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not null
 group by m1.measurement_concept_id,stratum_2,stratum_4,stratum_5
 union all
 select 0, 1900 as analysis_id,
@@ -272,7 +272,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on
 cast(m1.measurement_source_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
 and m1.value_as_number is not null
-and ar.analysis_id=3000 and ar.stratum_3='Measurement'
+and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not null
 group by m1.measurement_source_concept_id,stratum_2,stratum_4,stratum_5"
 
 # 1900 Measurement string value counts (This query generates counts, source counts of the value and gender combination. It gets bin size from joining the achilles_results)

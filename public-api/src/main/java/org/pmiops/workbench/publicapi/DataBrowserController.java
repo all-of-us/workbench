@@ -378,18 +378,36 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getGenderAnalysis(){
         AchillesAnalysis genderAnalysis = achillesAnalysisDao.findAnalysisById(GENDER_ANALYSIS);
+        for(AchillesResult ar: genderAnalysis.getResults()){
+            String analysisStratumName =ar.getAnalysisStratumName();
+            if (analysisStratumName == null || analysisStratumName.equals("")) {
+                ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum1()));
+            }
+        }
         return ResponseEntity.ok(TO_CLIENT_ANALYSIS.apply(genderAnalysis));
     }
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getRaceAnalysis(){
         AchillesAnalysis raceAnalysis = achillesAnalysisDao.findAnalysisById(RACE_ANALYSIS);
+        for(AchillesResult ar: raceAnalysis.getResults()){
+            String analysisStratumName =ar.getAnalysisStratumName();
+            if (analysisStratumName == null || analysisStratumName.equals("")) {
+                ar.setAnalysisStratumName(QuestionConcept.raceStratumNameMap.get(ar.getStratum1()));
+            }
+        }
         return ResponseEntity.ok(TO_CLIENT_ANALYSIS.apply(raceAnalysis));
     }
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getEthnicityAnalysis(){
         AchillesAnalysis ethnicityAnalysis = achillesAnalysisDao.findAnalysisById(ETHNICITY_ANALYSIS);
+        for(AchillesResult ar: ethnicityAnalysis.getResults()){
+            String analysisStratumName =ar.getAnalysisStratumName();
+            if (analysisStratumName == null || analysisStratumName.equals("")) {
+                ar.setAnalysisStratumName(QuestionConcept.ethnicityStratumNameMap.get(ar.getStratum1()));
+            }
+        }
         return ResponseEntity.ok(TO_CLIENT_ANALYSIS.apply(ethnicityAnalysis));
     }
 
