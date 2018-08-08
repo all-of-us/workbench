@@ -4,7 +4,6 @@ import java.util.stream.Collectors;
 import java.util.function.Function;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -447,7 +446,7 @@ public class DataBrowserControllerTest {
     public void setUp() {
         saveData();
         ConceptService conceptService = new ConceptService(entityManager);
-        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao, conceptSynonymDao);
+        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao);
     }
 
 

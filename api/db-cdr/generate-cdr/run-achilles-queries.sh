@@ -87,6 +87,26 @@ select 0, 5 as analysis_id,  CAST(ETHNICITY_CONCEPT_ID AS STRING) as stratum_1, 
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
 group by ETHNICITY_CONCEPT_ID"
 
+
+# 6	Number of persons by age decile
+echo "Getting age decile count"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` (id, analysis_id, stratum_1, count_value,source_count_value)
+select 0, 6 as analysis_id,  CAST(floor((2018 - year_of_birth)/10) AS STRING) as stratum_2,
+COUNT(distinct person_id) as count_value, 0 as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
+where floor((2018 - year_of_birth)/10) >=3
+group by stratum_2"
+
+# Age decile 2 count
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` (id, analysis_id, stratum_1, count_value,source_count_value)
+select 0, 6 as analysis_id,  '2' as stratum_2,
+COUNT(distinct person_id) as count_value, 0 as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
+where (2018 - year_of_birth) > 18 and (2018 - year_of_birth) < 30
+group by stratum_2"
+
+
 # 10	Number of all persons by year of birth and by gender
 echo "Getting year of birth , gender count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
