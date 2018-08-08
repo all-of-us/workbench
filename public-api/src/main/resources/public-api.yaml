@@ -87,6 +87,51 @@ paths:
           schema:
             $ref: "#/definitions/AchillesResult"
 
+  /v1/databrowser/gender-count:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets results for an analysis id
+      operationId: "getGenderAnalysis"
+      parameters: []
+      responses:
+        200:
+          description: Gender analysis along with results
+          schema:
+            $ref: "#/definitions/Analysis"
+
+  /v1/databrowser/race-count:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets results for an analysis id
+      operationId: "getRaceAnalysis"
+      parameters: []
+      responses:
+        200:
+          description: Race analysis along with results
+          schema:
+            $ref: "#/definitions/Analysis"
+
+  /v1/databrowser/ethnicity-count:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets results for an analysis id
+      operationId: "getEthnicityAnalysis"
+      parameters: []
+      responses:
+        200:
+          description: Ethnicity analysis along with results
+          schema:
+            $ref: "#/definitions/Analysis"
+
   /v1/databrowser/domain-search:
     get:
       security: []
