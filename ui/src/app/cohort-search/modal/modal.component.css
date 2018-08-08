@@ -53,17 +53,17 @@
   display: inline-block;
   margin: 0 0.75rem;
   box-sizing: border-box;
-  height: 0.75rem;
+  height: 0.99rem;
   width: 1px;
   border: 1px solid #979797;
 }
-.nav-link.active{
+.nav-link.active {
   -webkit-box-shadow: inset 0 -7px 0 #007cbb;
 }
+.nav .nav-link.btn {
+  color: #216FB4!important;
+}
 
-/*.nav-link.hover{*/
-  /*-webkit-box-shadow: inset 0 -7px 0 #007cbb;*/
-/*}*/
 button.active {
   color: rgb(0, 74, 112);
 }
@@ -151,6 +151,11 @@ button.active {
 .title-margin .padding-zero{
  padding-left: 0rem;
   padding-right: 0rem;
+}
+
+.btn-color{
+  color: #216FB4!important;
+  font-weight:bold!important;
 }
 
 h5.selection-title {

@@ -1,6 +1,3 @@
-<!--<div class="title">-->
- <!--hi  {{node.get('name','')}}-->
-<!--</div>-->
 <div *ngIf="negativeAlert" class="alert alert-danger alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
@@ -20,7 +17,7 @@
       <div class="container">
         <div class="row" style="padding-top:.5rem">
           <div class="col col-lg-4 ">
-            <div class="select">
+            <div class="">
 
               <clr-dropdown>
                 <button type="button" class="btn btn-outline" clrDropdownTrigger>
@@ -41,15 +38,6 @@
               </clr-dropdown>
 
               <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" required>
-
-              <!--<select class="dropdown-container" [name]="'operator'+i" [(ngModel)]="attr.operator" (ngModelChange)="selectChange(i, $event)" required>-->
-                <!--<option value="">''</option>-->
-                <!--<option value="EQUAL">Equals</option>-->
-                <!--<option value="GREATER_THAN_OR_EQUAL_TO">Greater than or Equal to</option>-->
-                <!--<option value="LESS_THAN_OR_EQUAL_TO">Less than or Equal to</option>-->
-                <!--<option value="BETWEEN">Between</option>-->
-                <!--<option value="ANY">Any</option>-->
-              <!--</select>-->
             </div>
           </div>
           <div class="col col-lg-2">
@@ -109,27 +97,5 @@
         </div>
       </div>
     </div>
-
-
-    <!--<div class="count-preview">-->
-      <!--<button type="button"-->
-              <!--class="btn calculate-btn"-->
-              <!--[disabled]="!attrForm.valid || negativeAlert"-->
-              <!--(click)="requestPreview(attrForm)">-->
-        <!--Calculate-->
-      <!--</button>-->
-      <!--<span *ngIf="preview.get('count')">-->
-        <!--Number Participants:-->
-      <!--</span>-->
-
-      <!--&lt;!&ndash;<span *ngIf="!preview.get('requesting')">&ndash;&gt;-->
-        <!--&lt;!&ndash;{{ preview.get('count', 0) }}&ndash;&gt;-->
-      <!--&lt;!&ndash;</span>&ndash;&gt;-->
-      <!--<span *ngIf="preview.get('requesting')" class="spinner spinner-inline">-->
-        <!--Loading...-->
-      <!--</span>-->
-    <!--</div>-->
-    <!--<button class="btn btn-link" type="button" (click)="cancel()">Cancel</button>-->
-    <!--<button class="btn btn-primary" type="submit" [disabled]="!attrForm.valid || negativeAlert">Add Item</button>-->
   </section>
 </form>

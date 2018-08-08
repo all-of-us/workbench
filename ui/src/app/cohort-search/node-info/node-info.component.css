@@ -37,7 +37,7 @@ selection-icon-blue {
 }
 .code {
   white-space: nowrap;
-  font-size: smaller;
+  font-size: 14px;
 }
 
 .name {
@@ -46,7 +46,7 @@ selection-icon-blue {
   overflow: hidden;
   text-overflow: ellipsis;
   margin: 0 0.2rem;
-  font-size: smaller;
+  font-size: 14px;
 }
 
 .count {

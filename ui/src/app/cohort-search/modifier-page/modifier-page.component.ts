@@ -23,6 +23,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   existing = List();
   preview = Map();
   subscription: Subscription;
+    dropdownOption = {
+        selected: ['', '', '']
+    };
 
   readonly modifiers = [{
     name: 'ageAtEvent',
@@ -62,6 +65,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     operators: [{
       name: 'N or More',
       value: 'GREATER_THAN_OR_EQUAL_TO',
+    }, {
+        name: 'N or Morettttt',
+        value: 'GREATER_THAN_OR_EQUALuyiuyiu_TO',
     }]
   }];
 
@@ -159,4 +165,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   requestPreview() {
     this.actions.requestPreview();
   }
+
+  selectChange(opt, index) {
+      this.dropdownOption.selected[index] = opt.name;
+  }
+
 }
