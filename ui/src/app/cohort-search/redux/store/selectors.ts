@@ -111,6 +111,10 @@ export const criteriaSearchTerms =
   () => (state): Array<string> =>
   state.getIn(['criteria', 'search', 'terms'], null);
 
+export const criteriaSubtree =
+  (kind: string) => (state): List<any> =>
+  state.getIn(['criteria', 'subtree', kind], List());
+
 export const isCriteriaLoading =
   (kind: string, parentId: number) =>
   (state): boolean =>
