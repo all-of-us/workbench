@@ -87,6 +87,51 @@ paths:
           schema:
             $ref: "#/definitions/AchillesResult"
 
+  /v1/databrowser/gender-count:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets results for an analysis id
+      operationId: "getGenderAnalysis"
+      parameters: []
+      responses:
+        200:
+          description: Gender analysis along with results
+          schema:
+            $ref: "#/definitions/Analysis"
+
+  /v1/databrowser/race-count:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets results for an analysis id
+      operationId: "getRaceAnalysis"
+      parameters: []
+      responses:
+        200:
+          description: Race analysis along with results
+          schema:
+            $ref: "#/definitions/Analysis"
+
+  /v1/databrowser/ethnicity-count:
+    get:
+      security: []
+      tags:
+        - dataBrowser
+
+      description: Gets results for an analysis id
+      operationId: "getEthnicityAnalysis"
+      parameters: []
+      responses:
+        200:
+          description: Ethnicity analysis along with results
+          schema:
+            $ref: "#/definitions/Analysis"
+
   /v1/databrowser/domain-search:
     get:
       security: []
@@ -284,7 +329,11 @@ definitions:
         description: prevalence among participants percent count divided num participants
         type: number
         format: float
-
+      conceptSynonyms:
+        description: concept synonym names
+        type: "array"
+        items:
+          type: "string"
 
   ConceptListResponse:
       type: object
@@ -540,7 +589,7 @@ definitions:
         type: object
         $ref: "#/definitions/Analysis"
       measurementValueOtherGenderAnalysis:
-        description: other gender analysis for measurement values
+        description: other  analysis for measurement values
         type: object
         $ref: "#/definitions/Analysis"
       measurementValueAgeAnalysis:
@@ -569,7 +618,7 @@ definitions:
   MatchType:
     type: string
     description: match column type on concept search
-    enum: [CONCEPT_CODE, CONCEPT_ID, CONCEPT_NAME]
+    enum: [CONCEPT_CODE, CONCEPT_ID, CONCEPT_NAME, CONCEPT_SYNONYM]
 
   SearchConceptsRequest:
     type: object
