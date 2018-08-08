@@ -5,8 +5,8 @@ import {InvitationVerificationRequest} from '../../generated/model/invitationVer
 import {
   BillingProjectStatus,
   DataAccessLevel,
-  PageVisit,
   IdVerificationListResponse,
+  PageVisit,
   Profile,
   ProfileService,
   UsernameTakenResponse,
