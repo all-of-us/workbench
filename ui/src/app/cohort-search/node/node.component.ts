@@ -15,7 +15,7 @@ import {
   criteriaSearchTerms,
   criteriaSubtree,
   isCriteriaLoading,
-  setScrollId,
+  subtreeSelected,
 } from '../redux';
 
 import {loadSubtreeItems} from '../redux/actions/creators';
@@ -101,22 +101,31 @@ export class NodeComponent implements OnInit, OnDestroy {
         .select(criteriaSearchTerms())
         .subscribe(searchTerms => {
           this.searchTerms = searchTerms;
-          this.numMatches = 0;
-          if (searchTerms && searchTerms.length) {
-            this.searchTree();
-          } else {
-            this.clearSearchTree();
+          if (this.fullTree) {
+            this.numMatches = 0;
+            if (searchTerms && searchTerms.length) {
+              this.searchTree();
+            } else {
+              this.clearSearchTree();
+            }
           }
         });
 
       const subtreeSub = this.ngRedux
         .select(criteriaSubtree(_type))
         .filter(nodeIds => nodeIds.includes(parentId.toString()))
-        .subscribe(nodeIds => {
+        .subscribe(() => {
           this.expanded = true;
-          // if (nodeIds.last() === parentId.toString()) {
-          //
-          // }
+        });
+
+      const subtreeSelectSub = this.ngRedux
+        .select(subtreeSelected())
+        .filter(selectedId => selectedId === parentId)
+        .subscribe(() => {
+          console.log(this.searchTerms);
+          const displayName = highlightMatches(this.searchTerms, this.node.get('name'));
+          this.node.set('name', displayName);
+          console.log(displayName);
         });
 
       this.subscription = errorSub;
@@ -124,6 +133,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
       this.subscription.add(subtreeSub);
+      this.subscription.add(subtreeSelectSub);
     }
     if (this.fullTree) {
       this.expanded = this.node.get('expanded', false);

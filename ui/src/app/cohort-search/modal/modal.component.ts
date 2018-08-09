@@ -11,7 +11,7 @@ import {
   activeParameterList,
   attributesPage,
   CohortSearchActions,
-  scrollId,
+  subtreeSelected,
   wizardOpen,
 } from '../redux';
 import {typeToTitle} from '../utils';
@@ -31,7 +31,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
   @select(activeParameterList) selection$: Observable<any>;
   @select(attributesPage) attributes$: Observable<any>;
-  @select(scrollId) scroll$: Observable<any>;
+  @select(subtreeSelected) scrollTo$: Observable<any>;
 
   readonly domainType = DomainType;
   readonly criteriaTypes = CRITERIA_TYPES;
@@ -98,10 +98,9 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subscription.add(this.scroll$
+    this.subscription.add(this.scrollTo$
       .subscribe(nodeId => {
         if (nodeId) {
-          console.log(nodeId);
           this.setScroll(nodeId);
         }
       })

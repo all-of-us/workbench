@@ -145,8 +145,9 @@ export const criteriaLoadErrors =
   (state): any =>
   state.getIn(['criteria', 'errors'], Map());
 
-export const scrollId = (state) =>
-  state.getIn(['criteria', 'tree', 'scroll'], null);
+export const subtreeSelected =
+  () => (state): any  =>
+  state.getIn(['criteria', 'subtree', 'selected'], null);
 
 /**
  * Other

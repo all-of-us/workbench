@@ -119,7 +119,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .mergeIn(['criteria', 'tree', action.kind], fromJS(subtreeObj))
           .setIn(['criteria', 'subtree', action.kind], fromJS(Object.keys(subtreeObj)))
-          .setIn(['criteria', 'tree', 'scroll'], action.id)
+          .setIn(['criteria', 'subtree', 'selected'], action.id)
           .deleteIn(['criteria', 'requests', action.kind, action.id]);
 
       case LOAD_CRITERIA_SUBTREE:
