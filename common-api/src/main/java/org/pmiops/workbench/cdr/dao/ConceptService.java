@@ -70,10 +70,7 @@ public class ConceptService {
     public static final String STANDARD_CONCEPT_CODE = "S";
     public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
-    public Slice<Concept> searchConcepts(String query,
-                                         StandardConceptFilter standardConceptFilter, List<String> vocabularyIds,
-                                         List<String> domainIds, int limit, int minCount, List<Long> synonymConceptIds) {
-
+    public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount, List<Long> synonymConceptIds) {
 
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
@@ -90,45 +87,32 @@ public class ConceptService {
                     nonStandardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                             criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
-
-
-                    // Fetch the concept synonyms
+                    // If the concepts that match the synonym names are found, they are fetched by applying standard concept filer, domain and vocabulary id filters
 
                     if(synonymConceptIds.size() > 0){
-
                         List<Predicate> synonymConceptPredicate = new ArrayList<>();
                         Expression<Long> conceptIdCheck = root.get("conceptId");
                         synonymConceptPredicate.add(conceptIdCheck.in(synonymConceptIds));
-
                         if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS) || standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
-
                                 predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
                                 predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
-
                         } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
-
                             predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
-
                             predicates.add(criteriaBuilder.or(
                                             criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
                                             criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))));
-
                         }else {
-
                             predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
                         }
-
-                    }else{
+                    }
+                    //Else, the concept code/ id/ name is matched against the query and the standard concept filter, domain and vocabulary id filters are applied
+                    else{
                         List<Predicate> conceptCodeIDName = new ArrayList<>();
                         Expression<Double> matchExp = null;
-
                         if(!Strings.isNullOrEmpty(query)){
-
                             final String keyword = modifyMultipleMatchKeyword(query);
-
                             conceptCodeIDName.add(criteriaBuilder.equal(root.get("conceptCode"),
                                     criteriaBuilder.literal(query)));
-
                             try {
                                 long conceptId = Long.parseLong(query);
                                 conceptCodeIDName.add(criteriaBuilder.equal(root.get("conceptId"),
@@ -136,49 +120,32 @@ public class ConceptService {
                             } catch (NumberFormatException e) {
                                 // Not a long, don't try to match it to a concept ID.
                             }
-
-
-                            matchExp = criteriaBuilder.function("match", Double.class,
-                                    root.get("conceptName"), criteriaBuilder.literal(keyword));
-
+                            matchExp = criteriaBuilder.function("match", Double.class, root.get("conceptName"), criteriaBuilder.literal(keyword));
                         }
-
 
                         // Optionally filter on standard concept, vocabulary ID, domain ID
                         if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
-
                             if(!Strings.isNullOrEmpty(query)) {
                                 conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
                                 predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
                             }
-
-
                             predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
 
                         } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
-
                             if(!Strings.isNullOrEmpty(query)) {
-
                                 conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
                                 predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
                             }
-
-
                             predicates.add(
                                     criteriaBuilder.or(
                                             criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
                                             criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))
                                     ));
-
-
                         } else if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
-
                             List<Predicate> conceptNameFilter = new ArrayList<>();
                             conceptNameFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-
                             conceptNameFilter.add(criteriaBuilder.or(
                                     standardConceptPredicates.toArray(new Predicate[0])));
-
                             predicates.add(
                                     criteriaBuilder.or(
                                             criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])),
@@ -186,16 +153,12 @@ public class ConceptService {
                                     ));
                         }
                         else {
-
                             if (!Strings.isNullOrEmpty(query)) {
-
                                 conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
                                 predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
                             }
                         }
                     }
-
-
 
                     if (vocabularyIds != null) {
                         predicates.add(root.get("vocabularyId").in(vocabularyIds));

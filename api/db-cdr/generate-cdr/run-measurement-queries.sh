@@ -233,7 +233,7 @@ group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg
 
 
 # 1900 Measurement numeric value counts (This query generates counts, source counts of the binned value and gender combination. It gets bin size from joining the achilles_results)
-echo "Getting measurements value counts"
+echo "Getting measurements binned gender value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_4, count_value, source_count_value)
@@ -274,7 +274,7 @@ and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not n
 group by m1.measurement_source_concept_id,stratum_2,stratum_4"
 
 # 1900 Measurement string value counts (This query generates counts, source counts of the value and gender combination. It gets bin size from joining the achilles_results)
-echo "Getting measurements value counts"
+echo "Getting measurements unbinned gender value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1,stratum_2,stratum_3,stratum_4,count_value,source_count_value)
@@ -303,7 +303,7 @@ group by m1.measurement_source_concept_id,m1.value_source_value,p1.gender_concep
 
 
 # 1901 Measurement numeric value counts (This query generates counts, source counts of the binned value and (age decile > 2) combination. It gets bin size from joining the achilles_results)
-echo "Getting measurements value counts"
+echo "Getting measurements binned age decile value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_4, count_value,source_count_value)
@@ -347,7 +347,7 @@ group by m1.measurement_source_concept_id,stratum_2,stratum_4"
 
 
 # 1901 Measurement numeric value counts (This query generates counts, source counts of the binned value and age decile 2. It gets bin size from joining the achilles_results)
-echo "Getting measurements value counts"
+echo "Getting measurements binned age decile 2 value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_4, count_value,source_count_value)
@@ -390,7 +390,7 @@ and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extra
 group by m1.measurement_source_concept_id,stratum_2,stratum_4"
 
 #1901 Measurement string value counts (This query generates counts, source counts of the value and age decile > 2 combination. It gets bin size from joining the achilles_results)
-echo "Getting measurements value counts"
+echo "Getting measurements unbinned age decile value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, count_value,source_count_value)
@@ -420,7 +420,7 @@ and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id !=
 group by m1.measurement_source_concept_id,m1.value_source_value,stratum_2"
 
 #1901 Measurement string value counts (This query generates counts, source counts of the value and age decile 2. It gets bin size from joining the achilles_results)
-echo "Getting measurements value counts"
+echo "Getting measurements unbinned age decile 2 value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, count_value,source_count_value)

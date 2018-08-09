@@ -252,7 +252,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
 ########################
 # concept_synonym #
 ########################
-echo "Inserting concept_relationship"
+echo "Inserting concept_synonym"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\`
  (concept_id, concept_synonym_name, language_concept_id)

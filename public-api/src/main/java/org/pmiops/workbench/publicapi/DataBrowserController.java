@@ -40,12 +40,15 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private ConceptService conceptService;
 
     @Autowired
-    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao) {
+    private ConceptSynonymDao conceptSynonymDao;
+
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, ConceptSynonymDao conceptSynonymDao) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
         this.dbDomainDao = dbDomainDao;
         this.achillesResultDao = achillesResultDao;
         this.achillesAnalysisDao = achillesAnalysisDao;
+        this.conceptSynonymDao = conceptSynonymDao;
     }
 
 
@@ -306,14 +309,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
-
-        List<Concept> conceptSynonymList = null;
         List<Long> synonymConceptIds = new ArrayList<>();
         if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
-            conceptSynonymList = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
-            for(Concept c:conceptSynonymList){
-                synonymConceptIds.add(c.getConceptId());
-            }
+            synonymConceptIds = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
         }
 
         Slice<Concept> concepts =
@@ -328,7 +326,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 String conceptId = String.valueOf(con.getConceptId());
 
                 if(con.getSynonyms() != null){
-                    response.setMatchType(MatchType.SYNONYM);
+                    response.setMatchType(MatchType.NAME);
                     for(ConceptSynonym conceptSynonym:con.getSynonyms()){
                         if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName())){
                             conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
@@ -511,6 +509,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 }
                             }
                         }
+
 
                         AchillesAnalysis maleAnalysis = new AchillesAnalysis(aa);
                         AchillesAnalysis femaleAnalysis = new AchillesAnalysis(aa);
