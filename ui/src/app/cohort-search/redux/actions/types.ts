@@ -16,6 +16,7 @@ export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
 export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
 export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
+export const SET_SCROLL_ID = 'SET_SCROLL_ID';
 
 export const BEGIN_COUNT_REQUEST = 'BEGIN_COUNT_REQUEST';
 export const BEGIN_ATTR_PREVIEW_REQUEST = 'BEGIN_ATTR_PREVIEW_REQUEST';
@@ -98,7 +99,7 @@ export interface ActionTypes {
   LOAD_SUBTREE_RESULTS: {
     type: typeof LOAD_SUBTREE_RESULTS;
     kind: string;
-    parentId: number;
+    id: number;
     results: any;
   };
   LOAD_CRITERIA_SUBTREE: {
@@ -146,6 +147,10 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
     error?: any;
+  };
+  SET_SCROLL_ID: {
+    type: typeof SET_SCROLL_ID;
+    nodeId: string;
   };
 
   BEGIN_COUNT_REQUEST: {
@@ -320,6 +325,7 @@ export type RootAction =
   | ActionTypes[typeof LOAD_INGREDIENT_LIST]
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
+  | ActionTypes[typeof SET_SCROLL_ID]
 
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]
   | ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST]

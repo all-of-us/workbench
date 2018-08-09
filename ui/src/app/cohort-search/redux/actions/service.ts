@@ -30,7 +30,6 @@ import {
   SearchParameter,
   SearchRequest,
 } from 'generated';
-import {loadSubtreeItems} from './creators';
 
 
 @Injectable()
@@ -59,6 +58,7 @@ export class CohortSearchActions {
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestCriteriaSubtree = ActionFuncs.requestCriteriaSubtree;
+  @dispatch() loadSubtreeItems = ActionFuncs.loadSubtreeItems;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
@@ -255,12 +255,11 @@ export class CohortSearchActions {
     this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
   }
 
-  loadCriteriaSubtreeTest(kind: string, subtree: Array<any>): void {
+  loadCriteriaSubtreeTest(kind: string, id: number, subtree: Array<any>): void {
     console.log(subtree);
     const subtreeObj = {};
     subtree.forEach(criterion => {
       if (criterion.parentId !== 0) {
-        // criterion = <Criteria>criterion;
         if (subtreeObj[criterion.parentId]) {
           subtreeObj[criterion.parentId].push(criterion);
         } else {
@@ -268,13 +267,16 @@ export class CohortSearchActions {
         }
       }
     });
-    for (const subParentId in subtreeObj) {
-      if (subtreeObj.hasOwnProperty(subParentId)) {
-        loadSubtreeItems(
-          kind, parseInt(subParentId, 10), subtreeObj[subParentId]
-        );
-      }
-    }
+    console.log(subtreeObj);
+    this.loadSubtreeItems(kind, id, subtreeObj);
+    // for (const subParentId in subtreeObj) {
+    //   if (subtreeObj.hasOwnProperty(subParentId)) {
+    //     console.log(subParentId);
+    //     this.loadSubtreeItems(
+    //       kind, parseInt(subParentId, 10), subtreeObj[subParentId]
+    //     );
+    //   }
+    // }
   }
 
   requestPreview(): void {

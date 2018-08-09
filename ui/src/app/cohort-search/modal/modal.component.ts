@@ -11,6 +11,7 @@ import {
   activeParameterList,
   attributesPage,
   CohortSearchActions,
+  scrollId,
   wizardOpen,
 } from '../redux';
 import {typeToTitle} from '../utils';
@@ -30,6 +31,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
   @select(activeParameterList) selection$: Observable<any>;
   @select(attributesPage) attributes$: Observable<any>;
+  @select(scrollId) scroll$: Observable<any>;
 
   readonly domainType = DomainType;
   readonly criteriaTypes = CRITERIA_TYPES;
@@ -43,6 +45,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
+  scrollTime: number;
+  count = 0;
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -93,6 +97,26 @@ export class ModalComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.subscription.add(this.scroll$
+      .subscribe(nodeId => {
+        if (nodeId) {
+          console.log(nodeId);
+          this.setScroll(nodeId);
+        }
+      })
+    );
+  }
+  setScroll(nodeId: string) {
+    let node: any;
+    Observable.interval(100)
+      .takeWhile(() => !node)
+      .subscribe(i => {
+        node = document.getElementById('node' + nodeId.toString());
+        if (node && i < 100) {
+          node.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+      });
   }
 
   ngOnDestroy() {

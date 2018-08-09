@@ -30,6 +30,7 @@ import {
   LOAD_INGREDIENT_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
@@ -104,11 +105,21 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
       case LOAD_SUBTREE_RESULTS:
-        console.log(action.parentId);
-        console.log(action.results);
+        const subtreeObj = {};
+        action.results.forEach(criterion => {
+          if (criterion.parentId !== 0) {
+            if (subtreeObj[criterion.parentId]) {
+              subtreeObj[criterion.parentId].push(criterion);
+            } else {
+              subtreeObj[criterion.parentId] = [criterion];
+            }
+          }
+        });
         return state
-          .setIn(['criteria', 'tree', action.kind, action.parentId], fromJS(action.results))
-          .deleteIn(['criteria', 'requests', action.kind, action.parentId]);
+          .mergeIn(['criteria', 'tree', action.kind], fromJS(subtreeObj))
+          .setIn(['criteria', 'subtree', action.kind], fromJS(Object.keys(subtreeObj)))
+          .setIn(['criteria', 'tree', 'scroll'], action.id)
+          .deleteIn(['criteria', 'requests', action.kind, action.id]);
 
       case LOAD_CRITERIA_SUBTREE:
         return state
@@ -157,6 +168,10 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['criteria', 'errors', List([action.kind, action.parentId])],
             fromJS({error: action.error})
           );
+
+      case SET_SCROLL_ID:
+        console.log('scroll')
+        return state.setIn(['criteria', 'tree', 'scroll'], action.nodeId);
 
       case BEGIN_PREVIEW_REQUEST:
         return state
