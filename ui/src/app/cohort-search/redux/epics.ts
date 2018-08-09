@@ -1156,7 +1156,7 @@ export class CohortSearchEpics {
     action$.ofType(BEGIN_CRITERIA_SUBTREE_REQUEST).mergeMap(
       ({cdrVersionId, kind, id}: CritSubRequestAction) => {
         return this.service.getCriteriaById(cdrVersionId, id)
-          .map(result => loadCriteriaSubtree(kind, mockSubtree))
+          .map(result => loadSubtreeItems(kind, id, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
             .filter(compare({kind, id}))

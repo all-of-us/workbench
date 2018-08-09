@@ -17,6 +17,7 @@ import {
   LOAD_INGREDIENT_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
@@ -89,9 +90,9 @@ export const loadCriteriaRequestResults =
   ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
 
 export const loadSubtreeItems =
-  (kind: string, parentId: number, results: any
+  (kind: string, id: number, results: any
   ): ActionTypes[typeof LOAD_SUBTREE_RESULTS] =>
-  ({type: LOAD_SUBTREE_RESULTS, kind, parentId, results});
+  ({type: LOAD_SUBTREE_RESULTS, kind, id, results});
 
 export const loadCriteriaSubtree =
   (kind: string, results: Criteria[]
@@ -146,6 +147,12 @@ export const criteriaRequestError =
   (kind: string, parentId: number, error?: any
   ): ActionTypes[typeof CRITERIA_REQUEST_ERROR] =>
   ({type: CRITERIA_REQUEST_ERROR, kind, parentId, error});
+
+export const setScrollId =
+  (nodeId: string
+  ): ActionTypes[typeof SET_SCROLL_ID] =>
+  ({type: SET_SCROLL_ID, nodeId});
+
 
 /**
  * Count loading mgmt

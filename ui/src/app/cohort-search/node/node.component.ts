@@ -15,6 +15,7 @@ import {
   criteriaSearchTerms,
   criteriaSubtree,
   isCriteriaLoading,
+  setScrollId,
 } from '../redux';
 
 import {loadSubtreeItems} from '../redux/actions/creators';
@@ -108,45 +109,35 @@ export class NodeComponent implements OnInit, OnDestroy {
           }
         });
 
+      const subtreeSub = this.ngRedux
+        .select(criteriaSubtree(_type))
+        .filter(nodeIds => nodeIds.includes(parentId.toString()))
+        .subscribe(nodeIds => {
+          this.expanded = true;
+          // if (nodeIds.last() === parentId.toString()) {
+          //
+          // }
+        });
+
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
-
-      if (this.node.get('id') === 0) {
-        const subtreeSub = this.ngRedux
-          .select(criteriaSubtree(_type))
-          .subscribe(subtree => {
-            this.actions.loadCriteriaSubtreeTest(_type, subtree.toJS());
-            const subtreeObj = {};
-            subtree.toJS().forEach(criterion => {
-              if (criterion.parentId !== 0) {
-                // criterion = <Criteria>criterion;
-                if (subtreeObj[criterion.parentId]) {
-                  subtreeObj[criterion.parentId].push(criterion);
-                } else {
-                  subtreeObj[criterion.parentId] = [criterion];
-                }
-              }
-            });
-            for (const subParentId in subtreeObj) {
-              if (subtreeObj.hasOwnProperty(subParentId)) {
-                loadSubtreeItems(
-                  _type, parseInt(subParentId, 10), subtreeObj[subParentId]
-                );
-              }
-            }
-          });
-        this.subscription.add(subtreeSub);
-      }
+      this.subscription.add(subtreeSub);
     }
-    this.expanded = this.node.get('expanded', false);
+    if (this.fullTree) {
+      this.expanded = this.node.get('expanded', false);
+    }
   }
 
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  get nodeId() {
+    return 'node' + this.node.get('id');
   }
 
   addChildToParent(child, itemList) {
