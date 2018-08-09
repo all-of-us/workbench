@@ -5,6 +5,7 @@ import {InvitationVerificationRequest} from '../../generated/model/invitationVer
 import {
   BillingProjectStatus,
   DataAccessLevel,
+  PageVisit,
   Profile,
   ProfileService,
   UsernameTakenResponse,
@@ -21,6 +22,7 @@ export class ProfileStubVariables {
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
+    pageVisit: [{page: 'test'}],
   };
 }
 
@@ -72,6 +74,10 @@ export class ProfileServiceStub extends ProfileService {
         isTaken: username === ProfileStubVariables.PROFILE_STUB.username
       });
     });
+  }
+
+  public updatePageVisits(pageVisit: PageVisit, extraHttpRequestParams?: any): Observable<Profile> {
+    return Observable.from([this.profile]);
   }
 
   private now(): number {

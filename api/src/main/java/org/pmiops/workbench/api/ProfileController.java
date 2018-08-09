@@ -9,18 +9,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
@@ -54,6 +50,7 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
+import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
@@ -500,6 +497,24 @@ public class ProfileController implements ProfileApiDelegate {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  @Override
+  public ResponseEntity<Profile> updatePageVisits(PageVisit newPageVisit) {
+    User user = userProvider.get();
+    user = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
+    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    boolean shouldAdd = user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
+    if (shouldAdd) {
+      org.pmiops.workbench.db.model.PageVisit firstPageVisit =
+        new org.pmiops.workbench.db.model.PageVisit();
+      firstPageVisit.setPageId(newPageVisit.getPage());
+      firstPageVisit.setUser(user);
+      firstPageVisit.setFirstVisit(timestamp);
+      user.getPageVisits().add(firstPageVisit);
+      userDao.save(user);
+    }
+    return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
   @Override

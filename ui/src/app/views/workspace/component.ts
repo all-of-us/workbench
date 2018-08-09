@@ -14,6 +14,8 @@ import {
   Cohort,
   CohortsService,
   FileDetail,
+  PageVisit,
+  ProfileService,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService,
@@ -74,12 +76,10 @@ enum Tabs {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
+  private static PAGE_ID = 'workspace';
+
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
-
-
-
-  greeting: string;
   showTip: boolean;
   workspace: Workspace;
   wsId: string;
@@ -97,6 +97,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   researchPurposeArray: String[] = [];
   leftResearchPurposes: String[];
   rightResearchPurposes: String[];
+  newPageVisit: PageVisit = { page: WorkspaceComponent.PAGE_ID};
+  firstVisit = true;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -108,6 +110,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
+    private profileService: ProfileService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
@@ -129,12 +132,27 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.researchPurposeArray.slice(
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
-    this.showTip = true;
+    this.showTip = false;
   }
 
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    // TODO: RW-1057
+    this.profileService.getMe().subscribe(
+      profile => {
+        if (profile.pageVisits) {
+          this.firstVisit = !profile.pageVisits.some(v =>
+            v.page === WorkspaceComponent.PAGE_ID);
+        }
+      },
+      error => {},
+      () => {
+        if (this.firstVisit) {
+          this.showTip = true;
+        }
+        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
+      });
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
       .subscribe(
         cohortsReceived => {
@@ -148,12 +166,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
-
-    if (this.newWorkspace) {
-      this.greeting = 'Get Started';
-    } else {
-      this.greeting = 'Recent Work';
-    }
   }
 
   private loadNotebookList() {
@@ -237,10 +249,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   get ownerPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
-  }
-
-  get newWorkspace(): boolean {
-    return this.cohortList.length === 0 && this.notebookList.length === 0 && this.showTip;
   }
 
   share(): void {
