@@ -19,7 +19,6 @@ import {
 import {ServerConfigService} from '../../services/server-config.service';
 
 import {AdminReviewIdVerificationComponent} from '../admin-review-id-verification/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class AdminReviewIdVerificationPage {
   fixture: ComponentFixture<AdminReviewIdVerificationComponent>;
@@ -38,10 +37,8 @@ class AdminReviewIdVerificationPage {
 
 
 describe('AdminReviewIdVerificationComponent', () => {
-  let profileServiceStub: ProfileServiceStub;
   let page: AdminReviewIdVerificationPage;
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -52,7 +49,7 @@ describe('AdminReviewIdVerificationComponent', () => {
         AdminReviewIdVerificationComponent
       ],
       providers: [
-        { provide: ProfileService, useValue: profileServiceStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({

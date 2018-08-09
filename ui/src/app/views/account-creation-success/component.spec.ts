@@ -23,7 +23,6 @@ import {AccountCreationModalsComponent} from '../account-creation-modals/compone
 import {AccountCreationSuccessComponent} from '../account-creation-success/component';
 import {AccountCreationComponent} from '../account-creation/component';
 import {LoginComponent} from '../login/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class AccountCreationSuccessPage {
   fixture: ComponentFixture<AccountCreationSuccessComponent>;
@@ -42,10 +41,8 @@ class AccountCreationSuccessPage {
 
 
 describe('AccountCreationSuccessComponent', () => {
-  let profileServiceStub: ProfileServiceStub;
   let page: AccountCreationSuccessPage;
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -66,7 +63,7 @@ describe('AccountCreationSuccessComponent', () => {
           contactEmail: ''
         }}},
         { provide: LoginComponent, useValue: {}},
-        { provide: ProfileService, useValue: profileServiceStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({

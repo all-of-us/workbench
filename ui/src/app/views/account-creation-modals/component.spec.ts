@@ -1,7 +1,5 @@
-import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
@@ -17,7 +15,6 @@ import {
 import {ServerConfigService} from '../../services/server-config.service';
 
 import {AccountCreationModalsComponent} from '../account-creation-modals/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class AccountCreationModalsPage {
   fixture: ComponentFixture<AccountCreationModalsComponent>;
@@ -36,10 +33,8 @@ class AccountCreationModalsPage {
 
 
 describe('AccountCreationModalsComponent', () => {
-  let profileServiceStub: ProfileServiceStub;
   let page: AccountCreationModalsPage;
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -50,7 +45,7 @@ describe('AccountCreationModalsComponent', () => {
         AccountCreationModalsComponent
       ],
       providers: [
-        { provide: ProfileService, useValue: profileServiceStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({

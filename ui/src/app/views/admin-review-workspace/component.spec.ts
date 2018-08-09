@@ -25,7 +25,6 @@ import {ServerConfigService} from '../../services/server-config.service';
 
 import {AdminReviewWorkspaceComponent} from '../admin-review-workspace/component';
 import {BugReportComponent} from '../bug-report/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class AdminReviewWorkspacePage {
   fixture: ComponentFixture<AdminReviewWorkspaceComponent>;
@@ -44,10 +43,8 @@ class AdminReviewWorkspacePage {
 
 
 describe('AdminReviewWorkspaceComponent', () => {
-  let profileServiceStub: ProfileServiceStub;
   let page: AdminReviewWorkspacePage;
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -60,7 +57,7 @@ describe('AdminReviewWorkspaceComponent', () => {
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
-        { provide: ProfileService, useValue: profileServiceStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         {
           provide: ServerConfigService,

@@ -24,7 +24,6 @@ import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {LoginComponent} from '../login/component';
 import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class AccountCreationPage {
   fixture: ComponentFixture<AccountCreationComponent>;
@@ -45,10 +44,8 @@ class AccountCreationPage {
 
 
 describe('AccountCreationComponent', () => {
-  let profileServiceStub: ProfileServiceStub;
   let page: AccountCreationPage;
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -66,7 +63,7 @@ describe('AccountCreationComponent', () => {
       providers: [
         { provide: LoginComponent, useValue: {}},
         { provide: InvitationKeyComponent, useValue: {}},
-        { provide: ProfileService, useValue: profileServiceStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
