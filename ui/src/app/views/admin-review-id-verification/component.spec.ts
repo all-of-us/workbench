@@ -49,8 +49,7 @@ describe('AdminReviewIdVerificationComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AdminReviewIdVerificationComponent,
-        RoutingSpinnerComponent
+        AdminReviewIdVerificationComponent
       ],
       providers: [
         { provide: ProfileService, useValue: profileServiceStub },

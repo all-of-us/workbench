@@ -56,8 +56,7 @@ describe('AdminReviewWorkspaceComponent', () => {
       ],
       declarations: [
         AdminReviewWorkspaceComponent,
-        BugReportComponent,
-        RoutingSpinnerComponent
+        BugReportComponent
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },

@@ -61,8 +61,7 @@ describe('AccountCreationComponent', () => {
         AccountCreationModalsComponent,
         AccountCreationSuccessComponent,
         InvitationKeyComponent,
-        PageTemplateSignedOutComponent,
-        RoutingSpinnerComponent
+        PageTemplateSignedOutComponent
       ],
       providers: [
         { provide: LoginComponent, useValue: {}},

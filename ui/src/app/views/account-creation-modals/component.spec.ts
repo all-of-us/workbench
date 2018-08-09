@@ -47,8 +47,7 @@ describe('AccountCreationModalsComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AccountCreationModalsComponent,
-        RoutingSpinnerComponent
+        AccountCreationModalsComponent
       ],
       providers: [
         { provide: ProfileService, useValue: profileServiceStub },

@@ -54,8 +54,7 @@ describe('AccountCreationSuccessComponent', () => {
       ],
       declarations: [
         AccountCreationModalsComponent,
-        AccountCreationSuccessComponent,
-        RoutingSpinnerComponent
+        AccountCreationSuccessComponent
       ],
       providers: [
         { provide: AccountCreationComponent, useValue: {profile: {
