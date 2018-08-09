@@ -272,6 +272,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     if (request.getCohortAnnotationDefinitionId() == null) {
       throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
     }
+    if (request.getCohortReviewId() == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid cohort review id.");
+    }
+    if (request.getParticipantId() == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
+    }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
@@ -279,7 +285,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
       FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
 
-    participantCohortAnnotation = cohortReviewService.saveParticipantCohortAnnotation(cohortReview.getCohortReviewId(), participantCohortAnnotation);
+    participantCohortAnnotation = cohortReviewService.saveParticipantCohortAnnotation(request.getCohortReviewId(), participantCohortAnnotation);
 
     return ResponseEntity.ok(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
   }
