@@ -9,7 +9,7 @@ import {
   ProfileService,
 } from 'generated';
 
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
@@ -54,14 +54,10 @@ describe('AccountCreationSuccessComponent', () => {
         AccountCreationSuccessComponent
       ],
       providers: [
-        { provide: AccountCreationComponent, useValue: {profile: {
-          username: '',
-          enabledInFireCloud: false,
-          dataAccessLevel: DataAccessLevel.Unregistered,
-          givenName: '',
-          familyName: '',
-          contactEmail: ''
-        }}},
+        { provide: AccountCreationComponent, useValue: {
+            profile: ProfileStubVariables.PROFILE_STUB
+          }
+        },
         { provide: LoginComponent, useValue: {}},
         { provide: ProfileService, useValue: new ProfileServiceStub },
         {
