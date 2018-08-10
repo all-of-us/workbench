@@ -2,7 +2,7 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {DomainType} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES} from '../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
 import {
   autocompleteError,
   autocompleteOptions,
@@ -60,7 +60,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
             }
           });
 
-          this.noResults = this._type === DomainType.DRUG
+          this.noResults = (this._type === DomainType.DRUG || this._type === CRITERIA_TYPES.MEAS)
             && !this.optionSelected
             && !this.options.length;
         }

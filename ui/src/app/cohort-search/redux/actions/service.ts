@@ -60,6 +60,7 @@ export class CohortSearchActions {
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestCriteriaSubtree = ActionFuncs.requestCriteriaSubtree;
   @dispatch() loadSubtreeItems = ActionFuncs.loadSubtreeItems;
+  @dispatch() setScrollId = ActionFuncs.setScrollId;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
@@ -249,10 +250,8 @@ export class CohortSearchActions {
     const isLoading = isAutocompleteLoading()(this.state);
     const isLoaded = this.state.getIn(['criteria', 'subtree', kind, id]);
     if (isLoaded || isLoading) {
-      console.log('return');
       return;
     }
-    console.log('request');
     this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
   }
 

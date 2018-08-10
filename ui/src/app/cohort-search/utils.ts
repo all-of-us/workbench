@@ -57,6 +57,9 @@ export function typeToTitle(_type: string): string {
     case CRITERIA_TYPES.DEMO:
       _type = 'Demographics';
       break;
+    case CRITERIA_TYPES.MEAS:
+      _type = 'Measurements';
+      break;
     case CRITERIA_TYPES.PM:
       _type = 'Physical Measurements';
       break;

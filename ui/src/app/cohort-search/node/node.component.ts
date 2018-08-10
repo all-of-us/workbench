@@ -58,6 +58,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   error = false;
   fullTree: boolean;
   subscription: Subscription;
+  @select(subtreeSelected) selected$: Observable<any>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -114,18 +115,13 @@ export class NodeComponent implements OnInit, OnDestroy {
       const subtreeSub = this.ngRedux
         .select(criteriaSubtree(_type))
         .filter(nodeIds => nodeIds.includes(parentId.toString()))
-        .subscribe(() => {
-          this.expanded = true;
-        });
+        .subscribe(() =>  this.expanded = true);
 
-      const subtreeSelectSub = this.ngRedux
-        .select(subtreeSelected())
+      const subtreeSelectSub = this.selected$
         .filter(selectedId => selectedId === parentId)
         .subscribe(() => {
-          console.log(this.searchTerms);
           const displayName = highlightMatches(this.searchTerms, this.node.get('name'));
-          this.node.set('name', displayName);
-          console.log(displayName);
+          this.node = this.node.set('name', displayName);
         });
 
       this.subscription = errorSub;
