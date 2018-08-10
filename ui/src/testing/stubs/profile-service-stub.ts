@@ -5,6 +5,7 @@ import {InvitationVerificationRequest} from '../../generated/model/invitationVer
 import {
   BillingProjectStatus,
   DataAccessLevel,
+  IdVerificationListResponse,
   PageVisit,
   Profile,
   ProfileService,
@@ -78,6 +79,14 @@ export class ProfileServiceStub extends ProfileService {
 
   public updatePageVisits(pageVisit: PageVisit, extraHttpRequestParams?: any): Observable<Profile> {
     return Observable.from([this.profile]);
+  }
+
+  public getIdVerificationsForReview(): Observable<IdVerificationListResponse> {
+    return new Observable(observer => {
+      observer.next({
+        profileList: [ProfileStubVariables.PROFILE_STUB]
+      });
+    });
   }
 
   private now(): number {
