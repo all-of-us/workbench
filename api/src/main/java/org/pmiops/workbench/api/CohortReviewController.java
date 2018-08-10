@@ -301,6 +301,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     if (annotationId == null) {
       throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
     }
+    if (participantId == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
+    }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
@@ -330,6 +333,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                   Long cdrVersionId,
                                                                   Long dataId,
                                                                   String domain) {
+    if (dataId == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid data id.");
+    }
+    if (domain == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid domain.");
+    }
+
     validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 

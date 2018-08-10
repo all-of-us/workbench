@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -39,6 +40,8 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
@@ -111,6 +114,9 @@ public class CohortReviewControllerTest {
 
   @Autowired
   private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
+
+  @Autowired
+  private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Autowired
   private WorkspaceService workspaceService;
@@ -524,6 +530,124 @@ public class CohortReviewControllerTest {
   }
 
   @Test
+  public void deleteParticipantCohortAnnotation() throws Exception {
+    org.pmiops.workbench.db.model.ParticipantCohortAnnotation annotation =
+      new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
+        .cohortReviewId(cohortReview.getCohortReviewId())
+        .participantId(participantCohortStatus1.getParticipantKey().getParticipantId())
+        .annotationValueString("test")
+        .cohortAnnotationDefinitionId(stringAnnotationDefinition.getCohortAnnotationDefinitionId());
+    participantCohortAnnotationDao.save(annotation);
+
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    cohortReviewController.deleteParticipantCohortAnnotation(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      participantCohortStatus1.getParticipantKey().getParticipantId(),
+      annotation.getAnnotationId());
+  }
+
+  @Test
+  public void deleteParticipantCohortAnnotationNullAnnotationId() throws Exception {
+    try {
+      cohortReviewController.deleteParticipantCohortAnnotation(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        participantCohortStatus1.getParticipantKey().getParticipantId(),
+        null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertThat(bre.getMessage())
+        .isEqualTo("Invalid Request: Please provide a valid cohort annotation definition id.");
+    }
+  }
+
+  @Test
+  public void deleteParticipantCohortAnnotationNoAnnotation() throws Exception {
+    Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
+    Long annotationId = 9999L;
+
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    try {
+      cohortReviewController.deleteParticipantCohortAnnotation(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        participantId,
+        annotationId);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException nfe) {
+      //Success
+      assertThat(nfe.getMessage())
+        .isEqualTo("Not Found: No participant cohort annotation found for annotationId: " +
+          annotationId + ", cohortReviewId: " + cohortReview.getCohortReviewId() + ", participantId: " + participantId);
+    }
+  }
+
+  @Test
+  public void deleteParticipantCohortAnnotationNullParticipantId() throws Exception {
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    try {
+      cohortReviewController.deleteParticipantCohortAnnotation(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        null,
+        1L);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertThat(bre.getMessage()).isEqualTo("Invalid Request: Please provide a valid participant id.");
+    }
+  }
+
+  @Test
+  public void deleteParticipantCohortAnnotationNoParticipant() throws Exception {
+    Long participantId = 9999L;
+
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    try {
+      cohortReviewController.deleteParticipantCohortAnnotation(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        participantId,
+        1L);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException nfe) {
+      //Success
+      assertThat(nfe.getMessage())
+        .isEqualTo("Not Found: Participant Cohort Status does not exist for cohortReviewId: " +
+          cohortReview.getCohortReviewId() + ", participantId: " + participantId);
+    }
+  }
+
+  @Test
+  public void getDetailParticipantData() throws Exception {
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.READER)).thenReturn(workspace);
+
+    stubBigQueryCohortCalls();
+    cohortReviewController.getDetailParticipantData(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      1L,
+      DomainType.CONDITION.name());
+  }
+
+  @Test
   public void getParticipantCohortStatuses() throws Exception {
     int page = 0;
     int pageSize = 25;
@@ -679,6 +803,7 @@ public class CohortReviewControllerTest {
     when(bigQueryService.executeQuery(null)).thenReturn(queryResult);
     when(bigQueryService.getResultMapper(queryResult)).thenReturn(rm);
     when(queryResult.iterateAll()).thenReturn(testIterable);
+    when(queryResult.getValues()).thenReturn(testIterable);
     when(bigQueryService.getLong(null, 0)).thenReturn(0L);
     when(bigQueryService.getString(null, 1)).thenReturn("1");
     when(bigQueryService.getLong(null, 2)).thenReturn(0L);
