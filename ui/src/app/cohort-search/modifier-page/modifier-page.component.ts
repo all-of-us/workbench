@@ -3,15 +3,12 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import * as moment from 'moment';
-
 import {
   activeModifierList,
   CohortSearchActions,
-  CohortSearchState,
   previewStatus
 } from '../redux';
-import {Observable} from 'rxjs/Observable';
+import * as moment from 'moment';
 
 @Component({
     selector: 'crit-modifier-page',
@@ -143,7 +140,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   }
     selectChange(opt, index, e, mod) {
         this.dropdownOption.selected[index] = opt.name;
-        if (e.target.value || this.form.controls.valueA){
+        if (e.target.value || this.form.controls.valueA) {
             this.formChanges = true;
         }
         if (mod.modType === 'AGE_AT_EVENT') {
