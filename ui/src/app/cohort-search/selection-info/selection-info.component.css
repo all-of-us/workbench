@@ -25,10 +25,8 @@
   white-space: nowrap;
 }
 
-.item-info > .name:hover {
-  overflow: visible;
-  white-space: normal;
-  text-align: justify;
+.tooltip-text {
+  font-size: 12px;
 }
 
 .text-size{
