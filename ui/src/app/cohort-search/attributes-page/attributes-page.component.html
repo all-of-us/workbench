@@ -44,7 +44,7 @@
           </div>
         </div>
     </div>
-    <div class="container count-preview ">
+    <div class="count-preview ">
       <div class="row">
         <div class="col-lg-2 ">
           <button type="button"
@@ -57,7 +57,7 @@
         <div class="spin-top-padding">
           <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading...   </span>
         </div>
-        <div class="col-lg-8 text-padding" *ngIf="preview.get('count')">
+        <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
           <div class="result-text">
             Results
           </div>

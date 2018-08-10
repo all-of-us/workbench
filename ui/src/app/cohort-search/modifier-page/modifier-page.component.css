@@ -71,16 +71,15 @@
     color: #4A4A4A;
 }
 
-.count-preview .result-text {
-    font-weight: bold;
-    color: #4A4A4A;
+.spin-top-padding {
+    padding-top: 0.5rem;
 }
 
 .count-preview .result-text {
     color: #262262;
     font-size: 14px;
     font-weight: 500;
-    line-height: 17px;
+    /*line-height: 17px;*/
 
 }
 
