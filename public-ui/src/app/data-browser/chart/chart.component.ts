@@ -410,7 +410,7 @@ export class ChartComponent implements OnChanges {
       }
     );
     const data = [];
-    let cats = [];
+    const cats = [];
     for (const a  of results) {
       // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
       const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] :
