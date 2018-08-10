@@ -26,7 +26,7 @@
                   </clr-dropdown-menu>
                 </clr-dropdown>
               </div>
-              <div class="">
+              <div>
                 <input *ngIf = "mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
               <div *ngIf = "mod.inputType === 'date'" >
@@ -37,18 +37,17 @@
                  <div>and</div>
                </div>
                <div>
-                 <input *ngIf = "mod.inputType !== 'date'"  class="modifier-event-indicator"
-                        formControlName="valueB" [type]="mod.inputType">
+                 <input *ngIf = "mod.inputType !== 'date'"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
                </div>
              </ng-container>
-          <ng-container *ngIf = "dropdownOption.selected[i] === 'Is Between'">
-            <div class="and-text" >
-              <div>and</div>
-            </div>
-            <div>
-              <input *ngIf = "mod.inputType === 'date'" class="modifier-calender" formControlName="valueB" [type]="mod.inputType" type="date" clrDate>
-            </div>
-          </ng-container>
+              <ng-container *ngIf = "dropdownOption.selected[i] === 'Is Between'">
+                <div class="and-text" >
+                  <div>and</div>
+                </div>
+                <div>
+                  <input *ngIf = "mod.inputType === 'date'" class="modifier-calender" formControlName="valueB" [type]="mod.inputType" type="date" clrDate>
+                </div>
+              </ng-container>
         </div>
     </div>
   </section>

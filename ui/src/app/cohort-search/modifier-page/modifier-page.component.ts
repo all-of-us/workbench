@@ -143,56 +143,34 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   }
     selectChange(opt, index,e,mod) {
         this.dropdownOption.selected[index] = opt.name;
-        // console.log(this.form.controls.)
         if(e.target.value || this.form.controls.valueA){
             this.formChanges = true;
         }
         if(mod.modType === 'AGE_AT_EVENT'){
-            let testForm = <FormArray>this.form.controls.ageAtEvent
-            // console.log(testForm);
-            console.log(testForm.controls);
-            // console.log(testForm.controls.get('operator'));
-            let anotherForm = <FormArray>testForm
-            console.log(anotherForm.get('operator').patchValue(opt.value));
-        }
-        if(mod.modType === 'EVENT_DATE'){
-            let testForm = <FormArray>this.form.controls.eventDate
-            // console.log(testForm);
-            console.log(testForm.controls);
-            // console.log(testForm.controls.get('operator'));
-            let anotherForm = <FormArray>testForm
-            console.log(anotherForm.get('operator').patchValue(opt.value));
-        }
-        if(mod.modType === 'NUM_OF_OCCURRENCES'){
-            let testForm = <FormArray>this.form.controls.hasOccurrences
-            // console.log(testForm);
-            console.log(testForm.controls);
-            // console.log(testForm.controls.get('operator'));
-            let anotherForm = <FormArray>testForm
-            console.log(anotherForm.get('operator').patchValue(opt.value));
+            let ageAtEventForm = <FormArray>this.form.controls.ageAtEvent;
+            let valueForm = <FormArray>ageAtEventForm;
+            valueForm.get('operator').patchValue(opt.value);
+        } else if(mod.modType === 'EVENT_DATE'){
+            let eventDateForm = <FormArray>this.form.controls.eventDate;
+            let valueForm = <FormArray>eventDateForm;
+            valueForm.get('operator').patchValue(opt.value);
+        } else if(mod.modType === 'NUM_OF_OCCURRENCES'){
+            let hasOccurrencesForm = <FormArray>this.form.controls.hasOccurrences;
+            let valueForm = <FormArray>hasOccurrencesForm;
+            valueForm.get('operator').patchValue(opt.value);
         }
     }
 
-
   currentMods(vals) {
     return this.modifiers.map(({name, inputType, modType}) => {
-
       const {operator, valueA, valueB} = vals[name];
-
-        if(inputType === 'date'){
-            this.dateValueA = moment(valueA, 'MM/DD/YYYY').format('YYYY-MM-DD');
-
-        }
-
-        if(inputType === 'date'){
-            this.dateValueB = moment(valueB, 'MM/DD/YYYY').format('YYYY-MM-DD');
-        }
-
       const between = operator === 'BETWEEN';
-      if (!operator || !this.dateValueA || (between && !this.dateValueB)) {
+      if (!operator || !valueA || (between && !valueB)) {
         return ;
       }
       if(inputType === 'date'){
+          this.dateValueA = moment(valueA, 'MM/DD/YYYY').format('YYYY-MM-DD');
+          this.dateValueB = moment(valueB, 'MM/DD/YYYY').format('YYYY-MM-DD');
           const operands = [this.dateValueA];
           if (between) { operands.push(this.dateValueB); }
           return fromJS({name: modType, operator, operands});
@@ -201,7 +179,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
           if (between) { operands.push(valueB); }
           return fromJS({name: modType, operator, operands});
       }
-
     });
   }
 
