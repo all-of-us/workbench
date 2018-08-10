@@ -26,24 +26,8 @@ import {ServerConfigService} from '../../services/server-config.service';
 import {AdminReviewWorkspaceComponent} from '../admin-review-workspace/component';
 import {BugReportComponent} from '../bug-report/component';
 
-class AdminReviewWorkspacePage {
-  fixture: ComponentFixture<AdminReviewWorkspaceComponent>;
-  component: AdminReviewWorkspaceComponent;
-
-  constructor(testBed: typeof TestBed) {
-    this.fixture = testBed.createComponent(AdminReviewWorkspaceComponent);
-    this.component = this.fixture.componentInstance;
-    this.readPageData();
-  }
-
-  readPageData() {
-    updateAndTick(this.fixture);
-  }
-}
-
-
 describe('AdminReviewWorkspaceComponent', () => {
-  let page: AdminReviewWorkspacePage;
+  let fixture: ComponentFixture<AdminReviewWorkspaceComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -68,13 +52,13 @@ describe('AdminReviewWorkspaceComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() }
       ]
     }).compileComponents().then(() => {
-      page = new AdminReviewWorkspacePage(TestBed);
+      fixture = TestBed.createComponent(AdminReviewWorkspaceComponent);
       tick();
     });
   }));
 
   it('should render', fakeAsync(() => {
-    page.readPageData();
-    expect(page.fixture).toBeTruthy();
+    updateAndTick(fixture);
+    expect(fixture).toBeTruthy();
   }));
 });

@@ -24,24 +24,8 @@ import {AccountCreationSuccessComponent} from '../account-creation-success/compo
 import {AccountCreationComponent} from '../account-creation/component';
 import {LoginComponent} from '../login/component';
 
-class AccountCreationSuccessPage {
-  fixture: ComponentFixture<AccountCreationSuccessComponent>;
-  component: AccountCreationSuccessComponent;
-
-  constructor(testBed: typeof TestBed) {
-    this.fixture = testBed.createComponent(AccountCreationSuccessComponent);
-    this.component = this.fixture.componentInstance;
-    this.readPageData();
-  }
-
-  readPageData() {
-    updateAndTick(this.fixture);
-  }
-}
-
-
 describe('AccountCreationSuccessComponent', () => {
-  let page: AccountCreationSuccessPage;
+  let fixture: ComponentFixture<AccountCreationSuccessComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -69,13 +53,13 @@ describe('AccountCreationSuccessComponent', () => {
         { provide: SignInService, useValue: new SignInServiceStub()}
       ]
     }).compileComponents().then(() => {
-      page = new AccountCreationSuccessPage(TestBed);
+      fixture = TestBed.createComponent(AccountCreationSuccessComponent);
       tick();
     });
   }));
 
   it('should render', fakeAsync(() => {
-    page.readPageData();
-    expect(page.fixture).toBeTruthy();
+    updateAndTick(fixture);
+    expect(fixture).toBeTruthy();
   }));
 });

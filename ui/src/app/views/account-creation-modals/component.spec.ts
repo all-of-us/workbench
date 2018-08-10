@@ -16,24 +16,8 @@ import {ServerConfigService} from '../../services/server-config.service';
 
 import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 
-class AccountCreationModalsPage {
-  fixture: ComponentFixture<AccountCreationModalsComponent>;
-  component: AccountCreationModalsComponent;
-
-  constructor(testBed: typeof TestBed) {
-    this.fixture = testBed.createComponent(AccountCreationModalsComponent);
-    this.component = this.fixture.componentInstance;
-    this.readPageData();
-  }
-
-  readPageData() {
-    updateAndTick(this.fixture);
-  }
-}
-
-
 describe('AccountCreationModalsComponent', () => {
-  let page: AccountCreationModalsPage;
+  let fixture: ComponentFixture<AccountCreationModalsComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -53,13 +37,13 @@ describe('AccountCreationModalsComponent', () => {
           })
         }]
     }).compileComponents().then(() => {
-      page = new AccountCreationModalsPage(TestBed);
+      fixture = TestBed.createComponent(AccountCreationModalsComponent);
       tick();
     });
   }));
 
   it('should render', fakeAsync(() => {
-    page.readPageData();
-    expect(page.fixture).toBeTruthy();
+    updateAndTick(fixture);
+    expect(fixture).toBeTruthy();
   }));
 });

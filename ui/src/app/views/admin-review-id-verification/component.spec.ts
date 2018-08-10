@@ -1,7 +1,5 @@
-import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
@@ -37,7 +35,7 @@ class AdminReviewIdVerificationPage {
 
 
 describe('AdminReviewIdVerificationComponent', () => {
-  let page: AdminReviewIdVerificationPage;
+  let fixture: ComponentFixture<AdminReviewIdVerificationComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -58,13 +56,13 @@ describe('AdminReviewIdVerificationComponent', () => {
         }
       ]
     }).compileComponents().then(() => {
-      page = new AdminReviewIdVerificationPage(TestBed);
+      fixture = TestBed.createComponent(AdminReviewIdVerificationComponent);
       tick();
     });
   }));
 
   it('should render', fakeAsync(() => {
-    page.readPageData();
-    expect(page.fixture).toBeTruthy();
+    updateAndTick(fixture);
+    expect(fixture).toBeTruthy();
   }));
 });
