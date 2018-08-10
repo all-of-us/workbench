@@ -387,6 +387,8 @@ export class ChartComponent implements OnChanges {
   public makeAgeChartOptions() {
     let results = [];
     let seriesName = '';
+
+    // Question/answers have a different data structure than other concepts
     if (this.analysis.analysisId === AGE_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
@@ -396,7 +398,18 @@ export class ChartComponent implements OnChanges {
       seriesName = this.selectedResult.stratum4;
     }
     // Age results have two stratum-- 1 is concept, 2 is age decile
-    let data = [];
+    // Sort by age decile (stratum2)
+    results = results.sort((a, b) => {
+        if (Number(a.stratum2) > Number(b.stratum2)) {
+          return 1;
+        }
+        if (Number(a.stratum2) < Number(b.stratum2)) {
+          return -1;
+        }
+        return 0;
+      }
+    );
+    const data = [];
     let cats = [];
     for (const a  of results) {
       // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
@@ -406,30 +419,8 @@ export class ChartComponent implements OnChanges {
         name: a.analysisStratumName
         , y: a.countValue, color: color
       });
-      cats.push(a.analysisStratumName
-      );
+      cats.push(a.analysisStratumName);
     }
-
-    data = data.sort((a, b) => {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
-      }
-    );
-    cats = cats.sort((a, b) => {
-      if (a > b) {
-        return 1;
-      }
-      if (a < b) {
-        return -1;
-      }
-      return 0;
-    });
-
 
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {

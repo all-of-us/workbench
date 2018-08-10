@@ -95,6 +95,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
+    console.log("Items from search", this.items);
     if (this.searchResult.standardConcepts) {
       this.standardConcepts = this.searchResult.standardConcepts;
     }
