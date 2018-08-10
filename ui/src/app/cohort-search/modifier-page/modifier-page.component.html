@@ -58,8 +58,7 @@
       <button type="button"
               class="btn calculate-btn"
               (click)="requestPreview()"
-              [disabled] = "!formChanges"
-              [clrLoading]="preview.get('requesting', false)">
+              [disabled] = "!formChanges">
         Calculate
       </button>
     </div>
