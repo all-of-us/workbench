@@ -137,7 +137,8 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
         .subscribe(result => {
           this.selectedConcept.analyses = result.items[0];
           console.log('Before organize' , this.selectedConcept.analyses);
-          // Organize, massage the data for ui graphing, for example, pregnant has only 1 result for pregnant,
+          // Organize, massage the data for ui graphing
+          // for example, pregnant has only 1 result for pregnant,
           // we add a not pregnant to make display better
           this.arrangeConceptAnalyses(this.selectedConcept);
           this.loadingStack.pop();
@@ -153,10 +154,12 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
       // Delete any male results so we don't look dumb with dumb data
       concept.analyses.measurementValueMaleAnalysis = null;
       concept.analyses.measurementValueOtherGenderAnalysis = null;
-      concept.analyses.genderAnalysis.results = concept.analyses.genderAnalysis.results.filter(result =>
+      concept.analyses.genderAnalysis.results =
+        concept.analyses.genderAnalysis.results.filter(result =>
         result.stratum2 === this.FEMALE_GENDER_ID );
 
-      // Add not pregnant result to the female value results because this concept is just a one value Yes
+      // Add not pregnant result to the female value results
+      // because this concept is just a one value Yes
       const pregnantResult  = concept.analyses.measurementValueFemaleAnalysis.results[0];
 
       const notPregnantResult: AchillesResult = {
@@ -180,13 +183,12 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     if (concept.analyses.genderAnalysis) {
       this.organizeGenders(concept);
     }
-    console.log("Concept after arranged", concept);
   }
   // Put the gender analysis in the order we want to show them
   // Sum up the other genders and make a result for that
   // Put the gender counts on selected concept for easy use in templates
-  organizeGenders(concept) {
-    let analysis = concept.analyses.genderAnalysis;
+  organizeGenders(concept: any) {
+    const analysis: Analysis = concept.analyses.genderAnalysis;
     let male = null;
     let female = null;
     const others = [];
