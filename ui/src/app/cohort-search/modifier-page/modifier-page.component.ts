@@ -2,13 +2,14 @@ import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {fromJS, List, Map} from 'immutable';
+import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
 import {
   activeModifierList,
   CohortSearchActions,
   previewStatus
 } from '../redux';
-import * as moment from 'moment';
+
 
 @Component({
     selector: 'crit-modifier-page',
