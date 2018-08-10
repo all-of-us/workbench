@@ -52,7 +52,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 (id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4,stratum_5, count_value, source_count_value)
 select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
 cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
-'Measurement' as stratum_3,
+'Measurement binned' as stratum_3,
 cast(floor(min(co1.value_as_number)) AS STRING) as stratum_4,
 cast(ceil(max(co1.value_as_number)) AS STRING) as stratum_5,
 COUNT(distinct co1.person_id) as count_value,
@@ -64,7 +64,7 @@ group by  co1.measurement_concept_id
 union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
 cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
-'Measurement' as stratum_3,
+'Measurement binned' as stratum_3,
 cast(floor(min(co1.value_as_number)) AS STRING) as stratum_4,
 cast(ceil(max(co1.value_as_number)) AS STRING) as stratum_5,
 COUNT(distinct co1.person_id) as count_value,
@@ -79,7 +79,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
 select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
-'Measurement' as stratum_3,
+'Measurement un-binned' as stratum_3,
 COUNT(distinct co1.person_id) as count_value,
 (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
@@ -88,7 +88,7 @@ and co1.value_as_number is null and co1.value_source_value is not null
 group by  co1.measurement_concept_id
 union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
-'Measurement' as stratum_3,
+'Measurement un-binned' as stratum_3,
 COUNT(distinct co1.person_id) as count_value,
 COUNT(distinct co1.person_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
