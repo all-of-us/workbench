@@ -140,8 +140,7 @@ export const criteriaLoadErrors =
   (state): any =>
   state.getIn(['criteria', 'errors'], Map());
 
-export const subtreeSelected =
-  () => (state): any  =>
+export const subtreeSelected = (state) =>
   state.getIn(['criteria', 'subtree', 'selected'], null);
 
 /**

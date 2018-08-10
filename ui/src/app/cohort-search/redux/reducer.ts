@@ -170,7 +170,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
       case SET_SCROLL_ID:
-        console.log('scroll')
         return state.setIn(['criteria', 'tree', 'scroll'], action.nodeId);
 
       case BEGIN_PREVIEW_REQUEST:
@@ -401,9 +400,8 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['entities', 'items', itemId], item)
           .updateIn(['entities', 'parameters'], Map(), mergeParams)
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'search', 'terms'])
-          .deleteIn(['criteria', 'search', 'options'])
-          .deleteIn(['criteria', 'search', 'ingredients']);
+          .deleteIn(['criteria', 'subtree'])
+          .deleteIn(['criteria', 'search']);
       }
 
       case WIZARD_CANCEL: {
@@ -420,9 +418,8 @@ export const rootReducer: Reducer<CohortSearchState> =
         }
         return state
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'search', 'terms'])
-          .deleteIn(['criteria', 'search', 'options'])
-          .deleteIn(['criteria', 'search', 'ingredients']);
+          .deleteIn(['criteria', 'subtree'])
+          .deleteIn(['criteria', 'search']);
       }
 
       case SET_WIZARD_CONTEXT:

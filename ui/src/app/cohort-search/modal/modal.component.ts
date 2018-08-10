@@ -99,6 +99,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.scrollTo$
+      .filter(nodeId => !!nodeId)
       .subscribe(nodeId => {
         if (nodeId) {
           this.setScroll(nodeId);
