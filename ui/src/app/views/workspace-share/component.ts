@@ -98,9 +98,9 @@ export class WorkspaceShareComponent implements OnInit {
       const email = this.convertToEmail(this.toShare);
       const role = this.selectedAccessLevel;
       if (this.checkUnique(email, role)) {
-        // A user can only have one role on a workspace so we replace their current role with the new one
+        // A user can only have one role on a workspace so we replace them in the list
         const updateList = Array.from(this.workspace.userRoles)
-          .filter(function(r) { return r.email !== email});
+          .filter(function(r) { return r.email !== email; });
         updateList.push({
           email: email,
           role: role
@@ -206,8 +206,8 @@ export class WorkspaceShareComponent implements OnInit {
   // Checks for an email + role combination in the current list of user roles.
   checkUnique(email: String, role: WorkspaceAccessLevel): Boolean {
     return Array.from(this.workspace.userRoles)
-      .filter(function(r) { return r.email === email})
-      .filter(function(r) { return r.role === role})
+      .filter(function(r) { return r.email === email; })
+      .filter(function(r) { return r.role === role; })
       .length === 0;
   }
 
