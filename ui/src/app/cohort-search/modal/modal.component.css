@@ -80,6 +80,10 @@ button.tab.active {
   font-size:14px;
 }
 
+.tab-node{
+  border-bottom: 7px solid #216FB4;
+}
+
 .btn-link .btn, .btn.btn-link {
   font-size: 14px;
 }

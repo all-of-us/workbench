@@ -7,11 +7,24 @@
             <div class="btn-group btn-link">
               <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
 
-                <button type="button" class="btn tab"
+                <button *ngIf="title !=='Physical Measurements' " type="button" class="btn tab"
                         [class.active]="mode === 'tree'"
                         (click)="mode = 'tree'">
                   {{ title }}
                 </button>
+                <ng-container *ngIf="title ==='Physical Measurements' ">
+                  <button  *ngIf="attributesNode.size === 0"  type="button" class="btn tab"
+                          [class.active]="mode === 'tree'"
+                          (click)="mode = 'tree'">
+                    {{ title }}
+                  </button>
+                  <button  *ngIf="attributesNode.size > 0" type="button" class="btn tab-node"
+                           (click)="mode = 'tree'">
+                   {{attributesNode.get('name')}}
+                  </button>
+                </ng-container>
+
+
                 <div *ngIf="ctype !== criteriaTypes.PM" class="vbar"></div>
                 <button type="button" class="btn tab"
                         *ngIf="ctype !== criteriaTypes.PM"
