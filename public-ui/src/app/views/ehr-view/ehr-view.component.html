@@ -127,8 +127,9 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-4 grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
-          <div class="col-md-4 grid-header flex-xs-middle"> Number of particpants </div>
+          <div class="col-md-2 grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
+          <div class="col-md-4 grid-header flex-xs-middle"> Synonyms </div>
+          <div class="col-md-2 grid-header flex-xs-middle"> Number of particpants </div>
           <div class="col-md-3 grid-header flex-xs-middle info-text"> <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon> What is SNOMED? </div>
           <div class="col-md-1 grid-header flex-xs-middle info-text"> View graphs </div>
 
@@ -136,10 +137,10 @@
         <div class="row expandable-grid-row"
              *ngFor="let r of items.concat(standardConcepts), let i = index"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-4 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}"> </div>
-          <div class="col-md-4 flex-xs-middle">
+          <div class="col-md-2 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}"> </div>
+          <div class="col-md-4 flex-xs-middle" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"> </div>
+          <div class="col-md-2 flex-xs-middle">
             {{r.countValue | number }} out of {{totalParticipants | number}} participants
-
           </div>
           <div class="col-md-3 flex-xs-middle">
             {{r.vocabularyId}} {{r.conceptCode}}
