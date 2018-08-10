@@ -4,24 +4,24 @@
       <div class="row">
         <div class="col col-lg-9 padding-zero" [ngClass]="{'col col-lg-12': ctype === criteriaTypes.DEMO}">
           <div class="title-bar">
-            <clr-tabs class="test" style="display:flex ">
-              <clr-tab *ngIf="title !=='Physical Measurements' ">
-                <button class="btn-color" clrTabLink (click)="mode = 'tree'">{{ title }}</button>
-                <ng-template clrIfActive="{{title}}"></ng-template>
-              </clr-tab>
-              <clr-tab *ngIf="title ==='Physical Measurements' ">
-                <button class="btn-color" clrTabLink *ngIf="attributesNode.size === 0" (click)="mode = 'tree'">{{ title }}</button>
-                <ng-template clrIfActive="{{title}}"></ng-template>
-                <button class="btn-color" clrTabLink *ngIf="attributesNode.size > 0">{{attributesNode.get('name')}}</button>
-              </clr-tab>
-              <!--<div class="vbar"></div>-->
-              <div *ngIf="ctype !== criteriaTypes.DEMO">
-                <clr-tab  *ngIf="ctype !== criteriaTypes.PM">
-                  <button class="btn-color" (click)="mode = 'modifiers'" clrTabLink>Modifiers</button>
-                  <ng-template *ngIf="ctype !== criteriaTypes.PM" [(clrIfActive)]="modifiers" ></ng-template>
-                </clr-tab>
-              </div>
-            </clr-tabs>
+            <div class="btn-group btn-link">
+              <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
+
+                <button type="button" class="btn tab"
+                        [class.active]="mode === 'tree'"
+                        (click)="mode = 'tree'">
+                  {{ title }}
+                </button>
+                <div *ngIf="ctype !== criteriaTypes.PM" class="vbar"></div>
+                <button type="button" class="btn tab"
+                        *ngIf="ctype !== criteriaTypes.PM"
+                        [class.active]="mode === 'modifiers'"
+                        [disabled]="noSelection"
+                        (click)="mode = 'modifiers'">
+                  Modifiers
+                </button>
+              </ng-container>
+            </div>
             <div *ngIf="ctype === domainType[domainType.DRUG]">
               <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank">
                 Explore

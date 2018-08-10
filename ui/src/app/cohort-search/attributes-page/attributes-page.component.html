@@ -10,62 +10,40 @@
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
     <div *ngFor="let attr of attrs; let i = index">
-      <div class="attr-name-color">
-        <label>{{attr.name}}</label>
-      </div>
-
-      <div class="container">
-        <div class="row" style="padding-top:.5rem">
-          <div class="col col-lg-4 ">
-            <div class="">
-
-              <clr-dropdown>
-                <button type="button" class="btn btn-outline" clrDropdownTrigger>
-                  <span *ngIf="attr.operator === ''">Select Operator</span>
-                  <span *ngIf="attr.operator !== ''">{{dropdowns.selected[i]}}</span>
-                  <clr-icon shape="caret down"></clr-icon>
-                </button>
-                <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-                <!--<h4 class="dropdown-header">Program Data</h4>-->
-                  <button
-                  *ngFor="let option of options"
-                  [name]="'operator'+i"
-                  (click)="selectChange(i, option)"
-                  class="dropdown-item"
-                  type="button"
-                  clrDropdownItem>{{option.name}}</button>
-                </clr-dropdown-menu>
-              </clr-dropdown>
-
-              <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" required>
-            </div>
+      <div class="attr-name-color">{{attr.name}}</div>
+        <div class="container">
+          <div class="dropdown-width">
+            <clr-dropdown>
+              <button type="button" class="btn btn-outline" clrDropdownTrigger>
+                <span *ngIf="attr.operator === ''">Select Operator</span>
+                <span *ngIf="attr.operator !== ''">{{dropdowns.selected[i]}}</span>
+                <clr-icon shape="caret down"></clr-icon>
+              </button>
+              <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+                <button
+                *ngFor="let option of options"
+                [name]="'operator'+i"
+                (click)="selectChange(i, option)"
+                class="dropdown-item"
+                type="button"
+                clrDropdownItem>{{option.name}}</button>
+              </clr-dropdown-menu>
+            </clr-dropdown>
+            <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" required>
           </div>
-          <div class="col col-lg-2">
-            <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group range-container">
-              <input class="number-container" type="number" min="0" [name]="'valueA'+i" [(ngModel)]="attr.operands[0]" (ngModelChange)="inputChange()" required>
-              <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
-            </div>
+          <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group range-container">
+            <input class="number-container" type="number" min="0" [name]="'valueA'+i" [(ngModel)]="attr.operands[0]" (ngModelChange)="inputChange()" required>
+            <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
           </div>
-          <div class="col col-lg-2" >
-            <div style="padding-left:0rem" *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
-              <div>and</div>
-            </div>
+          <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group and-text">
+            <div>and</div>
           </div>
-          <div class="col col-lg-3 ">
-            <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group range-container">
-              <input class="number-container" type="number" min="0" [name]="'valueB'+i" [(ngModel)]="attr.operands[1]" (ngModelChange)="inputChange()" required>
-              <span>{{units[node.get('subtype')]}}</span>
-            </div>
+          <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group range-container">
+            <input class="number-container" type="number" min="0" [name]="'valueB'+i" [(ngModel)]="attr.operands[1]" (ngModelChange)="inputChange()" required>
+            <span>{{units[node.get('subtype')]}}</span>
           </div>
         </div>
-      </div>
-
-
-
     </div>
-
-    <!--changes end-->
-
     <div class="container count-preview ">
       <div class="row">
         <div class="col-lg-2 ">
@@ -74,7 +52,6 @@
                   [disabled]="!attrForm.valid || negativeAlert"
                   (click)="requestPreview(attrForm)">
             Calculate
-
           </button>
         </div>
         <div class="spin-top-padding">
@@ -89,7 +66,6 @@
              <span class="text-bold" *ngIf="!preview.get('requesting')">
              {{ preview.get('count', 0) }}
              </span>
-
           </div>
         </div>
         <div class="col-lg-2" *ngIf="preview.get('count')">

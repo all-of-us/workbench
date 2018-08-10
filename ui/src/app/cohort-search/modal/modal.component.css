@@ -23,7 +23,6 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 80%;
-  /*height: 80%;*/
   background-color: white;
   border-radius: 4px;
   display: flex;
@@ -57,15 +56,36 @@
   width: 1px;
   border: 1px solid #979797;
 }
+
 .nav-link.active {
   -webkit-box-shadow: inset 0 -7px 0 #007cbb;
 }
+
 .nav .nav-link.btn {
   color: #216FB4!important;
 }
 
-button.active {
-  color: rgb(0, 74, 112);
+.nav {
+  box-shadow: none!important;
+  -webkit-box-shadow: none!important;
+}
+
+.nav-link {
+  margin-bottom: -4px!important;
+}
+
+button.tab.active {
+  color: #216FB4;
+  border-bottom: 7px solid #216FB4;
+  font-size:14px;
+}
+
+.btn-link .btn, .btn.btn-link {
+  font-size: 14px;
+}
+
+.test:target {
+  border-bottom: 5px solid red;
 }
 
 .close-button {
@@ -78,7 +98,6 @@ button.active {
 
 .content {
   flex: 1;
-  /*padding: 0.2rem 0.4rem;*/
   overflow: auto;
 }
 
@@ -118,15 +137,15 @@ button.active {
   display: block;
   animation: fadeEffect 1s;
   padding-left: 1rem;
-  max-height:30rem;
-  min-height:30rem;
-  overflow-y:auto;
+  max-height: 30rem;
+  min-height: 30rem;
+  overflow-y: auto;
 }
 .panel-right-container{
   width: 100%;
   padding-left: 1rem;
   padding-right: 1rem;
-  padding-top:.5rem;
+  padding-top: 0.5rem;
   background-color: rgb(241, 242, 242) ;
 }
 
