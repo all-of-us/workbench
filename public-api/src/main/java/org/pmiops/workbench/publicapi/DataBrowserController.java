@@ -20,6 +20,9 @@ import org.springframework.data.domain.Slice;
 import com.google.common.collect.ImmutableMultimap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -466,10 +469,26 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         }
                         conceptAnalysis.setGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                     }else if(aa.getAnalysisId() == AGE_ANALYSIS_ID){
+                        Set<String> uniqueAgeDeciles = new TreeSet<String>();
                         for(AchillesResult ar: aa.getResults()){
                             String analysisStratumName=ar.getAnalysisStratumName();
+                            uniqueAgeDeciles.add(ar.getStratum2());
                             if (analysisStratumName == null || analysisStratumName.equals("")) {
                                 ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
+                            }
+                        }
+                        if(uniqueAgeDeciles.size() < 13){
+                            Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"}));
+                            completeAgeDeciles.removeAll(uniqueAgeDeciles);
+                            for(String missingAgeDecile: completeAgeDeciles){
+                                AchillesResult missingResult = new AchillesResult();
+                                missingResult.setAnalysisId(AGE_ANALYSIS_ID);
+                                missingResult.setStratum1(conceptId);
+                                missingResult.setStratum2(missingAgeDecile);
+                                missingResult.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(missingAgeDecile));
+                                missingResult.setCountValue(0L);
+                                missingResult.setSourceCountValue(0L);
+                                aa.getResults().add(missingResult);
                             }
                         }
                         conceptAnalysis.setAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
