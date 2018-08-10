@@ -56,7 +56,7 @@ button.btn:focus {
     border: 1px solid #C3C3C3;;
     width: 3rem;
     height: 1.4rem;
-    text-align:center;
+    text-align: center;
 }
 
 .range-container {
@@ -70,19 +70,21 @@ button.btn:focus {
 }
 
 .text-padding {
-    padding-top:0.3rem;
+    padding-top: 0.3rem;
 }
 
 .spin-top-padding {
-    padding-top:0.5rem;
+    padding-top: 0.5rem;
 }
 
 .attr-name-color {
     color: #262262;
+    padding: .5rem;
+    font-weight: 500;
 }
 .dropdown, .dropdown .dropdown-toggle{
-    width:90%;
-    text-align:left;
+    width: 100%;
+    text-align: left;
 }
 
 .btn-info-outline .btn, .btn-outline .btn, .btn.btn-info-outline, .btn.btn-outline, .btn.btn-outline-info, .btn.btn-outline .btn {
@@ -95,5 +97,21 @@ button.btn:focus {
 }
 
 .dropdown-menu {
-    width:11.7rem;
+    width: 12rem;
+}
+
+.container {
+    display: flex;
+    padding-top: 0.5rem;
+}
+
+.container .dropdown-width {
+    width: 12rem;
+    margin-right: 1rem;
+}
+
+.container .and-text {
+    padding-left: 1rem;
+    padding-right: 1.5rem;
+    padding-top: 0.2rem;
 }

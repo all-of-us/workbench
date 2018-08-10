@@ -1,15 +1,17 @@
 import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
+import * as moment from 'moment'
 
 import {
   activeModifierList,
   CohortSearchActions,
   CohortSearchState,
-  previewStatus,
+  previewStatus
 } from '../redux';
+import {Observable} from "rxjs/Observable";
 
 @Component({
     selector: 'crit-modifier-page',
@@ -19,11 +21,13 @@ import {
 export class ModifierPageComponent implements OnInit, OnDestroy {
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
-
+  formChanges = false;
+  dateValueA : any;
+  dateValueB : any;
   existing = List();
   preview = Map();
   subscription: Subscription;
-    dropdownOption = {
+  dropdownOption = {
         selected: ['', '', '']
     };
 
@@ -65,9 +69,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     operators: [{
       name: 'N or More',
       value: 'GREATER_THAN_OR_EQUAL_TO',
-    }, {
-        name: 'N or Morettttt',
-        value: 'GREATER_THAN_OR_EQUALuyiuyiu_TO',
     }]
   }];
 
@@ -140,34 +141,76 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       })
     );
   }
+    selectChange(opt, index,e,mod) {
+        this.dropdownOption.selected[index] = opt.name;
+        // console.log(this.form.controls.)
+        if(e.target.value || this.form.controls.valueA){
+            this.formChanges = true;
+        }
+        if(mod.modType === 'AGE_AT_EVENT'){
+            let testForm = <FormArray>this.form.controls.ageAtEvent
+            // console.log(testForm);
+            console.log(testForm.controls);
+            // console.log(testForm.controls.get('operator'));
+            let anotherForm = <FormArray>testForm
+            console.log(anotherForm.get('operator').patchValue(opt.value));
+        }
+        if(mod.modType === 'EVENT_DATE'){
+            let testForm = <FormArray>this.form.controls.eventDate
+            // console.log(testForm);
+            console.log(testForm.controls);
+            // console.log(testForm.controls.get('operator'));
+            let anotherForm = <FormArray>testForm
+            console.log(anotherForm.get('operator').patchValue(opt.value));
+        }
+        if(mod.modType === 'NUM_OF_OCCURRENCES'){
+            let testForm = <FormArray>this.form.controls.hasOccurrences
+            // console.log(testForm);
+            console.log(testForm.controls);
+            // console.log(testForm.controls.get('operator'));
+            let anotherForm = <FormArray>testForm
+            console.log(anotherForm.get('operator').patchValue(opt.value));
+        }
+    }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
 
   currentMods(vals) {
     return this.modifiers.map(({name, inputType, modType}) => {
+
       const {operator, valueA, valueB} = vals[name];
+
+        if(inputType === 'date'){
+            this.dateValueA = moment(valueA, 'MM/DD/YYYY').format('YYYY-MM-DD');
+
+        }
+
+        if(inputType === 'date'){
+            this.dateValueB = moment(valueB, 'MM/DD/YYYY').format('YYYY-MM-DD');
+        }
+
       const between = operator === 'BETWEEN';
-      if (!operator || !valueA || (between && !valueB)) {
+      if (!operator || !this.dateValueA || (between && !this.dateValueB)) {
         return ;
       }
-      const operands = [valueA];
-      if (between) { operands.push(valueB); }
-      return fromJS({name: modType, operator, operands});
-    });
-  }
+      if(inputType === 'date'){
+          const operands = [this.dateValueA];
+          if (between) { operands.push(this.dateValueB); }
+          return fromJS({name: modType, operator, operands});
+      } else{
+          const operands = [valueA];
+          if (between) { operands.push(valueB); }
+          return fromJS({name: modType, operator, operands});
+      }
 
-  showValueB(modName) {
-    return this.form.get([modName, 'operator']).value === 'BETWEEN';
+    });
   }
 
   requestPreview() {
     this.actions.requestPreview();
-  }
+  };
 
-  selectChange(opt, index) {
-      this.dropdownOption.selected[index] = opt.name;
-  }
+  ngOnDestroy() {
+      this.subscription.unsubscribe();
+    }
 
 }

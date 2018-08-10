@@ -1,6 +1,6 @@
 .dropdown, .dropdown .dropdown-toggle{
-    width:90%;
-    text-align:left;
+    text-align: left;
+    width: 12rem;
 }
 
 .btn-info-outline .btn, .btn-outline .btn, .btn.btn-info-outline, .btn.btn-outline, .btn.btn-outline-info, .btn.btn-outline .btn {
@@ -26,23 +26,23 @@
     font-weight: 500;
     font-size: 16px;
     border-bottom: 1px solid #262262;
-    padding-bottom:0.5rem;
-    margin-bottom:1.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
 
 }
 
 .modifier-event-header {
     color: #262262;
     font-weight: 500;
-    padding-bottom:0.5rem;
-    padding-top:1rem;
+    padding-bottom: 0.5rem;
+    padding-top: 1rem;
 }
 .modifier-event-indicator {
     border-radius:0.15rem;
     border : 1px solid #C3C3C3;
-    width:1rem;
-    height:1.4rem;
-    text-align:center;
+    width: 1rem;
+    height: 1.4rem;
+    text-align: center;
 }
 
 .count-preview {
@@ -76,7 +76,7 @@
     color: #4A4A4A;
 }
 
-.count-preview .result-text{
+.count-preview .result-text {
     color: #262262;
     font-size: 14px;
     font-weight: 500;
@@ -85,16 +85,31 @@
 }
 
 .modifier-calender {
-    border-radius:0.15rem;
+    border-radius: 0.15rem;
     border : 1px solid #C3C3C3;
-    height:1.4rem;
-    text-align:center;
+    height: 1.4rem;
+    text-align: center;
 }
 .modifier-calender .datepicker-trigger .datepicker-trigger-icon {
-   height:30px;
-    width:30px;
+   height: 30px;
+    width: 30px;
 }
 
 .dropdown-menu {
-    width:11.7rem;
+    width: 12rem;
+}
+
+.modifier-container {
+    display: flex;
+    padding-top: 0.5rem;
+}
+
+.modifier-container .dropdown-width {
+    margin-right: 1rem;
+}
+
+.modifier-container .and-text {
+    padding-left: 1rem;
+    padding-right: 1.5rem;
+    padding-top: 0.2rem;
 }
