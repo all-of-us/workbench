@@ -29,8 +29,7 @@ describe('AppComponent', () => {
         AccountCreationComponent,
         AppComponent,
         InvitationKeyComponent,
-        PageTemplateSignedOutComponent,
-        RoutingSpinnerComponent,
+        PageTemplateSignedOutComponent
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [

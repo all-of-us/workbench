@@ -128,41 +128,5 @@ describe('LoginComponent', () => {
 
     expect(de.queryAll(By.css('app-fake-root')).length).toEqual(1);
   }));
-
-  it('should navigate to "from" on sign in', fakeAsync(() => {
-    router.navigate(['/login', {'from': '/ok'}]);
-    tick();
-    fixture.detectChanges();
-
-    signInService.signIn();
-    tick();
-    fixture.detectChanges();
-
-    expect(de.queryAll(By.css('app-fake-other')).length).toEqual(1);
-  }));
-
-  it('should navigate to root on bad "from"', fakeAsync(() => {
-    router.navigate(['/login', {'from': 'asdfasdf'}]);
-    tick();
-    fixture.detectChanges();
-
-    signInService.signIn();
-    tick();
-    fixture.detectChanges();
-
-    expect(de.queryAll(By.css('app-fake-root')).length).toEqual(1);
-  }));
-
-  it('should navigate to root on "from" nav error', fakeAsync(() => {
-    router.navigate(['/login', {'from': '/error'}]);
-    tick();
-    fixture.detectChanges();
-
-    signInService.signIn();
-    tick();
-    fixture.detectChanges();
-
-    expect(de.queryAll(By.css('app-fake-root')).length).toEqual(1);
-  }));
 });
 
