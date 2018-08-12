@@ -38,12 +38,7 @@
               {{r.countValue | number}}
             </div>
             <p class="card-text bigger">
-              <em> <b>concepts </b></em>
-              <span *ngIf="searchText.value"> match your search. </span>
-              <span *ngIf="!searchText.value">in this domain.</span>
-              <span *ngIf="r.participantCount">
-                <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
-              </span>
+              <span> matching medical concepts </span>
             </p>
 
             <div class="card-text bottom">
@@ -68,8 +63,11 @@
             {{r.countValue | number}}
           </div>
           <p class="card-text bigger">
-            There are {{r.countValue }} survey questions on this survey related to your search.
+            <span> matching survey questions </span>
+            <span class="domain-desc"> {{ r.domainDesc }} </span>
           </p>
+
+
 
           <div class="card-text bottom" >
             <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
