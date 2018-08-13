@@ -6,7 +6,7 @@
         Loading...
       </span>
       <span *ngIf="!(isRequesting$ | async)">
-        {{ total$ | async }}
+        {{ total$ | async | number }}
       </span>
     </h2>
     <div>
