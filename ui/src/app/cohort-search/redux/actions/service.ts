@@ -52,6 +52,7 @@ export class CohortSearchActions {
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
+  @dispatch() requestDemoCriteria = ActionFuncs.requestDemoCriteria;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;

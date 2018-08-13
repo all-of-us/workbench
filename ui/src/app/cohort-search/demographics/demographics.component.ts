@@ -122,7 +122,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       ].map(code => this.api
       .getCriteriaByTypeAndSubtype(cdrid, CRITERIA_TYPES.DEMO, code)
       .map(response => {
-        const items = response.items;
+        const items = response.items.filter(item => item.parentId !== 0);
         items.sort(sortByCountThenName);
         const nodes = fromJS(items).map(node => {
           if (node.get('subtype') !== CRITERIA_SUBTYPES.AGE) {

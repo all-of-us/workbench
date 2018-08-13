@@ -17,6 +17,7 @@ import {
   BEGIN_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
+  BEGIN_DEMO_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
@@ -89,6 +90,11 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
           .setIn(['criteria', 'requests', action.kind, action.parentId], true);
+
+      case BEGIN_DEMO_CRITERIA_REQUEST:
+        return state
+          .deleteIn(['criteria', 'errors', List([action.kind, action.subtype])])
+          .setIn(['criteria', 'requests', action.kind, action.subtype], true);
 
       case LOAD_CRITERIA_RESULTS:
         return state
