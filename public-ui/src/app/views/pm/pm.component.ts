@@ -14,6 +14,7 @@ import {ConceptAnalysisListResponse} from '../../../publicGenerated/model/concep
 })
 export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   title = 'Browse Program Physical Measurements';
+  pageImage = '/assets/db-images/man-standing.png';
   private subscriptions: ISubscription[] = [];
   chartType = 'histogram';
   MALE_GENDER_ID = '8507';
@@ -22,7 +23,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   PREGNANCY_CONCEPT_ID = '903120';
   WHEEL_CHAIR_CONCEPT_ID = '903111';
   // Todo put constants in a class for use in other views
-  GENDER_ANALYSIS_ID = 2;
 
   // Total analyses
   genderAnalysis: Analysis = null;
@@ -226,9 +226,8 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     analysis.results = results;
   }
 
-  makeChartTitle(gender) {
+  makeChartTitle(gender: any) {
     const title = gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString();
-    console.log(title);
     return title;
   }
 

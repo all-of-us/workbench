@@ -479,9 +479,10 @@ export class ChartComponent implements OnChanges {
       cats.push(d.name);
     }
 
+    // Todo later
     const seriesClick = function(event) {
       const thisCtrl = event.point.options.thisCtrl;
-      console.log('Histogram plot Clicked point :',  event.point);
+      // console.log('Histogram plot Clicked point :',  event.point);
       thisCtrl.resultClicked.emit(event.point.result);
     };
 
@@ -490,9 +491,12 @@ export class ChartComponent implements OnChanges {
     // Override tooltip and colors and such
     const series: any = {
       name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
-      tooltip: {pointFormat: '<b>{point.y} </b>' + unit },
+      tooltip: {
+        headerFormat: '<span style="font-size: 10px">{point.key} ' + unit + '</span><br/>',
+        pointFormat: '<b> {point.y} participants </b> '
+      },
       events: {
-        click: seriesClick
+        // Todo maybe later click: seriesClick
       }};
 
     // Note that our data is binned already so we use a column chart to show histogram.
