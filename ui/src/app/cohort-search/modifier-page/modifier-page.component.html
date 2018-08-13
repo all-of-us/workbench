@@ -28,7 +28,7 @@
   </button>
   Number Participants:
   <span *ngIf="!preview.get('requesting')">
-    {{ preview.get('count', 0) }}
+    {{ preview.get('count', 0) | number }}
   </span>
   <span *ngIf="preview.get('requesting')" class="spinner spinner-inline">
     Loading...

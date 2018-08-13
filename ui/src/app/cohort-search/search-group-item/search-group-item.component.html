@@ -24,7 +24,7 @@
       Loading...
     </span>
     <small *ngIf="!isRequesting" class="font-weight-bold">
-      {{ item.get('count', 0) }}
+      {{ item.get('count', 0) | number }}
     </small>
   </div>
 
