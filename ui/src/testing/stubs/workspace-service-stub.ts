@@ -226,8 +226,10 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        this.workspaces[updateIndex].userRoles = request.items;
-        observer.next({});
+        observer.next({
+          workspaceEtag: request.workspaceEtag,
+          items: request.items
+        });
         observer.complete();
       }, 0);
     });
