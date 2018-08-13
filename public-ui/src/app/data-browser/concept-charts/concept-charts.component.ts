@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import {ISubscription} from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {Concept} from '../../../publicGenerated/model/concept';
-import {ConceptAnalysis} from "../../../publicGenerated/model/conceptAnalysis";
+import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
 
 @Component({
   selector: 'app-concept-charts',
@@ -43,7 +43,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       this.ageAnalysis = this.results[0].ageAnalysis;
       this.genderAnalysis = this.results[0].genderAnalysis;
       this.analyses = results.items[0];
-      console.log("analyses: " , this.analyses);
+      console.log('analyses: ' , this.analyses);
       this.loading = false;
     });
 
