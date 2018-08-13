@@ -2,6 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import {ISubscription} from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {Concept} from '../../../publicGenerated/model/concept';
+import {ConceptAnalysis} from "../../../publicGenerated/model/conceptAnalysis";
 
 @Component({
   selector: 'app-concept-charts',
@@ -19,6 +20,13 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   ageAnalysis = null;
   genderAnalysis = null;
   sourceConcepts = null;
+  analyses: ConceptAnalysis;
+
+  MALE_GENDER_ID = '8507';
+  FEMALE_GENDER_ID = '8532';
+  OTHER_GENDER_ID = '8521';
+  PREGNANCY_CONCEPT_ID = '903120';
+  WHEEL_CHAIR_CONCEPT_ID = '903111';
 
   private subscription: ISubscription;
   private subscription2: ISubscription;
@@ -30,9 +38,12 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     this.loading = true;
     const conceptIdStr = '' + this.concept.conceptId.toString();
     this.subscription = this.api.getConceptAnalysisResults([conceptIdStr]).subscribe(results =>  {
+      console.log(results);
       this.results = results.items;
       this.ageAnalysis = this.results[0].ageAnalysis;
       this.genderAnalysis = this.results[0].genderAnalysis;
+      this.analyses = results.items[0];
+      console.log("analyses: " , this.analyses);
       this.loading = false;
     });
 
@@ -49,6 +60,10 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     this.subscription2 = this.api.getSourceConcepts(this.concept.conceptId).subscribe(
       results => this.sourceConcepts = results.items
       );
+  }
 
+  makeChartTitle(gender) {
+    const title = gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString();
+    return title;
   }
 }

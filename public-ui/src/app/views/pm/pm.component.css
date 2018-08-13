@@ -1,3 +1,6 @@
 .measurement.white-card-box {
     min-height: 400px;
 }
+.chart-wrapper {
+    width: 336px;
+}
