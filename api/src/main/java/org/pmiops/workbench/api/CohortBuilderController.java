@@ -113,6 +113,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<CriteriaListResponse> getCriteriaByTypeForCodeOrName(Long cdrVersionId,
+                                                                             String type,
+                                                                             String value) {
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, value);
+
+    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+
+    return ResponseEntity.ok(criteriaResponse);
+  }
+
+  @Override
   public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId, String drugName) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName);
@@ -169,6 +182,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         .count(bigQueryService.getLong(row, rm.get("count"))));
     }
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<CriteriaListResponse> getCriteriaById(Long cdrVersionId, Long id) {
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    final List<Criteria> criteriaList = criteriaDao.findCriteriaById(id);
+
+    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+
+    return ResponseEntity.ok(criteriaResponse);
   }
 
   @Override

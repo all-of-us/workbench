@@ -10,6 +10,7 @@ import {
   UpdateWorkspaceRequest,
   Workspace,
   WorkspaceAccessLevel,
+  WorkspaceListResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
 } from 'generated';
@@ -26,11 +27,13 @@ export class WorkspacesServiceStub {
   workspaces: Workspace[];
   // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
+  workspacesForReview: Workspace[];
 
   constructor() {
 
     this.workspaces = [WorkspacesServiceStub.stubWorkspace()];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
+    this.workspacesForReview = WorkspacesServiceStub.stubWorkspacesForReview();
   }
 
   static stubWorkspace(): Workspace {
@@ -68,6 +71,12 @@ export class WorkspacesServiceStub {
         },
       ]
     };
+  }
+
+  static stubWorkspacesForReview(): Workspace[] {
+    const stubWorkspace = this.stubWorkspace();
+    stubWorkspace.researchPurpose.reviewRequested = true;
+    return [stubWorkspace];
   }
 
   private clone(w: Workspace): Workspace {
@@ -150,6 +159,14 @@ export class WorkspacesServiceStub {
         });
         observer.complete();
       }, 0);
+    });
+  }
+
+  getWorkspacesForReview(): Observable<WorkspaceListResponse> {
+    return new Observable(observer => {
+      observer.next({
+        items: this.workspacesForReview
+      });
     });
   }
 

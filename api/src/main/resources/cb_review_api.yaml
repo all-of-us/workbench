@@ -506,7 +506,7 @@ definitions:
 
   DomainType:
     type: string
-    enum: [Condition, Procedure, Observation, Drug, AllEvents, Device, Visit, Measurement, Physical_Measure]
+    enum: [CONDITION, PROCEDURE, OBSERVATION, DRUG, ALL_EVENTS, DEVICE, VISIT, MEASUREMENT, PHYSICAL_MEASURE]
 
   SortOrder:
     type: string
@@ -728,6 +728,9 @@ definitions:
       itemDate:
         type: string
         description: The date of the event
+      numMentions:
+        type: string
+        description: Number of mentions
       domainType:
         $ref: "#/definitions/DomainType"
 

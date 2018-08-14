@@ -3,6 +3,7 @@
 }
 
 .greeting {
+  width: 89%;
   color: #2F2E7E;
   font-size: 20px;
   font-weight: 500;
@@ -11,7 +12,7 @@
 
 .description-text {
   color: #333;
-  width: 40rem;
+  width: 89%;
   padding-top: 0.5rem;
 }
 
@@ -55,30 +56,27 @@ h3 {
   color: #565656;
 }
 
-
-
 .btn.btn-primary.btn-create {
   width: max-content;
 }
 
-
 .main-body {
-  flex-grow: 1;
+  width: 77%;
   margin-right: 0.6rem;
+  position: relative;
 }
 
 .right-sidebar {
   background-color: #E2E2EA;
-  width: 16rem;
   margin-right: -0.6rem;
   padding-left: 0.5rem;
+  width: 22%;
 }
 
 .workspace-container {
   display: flex;
   justify-content: space-between;
-  width: 100%;
-  flex-grow: 1;
+  align-items: stretch;
   height: calc(100% - 60px);
 }
 
@@ -153,7 +151,7 @@ app-workspace-nav-bar {
 
 .research-purpose-items {
   margin-top: 1rem;
-  width: 50rem;
+  width: 89%;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -166,3 +164,4 @@ app-workspace-nav-bar {
   width: 45%;
   padding-right: 5%;
 }
+

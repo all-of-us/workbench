@@ -24,6 +24,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     oldVals = ['', ''];
     preview = Map();
     subscription: Subscription;
+    negativeAlert = false;
 
     constructor(private actions: CohortSearchActions) { }
 
@@ -65,6 +66,17 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
             }
             this.oldVals[index] = newVal;
         }
+    }
+
+    inputChange() {
+      this.negativeAlert = false;
+        this.attrs.forEach(attr => {
+            attr.operands.forEach(operand => {
+                if (operand < 0) {
+                  this.negativeAlert = true;
+                }
+            });
+        });
     }
 
     get paramId() {

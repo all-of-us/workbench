@@ -4,6 +4,7 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import javax.inject.Provider;
 
 import org.json.JSONObject;
@@ -234,19 +236,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         }
       };
 
+  private static final Function<WorkspaceUserRole, UserRole> TO_CLIENT_USER_ROLE =
+      new Function<WorkspaceUserRole, UserRole>() {
+        @Override
+        public UserRole apply(WorkspaceUserRole workspaceUserRole) {
 
-      private static final Function<WorkspaceUserRole, UserRole>
-          TO_CLIENT_USER_ROLE =
-          new Function<WorkspaceUserRole, UserRole>() {
-            @Override
-            public UserRole apply(WorkspaceUserRole workspaceUserRole) {
-              UserRole result = new UserRole();
-              result.setEmail(workspaceUserRole.getUser().getEmail());
-              result.setRole(workspaceUserRole.getRole());
-
-              return result;
-            }
-          };
+          UserRole result = new UserRole();
+          result.setEmail(workspaceUserRole.getUser().getEmail());
+          WorkspaceAccessLevel clientRole =
+              WorkspaceUserRole.accessLevelFromStorage(workspaceUserRole.getRole());
+          if (clientRole == null) {
+            throw new IllegalArgumentException(String.format(
+                "unknown WorkspaceAccessLevel storage value: %d", workspaceUserRole.getRole()));
+          }
+          result.setRole(clientRole);
+          return result;
+        }
+      };
 
   @VisibleForTesting
   void setUserProvider(Provider<User> userProvider) {
@@ -391,7 +397,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
     WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.setRole(WorkspaceAccessLevel.OWNER);
+    permissions.setRole(WorkspaceUserRole.accessLevelToStorage(WorkspaceAccessLevel.OWNER));
     permissions.setWorkspace(dbWorkspace);
     permissions.setUser(user);
 
@@ -663,7 +669,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
 
     WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.setRole(WorkspaceAccessLevel.OWNER);
+    permissions.setRole(WorkspaceUserRole.accessLevelToStorage(WorkspaceAccessLevel.OWNER));
     permissions.setWorkspace(dbWorkspace);
     permissions.setUser(user);
 
@@ -689,19 +695,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
     }
     Set<WorkspaceUserRole> dbUserRoles = new HashSet<WorkspaceUserRole>();
-    for (UserRole user : request.getItems()) {
-      if (user.getRole() == null || user.getRole().toString().trim().isEmpty()) {
+    for (UserRole role : request.getItems()) {
+      if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
       }
       WorkspaceUserRole newUserRole = new WorkspaceUserRole();
-      User newUser = userDao.findUserByEmail(user.getEmail());
+      User newUser = userDao.findUserByEmail(role.getEmail());
       if (newUser == null) {
         throw new BadRequestException(String.format(
             "User %s doesn't exist",
-            user.getEmail()));
+            role.getEmail()));
       }
       newUserRole.setUser(newUser);
-      newUserRole.setRole(user.getRole());
+      newUserRole.setRole(WorkspaceUserRole.accessLevelToStorage(role.getRole()));
       dbUserRoles.add(newUserRole);
     }
     // This automatically enforces owner role.

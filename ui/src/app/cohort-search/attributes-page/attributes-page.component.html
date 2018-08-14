@@ -1,6 +1,15 @@
 <div class="title">
   {{node.get('name','')}}
 </div>
+<div *ngIf="negativeAlert" class="alert alert-danger alert-sm">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-text">
+        Form cannot accept negative values
+      </div>
+    </div>
+  </div>
+</div>
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
     <div *ngFor="let attr of attrs; let i = index">
@@ -18,33 +27,33 @@
         </div>
       </div>
       <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group">
-        <input type="number" min="0" [name]="'valueA'+i" [ngModel]="attr.operands[0]" required>
+        <input type="number" min="0" [name]="'valueA'+i" [(ngModel)]="attr.operands[0]" (ngModelChange)="inputChange()" required>
         <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
       </div>
       <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
         <div>and</div>
       </div>
       <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
-        <input type="number" [name]="'valueB'+i" [ngModel]="attr.operands[1]" required>
+        <input type="number" min="0" [name]="'valueB'+i" [(ngModel)]="attr.operands[1]" (ngModelChange)="inputChange()" required>
         <span>{{units[node.get('subtype')]}}</span>
       </div>
     </div>
     <div class="count-preview">
       <button type="button"
               class="btn"
-              [disabled]="!attrForm.valid"
+              [disabled]="!attrForm.valid || negativeAlert"
               (click)="requestPreview(attrForm)">
         Calculate
       </button>
       Number Participants:
       <span *ngIf="!preview.get('requesting')">
-        {{ preview.get('count', 0) }}
+        {{ preview.get('count', 0) | number }}
       </span>
       <span *ngIf="preview.get('requesting')" class="spinner spinner-inline">
         Loading...
       </span>
     </div>
     <button class="btn btn-link" type="button" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" type="submit" [disabled]="!attrForm.valid">Add Item</button>
+    <button class="btn btn-primary" type="submit" [disabled]="!attrForm.valid || negativeAlert">Add Item</button>
   </section>
 </form>

@@ -1,0 +1,29 @@
+{
+  "type": "cohort",
+  "cohort": {
+    "name": "28-29age-toreACL",
+    "description": "demo",
+    "type": "demo",
+    "criteria": {
+      "includes":[{
+          "id":"includes_on29vorqv",
+          "items":[{
+              "id":"items_0p2emxdpa",
+              "type":"ICD10",
+              "searchParameters":[{
+                  "parameterId":"param86081",
+                  "name":"Dislocation and sprain of joints and ligaments of knee",
+                  "value":"S83",
+                  "type":"ICD10",
+                  "subtype":"ICD10CM",
+                  "group":true,
+                  "domain":""
+              }],
+              "modifiers":[{
+                  "name":"AGE_AT_EVENT",
+                  "operator":"BETWEEN",
+                  "operands":["28","29"]}]}]}],
+      "excludes":[]
+    }
+  }
+}

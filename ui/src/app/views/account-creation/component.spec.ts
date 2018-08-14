@@ -2,7 +2,6 @@ import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
-import {UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
@@ -25,7 +24,6 @@ import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {LoginComponent} from '../login/component';
 import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class AccountCreationPage {
   fixture: ComponentFixture<AccountCreationComponent>;
@@ -46,10 +44,8 @@ class AccountCreationPage {
 
 
 describe('AccountCreationComponent', () => {
-  let profileServiceStub: ProfileServiceStub;
   let page: AccountCreationPage;
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -62,13 +58,12 @@ describe('AccountCreationComponent', () => {
         AccountCreationModalsComponent,
         AccountCreationSuccessComponent,
         InvitationKeyComponent,
-        PageTemplateSignedOutComponent,
-        RoutingSpinnerComponent
+        PageTemplateSignedOutComponent
       ],
       providers: [
         { provide: LoginComponent, useValue: {}},
         { provide: InvitationKeyComponent, useValue: {}},
-        { provide: ProfileService, useValue: profileServiceStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
@@ -83,11 +78,11 @@ describe('AccountCreationComponent', () => {
 
   it('handles selecting username', fakeAsync(() => {
     page.readPageData();
-    expect(page.component.usernameOffFocus).toBeTruthy();
+    expect(page.component.usernameFocused).toBeFalsy();
     simulateEvent(page.fixture, page.usernameField, 'focus');
-    expect(page.component.usernameOffFocus).toBeFalsy();
+    expect(page.component.usernameFocused).toBeTruthy();
     simulateEvent(page.fixture, page.usernameField, 'blur');
-    expect(page.component.usernameOffFocus).toBeTruthy();
+    expect(page.component.usernameFocused).toBeFalsy();
   }));
 
   it('handles each username invalidity', fakeAsync(() => {
@@ -96,29 +91,28 @@ describe('AccountCreationComponent', () => {
     simulateEvent(page.fixture, page.usernameField, 'focus');
     simulateInput(page.fixture, page.usernameField, '.username');
     tick(300);
-    tick();
-    simulateEvent(page.fixture, page.usernameField, 'blur');
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // End with a period
     simulateInput(page.fixture, page.usernameField, 'username.');
     tick(300);
-    tick();
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // Contains special characters
     simulateInput(page.fixture, page.usernameField, 'user@name');
     tick(300);
-    tick();
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
 
 
     simulateInput(page.fixture, page.usernameField, 'blah');
     tick(300);
-    tick();
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeFalsy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeFalsy();
   }));
@@ -129,7 +123,7 @@ describe('AccountCreationComponent', () => {
     simulateInput(
       page.fixture, page.usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
     tick(300);
-    tick();
+    updateAndTick(page.fixture);
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
   }));

@@ -4,6 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {WorkspaceData} from 'app/resolvers/workspace';
 
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -22,6 +23,10 @@ import {
 export class WorkspaceNavBarComponent implements OnInit {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
+
+
+  @ViewChild(ConfirmDeleteModalComponent)
+  deleteModal: ConfirmDeleteModalComponent;
 
   workspace: Workspace;
   wsId: string;
@@ -50,14 +55,22 @@ export class WorkspaceNavBarComponent implements OnInit {
     this.wsId = this.route.snapshot.params['wsid'];
   }
 
-  delete(): void {
+  delete(workspace: Workspace): void {
     this.deleting = true;
     this.workspacesService.deleteWorkspace(
-      this.workspace.namespace, this.workspace.id).subscribe(() => {
+      workspace.namespace, workspace.id).subscribe(() => {
         this.router.navigate(['/workspaces']);
     }, () => {
       this.workspaceDeletionError = true;
     });
+  }
+
+  receiveDelete($event): void {
+    this.delete($event);
+  }
+
+  confirmDelete(): void {
+    this.deleteModal.open();
   }
 
   share(): void {

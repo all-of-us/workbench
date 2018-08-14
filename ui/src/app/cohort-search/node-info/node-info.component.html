@@ -4,7 +4,7 @@
       *ngIf="selectable"
       type="button"
       class="btn btn-sm btn-link selection-button"
-      [class.pm]="node.get('type') === 'PM'"
+      [class.pm]="node.get('type') === criteriaTypes.PM"
       [disabled]="isSelected"
       (click)="select($event)">
     <clr-icon *ngIf="isSelected" shape="check-circle" size="20" class="selection-icon"></clr-icon>
@@ -13,7 +13,7 @@
   </button>
 
   <!-- CODE -->
-  <div class="code font-weight-bold">
+  <div class="code font-weight-bold" [innerHTML]="displayCode | safeHtml">
     {{ displayCode }}
   </div>
 
@@ -27,10 +27,11 @@
     [innerHTML]="displayName | safeHtml"></div>
 
   <!-- COUNT -->
-  <div *ngIf="nonZeroCount" class="count">
+  <div *ngIf="node.get('selectable')" class="count">
     <span class="text-muted">&#124;</span>
     <span class="badge badge-info">
-      {{ node.get('count') }}
+      <span *ngIf="node.get('group')">~</span>
+      {{ node.get('count', 0) | number }}
     </span>
   </div>
 </div>

@@ -1,5 +1,6 @@
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Pipe} from '@angular/core';
+import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
@@ -66,9 +67,12 @@ export const ResearchPurposeItems = {
   },
   requestReview: {
     shortDescription: 'Request a review of your research purpose',
-    longDescription: 'I am concerned about potential stigmatization of research participants.\
-    I would like the All of Us Resource Access Board (RAB) to review my Research Purpose. \
-    (This will not prevent you from creating a workspace and proceeding.)'
+    /*
+     * The request review description includes a hyperlink, so needs to be coded
+     * inside the html, rather than as text here. There are ways to have it render
+     * html, but it strips out unsafe content, so was removing the click behavior
+     */
+    longDescription: 'SEE HTML'
   }
 };
 
@@ -98,6 +102,7 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
   private accessLevel: WorkspaceAccessLevel;
+  isBlank = isBlank;
   raceList = {
     'American Indian or Alaska Native': UnderservedPopulationEnum.RACEAMERICANINDIANORALASKANATIVE,
     'Hispanic or Latino': UnderservedPopulationEnum.RACEHISPANICORLATINO,
@@ -387,10 +392,19 @@ export class WorkspaceEditComponent implements OnInit {
     return this.workspace.researchPurpose.underservedPopulationDetails;
   }
 
+  get isValidWorkspace() {
+    return !isBlank(this.workspace.name) && !isBlank(this.workspace.description);
+  }
+
   get allowSave() {
     if (this.savingWorkspace) {
       return false;
     }
-    return !isBlank(this.workspace.name) && !isBlank(this.workspace.description);
+    return this.isValidWorkspace;
+  }
+
+  openStigmatizationLink() {
+    const stigmatizationURL = `/definitions/stigmatization`;
+    const stigmatizationPage = window.open(stigmatizationURL, '_blank');
   }
 }
