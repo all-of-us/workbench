@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,13 +8,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import javax.inject.Provider;
-
 import org.json.JSONObject;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -111,7 +109,9 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<ClusterListResponse> listClusters() {
-    if (userProvider.get().getFreeTierBillingProjectStatus() != BillingProjectStatus.READY) {
+    BillingProjectStatus billingStatus =
+        StorageEnums.billingProjectStatusFromStorage(userProvider.get().getFreeTierBillingProjectStatus());
+    if (billingStatus != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
           "User billing project is not yet initialized, cannot list/create clusters");
     }

@@ -4,7 +4,6 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -17,9 +16,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.inject.Provider;
-
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -29,6 +26,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -42,7 +40,6 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -114,7 +111,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .etag(Etags.fromVersion(workspace.getVersion()))
         .lastModifiedTime(workspace.getLastModifiedTime().getTime())
         .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.getDataAccessLevel())
+        .dataAccessLevel(StorageEnums.dataAccessLevelFromStorage(workspace.getDataAccessLevel()))
         .name(workspace.getName())
         .id(workspaceId.getWorkspaceName())
         .namespace(workspaceId.getWorkspaceNamespace())
@@ -172,7 +169,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .etag(Etags.fromVersion(workspace.getVersion()))
         .lastModifiedTime(workspace.getLastModifiedTime().getTime())
         .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.getDataAccessLevel())
+        .dataAccessLevel(
+            StorageEnums.dataAccessLevelFromStorage(workspace.getDataAccessLevel()))
         .name(workspace.getName())
         .id(fcWorkspace.getName())
         .namespace(fcWorkspace.getNamespace())
@@ -200,7 +198,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
           ResearchPurpose researchPurpose = createResearchPurpose(workspace);
           if(workspace.getContainsUnderservedPopulation()) {
-            Set<UnderservedPopulationEnum> dbSet = workspace.getUnderservedPopulationSet();
+            Set<UnderservedPopulationEnum> dbSet = workspace.getUnderservedPopulationSet().stream()
+                .map(p -> StorageEnums.underservedPopulationFromStorage(p))
+                .collect(Collectors.toSet());
             List<UnderservedPopulationEnum> clientList = new ArrayList<UnderservedPopulationEnum>();
             for (UnderservedPopulationEnum population : dbSet) {
               clientList.add(population);
@@ -220,7 +220,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           org.pmiops.workbench.db.model.Workspace result = new org.pmiops.workbench.db.model.Workspace();
           if (workspace.getDataAccessLevel() != null) {
             result.setDataAccessLevel(
-                DataAccessLevel.fromValue(workspace.getDataAccessLevel().toString()));
+                StorageEnums.dataAccessLevelToStorage(workspace.getDataAccessLevel()));
           }
           result.setDescription(workspace.getDescription());
           result.setName(workspace.getName());
@@ -245,7 +245,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           UserRole result = new UserRole();
           result.setEmail(workspaceUserRole.getUser().getEmail());
           WorkspaceAccessLevel clientRole =
-              WorkspaceUserRole.accessLevelFromStorage(workspaceUserRole.getRole());
+              StorageEnums.workspaceAccessLevelFromStorage(workspaceUserRole.getRole());
           if (clientRole == null) {
             throw new IllegalArgumentException(String.format(
                 "unknown WorkspaceAccessLevel storage value: %d", workspaceUserRole.getRole()));
@@ -302,12 +302,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
     dbWorkspace.setContainsUnderservedPopulation(purpose.getContainsUnderservedPopulation());
     if (purpose.getContainsUnderservedPopulation()) {
-      List<UnderservedPopulationEnum> list = purpose.getUnderservedPopulationDetails();
-      Set<UnderservedPopulationEnum> dbSet = new HashSet<UnderservedPopulationEnum>();
-      for (UnderservedPopulationEnum population : list) {
-        dbSet.add(population);
-      }
-      dbWorkspace.setUnderservedPopulationSet(dbSet);
+      dbWorkspace.setUnderservedPopulationSet(
+          purpose.getUnderservedPopulationDetails()
+          .stream()
+          .map(p -> StorageEnums.underservedPopulationToStorage(p))
+          .collect(Collectors.toSet()));
     }
   }
 
@@ -398,7 +397,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
     WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.setRole(WorkspaceUserRole.accessLevelToStorage(WorkspaceAccessLevel.OWNER));
+    permissions.setRole(StorageEnums.workspaceAccessLevelToStorage(WorkspaceAccessLevel.OWNER));
     permissions.setWorkspace(dbWorkspace);
     permissions.setUser(user);
 
@@ -670,7 +669,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
 
     WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.setRole(WorkspaceUserRole.accessLevelToStorage(WorkspaceAccessLevel.OWNER));
+    permissions.setRole(StorageEnums.workspaceAccessLevelToStorage(WorkspaceAccessLevel.OWNER));
     permissions.setWorkspace(dbWorkspace);
     permissions.setUser(user);
 
@@ -708,7 +707,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             role.getEmail()));
       }
       newUserRole.setUser(newUser);
-      newUserRole.setRole(WorkspaceUserRole.accessLevelToStorage(role.getRole()));
+      newUserRole.setRole(StorageEnums.workspaceAccessLevelToStorage(role.getRole()));
       dbUserRoles.add(newUserRole);
     }
     // This automatically enforces owner role.
@@ -719,7 +718,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .stream()
         .map(r -> new UserRole()
             .email(r.getUser().getEmail())
-            .role(WorkspaceUserRole.accessLevelFromStorage(r.getRole())))
+            .role(StorageEnums.workspaceAccessLevelFromStorage(r.getRole())))
         // Reverse sorting arranges the role list in a logical order - owners first, then by email.
         .sorted(Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
         .collect(Collectors.toList());

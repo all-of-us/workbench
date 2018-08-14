@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Authority;
 import org.springframework.boot.CommandLineRunner;
@@ -29,14 +30,14 @@ public class SetAuthority {
     return new HashSet<String>(Arrays.asList(str.split(",")));
   }
 
-  private Set<Authority> commaDelimitedStringToAuthoritySet(String str) {
-    Set<Authority> auths = new HashSet();
+  private Set<Short> commaDelimitedStringToAuthoritySet(String str) {
+    Set<Short> auths = new HashSet();
     for (String value : commaDelimitedStringToSet(str)) {
       String cleanedValue = value.trim().toUpperCase();
       if (cleanedValue.isEmpty()) {
         continue;
       }
-      auths.add(Authority.valueOf(cleanedValue));
+      auths.add(StorageEnums.authorityToStorage(Authority.valueOf(cleanedValue)));
     }
     return auths;
   }
@@ -52,7 +53,7 @@ public class SetAuthority {
             + Arrays.asList(args));
       }
       Set<String> emails = commaDelimitedStringToSet(args[0]);
-      Set<Authority> authorities = commaDelimitedStringToAuthoritySet(args[1]);
+      Set<Short> authorities = commaDelimitedStringToAuthoritySet(args[1]);
       boolean remove = Boolean.valueOf(args[2]);
       boolean dryRun = Boolean.valueOf(args[3]);
       int numUsers = 0;
@@ -70,8 +71,8 @@ public class SetAuthority {
         // JOIN authorities, not usually fetched.
         user = userDao.findUserWithAuthorities(user.getUserId());
 
-        Set<Authority> granted = user.getAuthorities();
-        Set<Authority> updated = new HashSet(granted);
+        Set<Short> granted = user.getAuthorities();
+        Set<Short> updated = new HashSet(granted);
         if (remove) {
           updated.removeAll(authorities);
         } else {

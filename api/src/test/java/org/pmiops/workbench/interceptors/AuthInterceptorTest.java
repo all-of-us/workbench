@@ -27,6 +27,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.AuthConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -227,8 +228,8 @@ public class AuthInterceptorTest {
   @Test
   public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
     User userWithAuthorities = new User();
-    Set<Authority> required = new HashSet<Authority>();
-    required.add(Authority.REVIEW_RESEARCH_PURPOSE);
+    Set<Short> required = new HashSet<>();
+    required.add(StorageEnums.authorityToStorage(Authority.REVIEW_RESEARCH_PURPOSE));
     userWithAuthorities.setAuthorities(required);
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithAuthorities);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");

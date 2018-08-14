@@ -7,6 +7,7 @@ import java.util.function.Function;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -79,26 +80,29 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
-    if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED
+    if (StorageEnums.dataAccessLevelFromStorage(user.getDataAccessLevel()) == DataAccessLevel.UNREGISTERED
         && user.getIdVerificationIsValid() != null
         && user.getIdVerificationIsValid()
         && user.getDemographicSurveyCompletionTime() != null
         && user.getEthicsTrainingCompletionTime() != null
         && user.getTermsOfServiceCompletionTime() != null
-        && user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
+        && StorageEnums.emailVerificationStatusFromStorage(user.getEmailVerificationStatus())
+            == EmailVerificationStatus.SUBSCRIBED) {
       this.fireCloudService.addUserToGroup(user.getEmail(),
           configProvider.get().firecloud.registeredDomainName);
-      user.setDataAccessLevel(DataAccessLevel.REGISTERED);
+      user.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     }
   }
 
   public User createServiceAccountUser(String email) {
     User user = new User();
-    user.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    user.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
     user.setEmail(email);
     user.setDisabled(false);
-    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.NONE);
+    user.setEmailVerificationStatus(
+        StorageEnums.emailVerificationStatusToStorage(EmailVerificationStatus.UNVERIFIED));
+    user.setFreeTierBillingProjectStatus(
+        StorageEnums.billingProjectStatusToStorage(BillingProjectStatus.NONE));
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -117,7 +121,7 @@ public class UserService {
       String email,
       String contactEmail) {
     User user = new User();
-    user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
+    user.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
     user.setEmail(email);
     user.setContactEmail(contactEmail);
     user.setFamilyName(familyName);
@@ -125,8 +129,10 @@ public class UserService {
     user.setDisabled(false);
     user.setAboutYou(null);
     user.setAreaOfResearch(null);
-    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.NONE);
+    user.setEmailVerificationStatus(
+        StorageEnums.emailVerificationStatusToStorage(EmailVerificationStatus.UNVERIFIED));
+    user.setFreeTierBillingProjectStatus(
+        StorageEnums.billingProjectStatusToStorage(BillingProjectStatus.NONE));
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -198,7 +204,7 @@ public class UserService {
       @Override
       public User apply(User user) {
         user.setFreeTierBillingProjectName(name);
-        user.setFreeTierBillingProjectStatus(status);
+        user.setFreeTierBillingProjectStatus(StorageEnums.billingProjectStatusToStorage(status));
         return user;
       }
     });

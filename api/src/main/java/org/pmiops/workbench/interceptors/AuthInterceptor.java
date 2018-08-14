@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
@@ -206,7 +208,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       }
       // Fetch the user with authorities, since they aren't loaded during normal
       user = userDao.findUserWithAuthorities(user.getUserId());
-      Collection<Authority> granted = user.getAuthorities();
+      Collection<Authority> granted = user.getAuthorities()
+          .stream()
+          .map(a -> StorageEnums.authorityFromStorage(a))
+          .collect(Collectors.toSet());
       if (granted.containsAll(Arrays.asList(req.value()))) {
         return true;
       } else {

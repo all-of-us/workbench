@@ -1,9 +1,13 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -19,14 +23,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.UnderservedPopulationEnum;
-
 
 @Entity
 @Table(name = "workspace")
 public class Workspace {
-
   private String firecloudUuid;
 
   public static class FirecloudWorkspaceId {
@@ -68,7 +68,7 @@ public class Workspace {
   private String description;
   private String workspaceNamespace;
   private String firecloudName;
-  private DataAccessLevel dataAccessLevel;
+  private Short dataAccessLevel;
   private CdrVersion cdrVersion;
   private User creator;
   private Timestamp creationTime;
@@ -86,8 +86,7 @@ public class Workspace {
   private String populationOfFocus;
   private String additionalNotes;
   private boolean containsUnderservedPopulation;
-  private Set<UnderservedPopulationEnum> underservedPopulationSet =
-      new HashSet<UnderservedPopulationEnum>();
+  private Set<Short> underservedPopulationSet = new HashSet<>();
 
   private Boolean reviewRequested;
   private Boolean approved;
@@ -152,11 +151,11 @@ public class Workspace {
   }
 
   @Column(name = "data_access_level")
-  public DataAccessLevel getDataAccessLevel() {
+  public Short getDataAccessLevel() {
     return dataAccessLevel;
   }
 
-  public void setDataAccessLevel(DataAccessLevel dataAccessLevel) {
+  public void setDataAccessLevel(Short dataAccessLevel) {
     this.dataAccessLevel = dataAccessLevel;
   }
 
@@ -300,11 +299,11 @@ public class Workspace {
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "underserved_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "underserved_population")
-  public Set<UnderservedPopulationEnum> getUnderservedPopulationSet() {
+  public Set<Short> getUnderservedPopulationSet() {
     return underservedPopulationSet;
   }
 
-  public void setUnderservedPopulationSet(Set<UnderservedPopulationEnum> newUnderservedPopulationSet) {
+  public void setUnderservedPopulationSet(Set<Short> newUnderservedPopulationSet) {
     this.underservedPopulationSet = newUnderservedPopulationSet;
   }
 

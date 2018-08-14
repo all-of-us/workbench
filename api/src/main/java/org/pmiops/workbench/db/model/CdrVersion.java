@@ -9,7 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
 @Table(name = "cdr_version")
@@ -17,7 +16,7 @@ public class CdrVersion {
 
   private long cdrVersionId;
   private String name;
-  private DataAccessLevel dataAccessLevel;
+  private Short dataAccessLevel;
   private short releaseNumber;
   private String bigqueryProject;
   private String bigqueryDataset;
@@ -47,11 +46,11 @@ public class CdrVersion {
   }
 
   @Column(name = "data_access_level")
-  public DataAccessLevel getDataAccessLevel() {
+  public Short getDataAccessLevel() {
     return dataAccessLevel;
   }
 
-  public void setDataAccessLevel(DataAccessLevel dataAccessLevel) {
+  public void setDataAccessLevel(Short dataAccessLevel) {
     this.dataAccessLevel = dataAccessLevel;
   }
 

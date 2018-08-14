@@ -31,6 +31,7 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
@@ -118,7 +119,7 @@ public class AnnotationQueryBuilderTest {
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    workspace.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
     workspaceDao.save(workspace);
 
     Cohort cohort = new Cohort();
@@ -435,7 +436,7 @@ public class AnnotationQueryBuilderTest {
     }
     for (int i = 0; i < actualResults.size(); i++) {
       MapDifference<String, Object> difference =
-          Maps.difference((Map<String, Object>) actualResults.get(i), expectedResults[i]);
+          Maps.difference(actualResults.get(i), expectedResults[i]);
       if (!difference.areEqual()) {
         fail("Result " + i + " had difference: " + difference.entriesDiffering()
             + "; unexpected entries: " + difference.entriesOnlyOnLeft()

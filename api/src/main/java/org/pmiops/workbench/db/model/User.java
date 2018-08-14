@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -19,36 +20,31 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
 public class User {
-
   private long userId;
   private int version;
   // The Google email address that the user signs in with.
   private String email;
   // The email address that can be used to contact the user.
   private String contactEmail;
-  private DataAccessLevel dataAccessLevel;
+  private Short dataAccessLevel;
   private String givenName;
   private String familyName;
   private String phoneNumber;
   private String freeTierBillingProjectName;
-  private BillingProjectStatus freeTierBillingProjectStatus;
+  private Short freeTierBillingProjectStatus;
   private Timestamp firstSignInTime;
-  private Set<Authority> authorities = new HashSet<Authority>();
+  private Set<Short> authorities = new HashSet<>();
   private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
   private Boolean idVerificationIsValid;
   private Timestamp termsOfServiceCompletionTime;
   private Timestamp ethicsTrainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
-  private EmailVerificationStatus emailVerificationStatus;
+  private Short emailVerificationStatus;
   private Boolean requestedIdVerification;
   private Set<PageVisit> pageVisits = new HashSet<PageVisit>();
 
@@ -96,11 +92,11 @@ public class User {
   }
 
   @Column(name = "data_access_level")
-  public DataAccessLevel getDataAccessLevel() {
+  public Short getDataAccessLevel() {
     return dataAccessLevel;
   }
 
-  public void setDataAccessLevel(DataAccessLevel dataAccessLevel) {
+  public void setDataAccessLevel(Short dataAccessLevel) {
     this.dataAccessLevel = dataAccessLevel;
   }
 
@@ -142,11 +138,11 @@ public class User {
   }
 
   @Column(name = "free_tier_billing_project_status")
-  public BillingProjectStatus getFreeTierBillingProjectStatus() {
+  public Short getFreeTierBillingProjectStatus() {
     return freeTierBillingProjectStatus;
   }
 
-  public void setFreeTierBillingProjectStatus(BillingProjectStatus freeTierBillingProjectStatus) {
+  public void setFreeTierBillingProjectStatus(Short freeTierBillingProjectStatus) {
     this.freeTierBillingProjectStatus = freeTierBillingProjectStatus;
   }
 
@@ -163,11 +159,11 @@ public class User {
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "authority", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "authority")
-  public Set<Authority> getAuthorities() {
+  public Set<Short> getAuthorities() {
     return authorities;
   }
 
-  public void setAuthorities(Set<Authority> newAuthorities) {
+  public void setAuthorities(Set<Short> newAuthorities) {
     this.authorities = newAuthorities;
   }
 
@@ -239,11 +235,11 @@ public class User {
   }
 
   @Column(name = "email_verification_status")
-  public EmailVerificationStatus getEmailVerificationStatus() {
+  public Short getEmailVerificationStatus() {
     return emailVerificationStatus;
   }
 
-  public void setEmailVerificationStatus(EmailVerificationStatus emailVerificationStatus) {
+  public void setEmailVerificationStatus(Short emailVerificationStatus) {
     this.emailVerificationStatus = emailVerificationStatus;
   }
 
