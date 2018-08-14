@@ -144,16 +144,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         })
       );
     });
-    // forkJoin(...calls).subscribe(([age, dec, gen, race, ethnicity]) => {
-    //   /* Age and Deceased are single nodes we use as templates */
-    //   this.ageNode = age.get(0);
-    //   this.deceasedNode = dec.get(0);
-    //   /* Gender, Race, and Ethnicity are all used to generate option lists */
-    //   this.genderNodes = gen;
-    //   this.raceNodes = race;
-    //   this.ethnicityNodes = ethnicity;
-    //   this.loading = false;
-    // });
   }
 
   loadOptions(nodes: any, subtype: string) {
