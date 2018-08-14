@@ -717,7 +717,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
     List<UserRole> updatedUserRoles = dbWorkspace.getWorkspaceUserRoles()
         .stream()
-        .map(r -> new UserRole().email(r.getUser().getEmail()).role(r.getRole()))
+        .map(r -> new UserRole()
+            .email(r.getUser().getEmail())
+            .role(WorkspaceUserRole.accessLevelFromStorage(r.getRole())))
         // Reverse sorting arranges the role list in a logical order - owners first, then by email.
         .sorted(Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
         .collect(Collectors.toList());
