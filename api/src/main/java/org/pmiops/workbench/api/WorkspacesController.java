@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -714,6 +715,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = workspaceService.updateUserRoles(dbWorkspace, dbUserRoles);
     ShareWorkspaceResponse resp = new ShareWorkspaceResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
+    List<UserRole> updatedUserRoles = dbWorkspace.getWorkspaceUserRoles()
+        .stream()
+        .map(r -> new UserRole()
+            .email(r.getUser().getEmail())
+            .role(WorkspaceUserRole.accessLevelFromStorage(r.getRole())))
+        // Reverse sorting arranges the role list in a logical order - owners first, then by email.
+        .sorted(Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
+        .collect(Collectors.toList());
+    resp.setItems(updatedUserRoles);
     return ResponseEntity.ok(resp);
   }
 
