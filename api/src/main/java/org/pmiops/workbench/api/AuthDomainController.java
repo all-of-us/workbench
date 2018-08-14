@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.AuthDomainRequest;
@@ -44,9 +43,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
-    DataAccessLevel previousAccess = StorageEnums.dataAccessLevelFromStorage(user.getDataAccessLevel());
+    DataAccessLevel previousAccess = user.enumGetDataAccessLevel();
     fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
-    user.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REVOKED));
+    user.enumSetDataAccessLevel(DataAccessLevel.REVOKED);
     user.setDisabled(true);
     userDao.save(user);
 
@@ -62,10 +61,10 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> addUserToAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
-    DataAccessLevel previousAccess = StorageEnums.dataAccessLevelFromStorage(user.getDataAccessLevel());
+    DataAccessLevel previousAccess = user.enumGetDataAccessLevel();
     fireCloudService.addUserToGroup(request.getEmail(), groupName);
     // TODO(blrubenstein): Parameterize this.
-    user.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+    user.enumSetDataAccessLevel(DataAccessLevel.REGISTERED);
     user.setDisabled(false);
     userDao.save(user);
 

@@ -12,7 +12,10 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 /**
  * Static utility for converting between API enums and stored short values. All
  * stored enums should have an entry here, and the property on the @Entity model
- * should be Short or short (depending on nullability).
+ * should be Short or short (depending on nullability). A helper method may also
+ * be added to the model class to handle conversion, but care should be taken in
+ * naming to avoid triggering Spring magic, e.g. prefixing helper method names
+ * with "enum" seems to avoid most issues.
  *
  * Usage requirements:
  *

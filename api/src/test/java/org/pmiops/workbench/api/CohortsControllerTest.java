@@ -32,7 +32,6 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -125,8 +124,7 @@ public class CohortsControllerTest {
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
-    user.setEmailVerificationStatus(
-        StorageEnums.emailVerificationStatusToStorage(EmailVerificationStatus.SUBSCRIBED));
+    user.enumSetEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 

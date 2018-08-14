@@ -1,9 +1,9 @@
 package org.pmiops.workbench.auth;
 
+import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.IdVerificationStatus;
@@ -66,8 +66,7 @@ public class ProfileService {
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
-    profile.setFreeTierBillingProjectStatus(
-        StorageEnums.billingProjectStatusFromStorage(user.getFreeTierBillingProjectStatus()));
+    profile.setFreeTierBillingProjectStatus(user.enumGetFreeTierBillingProjectStatus());
     profile.setEnabledInFireCloud(enabledInFireCloud);
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
@@ -94,12 +93,11 @@ public class ProfileService {
     if (user.getFirstSignInTime() != null) {
       profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
     }
-    if (user.getDataAccessLevel() != null) {
-      profile.setDataAccessLevel(StorageEnums.dataAccessLevelFromStorage(user.getDataAccessLevel()));
+    if (user.enumGetDataAccessLevel() != null) {
+      profile.setDataAccessLevel(user.enumGetDataAccessLevel());
     }
-    if (user.getAuthorities() != null) {
-      profile.setAuthorities(user.getAuthorities()
-          .stream().map(a -> StorageEnums.authorityFromStorage(a)).collect(Collectors.toList()));
+    if (user.enumGetAuthorities() != null) {
+      profile.setAuthorities(new ArrayList<>(user.enumGetAuthorities()));
     }
     if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
       profile.setPageVisits(user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
@@ -108,8 +106,7 @@ public class ProfileService {
     profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
         .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
         .collect(Collectors.toList()));
-    profile.setEmailVerificationStatus(
-        StorageEnums.emailVerificationStatusFromStorage(user.getEmailVerificationStatus()));
+    profile.setEmailVerificationStatus(user.enumGetEmailVerificationStatus());
     return profile;
   }
 }

@@ -2,7 +2,13 @@ package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -16,14 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
 
 @RestController
 public class BugReportController implements BugReportApiDelegate {
@@ -62,7 +60,7 @@ public class BugReportController implements BugReportApiDelegate {
       // or all of these log files might be missing, or the cluster may not even exist, so ignore
       // failures here.
       if (Optional.ofNullable(bugReport.getIncludeNotebookLogs()).orElse(false) &&
-          BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
+          BillingProjectStatus.READY.equals(user.enumGetFreeTierBillingProjectStatus())) {
         for (String fileName : BugReportController.notebookLogFiles) {
           try {
             String logContent = jupyterApi.getRootContents(

@@ -31,7 +31,6 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
@@ -119,7 +118,7 @@ public class AnnotationQueryBuilderTest {
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
+    workspace.enumSetDataAccessLevel(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     Cohort cohort = new Cohort();

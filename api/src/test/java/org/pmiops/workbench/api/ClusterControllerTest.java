@@ -25,7 +25,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -123,8 +122,7 @@ public class ClusterControllerTest {
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
     user.setFreeTierBillingProjectName(WORKSPACE_NS);
-    user.setFreeTierBillingProjectStatus(
-        StorageEnums.billingProjectStatusToStorage(BillingProjectStatus.READY));
+    user.enumSetFreeTierBillingProjectStatus(BillingProjectStatus.READY);
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
 

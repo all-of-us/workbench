@@ -24,7 +24,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -243,20 +242,18 @@ public class ProfileController implements ProfileApiDelegate {
       if (user.getFreeTierBillingProjectName() == null) {
         String billingProjectName = createFirecloudUserAndBillingProject(user);
         user.setFreeTierBillingProjectName(billingProjectName);
-        user.setFreeTierBillingProjectStatus(
-            StorageEnums.billingProjectStatusToStorage(BillingProjectStatus.PENDING));
+        user.enumSetFreeTierBillingProjectStatus(BillingProjectStatus.PENDING);
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       // If the user is logged in, then we know that they have followed the account creation instructions sent to
       // their initial contact email address.
-      user.setEmailVerificationStatus(
-          StorageEnums.emailVerificationStatusToStorage(EmailVerificationStatus.SUBSCRIBED));
+      user.enumSetEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
       return saveUserWithConflictHandling(user);
     }
 
     // Free tier billing project setup is complete; nothing to do.
-    if (BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatus())) {
+    if (BillingProjectStatus.READY.equals(user.enumGetFreeTierBillingProjectStatus())) {
       return user;
     }
 

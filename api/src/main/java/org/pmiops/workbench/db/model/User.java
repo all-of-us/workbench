@@ -2,10 +2,10 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -20,6 +20,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.BillingProjectStatus;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
@@ -100,6 +104,14 @@ public class User {
     this.dataAccessLevel = dataAccessLevel;
   }
 
+  public DataAccessLevel enumGetDataAccessLevel() {
+    return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+  }
+
+  public void enumSetDataAccessLevel(DataAccessLevel dataAccessLevel) {
+    setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+  }
+
   @Column(name = "given_name")
   public String getGivenName() {
     return givenName;
@@ -146,6 +158,16 @@ public class User {
     this.freeTierBillingProjectStatus = freeTierBillingProjectStatus;
   }
 
+  public BillingProjectStatus enumGetFreeTierBillingProjectStatus() {
+    return StorageEnums.billingProjectStatusFromStorage(getFreeTierBillingProjectStatus());
+  }
+
+  public void enumSetFreeTierBillingProjectStatus(
+      BillingProjectStatus freeTierBillingProjectStatus) {
+    setFreeTierBillingProjectStatus(
+        StorageEnums.billingProjectStatusToStorage(freeTierBillingProjectStatus));
+  }
+
   @Column(name = "first_sign_in_time")
   public Timestamp getFirstSignInTime() {
     return firstSignInTime;
@@ -165,6 +187,25 @@ public class User {
 
   public void setAuthorities(Set<Short> newAuthorities) {
     this.authorities = newAuthorities;
+  }
+
+  public Set<Authority> enumGetAuthorities() {
+    Set<Short> from = getAuthorities();
+    if (from == null) {
+      return null;
+    }
+    return from
+        .stream()
+        .map(StorageEnums::authorityFromStorage)
+        .collect(Collectors.toSet());
+  }
+
+  public void enumSetAuthorities(Set<Authority> newAuthorities) {
+    this.setAuthorities(
+        newAuthorities
+        .stream()
+        .map(StorageEnums::authorityToStorage)
+        .collect(Collectors.toSet()));
   }
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "user")
@@ -241,6 +282,15 @@ public class User {
 
   public void setEmailVerificationStatus(Short emailVerificationStatus) {
     this.emailVerificationStatus = emailVerificationStatus;
+  }
+
+  public EmailVerificationStatus enumGetEmailVerificationStatus() {
+    return StorageEnums.emailVerificationStatusFromStorage(getEmailVerificationStatus());
+  }
+
+  public void enumSetEmailVerificationStatus(EmailVerificationStatus emailVerificationStatus) {
+    setEmailVerificationStatus(
+        StorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }
 
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "userId", orphanRemoval = true, cascade = CascadeType.ALL)

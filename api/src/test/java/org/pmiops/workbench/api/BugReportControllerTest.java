@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.jira.model.IssueResponse;
@@ -77,8 +76,7 @@ public class BugReportControllerTest {
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
     user.setFreeTierBillingProjectName(FC_PROJECT_ID);
-    user.setFreeTierBillingProjectStatus(
-        StorageEnums.billingProjectStatusToStorage(BillingProjectStatus.READY));
+    user.enumSetFreeTierBillingProjectStatus(BillingProjectStatus.READY);
     user.setDisabled(false);
     when(userProvider.get()).thenReturn(user);
     bugReportController.setUserProvider(userProvider);

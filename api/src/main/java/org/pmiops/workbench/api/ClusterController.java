@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -109,13 +108,11 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<ClusterListResponse> listClusters() {
-    BillingProjectStatus billingStatus =
-        StorageEnums.billingProjectStatusFromStorage(userProvider.get().getFreeTierBillingProjectStatus());
-    if (billingStatus != BillingProjectStatus.READY) {
+    User user = this.userProvider.get();
+    if (user.enumGetFreeTierBillingProjectStatus() != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
           "User billing project is not yet initialized, cannot list/create clusters");
     }
-    User user = this.userProvider.get();
     String project = user.getFreeTierBillingProjectName();
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;

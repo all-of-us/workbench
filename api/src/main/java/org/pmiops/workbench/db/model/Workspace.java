@@ -1,13 +1,10 @@
 package org.pmiops.workbench.db.model;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
-
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -23,6 +20,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.UnderservedPopulationEnum;
 
 @Entity
 @Table(name = "workspace")
@@ -157,6 +156,14 @@ public class Workspace {
 
   public void setDataAccessLevel(Short dataAccessLevel) {
     this.dataAccessLevel = dataAccessLevel;
+  }
+
+  public DataAccessLevel enumGetDataAccessLevel() {
+    return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+  }
+
+  public void enumSetDataAccessLevel(DataAccessLevel dataAccessLevel) {
+    setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @ManyToOne
@@ -299,12 +306,31 @@ public class Workspace {
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "underserved_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "underserved_population")
-  public Set<Short> getUnderservedPopulationSet() {
+  public Set<Short> getUnderservedPopulationsShort() {
     return underservedPopulationSet;
   }
 
-  public void setUnderservedPopulationSet(Set<Short> newUnderservedPopulationSet) {
-    this.underservedPopulationSet = newUnderservedPopulationSet;
+  public void setUnderservedPopulationsShort(Set<Short> newUnderservedPopulations) {
+    this.underservedPopulationSet = newUnderservedPopulations;
+  }
+
+  public Set<UnderservedPopulationEnum> enumGetUnderservedPopulations() {
+    Set<Short> from = getUnderservedPopulationsShort();
+    if (from == null) {
+      return null;
+    }
+    return from
+        .stream()
+        .map(StorageEnums::underservedPopulationFromStorage)
+        .collect(Collectors.toSet());
+  }
+
+  public void enumSetUnderservedPopulations(Set<UnderservedPopulationEnum> newUnderservedPopulations) {
+    setUnderservedPopulationsShort(
+        newUnderservedPopulations
+        .stream()
+        .map(StorageEnums::underservedPopulationToStorage)
+        .collect(Collectors.toSet()));
   }
 
   @Column(name = "rp_review_requested")

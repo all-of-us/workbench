@@ -34,7 +34,6 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -172,7 +171,7 @@ public class ProfileControllerTest {
     createUser();
     User user = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
-    assertThat(user.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(user.enumGetDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
 
   @Test
@@ -706,8 +705,7 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
     user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    user.setEmailVerificationStatus(
-        StorageEnums.emailVerificationStatusToStorage(EmailVerificationStatus.SUBSCRIBED));
+    user.enumSetEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
     userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     when(userAuthenticationProvider.get()).thenReturn(
@@ -736,9 +734,9 @@ public class ProfileControllerTest {
     assertThat(user.getContactEmail()).isEqualTo(contactEmail);
     assertThat(user.getFamilyName()).isEqualTo(familyName);
     assertThat(user.getGivenName()).isEqualTo(givenName);
-    assertThat(user.getDataAccessLevel()).isEqualTo(dataAccessLevel);
+    assertThat(user.enumGetDataAccessLevel()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
-    assertThat(user.getDataAccessLevel()).isEqualTo(dataAccessLevel);
+    assertThat(user.enumGetDataAccessLevel()).isEqualTo(dataAccessLevel);
   }
 
 }

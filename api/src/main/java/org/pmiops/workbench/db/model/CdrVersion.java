@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
 @Table(name = "cdr_version")
@@ -52,6 +54,14 @@ public class CdrVersion {
 
   public void setDataAccessLevel(Short dataAccessLevel) {
     this.dataAccessLevel = dataAccessLevel;
+  }
+
+  public DataAccessLevel enumGetDataAccessLevel() {
+    return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+  }
+
+  public void enumSetDataAccessLevel(DataAccessLevel dataAccessLevel) {
+    setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @Column(name = "release_number")

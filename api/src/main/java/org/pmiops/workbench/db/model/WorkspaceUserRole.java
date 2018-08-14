@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 @Entity
 @Table(name = "user_workspace")
@@ -55,5 +56,13 @@ public class WorkspaceUserRole {
 
   public void setRole(Short role) {
     this.role = role;
+  }
+
+  public WorkspaceAccessLevel enumGetRole() {
+    return StorageEnums.workspaceAccessLevelFromStorage(this.role);
+  }
+
+  public void enumSetRole(WorkspaceAccessLevel role) {
+    this.role = StorageEnums.workspaceAccessLevelToStorage(role);
   }
 }
