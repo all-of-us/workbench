@@ -8,7 +8,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
-import {hasRegisteredAccess, navigateLogin} from 'app/utils';
+import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {Authority} from 'generated';
@@ -77,17 +77,22 @@ export class SignedInComponent implements OnInit {
       if (signedIn) {
         this.profileImage = this.signInService.profileImage;
       } else {
-        navigateLogin(this.router, this.router.routerState.snapshot.url);
+        this.navigateSignOut();
       }
     });
   }
 
   signOut(): void {
     this.signInService.signOut();
+    this.navigateSignOut();
+  }
+
+  private navigateSignOut(): void {
     // Force a hard browser reload here. We want to ensure that no local state
     // is persisting across user sessions, as this can lead to subtle bugs.
-    window.location.assign('/login');
+    window.location.assign('/');
   }
+
 
   get reviewWorkspaceActive(): boolean {
     return this.locationService.path().startsWith('/admin/review-workspace');

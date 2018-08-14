@@ -31,7 +31,7 @@
     <span class="text-muted">&#124;</span>
     <span class="badge badge-info">
       <span *ngIf="node.get('group')">~</span>
-      {{ node.get('count', 0) }}
+      {{ node.get('count', 0) | number }}
     </span>
   </div>
 </div>

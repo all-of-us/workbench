@@ -54,7 +54,7 @@
       Loading...
     </span>
     <span *ngIf="!isRequesting">
-    {{ group.get('count') || 0 }}
+    {{ group.get('count') || 0 | number }}
     </span>
   </div>
 
