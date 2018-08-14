@@ -72,7 +72,7 @@
       <div>
         Number Participants:
         <span class="text-bold" *ngIf="!preview.get('requesting')">
-             {{ preview.get('count', 0) }}
+             {{ preview.get('count', 0) | number}}
         </span>
       </div>
     </div>
