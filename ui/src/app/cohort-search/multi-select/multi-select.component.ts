@@ -17,6 +17,7 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
     const _selections = opts.map(opt => opt.get('parameterId')).toSet();
     this.selected = this.selected.union(_selections);
   }
+  @Input() loading: boolean;
 
   selected = Set<number>();
   filter = new FormControl();

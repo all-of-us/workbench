@@ -102,6 +102,11 @@ export const criteriaChildren =
   (state): List<any> =>
   state.getIn(['criteria', 'tree', kind, parentId], List());
 
+export const demoCriteriaChildren =
+  (kind: string, subtype: string) =>
+  (state): List<any> =>
+  state.getIn(['criteria', 'tree', kind, subtype], List());
+
 export const criteriaSearchTerms =
   () => (state): Array<string> =>
   state.getIn(['criteria', 'search', 'terms'], null);
