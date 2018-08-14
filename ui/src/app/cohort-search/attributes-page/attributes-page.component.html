@@ -60,7 +60,7 @@
         <div class="spin-top-padding">
           <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading...   </span>
         </div>
-        <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
+        <div class="col-lg-7 text-padding" *ngIf="preview.get('count') >= 0">
           <div class="result-text">
             Results
           </div>
@@ -71,7 +71,7 @@
              </span>
           </div>
         </div>
-        <div class="col-lg-2" *ngIf="preview.get('count')">
+        <div class="col-lg-3 button-padding" *ngIf="preview.get('count')">
           <button class="btn add-button " type="submit" [disabled]="!attrForm.valid || negativeAlert"> ADD THIS RESULT</button>
         </div>
       </div>
