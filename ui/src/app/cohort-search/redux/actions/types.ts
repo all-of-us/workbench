@@ -4,6 +4,7 @@ export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
+export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
 export const BEGIN_DRUG_AUTOCOMPLETE_REQUEST = 'BEGIN_DRUG_AUTOCOMPLETE_REQUEST';
@@ -84,6 +85,12 @@ export interface ActionTypes {
     type: typeof LOAD_CRITERIA_RESULTS;
     kind: string;
     parentId: number;
+    results: Criteria[];
+  };
+  LOAD_DEMO_CRITERIA_RESULTS: {
+    type: typeof LOAD_DEMO_CRITERIA_RESULTS;
+    kind: string;
+    subtype: string;
     results: Criteria[];
   };
   CANCEL_CRITERIA_REQUEST: {
@@ -287,6 +294,7 @@ export type RootAction =
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
+  | ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]
   | ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST]
