@@ -8,7 +8,6 @@ import {
   BEGIN_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
-  BEGIN_DEMO_CRITERIA_REQUEST,
   BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   CANCEL_CRITERIA_REQUEST,
@@ -43,8 +42,6 @@ import {
   loadAutocompleteOptions,
   autocompleteRequestError,
 
-  loadDemoCriteriaRequestResults,
-
   loadIngredients,
 } from './actions/creators';
 
@@ -55,7 +52,6 @@ import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
-type DemoCritRequestAction = ActionTypes[typeof BEGIN_DEMO_CRITERIA_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
 type AutocompleteRequestAction = ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
@@ -117,20 +113,6 @@ export class CohortSearchEpics {
             .filter(compare({kind, parentId}))
             .first())
           .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
-      }
-    )
-  )
-
-  fetchDemoCriteria: CSEpic = (action$) => (
-    action$.ofType(BEGIN_DEMO_CRITERIA_REQUEST).mergeMap(
-      ({cdrVersionId, kind, subtype}: DemoCritRequestAction) => {
-        return this.service.getCriteriaByTypeAndSubtype(cdrVersionId, kind, subtype)
-          .map(result => loadDemoCriteriaRequestResults(kind, subtype, result.items))
-          .race(action$
-            .ofType(CANCEL_CRITERIA_REQUEST)
-            .filter(compare({kind, subtype}))
-            .first())
-          .catch(e => Observable.of(criteriaRequestError(kind, 0, e)));
       }
     )
   )

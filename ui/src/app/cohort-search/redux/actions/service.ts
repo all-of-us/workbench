@@ -52,7 +52,7 @@ export class CohortSearchActions {
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
-  @dispatch() requestDemoCriteria = ActionFuncs.requestDemoCriteria;
+  @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
@@ -229,6 +229,14 @@ export class CohortSearchActions {
       return;
     }
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
+  }
+
+  fetchDemoCriteria(kind: string, subtype: string): void {
+    const isLoaded = this.state.getIn(['criteria', 'tree', kind, subtype]);
+    if (isLoaded) {
+      return;
+    }
+    this.requestDemoCriteria(this.cdrVersionId, kind, subtype);
   }
 
   fetchAutocompleteOptions(terms: string): void {

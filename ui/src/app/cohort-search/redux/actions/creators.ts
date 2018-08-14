@@ -8,7 +8,6 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
-  BEGIN_DEMO_CRITERIA_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
@@ -76,18 +75,13 @@ export const requestDrugCriteria =
   ): ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST] =>
   ({type: BEGIN_DRUG_CRITERIA_REQUEST, cdrVersionId, kind, parentId, subtype});
 
-export const requestDemoCriteria =
-  (cdrVersionId: number, kind: string, subtype: string
-  ): ActionTypes[typeof BEGIN_DEMO_CRITERIA_REQUEST] =>
-  ({type: BEGIN_DEMO_CRITERIA_REQUEST, cdrVersionId, kind, subtype});
-
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
   ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
 
 export const loadDemoCriteriaRequestResults =
-  (kind: string, subtype: string, results: Criteria[]
+  (kind: string, subtype: string, results: any
   ): ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS] =>
   ({type: LOAD_DEMO_CRITERIA_RESULTS, kind, subtype, results});
 
