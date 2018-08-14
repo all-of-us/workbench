@@ -114,38 +114,45 @@ const routes: Routes = [
             },
             {
               path: 'cohorts',
-              component: CohortListComponent,
-              data: {
-                title: 'View Cohorts',
-                breadcrumb: 'Cohorts'
-              }
-            },
-            {
-              path: 'cohorts/build',
-              loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-              data: {
-                breadcrumb: 'Add a Cohort'
-              }
-            }, {
-              path: 'cohorts/:cid/review',
-              loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
-              data: {
-                title: 'Cohort',
-                breadcrumb: 'Param: Cohort Name'
-              },
-              resolve: {
-                cohort: CohortResolver,
-              }
-            }, {
-              path: 'cohorts/:cid/edit',
-              component: CohortEditComponent,
-              data: {
-                title: 'Edit Cohort',
-                breadcrumb: 'Param: Cohort Name'
-              },
-              resolve: {
-                cohort: CohortResolver,
-              },
+              data: { breadcrumb: 'Cohorts' },
+              children: [
+                {
+                  path: '',
+                  component: CohortListComponent,
+                  data: {
+                    title: 'View Cohorts',
+                  },
+                },
+                {
+                  path: 'build',
+                  loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+                  data: {
+                    breadcrumb: 'Add a Cohort'
+                  }
+                },
+                {
+                  path: ':cid/review',
+                  loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+                  data: {
+                    title: 'Cohort',
+                    breadcrumb: 'Param: Cohort Name'
+                  },
+                  resolve: {
+                    cohort: CohortResolver,
+                  }
+                },
+                {
+                  path: ':cid/edit',
+                  component: CohortEditComponent,
+                  data: {
+                    title: 'Edit Cohort',
+                    breadcrumb: 'Param: Cohort Name'
+                  },
+                  resolve: {
+                    cohort: CohortResolver,
+                  }
+                }
+              ]
             }]
           }
         ]
