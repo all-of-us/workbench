@@ -231,14 +231,6 @@ export class CohortSearchActions {
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
   }
 
-  fetchDemoCriteria(kind: string, subtype: string): void {
-    const isLoaded = this.state.getIn(['criteria', 'tree', kind, subtype]);
-    if (isLoaded) {
-      return;
-    }
-    this.requestDemoCriteria(this.cdrVersionId, kind, subtype);
-  }
-
   fetchAutocompleteOptions(terms: string): void {
     this.requestAutocompleteOptions(this.cdrVersionId, terms);
   }
