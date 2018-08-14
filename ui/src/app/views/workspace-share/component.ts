@@ -204,7 +204,7 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   // Checks for an email + role combination in the current list of user roles.
-  checkUnique(email: String, role: WorkspaceAccessLevel): Boolean {
+  checkUnique(email: String, role: WorkspaceAccessLevel): boolean {
     return Array.from(this.workspace.userRoles)
       .filter(r => r.email === email)
       .filter(r => r.role === role)
