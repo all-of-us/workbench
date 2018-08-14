@@ -130,14 +130,18 @@ const routes: Routes = [
               path: 'cohorts/:cid/review',
               loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
               data: {
-                breadcrumb: 'Cohort'
+                title: 'Cohort',
+                breadcrumb: 'Param: Cohort Name'
+              },
+              resolve: {
+                cohort: CohortResolver,
               }
             }, {
               path: 'cohorts/:cid/edit',
               component: CohortEditComponent,
               data: {
                 title: 'Edit Cohort',
-                breadcrumb: 'Edit Cohort'
+                breadcrumb: 'Param: Cohort Name'
               },
               resolve: {
                 cohort: CohortResolver,
