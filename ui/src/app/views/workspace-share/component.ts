@@ -94,10 +94,10 @@ export class WorkspaceShareComponent implements OnInit {
       return;
     }
     if (!this.usersLoading) {
-      this.usersLoading = true;
       const email = this.convertToEmail(this.toShare);
       const role = this.selectedAccessLevel;
       if (this.checkUnique(email, role)) {
+        this.usersLoading = true;
         // A user can only have one role on a workspace so we replace them in the list
         const updateList = Array.from(this.workspace.userRoles)
           .filter(r => r.email !== email);
@@ -127,8 +127,6 @@ export class WorkspaceShareComponent implements OnInit {
             this.usersLoading = false;
           }
         );
-      } else {
-        this.usersLoading = false;
       }
     }
   }
