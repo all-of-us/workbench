@@ -37,7 +37,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  height:1.4rem;
+  height:59px;
   margin-top: 0.5rem;
 }
 
@@ -73,15 +73,22 @@
 .nav-link {
   margin-bottom: -4px!important;
 }
-
+button{
+  font-weight:300!important;
+}
 button.tab.active {
   color: #216FB4;
   border-bottom: 7px solid #216FB4;
   font-size:14px;
+  padding-bottom:1.8rem;
+  font-weight:bold!important;
 }
 
 .tab-node{
   border-bottom: 7px solid #216FB4;
+  padding-bottom:1.5rem;
+  font-weight:bold!important;
+
 }
 
 .btn-link .btn, .btn.btn-link {
@@ -107,7 +114,7 @@ button.tab.active {
 
 .footer {
   margin-top: 0.5rem;
-  padding: 0.45rem 0.4rem;
+  padding: 0.45rem 0rem;
   display: flex;
   justify-content: flex-end;
 }
@@ -148,7 +155,6 @@ button.tab.active {
 .panel-right-container{
   width: 100%;
   padding-left: 1rem;
-  padding-right: 1rem;
   padding-top: 0.5rem;
   background-color: rgb(241, 242, 242) ;
 }
@@ -161,7 +167,7 @@ button.tab.active {
   border-radius: 5px;
   overflow-y: auto;
   overflow-x: hidden;
-  min-height: 26.88rem;
+  min-height: 27.5rem;
   background-color: white;
 }
 
