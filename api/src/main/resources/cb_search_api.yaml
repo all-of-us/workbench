@@ -85,7 +85,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/search/{value}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/search:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -99,7 +99,7 @@ paths:
           type: string
           required: true
           description: the specific type of criteria to get
-        - in: path
+        - in: query
           name: value
           type: string
           required: true
@@ -156,7 +156,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/drug/{name}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/drug:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -165,7 +165,7 @@ paths:
       description: Returns criteria tree with the specified name
       operationId: "getDrugBrandOrIngredientByName"
       parameters:
-        - in: path
+        - in: query
           name: name
           type: string
           required: true

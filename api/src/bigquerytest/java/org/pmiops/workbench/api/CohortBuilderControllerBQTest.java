@@ -45,12 +45,12 @@ import static org.junit.Assert.fail;
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private static final String TYPE_ICD9 = "ICD9";
-  private static final String SUBTYPE_NONE = null;
   private static final String TYPE_ICD10 = "ICD10";
   private static final String TYPE_CPT = "CPT";
   private static final String TYPE_PM = "PM";
   private static final String TYPE_VISIT = "VISIT";
   private static final String TYPE_DRUG = "DRUG";
+  private static final String SUBTYPE_NONE = null;
   private static final String SUBTYPE_CPT4 = "CPT4";
   private static final String SUBTYPE_ICD10CM = "ICD10CM";
   private static final String SUBTYPE_ICD10PCS = "ICD10PCS";

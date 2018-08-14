@@ -1,6 +1,11 @@
+<div class="help-tip" *ngIf="showTip">
+  <div class="help-tip-title">Welcome to your workspace!</div>
+  <div class="help-tip-text">Define a subset of the participant data by creating a cohort. Create a notebook to access and analyze your cohorts in Python.</div>
+  <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times-circle" size="32px" style="position: absolute; right: 1rem; width: 32px; margin-top: .3rem"></clr-icon></div>
+</div>
 <div class="workspace-container">
   <div class="main-body">
-    <h2 class="greeting">{{greeting}}</h2>
+    <h2 class="greeting">{{showTip ? 'Get Started' : 'Recent Work'}}</h2>
     <div style="width: 200px">
       <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
         <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
@@ -22,11 +27,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="help-tip" style="position: relative; left: 250px; top: -170px" *ngIf="newWorkspace">
-      <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times" size="10px" style="position: absolute; top: 10px; right: 9px"></clr-icon></div>
-      <div class="help-tip-title">Welcome to your workspace!</div>
-      <div class="help-tip-text">One of the first things you may want to do is create a cohort and a notebook</div>
     </div>
     <div style="padding-top: 1rem;">
       <h4 class="subheader">Research Purpose</h4>
@@ -56,7 +56,6 @@
           Owner access is required to share the workspace.
         </span>
       </span>
-
     </div>
     <div *ngFor="let user of workspace.userRoles">
       <div>{{user.role}}: {{user.email}}</div>
