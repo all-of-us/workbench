@@ -90,14 +90,14 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const noCode = this.node.get('type', '') === DomainType.DRUG
+    const noCode = (this.node.get('type', '') === DomainType.DRUG && this.node.get('group'))
       || this.node.get('type', '') === CRITERIA_TYPES.PM;
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
     return (noCode || nameIsCode) ? '' : this.node.get('name', '');
   }
 
   get displayCode() {
-    if (this.node.get('type', '') === DomainType.DRUG
+    if ((this.node.get('type', '') === DomainType.DRUG && this.node.get('group'))
       || this.node.get('type', '') === CRITERIA_TYPES.PM) {
       return this.node.get('name', '');
     }
