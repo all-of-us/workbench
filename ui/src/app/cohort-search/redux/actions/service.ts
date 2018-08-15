@@ -17,6 +17,7 @@ import {
   getSearchRequest,
   groupList,
   includeGroups,
+  isAttributeLoading,
   isAutocompleteLoading,
   isCriteriaLoading,
   isRequesting,
@@ -83,7 +84,7 @@ export class CohortSearchActions {
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
-  @dispatch() showAttributesPage = ActionFuncs.showAttributesPage;
+  @dispatch() requestAttributes = ActionFuncs.requestAttributes;
   @dispatch() hideAttributesPage = ActionFuncs.hideAttributesPage;
 
   @dispatch() openWizard = ActionFuncs.openWizard;
@@ -253,6 +254,14 @@ export class CohortSearchActions {
       return;
     }
     this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
+  }
+
+  fetchAttributes(node: any): void {
+    const isLoading = isAttributeLoading()(this.state);
+    if (isLoading) {
+      return;
+    }
+    this.requestAttributes(this.cdrVersionId, node);
   }
 
   requestPreview(): void {

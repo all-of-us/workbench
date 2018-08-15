@@ -13,6 +13,7 @@ export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
 export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
 export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
 export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
+export const LOAD_ATTRIBUTE_LIST = 'LOAD_ATTRIBUTE_LIST';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
 export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
 export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
@@ -149,6 +150,10 @@ export interface ActionTypes {
     type: typeof LOAD_INGREDIENT_LIST;
     ingredients: any;
   };
+  LOAD_ATTRIBUTE_LIST: {
+    type: typeof LOAD_ATTRIBUTE_LIST;
+    attributes: any;
+  };
   CRITERIA_REQUEST_ERROR: {
     type: typeof CRITERIA_REQUEST_ERROR;
     kind: string;
@@ -268,7 +273,8 @@ export interface ActionTypes {
   };
   SHOW_ATTRIBUTES_PAGE: {
     type: typeof SHOW_ATTRIBUTES_PAGE;
-    node: any
+    cdrVersionId: number;
+    node: any;
   };
   HIDE_ATTRIBUTES_PAGE: {
     type: typeof HIDE_ATTRIBUTES_PAGE;
@@ -331,6 +337,7 @@ export type RootAction =
   | ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof LOAD_INGREDIENT_LIST]
+  | ActionTypes[typeof LOAD_ATTRIBUTE_LIST]
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
   | ActionTypes[typeof SET_SCROLL_ID]
