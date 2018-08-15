@@ -1262,7 +1262,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestExeption!");
     } catch (BadRequestException e) {
       //success
-      boolean isMeasurementConceptIdNull = attribute != null && attribute.getConceptId() == null && type == TYPE_MEAS;
+      boolean isMeasurementConceptIdNull = attribute != null && attribute.getConceptId() == null && TYPE_MEAS.equals(type);
       String message = isMeasurementConceptIdNull ? "Please provide valid concept id for %s."
         : "Please provide valid search attributes(operator, operands) for %s.";
       assertThat(e.getMessage()).isEqualTo(String.format(message, exceptionType));
