@@ -19,7 +19,7 @@ import {CohortBuilderService} from 'generated';
 import {DemographicsComponent} from './demographics.component';
 
 class MockActions {
-  @dispatch() addAttributeForPreview = activeParameterList;
+  @dispatch() activeParameterList = activeParameterList;
   @dispatch() demoCriteriaChildren = demoCriteriaChildren;
 }
 
