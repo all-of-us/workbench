@@ -30,6 +30,7 @@ import {
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
+  ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
   SET_SCROLL_ID,
 
@@ -166,6 +167,13 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .deleteIn(['criteria', 'search', 'autocomplete'])
           .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
+
+      case ATTRIBUTE_REQUEST_ERROR:
+        return state
+          .deleteIn(['wizard', 'item', 'attributes', 'loading'])
+          .setIn(
+            ['wizard', 'item', 'attributes', 'errors'], fromJS({error: action.error})
+          );
 
       case CRITERIA_REQUEST_ERROR:
         return state

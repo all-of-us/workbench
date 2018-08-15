@@ -5,11 +5,16 @@ import {NgForm} from '@angular/forms';
 import {fromJS, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {attributesPreviewStatus, CohortSearchActions} from '../redux';
+import {
+    attributesPreviewStatus,
+  CohortSearchActions,
+  isAttributeLoading,
+  loadAttributes,
+} from '../redux';
 
 import {Operator} from 'generated';
 
-import {PM_UNITS} from '../constant';
+import {CRITERIA_SUBTYPES, PM_UNITS} from '../constant';
 
 @Component({
   selector: 'crit-attributes-page',
@@ -17,19 +22,23 @@ import {PM_UNITS} from '../constant';
   styleUrls: ['./attributes-page.component.css']
 })
 export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
-  @select(attributesPreviewStatus) preview$;
-  @Input() node: any;
-  units = PM_UNITS;
-  attrs: any;
-  dropdowns = {
-    selected: ['', ''],
-    oldVals:  ['', '']
-  };
-  preview = Map();
-  subscription: Subscription;
-  negativeAlert = false;
-  options: any;
-  labels = [];
+    @select(attributesPreviewStatus) preview$;
+    @select(isAttributeLoading) loading$;
+    @select(loadAttributes) attributes$;
+    @Input() node: any;
+    units = PM_UNITS;
+    attrs: any;
+    attributes: any;
+    dropdowns = {
+        selected: ['', ''],
+        oldVals:  ['', '']
+    };
+    preview = Map();
+    subscription: Subscription;
+    negativeAlert = false;
+    loading: boolean;
+    options: any;
+    labels = [];
 
   constructor(private actions: CohortSearchActions) {
     this.options = [
@@ -41,9 +50,13 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     ];
   }
 
-  ngOnInit() {
-    this.subscription = this.preview$.subscribe(prev => this.preview = prev);
-  }
+    ngOnInit() {
+        this.subscription = this.preview$.subscribe(prev => this.preview = prev);
+        this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
+        this.subscription.add(
+          this.attributes$.subscribe(attributes => this.attributes = attributes)
+        );
+    }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
