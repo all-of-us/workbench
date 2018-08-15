@@ -9,6 +9,7 @@ import {CohortSearchActions} from './actions';
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
@@ -24,8 +25,10 @@ import {
   BEGIN_PREVIEW_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
 
+  SHOW_ATTRIBUTES_PAGE,
+
   RootAction,
-  ActionTypes, BEGIN_CRITERIA_SUBTREE_REQUEST,
+  ActionTypes,
 } from './actions/types';
 
 import {
@@ -66,6 +69,7 @@ type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
 type PreviewRequestAction = ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST];
 type AttributePreviewRequestAction = ActionTypes[typeof BEGIN_PREVIEW_REQUEST];
+type AttributeRequestAction = ActionTypes[typeof SHOW_ATTRIBUTES_PAGE];
 const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
 
 const mockSubtree = [
@@ -1213,6 +1217,17 @@ export class CohortSearchEpics {
   fetchIngredientsForBrand: CSEpic = (action$) => (
     action$.ofType(BEGIN_INGREDIENT_REQUEST).mergeMap(
       ({cdrVersionId, conceptId}: IngredientRequestAction) => {
+        return this.service.getDrugIngredientByConceptId(cdrVersionId, conceptId)
+          .map(result => loadIngredients(result.items))
+          .catch(e => Observable.of(autocompleteRequestError(e)));
+      }
+    )
+  )
+
+  fetchAttributes: CSEpic = (action$) => (
+    action$.ofType(BEGIN_INGREDIENT_REQUEST).mergeMap(
+      ({cdrVersionId, node}: AttributeRequestAction) => {
+        const conceptId = node.get('conceptId');
         return this.service.getDrugIngredientByConceptId(cdrVersionId, conceptId)
           .map(result => loadIngredients(result.items))
           .catch(e => Observable.of(autocompleteRequestError(e)));

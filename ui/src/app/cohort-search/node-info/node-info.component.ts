@@ -10,6 +10,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { DomainType } from 'generated';
+import {Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
@@ -130,7 +131,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
               MIN: 0,
               MAX: 1000
           }];
-      this.actions.showAttributesPage(this.node.set('attributes', attributes));
+      this.actions.fetchAttributes(this.node.set('attributes', attributes));
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
@@ -161,7 +162,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  selectChildren(node) {
+  selectChildren(node: Map<string, any>) {
     if (node.get('group')) {
       node.get('children').forEach(child => {
         this.selectChildren(child);

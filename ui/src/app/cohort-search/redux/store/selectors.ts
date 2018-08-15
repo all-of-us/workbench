@@ -93,6 +93,10 @@ export const attributesPreviewStatus = (state) =>
 export const attributesPage = (state) =>
   state.getIn(['wizard', 'item', 'attributes'], Map());
 
+export const isAttributeLoading =
+  () => (state): boolean =>
+    state.getIn(['wizard', 'item', 'attributes', 'loading'], false);
+
 
 /**
  * Criteria
