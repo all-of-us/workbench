@@ -186,7 +186,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaAttributeListResponse> getCriteriAttributeByConceptId(Long cdrVersionId, Long conceptId) {
+  public ResponseEntity<CriteriaAttributeListResponse> getCriteriaAttributeByConceptId(Long cdrVersionId, Long conceptId) {
     return null;
   }
 
