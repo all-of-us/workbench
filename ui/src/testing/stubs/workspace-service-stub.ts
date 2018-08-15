@@ -10,6 +10,7 @@ import {
   UpdateWorkspaceRequest,
   Workspace,
   WorkspaceAccessLevel,
+  WorkspaceListResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
 } from 'generated';
@@ -26,11 +27,13 @@ export class WorkspacesServiceStub {
   workspaces: Workspace[];
   // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
+  workspacesForReview: Workspace[];
 
   constructor() {
 
     this.workspaces = [WorkspacesServiceStub.stubWorkspace()];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
+    this.workspacesForReview = WorkspacesServiceStub.stubWorkspacesForReview();
   }
 
   static stubWorkspace(): Workspace {
@@ -70,6 +73,12 @@ export class WorkspacesServiceStub {
     };
   }
 
+  static stubWorkspacesForReview(): Workspace[] {
+    const stubWorkspace = this.stubWorkspace();
+    stubWorkspace.researchPurpose.reviewRequested = true;
+    return [stubWorkspace];
+  }
+
   private clone(w: Workspace): Workspace {
     if (w == null) {
       return w;
@@ -80,7 +89,10 @@ export class WorkspacesServiceStub {
   createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
     return new Observable<Workspace>(observer => {
       setTimeout(() => {
-        if (this.workspaces.find(w => w.id === newWorkspace.id)) {
+        if (this.workspaces.find(w => w.name === newWorkspace.name)) {
+          observer.error({message: 'Error', status: 409});
+          return;
+        } else if (this.workspaces.find(w => w.id === newWorkspace.id)) {
           observer.error(new Error(`Error creating. Workspace with `
                                    + `id: ${newWorkspace.id} already exists.`));
           return;
@@ -153,6 +165,14 @@ export class WorkspacesServiceStub {
     });
   }
 
+  getWorkspacesForReview(): Observable<WorkspaceListResponse> {
+    return new Observable(observer => {
+      observer.next({
+        items: this.workspacesForReview
+      });
+    });
+  }
+
   updateWorkspace(workspaceNamespace: string,
                   workspaceId: string,
                   newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
@@ -209,8 +229,10 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        this.workspaces[updateIndex].userRoles = request.items;
-        observer.next({});
+        observer.next({
+          workspaceEtag: request.workspaceEtag,
+          items: request.items
+        });
         observer.complete();
       }, 0);
     });

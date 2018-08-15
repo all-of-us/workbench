@@ -2,7 +2,6 @@ import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
-import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
@@ -24,7 +23,6 @@ import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {LoginComponent} from '../login/component';
 import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class AccountCreationPage {
   fixture: ComponentFixture<AccountCreationComponent>;
@@ -45,13 +43,10 @@ class AccountCreationPage {
 
 
 describe('AccountCreationComponent', () => {
-  let profileServiceStub: ProfileServiceStub;
   let page: AccountCreationPage;
   beforeEach(fakeAsync(() => {
-    profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
       ],
@@ -61,13 +56,12 @@ describe('AccountCreationComponent', () => {
         AccountCreationModalsComponent,
         AccountCreationSuccessComponent,
         InvitationKeyComponent,
-        PageTemplateSignedOutComponent,
-        RoutingSpinnerComponent
+        PageTemplateSignedOutComponent
       ],
       providers: [
         { provide: LoginComponent, useValue: {}},
         { provide: InvitationKeyComponent, useValue: {}},
-        { provide: ProfileService, useValue: profileServiceStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({

@@ -16,6 +16,7 @@ import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.ChartInfo;
 import org.pmiops.workbench.model.ChartInfoListResponse;
 import org.pmiops.workbench.model.ConceptIdName;
+import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
@@ -182,6 +183,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         .count(bigQueryService.getLong(row, rm.get("count"))));
     }
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<CriteriaAttributeListResponse> getCriteriaAttributeByConceptId(Long cdrVersionId, Long conceptId) {
+    return null;
   }
 
   @Override

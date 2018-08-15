@@ -3,7 +3,6 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
@@ -24,7 +23,6 @@ import {BugReportService} from 'generated';
 class BugReportPage {
   fixture: ComponentFixture<BugReportComponent>;
   bugReportService: BugReportService;
-  reportBugButton: DebugElement;
   sendButton: DebugElement;
   shortDescription: DebugElement;
   reproSteps: DebugElement;
@@ -52,7 +50,6 @@ describe('BugReportComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
         BrowserAnimationsModule,
         FormsModule,
         ClarityModule.forRoot()

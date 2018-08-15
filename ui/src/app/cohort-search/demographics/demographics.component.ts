@@ -1,5 +1,5 @@
-import {select} from '@angular-redux/store';
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {NgRedux, select} from '@angular-redux/store';
+import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS, List} from 'immutable';
@@ -7,7 +7,7 @@ import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
 
-import {activeParameterList, CohortSearchActions} from '../redux';
+import {activeParameterList, CohortSearchActions, CohortSearchState, demoCriteriaChildren, loadDemoCriteriaRequestResults} from '../redux';
 
 import {Attribute, CohortBuilderService, Operator} from 'generated';
 
@@ -73,6 +73,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private api: CohortBuilderService,
     private actions: CohortSearchActions,
+    private ngRedux: NgRedux<CohortSearchState>
   ) {}
 
   ngOnInit() {
@@ -119,31 +120,53 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       CRITERIA_SUBTYPES.GEN,
       CRITERIA_SUBTYPES.RACE,
       CRITERIA_SUBTYPES.ETH
-      ].map(code => this.api
-      .getCriteriaByTypeAndSubtype(cdrid, CRITERIA_TYPES.DEMO, code)
-      .map(response => {
-        const items = response.items;
-        items.sort(sortByCountThenName);
-        const nodes = fromJS(items).map(node => {
-          if (node.get('subtype') !== CRITERIA_SUBTYPES.AGE) {
-            const paramId = `param${node.get('id', node.get('code'))}`;
-            node = node.set('parameterId', paramId);
+    ].map(code => {
+      this.subscription.add(this.ngRedux.select(demoCriteriaChildren(CRITERIA_TYPES.DEMO, code))
+        .subscribe(options => {
+          if (options.size) {
+            this.loadOptions(options, code);
+          } else {
+            this.api.getCriteriaByTypeAndSubtype(cdrid, CRITERIA_TYPES.DEMO, code)
+              .subscribe(response => {
+                const items = response.items
+                  .filter(item => item.parentId !== 0 || code === CRITERIA_SUBTYPES.DEC);
+                items.sort(sortByCountThenName);
+                const nodes = fromJS(items).map(node => {
+                  if (node.get('subtype') !== CRITERIA_SUBTYPES.AGE) {
+                    const paramId = `param${node.get('id', node.get('code'))}`;
+                    node = node.set('parameterId', paramId);
+                  }
+                  return node;
+                });
+                this.actions.loadDemoCriteriaRequestResults(CRITERIA_TYPES.DEMO, code, nodes);
+              });
           }
-          return node;
-        });
-        return nodes;
-      })
-    );
-    forkJoin(...calls).subscribe(([age, dec, gen, race, ethnicity]) => {
-      /* Age and Deceased are single nodes we use as templates */
-      this.ageNode = age.get(0);
-      this.deceasedNode = dec.get(0);
-      /* Gender, Race, and Ethnicity are all used to generate option lists */
-      this.genderNodes = gen;
-      this.raceNodes = race;
-      this.ethnicityNodes = ethnicity;
-      this.loading = false;
+        })
+      );
     });
+  }
+
+  loadOptions(nodes: any, subtype: string) {
+    switch (subtype) {
+      /* Age and Deceased are single nodes we use as templates */
+      case CRITERIA_SUBTYPES.AGE:
+        this.ageNode = nodes.get(0);
+        break;
+      case CRITERIA_SUBTYPES.DEC:
+        this.deceasedNode = nodes.get(0);
+        break;
+      /* Gender, Race, and Ethnicity are all used to generate option lists */
+      case CRITERIA_SUBTYPES.GEN:
+        this.genderNodes = nodes;
+        break;
+      case CRITERIA_SUBTYPES.RACE:
+        this.raceNodes = nodes;
+        break;
+      case CRITERIA_SUBTYPES.ETH:
+        this.ethnicityNodes = nodes;
+        break;
+    }
+    this.loading = false;
   }
 
   /*

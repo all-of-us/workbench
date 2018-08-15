@@ -6,11 +6,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import javax.inject.Provider;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,7 +76,7 @@ public class BugReportControllerTest {
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
     user.setFreeTierBillingProjectName(FC_PROJECT_ID);
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
+    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
     user.setDisabled(false);
     when(userProvider.get()).thenReturn(user);
     bugReportController.setUserProvider(userProvider);

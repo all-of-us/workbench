@@ -141,7 +141,7 @@ public class ClusterControllerTest {
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
     user.setFreeTierBillingProjectName(WORKSPACE_NS);
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
+    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
 
