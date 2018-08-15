@@ -101,7 +101,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     key.setCohortReviewId(cohortReviewId);
     key.setParticipantId(participantId);
     ParticipantCohortStatus result = new ParticipantCohortStatus();
-    result.setStatus(status);
+    result.setStatusEnum(status);
     result.setParticipantKey(key);
     return result;
   }

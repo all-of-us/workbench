@@ -109,14 +109,14 @@ public class ParticipantCohortStatusDaoTest {
         ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey().cohortReviewId(2).participantId(4);
         ParticipantCohortStatus pcs1 = new ParticipantCohortStatus()
                 .participantKey(key1)
-                .status(CohortStatus.INCLUDED)
+                .statusEnum(CohortStatus.INCLUDED)
                 .birthDate(new Date(System.currentTimeMillis()))
                 .ethnicityConceptId(1L)
                 .genderConceptId(1L)
                 .raceConceptId(1L);
         ParticipantCohortStatus pcs2 = new ParticipantCohortStatus()
                 .participantKey(key2)
-                .status(CohortStatus.EXCLUDED)
+                .statusEnum(CohortStatus.EXCLUDED)
                 .birthDate(new Date(System.currentTimeMillis()))
                 .ethnicityConceptId(1L)
                 .genderConceptId(1L)
@@ -371,7 +371,7 @@ public class ParticipantCohortStatusDaoTest {
     private ParticipantCohortStatus createExpectedPCS(ParticipantCohortStatusKey key, CohortStatus status) {
         return new ParticipantCohortStatus()
                 .participantKey(key)
-                .status(status)
+                .statusEnum(status)
                 .ethnicityConceptId(38003564L)
                 .genderConceptId(8507L)
                 .raceConceptId(8515L);

@@ -178,7 +178,7 @@ public class AnnotationQueryBuilderTest {
   private CohortAnnotationDefinition makeAnnotationDefinition(long cohortId, String columnName,
       AnnotationType annotationType, String... enumValues) {
     CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition();
-    cohortAnnotationDefinition.setAnnotationType(annotationType);
+    cohortAnnotationDefinition.setAnnotationTypeEnum(annotationType);
     cohortAnnotationDefinition.setCohortId(cohortId);
     cohortAnnotationDefinition.setColumnName(columnName);
     if (enumValues.length > 0) {
@@ -197,7 +197,7 @@ public class AnnotationQueryBuilderTest {
     key.setCohortReviewId(cohortReviewId);
     key.setParticipantId(participantId);
     ParticipantCohortStatus result = new ParticipantCohortStatus();
-    result.setStatus(status);
+    result.setStatusEnum(status);
     result.setParticipantKey(key);
     return result;
   }

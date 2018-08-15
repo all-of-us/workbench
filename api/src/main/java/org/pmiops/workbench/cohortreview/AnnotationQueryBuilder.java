@@ -109,15 +109,15 @@ public class AnnotationQueryBuilder {
                 cohortReview.getCohortReviewId()));
         parameters.put("def_" + annotationCount, definition.getCohortAnnotationDefinitionId());
         String sourceColumn;
-        if (definition.getAnnotationType().equals(AnnotationType.ENUM)) {
+        if (definition.getAnnotationTypeEnum().equals(AnnotationType.ENUM)) {
           sourceColumn = String.format("ae%d.name", annotationCount);
           fromBuilder.append(
               String.format(ANNOTATION_VALUE_JOIN_SQL, annotationCount, annotationCount, annotationCount));
         } else {
 
-          String columnName = ANNOTATION_COLUMN_MAP.get(definition.getAnnotationType());
+          String columnName = ANNOTATION_COLUMN_MAP.get(definition.getAnnotationTypeEnum());
           if (columnName == null) {
-            throw new ServerErrorException("Invalid annotation type: " + definition.getAnnotationType());
+            throw new ServerErrorException("Invalid annotation type: " + definition.getAnnotationTypeEnum());
           }
           sourceColumn = String.format("a%d.%s", annotationCount, columnName);
         }

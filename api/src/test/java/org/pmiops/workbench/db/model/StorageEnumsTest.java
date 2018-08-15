@@ -9,10 +9,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
+import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
@@ -56,6 +59,24 @@ public class StorageEnumsTest {
         WorkspaceAccessLevel.values(),
         (Function<Short, WorkspaceAccessLevel>) StorageEnums::workspaceAccessLevelFromStorage,
         (Function<WorkspaceAccessLevel, Short>) StorageEnums::workspaceAccessLevelToStorage
+      },
+      {
+        ReviewStatus.class.getSimpleName(),
+        ReviewStatus.values(),
+        (Function<Short, ReviewStatus>) StorageEnums::reviewStatusFromStorage,
+        (Function<ReviewStatus, Short>) StorageEnums::reviewStatusToStorage
+      },
+      {
+        CohortStatus.class.getSimpleName(),
+        CohortStatus.values(),
+        (Function<Short, CohortStatus>) StorageEnums::cohortStatusFromStorage,
+        (Function<CohortStatus, Short>) StorageEnums::cohortStatusToStorage
+      },
+      {
+        AnnotationType.class.getSimpleName(),
+        AnnotationType.values(),
+        (Function<Short, AnnotationType>) StorageEnums::annotationTypeFromStorage,
+        (Function<AnnotationType, Short>) StorageEnums::annotationTypeToStorage
       },
     };
   }
