@@ -17,6 +17,7 @@ export const LOAD_ATTRIBUTE_LIST = 'LOAD_ATTRIBUTE_LIST';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
 export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
 export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
+export const ATTRIBUTE_REQUEST_ERROR = 'ATTRIBUTE_REQUEST_ERROR';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
 export const SET_SCROLL_ID = 'SET_SCROLL_ID';
 
@@ -144,6 +145,10 @@ export interface ActionTypes {
   };
   AUTOCOMPLETE_REQUEST_ERROR: {
     type: typeof AUTOCOMPLETE_REQUEST_ERROR;
+    error?: any;
+  };
+  ATTRIBUTE_REQUEST_ERROR: {
+    type: typeof ATTRIBUTE_REQUEST_ERROR;
     error?: any;
   };
   LOAD_INGREDIENT_LIST: {
@@ -339,6 +344,7 @@ export type RootAction =
   | ActionTypes[typeof LOAD_INGREDIENT_LIST]
   | ActionTypes[typeof LOAD_ATTRIBUTE_LIST]
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
+  | ActionTypes[typeof ATTRIBUTE_REQUEST_ERROR]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
   | ActionTypes[typeof SET_SCROLL_ID]
 

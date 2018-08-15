@@ -5,11 +5,16 @@ import {NgForm} from '@angular/forms';
 import {fromJS, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {attributesPreviewStatus, CohortSearchActions} from '../redux';
+import {
+    attributesPreviewStatus,
+  CohortSearchActions,
+  isAttributeLoading,
+  loadAttributes,
+} from '../redux';
 
 import {Operator} from 'generated';
 
-import {PM_UNITS} from '../constant';
+import {CRITERIA_SUBTYPES, PM_UNITS} from '../constant';
 
 @Component({
     selector: 'crit-attributes-page',
@@ -18,18 +23,26 @@ import {PM_UNITS} from '../constant';
 })
 export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     @select(attributesPreviewStatus) preview$;
+    @select(isAttributeLoading) loading$;
+    @select(loadAttributes) attributes$;
     @Input() node: any;
     units = PM_UNITS;
     attrs: any;
+    attributes: any;
     oldVals = ['', ''];
     preview = Map();
     subscription: Subscription;
     negativeAlert = false;
+    loading: boolean;
 
     constructor(private actions: CohortSearchActions) { }
 
     ngOnInit() {
         this.subscription = this.preview$.subscribe(prev => this.preview = prev);
+        this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
+        this.subscription.add(
+          this.attributes$.subscribe(attributes => this.attributes = attributes)
+        );
     }
 
     ngOnDestroy() {
@@ -39,7 +52,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     ngOnChanges(changes: SimpleChanges) {
         if (changes.node.currentValue.size) {
             const currentNode = changes.node.currentValue;
-            if (currentNode.get('subtype').substring(0, 2) === 'BP') {
+            if (currentNode.get('subtype') === CRITERIA_SUBTYPES.BP) {
                 this.attrs = currentNode.get('predefinedAttributes').toJS();
                 this.attrs.map(attr => {
                     attr.operator = '';
@@ -57,7 +70,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     }
 
     selectChange(index: number, newVal: string) {
-        if (this.node.get('subtype') === 'BP' && this.oldVals[index] !== newVal) {
+        if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP && this.oldVals[index] !== newVal) {
             const other = index === 0 ? 1 : 0;
             if (newVal === 'ANY') {
                 this.attrs[other].operator = this.oldVals[other] = 'ANY';

@@ -17,6 +17,7 @@ import {
   LOAD_INGREDIENT_LIST,
   LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
+  ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
   SET_SCROLL_ID,
 
@@ -148,6 +149,11 @@ export const loadAttributes =
   (attributes: any
   ): ActionTypes[typeof LOAD_ATTRIBUTE_LIST] =>
   ({type: LOAD_ATTRIBUTE_LIST, attributes});
+
+export const attributeRequestError =
+  (error?: any
+  ): ActionTypes[typeof ATTRIBUTE_REQUEST_ERROR] =>
+    ({type: ATTRIBUTE_REQUEST_ERROR, error});
 
 export const criteriaRequestError =
   (kind: string, parentId: number, error?: any
