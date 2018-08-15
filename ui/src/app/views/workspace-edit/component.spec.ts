@@ -93,7 +93,8 @@ describe('WorkspaceEditComponent', () => {
       ]}).compileComponents();
   }));
 
-  it('should show a conflict-specific error when creating a name conflict workspace', fakeAsync(() => {
+  it('should show a conflict-specific error when creating a name conflict workspace',
+    fakeAsync(() => {
     spyOn(TestBed.get(Router), 'navigate');
     setupComponent(WorkspaceEditMode.Create);
     testComponent.workspace.namespace = WorkspaceStubVariables.DEFAULT_WORKSPACE_NS;
@@ -120,7 +121,7 @@ describe('WorkspaceEditComponent', () => {
     spyOn(TestBed.get(Router), 'navigate');
     setupComponent(WorkspaceEditMode.Create);
     testComponent.workspace.namespace = WorkspaceStubVariables.DEFAULT_WORKSPACE_NS;
-    testComponent.workspace.name = "non-default name";
+    testComponent.workspace.name = 'non-default name';
     testComponent.workspace.id = WorkspaceStubVariables.DEFAULT_WORKSPACE_ID;
     testComponent.workspace.description = WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION;
     const originalSize = workspacesService.workspaces.length;
