@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String NUMERICAL = "LabNumerical";
-  private static final String CATEGORICAL = "LabCategorical";
-  private static final String TEXT = "LabText";
-  private static final String BOTH = "LabBoth";
+  public static final String NUMERICAL = "NUM";
+  public static final String CATEGORICAL = "CAT";
+  public static final String TEXT = "TEXT";
+  public static final String BOTH = "BOTH";
   private static final String LAB = "LAB";
 
   private static final String UNION_ALL = " union all\n";

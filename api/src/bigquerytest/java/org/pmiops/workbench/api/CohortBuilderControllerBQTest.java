@@ -14,6 +14,7 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.querybuilder.MeasurementQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -71,6 +72,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private static final String DOMAIN_MEASUREMENT = "Measurement";
   private static final String DOMAIN_OBSERVATION = "Observation";
   private static final String DOMAIN_DRUG = "Drug";
+  private static final String NUMERICAL = MeasurementQueryBuilder.NUMERICAL;
+  private static final String CATEGORICAL = MeasurementQueryBuilder.CATEGORICAL;
+  private static final String TEXT = MeasurementQueryBuilder.TEXT;
+  private static final String BOTH = MeasurementQueryBuilder.BOTH;
 
   @Autowired
   private CohortBuilderController controller;
@@ -699,7 +704,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabNumericalAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name("LabNumerical").operator(Operator.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(NUMERICAL).operator(Operator.ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -708,7 +713,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabNumericalBetween() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name("LabNumerical").operator(Operator.BETWEEN).operands(Arrays.asList("0", "1"))));
+    lab.attributes(Arrays.asList(new Attribute().name(NUMERICAL).operator(Operator.BETWEEN).operands(Arrays.asList("0", "1"))));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -717,7 +722,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabCategoricalAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name("LabCategorical").operator(Operator.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(CATEGORICAL).operator(Operator.ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -726,7 +731,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabCategoricalIn() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name("LabCategorical").operator(Operator.IN).operands(Arrays.asList("1"))));
+    lab.attributes(Arrays.asList(new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("1"))));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -735,7 +740,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabBothAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name("LabBoth").operator(Operator.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(BOTH).operator(Operator.ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -744,8 +749,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabBothNumericalAndCategorical() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute numerical = new Attribute().name("LabBoth").operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
-    Attribute categorical = new Attribute().name("LabBoth").operator(Operator.IN).operands(Arrays.asList("1"));
+    Attribute numerical = new Attribute().name(BOTH).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
+    Attribute categorical = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("1"));
     lab.attributes(Arrays.asList(numerical, categorical));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -755,7 +760,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabBothCategorical() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute categorical = new Attribute().name("LabBoth").operator(Operator.IN).operands(Arrays.asList("1"));
+    Attribute categorical = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("1"));
     lab.attributes(Arrays.asList(categorical));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -765,7 +770,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabBothNumerical() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute numerical = new Attribute().name("LabBoth").operator(Operator.EQUAL).operands(Arrays.asList("1.0"));
+    Attribute numerical = new Attribute().name(BOTH).operator(Operator.EQUAL).operands(Arrays.asList("1.0"));
     lab.attributes(Arrays.asList(numerical));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -775,10 +780,28 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabNumericalAnyAgeAtEvent() throws Exception {
     Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name("LabNumerical").operator(Operator.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(NUMERICAL).operator(Operator.ANY)));
     Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.GREATER_THAN_OR_EQUAL_TO).operands(Arrays.asList("25"));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsLabMoreThanOneSearchParameter() throws Exception {
+    Criteria labCriteria1 = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria2 = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("9");
+    Criteria labCriteria3 = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("9");
+    SearchParameter lab1 = createSearchParameter(labCriteria1, null);
+    SearchParameter lab2 = createSearchParameter(labCriteria2, null);
+    SearchParameter lab3 = createSearchParameter(labCriteria3, null);
+    Attribute labText = new Attribute().name(TEXT).operator(Operator.ANY);
+    Attribute labNumerical = new Attribute().name(NUMERICAL).operator(Operator.ANY);
+    Attribute labCategorical = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("77"));
+    lab1.attributes(Arrays.asList(labText));
+    lab2.attributes(Arrays.asList(labNumerical));
+    lab3.attributes(Arrays.asList(labCategorical));
+    SearchRequest searchRequest = createSearchRequests(lab1.getType(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -943,16 +966,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     attribute = new Attribute().name("Hip").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HC, "Hip Circumference", "Measurement");
 
-    attribute = new Attribute().name("LabNumerical").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
+    attribute = new Attribute().name(NUMERICAL).operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabCategorical").operator(Operator.IN).operands(Arrays.asList("zz")).conceptId(903136L);
+    attribute = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("zz")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabBoth").operator(Operator.IN).operands(Arrays.asList("zz")).conceptId(903136L);
+    attribute = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("zz")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabBoth").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
+    attribute = new Attribute().name(BOTH).operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
   }
 
@@ -976,16 +999,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     attribute = new Attribute().name("Hip").operands(Arrays.asList("10")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HC, "Hip Circumference", "Measurement");
 
-    attribute = new Attribute().name("LabText").operands(Arrays.asList("10")).conceptId(903136L);
+    attribute = new Attribute().name(TEXT).operands(Arrays.asList("10")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabNumerical").operands(Arrays.asList("10")).conceptId(903136L);
+    attribute = new Attribute().name(NUMERICAL).operands(Arrays.asList("10")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabCategorical").operands(Arrays.asList("10")).conceptId(903136L);
+    attribute = new Attribute().name(CATEGORICAL).operands(Arrays.asList("10")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabBoth").operands(Arrays.asList("10")).conceptId(903136L);
+    attribute = new Attribute().name(BOTH).operands(Arrays.asList("10")).conceptId(903136L);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
   }
 
@@ -1009,16 +1032,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     attribute = new Attribute().name("Hip").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
     assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HC, "Hip Circumference", "Measurement");
 
-    attribute = new Attribute().name("LabText").operator(Operator.ANY);
+    attribute = new Attribute().name(TEXT).operator(Operator.ANY);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabNumerical").operator(Operator.ANY);
+    attribute = new Attribute().name(NUMERICAL).operator(Operator.ANY);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabCategorical").operator(Operator.ANY);
+    attribute = new Attribute().name(CATEGORICAL).operator(Operator.ANY);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
 
-    attribute = new Attribute().name("LabBoth").operator(Operator.ANY);
+    attribute = new Attribute().name(BOTH).operator(Operator.ANY);
     assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
   }
 
