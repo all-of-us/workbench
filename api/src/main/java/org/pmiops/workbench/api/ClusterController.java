@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,9 +8,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import javax.inject.Provider;
-
 import org.json.JSONObject;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -111,11 +108,11 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<ClusterListResponse> listClusters() {
-    if (userProvider.get().getFreeTierBillingProjectStatus() != BillingProjectStatus.READY) {
+    User user = this.userProvider.get();
+    if (user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
           "User billing project is not yet initialized, cannot list/create clusters");
     }
-    User user = this.userProvider.get();
     String project = user.getFreeTierBillingProjectName();
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
