@@ -89,7 +89,10 @@ export class WorkspacesServiceStub {
   createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
     return new Observable<Workspace>(observer => {
       setTimeout(() => {
-        if (this.workspaces.find(w => w.id === newWorkspace.id)) {
+        if (this.workspaces.find(w => w.name === newWorkspace.name)) {
+          observer.error({message: 'Error', status: 409});
+          return;
+        } else if (this.workspaces.find(w => w.id === newWorkspace.id)) {
           observer.error(new Error(`Error creating. Workspace with `
                                    + `id: ${newWorkspace.id} already exists.`));
           return;
