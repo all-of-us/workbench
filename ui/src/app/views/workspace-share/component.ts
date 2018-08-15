@@ -94,14 +94,18 @@ export class WorkspaceShareComponent implements OnInit {
       return;
     }
     if (!this.usersLoading) {
-      this.usersLoading = true;
-      const updateList = Array.from(this.workspace.userRoles);
-      updateList.push({
-        email: this.convertToEmail(this.toShare),
-        role: this.selectedAccessLevel
-      });
-
-      this.workspacesService.shareWorkspace(
+      const email = this.convertToEmail(this.toShare);
+      const role = this.selectedAccessLevel;
+      if (this.checkUnique(email, role)) {
+        this.usersLoading = true;
+        // A user can only have one role on a workspace so we replace them in the list
+        const updateList = Array.from(this.workspace.userRoles)
+          .filter(r => r.email !== email);
+        updateList.push({
+          email: email,
+          role: role
+        });
+        this.workspacesService.shareWorkspace(
           this.workspace.namespace,
           this.workspace.id, {
             workspaceEtag: this.workspace.etag,
@@ -110,7 +114,7 @@ export class WorkspaceShareComponent implements OnInit {
           (resp: ShareWorkspaceResponse) => {
             this.workspace.etag = resp.workspaceEtag;
             this.usersLoading = false;
-            this.workspace.userRoles = updateList;
+            this.workspace.userRoles = resp.items;
             this.toShare = '';
             this.input.nativeElement.focus();
           },
@@ -122,7 +126,8 @@ export class WorkspaceShareComponent implements OnInit {
             }
             this.usersLoading = false;
           }
-      );
+        );
+      }
     }
   }
 
@@ -145,7 +150,7 @@ export class WorkspaceShareComponent implements OnInit {
         (resp: ShareWorkspaceResponse) => {
           this.workspace.etag = resp.workspaceEtag;
           this.usersLoading = false;
-          this.workspace.userRoles = updateList;
+          this.workspace.userRoles = resp.items;
         },
         (error) => {
           this.usersLoading = false;
@@ -194,6 +199,14 @@ export class WorkspaceShareComponent implements OnInit {
 
   navigateBack(): void {
     this.locationService.back();
+  }
+
+  // Checks for an email + role combination in the current list of user roles.
+  checkUnique(email: String, role: WorkspaceAccessLevel): boolean {
+    return Array.from(this.workspace.userRoles)
+      .filter(r => r.email === email)
+      .filter(r => r.role === role)
+      .length === 0;
   }
 
 }

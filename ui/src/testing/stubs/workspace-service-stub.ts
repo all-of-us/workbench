@@ -10,6 +10,7 @@ import {
   UpdateWorkspaceRequest,
   Workspace,
   WorkspaceAccessLevel,
+  WorkspaceListResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
 } from 'generated';
@@ -26,11 +27,13 @@ export class WorkspacesServiceStub {
   workspaces: Workspace[];
   // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
+  workspacesForReview: Workspace[];
 
   constructor() {
 
     this.workspaces = [WorkspacesServiceStub.stubWorkspace()];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
+    this.workspacesForReview = WorkspacesServiceStub.stubWorkspacesForReview();
   }
 
   static stubWorkspace(): Workspace {
@@ -68,6 +71,12 @@ export class WorkspacesServiceStub {
         },
       ]
     };
+  }
+
+  static stubWorkspacesForReview(): Workspace[] {
+    const stubWorkspace = this.stubWorkspace();
+    stubWorkspace.researchPurpose.reviewRequested = true;
+    return [stubWorkspace];
   }
 
   private clone(w: Workspace): Workspace {
@@ -153,6 +162,14 @@ export class WorkspacesServiceStub {
     });
   }
 
+  getWorkspacesForReview(): Observable<WorkspaceListResponse> {
+    return new Observable(observer => {
+      observer.next({
+        items: this.workspacesForReview
+      });
+    });
+  }
+
   updateWorkspace(workspaceNamespace: string,
                   workspaceId: string,
                   newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
@@ -209,8 +226,10 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        this.workspaces[updateIndex].userRoles = request.items;
-        observer.next({});
+        observer.next({
+          workspaceEtag: request.workspaceEtag,
+          items: request.items
+        });
         observer.complete();
       }, 0);
     });

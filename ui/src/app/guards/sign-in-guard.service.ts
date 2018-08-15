@@ -9,7 +9,6 @@ import {
 import {Observable} from 'rxjs/Observable';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {navigateLogin} from 'app/utils';
 
 
 declare const gapi: any;
@@ -20,7 +19,7 @@ export class SignInGuard implements CanActivate, CanActivateChild {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.signInService.isSignedIn$.do(
-      isSignedIn => isSignedIn || navigateLogin(this.router, state.url));
+      isSignedIn => isSignedIn || this.router.navigate(['/login']));
   }
   canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.canActivate(route, state);

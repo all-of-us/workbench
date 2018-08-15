@@ -1080,6 +1080,10 @@ definitions:
         type: string
         description: >
           Updated workspace etag after the share request has been applied.
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/UserRole"
 
   CloneWorkspaceRequest:
     type: object
