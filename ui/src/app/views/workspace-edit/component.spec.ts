@@ -95,7 +95,6 @@ describe('WorkspaceEditComponent', () => {
 
   it('should show a conflict-specific error when creating a name conflict workspace',
     fakeAsync(() => {
-    spyOn(TestBed.get(Router), 'navigate');
     setupComponent(WorkspaceEditMode.Create);
     testComponent.workspace.namespace = WorkspaceStubVariables.DEFAULT_WORKSPACE_NS;
     testComponent.workspace.name = WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME;
@@ -110,7 +109,6 @@ describe('WorkspaceEditComponent', () => {
     expect(workspacesService.workspaces.length).toBe(originalSize);
     const modalTitle = fixture.debugElement.query(By.css('.modal-title'));
     const modalBody = fixture.debugElement.query(By.css('.modal-body'));
-    console.log(modalBody);
     expect(modalTitle.nativeElement.textContent).toEqual('Error:');
     const errorMsg = 'You already have a workspace named ' + testComponent.workspace.name
       + '. Please choose another name.';
@@ -118,7 +116,6 @@ describe('WorkspaceEditComponent', () => {
   }));
 
   it('should show a generic error when creating an id conflict workspace', fakeAsync(() => {
-    spyOn(TestBed.get(Router), 'navigate');
     setupComponent(WorkspaceEditMode.Create);
     testComponent.workspace.namespace = WorkspaceStubVariables.DEFAULT_WORKSPACE_NS;
     testComponent.workspace.name = 'non-default name';
