@@ -2,30 +2,23 @@
   <label for="status-selector">
     Choose a Review Status for Participant {{ participant.id }}
   </label>
-  <!--<div>-->
-    <!--<clr-dropdown >-->
-      <!--<button type="button" class="btn btn-outline" clrDropdownTrigger>-->
-        <!--&lt;!&ndash;<span *ngIf = "dropdownOption.selected[i] !== ''; else elseBlock">{{dropdownOption.selected[i]}}</span>&ndash;&gt;-->
-        <!--&lt;!&ndash;<ng-template #elseBlock>&ndash;&gt;-->
-          <!--&lt;!&ndash;<span>Select Operator</span>&ndash;&gt;-->
-        <!--&lt;!&ndash;</ng-template>&ndash;&gt;-->
-        <!--<clr-icon shape="caret down"></clr-icon>-->
-      <!--</button>-->
-      <!--&lt;!&ndash;<clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>&ndash;&gt;-->
-        <!--&lt;!&ndash;<button&ndash;&gt;-->
-                <!--&lt;!&ndash;*ngFor="let status of cohortStatusList"&ndash;&gt;-->
-                <!--&lt;!&ndash;[value]="status.value"&ndash;&gt;-->
-                <!--&lt;!&ndash;class="dropdown-item"&ndash;&gt;-->
-                <!--&lt;!&ndash;type="button"&ndash;&gt;-->
-                <!--&lt;!&ndash;clrDropdownItem>{{status.display}}</button>&ndash;&gt;-->
-      <!--&lt;!&ndash;</clr-dropdown-menu>&ndash;&gt;-->
-    <!--&lt;!&ndash;</clr-dropdown>&ndash;&gt;-->
-  <!--</div>-->
-  <div class="select">
-  <select [formControl]="statusControl">
-    <option *ngFor="let status of cohortStatusList" [value]="status.value">
-      {{status.display}}
-    </option>
-  </select>
+  <div>
+    <clr-dropdown  class="participant-dropdown">
+      <button type="button" class="btn btn-outline" clrDropdownTrigger>
+        <span *ngIf = "defaultOption; else elseBlock">{{participantOption}}</span>
+        <ng-template #elseBlock>
+          <span>Select Operator</span>
+        </ng-template>
+        <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
+        <button
+                *ngFor="let status of cohortStatusList"
+                (click)="participantOptionChange(status)"
+                class="dropdown-item"
+                type="button"
+                clrDropdownItem>{{status.display}}</button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
   </div>
 </div>

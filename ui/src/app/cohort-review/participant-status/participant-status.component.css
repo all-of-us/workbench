@@ -1,0 +1,6 @@
+/*.participant-dropdown {*/
+    /*width:8rem;*/
+/*}*/
+.participant-dropdown.dropdown, .dropdown .dropdown-toggle {
+    width:10rem;
+}

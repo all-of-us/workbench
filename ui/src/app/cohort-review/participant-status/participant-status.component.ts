@@ -27,7 +27,12 @@ const validStatuses = [
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
-  readonly cohortStatusList = validStatuses.map(status => ({
+    participantOption: any;
+    defaultOption: boolean = false;
+    test: any;
+
+
+    readonly cohortStatusList = validStatuses.map(status => ({
     value: status,
     display: Participant.formatStatusForText(status),
   }));
@@ -53,10 +58,20 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    if(this.statusControl.value){
+        this.defaultOption = true;
+        if (this.statusControl.value === "NEEDS_FURTHER_REVIEW") {
+          this.participantOption = 'NEEDS FURTHER REVIEW';
+        } else {
+            this.participantOption = this.statusControl.value;
+        }
+    }
+
     this.subscription = this.statusControl.valueChanges
       .filter(status => validStatuses.includes(status))
       .switchMap(status => this.updateStatus(status))
       .subscribe();
+
   }
 
   ngOnDestroy() {
@@ -69,5 +84,13 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
+  }
+
+  participantOptionChange(status) {
+    this.participantOption = status.display;
+    this.statusControl.patchValue(status.value);
+    console.log(this.statusControl);
+    this.defaultOption = true;
+    this.updateStatus(status.value);
   }
 }
