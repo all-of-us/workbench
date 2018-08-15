@@ -40,11 +40,6 @@ public class QuestionConcept {
         ageStratumNameMap.put("6", "60-69 yrs old");
         ageStratumNameMap.put("7", "70-79 yrs old");
         ageStratumNameMap.put("8", "80-89 yrs old");
-        ageStratumNameMap.put("9", "90-99 yrs old");
-        ageStratumNameMap.put("10", "100-109 yrs old");
-        ageStratumNameMap.put("11", "110-119 yrs old");
-        ageStratumNameMap.put("12", "120-129 yrs old");
-        ageStratumNameMap.put("13", "130-139 yrs old");
     }
     public static void setGenderStratumNameMap() {
         /* This is to slow to use the db */

@@ -459,6 +459,75 @@ definitions:
           $ref: "#/definitions/AchillesResult"
 
 
+  AchillesResultDist:
+    type: object
+    required:
+      - analysisId
+
+    properties:
+      id:
+        description: pk id for jpa code to work
+        type: integer
+        format: int64
+      analysisId:
+        description: id analysis
+        type: integer
+        format: int64
+      stratum1:
+        description: stratum 1
+        type: string
+      stratum2:
+        description: stratum 2
+        type: string
+      stratum3:
+        description: stratum 3
+        type: string
+      stratum4:
+        description: stratum 4
+        type: string
+      stratum5:
+        description: stratum 5
+        type: string
+      countValue:
+        description: count
+        type: integer
+        format: int64
+      minValue:
+        description: min value
+        type: number
+        format: float
+      maxValue:
+        description: max value
+        type: number
+        format: float
+      avgValue:
+        description: avg value
+        type: number
+        format: float
+      stdevValue:
+        description: std deviation value
+        type: number
+        format: float
+      medianValue:
+        description: median value
+        type: number
+        format: float
+      p10Value:
+        description: 10th percentile  value
+        type: number
+        format: float
+      p25Value:
+        description: 25th percentile value
+        type: number
+        format: float
+      p75Value:
+        description: 75th percentile value
+        type: number
+        format: float
+      p90Value:
+        description: 90th percentile value
+        type: number
+        format: float
 
   Analysis:
     type: object
@@ -498,6 +567,11 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/AchillesResult"
+      distResults:
+        description: distribution results
+        type: array
+        items:
+          $ref: "#/definitions/AchillesResultDist"
 
   AnalysisListResponse:
     type: object
@@ -594,6 +668,10 @@ definitions:
         $ref: "#/definitions/Analysis"
       measurementValueAgeAnalysis:
         description: age analysis for measurement values
+        type: object
+        $ref: "#/definitions/Analysis"
+      measurementDistributionAnalysis:
+        description: measurement distribution analysis
         type: object
         $ref: "#/definitions/Analysis"
 

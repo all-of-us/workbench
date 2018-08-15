@@ -49,52 +49,77 @@ echo "Running measurement queries..."
 # 3000 Measurements that have numeric values - Number of persons with at least one measurement occurrence by measurement_concept_id, bin size of the measurement value for 10 bins, maximum and minimum from measurement value
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4,stratum_5, count_value, source_count_value)
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, count_value, source_count_value)
+with single_unit_measurement_concepts as
+(select measurement_concept_id,count(distinct unit_source_value) as cnt
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_concept_id != 0 group by measurement_concept_id having cnt=1
+),
+single_unit_measurement_source_concepts as
+(select measurement_source_concept_id,count(distinct unit_source_value) as cnt
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_source_concept_id != 0 and measurement_concept_id != measurement_source_concept_id group by measurement_source_concept_id having cnt=1
+)
 select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
 cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
 'Measurement binned' as stratum_3,
-cast(floor(min(co1.value_as_number)) AS STRING) as stratum_4,
-cast(ceil(max(co1.value_as_number)) AS STRING) as stratum_5,
+(case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
+(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else "unknown" end)end)
+as stratum_4,
 COUNT(distinct co1.person_id) as count_value,
 (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
 where co1.measurement_concept_id > 0
 and co1.value_as_number is not null
-group by  co1.measurement_concept_id
+group by  co1.measurement_concept_id,stratum_4
 union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
 cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
 'Measurement binned' as stratum_3,
-cast(floor(min(co1.value_as_number)) AS STRING) as stratum_4,
-cast(ceil(max(co1.value_as_number)) AS STRING) as stratum_5,
+(case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
+(case when co1.measurement_source_concept_id in (select measurement_source_concept_id from single_unit_measurement_source_concepts) then co1.unit_source_value else "unknown" end)end)
+as stratum_4,
 COUNT(distinct co1.person_id) as count_value,
 COUNT(distinct co1.person_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
 where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
 and co1.value_as_number is not null
-group by  co1.measurement_source_concept_id"
+group by  co1.measurement_source_concept_id,stratum_4"
+
 
 # 3000 Measurements that have string values - Number of persons with at least one measurement occurrence by measurement_concept_id
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+(id, analysis_id, stratum_1, stratum_3, stratum_4, count_value, source_count_value)
+with single_unit_measurement_concepts as
+(select measurement_concept_id,count(distinct unit_source_value) as cnt
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_concept_id != 0 group by measurement_concept_id having cnt=1
+),
+single_unit_measurement_source_concepts as
+(select measurement_source_concept_id,count(distinct unit_source_value) as cnt
+from  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_source_concept_id != 0 and measurement_concept_id != measurement_source_concept_id group by measurement_source_concept_id having cnt=1
+)
 select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
 'Measurement un-binned' as stratum_3,
+(case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
+(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else "unknown" end)end)
+as stratum_4,
 COUNT(distinct co1.person_id) as count_value,
 (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
 where co1.measurement_concept_id > 0
 and co1.value_as_number is null and co1.value_source_value is not null
-group by  co1.measurement_concept_id
+group by  co1.measurement_concept_id,stratum_4
 union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
 'Measurement un-binned' as stratum_3,
+(case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
+(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else "unknown" end)end)
+as stratum_4,
 COUNT(distinct co1.person_id) as count_value,
 COUNT(distinct co1.person_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
 where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
 and co1.value_as_number is null and co1.value_source_value is not null
-group by  co1.measurement_source_concept_id"
+group by  co1.measurement_source_concept_id,stratum_4"
 
 
 # 1815 Measurement response distribution
