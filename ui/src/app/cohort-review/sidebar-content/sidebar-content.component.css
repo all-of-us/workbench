@@ -8,4 +8,18 @@
 
 .demographics-info {
   color: #111;
+  padding-top: 0.25rem;
+}
+
+.sidebar-content .participant-color {
+  color: #478EBA;
+  font-weight: bold;
+}
+
+.sidebar-content .participant-info {
+  font-weight:bold
+}
+
+.sidebar-content .participant-flex {
+  display: flex;
 }
