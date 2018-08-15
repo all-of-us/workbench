@@ -1,41 +1,37 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ProfileService} from 'generated';
-
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
 import {
   updateAndTick
 } from '../../../testing/test-helpers';
+
 import {ServerConfigService} from '../../services/server-config.service';
 
-import {AccountCreationModalsComponent} from '../account-creation-modals/component';
+import {ConfirmDeleteModalComponent} from '../confirm-delete-modal/component';
 
-describe('AccountCreationModalsComponent', () => {
-  let fixture: ComponentFixture<AccountCreationModalsComponent>;
+describe('ConfirmDeleteModalComponent', () => {
+  let fixture: ComponentFixture<ConfirmDeleteModalComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        FormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
-        AccountCreationModalsComponent
+        ConfirmDeleteModalComponent,
       ],
       providers: [
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
-        }]
+        },
+      ]
     }).compileComponents().then(() => {
-      fixture = TestBed.createComponent(AccountCreationModalsComponent);
+      fixture = TestBed.createComponent(ConfirmDeleteModalComponent);
       tick();
     });
   }));
