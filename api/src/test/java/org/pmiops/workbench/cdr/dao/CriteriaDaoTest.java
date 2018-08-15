@@ -248,8 +248,7 @@ public class CriteriaDaoTest {
       .parentId(parentId)
       .type(type)
       .subtype(subtype)
-      .attribute(Boolean.FALSE)
-      .predefinedAttributes(predefinedAttributes);
+      .attribute(Boolean.FALSE);
   }
 
 }

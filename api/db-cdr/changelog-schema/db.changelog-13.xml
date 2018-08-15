@@ -11,6 +11,8 @@
       <column name="path" type="VARCHAR(500)"/>
     </addColumn>
 
+    <dropColumn tableName="criteria" columnName="predefined_attributes"/>
+
     <createTable tableName="criteria_attribute">
       <column name="id" type="BIGINT">
         <constraints primaryKey="true" nullable="false"/>

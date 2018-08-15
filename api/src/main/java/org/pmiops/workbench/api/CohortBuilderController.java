@@ -53,9 +53,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     new Function<Criteria, org.pmiops.workbench.model.Criteria>() {
       @Override
       public org.pmiops.workbench.model.Criteria apply(Criteria criteria) {
-        Type listType = new TypeToken<ArrayList<Attribute>>() {
-        }.getType();
-        List<Attribute> predefinedAttributes = new Gson().fromJson(criteria.getPredefinedAttributes(), listType);
         return new org.pmiops.workbench.model.Criteria()
           .id(criteria.getId())
           .parentId(criteria.getParentId())
@@ -68,8 +65,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
           .selectable(criteria.getSelectable())
           .conceptId(StringUtils.isEmpty(criteria.getConceptId()) ? null : new Long(criteria.getConceptId()))
           .domainId(criteria.getDomainId())
-          .hasAttributes(criteria.getAttribute())
-          .predefinedAttributes(predefinedAttributes);
+          .hasAttributes(criteria.getAttribute());
       }
     };
 

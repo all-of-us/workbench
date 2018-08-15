@@ -222,7 +222,6 @@ public class CohortBuilderControllerTest {
       .parentId(criteria.getParentId())
       .selectable(criteria.getSelectable())
       .subtype(criteria.getSubtype())
-      .type(criteria.getType())
-      .predefinedAttributes(null);
+      .type(criteria.getType());
   }
 }
