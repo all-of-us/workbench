@@ -1,41 +1,44 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ProfileService} from 'generated';
-
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {StatusCheckServiceStub} from 'testing/stubs/status-check-service-stub';
 
 import {
   updateAndTick
 } from '../../../testing/test-helpers';
+
+import {ErrorHandlingService} from '../../services/error-handling.service';
 import {ServerConfigService} from '../../services/server-config.service';
+import {StatusCheckService} from '../../services/status-check.service';
 
-import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 
-describe('AccountCreationModalsComponent', () => {
-  let fixture: ComponentFixture<AccountCreationModalsComponent>;
+import {ErrorHandlerComponent} from '../error-handler/component';
+
+describe('ErrorHandlerComponent', () => {
+  let fixture: ComponentFixture<ErrorHandlerComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        FormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
-        AccountCreationModalsComponent
+        ErrorHandlerComponent,
       ],
       providers: [
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        {provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub()},
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
-        }]
+        },
+        {provide: StatusCheckService, useValue: new StatusCheckServiceStub()}
+      ]
     }).compileComponents().then(() => {
-      fixture = TestBed.createComponent(AccountCreationModalsComponent);
+      fixture = TestBed.createComponent(ErrorHandlerComponent);
       tick();
     });
   }));

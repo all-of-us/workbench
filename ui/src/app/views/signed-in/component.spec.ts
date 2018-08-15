@@ -5,54 +5,56 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {
-  ProfileService,
+  BugReportService
 } from 'generated';
 
-import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
+import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
+import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
   updateAndTick
 } from '../../../testing/test-helpers';
+
+import {ErrorHandlingService} from '../../services/error-handling.service';
+import {ProfileStorageService} from '../../services/profile-storage.service';
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 
-import {AccountCreationModalsComponent} from '../account-creation-modals/component';
-import {AccountCreationSuccessComponent} from '../account-creation-success/component';
-import {AccountCreationComponent} from '../account-creation/component';
-import {LoginComponent} from '../login/component';
+import {BreadcrumbComponent} from '../breadcrumb/component';
+import {BugReportComponent} from '../bug-report/component';
+import {SignedInComponent} from '../signed-in/component';
 
-describe('AccountCreationSuccessComponent', () => {
-  let fixture: ComponentFixture<AccountCreationSuccessComponent>;
+describe('SignedInComponent', () => {
+  let fixture: ComponentFixture<SignedInComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
         FormsModule,
+        RouterTestingModule,
         ClarityModule.forRoot()
       ],
       declarations: [
-        AccountCreationModalsComponent,
-        AccountCreationSuccessComponent
+        BreadcrumbComponent,
+        BugReportComponent,
+        SignedInComponent,
       ],
       providers: [
-        { provide: AccountCreationComponent, useValue: {
-            profile: ProfileStubVariables.PROFILE_STUB
-          }
-        },
-        { provide: LoginComponent, useValue: {}},
-        { provide: ProfileService, useValue: new ProfileServiceStub },
+        {provide: BugReportService, useValue: new BugReportServiceStub()},
+        {provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub()},
+        {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
         },
-        { provide: SignInService, useValue: new SignInServiceStub()}
+        {provide: SignInService, useValue: new SignInServiceStub()},
       ]
     }).compileComponents().then(() => {
-      fixture = TestBed.createComponent(AccountCreationSuccessComponent);
+      fixture = TestBed.createComponent(SignedInComponent);
       tick();
     });
   }));
