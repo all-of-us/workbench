@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -22,6 +23,8 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -80,6 +83,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final UserService userService;
+  private final UserRecentResourceService userRecentResourceService;
 
   @Autowired
   WorkspacesController(
@@ -91,7 +95,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
-      UserService userService) {
+      UserService userService,
+      UserRecentResourceService userRecentResourceService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
@@ -101,8 +106,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
     this.userService = userService;
+    this.userRecentResourceService = userRecentResourceService;
   }
 
+  @VisibleForTesting
+  public void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
+  }
   // This does not populate the list of underserved research groups.
   private static final Workspace constructListWorkspaceFromDb(org.pmiops.workbench.db.model.Workspace workspace,
       ResearchPurpose researchPurpose) {
@@ -247,11 +257,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               return result;
             }
           };
-
-  @VisibleForTesting
-  void setUserProvider(Provider<User> userProvider) {
-    this.userProvider = userProvider;
-  }
 
   private static String generateRandomChars(String candidateChars, int length) {
     StringBuilder sb = new StringBuilder();
@@ -439,13 +444,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
       String workspaceId) {
-    List<FileDetail> fileList = new ArrayList<>();
+    final List<FileDetail> fileList;
     try {
       org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
           fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
               .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
       fileList = getFilesFromNotebooks(bucketName);
+      if(fileList.size() > 0 ) {
+        long userId = userProvider.get().getUserId();
+
+        CompletableFuture.runAsync(() -> {
+          long wId = workspaceService.getRequired(
+              workspaceNamespace, workspaceId).getWorkspaceId();
+          List<String> notebookName = fileList.stream().map(notebook -> notebook.getName())
+              .collect(Collectors.toList());
+          userRecentResourceService.deleteOrphanNotebookEntries(wId, userId, notebookName);
+        });
+      }
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",

@@ -14,12 +14,12 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -91,9 +91,10 @@ public class CohortsController implements CohortsApiDelegate {
   private final CdrVersionDao cdrVersionDao;
   private final CohortReviewDao cohortReviewDao;
   private final CohortMaterializationService cohortMaterializationService;
-  private final Provider<User> userProvider;
+  private Provider<User> userProvider;
   private final Clock clock;
   private final CdrVersionService cdrVersionService;
+  private final UserRecentResourceService userRecentResourceService;
 
   @Autowired
   CohortsController(
@@ -104,7 +105,8 @@ public class CohortsController implements CohortsApiDelegate {
       CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
       Clock clock,
-      CdrVersionService cdrVersionService) {
+      CdrVersionService cdrVersionService,
+      UserRecentResourceService userRecentResourceService) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
@@ -113,7 +115,15 @@ public class CohortsController implements CohortsApiDelegate {
     this.userProvider = userProvider;
     this.clock = clock;
     this.cdrVersionService = cdrVersionService;
+    this.userRecentResourceService = userRecentResourceService;
   }
+
+  @VisibleForTesting
+  public void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
+  }
+
+
 
   @Override
   public ResponseEntity<Cohort> createCohort(String workspaceNamespace, String workspaceId,
@@ -133,6 +143,7 @@ public class CohortsController implements CohortsApiDelegate {
     try {
       // TODO Make this a pre-check within a transaction?
       dbCohort = cohortDao.save(dbCohort);
+      userRecentResourceService.updateCohortEntry(workspace.getWorkspaceId(), userProvider.get().getUserId(), dbCohort.getCohortId(), now);
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
@@ -163,6 +174,7 @@ public class CohortsController implements CohortsApiDelegate {
 
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 

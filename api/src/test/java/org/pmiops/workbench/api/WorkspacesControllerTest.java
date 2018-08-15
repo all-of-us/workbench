@@ -5,7 +5,9 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
@@ -53,6 +55,7 @@ import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
@@ -143,7 +146,8 @@ public class WorkspacesControllerTest {
     BigQueryService.class,
     DomainLookupService.class,
     ParticipantCounter.class,
-    UserService.class
+    UserService.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean
@@ -185,6 +189,8 @@ public class WorkspacesControllerTest {
   @Autowired
   CohortsController cohortsController;
   @Autowired
+  UserRecentResourceService userRecentResourceService;
+  @Autowired
   CohortReviewController cohortReviewController;
 
   private CdrVersion cdrVersion;
@@ -201,7 +207,8 @@ public class WorkspacesControllerTest {
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);
-
+    cohortsController.setUserProvider(userProvider);
+    cohortReviewController.setUserProvider(userProvider);
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
     //set the db name to be empty since test cases currently

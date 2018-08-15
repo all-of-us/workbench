@@ -28,6 +28,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
@@ -95,6 +96,8 @@ public class CohortsControllerTest {
   @Autowired
   CohortReviewDao cohortReviewDao;
   @Autowired
+  UserRecentResourceService userRecentResourceService;
+  @Autowired
   UserDao userDao;
   @Mock
   CohortMaterializationService cohortMaterializationService;
@@ -111,7 +114,7 @@ public class CohortsControllerTest {
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
-  @MockBean({FireCloudService.class, NotebooksService.class, CloudStorageService.class})
+  @MockBean({FireCloudService.class, NotebooksService.class, CloudStorageService.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -146,7 +149,7 @@ public class CohortsControllerTest {
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
         cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        userService);
+        userService,userRecentResourceService);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
     JSONObject demoCohort = new JSONObject();
@@ -161,7 +164,7 @@ public class CohortsControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, cdrVersionDao, cohortReviewDao, cohortMaterializationService,
-        userProvider, CLOCK, cdrVersionService);
+        userProvider, CLOCK, cdrVersionService, userRecentResourceService);
   }
 
   private JSONObject createDemoCriteria() {

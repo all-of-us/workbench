@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Service
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
@@ -77,6 +78,16 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void deleteNotebookEntry(long workspaceId, long userId, String notebookName) {
     getDao().deleteUserRecentResourceByUserIdAndWorkspaceIdAndNotebookName(workspaceId, userId, notebookName);
+  }
+
+  @Override
+  public void deleteOrphanNotebookEntries(long workspace_id, long user_id, List<String> notebookList) {
+    List<UserRecentResource> orphanNotebooks =
+        getDao().findUserRecentResourceByUserIdAndWorkspaceIdAndCohortIdIsNullAndNotebookNameNotIn
+            (user_id, workspace_id, notebookList);
+    for (UserRecentResource resource : orphanNotebooks) {
+      getDao().delete(resource);
+    }
   }
 
   /**
