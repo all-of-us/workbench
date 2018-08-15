@@ -134,29 +134,23 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateAttributes(SearchParameter parameter) {
+    List<Attribute> attrs = parameter.getAttributes();
+    Predicate<Attribute> systolic = nameIsSystolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
+    Predicate<Attribute> diastolic = nameIsDiastolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
     if (parameter.getSubtype().equals(BLOOD_PRESSURE)) {
-      List<Attribute> systolicAttrs =
-        parameter.getAttributes().stream()
-          .filter(nameIsSystolic()
-            .and(operatorWithCorrectOperands())
-            .and(conceptIdNotNull())::test)
-          .collect(Collectors.toList());
-      List<Attribute> diastolicAttrs =
-        parameter.getAttributes().stream()
-          .filter(nameIsDiastolic()
-            .and(operatorWithCorrectOperands())
-            .and(conceptIdNotNull())::test)
-          .collect(Collectors.toList());
-      if (systolicAttrs.size() != 1 || diastolicAttrs.size() != 1) {
-        throw new BadRequestException("Please provide valid search attributes(name, operator, operands and conceptId) for Systolic and Diastolic.");
+      boolean systolicAttrs =
+        attrs.stream().filter(systolic::test).collect(Collectors.toList()).size() != 1;
+      boolean diastolicAttrs =
+        attrs.stream().filter(diastolic::test).collect(Collectors.toList()).size() != 1;
+      if (systolicAttrs || diastolicAttrs) {
+        throw new BadRequestException("Please provide valid search attributes" +
+          "(name, operator, operands and conceptId) for Systolic and Diastolic.");
       }
     } else if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
-      List<Attribute> attrs =
-        parameter.getAttributes().stream()
-          .filter(operatorWithCorrectOperands()
-            .and(conceptIdNotNull())::test)
-          .collect(Collectors.toList());
-      if (attrs.size() != 1) {
+      Predicate<Attribute> allTypes = operatorWithCorrectOperands().and(conceptIdNotNull());
+      boolean allAttrs =
+        parameter.getAttributes().stream().filter(allTypes::test).collect(Collectors.toList()).size() != 1;
+      if (allAttrs) {
         throw new BadRequestException("Please provide valid search attributes(operator, operands) for "
           + exceptionText.get(parameter.getSubtype()) + ".");
       }
@@ -183,19 +177,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   }
 
   private static Predicate<Attribute> operatorWithCorrectOperands() {
-    return attribute ->
-      (attribute.getOperator() != null
-        && attribute.getOperator().equals(Operator.ANY)
-        && attribute.getOperands().size() == 0)
-          || (attribute.getOperator() != null
-        && attribute.getOperator().equals(Operator.BETWEEN)
-        && attribute.getOperands().size() == 2
-        && StringUtils.isNumeric(attribute.getOperands().get(0)))
-        && StringUtils.isNumeric(attribute.getOperands().get(1))
-          || (attribute.getOperator() != null
-        && !attribute.getOperator().equals(Operator.BETWEEN)
-        && !attribute.getOperator().equals(Operator.ANY)
-        && attribute.getOperands().size() == 1
-        && StringUtils.isNumeric(attribute.getOperands().get(0)));
+    return attribute -> isOperatorAny(attribute)
+      || isOperatorBetween(attribute)
+      || isOperatorAnyEquals(attribute)
+      || isOperatorIn(attribute);
   }
 }

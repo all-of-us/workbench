@@ -8,7 +8,7 @@
     "measurement_type_concept_id":3,
     "operator_concept_id":3,
     "value_as_number":1.0,
-    "value_as_concept_id":3,
+    "value_as_concept_id":1,
     "unit_concept_id":3,
     "range_low":1.0,
     "range_high":10.0,
