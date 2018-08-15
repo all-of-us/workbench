@@ -3,7 +3,6 @@ import {Component, Input} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {RouterTestingModule} from '@angular/router/testing';
 
 
 import {ClarityModule} from '@clr/angular';
@@ -52,7 +51,6 @@ describe('ProfilePageComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
-        RouterTestingModule,
         IconsModule,
         ClarityModule.forRoot(),
         BrowserAnimationsModule,

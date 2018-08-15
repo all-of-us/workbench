@@ -1,5 +1,4 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
@@ -18,7 +17,6 @@ describe('PageTemplateSignedOutComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
         ClarityModule.forRoot()
       ],
       declarations: [
