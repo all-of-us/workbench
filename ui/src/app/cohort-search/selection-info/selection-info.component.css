@@ -23,6 +23,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 14px;
 }
 
 .tooltip-text {
@@ -32,4 +33,8 @@
 .text-size{
   font-size: 0.49rem;
   color: #4A4A4A;
+}
+
+.text-muted {
+  font-size: 14px;
 }
