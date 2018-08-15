@@ -1,13 +1,12 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS, List} from 'immutable';
-import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
 
-import {activeParameterList, CohortSearchActions, CohortSearchState, demoCriteriaChildren, loadDemoCriteriaRequestResults} from '../redux';
+import {activeParameterList, CohortSearchActions, CohortSearchState, demoCriteriaChildren} from '../redux';
 
 import {Attribute, CohortBuilderService, Operator} from 'generated';
 
