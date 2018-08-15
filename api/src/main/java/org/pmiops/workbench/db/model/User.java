@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -104,11 +105,12 @@ public class User {
     this.dataAccessLevel = dataAccessLevel;
   }
 
-  public DataAccessLevel enumGetDataAccessLevel() {
+  @Transient
+  public DataAccessLevel getDataAccessLevelEnum() {
     return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
-  public void enumSetDataAccessLevel(DataAccessLevel dataAccessLevel) {
+  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
     setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
@@ -158,11 +160,12 @@ public class User {
     this.freeTierBillingProjectStatus = freeTierBillingProjectStatus;
   }
 
-  public BillingProjectStatus enumGetFreeTierBillingProjectStatus() {
+  @Transient
+  public BillingProjectStatus getFreeTierBillingProjectStatusEnum() {
     return StorageEnums.billingProjectStatusFromStorage(getFreeTierBillingProjectStatus());
   }
 
-  public void enumSetFreeTierBillingProjectStatus(
+  public void setFreeTierBillingProjectStatusEnum(
       BillingProjectStatus freeTierBillingProjectStatus) {
     setFreeTierBillingProjectStatus(
         StorageEnums.billingProjectStatusToStorage(freeTierBillingProjectStatus));
@@ -189,7 +192,8 @@ public class User {
     this.authorities = newAuthorities;
   }
 
-  public Set<Authority> enumGetAuthorities() {
+  @Transient
+  public Set<Authority> getAuthoritiesEnum() {
     Set<Short> from = getAuthorities();
     if (from == null) {
       return null;
@@ -200,7 +204,7 @@ public class User {
         .collect(Collectors.toSet());
   }
 
-  public void enumSetAuthorities(Set<Authority> newAuthorities) {
+  public void setAuthoritiesEnum(Set<Authority> newAuthorities) {
     this.setAuthorities(
         newAuthorities
         .stream()
@@ -284,11 +288,12 @@ public class User {
     this.emailVerificationStatus = emailVerificationStatus;
   }
 
-  public EmailVerificationStatus enumGetEmailVerificationStatus() {
+  @Transient
+  public EmailVerificationStatus getEmailVerificationStatusEnum() {
     return StorageEnums.emailVerificationStatusFromStorage(getEmailVerificationStatus());
   }
 
-  public void enumSetEmailVerificationStatus(EmailVerificationStatus emailVerificationStatus) {
+  public void setEmailVerificationStatusEnum(EmailVerificationStatus emailVerificationStatus) {
     setEmailVerificationStatus(
         StorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }

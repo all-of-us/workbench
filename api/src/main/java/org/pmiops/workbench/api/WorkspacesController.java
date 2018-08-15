@@ -109,7 +109,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .etag(Etags.fromVersion(workspace.getVersion()))
         .lastModifiedTime(workspace.getLastModifiedTime().getTime())
         .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.enumGetDataAccessLevel())
+        .dataAccessLevel(workspace.getDataAccessLevelEnum())
         .name(workspace.getName())
         .id(workspaceId.getWorkspaceName())
         .namespace(workspaceId.getWorkspaceNamespace())
@@ -167,7 +167,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .etag(Etags.fromVersion(workspace.getVersion()))
         .lastModifiedTime(workspace.getLastModifiedTime().getTime())
         .creationTime(workspace.getCreationTime().getTime())
-        .dataAccessLevel(workspace.enumGetDataAccessLevel())
+        .dataAccessLevel(workspace.getDataAccessLevelEnum())
         .name(workspace.getName())
         .id(fcWorkspace.getName())
         .namespace(fcWorkspace.getNamespace())
@@ -196,7 +196,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           ResearchPurpose researchPurpose = createResearchPurpose(workspace);
           if (workspace.getContainsUnderservedPopulation()) {
             researchPurpose.setUnderservedPopulationDetails(
-                new ArrayList<>(workspace.enumGetUnderservedPopulations()));
+                new ArrayList<>(workspace.getUnderservedPopulationsEnum()));
           }
           Workspace result = constructListWorkspaceFromFCAndDb(workspace, fcWorkspace, researchPurpose);
           return result;
@@ -210,7 +210,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         public org.pmiops.workbench.db.model.Workspace apply(Workspace workspace) {
           org.pmiops.workbench.db.model.Workspace result = new org.pmiops.workbench.db.model.Workspace();
           if (workspace.getDataAccessLevel() != null) {
-            result.enumSetDataAccessLevel(workspace.getDataAccessLevel());
+            result.setDataAccessLevelEnum(workspace.getDataAccessLevel());
           }
           result.setDescription(workspace.getDescription());
           result.setName(workspace.getName());
@@ -234,7 +234,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
           UserRole result = new UserRole();
           result.setEmail(workspaceUserRole.getUser().getEmail());
-          result.setRole(workspaceUserRole.enumGetRole());
+          result.setRole(workspaceUserRole.getRoleEnum());
           return result;
         }
       };
@@ -286,7 +286,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setAdditionalNotes(purpose.getAdditionalNotes());
     dbWorkspace.setContainsUnderservedPopulation(purpose.getContainsUnderservedPopulation());
     if (purpose.getContainsUnderservedPopulation()) {
-      dbWorkspace.enumSetUnderservedPopulations(new HashSet<>(purpose.getUnderservedPopulationDetails()));
+      dbWorkspace.setUnderservedPopulationsEnum(new HashSet<>(purpose.getUnderservedPopulationDetails()));
     }
   }
 
@@ -377,7 +377,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
     WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.enumSetRole(WorkspaceAccessLevel.OWNER);
+    permissions.setRoleEnum(WorkspaceAccessLevel.OWNER);
     permissions.setWorkspace(dbWorkspace);
     permissions.setUser(user);
 
@@ -537,7 +537,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new ConflictException("Attempted to modify outdated workspace version");
     }
     if(workspace.getDataAccessLevel() != null &&
-        !dbWorkspace.enumGetDataAccessLevel().equals(workspace.getDataAccessLevel())){
+        !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())){
       throw new BadRequestException("Attempted to change data access level");
     }
     if (workspace.getDescription() != null) {
@@ -649,7 +649,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
 
     WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.enumSetRole(WorkspaceAccessLevel.OWNER);
+    permissions.setRoleEnum(WorkspaceAccessLevel.OWNER);
     permissions.setWorkspace(dbWorkspace);
     permissions.setUser(user);
 
@@ -687,7 +687,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             role.getEmail()));
       }
       newUserRole.setUser(newUser);
-      newUserRole.enumSetRole(role.getRole());
+      newUserRole.setRoleEnum(role.getRole());
       dbUserRoles.add(newUserRole);
     }
     // This automatically enforces owner role.
@@ -698,7 +698,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .stream()
         .map(r -> new UserRole()
             .email(r.getUser().getEmail())
-            .role(r.enumGetRole()))
+            .role(r.getRoleEnum()))
         // Reverse sorting arranges the role list in a logical order - owners first, then by email.
         .sorted(Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
         .collect(Collectors.toList());

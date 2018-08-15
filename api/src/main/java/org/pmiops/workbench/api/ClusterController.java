@@ -109,7 +109,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterListResponse> listClusters() {
     User user = this.userProvider.get();
-    if (user.enumGetFreeTierBillingProjectStatus() != BillingProjectStatus.READY) {
+    if (user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
           "User billing project is not yet initialized, cannot list/create clusters");
     }

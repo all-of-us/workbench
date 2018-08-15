@@ -70,7 +70,7 @@ public class SetAuthority {
         // JOIN authorities, not usually fetched.
         user = userDao.findUserWithAuthorities(user.getUserId());
 
-        Set<Authority> granted = user.enumGetAuthorities();
+        Set<Authority> granted = user.getAuthoritiesEnum();
         Set<Authority> updated = new HashSet(granted);
         if (remove) {
           updated.removeAll(authorities);
@@ -79,7 +79,7 @@ public class SetAuthority {
         }
         if (!updated.equals(granted)) {
           if (!dryRun) {
-            user.enumSetAuthorities(updated);
+            user.setAuthoritiesEnum(updated);
             userDao.save(user);
           }
           numChanged++;

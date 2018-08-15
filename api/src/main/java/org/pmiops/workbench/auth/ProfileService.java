@@ -66,7 +66,7 @@ public class ProfileService {
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
-    profile.setFreeTierBillingProjectStatus(user.enumGetFreeTierBillingProjectStatus());
+    profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatusEnum());
     profile.setEnabledInFireCloud(enabledInFireCloud);
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
@@ -93,11 +93,11 @@ public class ProfileService {
     if (user.getFirstSignInTime() != null) {
       profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
     }
-    if (user.enumGetDataAccessLevel() != null) {
-      profile.setDataAccessLevel(user.enumGetDataAccessLevel());
+    if (user.getDataAccessLevelEnum() != null) {
+      profile.setDataAccessLevel(user.getDataAccessLevelEnum());
     }
-    if (user.enumGetAuthorities() != null) {
-      profile.setAuthorities(new ArrayList<>(user.enumGetAuthorities()));
+    if (user.getAuthoritiesEnum() != null) {
+      profile.setAuthorities(new ArrayList<>(user.getAuthoritiesEnum()));
     }
     if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
       profile.setPageVisits(user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
@@ -106,7 +106,7 @@ public class ProfileService {
     profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
         .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
         .collect(Collectors.toList()));
-    profile.setEmailVerificationStatus(user.enumGetEmailVerificationStatus());
+    profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
     return profile;
   }
 }

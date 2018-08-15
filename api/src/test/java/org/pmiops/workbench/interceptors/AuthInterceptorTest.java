@@ -229,7 +229,7 @@ public class AuthInterceptorTest {
     User userWithAuthorities = new User();
     Set<Authority> required = new HashSet<>();
     required.add(Authority.REVIEW_RESEARCH_PURPOSE);
-    userWithAuthorities.enumSetAuthorities(required);
+    userWithAuthorities.setAuthoritiesEnum(required);
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithAuthorities);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isTrue();

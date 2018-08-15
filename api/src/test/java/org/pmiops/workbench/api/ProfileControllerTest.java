@@ -171,7 +171,7 @@ public class ProfileControllerTest {
     createUser();
     User user = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
-    assertThat(user.enumGetDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(user.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
 
   @Test
@@ -705,7 +705,7 @@ public class ProfileControllerTest {
     when(fireCloudService.isRequesterEnabledInFirecloud()).thenReturn(false);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
     user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    user.enumSetEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     when(userAuthenticationProvider.get()).thenReturn(
@@ -734,9 +734,9 @@ public class ProfileControllerTest {
     assertThat(user.getContactEmail()).isEqualTo(contactEmail);
     assertThat(user.getFamilyName()).isEqualTo(familyName);
     assertThat(user.getGivenName()).isEqualTo(givenName);
-    assertThat(user.enumGetDataAccessLevel()).isEqualTo(dataAccessLevel);
+    assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
     assertThat(user.getFirstSignInTime()).isEqualTo(firstSignInTime);
-    assertThat(user.enumGetDataAccessLevel()).isEqualTo(dataAccessLevel);
+    assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
   }
 
 }

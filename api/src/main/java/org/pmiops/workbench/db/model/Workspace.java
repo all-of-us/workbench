@@ -158,11 +158,12 @@ public class Workspace {
     this.dataAccessLevel = dataAccessLevel;
   }
 
-  public DataAccessLevel enumGetDataAccessLevel() {
+  @Transient
+  public DataAccessLevel getDataAccessLevelEnum() {
     return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
-  public void enumSetDataAccessLevel(DataAccessLevel dataAccessLevel) {
+  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
     setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
@@ -314,7 +315,8 @@ public class Workspace {
     this.underservedPopulationSet = newUnderservedPopulations;
   }
 
-  public Set<UnderservedPopulationEnum> enumGetUnderservedPopulations() {
+  @Transient
+  public Set<UnderservedPopulationEnum> getUnderservedPopulationsEnum() {
     Set<Short> from = getUnderservedPopulationsShort();
     if (from == null) {
       return null;
@@ -325,7 +327,7 @@ public class Workspace {
         .collect(Collectors.toSet());
   }
 
-  public void enumSetUnderservedPopulations(Set<UnderservedPopulationEnum> newUnderservedPopulations) {
+  public void setUnderservedPopulationsEnum(Set<UnderservedPopulationEnum> newUnderservedPopulations) {
     setUnderservedPopulationsShort(
         newUnderservedPopulations
         .stream()

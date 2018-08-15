@@ -242,18 +242,18 @@ public class ProfileController implements ProfileApiDelegate {
       if (user.getFreeTierBillingProjectName() == null) {
         String billingProjectName = createFirecloudUserAndBillingProject(user);
         user.setFreeTierBillingProjectName(billingProjectName);
-        user.enumSetFreeTierBillingProjectStatus(BillingProjectStatus.PENDING);
+        user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
       }
 
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       // If the user is logged in, then we know that they have followed the account creation instructions sent to
       // their initial contact email address.
-      user.enumSetEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
+      user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
       return saveUserWithConflictHandling(user);
     }
 
     // Free tier billing project setup is complete; nothing to do.
-    if (BillingProjectStatus.READY.equals(user.enumGetFreeTierBillingProjectStatus())) {
+    if (BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatusEnum())) {
       return user;
     }
 

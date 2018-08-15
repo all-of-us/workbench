@@ -60,7 +60,7 @@ public class BugReportController implements BugReportApiDelegate {
       // or all of these log files might be missing, or the cluster may not even exist, so ignore
       // failures here.
       if (Optional.ofNullable(bugReport.getIncludeNotebookLogs()).orElse(false) &&
-          BillingProjectStatus.READY.equals(user.enumGetFreeTierBillingProjectStatus())) {
+          BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatusEnum())) {
         for (String fileName : BugReportController.notebookLogFiles) {
           try {
             String logContent = jupyterApi.getRootContents(

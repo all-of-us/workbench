@@ -8,8 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
@@ -56,11 +56,12 @@ public class CdrVersion {
     this.dataAccessLevel = dataAccessLevel;
   }
 
-  public DataAccessLevel enumGetDataAccessLevel() {
+  @Transient
+  public DataAccessLevel getDataAccessLevelEnum() {
     return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
-  public void enumSetDataAccessLevel(DataAccessLevel dataAccessLevel) {
+  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
     setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 

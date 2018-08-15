@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 @Entity
@@ -58,11 +59,12 @@ public class WorkspaceUserRole {
     this.role = role;
   }
 
-  public WorkspaceAccessLevel enumGetRole() {
+  @Transient
+  public WorkspaceAccessLevel getRoleEnum() {
     return StorageEnums.workspaceAccessLevelFromStorage(this.role);
   }
 
-  public void enumSetRole(WorkspaceAccessLevel role) {
+  public void setRoleEnum(WorkspaceAccessLevel role) {
     this.role = StorageEnums.workspaceAccessLevelToStorage(role);
   }
 }
