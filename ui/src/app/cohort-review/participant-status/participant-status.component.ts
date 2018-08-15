@@ -28,7 +28,7 @@ const validStatuses = [
 export class ParticipantStatusComponent implements OnInit, OnDestroy {
 
     participantOption: any;
-    defaultOption: boolean = false;
+    defaultOption = false;
     test: any;
 
 
@@ -58,9 +58,9 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    if(this.statusControl.value){
+    if (this.statusControl.value) {
         this.defaultOption = true;
-        if (this.statusControl.value === "NEEDS_FURTHER_REVIEW") {
+        if (this.statusControl.value === 'NEEDS_FURTHER_REVIEW') {
           this.participantOption = 'NEEDS FURTHER REVIEW';
         } else {
             this.participantOption = this.statusControl.value;
@@ -89,7 +89,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
   participantOptionChange(status) {
     this.participantOption = status.display;
     this.statusControl.patchValue(status.value);
-    console.log(this.statusControl);
     this.defaultOption = true;
     this.updateStatus(status.value);
   }
