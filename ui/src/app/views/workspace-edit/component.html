@@ -297,6 +297,14 @@
     <button type="button" class="btn btn-primary" (click)="resetWorkspaceEditor()">Keep Editing</button>
   </div>
 </clr-modal>
+<clr-modal [(clrModalOpen)]="workspaceCreationConflictError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">You already have a workspace named {{workspace.name}}. Please choose another name.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="navigateBack()">Cancel Creation</button>
+    <button type="button" class="btn btn-primary" (click)="resetWorkspaceEditor()">Keep Editing</button>
+  </div>
+</clr-modal>
 <clr-modal [(clrModalOpen)]="workspaceUpdateError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not update workspace.</div>
