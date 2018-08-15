@@ -307,17 +307,17 @@ public class Workspace {
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "underserved_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "underserved_population")
-  public Set<Short> getUnderservedPopulationsShort() {
+  public Set<Short> getUnderservedPopulations() {
     return underservedPopulationSet;
   }
 
-  public void setUnderservedPopulationsShort(Set<Short> newUnderservedPopulations) {
+  public void setUnderservedPopulations(Set<Short> newUnderservedPopulations) {
     this.underservedPopulationSet = newUnderservedPopulations;
   }
 
   @Transient
   public Set<UnderservedPopulationEnum> getUnderservedPopulationsEnum() {
-    Set<Short> from = getUnderservedPopulationsShort();
+    Set<Short> from = getUnderservedPopulations();
     if (from == null) {
       return null;
     }
@@ -328,7 +328,7 @@ public class Workspace {
   }
 
   public void setUnderservedPopulationsEnum(Set<UnderservedPopulationEnum> newUnderservedPopulations) {
-    setUnderservedPopulationsShort(
+    setUnderservedPopulations(
         newUnderservedPopulations
         .stream()
         .map(StorageEnums::underservedPopulationToStorage)
