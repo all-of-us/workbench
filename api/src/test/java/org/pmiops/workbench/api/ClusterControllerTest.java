@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -131,7 +130,7 @@ public class ClusterControllerTest {
   private Provider<WorkbenchConfig> configProvider;
 
   private CdrVersion cdrVersion;
- // private FakeClock clock;
+  private FakeClock fakeClock;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
 
@@ -145,7 +144,7 @@ public class ClusterControllerTest {
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
 
-    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
+    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, fakeClock, fireCloudService, configProvider);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();

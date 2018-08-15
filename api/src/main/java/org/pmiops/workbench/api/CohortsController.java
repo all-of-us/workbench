@@ -123,8 +123,6 @@ public class CohortsController implements CohortsApiDelegate {
     this.userProvider = userProvider;
   }
 
-
-
   @Override
   public ResponseEntity<Cohort> createCohort(String workspaceNamespace, String workspaceId,
       Cohort cohort) {
@@ -174,7 +172,6 @@ public class CohortsController implements CohortsApiDelegate {
 
     org.pmiops.workbench.db.model.Cohort dbCohort = getDbCohort(workspaceNamespace, workspaceId,
         cohortId);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 

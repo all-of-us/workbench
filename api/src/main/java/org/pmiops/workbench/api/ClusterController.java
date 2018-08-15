@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Base64;
@@ -171,10 +170,13 @@ public class ClusterController implements ClusterApiDelegate {
     try {
       fcWorkspace = fireCloudService.getWorkspace(body.getWorkspaceNamespace(),
           body.getWorkspaceId()).getWorkspace();
-      long workspaceId = workspaceService.getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId()).getWorkspaceId();
+      long workspaceId =
+          workspaceService.getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
+          .getWorkspaceId();
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       body.getNotebookNames().forEach(
-          notebook -> userRecentResourceService.updateNotebookEntry(workspaceId, userProvider.get().getUserId(), notebook, now)
+          notebook ->
+              userRecentResourceService.updateNotebookEntry(workspaceId, userProvider.get().getUserId(), notebook, now)
       );
     } catch (NotFoundException e) {
       throw new NotFoundException(String.format("workspace %s/%s not found or not accessible",

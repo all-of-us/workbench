@@ -57,8 +57,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.verify;
