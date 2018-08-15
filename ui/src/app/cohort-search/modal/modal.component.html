@@ -2,7 +2,7 @@
   <div class="crit-modal-content">
     <div class="container title-margin">
       <div class="row">
-        <div class="col col-sm-9 padding-zero" [ngClass]="{'col col-lg-12': ctype === criteriaTypes.DEMO}">
+        <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === criteriaTypes.DEMO}">
           <div class="title-bar">
             <div class="btn-group btn-link">
               <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
@@ -74,7 +74,7 @@
           </div>
         </div>
 
-        <div class="col col-sm-3 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO">
+        <div class="col col-sm-4 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO">
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>
