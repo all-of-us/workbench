@@ -13,7 +13,6 @@ import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
