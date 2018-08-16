@@ -146,9 +146,9 @@ export const loadIngredients =
   ({type: LOAD_INGREDIENT_LIST, ingredients});
 
 export const loadAttributes =
-  (attributes: any
+  (node: any, attributes: any
   ): ActionTypes[typeof LOAD_ATTRIBUTE_LIST] =>
-  ({type: LOAD_ATTRIBUTE_LIST, attributes});
+  ({type: LOAD_ATTRIBUTE_LIST, node, attributes});
 
 export const attributeRequestError =
   (error?: any

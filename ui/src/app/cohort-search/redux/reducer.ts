@@ -29,6 +29,7 @@ import {
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
@@ -162,6 +163,12 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(['criteria', 'search', 'ingredients'], action.ingredients)
           .deleteIn(['criteria', 'search', 'autocomplete']);
+
+      case LOAD_ATTRIBUTE_LIST:
+        const node = action.node.set('attributes', action.attributes);
+        return state
+          .setIn(['wizard', 'item', 'attributes', 'node'], node)
+          .deleteIn(['wizard', 'item', 'attributes', 'loading']);
 
       case AUTOCOMPLETE_REQUEST_ERROR:
         return state
@@ -321,12 +328,11 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SHOW_ATTRIBUTES_PAGE:
         return state
-          .setIn(['wizard', 'item', 'attributes'], action.node)
           .setIn(['wizard', 'item', 'attributes', 'loading'], true)
           .deleteIn(['wizard', 'calculate', 'count']);
 
       case HIDE_ATTRIBUTES_PAGE:
-        return state.setIn(['wizard', 'item', 'attributes'], Map());
+        return state.setIn(['wizard', 'item', 'attributes', 'node'], Map());
 
         case REMOVE_ITEM: {
         state = state
