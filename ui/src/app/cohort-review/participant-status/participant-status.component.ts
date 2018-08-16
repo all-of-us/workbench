@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, OnChanges} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -25,7 +25,7 @@ const validStatuses = [
   templateUrl: './participant-status.component.html',
   styleUrls: ['./participant-status.component.css']
 })
-export class ParticipantStatusComponent implements OnInit, OnDestroy {
+export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges {
 
     participantOption: any;
     defaultOption = false;
@@ -57,16 +57,21 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
   ) {}
 
-  ngOnInit() {
+  ngOnChanges(){
+
     if (this.statusControl.value) {
         this.defaultOption = true;
         if (this.statusControl.value === 'NEEDS_FURTHER_REVIEW') {
-          this.participantOption = 'NEEDS FURTHER REVIEW';
+            this.participantOption = 'NEEDS FURTHER REVIEW';
         } else {
             this.participantOption = this.statusControl.value;
         }
+    }else{
+        this.defaultOption = false;
     }
+  }
 
+  ngOnInit() {
     this.subscription = this.statusControl.valueChanges
       .filter(status => validStatuses.includes(status))
       .switchMap(status => this.updateStatus(status))
