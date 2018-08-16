@@ -82,11 +82,11 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   private void validateAttributes(SearchParameter parameter) {
     List<Attribute> attrs = parameter.getAttributes();
-    Predicate<Attribute> any = nameIsAny().and(operatorAny());
+    Predicate<Attribute> any = nameIsAny();
     Predicate<Attribute> numerical = nameIsNumerical().and(operatorWithCorrectOperands());
-    Predicate<Attribute> categorical = nameIsCategorical().and(inWithCorrectOperands()).or(operatorAny());
+    Predicate<Attribute> categorical = nameIsCategorical().and(inWithCorrectOperands()).or(nameIsAny());
     Predicate<Attribute> both = nameIsBoth().and(operatorWithCorrectOperands());
-    boolean textAttrs =
+    boolean anyAttrs =
       attrs.stream().filter(any::test).collect(Collectors.toList()).size() != 1;
     boolean numericalAttrs =
       attrs.stream().filter(numerical::test).collect(Collectors.toList()).size() != 1;
@@ -94,7 +94,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       attrs.stream().filter(categorical::test).collect(Collectors.toList()).size() != 1;
     boolean bothAttrs =
       attrs.stream().filter(both::test).collect(Collectors.toList()).size() == 0;
-    if (bothAttrs && textAttrs && numericalAttrs && categoricalAttrs) {
+    if (bothAttrs && anyAttrs && numericalAttrs && categoricalAttrs) {
       throw new BadRequestException("Please provide valid search attributes" +
         "(operator, operands) for Measurements.");
     }
@@ -109,15 +109,11 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private static Predicate<Attribute> nameIsAny() {
-    return attribute -> ANY.equals(attribute.getName());
+    return attribute -> isNameAny(attribute);
   }
 
   private static Predicate<Attribute> nameIsBoth() {
     return attribute -> BOTH.equals(attribute.getName());
-  }
-
-  private static Predicate<Attribute> operatorAny() {
-    return attribute -> (isNameAny(attribute));
   }
 
   private static Predicate<Attribute> inWithCorrectOperands() {
