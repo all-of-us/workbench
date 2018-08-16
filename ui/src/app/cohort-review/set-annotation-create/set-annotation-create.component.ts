@@ -82,8 +82,16 @@ export class SetAnnotationCreateComponent {
   }
 
   cancel() {
+
     this.onFinish.emit(true);
   }
+    get open() {
+        return this.state.annotationManagerOpen.getValue();
+    }
+
+    set open(value: boolean) {
+        this.state.annotationManagerOpen.next(value);
+    }
 
   addEnumValue() {
     const val = this.addValue.value;

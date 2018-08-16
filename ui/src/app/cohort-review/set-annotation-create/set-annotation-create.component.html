@@ -1,18 +1,20 @@
 <form [formGroup]="form" ngSubmit="submit()" class="compact">
-  <section class="form-block">
-    <label>Create a new Cohort-wide Annotation</label>
+  <section class="form-block annotation-input-container">
+    <!--<label>Create a Cohort-wide Annotation</label>-->
 
-    <div class="form-group">
-      <label for="name" class="required">Annotation Name</label>
+    <div class="">
+      <!--<label for="name" class="required">2 Annotation Name</label>-->
+      <!--[class.invalid]="name.invalid && (name.dirty || name.touched)"-->
       <label
         aria-haspopup="true"
         role="tooltip"
-        class="tooltip tooltip-validation tooltip-sm tooltip-right"
-        [class.invalid]="name.invalid && (name.dirty || name.touched)">
+        class="tooltip tooltip-validation tooltip-sm tooltip-right">
         <input id="name"
+               class="annotation-name-input"
           name="name"
           formControlName="name"
           type="text"
+               placeholder="ANNOTATION NAME"
           autofocus >
         <span class="tooltip-content">
           A Name is required
@@ -20,15 +22,33 @@
       </label>
     </div>
 
-    <div class="form-group">
-      <label for="kind" class="required">Annotation Data Type</label>
-      <div class="select">
-        <select id="kind" name="kind" formControlName="kind">
-          <option *ngFor="let dt of datatypes" [value]="dt.value">
-              {{ dt.displayName }}
-          </option>
-        </select>
-      </div>
+    <div class="annotation-dropdown">
+      <clr-dropdown >
+        <button type="button" class="btn btn-outline" clrDropdownTrigger>
+          <!--<span *ngIf = "dropdownOption.selected[i] !== ''; else elseBlock">{{dropdownOption.selected[i]}}</span>-->
+          <!--<ng-template #elseBlock>-->
+            <span class="annotation-data-type">ANNOTATION DATA TYPE</span>
+          <!--</ng-template>-->
+          <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
+          <button
+                  *ngFor="let dt of datatypes"
+                  [value]="dt.value"
+
+                  class="dropdown-item"
+                  type="button"
+                  clrDropdownItem>{{ dt.displayName }}</button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+      <!--<label for="kind" class="required">3 Annotation Data Type</label>-->
+      <!--<div class="select">-->
+        <!--<select id="kind" name="kind" formControlName="kind">-->
+          <!--<option *ngFor="let dt of datatypes" [value]="dt.value">-->
+              <!--{{ dt.displayName }}-->
+          <!--</option>-->
+        <!--</select>-->
+      <!--</div>-->
     </div>
   </section>
 
@@ -61,19 +81,23 @@
       </ul>
     </section>
   </ng-container>
+  <div class="footer-button">
+    <button
+            type="button"
+            class="btn btn-link cancel"
+            (click)="open = false">
+      Cancel
+    </button>
+    <!--[clrLoading]="posting"-->
+    <!--[disabled]="formIsInvalid"-->
+    <button
+            type="button"
+            class="btn btn-primary"
+            (click)="create()"
+            >
+      Create
+    </button>
 
-  <button
-    type="button"
-    class="btn btn-primary-outline"
-    (click)="create()"
-    [clrLoading]="posting"
-    [disabled]="formIsInvalid">
-    Create
-  </button>
-  <button
-    type="button"
-    class="btn btn-danger-outline"
-    (click)="cancel()">
-    Cancel
-  </button>
+  </div>
+
 </form>
