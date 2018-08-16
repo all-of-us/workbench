@@ -135,7 +135,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     Cohort cohort = new Cohort();
