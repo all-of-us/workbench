@@ -25,6 +25,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     preview = Map();
     subscription: Subscription;
     negativeAlert = false;
+    labels = [];
 
     constructor(private actions: CohortSearchActions) { }
 
@@ -44,8 +45,10 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
                 this.attrs.map(attr => {
                     attr.operator = '';
                     attr.operands = [null];
+                    this.labels.push(attr.name);
                 });
             } else {
+                this.labels = [''];
                 this.attrs = [{
                     name: '',
                     operator: '',
@@ -92,8 +95,9 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
             name += (attr.name !== '' ? attr.name + ' ' : '');
             switch (values['operator' + i]) {
                 case 'ANY':
-                    attr.operator = Operator.ANY;
+                    attr.operator = 'ANY';
                     attr.operands = [];
+                    attr.name = 'ANY';
                     name += 'Any';
                     break;
                 case 'BETWEEN':
@@ -118,7 +122,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
                     break;
             }
         });
-        name += (this.attrs[0].operator !== Operator.ANY
+        name += (this.attrs[0].name !== 'ANY'
             ? this.units[this.node.get('subtype')]
             : '') + ')';
         return this.node

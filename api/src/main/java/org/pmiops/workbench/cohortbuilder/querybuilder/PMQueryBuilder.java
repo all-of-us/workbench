@@ -3,7 +3,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
@@ -78,16 +77,16 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
         validateAttributes(parameter);
         for (Attribute attribute : parameter.getAttributes()) {
-          boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
           String namedParameterConceptId = CONCEPT_ID + getUniqueNamedParameterPostfix();
           String namedParameter1 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
           String namedParameter2 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
-          if (attribute.getOperator().equals(Operator.ANY)) {
+          if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             tempQueryParts.add(tempSql
               .replace("${conceptId}", "@" + namedParameterConceptId));
             queryParams.put(namedParameterConceptId, QueryParameterValue.int64(attribute.getConceptId()));
           } else {
+            boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE + VALUE_AS_NUMBER : VALUE_AS_NUMBER_SQL_TEMPLATE;
             tempQueryParts.add(tempSql
               .replace("${conceptId}", "@" + namedParameterConceptId)
@@ -142,7 +141,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
         attrs.stream().filter(systolic::test).collect(Collectors.toList()).size() != 1;
       boolean diastolicAttrs =
         attrs.stream().filter(diastolic::test).collect(Collectors.toList()).size() != 1;
-      if (systolicAttrs || diastolicAttrs) {
+      boolean anyAttrs =
+        attrs.stream().filter(nameIsAny()::test).collect(Collectors.toList()).size() != 2;
+      if ((systolicAttrs || diastolicAttrs) && anyAttrs) {
         throw new BadRequestException("Please provide valid search attributes" +
           "(name, operator, operands and conceptId) for Systolic and Diastolic.");
       }
@@ -176,8 +177,10 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     return attribute -> attribute.getConceptId() != null;
   }
 
+  private static Predicate<Attribute> nameIsAny() { return attribute -> isNameAny(attribute); }
+
   private static Predicate<Attribute> operatorWithCorrectOperands() {
-    return attribute -> isOperatorAny(attribute)
+    return attribute -> isNameAny(attribute)
       || isOperatorBetween(attribute)
       || isOperatorAnyEquals(attribute)
       || isOperatorIn(attribute);

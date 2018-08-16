@@ -14,7 +14,7 @@
   <section class="form-block">
     <div *ngFor="let attr of attrs; let i = index">
       <div class="form-group">
-        <label>{{attr.name}}</label>
+        <label>{{labels[i]}}</label>
         <div class="select">
           <select [name]="'operator'+i" [(ngModel)]="attr.operator" (ngModelChange)="selectChange(i, $event)" required>
             <option value=""></option>

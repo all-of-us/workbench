@@ -21,9 +21,8 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   public static final String NUMERICAL = "NUM";
   public static final String CATEGORICAL = "CAT";
-  public static final String TEXT = "TEXT";
   public static final String BOTH = "BOTH";
-  private static final String LAB = "LAB";
+  public static final String LAB = "LAB";
 
   private static final String UNION_ALL = " union all\n";
   private static final String AND = " and ";
@@ -49,7 +48,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", parameter.getConceptId().toString());
       List<String> tempQueryParts = new ArrayList<String>();
       for (Attribute attribute : parameter.getAttributes()) {
-        if (attribute.getOperator().equals(Operator.ANY)) {
+        if (attribute.getName().equals(ANY)) {
           queryParts.add(baseSql);
         } else {
           if (attribute.getName().equals(NUMERICAL)) {
@@ -83,12 +82,12 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   private void validateAttributes(SearchParameter parameter) {
     List<Attribute> attrs = parameter.getAttributes();
-    Predicate<Attribute> text = nameIsText().and(operatorAny());
+    Predicate<Attribute> any = nameIsAny().and(operatorAny());
     Predicate<Attribute> numerical = nameIsNumerical().and(operatorWithCorrectOperands());
     Predicate<Attribute> categorical = nameIsCategorical().and(inWithCorrectOperands()).or(operatorAny());
     Predicate<Attribute> both = nameIsBoth().and(operatorWithCorrectOperands());
     boolean textAttrs =
-      attrs.stream().filter(text::test).collect(Collectors.toList()).size() != 1;
+      attrs.stream().filter(any::test).collect(Collectors.toList()).size() != 1;
     boolean numericalAttrs =
       attrs.stream().filter(numerical::test).collect(Collectors.toList()).size() != 1;
     boolean categoricalAttrs =
@@ -109,8 +108,8 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     return attribute -> CATEGORICAL.equals(attribute.getName());
   }
 
-  private static Predicate<Attribute> nameIsText() {
-    return attribute -> TEXT.equals(attribute.getName());
+  private static Predicate<Attribute> nameIsAny() {
+    return attribute -> ANY.equals(attribute.getName());
   }
 
   private static Predicate<Attribute> nameIsBoth() {
@@ -118,7 +117,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private static Predicate<Attribute> operatorAny() {
-    return attribute -> (isOperatorAny(attribute));
+    return attribute -> (isNameAny(attribute));
   }
 
   private static Predicate<Attribute> inWithCorrectOperands() {
@@ -126,7 +125,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private static Predicate<Attribute> operatorWithCorrectOperands() {
-    return attribute -> isOperatorAny(attribute)
+    return attribute -> isNameAny(attribute)
       || isOperatorBetween(attribute)
       || isOperatorAnyEquals(attribute)
       || isOperatorIn(attribute);
