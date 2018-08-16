@@ -27,6 +27,12 @@ input {
     padding: 0;
     min-width: auto;
 }
+
+.no-border{
+    border: none!important;
+    background: none!important;
+}
+
 .dropdown {
     width: 100%;
     margin-top: 0;

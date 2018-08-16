@@ -1,110 +1,112 @@
 <div class="crit-modal-container" [class.show]="open">
   <div class="crit-modal-content">
+    <div class="container title-margin">
+      <div class="row">
+        <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === criteriaTypes.DEMO}">
+          <div class="title-bar">
+            <div class="btn-group btn-link">
+              <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
 
-    <div class="title-bar">
-      <div class="btn-group btn-link">
-        <div class="title">{{ title }}</div>
-        <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
-          <div class="vbar"></div>
-          <button type="button" class="btn"
-            [class.active]="mode === 'tree'"
-            (click)="mode = 'tree'">
-            Criteria Tree
-          </button>
-          <button type="button" class="btn"
-            *ngIf="ctype !== criteriaTypes.PM"
-            [class.active]="mode === 'modifiers'"
-            (click)="mode = 'modifiers'">
-            Modifiers
-          </button>
-          <!--
-          <button type="button" class="btn"
-            [class.active]="mode === 'summary'"
-            (click)="mode = 'summary'">
-            Summary
-          </button>
-          -->
-        </ng-container>
-      </div>
-      <div *ngIf="ctype === domainType[domainType.DRUG]">
-        <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank">
-          Explore
-        </a>
-        drugs by brand names outside of All of Us
-      </div>
-      <button
-        (click)="cancel()"
-        class="btn btn-link btn-icon">
-        <clr-icon class="close-button" size="24" shape="close"></clr-icon>
-      </button>
-    </div>
+                <button *ngIf="title !=='Physical Measurements' " type="button" class="btn tab"
+                        [class.active]="mode === 'tree'"
+                        (click)="mode = 'tree'">
+                  {{ title }}
+                </button>
+                <ng-container *ngIf="title ==='Physical Measurements' ">
+                  <button  *ngIf="attributesNode.size === 0"  type="button" class="btn tab"
+                          [class.active]="mode === 'tree'"
+                          (click)="mode = 'tree'">
+                    {{ title }}
+                  </button>
+                  <button  *ngIf="attributesNode.size > 0" type="button" class="btn tab-node"
+                           (click)="mode = 'tree'">
+                   {{attributesNode.get('name')}}
+                  </button>
+                </ng-container>
 
-    <!-- Wrapping the content in an ngIf makes sure that the various forms
-      included in the content are destroyed and recreated each time the modal
-      is opened / closed; i.e. modal state doesn't "leak" from one "instance"
-      to another
-    -->
-    <div class="content" *ngIf="open">
-      <ng-container [ngSwitch]="ctype">
-        <crit-demographics *ngSwitchCase="criteriaTypes.DEMO"
-          (cancel)="cancel()"
-          (finish)="finish()">
-        </crit-demographics>
 
-        <ng-container *ngSwitchDefault>
-          <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes'">
-            <!-- Tree Page -->
-            <div class="panel-left" [class.show]="mode === 'tree'">
-              <crit-tree [node]="rootNode"></crit-tree>
+                <div *ngIf="ctype !== criteriaTypes.PM" class="vbar"></div>
+                <button type="button" class="btn tab"
+                        *ngIf="ctype !== criteriaTypes.PM"
+                        [class.active]="mode === 'modifiers'"
+                        [disabled]="noSelection"
+                        (click)="mode = 'modifiers'">
+                  Modifiers
+                </button>
+              </ng-container>
             </div>
-            <!-- Modifiers Page -->
-            <div class="panel-left" [class.show]="mode === 'modifiers'">
-              <crit-modifier-page></crit-modifier-page>
+            <div *ngIf="ctype === domainType[domainType.DRUG]">
+              <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank">
+                Explore
+              </a>
+              drugs by brand names outside of AoU
             </div>
-            <!-- Attributes Page -->
-            <div class="panel-left" [class.show]="mode === 'attributes'">
-              <crit-attributes-page [node]="attributesNode"></crit-attributes-page>
-            </div>
-            <div class="panel-right selected">
-              <h5 class="selection-title">{{ selectionTitle }}</h5>
-              <crit-selection-info
-                *ngFor="let parameter of (selection$ | async); let i = index"
-                [index]="i"
-                [parameter]="parameter">
-              </crit-selection-info>
-            </div>
+            <button *ngIf="attributesNode.size > 0"
+                    (click)="back()"
+                    class="btn btn-link btn-icon">
+              <clr-icon size="24" shape="close"></clr-icon>
+            </button>
+          </div>
+          <div class="content" *ngIf="open">
+            <ng-container [ngSwitch]="ctype">
+              <crit-demographics *ngSwitchCase="criteriaTypes.DEMO"
+                                 (cancel)="cancel()"
+                                 (finish)="finish()">
+              </crit-demographics>
+
+              <ng-container *ngSwitchDefault>
+                <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes'">
+                  <!-- Tree Page -->
+                  <div class="panel-left" [class.show]="mode === 'tree'">
+                    <crit-tree [node]="rootNode"></crit-tree>
+                  </div>
+                  <!-- Modifiers Page -->
+                  <div class="panel-left" [class.show]="mode === 'modifiers'">
+                    <crit-modifier-page></crit-modifier-page>
+                  </div>
+                  <!-- Attributes Page -->
+                  <div class="panel-left" [class.show]="mode === 'attributes'">
+                    <crit-attributes-page [node]="attributesNode"></crit-attributes-page>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="col col-sm-4 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO">
+          <div class="content" *ngIf="open">
+            <ng-container [ngSwitch]="ctype">
+              <ng-container *ngSwitchDefault>
+                <div class="panel-right-container">
+                  <h5 class="selection-title">{{ selectionTitle }}</h5>
+                  <div class="panel-right selected">
+                    <crit-selection-info
+                            *ngFor="let parameter of (selection$ | async); let i = index"
+                            [index]="i"
+                            [parameter]="parameter">
+                    </crit-selection-info>
+                  </div>
+                  <div *ngIf="ctype !== criteriaTypes.DEMO" class="footer">
+                    <button type="button"
+                            (click)="cancel()"
+                            class="btn btn-link">
+                      Cancel
+                    </button>
+                    <button type="button"
+                            [disabled]="noSelection"
+                            (click)="finish()"
+                            class="btn btn-primary">
+                      Finish
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
           </div>
 
-          <!-- Summary Page
-          <div id="summary" class="panel" [class.show]="mode === 'summary'">
-            Summary
-          </div>
-          -->
-        </ng-container>
-
-      </ng-container>
-    </div>
-
-    <div *ngIf="ctype !== criteriaTypes.DEMO" class="footer">
-      <button type="button"
-        (click)="cancel()"
-        class="btn btn-link">
-        Cancel
-      </button>
-      <button *ngIf="hasNextPage"
-        [disabled]="noSelection"
-        (click)="nextPage()"
-        type="button"
-        class="btn btn-secondary"
-        >
-        Next
-      </button>
-      <button type="button"
-        [disabled]="noSelection"
-        (click)="finish()"
-        class="btn btn-primary">
-        Finish
-      </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

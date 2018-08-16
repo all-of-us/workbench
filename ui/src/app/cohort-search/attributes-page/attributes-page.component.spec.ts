@@ -72,11 +72,11 @@ describe('AttributesPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the form with title', () => {
-    expect(fixture.debugElement.query(By.css('form'))).toBeTruthy();
-
-    const title = fixture.debugElement.query(By.css('div.title')).nativeElement;
-    expect(title.textContent.replace(/\s+/g, ' ').trim()).toEqual('Height Detail');
-  });
+  // it('should display the form with title', () => {
+  //   expect(fixture.debugElement.query(By.css('form'))).toBeTruthy();
+  //
+  //   const title = fixture.debugElement.query(By.css('div.title')).nativeElement;
+  //   expect(title.textContent.replace(/\s+/g, ' ').trim()).toEqual('Height Detail');
+  // });
 
 });
