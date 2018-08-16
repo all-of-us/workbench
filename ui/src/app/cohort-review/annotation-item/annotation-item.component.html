@@ -1,5 +1,5 @@
 <div class="wrapper">
-  <ng-container [ngSwitch]="annotation.definition.annotationType">
+  <div [ngSwitch]="annotation.definition.annotationType">
 
     <!-- STRING, DATE, INTEGER all rely on the blur event to update the annotation -->
     <div *ngSwitchCase="kinds.STRING">
@@ -31,12 +31,19 @@
           <em>{{ datatypeDisplay | titlecase }}</em>
         </span>
       </label>
-      <input
-        (blur)="handleInput()"
-        type="date"
-        [name]="machineName"
-        [id]="machineName"
-        [formControl]="control">
+      <!--<input type="date" id="myDate" name="myDate" [(ngModel)]="myDate" [formControl]="control"  clrDate>-->
+      <div (click)=" dateChange(myDate)" >
+        <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
+               (ngModelChange)="myDate = $event" [name]="machineName" [id]="machineName" [formControl]="control"  type="date" clrDate>
+      </div>
+
+      <!--<input-->
+              <!--[ngModel]="myDate | date:'yyyy-MM-dd'"-->
+              <!--(ngModelChange)="myDate = $event"-->
+        <!--(blur)="dateChange($event)"-->
+        <!--type="date"-->
+        <!--[id]="machineName"-->
+        <!--[formControl]="control"  clrDate>-->
     </div>
 
     <div *ngSwitchCase="kinds.INTEGER">
@@ -59,41 +66,41 @@
       <label [for]="machineName" class="flex-container">
         <span class="flex-content-main">
           {{ annotation.definition.columnName }}
-          <em>{{ datatypeDisplay | titlecase }}</em>
+          <em>{{ datatypeDisplay | titlecase }}</em>s
         </span>
       </label>
       <!--<h1>check</h1>-->
-      <!--<div>-->
-        <!--<clr-dropdown  class="participant-dropdown">-->
-          <!--<button type="button" class="btn btn-outline" clrDropdownTrigger>-->
-            <!--<span *ngIf = "defaultOption; else elseBlock">{{participantOption}}</span>-->
-            <!--<ng-template #elseBlock>-->
-              <!--<span>Select Operator</span>-->
-            <!--</ng-template>-->
-            <!--<clr-icon shape="caret down"></clr-icon>-->
-          <!--</button>-->
-          <!--<clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>-->
-            <!--<button-->
-                    <!--*ngFor="let value of annotation.definition.enumValues"-->
-                    <!--(click)="participantOptionChange(status)"-->
-                    <!--class="dropdown-item"-->
-                    <!--type="button"-->
-                    <!--clrDropdownItem>{{ value | titlecase }}</button>-->
-          <!--</clr-dropdown-menu>-->
-        <!--</clr-dropdown>-->
-      <!--</div>-->
-      <div class="select">
-        <select
-          (change)="handleInput()"
-          [name]="machineName"
-          [id]="machineName"
-          [formControl]="control">
-          <option value=''><em>No Selection</em></option>
-          <option *ngFor="let value of annotation.definition.enumValues" [value]="value">
-            {{ value | titlecase }}
-          </option>
-        </select>
+      <div>
+        <clr-dropdown  class="participant-dropdown">
+          <button type="button" class="btn btn-outline" clrDropdownTrigger>
+            <span *ngIf = "defaultAnnotation; else elseBlock">{{annotationOption}}</span>
+            <ng-template #elseBlock>
+              <span>Select Operator</span>
+            </ng-template>
+            <clr-icon shape="caret down"></clr-icon>
+          </button>
+          <clr-dropdown-menu   clrPosition="bottom-left" *clrIfOpen>
+            <button [name]="machineName" [id]="machineName"
+                    *ngFor="let value of annotation.definition.enumValues"
+                    (click)="annotationOptionChange(value)"
+                    class="dropdown-item"
+                    type="button"
+                    clrDropdownItem>{{ value | titlecase }}</button>
+          </clr-dropdown-menu>
+        </clr-dropdown>
       </div>
+      <!--<div class="select">-->
+        <!--<select-->
+          <!--(change)="handleInput()"-->
+          <!--[name]="machineName"-->
+          <!--[id]="machineName"-->
+          <!--[formControl]="control">-->
+          <!--<option value=''><em>No Selection</em></option>-->
+          <!--<option *ngFor="let value of annotation.definition.enumValues" [value]="value">-->
+            <!--{{ value | titlecase }}-->
+          <!--</option>-->
+        <!--</select>-->
+      <!--</div>-->
     </div>
 
     <div *ngSwitchCase="kinds.BOOLEAN">
@@ -110,6 +117,4 @@
         </label>
       </div>
     </div>
-
-  </ng-container>
 </div>
