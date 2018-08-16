@@ -130,9 +130,10 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   }
 
   private notebookUrl(cluster: Cluster, nbName: string): string {
-    return environment.leoApiUrl + '/notebooks/'
-      + cluster.clusterNamespace + '/'
-      + cluster.clusterName + '/notebooks/' + nbName;
+    return encodeURI(
+      environment.leoApiUrl + '/notebooks/'
+        + cluster.clusterNamespace + '/'
+        + cluster.clusterName + '/notebooks/' + nbName);
   }
 
   private initializeNotebookCookies(c: Cluster): Observable<Cluster> {

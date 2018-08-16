@@ -1242,6 +1242,28 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testNotebookFileListOmitsExtraDirectories() throws Exception {
+    when(fireCloudService.getWorkspace("project", "workspace")).thenReturn(
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse()
+        .workspace(
+            new org.pmiops.workbench.firecloud.model.Workspace()
+            .bucketName("bucket")));
+    Blob mockBlob1 = mock(Blob.class);
+    Blob mockBlob2 = mock(Blob.class);
+    when(mockBlob1.getName()).thenReturn("notebooks/extra/nope.ipynb");
+    when(mockBlob2.getName()).thenReturn("notebooks/foo.ipynb");
+    when(cloudStorageService.getBlobList("bucket", "notebooks")).thenReturn(
+        ImmutableList.of(mockBlob1, mockBlob2));
+
+    List<String> gotNames = workspacesController
+        .getNoteBookList("project", "workspace").getBody()
+        .stream()
+        .map(details -> details.getName())
+        .collect(Collectors.toList());
+    assertEquals(gotNames, ImmutableList.of("foo.ipynb"));
+  }
+
+  @Test
   public void testNotebookFileListNotFound() throws Exception {
     when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
     try {
