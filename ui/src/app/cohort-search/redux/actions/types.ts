@@ -157,6 +157,7 @@ export interface ActionTypes {
   };
   LOAD_ATTRIBUTE_LIST: {
     type: typeof LOAD_ATTRIBUTE_LIST;
+    node: any;
     attributes: any;
   };
   CRITERIA_REQUEST_ERROR: {

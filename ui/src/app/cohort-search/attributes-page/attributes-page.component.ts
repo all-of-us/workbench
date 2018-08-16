@@ -9,7 +9,7 @@ import {
     attributesPreviewStatus,
   CohortSearchActions,
   isAttributeLoading,
-  loadAttributes,
+  nodeAttributes,
 } from '../redux';
 
 import {Operator} from 'generated';
@@ -24,8 +24,8 @@ import {CRITERIA_SUBTYPES, PM_UNITS} from '../constant';
 export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     @select(attributesPreviewStatus) preview$;
     @select(isAttributeLoading) loading$;
-    @select(loadAttributes) attributes$;
-    @Input() node: any;
+    @select(nodeAttributes) node$;
+    node: Map<any, any>;
     units = PM_UNITS;
     attrs: any;
     attributes: any;
@@ -53,36 +53,32 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     ngOnInit() {
         this.subscription = this.preview$.subscribe(prev => this.preview = prev);
         this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
-        this.subscription.add(
-          this.attributes$.subscribe(attributes => this.attributes = attributes)
-        );
+        this.subscription.add(this.node$.subscribe(node => this.node = node));
     }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.node.currentValue.size) {
-      const currentNode = changes.node.currentValue;
-      if (currentNode.get('subtype').substring(0, 2) === 'BP') {
-        this.attrs = currentNode.get('attributes');
-        this.attrs.map(attr => {
-          attr.operator = '';
-          attr.operands = [null];
-          this.labels.push(attr.name);
-        });
-      } else {
-        this.labels = [''];
-        this.attrs = [{
-          name: '',
-          operator: '',
-          operands: [null],
-          conceptId: currentNode.get('conceptId', null)
-        }];
-      }
+    ngOnChanges(changes: SimpleChanges) {
+        // if (changes.node.currentValue.size) {
+        //     const currentNode = changes.node.currentValue;
+        //     if (currentNode.get('subtype') === CRITERIA_SUBTYPES.BP) {
+        //         this.attrs = currentNode.get('predefinedAttributes').toJS();
+        //         this.attrs.map(attr => {
+        //             attr.operator = '';
+        //             attr.operands = [null];
+        //         });
+        //     } else {
+        //         this.attrs = [{
+        //             name: '',
+        //             operator: '',
+        //             operands: [null],
+        //             conceptId: currentNode.get('conceptId', null)
+        //         }];
+        //     }
+        // }
     }
-  }
 
   selectChange(index: number, option: any) {
     this.attrs[index].operator = option.value;
