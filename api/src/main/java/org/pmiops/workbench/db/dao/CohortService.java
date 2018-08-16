@@ -34,7 +34,7 @@ public class CohortService {
       cr.setMatchedParticipantCount(fromReview.getMatchedParticipantCount());
       cr.setReviewSize(fromReview.getReviewSize());
       cr.setReviewedCount(fromReview.getReviewedCount());
-      cr.setReviewStatus(fromReview.getReviewStatus());
+      cr.setReviewStatusEnum(fromReview.getReviewStatusEnum());
       cr = cohortReviewDao.save(cr);
       participantCohortStatusDao.bulkCopyByCohortReview(
         fromReview.getCohortReviewId(), cr.getCohortReviewId());

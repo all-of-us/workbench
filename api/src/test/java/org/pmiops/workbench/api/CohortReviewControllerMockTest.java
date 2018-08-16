@@ -327,7 +327,7 @@ public class CohortReviewControllerMockTest {
     }
 
     private void assertCreateParticipantCohortAnnotation(ParticipantCohortAnnotation request, AnnotationType annotationType) throws Exception {
-        CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition().annotationType(annotationType);
+        CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition().annotationTypeEnum(annotationType);
         if (request.getAnnotationValueEnum() != null) {
             CohortAnnotationEnumValue cohortAnnotationEnumValue = new CohortAnnotationEnumValue().name(request.getAnnotationValueEnum());
             cohortAnnotationDefinition.setEnumValues(new TreeSet(Arrays.asList(cohortAnnotationEnumValue)));
@@ -378,7 +378,7 @@ public class CohortReviewControllerMockTest {
 
         return new ParticipantCohortStatus()
                 .participantKey(key)
-                .status(cohortStatus)
+                .statusEnum(cohortStatus)
                 .birthDate(dob)
                 .ethnicityConceptId(1L)
                 .genderConceptId(1L)
@@ -393,7 +393,7 @@ public class CohortReviewControllerMockTest {
                 .cdrVersionId(cdrVersionId)
                 .matchedParticipantCount(1000)
                 .creationTime(new Timestamp(System.currentTimeMillis()))
-                .reviewStatus(reviewStatus);
+                .reviewStatusEnum(reviewStatus);
     }
 
     private Cohort createCohort(long cohortId, long workspaceId, String definition) {
