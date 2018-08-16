@@ -39,6 +39,7 @@ public abstract class AbstractQueryBuilder {
   public static final String AGE_AT_EVENT_PREFIX = "age";
   public static final String EVENT_DATE_PREFIX = "event";
   public static final String OCCURRENCES_PREFIX = "occ";
+  public static final String ANY = "ANY";
 
   public static final String WHERE = " where ";
   public static final String AND = " and ";
@@ -76,10 +77,9 @@ public abstract class AbstractQueryBuilder {
       modifierSql;
   }
 
-  protected static boolean isOperatorAny(Attribute attribute) {
-    return attribute.getOperator() != null
-      && attribute.getOperator().equals(Operator.ANY)
-      && attribute.getOperands().size() == 0;
+  protected static boolean isNameAny(Attribute attribute) {
+    return attribute.getName() != null
+      && attribute.getName().equals(ANY);
   }
 
   protected static boolean isOperatorBetween(Attribute attribute) {

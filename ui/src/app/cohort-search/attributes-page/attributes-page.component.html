@@ -1,3 +1,6 @@
+<div class="title">
+  {{node.get('name','')}}
+</div>
 <div *ngIf="negativeAlert" class="alert alert-danger alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
@@ -10,7 +13,7 @@
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
     <div *ngFor="let attr of attrs; let i = index">
-      <div class="attr-name-color">{{attr.name}}</div>
+      <div class="attr-name-color">{{labels[i]}}</div>
         <div class="container">
           <div class="dropdown-width">
             <clr-dropdown>
