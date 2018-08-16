@@ -12,7 +12,7 @@ import {
 import { DomainType } from 'generated';
 import {Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_TYPES} from '../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
 
 /*
@@ -24,7 +24,7 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  */
 function needsAttributes(node: any) {
   // will change soon to check for attributes property instead of id
-  return node.get('hasAttributes', '') === true;
+  return node.get('hasAttributes') === true;
 }
 
 
@@ -121,7 +121,18 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     event.stopPropagation();
     if (needsAttributes(this.node)) {
-      this.actions.fetchAttributes(this.node);
+      if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+        this.actions.fetchAttributes(this.node);
+      } else {
+        const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+          ? PREDEFINED_ATTRIBUTES.Normal.map(attr => {
+            attr.operator = null;
+            attr.operands = [null];
+            return attr;
+          })
+          : {name: '', operator: '', operands: [null], conceptId: this.node.get('conceptId', null)};
+        this.actions.loadAttributes(this.node, attributes);
+      }
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
@@ -135,7 +146,16 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.selectChildren(child);
         });
       } else {
-        const param = this.node.set('parameterId', this.paramId);
+        let attributes = [];
+        if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+          attributes = Object.keys(PREDEFINED_ATTRIBUTES).filter(name => {
+            if (this.node.get('name').indexOf(name) === 0) {
+              return PREDEFINED_ATTRIBUTES[name];
+            }
+            return [];
+          });
+        }
+        const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
         this.actions.addParameter(param);
       }
     }

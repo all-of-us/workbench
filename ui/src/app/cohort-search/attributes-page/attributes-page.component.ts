@@ -14,7 +14,7 @@ import {
 
 import {Operator} from 'generated';
 
-import {CRITERIA_SUBTYPES, PM_UNITS} from '../constant';
+import {CRITERIA_TYPES, PM_UNITS} from '../constant';
 
 @Component({
   selector: 'crit-attributes-page',
@@ -41,18 +41,26 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
 
   constructor(private actions: CohortSearchActions) {
     this.options = [
+      {value: 'ANY', name: 'Any'},
       {value: 'EQUAL', name: 'Equals'},
       {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to'},
       {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to'},
       {value: 'BETWEEN', name: 'Between'},
-      {value: 'ANY', name: 'Any'}
     ];
   }
 
     ngOnInit() {
         this.subscription = this.preview$.subscribe(prev => this.preview = prev);
         this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
-        this.subscription.add(this.node$.subscribe(node => this.node = node));
+        this.subscription.add(this.node$.subscribe(node => {
+          console.log(node.toJS());
+          this.node = node;
+          if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+            console.log(this.node.toJS());
+          } else {
+            this.attrs = this.node.get('attributes');
+          }
+        }));
     }
 
     ngOnDestroy() {

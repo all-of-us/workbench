@@ -1,4 +1,4 @@
-import { DomainType } from 'generated';
+import { DomainType, Operator } from 'generated';
 
 export const CRITERIA_TYPES = {
   'PM': 'PM',
@@ -52,4 +52,63 @@ export const PM_UNITS = {
     'HC': 'cm',
     'BP': '',
     'HR-DETAIL': 'beats/min'
+};
+
+export const PREDEFINED_ATTRIBUTES = {
+  'Hypotensive': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: ['90'],
+      operator: Operator.LESSTHANOREQUALTO
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: ['60'],
+      operator: Operator.LESSTHANOREQUALTO
+    }
+  ],
+  'Normal': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: ['120'],
+      operator: Operator.LESSTHANOREQUALTO
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: ['80'],
+      operator: Operator.LESSTHANOREQUALTO
+    }
+  ],
+  'Pre-Hypertensive': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: ['121', '139'],
+      operator: Operator.BETWEEN
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: ['81', '89'],
+      operator: Operator.BETWEEN
+    }
+  ],
+  'Hypertensive': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: ['140'],
+      operator: Operator.GREATERTHANOREQUALTO
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: ['90'],
+      operator: Operator.GREATERTHANOREQUALTO
+    }
+  ],
 };
