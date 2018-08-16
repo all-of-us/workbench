@@ -1,15 +1,15 @@
 import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {fromJS, List, Map} from 'immutable';
+import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
-
 import {
   activeModifierList,
   CohortSearchActions,
-  CohortSearchState,
-  previewStatus,
+  previewStatus
 } from '../redux';
+
 
 @Component({
     selector: 'crit-modifier-page',
@@ -19,10 +19,15 @@ import {
 export class ModifierPageComponent implements OnInit, OnDestroy {
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
-
+  formChanges = false;
+  dateValueA: any;
+  dateValueB: any;
   existing = List();
   preview = Map();
   subscription: Subscription;
+  dropdownOption = {
+        selected: ['', '', '']
+    };
 
   readonly modifiers = [{
     name: 'ageAtEvent',
@@ -134,10 +139,25 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       })
     );
   }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
+    selectChange(opt, index, e, mod) {
+        this.dropdownOption.selected[index] = opt.name;
+        if (e.target.value || this.form.controls.valueA) {
+            this.formChanges = true;
+        }
+        if (mod.modType === 'AGE_AT_EVENT') {
+            const ageAtEventForm = <FormArray>this.form.controls.ageAtEvent;
+            const valueForm = <FormArray>ageAtEventForm;
+            valueForm.get('operator').patchValue(opt.value);
+        } else if (mod.modType === 'EVENT_DATE') {
+            const eventDateForm = <FormArray>this.form.controls.eventDate;
+            const valueForm = <FormArray>eventDateForm;
+            valueForm.get('operator').patchValue(opt.value);
+        } else if (mod.modType === 'NUM_OF_OCCURRENCES') {
+            const hasOccurrencesForm = <FormArray>this.form.controls.hasOccurrences;
+            const valueForm = <FormArray>hasOccurrencesForm;
+            valueForm.get('operator').patchValue(opt.value);
+        }
+    }
 
   currentMods(vals) {
     return this.modifiers.map(({name, inputType, modType}) => {
@@ -146,17 +166,26 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       if (!operator || !valueA || (between && !valueB)) {
         return ;
       }
-      const operands = [valueA];
-      if (between) { operands.push(valueB); }
-      return fromJS({name: modType, operator, operands});
+      if (inputType === 'date') {
+          this.dateValueA = moment(valueA, 'MM/DD/YYYY').format('YYYY-MM-DD');
+          this.dateValueB = moment(valueB, 'MM/DD/YYYY').format('YYYY-MM-DD');
+          const operands = [this.dateValueA];
+          if (between) { operands.push(this.dateValueB); }
+          return fromJS({name: modType, operator, operands});
+      } else {
+          const operands = [valueA];
+          if (between) { operands.push(valueB); }
+          return fromJS({name: modType, operator, operands});
+      }
     });
-  }
-
-  showValueB(modName) {
-    return this.form.get([modName, 'operator']).value === 'BETWEEN';
   }
 
   requestPreview() {
     this.actions.requestPreview();
   }
+
+  ngOnDestroy() {
+      this.subscription.unsubscribe();
+    }
+
 }

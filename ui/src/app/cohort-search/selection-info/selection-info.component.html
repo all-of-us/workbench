@@ -4,15 +4,21 @@
     [style.padding]="'0 0.25rem'"
     class="btn btn-icon btn-link btn-sm text-danger"
     (click)="remove()">
-    <clr-icon shape="close"></clr-icon>
+    <clr-icon shape="times-circle"></clr-icon>
   </button>
   <span class="item-info">
     <small *ngIf="index > 0" class="font-weight-bold">OR</small>
     <small *ngIf="parameter.get('group')" class="text-muted">Group</small>
-    <small class="name">
+    <small class="name"
+           [popper]="codesPopper"
+           [popperTrigger]="'hover'"
+           [popperPlacement]="'bottom'">
       <strong *ngIf="parameter.get('type') !== criteriaTypes.PM && parameter.get('type') !== domainType.DRUG">{{ _type }}</strong>
-      <span class="text-muted">{{ name }}</span>
+      <span class="text-size text-muted">{{ name }}</span>
       <span class="text-muted">{{ attribute }}</span>
     </small>
   </span>
+  <popper-content #codesPopper>
+  <p class="tooltip-text" [style.margin]="'0'">{{name}}</p>
+  </popper-content>
 </div>

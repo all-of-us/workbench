@@ -84,7 +84,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
-  awaitingReview = false;
   cohortsLoading = true;
   cohortsError = false;
   cohortList: Cohort[] = [];
@@ -106,7 +105,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
-    private http: Http,
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
@@ -115,8 +113,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
-    const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.awaitingReview = reviewRequested && !approved;
     Object.keys(ResearchPurposeItems).forEach((key) => {
       if (this.workspace.researchPurpose[key]) {
         let shortDescription = ResearchPurposeItems[key].shortDescription;
@@ -227,9 +223,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   buildCohort(): void {
-    if (!this.awaitingReview) {
-      this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
-    }
+    this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
   }
 
   get workspaceCreationTime(): string {

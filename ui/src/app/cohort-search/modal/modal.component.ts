@@ -128,20 +128,13 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.actions.cancelWizard();
   }
 
+  back() {
+    this.actions.hideAttributesPage();
+  }
+
   finish() {
     this.open = false;
     this.actions.finishWizard();
-  }
-
-  get hasNextPage() {
-    if (this.ctype !== CRITERIA_TYPES.DEMO && this.mode === 'tree') {
-      return true;
-    }
-    return false;
-  }
-
-  nextPage() {
-    this.mode = 'modifiers';
   }
 
   /* Used to bootstrap the criteria tree */
@@ -156,7 +149,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
     return title
-      ? `Selected ${title} Codes`
+      ? `Add Selected ${title} Criteria to Cohort`
       : 'No Selection';
   }
 }
