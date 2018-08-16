@@ -22,7 +22,7 @@ export class SetAnnotationModalComponent {
    * sent through the app-global state service and bind it to the clr-modal
    * component.
    */
-  private _open = false;
+  // private _open = false;
 
   get open() {
     return this.state.annotationManagerOpen.getValue();
