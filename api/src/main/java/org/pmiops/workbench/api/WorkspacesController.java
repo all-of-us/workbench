@@ -436,9 +436,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
       fileList = getFilesFromNotebooks(bucketName);
-      if(fileList.size() > 0 ) {
+      if(fileList !=null && fileList.size() > 0 ) {
         long userId = userProvider.get().getUserId();
-
         CompletableFuture.runAsync(() -> {
           long wId = workspaceService.getRequired(
               workspaceNamespace, workspaceId).getWorkspaceId();

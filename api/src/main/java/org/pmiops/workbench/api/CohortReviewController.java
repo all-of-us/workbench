@@ -89,7 +89,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private ReviewTabQueryBuilder reviewTabQueryBuilder;
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private UserRecentResourceService userRecentResourceService;
-  private WorkspaceService workspaceService;
   private Provider<User> userProvider;
   private final Clock clock;
 
@@ -188,7 +187,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                          Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
                          UserRecentResourceService userRecentResourceService,
                          Provider<User> userProvider,
-                         WorkspaceService workspaceService,
                          Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
@@ -197,7 +195,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
-    this.workspaceService = workspaceService;
     this.clock = clock;
   }
 
