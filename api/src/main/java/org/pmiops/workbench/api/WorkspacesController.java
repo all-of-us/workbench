@@ -439,9 +439,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (fileList != null && fileList.size() > 0) {
         long userId = userProvider.get().getUserId();
         CompletableFuture.runAsync(() -> {
-          long wId = workspaceService.getRequired(
-              workspaceNamespace, workspaceId).getWorkspaceId();
-          List<String> notebookName = fileList.stream().map(notebook -> notebook.getName())
+          long wId = workspaceService.getRequired(workspaceNamespace, workspaceId).getWorkspaceId();
+          List<String> notebookName = fileList.stream()
+              .map(notebook -> notebook.getName())
               .collect(Collectors.toList());
           userRecentResourceService.deleteOrphanNotebookEntries(wId, userId, notebookName);
         });

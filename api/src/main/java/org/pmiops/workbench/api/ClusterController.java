@@ -170,8 +170,8 @@ public class ClusterController implements ClusterApiDelegate {
     try {
       fcWorkspace = fireCloudService.getWorkspace(body.getWorkspaceNamespace(),
           body.getWorkspaceId()).getWorkspace();
-      long workspaceId =
-          workspaceService.getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
+      long workspaceId = workspaceService
+          .getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
           .getWorkspaceId();
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       body.getNotebookNames().forEach(
