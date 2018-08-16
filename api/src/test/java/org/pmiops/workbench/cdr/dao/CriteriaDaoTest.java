@@ -91,7 +91,7 @@ public class CriteriaDaoTest {
       "[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['90']},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['60']}]");
     drugCriteriaIngredient = createCriteria(TYPE_DRUG, SUBTYPE_ATC, "", "ACETAMIN", 0, false, true, "").conceptId("1");
     drugCriteriaBrand = createCriteria(TYPE_DRUG, SUBTYPE_BRAND, "", "BLAH", 0, false, true, "");
-    labCriteria = createCriteria(TYPE_MEASUREMENT, SUBTYPE_LAB, "LP1234", "mysearchname", 0, false, false, "").conceptId("123");
+    labCriteria = createCriteria(TYPE_MEASUREMENT, SUBTYPE_LAB, "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
@@ -236,7 +236,7 @@ public class CriteriaDaoTest {
                                   long parentId,
                                   boolean group,
                                   boolean selectable,
-                                  String predefinedAttributes) {
+                                  String path) {
     return new Criteria()
       .code(code)
       .count("10")
@@ -248,7 +248,8 @@ public class CriteriaDaoTest {
       .parentId(parentId)
       .type(type)
       .subtype(subtype)
-      .attribute(Boolean.FALSE);
+      .attribute(Boolean.FALSE)
+      .path(path);
   }
 
 }

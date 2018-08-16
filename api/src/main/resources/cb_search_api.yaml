@@ -376,6 +376,9 @@ definitions:
       hasAttributes:
         description: specifies if extra attributes are needed
         type: boolean
+      path:
+        description: full path from parent to this node with ids
+        type: string
 
   CriteriaAttributeListResponse:
     type: object

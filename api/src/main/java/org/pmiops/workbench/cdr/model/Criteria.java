@@ -27,6 +27,7 @@ public class Criteria {
     private String conceptId;
     private String domainId;
     private boolean attribute;
+    private String path;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -198,27 +199,42 @@ public class Criteria {
         return this;
     }
 
+    @Column(name = "path")
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public Criteria path(String path) {
+        this.path = path;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Criteria criteria = (Criteria) o;
         return id == criteria.id &&
-                parentId == criteria.parentId &&
-                group == criteria.group &&
-                selectable == criteria.selectable &&
-                Objects.equals(type, criteria.type) &&
-                Objects.equals(code, criteria.code) &&
-                Objects.equals(name, criteria.name) &&
-                Objects.equals(count, criteria.count) &&
-                Objects.equals(conceptId, criteria.conceptId) &&
-                Objects.equals(domainId, criteria.domainId) &&
-                Objects.equals(attribute, criteria.attribute);
+          parentId == criteria.parentId &&
+          group == criteria.group &&
+          selectable == criteria.selectable &&
+          Objects.equals(type, criteria.type) &&
+          Objects.equals(code, criteria.code) &&
+          Objects.equals(name, criteria.name) &&
+          Objects.equals(count, criteria.count) &&
+          Objects.equals(conceptId, criteria.conceptId) &&
+          Objects.equals(domainId, criteria.domainId) &&
+          Objects.equals(attribute, criteria.attribute) &&
+          Objects.equals(path, criteria.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId, attribute);
+        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId, attribute, path);
     }
 
     @Override

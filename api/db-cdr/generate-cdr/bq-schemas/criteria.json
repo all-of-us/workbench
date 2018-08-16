@@ -61,7 +61,7 @@
       },
       {
         "mode": "NULLABLE",
-        "name": "predefined_attributes",
+        "name": "path",
         "type": "STRING"
       }
 ]
