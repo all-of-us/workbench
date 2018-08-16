@@ -12,7 +12,15 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.ChartInfo;
+import org.pmiops.workbench.model.ChartInfoListResponse;
+import org.pmiops.workbench.model.ConceptIdName;
+import org.pmiops.workbench.model.CriteriaAttributeListResponse;
+import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.ParticipantDemographics;
+import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -178,7 +186,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaAttributeListResponse> getCriteriAttributeByConceptId(Long cdrVersionId, Long conceptId) {
+  public ResponseEntity<CriteriaAttributeListResponse> getCriteriaAttributeByConceptId(Long cdrVersionId, Long conceptId) {
     return ResponseEntity.ok(new CriteriaAttributeListResponse().addItemsItem(new CriteriaAttribute().conceptId(1L).conceptName("test").estCount("10").id(1L).type("NUM")));
   }
 
