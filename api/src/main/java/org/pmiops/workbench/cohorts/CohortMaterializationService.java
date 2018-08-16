@@ -25,6 +25,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.FieldSet;
@@ -69,8 +70,11 @@ public class CohortMaterializationService {
     if (cohortReview == null) {
       return ImmutableSet.of();
     }
+    List<Short> dbStatusFilter = statusFilter.stream()
+        .map(StorageEnums::cohortStatusToStorage)
+        .collect(Collectors.toList());
     Set<Long> participantIds = participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndStatusIn(
-        cohortReview.getCohortReviewId(), statusFilter)
+        cohortReview.getCohortReviewId(), dbStatusFilter)
         .stream()
         .map(ParticipantIdAndCohortStatus::getParticipantKey)
         .map(Key::getParticipantId)
