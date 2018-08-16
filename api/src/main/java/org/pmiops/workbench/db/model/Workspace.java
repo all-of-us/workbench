@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -22,11 +23,9 @@ import javax.persistence.Version;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
 
-
 @Entity
 @Table(name = "workspace")
 public class Workspace {
-
   private String firecloudUuid;
 
   public static class FirecloudWorkspaceId {
@@ -68,7 +67,7 @@ public class Workspace {
   private String description;
   private String workspaceNamespace;
   private String firecloudName;
-  private DataAccessLevel dataAccessLevel;
+  private Short dataAccessLevel;
   private CdrVersion cdrVersion;
   private User creator;
   private Timestamp creationTime;
@@ -86,8 +85,7 @@ public class Workspace {
   private String populationOfFocus;
   private String additionalNotes;
   private boolean containsUnderservedPopulation;
-  private Set<UnderservedPopulationEnum> underservedPopulationSet =
-      new HashSet<UnderservedPopulationEnum>();
+  private Set<Short> underservedPopulationSet = new HashSet<>();
 
   private Boolean reviewRequested;
   private Boolean approved;
@@ -152,12 +150,21 @@ public class Workspace {
   }
 
   @Column(name = "data_access_level")
-  public DataAccessLevel getDataAccessLevel() {
+  public Short getDataAccessLevel() {
     return dataAccessLevel;
   }
 
-  public void setDataAccessLevel(DataAccessLevel dataAccessLevel) {
+  public void setDataAccessLevel(Short dataAccessLevel) {
     this.dataAccessLevel = dataAccessLevel;
+  }
+
+  @Transient
+  public DataAccessLevel getDataAccessLevelEnum() {
+    return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+  }
+
+  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
+    setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @ManyToOne
@@ -300,12 +307,32 @@ public class Workspace {
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "underserved_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "underserved_population")
-  public Set<UnderservedPopulationEnum> getUnderservedPopulationSet() {
+  public Set<Short> getUnderservedPopulations() {
     return underservedPopulationSet;
   }
 
-  public void setUnderservedPopulationSet(Set<UnderservedPopulationEnum> newUnderservedPopulationSet) {
-    this.underservedPopulationSet = newUnderservedPopulationSet;
+  public void setUnderservedPopulations(Set<Short> newUnderservedPopulations) {
+    this.underservedPopulationSet = newUnderservedPopulations;
+  }
+
+  @Transient
+  public Set<UnderservedPopulationEnum> getUnderservedPopulationsEnum() {
+    Set<Short> from = getUnderservedPopulations();
+    if (from == null) {
+      return null;
+    }
+    return from
+        .stream()
+        .map(StorageEnums::underservedPopulationFromStorage)
+        .collect(Collectors.toSet());
+  }
+
+  public void setUnderservedPopulationsEnum(Set<UnderservedPopulationEnum> newUnderservedPopulations) {
+    setUnderservedPopulations(
+        newUnderservedPopulations
+        .stream()
+        .map(StorageEnums::underservedPopulationToStorage)
+        .collect(Collectors.toSet()));
   }
 
   @Column(name = "rp_review_requested")

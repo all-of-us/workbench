@@ -1,41 +1,33 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
 
-import {ClarityModule} from '@clr/angular';
-
-import {ProfileService} from 'generated';
-
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
 import {
   updateAndTick
 } from '../../../testing/test-helpers';
+
 import {ServerConfigService} from '../../services/server-config.service';
 
-import {AccountCreationModalsComponent} from '../account-creation-modals/component';
+import {StigmatizationPageComponent} from '../stigmatization-page/component';
 
-describe('AccountCreationModalsComponent', () => {
-  let fixture: ComponentFixture<AccountCreationModalsComponent>;
+describe('StigmatizationPageComponent', () => {
+  let fixture: ComponentFixture<StigmatizationPageComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        FormsModule,
-        ClarityModule.forRoot()
-      ],
+      imports: [],
       declarations: [
-        AccountCreationModalsComponent
+        StigmatizationPageComponent,
       ],
       providers: [
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
-        }]
+        },
+      ]
     }).compileComponents().then(() => {
-      fixture = TestBed.createComponent(AccountCreationModalsComponent);
+      fixture = TestBed.createComponent(StigmatizationPageComponent);
       tick();
     });
   }));
