@@ -142,7 +142,7 @@ public class CohortReviewControllerTest {
     BigQueryService.class,
     FireCloudService.class,
     UserRecentResourceService.class,
-      WorkspaceService.class,
+    WorkspaceService.class,
     User.class
   })
   static class Configuration {

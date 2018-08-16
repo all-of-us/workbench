@@ -130,7 +130,6 @@ public class ClusterControllerTest {
   private Provider<WorkbenchConfig> configProvider;
 
   private CdrVersion cdrVersion;
-  private FakeClock fakeClock;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
 
@@ -144,7 +143,7 @@ public class ClusterControllerTest {
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
 
-    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, fakeClock, fireCloudService, configProvider);
+    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, CLOCK, fireCloudService, configProvider);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();
