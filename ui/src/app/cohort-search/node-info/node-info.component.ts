@@ -24,7 +24,7 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  */
 function needsAttributes(node: any) {
   // will change soon to check for attributes property instead of id
-  return node.get('hasAttributes', '') === true;
+  return node.get('hasAttributes') === true;
 }
 
 
@@ -121,17 +121,18 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     event.stopPropagation();
     if (needsAttributes(this.node)) {
-      const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
-          ? PREDEFINED_ATTRIBUTES.Normal
-          : [{
-              name: '',
-              operator: null,
-              operands: [null],
-              conceptId: this.node.get('conceptId', null),
-              MIN: 0,
-              MAX: 1000
-          }];
-      this.actions.fetchAttributes(this.node.set('attributes', attributes));
+      if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+        this.actions.fetchAttributes(this.node);
+      } else {
+        const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+          ? PREDEFINED_ATTRIBUTES.Normal.map(attr => {
+            attr.operator = null;
+            attr.operands = [null];
+            return attr;
+          })
+          : {name: '', operator: '', operands: [null], conceptId: this.node.get('conceptId', null)};
+        this.actions.loadAttributes(this.node, attributes);
+      }
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is

@@ -9,8 +9,8 @@ import {
   activeCriteriaTreeType,
   activeCriteriaType,
   activeParameterList,
-  attributesPage,
   CohortSearchActions,
+  nodeAttributes,
   subtreeSelected,
   wizardOpen,
 } from '../redux';
@@ -30,7 +30,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
   @select(activeParameterList) selection$: Observable<any>;
-  @select(attributesPage) attributes$: Observable<any>;
+  @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
 
   readonly domainType = DomainType;

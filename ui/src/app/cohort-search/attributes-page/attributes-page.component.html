@@ -18,8 +18,8 @@
           <div class="dropdown-width">
             <clr-dropdown>
               <button type="button" class="btn btn-outline" clrDropdownTrigger>
-                <span *ngIf="attr.operator === ''">Select Operator</span>
-                <span *ngIf="attr.operator !== ''">{{dropdowns.selected[i]}}</span>
+                <span *ngIf="!attr.operator">Select Operator</span>
+                <span *ngIf="attr.operator">{{dropdowns.selected[i]}}</span>
                 <clr-icon shape="caret down"></clr-icon>
               </button>
               <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
