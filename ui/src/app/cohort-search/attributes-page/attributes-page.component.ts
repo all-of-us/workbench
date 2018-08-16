@@ -14,7 +14,7 @@ import {
 
 import {Operator} from 'generated';
 
-import {CRITERIA_TYPES, PM_UNITS} from '../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PM_UNITS} from '../constant';
 
 @Component({
   selector: 'crit-attributes-page',
@@ -31,14 +31,14 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     attributes: any;
     dropdowns = {
         selected: ['', ''],
-        oldVals:  ['', '']
+        oldVals: ['', ''],
+        labels: ['', '']
     };
     preview = Map();
     subscription: Subscription;
     negativeAlert = false;
     loading: boolean;
     options: any;
-    labels = [];
 
   constructor(private actions: CohortSearchActions) {
     this.options = [
@@ -76,8 +76,10 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
         //         this.attrs.map(attr => {
         //             attr.operator = '';
         //             attr.operands = [null];
+        //             this.labels.push(attr.name);
         //         });
         //     } else {
+        //         this.labels = [''];
         //         this.attrs = [{
         //             name: '',
         //             operator: '',
