@@ -7,12 +7,12 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -197,7 +196,7 @@ public class WorkspacesControllerTest {
     user.setUserId(123L);
     user.setFreeTierBillingProjectName("TestBillingProject1");
     user.setDisabled(false);
-    user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);
@@ -1240,6 +1239,28 @@ public class WorkspacesControllerTest {
         .map(details -> details.getName())
         .collect(Collectors.toList());
     assertEquals(gotNames, ImmutableList.of("mockFile.ipynb", "two words.ipynb"));
+  }
+
+  @Test
+  public void testNotebookFileListOmitsExtraDirectories() throws Exception {
+    when(fireCloudService.getWorkspace("project", "workspace")).thenReturn(
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse()
+        .workspace(
+            new org.pmiops.workbench.firecloud.model.Workspace()
+            .bucketName("bucket")));
+    Blob mockBlob1 = mock(Blob.class);
+    Blob mockBlob2 = mock(Blob.class);
+    when(mockBlob1.getName()).thenReturn("notebooks/extra/nope.ipynb");
+    when(mockBlob2.getName()).thenReturn("notebooks/foo.ipynb");
+    when(cloudStorageService.getBlobList("bucket", "notebooks")).thenReturn(
+        ImmutableList.of(mockBlob1, mockBlob2));
+
+    List<String> gotNames = workspacesController
+        .getNoteBookList("project", "workspace").getBody()
+        .stream()
+        .map(details -> details.getName())
+        .collect(Collectors.toList());
+    assertEquals(gotNames, ImmutableList.of("foo.ipynb"));
   }
 
   @Test

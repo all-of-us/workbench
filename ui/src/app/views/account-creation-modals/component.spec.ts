@@ -1,6 +1,5 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
@@ -21,7 +20,6 @@ describe('AccountCreationModalsComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
       ],

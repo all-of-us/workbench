@@ -606,7 +606,7 @@ public class CohortReviewServiceImplTest {
 
     private CohortAnnotationDefinition createCohortAnnotationDefinition(long cohortAnnotationDefinitionId, AnnotationType annotationType) {
         return new CohortAnnotationDefinition()
-                .annotationType(annotationType)
+                .annotationTypeEnum(annotationType)
                 .columnName("name")
                 .cohortAnnotationDefinitionId(cohortAnnotationDefinitionId)
                 .cohortId(1)
@@ -620,7 +620,7 @@ public class CohortReviewServiceImplTest {
             cohortReviewService.saveParticipantCohortAnnotation(participantCohortAnnotation.getCohortReviewId(), participantCohortAnnotation);
             fail("Should have thrown BadRequestExcpetion!");
         } catch (BadRequestException e) {
-            assertEquals("Invalid Request: Please provide a valid " + cohortAnnotationDefinition.getAnnotationType().name()
+            assertEquals("Invalid Request: Please provide a valid " + cohortAnnotationDefinition.getAnnotationTypeEnum().name()
                     + " value for annotation defintion id: " + cohortAnnotationDefinition.getCohortAnnotationDefinitionId(), e.getMessage());
         }
 
@@ -644,7 +644,7 @@ public class CohortReviewServiceImplTest {
             cohortReviewService.updateParticipantCohortAnnotation(annotationId, cohortReviewId, participantId, new ModifyParticipantCohortAnnotationRequest());
             fail("Should have thrown BadRequestExcpetion!");
         } catch (BadRequestException e) {
-            assertEquals("Invalid Request: Please provide a valid " + cohortAnnotationDefinition.getAnnotationType().name()
+            assertEquals("Invalid Request: Please provide a valid " + cohortAnnotationDefinition.getAnnotationTypeEnum().name()
                     + " value for annotation defintion id: " + cohortAnnotationDefinition.getCohortAnnotationDefinitionId(), e.getMessage());
         }
 

@@ -11,11 +11,17 @@
 .google-icon {
   height: 54px;
   width: 54px;
-  margin-right: 24px;
+  /*The image file comes with about 5 pixels of padding around it, which we want to trim off*/
+  margin: -3px 19px -3px -3px;
 }
 
 .btn.btn-lg.btn-primary {
-  font-family: Roboto;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  height: auto;
+  font-family: 'Roboto', sans-serif;
+  padding-left: 0;
   font-size: 18px;
   font-weight: 500;
   font-style: normal;

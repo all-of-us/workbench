@@ -1,16 +1,16 @@
 package org.pmiops.workbench.db.model;
 
-import javax.persistence.GenerationType;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.model.ReviewStatus;
-
+import java.sql.Timestamp;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Timestamp;
-import java.util.Objects;
+import javax.persistence.Transient;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.model.ReviewStatus;
 
 @Entity
 @Table(name = "cohort_review")
@@ -24,7 +24,7 @@ public class CohortReview {
     private long matchedParticipantCount;
     private long reviewSize;
     private long reviewedCount;
-    private ReviewStatus reviewStatus;
+    private Short reviewStatus;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -145,17 +145,30 @@ public class CohortReview {
     }
 
     @Column(name = "review_status")
-    public ReviewStatus getReviewStatus() {
+    public Short getReviewStatus() {
         return reviewStatus;
     }
 
-    public void setReviewStatus(ReviewStatus reviewStatus) {
+    public void setReviewStatus(Short reviewStatus) {
         this.reviewStatus = reviewStatus;
     }
 
-    public CohortReview reviewStatus(ReviewStatus reviewStatus) {
+    public CohortReview reviewStatus(Short reviewStatus) {
         this.reviewStatus = reviewStatus;
         return this;
+    }
+
+    @Transient
+    public ReviewStatus getReviewStatusEnum() {
+        return StorageEnums.reviewStatusFromStorage(getReviewStatus());
+    }
+
+    public void setReviewStatusEnum(ReviewStatus reviewStatus) {
+        setReviewStatus(StorageEnums.reviewStatusToStorage(reviewStatus));
+    }
+
+    public CohortReview reviewStatusEnum(ReviewStatus reviewStatus) {
+        return this.reviewStatus(StorageEnums.reviewStatusToStorage(reviewStatus));
     }
 
     @Override

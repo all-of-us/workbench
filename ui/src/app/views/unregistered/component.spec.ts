@@ -1,12 +1,9 @@
-import {Component, DebugElement, Injectable} from '@angular/core';
+import {Component, DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
-  ActivatedRouteSnapshot,
-  Resolve,
   Router,
-  RouterStateSnapshot,
 } from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
@@ -18,7 +15,6 @@ import {UnregisteredComponent} from 'app/views/unregistered/component';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
-import {updateAndTick} from 'testing/test-helpers';
 
 import {
   DataAccessLevel,

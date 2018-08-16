@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.AnnotationQuery;
@@ -109,15 +110,15 @@ public class AnnotationQueryBuilder {
                 cohortReview.getCohortReviewId()));
         parameters.put("def_" + annotationCount, definition.getCohortAnnotationDefinitionId());
         String sourceColumn;
-        if (definition.getAnnotationType().equals(AnnotationType.ENUM)) {
+        if (definition.getAnnotationTypeEnum().equals(AnnotationType.ENUM)) {
           sourceColumn = String.format("ae%d.name", annotationCount);
           fromBuilder.append(
               String.format(ANNOTATION_VALUE_JOIN_SQL, annotationCount, annotationCount, annotationCount));
         } else {
 
-          String columnName = ANNOTATION_COLUMN_MAP.get(definition.getAnnotationType());
+          String columnName = ANNOTATION_COLUMN_MAP.get(definition.getAnnotationTypeEnum());
           if (columnName == null) {
-            throw new ServerErrorException("Invalid annotation type: " + definition.getAnnotationType());
+            throw new ServerErrorException("Invalid annotation type: " + definition.getAnnotationTypeEnum());
           }
           sourceColumn = String.format("a%d.%s", annotationCount, columnName);
         }
@@ -233,7 +234,7 @@ public class AnnotationQueryBuilder {
           if (obj != null) {
             String column = columns.get(i);
             if (column.equals(REVIEW_STATUS_COLUMN)) {
-              result.put(column, CohortStatus.values()[(Integer) obj].name());
+              result.put(column, StorageEnums.cohortStatusFromStorage((Short) obj).name());
             } else if (obj instanceof java.sql.Date) {
               result.put(column, DATE_FORMAT.format((java.sql.Date) obj));
             } else {

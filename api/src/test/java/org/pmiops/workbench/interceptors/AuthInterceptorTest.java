@@ -227,9 +227,9 @@ public class AuthInterceptorTest {
   @Test
   public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
     User userWithAuthorities = new User();
-    Set<Authority> required = new HashSet<Authority>();
+    Set<Authority> required = new HashSet<>();
     required.add(Authority.REVIEW_RESEARCH_PURPOSE);
-    userWithAuthorities.setAuthorities(required);
+    userWithAuthorities.setAuthoritiesEnum(required);
     when(userDao.findUserWithAuthorities(USER_ID)).thenReturn(userWithAuthorities);
     Method apiControllerMethod = FakeApiController.class.getMethod("handle");
     assertThat(interceptor.hasRequiredAuthority(apiControllerMethod, user)).isTrue();
