@@ -82,6 +82,9 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       if (label === 'Param: Workspace Name') {
         label = child.snapshot.data['workspace'].name;
       }
+      if (label === 'Param: Cohort Name') {
+        label = child.snapshot.data['cohort'].name;
+      }
       // Prevent processing children with duplicate urls
       if (!breadcrumbs.some(b => b.url === url)) {
         const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);

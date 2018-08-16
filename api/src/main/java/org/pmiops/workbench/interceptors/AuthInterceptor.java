@@ -206,7 +206,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       }
       // Fetch the user with authorities, since they aren't loaded during normal
       user = userDao.findUserWithAuthorities(user.getUserId());
-      Collection<Authority> granted = user.getAuthorities();
+      Collection<Authority> granted = user.getAuthoritiesEnum();
       if (granted.containsAll(Arrays.asList(req.value()))) {
         return true;
       } else {

@@ -14,7 +14,6 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Provider;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -125,7 +124,7 @@ public class CohortsControllerTest {
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
-    user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
 

@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.pmiops.workbench.model.DataAccessLevel;
 
@@ -17,7 +18,7 @@ public class CdrVersion {
 
   private long cdrVersionId;
   private String name;
-  private DataAccessLevel dataAccessLevel;
+  private Short dataAccessLevel;
   private short releaseNumber;
   private String bigqueryProject;
   private String bigqueryDataset;
@@ -47,12 +48,21 @@ public class CdrVersion {
   }
 
   @Column(name = "data_access_level")
-  public DataAccessLevel getDataAccessLevel() {
+  public Short getDataAccessLevel() {
     return dataAccessLevel;
   }
 
-  public void setDataAccessLevel(DataAccessLevel dataAccessLevel) {
+  public void setDataAccessLevel(Short dataAccessLevel) {
     this.dataAccessLevel = dataAccessLevel;
+  }
+
+  @Transient
+  public DataAccessLevel getDataAccessLevelEnum() {
+    return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+  }
+
+  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
+    setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @Column(name = "release_number")
