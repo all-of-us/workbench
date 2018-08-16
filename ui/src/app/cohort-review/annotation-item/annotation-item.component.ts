@@ -111,4 +111,8 @@ export class AnnotationItemComponent implements OnInit {
       ? ` (${this.annotation.definition.annotationType})`
       : '';
   }
+
+    toggleOptions(val){
+
+    }
 }

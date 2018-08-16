@@ -62,6 +62,26 @@
           <em>{{ datatypeDisplay | titlecase }}</em>
         </span>
       </label>
+      <!--<h1>check</h1>-->
+      <!--<div>-->
+        <!--<clr-dropdown  class="participant-dropdown">-->
+          <!--<button type="button" class="btn btn-outline" clrDropdownTrigger>-->
+            <!--<span *ngIf = "defaultOption; else elseBlock">{{participantOption}}</span>-->
+            <!--<ng-template #elseBlock>-->
+              <!--<span>Select Operator</span>-->
+            <!--</ng-template>-->
+            <!--<clr-icon shape="caret down"></clr-icon>-->
+          <!--</button>-->
+          <!--<clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>-->
+            <!--<button-->
+                    <!--*ngFor="let value of annotation.definition.enumValues"-->
+                    <!--(click)="participantOptionChange(status)"-->
+                    <!--class="dropdown-item"-->
+                    <!--type="button"-->
+                    <!--clrDropdownItem>{{ value | titlecase }}</button>-->
+          <!--</clr-dropdown-menu>-->
+        <!--</clr-dropdown>-->
+      <!--</div>-->
       <div class="select">
         <select
           (change)="handleInput()"

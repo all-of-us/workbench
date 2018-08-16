@@ -6,7 +6,7 @@
   border-radius: 2px;
   height: 100%;
   z-index: 1;
-  /*background-color: rgb(250, 250, 250);*/
+  background-color: #E2E2EA;
   display: flex;
   margin-right: -0.6rem;
 
@@ -41,7 +41,7 @@
 }
 
 .sidebar-content.sidebar-open {
-  margin-left: 0.25rem;
+  /*margin-left: 0.25rem;*/
   width: 383px;
   border-left: 1rem solid #728FA3;
   padding-left: 0.3rem;
