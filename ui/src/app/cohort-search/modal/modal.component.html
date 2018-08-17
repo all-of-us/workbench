@@ -6,31 +6,26 @@
           <div class="title-bar">
             <div class="btn-group btn-link">
               <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
-
-                <button *ngIf="title !=='Physical Measurements' " type="button" class="btn tab"
-                        [class.active]="mode === 'tree'"
-                        (click)="mode = 'tree'">
+                <button  *ngIf="attributesNode.size === 0"
+                  type="button"
+                  class="btn tab"
+                  [class.active]="mode === 'tree'"
+                  (click)="mode = 'tree'">
                   {{ title }}
                 </button>
-                <ng-container *ngIf="title ==='Physical Measurements' ">
-                  <button  *ngIf="attributesNode.size === 0"  type="button" class="btn tab"
-                          [class.active]="mode === 'tree'"
-                          (click)="mode = 'tree'">
-                    {{ title }}
-                  </button>
-                  <button  *ngIf="attributesNode.size > 0" type="button" class="btn tab-node"
-                           (click)="mode = 'tree'">
-                   {{attributesNode.get('name')}}
-                  </button>
-                </ng-container>
-
+                <button *ngIf="attributesNode.size > 0"
+                  type="button"
+                  class="btn tab-node">
+                  {{attributeTitle}}
+                </button>
 
                 <div *ngIf="ctype !== criteriaTypes.PM" class="vbar"></div>
-                <button type="button" class="btn tab"
-                        *ngIf="ctype !== criteriaTypes.PM"
-                        [class.active]="mode === 'modifiers'"
-                        [disabled]="noSelection"
-                        (click)="mode = 'modifiers'">
+                <button type="button"
+                  class="btn tab"
+                  *ngIf="ctype !== criteriaTypes.PM"
+                  [class.active]="mode === 'modifiers'"
+                  [disabled]="noSelection"
+                  (click)="mode = 'modifiers'">
                   Modifiers
                 </button>
               </ng-container>
@@ -42,8 +37,8 @@
               drugs by brand names outside of All of Us
             </div>
             <button *ngIf="attributesNode.size > 0"
-                    (click)="back()"
-                    class="btn btn-link btn-icon">
+              (click)="back()"
+              class="btn btn-link btn-icon">
               <clr-icon size="24" shape="close"></clr-icon>
             </button>
           </div>
