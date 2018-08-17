@@ -32,7 +32,7 @@
 
     <div *ngSwitchCase="kinds.DATE">
       <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main items-text">
+        <span class="flex-content-main items-date">
           {{ annotation.definition.columnName }}
           <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
         </span>
@@ -54,12 +54,13 @@
 
     <div *ngSwitchCase="kinds.INTEGER">
       <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main items-text">
+        <span class="flex-content-main items-Integer">
           {{ annotation.definition.columnName }}
           <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
         </span>
       </label>
       <input
+              class="integer-style"
         (blur)="handleInput()"
         type="number"
         [name]="machineName"
@@ -70,7 +71,7 @@
     <!-- ENUM and BOOLEAN rely on the change event to update the annotation -->
     <div *ngSwitchCase="kinds.ENUM">
       <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main items-text">
+        <span class="flex-content-main items-enum">
           {{ annotation.definition.columnName }}
           <!--<em>{{ datatypeDisplay | titlecase }}</em>s-->
         </span>
@@ -109,19 +110,18 @@
       <!--</div>-->
     </div>
 
-    <div *ngSwitchCase="kinds.BOOLEAN">
-      <div class="checkbox-inline flex-container">
-        <input
+    <div class="checkbox-container" *ngSwitchCase="kinds.BOOLEAN">
+      <label [for]="machineName" class="flex-content-main items-check">
+        {{ annotation.definition.columnName }}
+        <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
+      </label>
+        <input class="checkbox-style"
           (change)="handleInput()"
           type="checkbox"
           [name]="machineName"
           [id]="machineName"
           [formControl]="control">
-        <label [for]="machineName" class="flex-content-main">
-          {{ annotation.definition.columnName }}
-          <em>{{ datatypeDisplay | titlecase }}</em>
-        </label>
-      </div>
+
     </div>
 </div>
 </div>

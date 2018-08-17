@@ -1,5 +1,6 @@
 .sidebar-content {
   padding-right: 0.25rem;
+  position: relative;
 }
 
 .sidebar-content h4 {
