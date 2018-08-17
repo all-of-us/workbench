@@ -24,6 +24,12 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   WHEEL_CHAIR_CONCEPT_ID = '903111';
   // Todo put constants in a class for use in other views
 
+  // What charts to show
+  showMeasurementGenderBins = true;
+  showAge = true;
+  showGender = false;
+  showSources = false;
+
   // Total analyses
   genderAnalysis: Analysis = null;
   raceAnalysis: Analysis = null;
@@ -103,7 +109,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     this.loadingStack.push(true);
     this.subscriptions.push(this.api.getRaceAnalysis()
       .subscribe(result => {
-        console.log('race analysis', result);
         this.raceAnalysis = result;
         this.loadingStack.pop();
       }));
@@ -111,7 +116,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     this.loadingStack.push(true);
     this.subscriptions.push(this.api.getEthnicityAnalysis()
       .subscribe(result => {
-        console.log('ethnicity analysis', result);
         this.ethnicityAnalysis = result;
         this.loadingStack.pop();
       }));
@@ -130,6 +134,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     console.log(group, concept);
     this.selectedGroup = group;
     this.selectedConcept = concept;
+
     if (!this.selectedConcept.analyses) {
       this.loadingStack.push(true);
       this.subscriptions.push(this.api.getConceptAnalysisResults(
@@ -218,11 +223,12 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
       countValue: concept.otherCount
     };
 
-    // Order like Male, Female , Others
+    // Order genders how we want to display  Male, Female , Others
     if (male) { results.push(male); }
     if (female) { results.push(female); }
-    results.push(otherResult);
-
+    if (concept.otherCount > 0) {
+      results.push(otherResult);
+    }
     analysis.results = results;
   }
 

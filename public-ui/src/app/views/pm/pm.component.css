@@ -4,3 +4,8 @@
 .chart-wrapper {
     width: 336px;
 }
+
+/* Style the active sub buttons */
+button.active.btn-link {
+    font-weight: bolder;
+}

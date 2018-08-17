@@ -4,31 +4,44 @@
   </span>
 </div>
 
-<div *ngIf="!loading && concept.domainId !== 'Measurement'" class="row concept-charts chart">
-  <div class="col-md-4 col-xs-12 chart" *ngIf="showGender && genderAnalysis"  >
-    <app-chart [analysis]="genderAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
-  </div>
-  <div class="col-md-4 col-xs-12 chart" *ngIf="showAge && ageAnalysis" >
-    <app-chart [analysis]="ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
+<div *ngIf="!loading" class="row concept-charts chart">
+  <!-- show measurements binned by gender if we want -->
+  <div class="col-md-4 col-xs-12 chart" *ngIf="showMeasurementGenderBins && analyses.measurementValueMaleAnalysis">
+    <app-chart [chartType]="'histogram'" [chartTitle]="makeChartTitle(maleGenderResult)"
+               [analysis]="analyses.measurementValueMaleAnalysis" [backgroundColor]="backgroundColor">
+    </app-chart>
   </div>
 
+  <div class="col-md-4 col-xs-12 chart" *ngIf="showMeasurementGenderBins &&
+    analyses.measurementValueFemaleAnalysis && analyses.measurementValueFemaleAnalysis.results.length">
+    <app-chart [chartType]="'histogram'" [chartTitle]="makeChartTitle(femaleGenderResult)" [chartType]="histogram"
+               [analysis]="analyses.measurementValueFemaleAnalysis" [backgroundColor]="backgroundColor">
+    </app-chart>
+  </div>
+
+  <div class="col-md-4 col-xs-12 chart" *ngIf="showMeasurementGenderBins &&
+    analyses.measurementValueOtherGenderAnalysis && analyses.measurementValueOtherGenderAnalysis.results.length">
+    <app-chart [chartType]="'histogram'" [chartTitle]="makeChartTitle(otherGenderResult)" [chartType]="histogram"
+               [analysis]="analyses.measurementValueOtherGenderAnalysis" [backgroundColor]="backgroundColor">
+    </app-chart>
+  </div>
+
+  <!-- show gender totals  if we want -->
+  <div class="col-md-4 col-xs-12 chart" *ngIf="showGender && analyses.genderAnalysis"  >
+    <app-chart [analysis]="analyses.genderAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
+  </div>
+
+  <!-- show age totals  if we want -->
+  <div class="col-md-4 col-xs-12 chart" *ngIf="showAge && analyses.ageAnalysis" >
+    <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
+  </div>
+
+  <!-- show sources totals  if we want -->
   <div class="col-md-4 col-xs-12 chart"  *ngIf="showSources && ageAnalysis && sourceConcepts && sourceConcepts.length">
-    <app-chart [concepts]="sourceConcepts" [sources]="true" [pointWidth]="20" [backgroundColor]="backgroundColor" [chartTitle]="'Sources'"> </app-chart>
+    <app-chart [concepts]="sourceConcepts" [sources]="true" [pointWidth]="20"
+               [backgroundColor]="backgroundColor" [chartTitle]="'Sources'">
+    </app-chart>
   </div>
-</div>
 
-<div *ngIf="!loading && concept.domainId === 'Measurement' && genderAnalysis" class="row concept-charts chart">
-  <div class="col-md-4 col-xs-12 chart" *ngFor="let gender of genderAnalysis.results;">
-    <app-chart *ngIf="gender.stratum2 === MALE_GENDER_ID && analyses && analyses.measurementValueMaleAnalysis"
-               [chartType]="'histogram'" [chartTitle]="makeChartTitle(gender)"
-               [analysis]="analyses.measurementValueMaleAnalysis"></app-chart>
 
-    <app-chart *ngIf="gender.stratum2 === FEMALE_GENDER_ID && analyses && analyses.measurementValueFemaleAnalysis"
-               [chartType]="'histogram'" [chartTitle]="makeChartTitle(gender)" [chartType]="column"
-               [analysis]="analyses.measurementValueFemaleAnalysis"></app-chart>
-
-    <app-chart *ngIf="gender.stratum2 === OTHER_GENDER_ID && analyses && analyses.measurementValueOtherGenderAnalysis"
-               [chartTitle]="makeChartTitle(gender)" [chartType]="column" [analysis]="analyses.measurementValueOtherGenderAnalysis"></app-chart>
-
-  </div>
 </div>

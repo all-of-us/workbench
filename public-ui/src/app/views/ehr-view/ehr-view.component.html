@@ -137,7 +137,8 @@
         <div class="row expandable-grid-row"
              *ngFor="let r of items.concat(standardConcepts), let i = index"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-2 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}"> </div>
+          <div class="col-md-2 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}
+            -- {{r.conceptId}}"> </div>
           <div class="col-md-4 flex-xs-middle" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"> </div>
           <div class="col-md-2 flex-xs-middle">
             {{r.countValue | number }} out of {{totalParticipants | number}} participants
@@ -151,7 +152,9 @@
             </button>
           </div>
           <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded">
-            <app-concept-charts [concept]="r" [showSources]="true" [backgroundColor]="'#ECF1F4'"></app-concept-charts>
+            <app-concept-charts [concept]="r" [showMeasurementGenderBins]="showMeasurementGenderBins" [showAge]="showAge" [showGender]="showGender"
+                                [showSources]="showSources" [backgroundColor]="'#ECF1F4'">
+            </app-concept-charts>
           </div>
         </div>
       </div>

@@ -36,6 +36,14 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchRequest: SearchConceptsRequest;
   private subscriptions: ISubscription[] = [];
 
+  /* Show different graphs depending on domain we are in */
+  // defaults,  most domains
+  showAge = true;
+  showGender = true;
+  showSources = true;
+  showMeasurementGenderBins = false;
+
+
   constructor(private route: ActivatedRoute,
               private api: DataBrowserService
               // public responsiveSizeInfoRx: ResponsiveSizeInfoRx,
@@ -47,10 +55,10 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue);
+    this.subscriptions.push(this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue));
     this.items = [];
 
-    // Get search result from localStorage
+    // Get search text from localStorage
     this.prevSearchText = localStorage.getItem('searchText');
     if (!this.prevSearchText) {
       this.prevSearchText = '';
@@ -64,11 +72,13 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     } else {
       /* Error. We need a db Domain object. */
       this.title   = 'Keyword: ' + this.searchText;
-      this.title = 'Domain Search Results: ' + 'Error - no result domain selected';
+      this.title = 'Domain Search Results: ' + 'Error - no result for domain selected';
     }
 
     if (this.dbDomain) {
-      // Run search initially filter to domain,
+      // Set the graphs we want to show for this domain
+      this.setGraphsToDisplay();
+      // Run search initially to filter to domain,
       // a empty search returns top ordered by count_value desc
       this.subscriptions.push(this.searchDomain(this.prevSearchText).subscribe(results =>
         this.searchCallback(results)));
@@ -92,6 +102,12 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  private setGraphsToDisplay() {
+    if (this.dbDomain.domainId === 'Measurement') {
+      this.showGender = false;
+      this.showMeasurementGenderBins = true;
+    }
+  }
   private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
