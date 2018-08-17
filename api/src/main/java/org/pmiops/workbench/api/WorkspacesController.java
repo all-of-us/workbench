@@ -440,10 +440,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         long userId = userProvider.get().getUserId();
         CompletableFuture.runAsync(() -> {
           long wId = workspaceService.getRequired(workspaceNamespace, workspaceId).getWorkspaceId();
-          List<String> notebookName = fileList.stream()
+          List<String> notebookNameList = fileList.stream()
               .map(notebook -> notebook.getName())
               .collect(Collectors.toList());
-          userRecentResourceService.deleteOrphanNotebookEntries(wId, userId, notebookName);
+          userRecentResourceService.deleteOrphanNotebookEntries(wId, userId, notebookNameList);
         });
       }
     } catch (org.pmiops.workbench.firecloud.ApiException e) {

@@ -8,11 +8,12 @@ import java.util.List;
 @Service
 public interface UserRecentResourceService {
 
-  void updateNotebookEntry(long workspace_Id, long user_Id, String notebookName, Timestamp lastAccessDateTime);
+  void updateNotebookEntry(long workspaceId, long userId, String notebookName, Timestamp lastAccessDateTime);
 
-  void updateCohortEntry(long workspace_Id, long user_Id, long cohortId, Timestamp lastAccessDateTime);
+  void updateCohortEntry(long workspaceId, long userId, long cohortId, Timestamp lastAccessDateTime);
 
-  void deleteNotebookEntry(long workspace_Id, long user_Id, String notebookName);
+  void deleteNotebookEntry(long workspaceId, long userId, String notebookName);
 
-  void deleteOrphanNotebookEntries(long workspace_id, long user_id, List<String> notebookList);
+  void deleteOrphanNotebookEntries(long workspaceId, long userId, List<String> notebookNameList);
 }
+

@@ -148,7 +148,7 @@ public class CohortsControllerTest {
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
         cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        userService,userRecentResourceService);
+        userService, userRecentResourceService);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
     JSONObject demoCohort = new JSONObject();
