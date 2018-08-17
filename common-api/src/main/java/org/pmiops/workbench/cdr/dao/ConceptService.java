@@ -94,74 +94,38 @@ public class ConceptService {
                         Expression<Long> conceptIdCheck = root.get("conceptId");
                         synonymConceptPredicate.add(conceptIdCheck.in(synonymConceptIds));
                         predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
-                        if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS) || standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
-                            predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
-                        } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
-                            predicates.add(criteriaBuilder.or(
-                                            criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
-                                            criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))));
-                        }
                     }
-                    else{
-                        List<Predicate> conceptCodeIDName = new ArrayList<>();
-                        Expression<Double> matchExp = null;
-                        if(!Strings.isNullOrEmpty(query)){
-                            final String keyword = modifyMultipleMatchKeyword(query);
+                    else {
+                        List<Predicate> conceptCodeID = new ArrayList<>();
+                        if (!Strings.isNullOrEmpty(query)) {
                             // adds check ?(conceptCode == query) o the predicate list
-                            conceptCodeIDName.add(criteriaBuilder.equal(root.get("conceptCode"),
+                            conceptCodeID.add(criteriaBuilder.equal(root.get("conceptCode"),
                                     criteriaBuilder.literal(query)));
                             try {
                                 // adds check ?(conceptId == query) to the predicate list
                                 long conceptId = Long.parseLong(query);
-                                conceptCodeIDName.add(criteriaBuilder.equal(root.get("conceptId"),
+                                conceptCodeID.add(criteriaBuilder.equal(root.get("conceptId"),
                                         criteriaBuilder.literal(conceptId)));
                             } catch (NumberFormatException e) {
                                 // Not a long, don't try to match it to a concept ID.
                             }
-                            // match exp match(conceptname,query) > 0
-                            matchExp = criteriaBuilder.function("match", Double.class, root.get("conceptName"), criteriaBuilder.literal(keyword));
+
                         }
+
+                        predicates.add(criteriaBuilder.or(conceptCodeID.toArray(new Predicate[0])));
+                    }
 
                         // Optionally filter on standard concept, vocabulary ID, domain ID
                         if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
-                            if(!Strings.isNullOrEmpty(query)) {
-                                // (code match or id match or name match) & std_concept_filter check
-                                conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                                predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
-                            }
                             predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
-
                         } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
-                            // (code match or id match or name match) & non_std_concept_filter check
-                            if(!Strings.isNullOrEmpty(query)) {
-                                conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                                predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
-                            }
                             predicates.add(
                                     criteriaBuilder.or(
                                             criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
                                             criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))
                                     ));
-                        } else if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
-                            // (code match or id match or (name match & std_concept_filter check))
-                            List<Predicate> conceptNameFilter = new ArrayList<>();
-                            conceptNameFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                            conceptNameFilter.add(criteriaBuilder.or(
-                                    standardConceptPredicates.toArray(new Predicate[0])));
-                            predicates.add(
-                                    criteriaBuilder.or(
-                                            criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])),
-                                            criteriaBuilder.and(conceptNameFilter.toArray(new Predicate[0]))
-                                    ));
                         }
-                        else {
-                            // code match or id match or name match
-                            if (!Strings.isNullOrEmpty(query)) {
-                                conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                                predicates.add(criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])));
-                            }
-                        }
-                    }
+
 
                     if (vocabularyIds != null) {
                         predicates.add(root.get("vocabularyId").in(vocabularyIds));
