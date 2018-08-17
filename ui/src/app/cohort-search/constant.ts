@@ -111,4 +111,22 @@ export const PREDEFINED_ATTRIBUTES = {
       operator: Operator.GREATERTHANOREQUALTO
     }
   ],
+  'BP_DETAIL': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: [null],
+      operator: null,
+      MIN: 0,
+      MAX: 1000
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: [null],
+      operator: null,
+      MIN: 0,
+      MAX: 1000
+    }
+  ],
 };

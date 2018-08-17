@@ -1,6 +1,3 @@
-<div class="title">
-  {{node.get('name','')}}
-</div>
 <div *ngIf="negativeAlert" class="alert alert-danger alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
@@ -12,32 +9,8 @@
 </div>
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
-    <div *ngFor="let attr of attrs; let i = index">
-      <div class="form-group">
-        <label>{{labels[i]}}</label>
-        <div class="select">
-          <select [name]="'operator'+i" [(ngModel)]="attr.operator" (ngModelChange)="selectChange(i, $event)" required>
-            <option value=""></option>
-            <option value="EQUAL">Equals</option>
-            <option value="GREATER_THAN_OR_EQUAL_TO">Greater than or Equal to</option>
-            <option value="LESS_THAN_OR_EQUAL_TO">Less than or Equal to</option>
-            <option value="BETWEEN">Between</option>
-            <option value="ANY">Any</option>
-          </select>
-        </div>
-      </div>
-      <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group">
-        <input type="number" min="0" [name]="'valueA'+i" [(ngModel)]="attr.operands[0]" (ngModelChange)="inputChange()" required>
-        <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
-      </div>
-      <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
-        <div>and</div>
-      </div>
-      <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group">
-        <input type="number" min="0" [name]="'valueB'+i" [(ngModel)]="attr.operands[1]" (ngModelChange)="inputChange()" required>
-        <span>{{units[node.get('subtype')]}}</span>
-      </div>
-      <div class="attr-name-color">{{labels[i]}}</div>
+    <div *ngFor="let attr of attrs.NUM; let i = index">
+      <div class="attr-name-color">{{dropdowns.labels[i]}}</div>
         <div class="container">
           <div class="dropdown-width">
             <clr-dropdown>
@@ -59,17 +32,40 @@
             <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" required>
           </div>
           <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group range-container">
-            <input class="number-container" type="number" min="0" [name]="'valueA'+i" [(ngModel)]="attr.operands[0]" (ngModelChange)="inputChange()" required>
+            <input class="number-container"
+              type="number"
+              [min]="attr.MIN"
+              [max]="attr.MAX"
+              [name]="'valueA'+i"
+              [(ngModel)]="attr.operands[0]"
+              (ngModelChange)="inputChange()"
+              required>
             <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
           </div>
           <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group and-text">
             <div>and</div>
           </div>
           <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group range-container">
-            <input class="number-container" type="number" min="0" [name]="'valueB'+i" [(ngModel)]="attr.operands[1]" (ngModelChange)="inputChange()" required>
+            <input class="number-container"
+              type="number"
+              [min]="attr.MIN"
+              [max]="attr.MAX"
+              [name]="'valueB'+i"
+              [(ngModel)]="attr.operands[1]"
+              (ngModelChange)="inputChange()"
+              required>
             <span>{{units[node.get('subtype')]}}</span>
           </div>
         </div>
+    </div>
+    <div *ngFor="let attr of attrs.CAT">
+      {{attr.conceptName}}
+      <div class="count">
+        <span class="text-muted">&#124;</span>
+        <span class="badge badge-info">
+        {{attr.estCount}}
+    </span>
+      </div>
     </div>
     <div class="count-preview ">
       <div class="row">
