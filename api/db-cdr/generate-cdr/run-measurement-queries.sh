@@ -62,7 +62,7 @@ select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as st
 cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
 'Measurement binned' as stratum_3,
 (case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
-(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else "unknown" end)end)
+(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else 'unknown' end)end)
 as stratum_4,
 COUNT(distinct co1.person_id) as count_value,
 (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
@@ -75,7 +75,7 @@ select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING
 cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
 'Measurement binned' as stratum_3,
 (case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
-(case when co1.measurement_source_concept_id in (select measurement_source_concept_id from single_unit_measurement_source_concepts) then co1.unit_source_value else "unknown" end)end)
+(case when co1.measurement_source_concept_id in (select measurement_source_concept_id from single_unit_measurement_source_concepts) then co1.unit_source_value else 'unknown' end)end)
 as stratum_4,
 COUNT(distinct co1.person_id) as count_value,
 COUNT(distinct co1.person_id) as source_count_value
@@ -100,7 +100,7 @@ from  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_source_conce
 select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
 'Measurement un-binned' as stratum_3,
 (case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
-(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else "unknown" end)end)
+(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else 'unknown' end)end)
 as stratum_4,
 COUNT(distinct co1.person_id) as count_value,
 (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
@@ -112,7 +112,7 @@ union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
 'Measurement un-binned' as stratum_3,
 (case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
-(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else "unknown" end)end)
+(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_source_concepts) then co1.unit_source_value else 'unknown' end)end)
 as stratum_4,
 COUNT(distinct co1.person_id) as count_value,
 COUNT(distinct co1.person_id) as source_count_value
@@ -258,6 +258,7 @@ group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg
 
 
 # 1900 Measurement numeric value counts (This query generates counts, source counts of the binned value and gender combination. It gets bin size from joining the achilles_results)
+# We do net yet generate the binned source counts of standard concepts
 echo "Getting measurements binned gender value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -277,7 +278,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on
 cast(m1.measurement_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_concept_id > 0
 and m1.value_as_number is not null
-and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not null
+and ar.analysis_id=3000 and ar.stratum_3 like '%Measurement%' and ar.stratum_2 is not null
 group by m1.measurement_concept_id,stratum_2,stratum_4
 union all
 select 0, 1900 as analysis_id,
@@ -295,10 +296,11 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on
 cast(m1.measurement_source_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
 and m1.value_as_number is not null
-and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not null
+and ar.analysis_id=3000 and ar.stratum_3 like '%Measurement%' and ar.stratum_2 is not null
 group by m1.measurement_source_concept_id,stratum_2,stratum_4"
 
 # 1900 Measurement string value counts (This query generates counts, source counts of the value and gender combination. It gets bin size from joining the achilles_results)
+# We do not yet generate the source counts of standard concepts
 echo "Getting measurements unbinned gender value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -328,6 +330,7 @@ group by m1.measurement_source_concept_id,m1.value_source_value,p1.gender_concep
 
 
 # 1901 Measurement numeric value counts (This query generates counts, source counts of the binned value and (age decile > 2) combination. It gets bin size from joining the achilles_results)
+# We do not yet generate the binned source counts of standard concepts
 echo "Getting measurements binned age decile value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -348,7 +351,7 @@ cast(m1.measurement_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_concept_id > 0
 and m1.value_as_number is not null
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
-and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not null
+and ar.analysis_id=3000 and ar.stratum_3 like '%Measurement%' and ar.stratum_2 is not null
 group by m1.measurement_concept_id,stratum_2,stratum_4
 union all
 select 0, 1901 as analysis_id,
@@ -366,12 +369,13 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on
 cast(m1.measurement_source_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
 and m1.value_as_number is not null
-and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not null
+and ar.analysis_id=3000 and ar.stratum_3 like '%Measurement%' and ar.stratum_2 is not null
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
 group by m1.measurement_source_concept_id,stratum_2,stratum_4"
 
 
 # 1901 Measurement numeric value counts (This query generates counts, source counts of the binned value and age decile 2. It gets bin size from joining the achilles_results)
+# We do not yet generate the binned source counts of standard concepts
 echo "Getting measurements binned age decile 2 value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -392,7 +396,7 @@ cast(m1.measurement_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_concept_id > 0
 and m1.value_as_number is not null
 and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
-and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not null
+and ar.analysis_id=3000 and ar.stratum_3 like '%Measurement%' and ar.stratum_2 is not null
 group by m1.measurement_concept_id,stratum_2,stratum_4
 union all
 select 0, 1901 as analysis_id,
@@ -410,11 +414,12 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on
 cast(m1.measurement_source_concept_id AS STRING)=ar.stratum_1
 where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
 and m1.value_as_number is not null
-and ar.analysis_id=3000 and ar.stratum_3='Measurement' and ar.stratum_2 is not null
+and ar.analysis_id=3000 and ar.stratum_3 like '%Measurement%' and ar.stratum_2 is not null
 and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
 group by m1.measurement_source_concept_id,stratum_2,stratum_4"
 
 #1901 Measurement string value counts (This query generates counts, source counts of the value and age decile > 2 combination. It gets bin size from joining the achilles_results)
+# We do not yet generate the binned source counts of standard concepts
 echo "Getting measurements unbinned age decile value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -445,6 +450,7 @@ and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id !=
 group by m1.measurement_source_concept_id,m1.value_source_value,stratum_2"
 
 #1901 Measurement string value counts (This query generates counts, source counts of the value and age decile 2. It gets bin size from joining the achilles_results)
+# We do not yet generate the binned source counts of standard concepts
 echo "Getting measurements unbinned age decile 2 value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
