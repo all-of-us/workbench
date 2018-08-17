@@ -121,6 +121,7 @@ export class SetAnnotationCreateComponent implements OnChanges {
       .do((defns: CohortAnnotationDefinition[]) =>
         this.state.annotationDefinitions.next(defns))
       .subscribe(_ => {
+        this.open = false;
         this.posting = false;
         this.onFinish.emit(true);
       });
@@ -164,4 +165,5 @@ export class SetAnnotationCreateComponent implements OnChanges {
         this.annotationOptions = data.displayName;
         this.kind.patchValue(data.value);
     }
+
 }

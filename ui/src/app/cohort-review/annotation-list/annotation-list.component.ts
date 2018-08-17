@@ -47,7 +47,6 @@ export class AnnotationListComponent implements OnChanges {
   @Input() participant;
 
   annotations$: Observable<Annotation[]>;
-
   /* Determines if the children should show the datatype of the annotation */
   showDataType = false;
 
@@ -71,5 +70,9 @@ export class AnnotationListComponent implements OnChanges {
 
   openManager(): void {
     this.state.annotationManagerOpen.next(true);
+  }
+
+  openEditManager(): void {
+    this.state.editAnnotationManagerOpen.next(true);
   }
 }

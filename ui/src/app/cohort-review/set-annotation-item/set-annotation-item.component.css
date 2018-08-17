@@ -2,6 +2,9 @@
   display: flex;
   justify-content: space-between;
   align-items: middle;
+  border-bottom: 1px solid #9B9B9B;
+  padding-bottom: 0.2rem;
+  padding-top: 0.2rem;
 }
 
 .name {
@@ -12,6 +15,16 @@
   flex: 1;
 }
 
+/*.name-edit {*/
+  /*width: 94%;*/
+/*}*/
+
 .name-edit {
-  width: 94%;
+  border: 1px solid #979797!important;
+  border-radius: 5px;
+  width:10rem;
+  padding:0.7rem;
+  font-size:10px;
+  font-weight: bold;
+  color: #9B9B9B;
 }

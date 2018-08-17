@@ -32,10 +32,18 @@ export class SetAnnotationModalComponent {
     this.state.annotationManagerOpen.next(value);
   }
 
+    get openEdit() {
+        return this.state.editAnnotationManagerOpen.getValue();
+    }
+
+    set openEdit(value: boolean) {
+        this.state.editAnnotationManagerOpen.next(value);
+    }
+
   get modalTitle() {
     return {
-      'list': 'Cohort Annotation Definitions',
-      'create': 'Create New Annotation Definition',
+      'list': 'Edit Cohort-wide Annotation',
+      'create': 'Create a Cohort-wide Annotation',
     }[this.mode];
   }
 
