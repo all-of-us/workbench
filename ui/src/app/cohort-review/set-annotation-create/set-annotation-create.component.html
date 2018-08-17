@@ -25,17 +25,17 @@
     <div class="annotation-dropdown">
       <clr-dropdown >
         <button type="button" class="btn btn-outline" clrDropdownTrigger>
-          <!--<span *ngIf = "dropdownOption.selected[i] !== ''; else elseBlock">{{dropdownOption.selected[i]}}</span>-->
-          <!--<ng-template #elseBlock>-->
+          <span *ngIf = "annotationOptions !== ''; else elseBlock">{{annotationOptions}}</span>
+            <ng-template #elseBlock>
             <span class="annotation-data-type">ANNOTATION DATA TYPE</span>
-          <!--</ng-template>-->
+          </ng-template>
           <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
-          <button
+          <button id="kind" name="kind"
                   *ngFor="let dt of datatypes"
                   [value]="dt.value"
-
+                  (click)="selectDropdownChange(dt)"
                   class="dropdown-item"
                   type="button"
                   clrDropdownItem>{{ dt.displayName }}</button>
@@ -54,33 +54,45 @@
 
   <!-- Specify the enumeration -->
   <ng-container *ngIf="isEnum">
-    <hr />
     <section class="form-block">
-      <label for="enum-values">Values</label>
-      <div class="form-group">
-        <label for="add-value">Add a Value</label>
-        <input type="text"
-          name="add-value"
-          id="add-value"
-          formControlName="addValue">
-        <button type="button"
-          class="btn btn-icon btn-sm"
-          (click)="addEnumValue()">
-          <clr-icon shape="plus" size="18"></clr-icon>
-        </button>
-      </div>
-      <ul>
-        <li *ngFor="let val of enumValues">
+      <label class="value-text" for="enum-values">Values</label>
+      <div class="">
+        <ng-container *ngFor="let val of enumValues">
+          <input type="text"
+                 class="annotation-value-input"
+                 value= {{val}}>
           <button type="button"
-            class="btn btn-icon btn-link btn-sm text-danger"
-            (click)="removeEnumValue(val)">
-            <clr-icon shape="close" size="18"></clr-icon>
+                  class="btn btn-icon btn-link btn-sm text-danger"
+                  (click)="removeEnumValue(val)">
+            <clr-icon shape="minus-circle" size="18"></clr-icon>
           </button>
-          {{ val }}
-        </li>
-      </ul>
+          <!--{{ val }}-->
+        </ng-container>
+        <!--<label for="add-value">Add a Value</label>-->
+
+      </div>
+      <!--<ul>-->
+      <input type="text"
+             class="annotation-value-input"
+             placeholder="ADD A VALUE"
+             name="add-value"
+             id="add-value"
+             formControlName="addValue">
+      <button type="button"
+              class="btn btn-icon btn-link"
+              (click)="addEnumValue()">
+        <clr-icon shape="plus-circle" size="18"></clr-icon>
+      </button>
+
+      <!--</ul>-->
     </section>
   </ng-container>
+  <app-annotation-item
+          *ngFor="let anno of (annotations$ | async)"
+          [annotation]="anno"
+          [showDataType]="showDataType">
+  </app-annotation-item>
+
   <div class="footer-button">
     <button
             type="button"
