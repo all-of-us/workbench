@@ -197,7 +197,7 @@ public class CohortMaterializationService {
     int pageSize = request.getPageSize();
     // TODO: add CDR version ID here
     // We require the client to specify requestHash here instead of hashing searchRequest itself,
-    // and use Objects.toString(statusFilter) instead of just statusFilter;
+    // and use String.valueOf(statusFilter) instead of just statusFilter;
     // both searchRequest and statusFilter contain enums, which do not have stable has codes across
     // JVMs (see [RW-1149]).
     Object[] paginationParameters = new Object[] { requestHash, String.valueOf(statusFilter) };
