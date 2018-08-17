@@ -27,7 +27,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     @select(nodeAttributes) node$;
     node: Map<any, any>;
     units = PM_UNITS;
-    attrs: any;
+    attrs = {NUM: [], CAT: []};
     attributes: any;
     dropdowns = {
         selected: ['', ''],
@@ -39,6 +39,41 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     negativeAlert = false;
     loading: boolean;
     options: any;
+
+    testAttrs = [
+      {
+        id: 1,
+        conceptId: 112345,
+        valueAsConceptId: null,
+        conceptName: 'MIN',
+        type: 'NUM',
+        estCount: '1'
+      },
+      {
+        id: 2,
+        conceptId: 12345,
+        valueAsConceptId: null,
+        conceptName: 'MAX',
+        type: 'NUM',
+        estCount: '16'
+      },
+      {
+        id: 3,
+        conceptId: 12345,
+        valueAsConceptId: 2345,
+        conceptName: 'POSITIVE',
+        type: 'CAT',
+        estCount: '465'
+      },
+      {
+        id: 4,
+        conceptId: 12345,
+        valueAsConceptId: 2346,
+        conceptName: 'PRESENT',
+        type: 'CAT',
+        estCount: '287'
+      }
+    ]
 
   constructor(private actions: CohortSearchActions) {
     this.options = [
@@ -58,8 +93,33 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
           this.node = node;
           if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
             console.log(this.node.toJS());
+            // const attrs = {NUM: [], CAT: []};
+            this.testAttrs.forEach(attr => {
+              switch (attr.type) {
+                case 'NUM':
+                  if (this.attrs.NUM.length) {
+                    this.attrs.NUM[0][attr.conceptName] = attr.estCount;
+                  } else {
+                    this.attrs.NUM.push({
+                      name: '',
+                      operator: '',
+                      operands: [null],
+                      conceptId: attr.conceptId
+                    });
+                    this.attrs.NUM[0][attr.conceptName] = attr.estCount;
+                  }
+                  break;
+                case 'CAT':
+                  if (parseInt(attr.estCount, 10) > 0) {
+                    this.attrs.CAT.push(attr);
+                  }
+              }
+            });
           } else {
-            this.attrs = this.node.get('attributes');
+            this.attrs.NUM = this.node.get('attributes');
+            if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+              this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
+            }
           }
         }));
     }
@@ -91,15 +151,15 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     }
 
   selectChange(index: number, option: any) {
-    this.attrs[index].operator = option.value;
+    this.attrs.NUM[index].operator = option.value;
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
       const other = index === 0 ? 1 : 0;
       if (option.value === 'ANY') {
-        this.attrs[other].operator = this.dropdowns.oldVals[other] = 'ANY';
+        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = 'ANY';
         this.dropdowns.selected[other] = 'Any';
       } else if (this.dropdowns.oldVals[index] === 'ANY') {
-        this.attrs[other].operator = this.dropdowns.oldVals[other] = '';
+        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = '';
         this.dropdowns.selected[other] = '';
       }
       this.dropdowns.oldVals[index] = option.value;
@@ -108,7 +168,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
 
   inputChange() {
     this.negativeAlert = false;
-    this.attrs.forEach(attr => {
+    this.attrs.NUM.forEach(attr => {
       attr.operands.forEach(operand => {
         if (operand < 0) {
           this.negativeAlert = true;
@@ -123,7 +183,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
 
   getParamWithAttributes(values: any) {
     let name = this.node.get('name', '') + ' (';
-    this.attrs.map((attr, i) => {
+    this.attrs.NUM.map((attr, i) => {
       if (i > 0) {
         name += ' / ';
       }
@@ -157,13 +217,13 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
           break;
       }
     });
-    name += (this.attrs[0].name !== 'ANY'
+    name += (this.attrs.NUM[0].name !== 'ANY'
       ? this.units[this.node.get('subtype')]
       : '') + ')';
     return this.node
       .set('parameterId', this.paramId)
       .set('name', name)
-      .set('attributes', fromJS(this.attrs));
+      .set('attributes', fromJS(this.attrs.NUM));
   }
 
   requestPreview(attrform: NgForm) {

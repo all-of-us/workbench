@@ -125,12 +125,15 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.actions.fetchAttributes(this.node);
       } else {
         const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
-          ? PREDEFINED_ATTRIBUTES.Normal.map(attr => {
-            attr.operator = null;
-            attr.operands = [null];
-            return attr;
-          })
-          : {name: '', operator: '', operands: [null], conceptId: this.node.get('conceptId', null)};
+          ? PREDEFINED_ATTRIBUTES.Normal
+          : [{
+            name: '',
+            operator: null,
+            operands: [null],
+            conceptId: this.node.get('conceptId', null),
+            MIN: 0,
+            MAX: 1000
+          }];
         this.actions.loadAttributes(this.node, attributes);
       }
     } else {
