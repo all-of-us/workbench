@@ -55,7 +55,7 @@ fi
 
 for table in ${tables[@]}; do
   echo "Dumping table : $table"
-  if [[ $table =~ ^(concept|concept_relationship|concept_ancestor)$ ]]
+  if [[ $table =~ ^(concept|concept_relationship|concept_ancestor|concept_synonym)$ ]]
   then
     bq extract $PROJECT:$DATASET.$table gs://$BUCKET/$DATASET/$table*.csv
   else
