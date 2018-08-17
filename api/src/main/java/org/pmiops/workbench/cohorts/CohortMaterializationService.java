@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -166,7 +167,6 @@ public class CohortMaterializationService {
    * @param request {@link MaterializeCohortRequest} representing the request options
    * @return {@link MaterializeCohortResponse} containing the results of cohort materialization
    */
-
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
       String cohortSpec, MaterializeCohortRequest request) {
     SearchRequest searchRequest;
@@ -196,10 +196,11 @@ public class CohortMaterializationService {
     String paginationToken = request.getPageToken();
     int pageSize = request.getPageSize();
     // TODO: add CDR version ID here
-    // We require the client to specify requestHash here instead of hashing searchRequest itself;
-    // searchRequest.hashCode() includes hashing of Enum values and is thus not stable across
+    // We require the client to specify requestHash here instead of hashing searchRequest itself,
+    // and use Objects.toString(statusFilter) instead of just statusFilter;
+    // both searchRequest and statusFilter contain enums, which do not have stable has codes across
     // JVMs (see [RW-1149]).
-    Object[] paginationParameters = new Object[] { requestHash, statusFilter };
+    Object[] paginationParameters = new Object[] { requestHash, String.valueOf(statusFilter) };
 
     if (paginationToken != null) {
       PaginationToken token = PaginationToken.fromBase64(paginationToken);
