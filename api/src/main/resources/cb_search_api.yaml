@@ -572,7 +572,6 @@ definitions:
   Attribute:
     type: object
     required:
-      - operator
       - operands
     properties:
       name:
