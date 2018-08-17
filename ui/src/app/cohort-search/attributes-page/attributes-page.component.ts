@@ -91,10 +91,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.subscription = this.preview$.subscribe(prev => this.preview = prev);
     this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
     this.subscription.add(this.node$.subscribe(node => {
-      console.log(node.toJS());
       this.node = node;
       if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
-        console.log(this.node.toJS());
         this.testAttrs.forEach(attr => {
           switch (attr.type) {
             case 'NUM':
@@ -102,7 +100,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
                 this.attrs.NUM[0][attr.conceptName] = attr.estCount;
               } else {
                 this.attrs.NUM.push({
-                  name: '',
+                  name: 'NUM',
                   operator: '',
                   operands: [null],
                   conceptId: attr.conceptId
@@ -119,7 +117,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         });
       } else {
         this.attrs.NUM = this.node.get('attributes');
-        console.log(this.attrs);
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
           this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
         }
@@ -132,7 +129,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   toggleRadio() {
-    console.log('click');
     this.attrs.EXISTS = !this.attrs.EXISTS;
   }
 
@@ -170,47 +166,69 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
 
   getParamWithAttributes(values: any) {
     let name = this.node.get('name', '') + ' (';
-    this.attrs.NUM.map((attr, i) => {
+    let attrs = [];
+    this.attrs.NUM.forEach((attr, i) => {
+      const paramAttr = {
+        name: attr.name,
+        operator: attr.operator,
+        operands: attr.operands,
+        conceptId: attr.conceptId
+      };
       if (i > 0) {
         name += ' / ';
       }
-      name += (attr.name !== '' ? attr.name + ' ' : '');
+      name += (attr.name !== '' && values['operator' + i] !== 'ANY') ? attr.name + ' ' : '';
       switch (values['operator' + i]) {
         case 'ANY':
-          attr.operator = 'ANY';
-          attr.operands = [];
-          attr.name = 'ANY';
+          paramAttr.operands = [];
+          paramAttr.name = 'ANY';
           name += 'Any';
           break;
         case 'BETWEEN':
-          attr.operator = Operator.BETWEEN;
-          attr.operands = [values['valueA' + i], values['valueB' + i]];
+          paramAttr.operator = Operator.BETWEEN;
+          paramAttr.operands = [values['valueA' + i], values['valueB' + i]];
           name += values['valueA' + i] + '-' + values['valueB' + i];
           break;
         case 'EQUAL':
-          attr.operator = Operator.EQUAL;
-          attr.operands = [values['valueA' + i]];
+          paramAttr.operator = Operator.EQUAL;
+          paramAttr.operands = [values['valueA' + i]];
           name += '= ' + values['valueA' + i];
           break;
         case 'LESS_THAN_OR_EQUAL_TO':
-          attr.operator = Operator.LESSTHANOREQUALTO;
-          attr.operands = [values['valueA' + i]];
+          paramAttr.operator = Operator.LESSTHANOREQUALTO;
+          paramAttr.operands = [values['valueA' + i]];
           name += '<= ' + values['valueA' + i];
           break;
         case 'GREATER_THAN_OR_EQUAL_TO':
-          attr.operator = Operator.GREATERTHANOREQUALTO;
-          attr.operands = [values['valueA' + i]];
+          paramAttr.operator = Operator.GREATERTHANOREQUALTO;
+          paramAttr.operands = [values['valueA' + i]];
           name += '>= ' + values['valueA' + i];
           break;
       }
+      attrs.push(paramAttr);
     });
-    name += (this.attrs.NUM[0].name !== 'ANY'
+    const catAttr = {name: 'CAT', operator: Operator.IN, operands: []};
+    this.attrs.CAT.forEach(attr => {
+      if (attr.checked) {
+        catAttr.operands.push(attr.valueAsConceptId);
+      }
+    });
+    if (catAttr.operands.length) {
+      attrs.push(catAttr);
+    }
+    if (this.attrs.NUM.length && this.attrs.CAT.length) {
+      attrs = attrs.map(attr => {
+        attr.name = 'BOTH';
+        return attr;
+      });
+    }
+    name += (attrs[0].name !== 'ANY'
       ? this.units[this.node.get('subtype')]
       : '') + ')';
     return this.node
       .set('parameterId', this.paramId)
       .set('name', name)
-      .set('attributes', fromJS(this.attrs.NUM));
+      .set('attributes', fromJS(attrs));
   }
 
   requestPreview(attrform: NgForm) {
