@@ -18,11 +18,12 @@ input[type=text]:not([readonly]):focus {
 }
 
 .annotation-input-container {
-  height: 22vh;
+  height: 11vh;
 }
 
 .footer-button {
   margin-left: 10rem;
+  margin-top: 4rem;
 }
 .footer-button .cancel{
   color:black;
@@ -49,6 +50,22 @@ input[type=text]:not([readonly]):focus {
 }
 
 .annotation-data-type {
+  font-size:10px;
+  font-weight: bold;
+  color: #9B9B9B;
+}
+
+.value-text {
+  color:#224F83;
+  font-weight: bold;
+  padding-bottom: 0.7rem;
+}
+
+.annotation-value-input {
+  border: 1px solid #979797!important;
+  border-radius: 5px;
+  width:16.4rem;
+  padding:0.7rem;
   font-size:10px;
   font-weight: bold;
   color: #9B9B9B;

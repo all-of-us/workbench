@@ -1,22 +1,28 @@
-<div class="wrapper">
+<div>
   <div [ngSwitch]="annotation.definition.annotationType">
 
     <!-- STRING, DATE, INTEGER all rely on the blur event to update the annotation -->
     <div *ngSwitchCase="kinds.STRING">
-      <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main">
+      <div>
+        <label [for]="machineName" class="flex-container ">
+        <span class="flex-content-main items-text">
           {{ annotation.definition.columnName }}
-          <em>{{ datatypeDisplay | titlecase }}</em>
+          <!--<em>{{datatypeDisplay | titlecase }}</em>-->
         </span>
-        <clr-icon shape="caret" dir="down" (click)="toggleExpandText()"></clr-icon>
-      </label>
-      <input *ngIf="!expandText"
-        type="text"
-        (blur)="handleInput()"
-        [name]="machineName"
-        [id]="machineName"
-        [formControl]="control">
-        <textarea *ngIf="expandText"
+          <!--<clr-icon shape="caret" dir="down" (click)="toggleExpandText()"></clr-icon>-->
+        </label>
+      </div>
+
+      <!--*ngIf="!expandText"-->
+      <!--<input-->
+        <!--class="text-wrapper"-->
+        <!--type="text"-->
+        <!--(blur)="handleInput()"-->
+        <!--[name]="machineName"-->
+        <!--[id]="machineName"-->
+        <!--[formControl]="control">-->
+        <textarea
+          class="textarea-wrapper"
           (blur)="handleInput()"
           [name]="machineName"
           [id]="machineName"
@@ -26,9 +32,9 @@
 
     <div *ngSwitchCase="kinds.DATE">
       <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main">
+        <span class="flex-content-main items-text">
           {{ annotation.definition.columnName }}
-          <em>{{ datatypeDisplay | titlecase }}</em>
+          <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
         </span>
       </label>
       <!--<input type="date" id="myDate" name="myDate" [(ngModel)]="myDate" [formControl]="control"  clrDate>-->
@@ -48,9 +54,9 @@
 
     <div *ngSwitchCase="kinds.INTEGER">
       <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main">
+        <span class="flex-content-main items-text">
           {{ annotation.definition.columnName }}
-          <em>{{ datatypeDisplay | titlecase }}</em>
+          <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
         </span>
       </label>
       <input
@@ -64,9 +70,9 @@
     <!-- ENUM and BOOLEAN rely on the change event to update the annotation -->
     <div *ngSwitchCase="kinds.ENUM">
       <label [for]="machineName" class="flex-container">
-        <span class="flex-content-main">
+        <span class="flex-content-main items-text">
           {{ annotation.definition.columnName }}
-          <em>{{ datatypeDisplay | titlecase }}</em>s
+          <!--<em>{{ datatypeDisplay | titlecase }}</em>s-->
         </span>
       </label>
       <!--<h1>check</h1>-->
@@ -117,4 +123,5 @@
         </label>
       </div>
     </div>
+</div>
 </div>

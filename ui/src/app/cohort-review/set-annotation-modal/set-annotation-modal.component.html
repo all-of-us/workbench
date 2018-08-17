@@ -8,13 +8,14 @@
   <!-- The modal operates in one of two modes: show a list, or show a create form -->
   <div class="modal-body">
 
-    <!-- New set annotation form -->
+     <!--New set annotation form -->
     <!--<div *ngIf="mode ==='create'">-->
       <!-- onFinish is just a sentinal to indicate the form is done -->
       <app-set-annotation-create (onFinish)="mode = 'list'"></app-set-annotation-create>
     <!--</div>-->
 
     <!-- Show the set annotation list -->
+    <!--<div *ngIf="mode === 'list'">-->
     <!--<div *ngIf="mode === 'list'">-->
       <!--<app-set-annotation-list></app-set-annotation-list>-->
     <!--</div>-->

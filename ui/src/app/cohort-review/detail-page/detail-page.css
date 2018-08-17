@@ -42,9 +42,9 @@
 
 .sidebar-content.sidebar-open {
   /*margin-left: 0.25rem;*/
-  width: 383px;
+  width: 413px;
   border-left: 1rem solid #728FA3;
-  padding-left: 0.3rem;
+  padding-left: 0.5rem;
 }
 
 .sidebar-handle.sidebar-open {
