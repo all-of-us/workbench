@@ -82,7 +82,7 @@ clr-dropdown > button {
   font-size: 0.5rem;
   line-height: 0.8rem;
   margin: 0;
-  padding: 0;
+  padding: 0 0 1rem 0;
 }
 
 .paragraph-text a {
@@ -125,4 +125,8 @@ clr-dropdown > button {
 
 .loading-users {
   padding-top: 1rem;
+}
+
+.modal-title-text {
+  margin-top: 0;
 }
