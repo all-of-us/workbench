@@ -110,9 +110,10 @@ public class ConceptService {
                                 // Not a long, don't try to match it to a concept ID.
                             }
 
+                            predicates.add(criteriaBuilder.or(conceptCodeID.toArray(new Predicate[0])));
                         }
 
-                        predicates.add(criteriaBuilder.or(conceptCodeID.toArray(new Predicate[0])));
+
                     }
 
                         // Optionally filter on standard concept, vocabulary ID, domain ID
