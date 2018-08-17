@@ -14,7 +14,7 @@ import {
   subtreeSelected,
   wizardOpen,
 } from '../redux';
-import {typeToTitle} from '../utils';
+import {stripHtml, typeToTitle} from '../utils';
 
 
 @Component({
@@ -151,5 +151,9 @@ export class ModalComponent implements OnInit, OnDestroy {
     return title
       ? `Add Selected ${title} Criteria to Cohort`
       : 'No Selection';
+  }
+
+  get attributeTitle() {
+    return stripHtml(this.attributesNode.get('name'));
   }
 }

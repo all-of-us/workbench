@@ -9,6 +9,13 @@
 </div>
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
+    <div *ngIf="node.get('type') === criteriaTypes.MEAS">
+      <div class="attr-name-color">Labs</div>
+      <div class="radio" (click)="toggleRadio()">
+        <input type="radio" [value]="true" name="labExists" [(ngModel)]="attrs.EXISTS">
+        <label>Any value (lab exists)</label>
+      </div>
+    </div>
     <div *ngFor="let attr of attrs.NUM; let i = index">
       <div class="attr-name-color">{{dropdowns.labels[i]}}</div>
         <div class="container">
@@ -41,6 +48,9 @@
               (ngModelChange)="inputChange()"
               required>
             <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
+            <span *ngIf="node.get('type') === criteriaTypes.MEAS">
+              Range: {{attr.MIN}} - {{attr.MAX}}
+            </span>
           </div>
           <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group and-text">
             <div>and</div>
@@ -54,26 +64,31 @@
               [(ngModel)]="attr.operands[1]"
               (ngModelChange)="inputChange()"
               required>
-            <span>{{units[node.get('subtype')]}}</span>
+            <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
+            <span *ngIf="node.get('type') === criteriaTypes.MEAS">
+              Range: {{attr.MIN}} - {{attr.MAX}}
+            </span>
           </div>
         </div>
     </div>
-    <div *ngFor="let attr of attrs.CAT">
-      {{attr.conceptName}}
-      <div class="count">
-        <span class="text-muted">&#124;</span>
-        <span class="badge badge-info">
-        {{attr.estCount}}
-    </span>
+    <ng-container *ngIf="attrs.CAT.length">
+      <div class="attr-name-color">Categorical Values</div>
+      <div class="form-group">
+        <clr-checkbox *ngFor="let attr of attrs.CAT" [clrChecked]="attr.checked" [clrInline]="true">
+          {{attr.conceptName}}
+          <span class="badge badge-info">
+            {{ attr.estCount }}
+          </span>
+        </clr-checkbox>
       </div>
-    </div>
+    </ng-container>
     <div class="count-preview ">
       <div class="row">
         <div class="col-lg-2 ">
           <button type="button"
-                  class="btn calculate-btn"
-                  [disabled]="!attrForm.valid || negativeAlert"
-                  (click)="requestPreview(attrForm)">
+            class="btn calculate-btn"
+            [disabled]="!attrForm.valid || negativeAlert"
+            (click)="requestPreview(attrForm)">
             Calculate
           </button>
         </div>

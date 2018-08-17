@@ -125,7 +125,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.actions.fetchAttributes(this.node);
       } else {
         const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
-          ? PREDEFINED_ATTRIBUTES.Normal
+          ? PREDEFINED_ATTRIBUTES.BP_DETAIL
           : [{
             name: '',
             operator: null,

@@ -1,12 +1,12 @@
 import {select} from '@angular-redux/store';
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NgForm} from '@angular/forms';
 
 import {fromJS, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
-    attributesPreviewStatus,
+  attributesPreviewStatus,
   CohortSearchActions,
   isAttributeLoading,
   nodeAttributes,
@@ -21,26 +21,28 @@ import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PM_UNITS} from '../constant';
   templateUrl: './attributes-page.component.html',
   styleUrls: ['./attributes-page.component.css']
 })
-export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
-    @select(attributesPreviewStatus) preview$;
-    @select(isAttributeLoading) loading$;
-    @select(nodeAttributes) node$;
-    node: Map<any, any>;
-    units = PM_UNITS;
-    attrs = {NUM: [], CAT: []};
-    attributes: any;
-    dropdowns = {
-        selected: ['', ''],
-        oldVals: ['', ''],
-        labels: ['', '']
-    };
-    preview = Map();
-    subscription: Subscription;
-    negativeAlert = false;
-    loading: boolean;
-    options: any;
+export class AttributesPageComponent implements OnDestroy, OnInit {
+  @select(attributesPreviewStatus) preview$;
+  @select(isAttributeLoading) loading$;
+  @select(nodeAttributes) node$;
+  node: Map<any, any>;
+  units = PM_UNITS;
+  attrs = {EXISTS: true, NUM: [], CAT: []};
+  attributes: any;
+  dropdowns = {
+      selected: ['', ''],
+      oldVals: ['', ''],
+      labels: ['', '']
+  };
+  preview = Map();
+  subscription: Subscription;
+  negativeAlert = false;
+  loading: boolean;
+  options: any;
 
-    testAttrs = [
+  readonly criteriaTypes = CRITERIA_TYPES;
+
+  testAttrs = [
       {
         id: 1,
         conceptId: 112345,
@@ -85,72 +87,57 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     ];
   }
 
-    ngOnInit() {
-        this.subscription = this.preview$.subscribe(prev => this.preview = prev);
-        this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
-        this.subscription.add(this.node$.subscribe(node => {
-          console.log(node.toJS());
-          this.node = node;
-          if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
-            console.log(this.node.toJS());
-            // const attrs = {NUM: [], CAT: []};
-            this.testAttrs.forEach(attr => {
-              switch (attr.type) {
-                case 'NUM':
-                  if (this.attrs.NUM.length) {
-                    this.attrs.NUM[0][attr.conceptName] = attr.estCount;
-                  } else {
-                    this.attrs.NUM.push({
-                      name: '',
-                      operator: '',
-                      operands: [null],
-                      conceptId: attr.conceptId
-                    });
-                    this.attrs.NUM[0][attr.conceptName] = attr.estCount;
-                  }
-                  break;
-                case 'CAT':
-                  if (parseInt(attr.estCount, 10) > 0) {
-                    this.attrs.CAT.push(attr);
-                  }
+  ngOnInit() {
+    this.subscription = this.preview$.subscribe(prev => this.preview = prev);
+    this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
+    this.subscription.add(this.node$.subscribe(node => {
+      console.log(node.toJS());
+      this.node = node;
+      if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+        console.log(this.node.toJS());
+        this.testAttrs.forEach(attr => {
+          switch (attr.type) {
+            case 'NUM':
+              if (this.attrs.NUM.length) {
+                this.attrs.NUM[0][attr.conceptName] = attr.estCount;
+              } else {
+                this.attrs.NUM.push({
+                  name: '',
+                  operator: '',
+                  operands: [null],
+                  conceptId: attr.conceptId
+                });
+                this.attrs.NUM[0][attr.conceptName] = attr.estCount;
               }
-            });
-          } else {
-            this.attrs.NUM = this.node.get('attributes');
-            if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
-              this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
-            }
+              break;
+            case 'CAT':
+              if (parseInt(attr.estCount, 10) > 0) {
+                attr['checked'] = false;
+                this.attrs.CAT.push(attr);
+              }
           }
-        }));
-    }
+        });
+      } else {
+        this.attrs.NUM = this.node.get('attributes');
+        console.log(this.attrs);
+        if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+          this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
+        }
+      }
+    }));
+  }
 
-    ngOnDestroy() {
-        this.subscription.unsubscribe();
-    }
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
-    ngOnChanges(changes: SimpleChanges) {
-        // if (changes.node.currentValue.size) {
-        //     const currentNode = changes.node.currentValue;
-        //     if (currentNode.get('subtype') === CRITERIA_SUBTYPES.BP) {
-        //         this.attrs = currentNode.get('predefinedAttributes').toJS();
-        //         this.attrs.map(attr => {
-        //             attr.operator = '';
-        //             attr.operands = [null];
-        //             this.labels.push(attr.name);
-        //         });
-        //     } else {
-        //         this.labels = [''];
-        //         this.attrs = [{
-        //             name: '',
-        //             operator: '',
-        //             operands: [null],
-        //             conceptId: currentNode.get('conceptId', null)
-        //         }];
-        //     }
-        // }
-    }
+  toggleRadio() {
+    console.log('click');
+    this.attrs.EXISTS = !this.attrs.EXISTS;
+  }
 
   selectChange(index: number, option: any) {
+      this.attrs.EXISTS = false;
     this.attrs.NUM[index].operator = option.value;
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
