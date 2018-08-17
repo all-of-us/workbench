@@ -79,7 +79,7 @@ input[type=text]:not([readonly]):focus {
   width: 1rem;
   height: 1rem;
   position: absolute;
-  left: 7.4rem;
+  left: 7rem;
   top: 0rem;
 }
 
@@ -124,4 +124,9 @@ input[type=text]:not([readonly]):focus {
   padding: 0.6rem;
   border-radius: 0.2rem;
   width: 9rem;
+}
+
+.datepicker-trigger .datepicker-trigger-icon {
+  width: 2rem;
+  height: 1rem;
 }

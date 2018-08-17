@@ -1,10 +1,10 @@
-<div class="container" [class.is-posting]="posting">
-  <div class="item">
-    <span class="name">Name</span>
-    <span class="type">Type</span>
-    <span class="delete">Remove</span>
-  </div>
-  <hr />
+<div *ngIf="definitions.length !== 0" class="container" [class.is-posting]="posting">
+  <!--<div class="item">-->
+    <!--<span class="name">Name</span>-->
+    <!--<span class="type">Type</span>-->
+    <!--<span class="delete">Remove</span>-->
+  <!--</div>-->
+  <!--<hr />-->
 
   <app-set-annotation-item
     *ngFor="let defn of definitions"
@@ -19,4 +19,22 @@
   <div *ngIf="posting" class="spinner spinner-md spin-in-overlay">
     Loading...
   </div>
+
+</div>
+
+
+<div class="footer-button">
+  <button
+          type="button"
+          class="btn btn-link cancel"
+          (click)="openEdit = false">
+    Cancel
+  </button>
+  <button
+          type="button"
+          class="btn btn-primary"
+  >
+    Save
+  </button>
+
 </div>

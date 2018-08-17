@@ -30,3 +30,13 @@
   top: 50%;
   right: 50%;
 }
+
+.footer-button {
+  margin-left: 10rem;
+  margin-top: 3rem;
+}
+.footer-button .cancel{
+  color:black;
+  font-weight: 500;
+  font-size: 14px;
+}

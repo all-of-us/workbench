@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -14,11 +14,10 @@ type DefnId = CohortAnnotationDefinition['cohortAnnotationDefinitionId'];
   templateUrl: './set-annotation-list.component.html',
   styleUrls: ['./set-annotation-list.component.css']
 })
-export class SetAnnotationListComponent implements OnInit, OnDestroy {
+export class SetAnnotationListComponent  {
   subscription: Subscription;
   definitions: CohortAnnotationDefinition[];
   postSet: Set<DefnId> = new Set<DefnId>();
-
   constructor(private state: ReviewStateService) {}
 
   ngOnInit() {
@@ -42,4 +41,12 @@ export class SetAnnotationListComponent implements OnInit, OnDestroy {
   get posting() {
     return this.postSet.size > 0;
   }
+
+    get openEdit() {
+        return this.state.editAnnotationManagerOpen.getValue();
+    }
+
+    set openEdit(value: boolean) {
+        this.state.editAnnotationManagerOpen.next(value);
+    }
 }
