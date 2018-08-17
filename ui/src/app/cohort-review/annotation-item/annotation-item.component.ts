@@ -114,8 +114,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
   get valuePropertyName() {
     return {
       [AnnotationType.STRING]:   'annotationValueString',
-      [AnnotationType.ENUM]:     'annotationValueEnum',
       [AnnotationType.DATE]:     'annotationValueDate',
+      [AnnotationType.ENUM]:     'annotationValueEnum',
       [AnnotationType.BOOLEAN]:  'annotationValueBoolean',
       [AnnotationType.INTEGER]:  'annotationValueInteger'
     }[this.annotation.definition.annotationType];
