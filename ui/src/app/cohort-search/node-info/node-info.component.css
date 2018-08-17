@@ -6,9 +6,7 @@
 }
 
 .selection-button {
-  color: rgb(98, 164, 32);
   align-self: center;
-
   /* Redo clarity's .btn styles */
   margin: 0;
   padding: 0;
@@ -28,11 +26,17 @@
 
 .selection-icon {
   margin: calc((1.25rem - 20px) / 2);
+  color: rgb(98, 164, 32);
+}
+
+selection-icon-blue {
+  margin: calc((1.25rem - 20px) / 2);
+  color: #216FB4;
 }
 
 .code {
   white-space: nowrap;
-  font-size: smaller;
+  font-size: 14px;
 }
 
 .name {
@@ -41,7 +45,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   margin: 0 0.2rem;
-  font-size: smaller;
+  font-size: 14px;
 }
 
 .count {

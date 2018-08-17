@@ -67,9 +67,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
-  private static final Pattern NOTEBOOK_PATTERN = Pattern.compile("(.+(\\.(?i)(ipynb))$)");
   // "directory" for notebooks, within the workspace cloud storage bucket.
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
+  private static final Pattern NOTEBOOK_PATTERN =
+      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;

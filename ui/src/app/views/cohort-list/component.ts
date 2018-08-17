@@ -19,7 +19,6 @@ import {
 })
 export class CohortListComponent implements OnInit, OnDestroy {
   accessLevel: WorkspaceAccessLevel;
-  awaitingReview: boolean;
   cohortList: Cohort[] = [];
   workspace: Workspace;
   cohortsLoading = true;
@@ -40,8 +39,6 @@ export class CohortListComponent implements OnInit, OnDestroy {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
-    const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.awaitingReview = reviewRequested && !approved;
   }
 
   ngOnInit(): void {
@@ -71,9 +68,7 @@ export class CohortListComponent implements OnInit, OnDestroy {
   }
 
   buildCohort(): void {
-    if (!this.awaitingReview) {
-      this.router.navigate(['build'], {relativeTo: this.route});
-    }
+    this.router.navigate(['build'], {relativeTo: this.route});
   }
 
   openCohort(cohort: Cohort): void {
@@ -105,6 +100,6 @@ export class CohortListComponent implements OnInit, OnDestroy {
   }
 
   get actionsDisabled(): boolean {
-    return !this.writePermission || this.awaitingReview;
+    return !this.writePermission;
   }
 }

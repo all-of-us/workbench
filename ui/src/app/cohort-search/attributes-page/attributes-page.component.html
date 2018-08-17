@@ -14,7 +14,7 @@
   <section class="form-block">
     <div *ngFor="let attr of attrs; let i = index">
       <div class="form-group">
-        <label>{{attr.name}}</label>
+        <label>{{labels[i]}}</label>
         <div class="select">
           <select [name]="'operator'+i" [(ngModel)]="attr.operator" (ngModelChange)="selectChange(i, $event)" required>
             <option value=""></option>
@@ -37,23 +37,68 @@
         <input type="number" min="0" [name]="'valueB'+i" [(ngModel)]="attr.operands[1]" (ngModelChange)="inputChange()" required>
         <span>{{units[node.get('subtype')]}}</span>
       </div>
+      <div class="attr-name-color">{{labels[i]}}</div>
+        <div class="container">
+          <div class="dropdown-width">
+            <clr-dropdown>
+              <button type="button" class="btn btn-outline" clrDropdownTrigger>
+                <span *ngIf="attr.operator === ''">Select Operator</span>
+                <span *ngIf="attr.operator !== ''">{{dropdowns.selected[i]}}</span>
+                <clr-icon shape="caret down"></clr-icon>
+              </button>
+              <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+                <button
+                *ngFor="let option of options"
+                [name]="'operator'+i"
+                (click)="selectChange(i, option)"
+                class="dropdown-item"
+                type="button"
+                clrDropdownItem>{{option.name}}</button>
+              </clr-dropdown-menu>
+            </clr-dropdown>
+            <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" required>
+          </div>
+          <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group range-container">
+            <input class="number-container" type="number" min="0" [name]="'valueA'+i" [(ngModel)]="attr.operands[0]" (ngModelChange)="inputChange()" required>
+            <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
+          </div>
+          <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group and-text">
+            <div>and</div>
+          </div>
+          <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group range-container">
+            <input class="number-container" type="number" min="0" [name]="'valueB'+i" [(ngModel)]="attr.operands[1]" (ngModelChange)="inputChange()" required>
+            <span>{{units[node.get('subtype')]}}</span>
+          </div>
+        </div>
     </div>
-    <div class="count-preview">
-      <button type="button"
-              class="btn"
-              [disabled]="!attrForm.valid || negativeAlert"
-              (click)="requestPreview(attrForm)">
-        Calculate
-      </button>
-      Number Participants:
-      <span *ngIf="!preview.get('requesting')">
-        {{ preview.get('count', 0) | number }}
-      </span>
-      <span *ngIf="preview.get('requesting')" class="spinner spinner-inline">
-        Loading...
-      </span>
+    <div class="count-preview ">
+      <div class="row">
+        <div class="col-lg-2 ">
+          <button type="button"
+                  class="btn calculate-btn"
+                  [disabled]="!attrForm.valid || negativeAlert"
+                  (click)="requestPreview(attrForm)">
+            Calculate
+          </button>
+        </div>
+        <div class="spin-top-padding">
+          <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading...   </span>
+        </div>
+        <div class="col-lg-7 text-padding" *ngIf="preview.get('count') >= 0">
+          <div class="result-text">
+            Results
+          </div>
+           <div >
+              Number Participants:
+             <span class="text-bold" *ngIf="!preview.get('requesting')">
+             {{ preview.get('count', 0)  | number }}
+             </span>
+          </div>
+        </div>
+        <div class="col-lg-3 button-padding" *ngIf="preview.get('count')">
+          <button class="btn add-button " type="submit" [disabled]="!attrForm.valid || negativeAlert"> ADD THIS RESULT</button>
+        </div>
+      </div>
     </div>
-    <button class="btn btn-link" type="button" (click)="cancel()">Cancel</button>
-    <button class="btn btn-primary" type="submit" [disabled]="!attrForm.valid || negativeAlert">Add Item</button>
   </section>
 </form>
