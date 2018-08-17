@@ -32,14 +32,14 @@ public class QuestionConcept {
 
     /* Todo Find right place for these static things to be generated from db if possible and live */
     public static void setAgeStratumNameMap() {
-        ageStratumNameMap.put("1", "0-18 yrs old");
-        ageStratumNameMap.put("2", "18-29 yrs old");
-        ageStratumNameMap.put("3", "30-39 yrs old");
-        ageStratumNameMap.put("4", "40-49 yrs old");
-        ageStratumNameMap.put("5", "50-59 yrs old");
-        ageStratumNameMap.put("6", "60-69 yrs old");
-        ageStratumNameMap.put("7", "70-79 yrs old");
-        ageStratumNameMap.put("8", "80-89 yrs old");
+        ageStratumNameMap.put("1", "0-18");
+        ageStratumNameMap.put("2", "18-29");
+        ageStratumNameMap.put("3", "30-39");
+        ageStratumNameMap.put("4", "40-49");
+        ageStratumNameMap.put("5", "50-59");
+        ageStratumNameMap.put("6", "60-69");
+        ageStratumNameMap.put("7", "70-79");
+        ageStratumNameMap.put("8", "80-89");
     }
     public static void setGenderStratumNameMap() {
         /* This is to slow to use the db */

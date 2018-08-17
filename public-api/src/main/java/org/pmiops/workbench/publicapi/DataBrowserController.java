@@ -45,12 +45,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private ConceptService conceptService;
 
 
-    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao) {
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
         this.dbDomainDao = dbDomainDao;
         this.achillesResultDao = achillesResultDao;
         this.achillesAnalysisDao = achillesAnalysisDao;
+        this.achillesResultDistDao = achillesResultDistDao;
     }
 
 
@@ -310,10 +311,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
-    public ResponseEntity<DbDomainListResponse> getDomainSearchResults(String keyword){
+    public ResponseEntity<DbDomainListResponse> getDomainSearchResults(String query){
 
-        keyword = ConceptService.modifyMultipleMatchKeyword(keyword);
-        List<DbDomain> domains = dbDomainDao.findDomainSearchResults(keyword);
+        String keyword = ConceptService.modifyMultipleMatchKeyword(query);
+        List<DbDomain> domains = new ArrayList<>();
+        domains = dbDomainDao.findDomainSearchResults(keyword);
+        if(domains.size() == 0){
+            domains = dbDomainDao.findDomainSearchResults(query);
+        }
         DbDomainListResponse resp = new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
@@ -371,7 +376,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 if(con.getSynonyms() != null){
                     response.setMatchType(MatchType.NAME);
                     for(ConceptSynonym conceptSynonym:con.getSynonyms()){
-                        if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName())){
+                        if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
                             conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
                         }
                     }
@@ -606,7 +611,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
             if(isMeasurement){
                 AchillesAnalysis analysis = achillesAnalysisDao.findAnalysisById(MEASUREMENT_DIST_ANALYSIS_ID);
-                List<AchillesResultDist> achillesResultDistList = achillesResultDistDao.fetchDistributionResults(MEASUREMENT_DIST_ANALYSIS_ID,conceptId);
+                List<AchillesResultDist> achillesResultDistList = achillesResultDistDao.fetchConceptDistResults(MEASUREMENT_DIST_ANALYSIS_ID,conceptId);
                 analysis.setDistResults(achillesResultDistList);
                 conceptAnalysis.setMeasurementDistributionAnalysis(TO_CLIENT_ANALYSIS.apply(analysis));
             }

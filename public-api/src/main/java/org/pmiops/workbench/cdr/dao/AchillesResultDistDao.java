@@ -9,7 +9,7 @@ public interface AchillesResultDistDao extends CrudRepository<AchillesResultDist
     List<AchillesResultDist> findAll();
 
     @Query(value = "select * from achilles_results_dist where analysis_id=?1 and stratum_1=?2",nativeQuery=true)
-    List<AchillesResultDist> fetchDistributionResults(Long analysisId, String conceptId);
+    List<AchillesResultDist> fetchConceptDistResults(Long analysisId, String conceptId);
 
 }
 

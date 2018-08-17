@@ -87,25 +87,21 @@ public class ConceptService {
                     nonStandardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                             criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
-                    // If the concepts that match the synonym names are found, they are fetched by applying standard concept filer, domain and vocabulary id filters
+                    // Apply the synonyms filter if any synonym concepts are found, else apply query/ concept code/ id filters
 
                     if(synonymConceptIds.size() > 0){
                         List<Predicate> synonymConceptPredicate = new ArrayList<>();
                         Expression<Long> conceptIdCheck = root.get("conceptId");
                         synonymConceptPredicate.add(conceptIdCheck.in(synonymConceptIds));
+                        predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
                         if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS) || standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
                                 predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
-                                predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
                         } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
-                            predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
                             predicates.add(criteriaBuilder.or(
                                             criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
                                             criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))));
-                        }else {
-                            predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
                         }
                     }
-                    //Else, the concept code/ id/ name is matched against the query and the standard concept filter, domain and vocabulary id filters are applied
                     else{
                         List<Predicate> conceptCodeIDName = new ArrayList<>();
                         Expression<Double> matchExp = null;

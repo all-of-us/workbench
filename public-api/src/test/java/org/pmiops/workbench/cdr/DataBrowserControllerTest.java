@@ -19,6 +19,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.DbDomainDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
 import org.pmiops.workbench.cdr.dao.AchillesResultDao;
@@ -435,6 +436,8 @@ public class DataBrowserControllerTest {
     private AchillesResultDao achillesResultDao;
     @Autowired
     private ConceptSynonymDao conceptSynonymDao;
+    @Autowired
+    private AchillesResultDistDao achillesResultDistDao;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -446,7 +449,7 @@ public class DataBrowserControllerTest {
     public void setUp() {
         saveData();
         ConceptService conceptService = new ConceptService(entityManager);
-        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao);
+        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao);
     }
 
 
@@ -627,16 +630,6 @@ public class DataBrowserControllerTest {
         assertThat(concepts)
                 .containsExactly(CONCEPT_2)
                 .inOrder();
-    }
-
-    @Test
-    public void testGetMeasurementAnalysisOneMatch() throws Exception{
-        ArrayList<String> queryConceptIds = new ArrayList<String>();
-        queryConceptIds.add("137989");
-        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(queryConceptIds);
-        List<ConceptAnalysis> conceptAnalysisList = response.getBody().getItems();
-        Analysis ageAnalysis = conceptAnalysisList.get(0).getMeasurementValueAgeAnalysis();
-        assertThat(ageAnalysis).isNotEqualTo(null);
     }
 
     @Test
