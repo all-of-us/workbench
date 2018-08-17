@@ -74,7 +74,7 @@
     <ng-container *ngIf="attrs.CAT.length">
       <div class="attr-name-color">Categorical Values</div>
       <div class="form-group">
-        <clr-checkbox *ngFor="let attr of attrs.CAT" [clrChecked]="attr.checked" [clrInline]="true">
+        <clr-checkbox *ngFor="let attr of attrs.CAT" [(clrChecked)]="attr.checked" [clrInline]="true">
           {{attr.conceptName}}
           <span class="badge badge-info">
             {{ attr.estCount }}

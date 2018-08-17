@@ -328,11 +328,12 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SHOW_ATTRIBUTES_PAGE:
         return state
-          .setIn(['wizard', 'item', 'attributes', 'loading'], true)
-          .deleteIn(['wizard', 'calculate', 'count']);
+          .setIn(['wizard', 'item', 'attributes', 'loading'], true);
 
       case HIDE_ATTRIBUTES_PAGE:
-        return state.setIn(['wizard', 'item', 'attributes', 'node'], Map());
+        return state
+          .setIn(['wizard', 'item', 'attributes', 'node'], Map())
+          .deleteIn(['wizard', 'calculate', 'count']);
 
         case REMOVE_ITEM: {
         state = state
