@@ -137,6 +137,9 @@ task generate_local_appengine_web_xml(type: Exec) {
 
 configurations {
   generatedCompile
+  all {
+    exclude group: 'com.google.guava', module:'guava-jdk5'
+  }
 }
 
 project.ext.GAE_VERSION = '1.9.64'
@@ -263,9 +266,7 @@ dependencies {
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
   compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
-  compile ('com.google.cloud:google-cloud-storage:1.8.0') {
-    exclude group: 'com.google.guava', module:'guava-jdk5'
-  }
+  compile 'com.google.cloud:google-cloud-storage:1.8.0'
   compile 'com.google.code.gson:gson:2.8.5'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
   compile 'com.squareup.okhttp:okhttp:2.7.4'
