@@ -88,7 +88,7 @@ public class ConceptService {
             if (conceptIds.isEmpty() ) {
                 // Find by name or synonm
                conceptIds = conceptDao.findConceptSynonyms(query);
-               if (! conceptIds.isEmpty()) { matchType = codeorId; }
+               if (! conceptIds.isEmpty()) { matchType = name; }
             }
         }
 
@@ -98,7 +98,7 @@ public class ConceptService {
         // Search within a search ... Anyway, don't worry about that now.  But it would just work with some initialization
         // of conceptIds and query at the right time
 
-        
+
 
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
