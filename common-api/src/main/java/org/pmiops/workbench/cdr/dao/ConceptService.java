@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
 import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -71,6 +72,33 @@ public class ConceptService {
     public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
     public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount, List<Long> synonymConceptIds) {
+
+        // Peter Changes : Try something like this pseuedo code
+        ConceptDao conceptDao;
+        // Can we use conceptDao here to find Code match then Synonmyns ?
+        List<Long> conceptIds;
+        if (query.length() > 0) {
+            // Try to find by Code or id
+            conceptIds = conceptDao.findConceptIdByCodeOrId(query);
+            // or if want concepts now
+            List<Concept> concepts= conceptDao.findByConceptCodeOrConceptId(query);
+            // Question -- Do we need to do anything else now with filters or does code or id trump all other
+            // filters ? If we just want to return concepts here
+            if (! conceptIds.isEmpty()) { matchType = codeorId; }
+            if (conceptIds.isEmpty() ) {
+                // Find by name or synonm
+               conceptIds = conceptDao.findConceptSynonyms(query);
+               if (! conceptIds.isEmpty()) { matchType = codeorId; }
+            }
+        }
+
+        // Now we have our conceptIds to use in rest of stuff below and don't need to pass in synonmIds
+        // Though One thing that may be cool is if this had a conceptId arg and query  and we could search within
+        // those concept ids
+        // Search within a search ... Anyway, don't worry about that now.  But it would just work with some initialization
+        // of conceptIds and query at the right time
+
+        
 
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
@@ -149,6 +177,7 @@ public class ConceptService {
         // Return up to limit results, sorted in descending count value order.
         Pageable pageable = new PageRequest(0, limit,
                 new Sort(Direction.DESC, "countValue"));
+        ConceptDao conceptDao;
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);
         return conceptDao.findAll(conceptSpecification, pageable);
