@@ -105,7 +105,13 @@ public class ConceptsController implements ConceptsApiDelegate {
     }
 
     List<Long> conceptCodeIdMatchConcepts = new ArrayList<>();
-    conceptCodeIdMatchConcepts = conceptDao.findConceptByCodeOrId(request.getQuery());
+    conceptCodeIdMatchConcepts = conceptDao.findConceptByCode(request.getQuery());
+    try{
+      Long conceptIdQuery = Long.parseLong(request.getQuery());
+      conceptCodeIdMatchConcepts.addAll(conceptDao.findConceptById(conceptIdQuery));
+    }catch(NumberFormatException nfe){
+
+    }
     List<Long> synonymConceptIds = new ArrayList<>();
     if(conceptCodeIdMatchConcepts.size() == 0) {
         synonymConceptIds = conceptDao.findConceptByNameOrSynonymName(ConceptService.modifyMultipleMatchKeyword(request.getQuery()));
@@ -119,10 +125,6 @@ public class ConceptsController implements ConceptsApiDelegate {
     if(synonymConceptIds.size() > 0 && (concepts==null || concepts.getNumberOfElements()==0)){
       concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
-    }
-    if(concepts == null || concepts.getNumberOfElements() == 0){
-      concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
-              request.getVocabularyIds(), domainIds, maxResults, minCount, new ArrayList<Long>());
     }
 
     // TODO: move Swagger codegen to common-api, pass request with modified values into service

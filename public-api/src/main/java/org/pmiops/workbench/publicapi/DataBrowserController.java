@@ -345,7 +345,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             if(standardConceptFilter == null || standardConceptFilter == StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH){
                 standardConceptFilter = StandardConceptFilter.STANDARD_CONCEPTS;
             }
-        }else{
+        }
+        if(standardConceptFilter == null){
             standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
         }
 
@@ -358,7 +359,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         List<Long> conceptCodeIdMatchConcepts = new ArrayList<>();
         if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
-            conceptCodeIdMatchConcepts = conceptDao.findConceptByCodeOrId(searchConceptsRequest.getQuery());
+            conceptCodeIdMatchConcepts = conceptDao.findConceptByCode(searchConceptsRequest.getQuery());
+            try{
+                Long conceptIdQuery = Long.parseLong(searchConceptsRequest.getQuery());
+                conceptCodeIdMatchConcepts.addAll(conceptDao.findConceptById(conceptIdQuery));
+            }catch(NumberFormatException nfe){
+
+            }
         }
         List<Long> synonymConceptIds = new ArrayList<>();
         if (searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()) {
@@ -377,7 +384,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                     searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
         }
-        if(concepts == null || concepts.getNumberOfElements() == 0){
+        if((concepts == null || concepts.getNumberOfElements() == 0) && (searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty())){
             concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                     searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, new ArrayList<Long>());
         }
