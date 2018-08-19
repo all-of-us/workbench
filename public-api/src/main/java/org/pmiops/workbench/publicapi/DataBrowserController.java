@@ -373,11 +373,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                     searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, conceptCodeIdMatchConcepts);
         }
-        if(synonymConceptIds.size() > 0 && concepts.getNumberOfElements() == 0){
+        if(synonymConceptIds.size() > 0 && (concepts==null || concepts.getNumberOfElements()==0)){
             concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                     searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
         }
-        if(concepts.getNumberOfElements() == 0){
+        if(concepts == null || concepts.getNumberOfElements() == 0){
             concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                     searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, new ArrayList<Long>());
         }

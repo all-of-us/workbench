@@ -116,7 +116,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount, conceptCodeIdMatchConcepts);
     }
-    if(synonymConceptIds.size() > 0 && concepts.getNumberOfElements()==0){
+    if(synonymConceptIds.size() > 0 && (concepts==null || concepts.getNumberOfElements()==0)){
       concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
     }
