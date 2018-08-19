@@ -120,7 +120,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
     }
-    if(concepts.getNumberOfElements() == 0){
+    if(concepts == null || concepts.getNumberOfElements() == 0){
       concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount, new ArrayList<Long>());
     }
