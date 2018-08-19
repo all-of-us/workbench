@@ -19,6 +19,7 @@ import org.springframework.data.domain.Slice;
 
 import com.google.common.collect.ImmutableMultimap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -96,7 +97,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public static final long RACE_ANALYSIS = 4;
     public static final long ETHNICITY_ANALYSIS = 5;
 
-    public static List<String> conceptSynonymNames = new ArrayList<>();
+    public static HashMap<Long,ArrayList<String>> conceptSynonymNames = new HashMap<>();
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -118,7 +119,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .countValue(concept.getCountValue())
                             .sourceCountValue(concept.getSourceCountValue())
                             .prevalence(concept.getPrevalence())
-                            .conceptSynonyms(conceptSynonymNames);
+                            .conceptSynonyms(conceptSynonymNames.get(concept.getConceptId()));
                 }
             };
 
@@ -372,7 +373,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 synonymConceptIds = conceptDao.findConceptByNameOrSynonymName(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
         }
 
-
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
         Slice<Concept> concepts = null;
@@ -395,11 +395,12 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         if(concepts != null){
             matchedConcepts = concepts.getContent();
         }
-        List<String> conceptSynonymNames = new ArrayList<>();
 
         for(Concept con : matchedConcepts){
             String conceptCode = con.getConceptCode();
             String conceptId = String.valueOf(con.getConceptId());
+
+            ArrayList<String> conceptSynonymNames = new ArrayList<>();
 
             if(con.getSynonyms() != null){
                 response.setMatchType(MatchType.NAME);
@@ -410,8 +411,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 }
             }
 
-            this.conceptSynonymNames = conceptSynonymNames;
-
+            this.conceptSynonymNames.put(con.getConceptId(),conceptSynonymNames);
 
             if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
                 response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
