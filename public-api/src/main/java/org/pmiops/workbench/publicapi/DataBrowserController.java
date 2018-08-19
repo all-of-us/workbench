@@ -346,9 +346,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 standardConceptFilter = StandardConceptFilter.STANDARD_CONCEPTS;
             }
         }else{
-            if(standardConceptFilter == null){
-                standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
-            }
+            standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
         }
 
 
@@ -357,51 +355,72 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             domainIds = DOMAIN_MAP.get(searchConceptsRequest.getDomain()).asList();
         }
 
-        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
-        List<Long> synonymConceptIds = new ArrayList<>();
+        List<Long> conceptCodeIdMatchConcepts = new ArrayList<>();
         if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
-            synonymConceptIds = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
+            conceptCodeIdMatchConcepts = conceptDao.findConceptByCodeOrId(searchConceptsRequest.getQuery());
+        }
+        List<Long> synonymConceptIds = new ArrayList<>();
+        if (searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()) {
+                synonymConceptIds = conceptDao.findConceptByNameOrSynonymName(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
         }
 
-        Slice<Concept> concepts =
-                    conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                            searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
-            ConceptListResponse response = new ConceptListResponse();
-            List<Concept> matchedConcepts = concepts.getContent();
-            List<String> conceptSynonymNames = new ArrayList<>();
 
-            for(Concept con : matchedConcepts){
-                String conceptCode = con.getConceptCode();
-                String conceptId = String.valueOf(con.getConceptId());
+        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
-                if(con.getSynonyms() != null){
-                    response.setMatchType(MatchType.NAME);
-                    for(ConceptSynonym conceptSynonym:con.getSynonyms()){
-                        if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
-                            conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
-                        }
+        Slice<Concept> concepts = null;
+        if(conceptCodeIdMatchConcepts.size() > 0){
+            concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
+                    searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, conceptCodeIdMatchConcepts);
+        }
+        if(synonymConceptIds.size() > 0 && concepts.getNumberOfElements() == 0){
+            concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
+                    searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
+        }
+        if(concepts.getNumberOfElements() == 0){
+            concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
+                    searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, new ArrayList<Long>());
+        }
+
+
+        ConceptListResponse response = new ConceptListResponse();
+        List<Concept> matchedConcepts = new ArrayList<>();
+        if(concepts != null){
+            matchedConcepts = concepts.getContent();
+        }
+        List<String> conceptSynonymNames = new ArrayList<>();
+
+        for(Concept con : matchedConcepts){
+            String conceptCode = con.getConceptCode();
+            String conceptId = String.valueOf(con.getConceptId());
+
+            if(con.getSynonyms() != null){
+                response.setMatchType(MatchType.NAME);
+                for(ConceptSynonym conceptSynonym:con.getSynonyms()){
+                    if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
+                        conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
                     }
                 }
-
-                this.conceptSynonymNames = conceptSynonymNames;
-
-
-                if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
-                    response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
-
-                    List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
-                    response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-                }
-
             }
 
-            if(response.getMatchType() == null && response.getStandardConcepts() == null){
-                response.setMatchType(MatchType.NAME);
+            this.conceptSynonymNames = conceptSynonymNames;
+
+
+            if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
+                response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
+
+                List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
+                response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
             }
 
-            response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-            return ResponseEntity.ok(response);
+        }
+
+        if(response.getMatchType() == null && response.getStandardConcepts() == null){
+            response.setMatchType(MatchType.NAME);
+        }
+
+        response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        return ResponseEntity.ok(response);
     }
 
     @Override

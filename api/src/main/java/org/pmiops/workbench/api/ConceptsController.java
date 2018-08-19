@@ -104,18 +104,33 @@ public class ConceptsController implements ConceptsApiDelegate {
       throw new BadRequestException("Query must be non-whitespace");
     }
 
+    List<Long> conceptCodeIdMatchConcepts = new ArrayList<>();
+    conceptCodeIdMatchConcepts = conceptDao.findConceptByCodeOrId(request.getQuery());
     List<Long> synonymConceptIds = new ArrayList<>();
-    if(request.getQuery() != null && !request.getQuery().isEmpty()){
-      synonymConceptIds = conceptDao.findConceptSynonyms(ConceptService.modifyMultipleMatchKeyword(request.getQuery()));
+    if(conceptCodeIdMatchConcepts.size() == 0) {
+        synonymConceptIds = conceptDao.findConceptByNameOrSynonymName(ConceptService.modifyMultipleMatchKeyword(request.getQuery()));
+    }
+
+    Slice<org.pmiops.workbench.cdr.model.Concept> concepts = null;
+    if(conceptCodeIdMatchConcepts.size() > 0){
+      concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
+              request.getVocabularyIds(), domainIds, maxResults, minCount, conceptCodeIdMatchConcepts);
+    }
+    if(synonymConceptIds.size() > 0 && concepts.getNumberOfElements()==0){
+      concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
+              request.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
+    }
+    if(concepts.getNumberOfElements() == 0){
+      concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
+              request.getVocabularyIds(), domainIds, maxResults, minCount, new ArrayList<Long>());
     }
 
     // TODO: move Swagger codegen to common-api, pass request with modified values into service
-    Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
-        conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
-            request.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
     ConceptListResponse response = new ConceptListResponse();
-    response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
-        .collect(Collectors.toList()));
+    if(concepts != null){
+      response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
+              .collect(Collectors.toList()));
+    }
     return ResponseEntity.ok(response);
   }
 }

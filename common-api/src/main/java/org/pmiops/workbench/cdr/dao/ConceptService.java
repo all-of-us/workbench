@@ -71,8 +71,9 @@ public class ConceptService {
     public static final String STANDARD_CONCEPT_CODE = "S";
     public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
-    public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount, List<Long> synonymConceptIds) {
+    public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount, List<Long> matchedConceptIds) {
 
+        /*
         // Peter Changes : Try something like this pseuedo code
         ConceptDao conceptDao;
         // Can we use conceptDao here to find Code match then Synonmyns ?
@@ -97,6 +98,7 @@ public class ConceptService {
         // those concept ids
         // Search within a search ... Anyway, don't worry about that now.  But it would just work with some initialization
         // of conceptIds and query at the right time
+        */
 
 
 
@@ -115,45 +117,25 @@ public class ConceptService {
                     nonStandardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                             criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
-                    // Apply the synonyms filter if any synonym concepts are found, else apply query/ concept code/ id filters
+                    // Apply the matched concepts filter if any matched concepts are found
 
-                    if(synonymConceptIds.size() > 0){
-                        List<Predicate> synonymConceptPredicate = new ArrayList<>();
+                    if(matchedConceptIds.size() > 0){
+                        List<Predicate> conceptFetchPredicate = new ArrayList<>();
                         Expression<Long> conceptIdCheck = root.get("conceptId");
-                        synonymConceptPredicate.add(conceptIdCheck.in(synonymConceptIds));
-                        predicates.add(criteriaBuilder.or(synonymConceptPredicate.toArray(new Predicate[0])));
-                    }
-                    else {
-                        List<Predicate> conceptCodeID = new ArrayList<>();
-                        if (!Strings.isNullOrEmpty(query)) {
-                            // adds check ?(conceptCode == query) o the predicate list
-                            conceptCodeID.add(criteriaBuilder.equal(root.get("conceptCode"),
-                                    criteriaBuilder.literal(query)));
-                            try {
-                                // adds check ?(conceptId == query) to the predicate list
-                                long conceptId = Long.parseLong(query);
-                                conceptCodeID.add(criteriaBuilder.equal(root.get("conceptId"),
-                                        criteriaBuilder.literal(conceptId)));
-                            } catch (NumberFormatException e) {
-                                // Not a long, don't try to match it to a concept ID.
-                            }
-
-                            predicates.add(criteriaBuilder.or(conceptCodeID.toArray(new Predicate[0])));
-                        }
-
-
+                        conceptFetchPredicate.add(conceptIdCheck.in(matchedConceptIds));
+                        predicates.add(criteriaBuilder.or(conceptFetchPredicate.toArray(new Predicate[0])));
                     }
 
-                        // Optionally filter on standard concept, vocabulary ID, domain ID
-                        if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
-                            predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
-                        } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
-                            predicates.add(
-                                    criteriaBuilder.or(
-                                            criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
-                                            criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))
-                                    ));
-                        }
+                    // Optionally filter on standard concept, vocabulary ID, domain ID
+                    if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
+                        predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
+                    }else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
+                                        criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))
+                                ));
+                    }
 
 
                     if (vocabularyIds != null) {
@@ -177,7 +159,6 @@ public class ConceptService {
         // Return up to limit results, sorted in descending count value order.
         Pageable pageable = new PageRequest(0, limit,
                 new Sort(Direction.DESC, "countValue"));
-        ConceptDao conceptDao;
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);
         return conceptDao.findAll(conceptSpecification, pageable);
