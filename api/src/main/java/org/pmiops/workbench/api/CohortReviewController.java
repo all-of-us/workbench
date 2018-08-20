@@ -327,33 +327,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ParticipantData> getDetailParticipantData(String workspaceNamespace,
-                                                                  String workspaceId,
-                                                                  Long cohortId,
-                                                                  Long cdrVersionId,
-                                                                  Long dataId,
-                                                                  String domain) {
-    if (dataId == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid data id.");
-    }
-    if (domain == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid domain.");
-    }
-
-    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
-      cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
-
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      reviewTabQueryBuilder.buildDetailsQuery(dataId, DomainType.fromValue(domain))));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
-    ParticipantData response =
-      convertRowToParticipantData(rm, result.getValues().iterator().next(), DomainType.fromValue(domain));
-
-    return ResponseEntity.ok(response);
-  }
-
-  @Override
   public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(String workspaceNamespace,
                                                                                                  String workspaceId,
                                                                                                  Long cohortId,
@@ -435,17 +408,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     //this validates that the participant is in the requested review.
     cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
-    boolean invalidDomain = true;
     DomainType domain = ((ReviewFilter) request).getDomain();
-    for (DomainType domainType : DomainType.values()) {
-      if (domainType.name().equals(domain.name())) {
-        invalidDomain = false;
-      }
-    }
-    if (invalidDomain) {
-      throw new BadRequestException("Invalid Domain: " + domain.toString() +
-        " Please provide a valid Domain.");
-    }
     PageRequest pageRequest = createPageRequest(request);
 
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(

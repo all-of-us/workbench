@@ -43,10 +43,14 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.ModifyCohortStatusRequest;
+import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
+import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantCohortStatuses;
+import org.pmiops.workbench.model.ReviewFilter;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -97,6 +101,7 @@ public class CohortReviewControllerTest {
   private CohortAnnotationDefinition dateAnnotationDefinition;
   private CohortAnnotationDefinition booleanAnnotationDefinition;
   private CohortAnnotationDefinition integerAnnotationDefinition;
+  private org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantAnnotation;
 
   @Autowired
   private CdrVersionDao cdrVersionDao;
@@ -284,6 +289,14 @@ public class CohortReviewControllerTest {
         .columnName("test")
         .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(integerAnnotationDefinition);
+
+    participantAnnotation =
+      new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
+        .cohortReviewId(cohortReview.getCohortReviewId())
+        .participantId(participantCohortStatus1.getParticipantKey().getParticipantId())
+        .annotationValueString("test")
+        .cohortAnnotationDefinitionId(stringAnnotationDefinition.getCohortAnnotationDefinitionId());
+    participantCohortAnnotationDao.save(participantAnnotation);
   }
 
   @After
@@ -300,6 +313,7 @@ public class CohortReviewControllerTest {
     cohortDao.delete(cohortWithoutReview);
     workspaceDao.delete(workspace);
     cdrVersionDao.delete(cdrVersion);
+    participantCohortAnnotationDao.delete(participantAnnotation);
   }
 
   @Test
@@ -494,6 +508,7 @@ public class CohortReviewControllerTest {
   @Test
   public void createParticipantCohortAnnotation() throws Exception {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
+    participantCohortAnnotationDao.delete(participantAnnotation);
 
     assertCreateParticipantCohortAnnotation(participantId,
       stringAnnotationDefinition.getCohortAnnotationDefinitionId(),
@@ -551,6 +566,8 @@ public class CohortReviewControllerTest {
       cdrVersion.getCdrVersionId(),
       participantCohortStatus1.getParticipantKey().getParticipantId(),
       annotation.getAnnotationId());
+
+    assertThat(participantCohortAnnotationDao.findOne(annotation.getAnnotationId())).isEqualTo(null);
   }
 
   @Test
@@ -637,17 +654,39 @@ public class CohortReviewControllerTest {
   }
 
   @Test
-  public void getDetailParticipantData() throws Exception {
+  public void getParticipantCohortAnnotations() throws Exception {
     when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
       WORKSPACE_NAME, WorkspaceAccessLevel.READER)).thenReturn(workspace);
 
-    stubBigQueryCohortCalls();
-    cohortReviewController.getDetailParticipantData(WORKSPACE_NAMESPACE,
+    ParticipantCohortAnnotationListResponse response =
+      cohortReviewController.getParticipantCohortAnnotations(WORKSPACE_NAMESPACE,
       WORKSPACE_NAME,
       cohort.getCohortId(),
       cdrVersion.getCdrVersionId(),
-      1L,
-      DomainType.CONDITION.name());
+      participantCohortStatus1.getParticipantKey().getParticipantId()).getBody();
+
+    assertThat(response.getItems().size()).isEqualTo(1);
+    assertThat(response.getItems().get(0).getCohortReviewId()).isEqualTo(cohortReview.getCohortReviewId());
+    assertThat(response.getItems().get(0).getParticipantId()).isEqualTo(participantCohortStatus1.getParticipantKey().getParticipantId());
+  }
+
+  @Test
+  public void getParticipantCohortStatus() throws Exception {
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.READER)).thenReturn(workspace);
+
+    org.pmiops.workbench.model.ParticipantCohortStatus response =
+    cohortReviewController.getParticipantCohortStatus(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      participantCohortStatus1.getParticipantKey().getParticipantId()).getBody();
+
+    assertThat(response.getParticipantId()).isEqualTo(participantCohortStatus1.getParticipantKey().getParticipantId());
+    assertThat(response.getStatus()).isEqualTo(StorageEnums.cohortStatusFromStorage(participantCohortStatus1.getStatus()));
+    assertThat(response.getEthnicityConceptId()).isEqualTo(participantCohortStatus1.getEthnicityConceptId());
+    assertThat(response.getRaceConceptId()).isEqualTo(participantCohortStatus1.getRaceConceptId());
+    assertThat(response.getGenderConceptId()).isEqualTo(participantCohortStatus1.getGenderConceptId());
   }
 
   @Test
@@ -693,6 +732,39 @@ public class CohortReviewControllerTest {
     assertParticipantCohortStatuses(expectedReview4, null, pageSize, null, null);
     assertParticipantCohortStatuses(expectedReview4, page, null, null, null);
     assertParticipantCohortStatuses(expectedReview4, null, null, null, null);
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotation() throws Exception {
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    ParticipantCohortAnnotation participantCohortAnnotation =
+      cohortReviewController.updateParticipantCohortAnnotation(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      participantCohortStatus1.getParticipantKey().getParticipantId(),
+      participantAnnotation.getAnnotationId(),
+      new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")).getBody();
+
+    assertThat(participantCohortAnnotation.getAnnotationValueString()).isEqualTo("test1");
+  }
+
+  @Test
+  public void updateParticipantCohortStatus() throws Exception {
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    org.pmiops.workbench.model.ParticipantCohortStatus participantCohortStatus =
+      cohortReviewController.updateParticipantCohortStatus(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      participantCohortStatus1.getParticipantKey().getParticipantId(),
+      new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED)).getBody();
+
+    assertThat(participantCohortStatus.getStatus()).isEqualTo(CohortStatus.INCLUDED);
   }
 
   /**
