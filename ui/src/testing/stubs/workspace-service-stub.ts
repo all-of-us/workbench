@@ -262,12 +262,11 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        const responseItems: UserRole[] = [];
-        request.items.forEach((userRole) => {
-          responseItems.push(
-            this.sharingProfilesList.find(current => userRole.email === current.email));
-        });
-        console.log(responseItems);
+        let responseItems: UserRole[] = [];
+        responseItems = request.items.map(
+          userRole => this.sharingProfilesList.find(
+            current => userRole.email === current.email));
+
         observer.next({
           workspaceEtag: request.workspaceEtag,
           items: responseItems

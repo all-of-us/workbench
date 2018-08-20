@@ -24,7 +24,7 @@ import {UserRole} from 'generated';
 import {WorkspaceAccessLevel} from 'generated';
 import {WorkspacesService} from 'generated';
 
-interface RoleNamePair {
+interface UserRoleRow {
   fullName: string;
   email: string;
   role: WorkspaceAccessLevel;
@@ -36,7 +36,7 @@ class WorkspaceSharePage {
   route: UrlSegment[];
   workspaceNamespace: string;
   workspaceId: string;
-  roleNamePairsOnPage: Array<RoleNamePair>;
+  roleNamePairsOnPage: Array<UserRoleRow>;
   emailField: DebugElement;
   permissionsField: DebugElement;
   constructor(testBed: typeof TestBed) {
@@ -103,8 +103,8 @@ const userValuesStub = {
   ]
 };
 
-function convertToRoleNamePair(userRoles: UserRole[]): RoleNamePair[] {
-  const roleNamePairs: RoleNamePair[] = [];
+function convertToUserRoleRow(userRoles: UserRole[]): UserRoleRow[] {
+  const roleNamePairs: UserRoleRow[] = [];
   userRoles.forEach((userRole) => {
     roleNamePairs.push({
       fullName: userRole.givenName + ' ' + userRole.familyName,
@@ -151,7 +151,7 @@ describe('WorkspaceShareComponent', () => {
   it('displays correct information in default workspace sharing', fakeAsync(() => {
     workspaceSharePage.readPageData();
     const roleNamePairs =
-      convertToRoleNamePair(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
+      convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
     expect(workspaceSharePage.roleNamePairsOnPage)
         .toEqual(roleNamePairs);
   }));
@@ -166,7 +166,7 @@ describe('WorkspaceShareComponent', () => {
         workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
     workspaceSharePage.readPageData();
     const roleNamePairs =
-      convertToRoleNamePair(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
+      convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
     expect(workspaceSharePage.roleNamePairsOnPage)
         .toEqual(roleNamePairs);
     expect(workspaceSharePage.roleNamePairsOnPage.length)
@@ -183,7 +183,7 @@ describe('WorkspaceShareComponent', () => {
     });
     workspaceSharePage.readPageData();
     const roleNamePairs =
-      convertToRoleNamePair(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
+      convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
     expect(workspaceSharePage.roleNamePairsOnPage)
         .toEqual(roleNamePairs);
     expect(workspaceSharePage.roleNamePairsOnPage.length)
