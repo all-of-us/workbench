@@ -7,7 +7,8 @@ import {
     OnInit,
     Output,
     ViewChild,
-    OnChanges
+    OnChanges,
+    SimpleChanges
 } from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -42,10 +43,10 @@ export class SetAnnotationItemComponent implements OnChanges{
         private ngZone: NgZone,
     ) {}
 
-    ngOnChanges(){
-        if(this.cancelEvent){
-            this.cancelEdit();
-        }
+    ngOnChanges(changes: SimpleChanges){
+        // if(this.cancelEvent){
+        //     this.cancelEdit();
+        // }
 
         if (this.saveEvent) {
             this.saveEdit();
@@ -99,42 +100,42 @@ export class SetAnnotationItemComponent implements OnChanges{
             });
     }
 
-    // cancelEdit(event?) {
-    //     const columnName = this.name.value.trim();
-    //     const oldColumnName = this.definition.columnName.trim();
-    //     console.log(columnName);
-    //     console.log(oldColumnName)
-    //     this.name.setValue(this.definition.columnName);
-    //     this.editing = false;
-    //     if (event) {
-    //         event.stopPropagation();
-    //     }
-    // }
     cancelEdit(event?) {
-          const columnName = this.name.value.trim();
-          const oldColumnName = this.definition.columnName.trim();
-         console.log(oldColumnName);
-         console.log(columnName);
-        // // if (this.name.invalid || (columnName === oldColumnName)) {
-
-            if(this.cancelEvent){
-                console.log(this.cancelEvent);
-                this.name.setValue(oldColumnName);
-                console.log(oldColumnName);
-            }
-            this.editing = false;
-            if (event) {
-                event.stopPropagation();
-            }
-           // return ;
-       // }
-      // if(this.cancelEvent){
-
-      // } else {
-      //   console.log('checking');
-      // }
-
+       // const columnName = this.name.value.trim();
+       // const oldColumnName = this.definition.columnName.trim();
+       // console.log(columnName);
+      //  console.log(oldColumnName)
+        this.name.setValue(this.definition.columnName);
+        this.editing = false;
+        if (event) {
+            event.stopPropagation();
+        }
     }
+    // cancelEdit(event?) {
+    //       const columnName = this.name.value.trim();
+    //       const oldColumnName = this.definition.columnName.trim();
+    //      console.log(oldColumnName);
+    //      console.log(columnName);
+    //     // // if (this.name.invalid || (columnName === oldColumnName)) {
+    //
+    //         if(this.cancelEvent){
+    //             console.log(this.cancelEvent);
+    //             this.name.setValue(oldColumnName);
+    //             console.log(oldColumnName);
+    //         }
+    //         this.editing = false;
+    //         if (event) {
+    //             event.stopPropagation();
+    //         }
+    //        // return ;
+    //    // }
+    //   // if(this.cancelEvent){
+    //
+    //   // } else {
+    //   //   console.log('checking');
+    //   // }
+    //
+    // }
     delete(): void {
         const {ns, wsid, cid} = this.route.snapshot.params;
         const id = this.definition.cohortAnnotationDefinitionId;
