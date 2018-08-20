@@ -1,4 +1,4 @@
-import {AfterContentChecked, Component, ChangeDetectorRef, Input, OnChanges, OnInit} from '@angular/core';
+import {AfterContentChecked, Component, ChangeDetectorRef, Input, OnInit, OnChanges} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {
@@ -48,9 +48,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
             this.defaultAnnotation = false;
         }
     }
-
-
-
 
     ngOnInit() {
       this.ngAfterContentChecked();
@@ -144,9 +141,13 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     }
 
     dateChange(e) {
+    console.log(e)
+    if(e !== null){
         const newDate = moment(e).format('YYYY-MM-DD');
         this.control.patchValue(newDate);
         this.handleInput();
+    }
+
     }
 
 
