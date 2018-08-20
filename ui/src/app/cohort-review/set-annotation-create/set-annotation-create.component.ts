@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
@@ -10,40 +10,13 @@ import {
   CohortAnnotationDefinitionService,
   ModifyCohortAnnotationDefinitionRequest,
 } from 'generated';
-import {Observable} from 'rxjs/Observable';
-import {ParticipantCohortAnnotation} from '../../../generated';
-interface Annotation {
-    definition: CohortAnnotationDefinition;
-    value: ParticipantCohortAnnotation;
-}
-/*
- * Curried predicate function that matches CohortAnnotationDefinitions to
- * ParticipantCohortAnnotations - byDefinitionId(definition)(value) => true/false.
- */
-const byDefinitionId =
-    ({cohortAnnotationDefinitionId}: CohortAnnotationDefinition) =>
-        ({cohortAnnotationDefinitionId: annotationDefinitionId}: ParticipantCohortAnnotation): boolean =>
-            (cohortAnnotationDefinitionId === annotationDefinitionId);
 
-/*
- * Curried ParticipantCohortAnnotation factory - generates a blank value, given
- * a participant and a cohort review id
- */
-const valueFactory =
-    ([participantId, cohortReviewId]) =>
-        (): ParticipantCohortAnnotation =>
-            (<ParticipantCohortAnnotation>{participantId, cohortReviewId});
-
-/*
- * The identity function (useful for filtering objects by truthiness)
- */
-const identity = obj => obj;
 @Component({
   selector: 'app-set-annotation-create',
   templateUrl: './set-annotation-create.component.html',
   styleUrls: ['./set-annotation-create.component.css']
 })
-export class SetAnnotationCreateComponent implements OnChanges {
+export class SetAnnotationCreateComponent {
   readonly datatypes = [{
     value: AnnotationType.STRING,
     displayName: 'Text'
@@ -60,13 +33,11 @@ export class SetAnnotationCreateComponent implements OnChanges {
     value: AnnotationType.INTEGER,
     displayName: 'Integer'
   }];
-    @Input() participant;
+
   @Output() onFinish = new EventEmitter<boolean>();
   posting = false;
   enumValues = <string[]>[];
-  annotationOptions = '';
-  showDataType = false;
-    annotations$: Observable<Annotation[]>;
+
   form = new FormGroup({
     name: new FormControl('', Validators.required),
     kind: new FormControl('', Validators.required),
@@ -83,23 +54,7 @@ export class SetAnnotationCreateComponent implements OnChanges {
     private route: ActivatedRoute,
   ) {}
 
-    ngOnChanges(changes) {
-        const defs$ = this.state.annotationDefinitions$.filter(identity);
-        const factory$ = this.state.review$.filter(identity).pluck('cohortReviewId')
-            .map(rid => valueFactory([this.participant.id, rid]));
-
-        this.annotations$ = Observable
-            .combineLatest(defs$, factory$)
-            .map(([defs, factoryFunc]) =>
-                defs.map(definition => {
-                    const vals = this.participant.annotations;
-                    const value = vals.find(byDefinitionId(definition)) || factoryFunc();
-                    return <Annotation>{definition, value};
-                }))
-            .do(console.dir);
-    }
-
-    create(): void {
+  create(): void {
     this.posting = true;
     const {ns, wsid, cid} = this.route.snapshot.params;
 
@@ -121,23 +76,14 @@ export class SetAnnotationCreateComponent implements OnChanges {
       .do((defns: CohortAnnotationDefinition[]) =>
         this.state.annotationDefinitions.next(defns))
       .subscribe(_ => {
-        this.open = false;
         this.posting = false;
         this.onFinish.emit(true);
       });
   }
 
   cancel() {
-
     this.onFinish.emit(true);
   }
-    get open() {
-        return this.state.annotationManagerOpen.getValue();
-    }
-
-    set open(value: boolean) {
-        this.state.annotationManagerOpen.next(value);
-    }
 
   addEnumValue() {
     const val = this.addValue.value;
@@ -160,10 +106,4 @@ export class SetAnnotationCreateComponent implements OnChanges {
     const isEmptyEnum = this.isEnum && !(this.enumValues.length > 0);
     return (this.form.invalid || isEmptyEnum);
   }
-
-    selectDropdownChange(data) {
-        this.annotationOptions = data.displayName;
-        this.kind.patchValue(data.value);
-    }
-
 }

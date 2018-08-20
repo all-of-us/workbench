@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
+import {Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -59,13 +59,13 @@ export class SetAnnotationListComponent implements OnInit, OnDestroy {
         this.state.editAnnotationManagerOpen.next(value);
     }
 
-    cancelFromChange (){
+    cancelFromChange () {
         this.cancelFlag = true;
         this.openEdit = false;
         this.saveButtonEvent = false;
     }
 
-    saveFromChange(){
+    saveFromChange() {
         this.saveButtonEvent = true;
         this.openEdit = false;
     }
