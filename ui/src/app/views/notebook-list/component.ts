@@ -6,8 +6,8 @@ import {ActivatedRoute} from '@angular/router';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {RenameModalComponent} from "app/views/rename-modal/component";
-import {ConfirmDeleteModalComponent} from "app/views/confirm-delete-modal/component";
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {environment} from 'environments/environment';
 
 import {
@@ -128,7 +128,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   openNotebook(nb?: FileDetail): void {
     let nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/notebooks/`;
-    console.log("before if in open: " + JSON.stringify(nb));
     if (nb) {
       nbUrl += encodeURIComponent(nb.name);
     } else {
@@ -183,7 +182,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       newName = rename.newName + '.ipynb';
     }
    this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename).subscribe(() => {
-     this.notebookList.filter((nb) => { return nb.name === rename.name; }).map((nb) => {
+     this.notebookList.filter((nb) => nb.name === rename.name).map((nb) => {
        nb.name = newName;
        nb.path = nb.path.replace(rename.name, newName);
      });
@@ -192,7 +191,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   cloneThis(notebook): void {
-    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, notebook.name).subscribe(() => {
+    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, notebook.name)
+      .subscribe(() => {
       this.loadNotebookList();
     });
   }
@@ -208,9 +208,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   public deleteNotebook(notebook): void {
-    this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, notebook.name).subscribe(() => {
+    this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, notebook.name)
+      .subscribe(() => {
       this.loadNotebookList();
-    })
+    });
   }
 
   get writePermission(): boolean {
