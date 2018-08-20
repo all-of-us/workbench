@@ -118,7 +118,7 @@ public class AnnotationQueryBuilderTest {
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     Cohort cohort = new Cohort();
@@ -178,7 +178,7 @@ public class AnnotationQueryBuilderTest {
   private CohortAnnotationDefinition makeAnnotationDefinition(long cohortId, String columnName,
       AnnotationType annotationType, String... enumValues) {
     CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition();
-    cohortAnnotationDefinition.setAnnotationType(annotationType);
+    cohortAnnotationDefinition.setAnnotationTypeEnum(annotationType);
     cohortAnnotationDefinition.setCohortId(cohortId);
     cohortAnnotationDefinition.setColumnName(columnName);
     if (enumValues.length > 0) {
@@ -197,7 +197,7 @@ public class AnnotationQueryBuilderTest {
     key.setCohortReviewId(cohortReviewId);
     key.setParticipantId(participantId);
     ParticipantCohortStatus result = new ParticipantCohortStatus();
-    result.setStatus(status);
+    result.setStatusEnum(status);
     result.setParticipantKey(key);
     return result;
   }
@@ -435,7 +435,7 @@ public class AnnotationQueryBuilderTest {
     }
     for (int i = 0; i < actualResults.size(); i++) {
       MapDifference<String, Object> difference =
-          Maps.difference((Map<String, Object>) actualResults.get(i), expectedResults[i]);
+          Maps.difference(actualResults.get(i), expectedResults[i]);
       if (!difference.areEqual()) {
         fail("Result " + i + " had difference: " + difference.entriesDiffering()
             + "; unexpected entries: " + difference.entriesOnlyOnLeft()

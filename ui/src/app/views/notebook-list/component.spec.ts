@@ -31,7 +31,7 @@ import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-import {simulateClick, updateAndTick} from 'testing/test-helpers';
+import {updateAndTick} from 'testing/test-helpers';
 
 class NotebookListPage {
   fixture: ComponentFixture<NotebookListComponent>;

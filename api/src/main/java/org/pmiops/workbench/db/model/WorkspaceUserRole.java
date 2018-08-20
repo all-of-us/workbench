@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-
+import javax.persistence.Transient;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 @Entity
@@ -17,9 +17,7 @@ public class WorkspaceUserRole {
   private long userWorkspaceId;
   private User user;
   private Workspace workspace;
-  private WorkspaceAccessLevel role;
-
-
+  private Short role;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +29,7 @@ public class WorkspaceUserRole {
   public void setUserWorkspaceId(long userWorkspaceId) {
     this.userWorkspaceId = userWorkspaceId;
   }
-  
+
   @ManyToOne
   @JoinColumn(name="user_id")
   public User getUser() {
@@ -52,13 +50,21 @@ public class WorkspaceUserRole {
     this.workspace = workspace;
   }
 
-
   @Column(name="role")
-  public WorkspaceAccessLevel getRole() {
+  public Short getRole() {
     return this.role;
   }
 
-  public void setRole(WorkspaceAccessLevel role) {
+  public void setRole(Short role) {
     this.role = role;
+  }
+
+  @Transient
+  public WorkspaceAccessLevel getRoleEnum() {
+    return StorageEnums.workspaceAccessLevelFromStorage(this.role);
+  }
+
+  public void setRoleEnum(WorkspaceAccessLevel role) {
+    this.role = StorageEnums.workspaceAccessLevelToStorage(role);
   }
 }

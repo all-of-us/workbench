@@ -1,4 +1,4 @@
-"id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","predefined_attributes"
+"id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","path"
 180,0,"ICD9","","001-999.99","DISEASES AND INJURIES",1,0,"","","",0,""
 181,0,"ICD9","","00-99.99","PROCEDURES",1,0,"","","",0,""
 182,0,"ICD9","","V01-V91.99","FACTORS INFLUENCING HEALTH STATUS AND CONTACT WITH HEALTH SERVICES",1,0,"","","",0,""

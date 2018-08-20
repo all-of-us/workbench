@@ -221,15 +221,15 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     private void validateParticipantCohortAnnotation(ParticipantCohortAnnotation participantCohortAnnotation,
                                                      CohortAnnotationDefinition cohortAnnotationDefinition) {
 
-        if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.BOOLEAN)) {
+        if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.BOOLEAN)) {
             if (participantCohortAnnotation.getAnnotationValueBoolean() == null) {
                 throw createBadRequestException(AnnotationType.BOOLEAN.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
             }
-        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.STRING)) {
+        } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.STRING)) {
             if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueString())) {
                 throw createBadRequestException(AnnotationType.STRING.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
             }
-        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.DATE)) {
+        } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.DATE)) {
             if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueDateString())) {
                 throw createBadRequestException(AnnotationType.DATE.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
             }
@@ -243,11 +243,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                         sdf.toPattern(),
                         participantCohortAnnotation.getCohortAnnotationDefinitionId()));
             }
-        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.INTEGER)) {
+        } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.INTEGER)) {
             if (participantCohortAnnotation.getAnnotationValueInteger() == null) {
                 throw createBadRequestException(AnnotationType.INTEGER.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
             }
-        } else if (cohortAnnotationDefinition.getAnnotationType().equals(AnnotationType.ENUM)) {
+        } else if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.ENUM)) {
             if (StringUtils.isBlank(participantCohortAnnotation.getAnnotationValueEnum())) {
                 throw createBadRequestException(AnnotationType.ENUM.name(), participantCohortAnnotation.getCohortAnnotationDefinitionId());
             }

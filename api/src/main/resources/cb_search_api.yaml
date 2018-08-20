@@ -85,7 +85,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/search/{value}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/search:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -99,7 +99,7 @@ paths:
           type: string
           required: true
           description: the specific type of criteria to get
-        - in: path
+        - in: query
           name: value
           type: string
           required: true
@@ -156,7 +156,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/drug/{name}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/drug:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -165,7 +165,7 @@ paths:
       description: Returns criteria tree with the specified name
       operationId: "getDrugBrandOrIngredientByName"
       parameters:
-        - in: path
+        - in: query
           name: name
           type: string
           required: true
@@ -196,6 +196,27 @@ paths:
           description: A collection of criteria
           schema:
             $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/attribute/{conceptId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns criteria tree with the specified name
+      operationId: "getCriteriaAttributeByConceptId"
+      parameters:
+        - in: path
+          name: conceptId
+          type: integer
+          format: int64
+          required: true
+          description: conceptId of brand
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaAttributeListResponse"
 
   /v1/cohortbuilder/{cdrVersionId}/search:
     parameters:
@@ -305,7 +326,6 @@ definitions:
       - group
       - selectable
       - hasAttribute
-      - predefinedAttributes
     properties:
       id:
         description: id of the criteria
@@ -356,10 +376,51 @@ definitions:
       hasAttributes:
         description: specifies if extra attributes are needed
         type: boolean
-      predefinedAttributes:
-        type: array
+      path:
+        description: full path from parent to this node with ids
+        type: string
+
+  CriteriaAttributeListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
         items:
-          $ref: "#/definitions/Attribute"
+          $ref: "#/definitions/CriteriaAttribute"
+
+  CriteriaAttribute:
+    type: object
+    required:
+      - id
+      - conceptId
+      - valueAsConceptId
+      - conceptName
+      - type
+      - estCount
+    properties:
+      id:
+        description: id of the criteria
+        type: integer
+        format: int64
+      conceptId:
+        description: conceptId of the concept
+        type: integer
+        format: int64
+      valueAsConceptId:
+        description: categorical concept id
+        type: integer
+        format: int64
+      conceptName:
+        description: name of concept
+        type: string
+      type:
+        description: numerical or categorical
+        type: string
+      estCount:
+        description: possible count
+        type: string
 
   SearchRequest:
     description: >
@@ -509,7 +570,6 @@ definitions:
   Attribute:
     type: object
     required:
-      - operator
       - operands
     properties:
       name:

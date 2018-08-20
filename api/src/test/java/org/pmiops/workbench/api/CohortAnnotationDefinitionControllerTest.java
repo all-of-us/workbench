@@ -861,7 +861,7 @@ public class CohortAnnotationDefinitionControllerTest {
         return new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
                 .cohortId(cohortId)
                 .cohortAnnotationDefinitionId(annotationDefinitionId)
-                .annotationType(annotationType)
+                .annotationTypeEnum(annotationType)
                 .columnName(columnName);
     }
 

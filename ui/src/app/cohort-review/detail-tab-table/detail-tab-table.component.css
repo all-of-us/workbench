@@ -9,3 +9,8 @@
 clr-dg-cell.cell {
   font-size: 0.5rem;
 }
+.datagrid-host {
+  max-height: 31rem;
+  min-height: 31rem;
+  overflow-y: auto;
+}
