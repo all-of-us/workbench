@@ -8,7 +8,8 @@
       <label
         aria-haspopup="true"
         role="tooltip"
-        class="tooltip tooltip-validation tooltip-sm tooltip-right">
+        class="tooltip tooltip-validation tooltip-sm tooltip-right"
+        [class.invalid]="name.invalid && (name.dirty || name.touched)">
         <input id="name"
                class="annotation-name-input"
           name="name"
@@ -100,12 +101,13 @@
             (click)="open = false">
       Cancel
     </button>
-    <!--[clrLoading]="posting"-->
-    <!--[disabled]="formIsInvalid"-->
+
     <button
             type="button"
             class="btn btn-primary"
-            (click)="create()"
+            [clrLoading]="posting"
+            [disabled]="formIsInvalid"
+            (click)="open = false"
             >
       Create
     </button>

@@ -55,7 +55,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
 
     ngOnInit() {
-     // this.ngAfterContentChecked();
+      this.ngAfterContentChecked();
     const oldValue = this.annotation.value[this.valuePropertyName];
     if (oldValue !== undefined) {
       this.control.setValue(oldValue);

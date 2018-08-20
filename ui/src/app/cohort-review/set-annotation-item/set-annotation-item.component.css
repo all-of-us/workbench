@@ -28,3 +28,8 @@
   font-weight: bold;
   color: #9B9B9B;
 }
+
+.simple-input-view {
+  border:none!important;
+  pointer-events: none;
+}

@@ -1,37 +1,25 @@
 <div class="container">
-  <div class="item">
-    <span class="name">Name</span>
-    <span class="type">Type</span>
-    <span class="delete">Remove</span>
-  </div>
-  <hr />
-<h1>hi{{saveButtonEvent}}</h1>
+  <!--[cancelEvent] = "cancelFlag"-->
+  <!--[saveEvent] = "saveButtonEvent"-->
   <app-set-annotation-item
           *ngFor="let defn of definitions"
           [definition]="defn"
-          [cancelEvent] = "cancelFlag"
-          [saveEvent] = "saveButtonEvent"
           (isPosting)="isPosting($event, defn)">
   </app-set-annotation-item>
 
-  <div *ngIf="definitions.length === 0">
-    <em>No review annotations defined yet.</em>
+  <div *ngIf="posting" class="spinner spinner-md spin-in-overlay">
+    Loading...
   </div>
-
-  <!--<div *ngIf="posting" class="spinner spinner-md spin-in-overlay">-->
-    <!--Loading...-->
-  <!--</div>-->
 </div>
+<h1>hi{{definitions.length}}</h1>
 
 <div class="footer-button">
   <button
           type="button"
           class="btn btn-link cancel"
-          (click)="cancelFromChange()"
-  >
+          (click)="cancelFromChange()">
     Cancel
   </button>
-  <!--[ngClass]="{'save-disable': !saveButton}"-->
   <button
           type="button"
           class="btn btn-primary"
@@ -39,8 +27,4 @@
   >
     Save
   </button>
-
-  <div class="spinner spinner-md spin-in-overlay">
-    Loading...
-  </div>
 </div>
