@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, ChangeDetectorRef,  Input, OnChanges, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
@@ -51,7 +51,12 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
         }
     }
 
-  ngOnInit() {
+    ngAfterContentChecked() {
+        this.cdref.detectChanges();
+    }
+
+
+    ngOnInit() {
       this.ngAfterContentChecked();
     const oldValue = this.annotation.value[this.valuePropertyName];
     if (oldValue !== undefined) {
@@ -59,9 +64,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
     }
   }
 
-  ngAfterContentChecked() {
-    this.cdref.detectChanges();
-  }
 
   handleInput() {
     /* Parameters from the path */
