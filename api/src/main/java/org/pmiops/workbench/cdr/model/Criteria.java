@@ -27,7 +27,7 @@ public class Criteria {
     private String conceptId;
     private String domainId;
     private boolean attribute;
-    private String predefinedAttributes;
+    private String path;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -199,17 +199,17 @@ public class Criteria {
         return this;
     }
 
-    @Column(name = "predefined_attributes")
-    public String getPredefinedAttributes() {
-        return predefinedAttributes;
+    @Column(name = "path")
+    public String getPath() {
+        return path;
     }
 
-    public void setPredefinedAttributes(String predefinedAttributes) {
-        this.predefinedAttributes = predefinedAttributes;
+    public void setPath(String path) {
+        this.path = path;
     }
 
-    public Criteria predefinedAttributes(String predefinedAttributes) {
-        this.predefinedAttributes = predefinedAttributes;
+    public Criteria path(String path) {
+        this.path = path;
         return this;
     }
 
@@ -219,22 +219,22 @@ public class Criteria {
         if (o == null || getClass() != o.getClass()) return false;
         Criteria criteria = (Criteria) o;
         return id == criteria.id &&
-                parentId == criteria.parentId &&
-                group == criteria.group &&
-                selectable == criteria.selectable &&
-                Objects.equals(type, criteria.type) &&
-                Objects.equals(code, criteria.code) &&
-                Objects.equals(name, criteria.name) &&
-                Objects.equals(count, criteria.count) &&
-                Objects.equals(conceptId, criteria.conceptId) &&
-                Objects.equals(domainId, criteria.domainId) &&
-                Objects.equals(attribute, criteria.attribute) &&
-                Objects.equals(predefinedAttributes, criteria.predefinedAttributes);
+          parentId == criteria.parentId &&
+          group == criteria.group &&
+          selectable == criteria.selectable &&
+          Objects.equals(type, criteria.type) &&
+          Objects.equals(code, criteria.code) &&
+          Objects.equals(name, criteria.name) &&
+          Objects.equals(count, criteria.count) &&
+          Objects.equals(conceptId, criteria.conceptId) &&
+          Objects.equals(domainId, criteria.domainId) &&
+          Objects.equals(attribute, criteria.attribute) &&
+          Objects.equals(path, criteria.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId, attribute, predefinedAttributes);
+        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId, attribute, path);
     }
 
     @Override
