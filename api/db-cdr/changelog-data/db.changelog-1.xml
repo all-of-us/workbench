@@ -10,6 +10,7 @@
     <validCheckSum>ANY</validCheckSum>
 
     <delete tableName="criteria"/>
+    <delete tableName="criteria_attribute"/>
     <delete tableName="achilles_analysis"/>
 
   </changeSet>
