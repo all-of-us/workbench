@@ -20,9 +20,12 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {UserRole} from 'generated';
-import {WorkspaceAccessLevel} from 'generated';
-import {WorkspacesService} from 'generated';
+import {
+  UserRole,
+  WorkspaceAccessLevel,
+  WorkspaceResponse,
+  WorkspacesService
+} from 'generated';
 
 class WorkspaceSharePage {
   fixture: ComponentFixture<WorkspaceShareComponent>;
@@ -38,6 +41,13 @@ class WorkspaceSharePage {
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.fixture.componentRef.instance.sharing = true;
+
+    this.workspacesService.getWorkspace(
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
+        this.fixture.componentInstance.workspace = response.workspace;
+    });
+    tick();
     this.readPageData();
   }
 
@@ -130,8 +140,11 @@ describe('WorkspaceShareComponent', () => {
   it('removes users correctly and does not allow self removal', fakeAsync(() => {
     workspaceSharePage.fixture.componentRef.instance.userEmail
         = 'sampleuser1@fake-research-aou.org';
+    workspaceSharePage.fixture.componentRef.instance.accessLevel
+        = WorkspaceAccessLevel.OWNER;
     workspaceSharePage.readPageData();
     const de = workspaceSharePage.fixture.debugElement;
+    console.log(de.queryAll(By.css('.user')));
     de.queryAll(By.css('.remove-button')).forEach((removeButton) => {
       simulateClick(workspaceSharePage.fixture, removeButton);
     });
