@@ -1,6 +1,5 @@
 input.share, .sharing-buttons {
   width: 10rem;
-  font-family: GothamLight, sans-serif;
   color: #565656;
   border: 1px #565656 solid;
   border-radius: 0.2rem;
@@ -33,21 +32,22 @@ input.share, .sharing-buttons {
   width: 22rem;
 }
 
-.removing-area h5, .user-role {
-  font-family: GothamBook;
-  font-size: 0.5rem;
+.removing-area .user-name, .user-email, .user-role {
+  font-weight: 300;
   line-height: 0.8rem;
   color: rgb(38, 34, 98);
 }
 
-.removing-area h5 {
+.removing-area .user-name, .user-email {
   margin-top: 0;
   padding-top: 0;
+  font-size: 0.5rem;
 }
 
 .user-role {
-  font-family: GothamBook;
   color: #565656;
+  font-weight: 300;
+  font-size: 0.4rem
 }
 
 .user {
@@ -56,12 +56,9 @@ input.share, .sharing-buttons {
   clear: both;
 }
 
-.user.owner {
-  padding-left: 22px;
-}
-
 .collaborator-icon {
   width: 22px;
+  margin-top: -3px;
 }
 
 .collaborator, .collaborator-icon {
@@ -82,11 +79,10 @@ clr-dropdown > button {
 }
 
 .paragraph-text {
-  font-family: GothamBook;
   font-size: 0.5rem;
   line-height: 0.8rem;
   margin: 0;
-  padding: 0;
+  padding: 0 0 1rem 0;
 }
 
 .paragraph-text a {
@@ -105,11 +101,10 @@ clr-dropdown > button {
 
 .adding-area {
   flex: 0 0 auto;
-  border-right: 1px solid black;
+  border-right: 1px solid #979797;
 }
 
 .collaborator-label {
-  font-family: GothamLight;
   font-size: 0.65rem;
   display: block;
   margin: 0 0 0.5rem 0;
@@ -130,4 +125,8 @@ clr-dropdown > button {
 
 .loading-users {
   padding-top: 1rem;
+}
+
+.modal-title-text {
+  margin-top: 0;
 }
