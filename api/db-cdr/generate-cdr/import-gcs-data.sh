@@ -37,8 +37,7 @@ REMOTE_DATA_LOC=https://storage.googleapis.com/$BUCKET
 echo "Importing data files from $REMOTE_DATA_LOC"
 
 # Add tables names of files to import here
-#TABLES=(achilles_analysis achilles_results achilles_results_dist db_domain domain vocabulary criteria concept concept_relationship concept_ancestor concept_synonym)
-TABLES=(concept_synonym)
+TABLES=(achilles_analysis achilles_results achilles_results_dist db_domain domain vocabulary criteria concept concept_relationship concept_ancestor concept_synonym)
 # Make a dir for the csvs
 local_fpath=/tmp/$CDR_DB_NAME
 rm -rf $local_fpath
@@ -62,6 +61,17 @@ function mysqlimport_table () {
       -u root -p${MYSQL_ROOT_PASSWORD} $db $file
 }
 
+# Function for mysqlimport concept_synonym
+function mysqlimport_concept_synonym_table () {
+   db=$1
+   file=$2
+
+   echo "Mysql importing $file into $db.$table..."
+   mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-optionally-enclosed-by='"' --columns=concept_id,concept_synonym_name,language_concept_id \
+      --verbose --local -h ${DB_HOST} --port ${DB_PORT} \
+      -u root -p${MYSQL_ROOT_PASSWORD} $db $file
+}
+
 # Import data
 for table in "${TABLES[@]}"
 do
@@ -72,7 +82,12 @@ do
   #  $table0*.csv will be multiple files.
   if [ -f $local_fpath/${table}.csv ]
   then
-    mysqlimport_table $CDR_DB_NAME $local_fpath/${table}.csv
+    if [ "$table" == "concept_synonym" ];
+    then
+        mysqlimport_concept_synonym_table $CDR_DB_NAME $local_fpath/${table}.csv
+    else
+        mysqlimport_table $CDR_DB_NAME $local_fpath/${table}.csv
+    fi
   else
     shopt -s nullglob # This makes files be an empty array if there aren't any matching files
     files=($local_fpath/${table}0*)
@@ -86,7 +101,12 @@ do
       do
         # Move file to $table.csv for mysqlimport. It needs csv named exactly $table.csv
         mv $f $local_fpath/${table}.csv
-        mysqlimport_table $CDR_DB_NAME $local_fpath/${table}.csv
+        if [ "$table" == "concept_synonym" ];
+        then
+            mysqlimport_concept_synonym_table $CDR_DB_NAME $local_fpath/${table}.csv
+        else
+            mysqlimport_table $CDR_DB_NAME $local_fpath/${table}.csv
+        fi
       done
     fi
 
