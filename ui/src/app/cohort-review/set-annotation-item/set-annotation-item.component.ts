@@ -4,11 +4,11 @@ import {
     EventEmitter,
     Input,
     NgZone,
+    OnChanges,
     OnInit,
     Output,
-    ViewChild,
-    OnChanges,
-    SimpleChanges
+    SimpleChanges,
+    ViewChild
 } from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -26,7 +26,7 @@ import {
     templateUrl: './set-annotation-item.component.html',
     styleUrls: ['./set-annotation-item.component.css']
 })
-export class SetAnnotationItemComponent implements OnChanges{
+export class SetAnnotationItemComponent implements OnChanges {
     @Input() definition: CohortAnnotationDefinition;
     @Output() isPosting = new EventEmitter<boolean>();
     @Input() cancelEvent: false;
@@ -43,7 +43,7 @@ export class SetAnnotationItemComponent implements OnChanges{
         private ngZone: NgZone,
     ) {}
 
-    ngOnChanges(changes: SimpleChanges){
+    ngOnChanges(changes: SimpleChanges) {
         // if(this.cancelEvent){
         //     this.cancelEdit();
         // }
