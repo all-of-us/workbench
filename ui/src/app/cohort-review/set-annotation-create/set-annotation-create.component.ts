@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, OnChanges, Input} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
@@ -10,8 +10,8 @@ import {
   CohortAnnotationDefinitionService,
   ModifyCohortAnnotationDefinitionRequest,
 } from 'generated';
-import {Observable} from "rxjs/Observable";
-import {ParticipantCohortAnnotation} from "../../../generated";
+import {Observable} from 'rxjs/Observable';
+import {ParticipantCohortAnnotation} from '../../../generated';
 interface Annotation {
     definition: CohortAnnotationDefinition;
     value: ParticipantCohortAnnotation;
@@ -64,7 +64,7 @@ export class SetAnnotationCreateComponent implements OnChanges {
   @Output() onFinish = new EventEmitter<boolean>();
   posting = false;
   enumValues = <string[]>[];
-  annotationOptions: string = '';
+  annotationOptions = '';
   showDataType = false;
     annotations$: Observable<Annotation[]>;
   form = new FormGroup({
@@ -161,7 +161,7 @@ export class SetAnnotationCreateComponent implements OnChanges {
     return (this.form.invalid || isEmptyEnum);
   }
 
-    selectDropdownChange(data){
+    selectDropdownChange(data) {
         this.annotationOptions = data.displayName;
         this.kind.patchValue(data.value);
     }
