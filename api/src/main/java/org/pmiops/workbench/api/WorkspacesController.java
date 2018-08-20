@@ -82,6 +82,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final UserService userService;
   private final UserRecentResourceService userRecentResourceService;
+  private CompletableFuture<Void> asyncHandleOrphanNotebooks;
+
+  @VisibleForTesting
+  public CompletableFuture<Void> getAsyncHandleOrphanNotebooks() {
+    return asyncHandleOrphanNotebooks;
+  }
 
   @Autowired
   WorkspacesController(
@@ -441,7 +447,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       fileList = getFilesFromNotebooks(bucketName);
       if (fileList != null && fileList.size() > 0) {
         long userId = userProvider.get().getUserId();
-        CompletableFuture.runAsync(() -> {
+        asyncHandleOrphanNotebooks = CompletableFuture.runAsync(() -> {
           long wId = workspaceService.getRequired(workspaceNamespace, workspaceId).getWorkspaceId();
           List<String> notebookNameList = fileList.stream()
               .map(notebook -> notebook.getName())
