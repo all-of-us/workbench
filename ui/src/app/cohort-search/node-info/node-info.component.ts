@@ -126,7 +126,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         console.log(PREDEFINED_ATTRIBUTES.BP_DETAIL);
         const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
-          ? PREDEFINED_ATTRIBUTES.BP_DETAIL
+          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{
             name: '',
             operator: null,
@@ -152,11 +152,10 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         let attributes = [];
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
-          attributes = Object.keys(PREDEFINED_ATTRIBUTES).filter(name => {
+          Object.keys(PREDEFINED_ATTRIBUTES).forEach(name => {
             if (this.node.get('name').indexOf(name) === 0) {
-              return PREDEFINED_ATTRIBUTES[name];
+              attributes = PREDEFINED_ATTRIBUTES[name];
             }
-            return [];
           });
         }
         const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
