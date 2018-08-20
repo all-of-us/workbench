@@ -124,6 +124,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
         this.actions.fetchAttributes(this.node);
       } else {
+        console.log(PREDEFINED_ATTRIBUTES.BP_DETAIL);
         const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
           ? PREDEFINED_ATTRIBUTES.BP_DETAIL
           : [{

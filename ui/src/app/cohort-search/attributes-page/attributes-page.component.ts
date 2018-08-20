@@ -117,6 +117,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         });
       } else {
         this.attrs.NUM = this.node.get('attributes');
+        console.log(this.attrs.NUM);
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
           this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
         }
