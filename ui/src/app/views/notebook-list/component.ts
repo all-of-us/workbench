@@ -30,7 +30,6 @@ import {
 export class NotebookListComponent implements OnInit, OnDestroy {
 
   private static PAGE_ID = 'notebook';
-  awaitingReview: boolean;
   notebooksLoading: boolean;
   notebookList: FileDetail[] = [];
   workspace: Workspace;
@@ -63,8 +62,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
-    const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.awaitingReview = reviewRequested && !approved;
     this.showTip = false;
     this.cohortsLoading = true;
     this.cohortsError = false;
@@ -171,7 +168,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   get createDisabled(): boolean {
-    return this.awaitingReview || !this.writePermission;
+    return !this.writePermission;
   }
 
   submitNotebooksLoadBugReport(): void {

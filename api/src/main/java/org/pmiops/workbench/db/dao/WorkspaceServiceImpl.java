@@ -139,7 +139,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
       WorkspaceUserRole mapValue = userRoleMap.get(currentUserRole.getUser().getUserId());
       if (mapValue != null) {
-        currentUserRole.setRole(mapValue.getRole());
+        currentUserRole.setRoleEnum(mapValue.getRoleEnum());
         userRoleMap.remove(currentUserRole.getUser().getUserId());
       } else {
         // This is how to remove a user from the FireCloud ACL:
@@ -162,8 +162,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
       currentUpdate.setEmail(currentWorkspaceUser.getUser().getEmail());
       currentUpdate.setCanCompute(false);
-      WorkspaceAccessLevel access =
-          WorkspaceUserRole.accessLevelFromStorage(currentWorkspaceUser.getRole());
+      WorkspaceAccessLevel access = currentWorkspaceUser.getRoleEnum();
       if (access == WorkspaceAccessLevel.OWNER) {
         currentUpdate.setCanShare(true);
         currentUpdate.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());

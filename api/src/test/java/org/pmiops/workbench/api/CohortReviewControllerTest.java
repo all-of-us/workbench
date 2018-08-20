@@ -32,6 +32,7 @@ import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -195,17 +196,19 @@ public class CohortReviewControllerTest {
     workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     cohort = new Cohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
-    cohort.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"ICD10\",\"searchParameters\":[{\"parameterId\":\"param25164\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":true,\"domain\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+    cohort.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"ICD10\",\"searchParameters\":[{\"parameterId\":\"param25164\"," +
+      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":true,\"domain\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
     cohortDao.save(cohort);
 
     cohortWithoutReview = new Cohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
-    cohortWithoutReview.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"ICD10\",\"searchParameters\":[{\"parameterId\":\"param25164\",\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":true,\"domain\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+    cohortWithoutReview.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"ICD10\",\"searchParameters\":[{\"parameterId\":\"param25164\"," +
+      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":true,\"domain\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
     cohortDao.save(cohortWithoutReview);
 
     Timestamp today = new Timestamp(new Date().getTime());
@@ -224,7 +227,7 @@ public class CohortReviewControllerTest {
       .participantId(2L);
 
     participantCohortStatus1 = new ParticipantCohortStatus()
-      .status(CohortStatus.NOT_REVIEWED)
+      .statusEnum(CohortStatus.NOT_REVIEWED)
       .participantKey(key1)
       .genderConceptId(TestDemo.MALE.getConceptId())
       .gender(TestDemo.MALE.getName())
@@ -234,7 +237,7 @@ public class CohortReviewControllerTest {
       .ethnicity(TestDemo.NOT_HISPANIC.getName())
       .birthDate(new java.sql.Date(today.getTime()));
     participantCohortStatus2 = new ParticipantCohortStatus()
-      .status(CohortStatus.NOT_REVIEWED)
+      .statusEnum(CohortStatus.NOT_REVIEWED)
       .participantKey(key2)
       .genderConceptId(TestDemo.FEMALE.getConceptId())
       .gender(TestDemo.FEMALE.getName())
@@ -249,13 +252,13 @@ public class CohortReviewControllerTest {
 
     stringAnnotationDefinition =
       new CohortAnnotationDefinition()
-        .annotationType(AnnotationType.STRING)
+        .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.STRING))
         .columnName("test")
         .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(stringAnnotationDefinition);
     enumAnnotationDefinition =
       new CohortAnnotationDefinition()
-        .annotationType(AnnotationType.ENUM)
+        .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.ENUM))
         .columnName("test")
         .cohortId(cohort.getCohortId());
     SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<CohortAnnotationEnumValue>();
@@ -265,19 +268,19 @@ public class CohortReviewControllerTest {
     cohortAnnotationDefinitionDao.save(enumAnnotationDefinition.enumValues(enumValues));
     dateAnnotationDefinition =
       new CohortAnnotationDefinition()
-        .annotationType(AnnotationType.DATE)
+        .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.DATE))
         .columnName("test")
         .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(dateAnnotationDefinition);
     booleanAnnotationDefinition =
       new CohortAnnotationDefinition()
-        .annotationType(AnnotationType.BOOLEAN)
+        .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.BOOLEAN))
         .columnName("test")
         .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(booleanAnnotationDefinition);
     integerAnnotationDefinition =
       new CohortAnnotationDefinition()
-        .annotationType(AnnotationType.INTEGER)
+        .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.INTEGER))
         .columnName("test")
         .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(integerAnnotationDefinition);
@@ -829,7 +832,7 @@ public class CohortReviewControllerTest {
         .participantId(participantCohortStatus.getParticipantKey().getParticipantId())
         .raceConceptId(participantCohortStatus.getRaceConceptId())
         .race(participantCohortStatus.getRace())
-        .status(participantCohortStatus.getStatus()));
+        .status(participantCohortStatus.getStatusEnum()));
     }
     return new org.pmiops.workbench.model.CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())

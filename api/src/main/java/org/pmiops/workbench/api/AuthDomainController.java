@@ -43,10 +43,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
-    DataAccessLevel previousAccess = user.getDataAccessLevel();
+    DataAccessLevel previousAccess = user.getDataAccessLevelEnum();
     fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
-    // TODO(calbach): Teardown any active clusters here.
-    user.setDataAccessLevel(DataAccessLevel.REVOKED);
+    user.setDataAccessLevelEnum(DataAccessLevel.REVOKED);
     user.setDisabled(true);
     userDao.save(user);
 
@@ -62,10 +61,10 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.MANAGE_GROUP})
   public ResponseEntity<Void> addUserToAuthDomain(String groupName, AuthDomainRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
-    DataAccessLevel previousAccess = user.getDataAccessLevel();
+    DataAccessLevel previousAccess = user.getDataAccessLevelEnum();
     fireCloudService.addUserToGroup(request.getEmail(), groupName);
     // TODO(blrubenstein): Parameterize this.
-    user.setDataAccessLevel(DataAccessLevel.REGISTERED);
+    user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     user.setDisabled(false);
     userDao.save(user);
 

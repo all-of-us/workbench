@@ -5,7 +5,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {
-  DataAccessLevel,
   ProfileService,
 } from 'generated';
 

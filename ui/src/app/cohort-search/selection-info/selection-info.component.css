@@ -1,7 +1,8 @@
 .container {
   display: flex;
   width: 100%;
-  padding: 0 0.5rem 0 0;
+  padding-top: 0.2rem;
+  padding-left: 0.2rem;
 }
 
 .item-info {
@@ -22,10 +23,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 14px;
 }
 
-.item-info > .name:hover {
-  overflow: visible;
-  white-space: normal;
-  text-align: justify;
+.tooltip-text {
+  font-size: 12px;
+}
+
+.text-size{
+  font-size: 0.49rem;
+  color: #4A4A4A;
+}
+
+.text-muted {
+  font-size: 14px;
 }

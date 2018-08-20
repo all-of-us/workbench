@@ -6,10 +6,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -25,6 +28,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.FieldSet;
@@ -69,8 +73,11 @@ public class CohortMaterializationService {
     if (cohortReview == null) {
       return ImmutableSet.of();
     }
+    List<Short> dbStatusFilter = statusFilter.stream()
+        .map(StorageEnums::cohortStatusToStorage)
+        .collect(Collectors.toList());
     Set<Long> participantIds = participantCohortStatusDao.findByParticipantKey_CohortReviewIdAndStatusIn(
-        cohortReview.getCohortReviewId(), statusFilter)
+        cohortReview.getCohortReviewId(), dbStatusFilter)
         .stream()
         .map(ParticipantIdAndCohortStatus::getParticipantKey)
         .map(Key::getParticipantId)
@@ -152,15 +159,49 @@ public class CohortMaterializationService {
     }
   }
 
+
+  /**
+   * Materializes a cohort.
+   * @param cohortReview {@link CohortReview} representing a manual review of participants in the cohort.
+   * @param cohortSpec JSON representing the cohort criteria.
+   * @param request {@link MaterializeCohortRequest} representing the request options
+   * @return {@link MaterializeCohortResponse} containing the results of cohort materialization
+   */
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
-      SearchRequest searchRequest, MaterializeCohortRequest request) {
+      String cohortSpec, MaterializeCohortRequest request) {
+    SearchRequest searchRequest;
+    try {
+      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
+    } catch (JsonSyntaxException e) {
+      throw new BadRequestException("Invalid cohort spec");
+    }
+    return materializeCohort(cohortReview, searchRequest, cohortSpec.hashCode(), request);
+  }
+
+  /**
+   * Materializes a cohort.
+   * @param cohortReview {@link CohortReview} representing a manual review of participants in the cohort.
+   * @param searchRequest {@link SearchRequest} representing the cohort criteria
+   * @param requestHash a number representing a stable hash of the request; used to enforce that pagination
+   *   tokens are used appropriately
+   * @param request {@link MaterializeCohortRequest} representing the request
+   * @return {@link MaterializeCohortResponse} containing the results of cohort materialization
+   */
+  @VisibleForTesting
+  MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
+      SearchRequest searchRequest, int requestHash, MaterializeCohortRequest request) {
     long offset = 0L;
     FieldSet fieldSet = request.getFieldSet();
     List<CohortStatus> statusFilter = request.getStatusFilter();
     String paginationToken = request.getPageToken();
     int pageSize = request.getPageSize();
     // TODO: add CDR version ID here
-    Object[] paginationParameters = new Object[] { searchRequest, statusFilter };
+    // We require the client to specify requestHash here instead of hashing searchRequest itself,
+    // and use String.valueOf(statusFilter) instead of just statusFilter;
+    // both searchRequest and statusFilter contain enums, which do not have stable has codes across
+    // JVMs (see [RW-1149]).
+    Object[] paginationParameters = new Object[] { requestHash, String.valueOf(statusFilter) };
+
     if (paginationToken != null) {
       PaginationToken token = PaginationToken.fromBase64(paginationToken);
       if (token.matchesParameters(paginationParameters)) {
@@ -170,9 +211,7 @@ public class CohortMaterializationService {
             String.format("Use of pagination token %s with new parameter values", paginationToken));
       }
     }
-    // Grab the next pagination token here, because searchRequest can be mutated during query
-    // execution, which will make the hash of SearchRequest no longer match; see
-    // [RW-844].
+    // Grab the next pagination token here, because statusFilter can be modified below.
     // TODO: consider pagination based on cursor / values rather than offset
     String nextToken = PaginationToken.of(offset + pageSize, paginationParameters).toBase64();
 

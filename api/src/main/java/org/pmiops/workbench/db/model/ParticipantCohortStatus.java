@@ -1,8 +1,7 @@
 package org.pmiops.workbench.db.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.model.CohortStatus;
-
+import java.sql.Date;
+import java.util.Objects;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
@@ -10,8 +9,8 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.sql.Date;
-import java.util.Objects;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.model.CohortStatus;
 
 @Entity
 @Table(name = "participant_cohort_status")
@@ -19,7 +18,7 @@ public class ParticipantCohortStatus {
 
     // Important: Keep fields in sync with ParticipantCohortStatusDao.ALL_COLUMNS_EXCEPT_REVIEW_ID.
     private ParticipantCohortStatusKey participantKey;
-    private CohortStatus status;
+    private Short status;
     private Long genderConceptId;
     private String gender;
     private Date birthDate;
@@ -49,17 +48,30 @@ public class ParticipantCohortStatus {
     }
 
     @Column(name = "status")
-    public CohortStatus getStatus() {
+    public Short getStatus() {
         return status;
     }
 
-    public void setStatus(CohortStatus status) {
+    public void setStatus(Short status) {
         this.status = status;
     }
 
-    public ParticipantCohortStatus status(CohortStatus status) {
+    public ParticipantCohortStatus status(Short status) {
         this.status = status;
         return this;
+    }
+
+    @Transient
+    public CohortStatus getStatusEnum() {
+        return StorageEnums.cohortStatusFromStorage(getStatus());
+    }
+
+    public void setStatusEnum(CohortStatus status) {
+        setStatus(StorageEnums.cohortStatusToStorage(status));
+    }
+
+    public ParticipantCohortStatus statusEnum(CohortStatus status) {
+        return this.status(StorageEnums.cohortStatusToStorage(status));
     }
 
     @Column(name = "gender_concept_id")

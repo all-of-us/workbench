@@ -1054,6 +1054,10 @@ definitions:
     properties:
       email:
         type: string
+      givenName:
+        type: string
+      familyName:
+        type: string
       role:
         $ref: "#/definitions/WorkspaceAccessLevel"
 

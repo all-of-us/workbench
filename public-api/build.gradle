@@ -120,7 +120,7 @@ dependencies {
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
-  compile 'com.google.guava:guava:25.1-jre'
+  compile 'com.google.guava:guava:26.0-jre'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'

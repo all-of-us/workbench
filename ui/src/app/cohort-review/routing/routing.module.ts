@@ -32,6 +32,7 @@ const routes: Routes = [{
     component: CreateReviewPage,
     data: {
       title: 'Create a New Cohort Review',
+      breadcrumb: 'Create a New Cohort Review',
     },
   }, {
     path: '',
