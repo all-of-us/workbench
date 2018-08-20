@@ -37,7 +37,8 @@ REMOTE_DATA_LOC=https://storage.googleapis.com/$BUCKET
 echo "Importing data files from $REMOTE_DATA_LOC"
 
 # Add tables names of files to import here
-TABLES=(achilles_analysis achilles_results achilles_results_dist db_domain domain vocabulary criteria concept concept_relationship concept_ancestor concept_synonym)
+#TABLES=(achilles_analysis achilles_results achilles_results_dist db_domain domain vocabulary criteria concept concept_relationship concept_ancestor concept_synonym)
+TABLES=(concept_synonym)
 # Make a dir for the csvs
 local_fpath=/tmp/$CDR_DB_NAME
 rm -rf $local_fpath
@@ -56,7 +57,7 @@ function mysqlimport_table () {
    file=$2
 
    echo "Mysql importing $file into $db.$table..."
-   mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-enclosed-by='"' \
+   mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-optionally-enclosed-by='"' \
       --verbose --local -h ${DB_HOST} --port ${DB_PORT} \
       -u root -p${MYSQL_ROOT_PASSWORD} $db $file
 }
