@@ -77,6 +77,7 @@ export class SetAnnotationCreateComponent {
       .do((defns: CohortAnnotationDefinition[]) =>
         this.state.annotationDefinitions.next(defns))
       .subscribe(_ => {
+          this.open = false;
         this.posting = false;
         this.onFinish.emit(true);
       });
@@ -118,7 +119,7 @@ export class SetAnnotationCreateComponent {
     selectDropdownChange(val) {
     this.annotationOptions = val.displayName ;
     this.kind.patchValue(val.value);
-    this.create();
+   // this.create();
     }
 
 }
