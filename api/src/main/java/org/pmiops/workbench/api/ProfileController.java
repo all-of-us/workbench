@@ -574,7 +574,7 @@ public class ProfileController implements ProfileApiDelegate {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<>();
     for (User user : userService.getNonVerifiedUsers()) {
-      responseList.add(profileService.getProfile(user));
+      responseList.add(profileService.getTrimmedProfile(user));
     }
     response.setProfileList(responseList);
     return ResponseEntity.ok(response);
