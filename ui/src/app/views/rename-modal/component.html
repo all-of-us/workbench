@@ -7,11 +7,11 @@
         <div class="form-section">
             <label>New Name: </label>
             <input id="new-notebook-name" type="text" class="input"
-                   [(ngModel)]="name">
+                   [(ngModel)]="newName">
         </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline" (click)="renaming=false">Cancel</button>
-        <button type="button" class="btn btn-primary confirm-delete-btn" (click)="this.receiveRename.emit({name: resource.name, newName: name});">Rename {{resourceType}}</button>
+        <button type="button" class="btn btn-primary confirm-delete-btn" (click)="this.receiveRename.emit({name: resource.name, newName: newName});">Rename {{resourceType}}</button>
     </div>
 </clr-modal>

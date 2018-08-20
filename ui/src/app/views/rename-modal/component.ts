@@ -8,6 +8,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 })
 export class RenameModalComponent {
   public renaming = false;
+  public newName = '';
 
   @Input() resourceType: string;
   @Output() receiveRename = new EventEmitter<object>();
