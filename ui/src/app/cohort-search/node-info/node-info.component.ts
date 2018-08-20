@@ -126,7 +126,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         console.log(PREDEFINED_ATTRIBUTES.BP_DETAIL);
         const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
-          ? PREDEFINED_ATTRIBUTES.BP_DETAIL
+          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{
             name: '',
             operator: null,
@@ -152,14 +152,11 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         let attributes = [];
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
-            for (const key in PREDEFINED_ATTRIBUTES) {
-                if (PREDEFINED_ATTRIBUTES.hasOwnProperty(key)) {
-                    if (this.node.get('name').indexOf(key) === 0) {
-                        attributes = PREDEFINED_ATTRIBUTES[key];
-                    }
-                    break;
-                }
+          Object.keys(PREDEFINED_ATTRIBUTES).forEach(name => {
+            if (this.node.get('name').indexOf(name) === 0) {
+              attributes = PREDEFINED_ATTRIBUTES[name];
             }
+          });
         }
         const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
         this.actions.addParameter(param);
