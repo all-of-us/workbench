@@ -11,19 +11,18 @@
     Loading...
   </div>
 </div>
-<h1>hi{{definitions.length}}</h1>
 
 <div class="footer-button">
   <button
           type="button"
           class="btn btn-link cancel"
-          (click)="cancelFromChange()">
+          (click)="openEdit = false">
     Cancel
   </button>
   <button
           type="button"
           class="btn btn-primary"
-          (click)="saveFromChange()"
+          (click)="openEdit = false"
   >
     Save
   </button>
