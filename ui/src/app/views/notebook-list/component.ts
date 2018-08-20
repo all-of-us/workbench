@@ -6,11 +6,12 @@ import {ActivatedRoute} from '@angular/router';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {RenameModalComponent} from "app/views/rename-modal/component";
+import {ConfirmDeleteModalComponent} from "app/views/confirm-delete-modal/component";
 import {environment} from 'environments/environment';
 
 import {
   Cluster,
-  ClusterService,
   Cohort,
   CohortsService,
   FileDetail,
@@ -47,10 +48,15 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   cohortsError: boolean;
   newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
   firstVisit = true;
+  notebookInFocus: String;
 
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
+  @ViewChild(RenameModalComponent)
+  renameModal: RenameModalComponent;
+  @ViewChild(ConfirmDeleteModalComponent)
+  deleteModal: ConfirmDeleteModalComponent;
 
 
   constructor(
@@ -122,6 +128,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   openNotebook(nb?: FileDetail): void {
     let nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/notebooks/`;
+    console.log("before if in open: " + JSON.stringify(nb));
     if (nb) {
       nbUrl += encodeURIComponent(nb.name);
     } else {
@@ -161,6 +168,51 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.openNotebook();
   }
 
+  renameThis(notebook: String): void {
+    this.notebookInFocus = notebook;
+    this.renameModal.open();
+  }
+
+  receiveRename($event): void {
+    this.renameNotebook($event);
+  }
+
+  renameNotebook(rename): void {
+    let newName = rename.newName;
+    if (!(new RegExp('^.+\.ipynb$').test(newName))) {
+      newName = rename.newName + '.ipynb';
+    }
+   this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename).subscribe(() => {
+     this.notebookList.filter((nb) => { return nb.name === rename.name; }).map((nb) => {
+       nb.name = newName;
+       nb.path = nb.path.replace(rename.name, newName);
+     });
+     this.renameModal.close();
+   });
+  }
+
+  cloneThis(notebook): void {
+    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, notebook.name).subscribe(() => {
+      this.loadNotebookList();
+    });
+  }
+
+  confirmDelete(notebook): void {
+    this.notebookInFocus = notebook;
+    this.deleteModal.open();
+  }
+
+  receiveDelete($event): void {
+    this.deleteNotebook($event);
+    this.deleteModal.close();
+  }
+
+  public deleteNotebook(notebook): void {
+    this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, notebook.name).subscribe(() => {
+      this.loadNotebookList();
+    })
+  }
+
   get writePermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
       || this.accessLevel === WorkspaceAccessLevel.WRITER;
@@ -170,7 +222,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
-  get createDisabled(): boolean {
+  get actionsDisabled(): boolean {
     return this.awaitingReview || !this.writePermission;
   }
 

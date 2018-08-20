@@ -2,6 +2,9 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.CopyWriter;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import java.sql.Timestamp;
@@ -42,6 +45,7 @@ import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -742,6 +746,45 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(response);
   }
 
+  @Override
+  public ResponseEntity<EmptyResponse> renameNotebook(String workspace, String workspaceName, NotebookRename rename) {
+    String fromBucket = fireCloudService.getWorkspace(workspace, workspaceName)
+      .getWorkspace()
+      .getBucketName();
+    String origPath = "notebooks/" + rename.getName();
+    String newName = rename.getNewName();
+    if (!NOTEBOOK_PATTERN.matcher(newName).matches()) {
+      newName = newName + ".ipynb";
+    }
+    String newPath = "notebooks/" + newName;
+    BlobId blobId = BlobId.of(fromBucket, origPath);
+    cloudStorageService.copyBlob(blobId, BlobId.of(fromBucket, newPath));
+    cloudStorageService.deleteBlob(blobId);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> cloneNotebook(String workspace, String workspaceName, String notebookName) {
+    String fromBucket = fireCloudService.getWorkspace(workspace, workspaceName)
+      .getWorkspace()
+      .getBucketName();
+    String origPath = "notebooks/" + notebookName;
+    String newPath = "notebooks/Clone " + notebookName;
+    BlobId blobId = BlobId.of(fromBucket, origPath);
+    cloudStorageService.copyBlob(blobId, BlobId.of(fromBucket, newPath));
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName, String notebookName) {
+    String fromBucket = fireCloudService.getWorkspace(workspace, workspaceName)
+      .getWorkspace()
+      .getBucketName();
+    String origPath = "notebooks/" + notebookName;
+    BlobId blobId = BlobId.of(fromBucket, origPath);
+    cloudStorageService.deleteBlob(blobId);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
   /**
    * Returns List of python fileDetails from notebooks folder
    * @param bucketName

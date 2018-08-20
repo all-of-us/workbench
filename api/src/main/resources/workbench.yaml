@@ -795,6 +795,75 @@ paths:
           schema:
             $ref: "#/definitions/CloneWorkspaceResponse"
 
+  # Notebooks ############################################################################
+
+  /v1/notebooks/{workspaceNamespace}/{workspaceId}/renameNotebook:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: Renames specified notebook
+      operationId: "renameNotebook"
+      parameters:
+        - in: body
+          name: NotebookRename
+          description: new name for notebook
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              newName:
+                type: string
+      responses:
+        200:
+          description: Successful rename
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
+
+  /v1/notebooks/{workspaceNamespace}/{workspaceId}/{notebookName}/clone:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: Clones specified notebook
+      operationId: "cloneNotebook"
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful clone
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
+  /v1/notebooks/{workspaceNamespace}/{workspaceId}/{notebookName}/delete:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    delete:
+      tags:
+        - workspaces
+      description: Deletes specified notebook
+      operationId: "deleteNotebook"
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful delete
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
   # Cohorts ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
