@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, OnChanges, ChangeDetectorRef} from '@angular/core';
+import {Component, ChangeDetectorRef, Input, OnInit, OnChanges} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
@@ -9,7 +9,7 @@ import {
   ModifyParticipantCohortAnnotationRequest,
   ParticipantCohortAnnotation,
 } from 'generated';
-import * as moment from "moment";
+import * as moment from 'moment';
 
 interface Annotation {
   definition: CohortAnnotationDefinition;
@@ -34,7 +34,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
   annotationOption: any;
   oldValue: any;
   myDate: any;
-  testSpinner= false;
+  testSpinner = false;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -42,11 +42,11 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
     private cdref: ChangeDetectorRef
   ) {}
 
-    ngOnChanges(){
+    ngOnChanges() {
         if (this.annotation.value[this.valuePropertyName]) {
             this.defaultAnnotation = true;
                 this.annotationOption = this.annotation.value[this.valuePropertyName];
-        }else{
+        } else {
             this.defaultAnnotation = false;
         }
     }
@@ -59,16 +59,12 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
     }
   }
 
-    ngAfterContentChecked() {
-        this.cdref.detectChanges();
-    }
+  ngAfterContentChecked() {
+      this.cdref.detectChanges();
+  }
 
   handleInput() {
     /* Parameters from the path */
-      setTimeout(function(){
-          this.testSpinner = true;
-        },30000);
-
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
@@ -136,16 +132,16 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
           : '';
       }
 
-    annotationOptionChange(value){
+    annotationOptionChange(value) {
     this.annotationOption = value;
     this.defaultAnnotation = true;
     this.control.patchValue(value);
     this.oldValue = value;
-        this.handleInput();
+    this.handleInput();
 
     }
 
-    dateChange(e){
+    dateChange(e) {
         let newDate = moment(e).format('YYYY-MM-DD');
         this.control.patchValue(newDate);
         this.handleInput();
