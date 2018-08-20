@@ -454,13 +454,8 @@ export class CohortSearchActions {
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
-      attributes: immParam.get('attributes'),
+      attributes: immParam.get('attributes')
     };
-
-    if (immParam.get('hasAttributes') || param.type === CRITERIA_TYPES.DEMO) {
-      param.attributes = typeof immParam.get('attributes') !== 'undefined'
-        ? immParam.get('attributes') : [];
-    }
 
     if (param.type === CRITERIA_TYPES.DEMO
       || param.type === DomainType[DomainType.VISIT]
