@@ -1,7 +1,6 @@
 import {AfterContentChecked, Component, ChangeDetectorRef, Input, OnChanges, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-
 import {
   AnnotationType,
   CohortAnnotationDefinition,
@@ -10,7 +9,6 @@ import {
   ParticipantCohortAnnotation,
 } from 'generated';
 import * as moment from 'moment';
-
 interface Annotation {
   definition: CohortAnnotationDefinition;
   value: ParticipantCohortAnnotation;
