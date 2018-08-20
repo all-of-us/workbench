@@ -115,7 +115,7 @@ export class SetAnnotationCreateComponent {
     return (this.form.invalid || isEmptyEnum);
   }
 
-    selectDropdownChange(val){
+    selectDropdownChange(val) {
     this.annotationOptions = val.displayName ;
     this.kind.patchValue(val.value);
     this.create();
