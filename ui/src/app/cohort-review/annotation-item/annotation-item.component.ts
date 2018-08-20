@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnInit, OnChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnChanges, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
@@ -60,7 +60,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
   }
 
   ngAfterContentChecked() {
-      this.cdref.detectChanges();
+    this.cdref.detectChanges();
   }
 
   handleInput() {
