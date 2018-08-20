@@ -12,8 +12,8 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {NotebookListComponent} from 'app/views/notebook-list/component';
+import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
@@ -97,8 +97,8 @@ describe('NotebookListComponent', () => {
       declarations: [
         BugReportComponent,
         ConfirmDeleteModalComponent,
-        RenameModalComponent,
         NotebookListComponent,
+        RenameModalComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
       ],
