@@ -1,4 +1,4 @@
-import {AfterContentChecked, ChangeDetectorRef, Component,  Input, OnInit, OnChanges} from '@angular/core';
+import {AfterContentChecked, ChangeDetectorRef, Component, Input, OnChanges, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {
