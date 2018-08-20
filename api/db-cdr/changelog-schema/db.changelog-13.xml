@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="brianfreeman" id="changelog-13">
+
+    <addColumn tableName="criteria">
+      <column name="path" type="VARCHAR(500)"/>
+    </addColumn>
+
+    <dropColumn tableName="criteria" columnName="predefined_attributes"/>
+
+    <createTable tableName="criteria_attribute">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="value_as_concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="type" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="est_count" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_criteria_attribute_concept_id"
+      tableName="criteria_attribute"
+      unique="false">
+      <column name="concept_id"/>
+    </createIndex>
+
+  </changeSet>
+</databaseChangeLog>
