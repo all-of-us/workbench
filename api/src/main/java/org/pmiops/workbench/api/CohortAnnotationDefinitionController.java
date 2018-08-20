@@ -46,7 +46,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                     return new CohortAnnotationDefinition()
                             .columnName(cohortAnnotationDefinition.getColumnName())
                             .cohortId(cohortAnnotationDefinition.getCohortId())
-                            .annotationType(cohortAnnotationDefinition.getAnnotationType())
+                            .annotationType(cohortAnnotationDefinition.getAnnotationTypeEnum())
                             .cohortAnnotationDefinitionId(cohortAnnotationDefinition.getCohortAnnotationDefinitionId())
                             .enumValues(enumValues);
                 }
@@ -61,7 +61,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                             new org.pmiops.workbench.db.model.CohortAnnotationDefinition()
                                     .cohortId(cohortAnnotationDefinition.getCohortId())
                                     .columnName(cohortAnnotationDefinition.getColumnName())
-                                    .annotationType(cohortAnnotationDefinition.getAnnotationType());
+                                    .annotationTypeEnum(cohortAnnotationDefinition.getAnnotationType());
                     List<CohortAnnotationEnumValue> enumValuesList = (cohortAnnotationDefinition.getEnumValues() == null) ? new ArrayList<>() :
                             IntStream.range(0, cohortAnnotationDefinition.getEnumValues().size())
                                     .mapToObj(i -> new CohortAnnotationEnumValue()

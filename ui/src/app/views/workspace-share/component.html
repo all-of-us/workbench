@@ -40,15 +40,18 @@
         <h4 class="collaborator-label">Current Collaborators</h4>
         <ul>
           <div *ngFor="let user of workspace.userRoles" class="user" [ngClass]="{'owner' : (user.email === userEmail || !hasPermission)}">
-            <div class="collaborator-icon">
-              <clr-icon *ngIf="user.email !== userEmail && hasPermission"
-                      shape="minus-circle"
-                      class="remove-button"
-                      (click)="removeCollaborator(user)" style="color: #8BC990"></clr-icon>
-            </div>
-            <div class="collaborator">
-              <h5 class="user-email">{{user.email}}</h5>
-              <div class="user-role">{{user.role}}</div>
+            <div style="display: flex; align-items: flex-start;">
+              <div class="collaborator-icon">
+                <clr-icon *ngIf="user.email !== userEmail && hasPermission"
+                        shape="minus-circle"
+                        class="remove-button"
+                        (click)="removeCollaborator(user)" style="color: #8BC990"></clr-icon>
+              </div>
+              <div class="collaborator">
+                <h5 class="user-name">{{user.givenName}} {{user.familyName}}</h5>
+                <div class="user-email">{{user.email}}</div>
+                <div class="user-role">{{user.role}}</div>
+              </div>
             </div>
           </div>
           <div *ngIf="usersLoading" class="loading-users">

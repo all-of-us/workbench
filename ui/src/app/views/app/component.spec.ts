@@ -10,7 +10,6 @@ import {AccountCreationComponent} from '../account-creation/component';
 import {AppComponent} from '../app/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 

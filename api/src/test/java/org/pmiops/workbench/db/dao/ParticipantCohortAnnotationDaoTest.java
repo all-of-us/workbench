@@ -51,7 +51,7 @@ public class ParticipantCohortAnnotationDaoTest {
                 new CohortAnnotationDefinition()
                 .cohortId(COHORT_ID)
                 .columnName("enum")
-                .annotationType(AnnotationType.ENUM);
+                .annotationTypeEnum(AnnotationType.ENUM);
         CohortAnnotationEnumValue enumValue1 = new CohortAnnotationEnumValue().name("z").order(0).cohortAnnotationDefinition(cohortAnnotationDefinition);
         CohortAnnotationEnumValue enumValue2 = new CohortAnnotationEnumValue().name("r").order(1).cohortAnnotationDefinition(cohortAnnotationDefinition);
         CohortAnnotationEnumValue enumValue3 = new CohortAnnotationEnumValue().name("a").order(2).cohortAnnotationDefinition(cohortAnnotationDefinition);

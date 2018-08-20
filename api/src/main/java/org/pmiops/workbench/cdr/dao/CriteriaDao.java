@@ -15,17 +15,17 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
   @Query(value = "select * from criteria where id in ( " +
     "select id from " +
-    "(select @curRow \\:= case " +
+    "(select case " +
     "when @curType = name " +
-    "then @curRow + 1 " +
-    "else 1 end as rank, " +
+    "then @curRow \\:= @curRow + 1 " +
+    "else @curRow \\:= 1 end as rank, " +
     "id, " +
     "code, " +
     "@curType \\:= name as name, " +
     "concept_id " +
     "from (select * from criteria where type = upper(:type) and " +
     "(upper(code) like upper(concat('%',:value,'%')) or upper(name) like upper(concat('%',:value,'%'))) ) a, " +
-    "(select @curRow \\:= 1, @curType \\:= '') r " +
+    "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
     "limit 250", nativeQuery = true)
@@ -66,7 +66,8 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and c.subtype in ('ATC', 'BRAND') " +
     "and c.is_selectable = 1 " +
     "and upper(c.name) like upper(concat('%',:name,'%')) " +
-    "order by c.name asc", nativeQuery = true)
+    "order by c.name asc " +
+    "limit 250", nativeQuery = true)
   List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name);
 
   @Query(value = "select * from criteria c " +

@@ -220,4 +220,16 @@ describe('NotebookRedirectComponent', () => {
     fixture.detectChanges();
     expect(spinnerText()).toContain('Redirecting');
   }));
+
+
+  it('should escape notebooks names', fakeAsync(() => {
+    updateAndTick(fixture);
+
+    fixture.componentInstance.notebookName = '1%2B1.ipynb';
+    blockingClusterStub.cluster.status = ClusterStatus.Running;
+    tick(10000);
+    fixture.detectChanges();
+
+    expect(fakeWindow.location.href).toContain('/1%252B1.ipynb');
+  }));
 });

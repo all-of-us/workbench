@@ -1,8 +1,16 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,16 +50,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -157,7 +155,7 @@ public class CohortReviewControllerTest {
     workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     Cohort cohort = new Cohort();
@@ -180,7 +178,7 @@ public class CohortReviewControllerTest {
       .participantId(2L);
 
     participantCohortStatus1 = new ParticipantCohortStatus()
-      .status(CohortStatus.NOT_REVIEWED)
+      .statusEnum(CohortStatus.NOT_REVIEWED)
       .participantKey(key1)
       .genderConceptId(TestDemo.MALE.getConceptId())
       .gender(TestDemo.MALE.getName())
@@ -190,7 +188,7 @@ public class CohortReviewControllerTest {
       .ethnicity(TestDemo.NOT_HISPANIC.getName())
       .birthDate(new java.sql.Date(today.getTime()));
     participantCohortStatus2 = new ParticipantCohortStatus()
-      .status(CohortStatus.NOT_REVIEWED)
+      .statusEnum(CohortStatus.NOT_REVIEWED)
       .participantKey(key2)
       .genderConceptId(TestDemo.FEMALE.getConceptId())
       .gender(TestDemo.FEMALE.getName())
@@ -295,7 +293,7 @@ public class CohortReviewControllerTest {
         .participantId(participantCohortStatus.getParticipantKey().getParticipantId())
         .raceConceptId(participantCohortStatus.getRaceConceptId())
         .race(participantCohortStatus.getRace())
-        .status(participantCohortStatus.getStatus()));
+        .status(participantCohortStatus.getStatusEnum()));
     }
     return new org.pmiops.workbench.model.CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())

@@ -160,3 +160,13 @@ form .form-block > label,
 .clr-wizard .clr-wizard-stepnav-item.active {
   font-weight: 300;
 }
+
+button:focus {
+    text-decoration: none;
+    outline:none;
+    border: none;
+    box-shadow: none;
+  background: none;
+}
+
+/**:focus {outline:none !important}*/
