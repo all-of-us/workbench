@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit, OnChanges} from '@angular/core';
+import {Component, Input, OnDestroy, OnChanges, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -57,7 +57,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
     private route: ActivatedRoute,
   ) {}
 
-  ngOnChanges(){
+  ngOnChanges() {
 
     if (this.statusControl.value) {
         this.defaultOption = true;
@@ -66,7 +66,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
         } else {
             this.participantOption = this.statusControl.value;
         }
-    }else{
+    } else {
         this.defaultOption = false;
     }
   }

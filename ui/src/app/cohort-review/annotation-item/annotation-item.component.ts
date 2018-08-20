@@ -1,4 +1,4 @@
-import {Component, ChangeDetectorRef, Input, OnInit, OnChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnInit, OnChanges} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
@@ -142,7 +142,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
     }
 
     dateChange(e) {
-        let newDate = moment(e).format('YYYY-MM-DD');
+        const newDate = moment(e).format('YYYY-MM-DD');
         this.control.patchValue(newDate);
         this.handleInput();
     }
