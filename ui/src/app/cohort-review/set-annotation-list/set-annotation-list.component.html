@@ -1,15 +1,17 @@
-<div *ngIf="definitions.length !== 0" class="container" [class.is-posting]="posting">
-  <!--<div class="item">-->
-    <!--<span class="name">Name</span>-->
-    <!--<span class="type">Type</span>-->
-    <!--<span class="delete">Remove</span>-->
-  <!--</div>-->
-  <!--<hr />-->
+<div class="container" [class.is-posting]="posting">
+  <div class="item">
+    <span class="name">Name</span>
+    <span class="type">Type</span>
+    <span class="delete">Remove</span>
+  </div>
+  <hr />
 
   <app-set-annotation-item
-    *ngFor="let defn of definitions"
-    [definition]="defn"
-    (isPosting)="isPosting($event, defn)">
+          *ngFor="let defn of definitions"
+          [definition]="defn"
+          [cancelEvent] = "cancelFlag"
+          [saveEvent] = "saveButtonEvent"
+          (isPosting)="isPosting($event, defn)">
   </app-set-annotation-item>
 
   <div *ngIf="definitions.length === 0">
@@ -19,20 +21,21 @@
   <div *ngIf="posting" class="spinner spinner-md spin-in-overlay">
     Loading...
   </div>
-
 </div>
-
 
 <div class="footer-button">
   <button
           type="button"
           class="btn btn-link cancel"
-          (click)="openEdit = false">
+          (click)="cancelFromChange()"
+  >
     Cancel
   </button>
-  <button
+  <!--[ngClass]="{'save-disable': !saveButton}"-->
+  <button [ngClass]="{'save-disable': !saveButton}"
           type="button"
           class="btn btn-primary"
+          (click)="saveFromChange()"
   >
     Save
   </button>

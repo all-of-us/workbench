@@ -34,6 +34,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
   annotationOption: any;
   oldValue: any;
   myDate: any;
+  testSpinner= false;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -64,6 +65,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges {
 
   handleInput() {
     /* Parameters from the path */
+      setTimeout(function(){
+          this.testSpinner = true;
+        },30000);
+
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
