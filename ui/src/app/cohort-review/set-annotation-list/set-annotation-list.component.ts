@@ -67,8 +67,8 @@ export class SetAnnotationListComponent implements OnInit, OnDestroy {
 
     saveFromChange() {
       //  this.saveButtonEvent = true;
-        setTimeout(()=>{
-           this.cancelFromChange ();
+        setTimeout (() => {
+           this.cancelFromChange();
             },5000);
     }
 }
