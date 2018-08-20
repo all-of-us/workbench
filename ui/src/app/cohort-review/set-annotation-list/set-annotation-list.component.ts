@@ -19,9 +19,9 @@ export class SetAnnotationListComponent implements OnInit, OnDestroy {
     subscription: Subscription;
     definitions: CohortAnnotationDefinition[];
     postSet: Set<DefnId> = new Set<DefnId>();
-    cancelFlag = false;
-    saveButtonEvent = false;
-
+    // cancelFlag = false;
+    // saveButtonEvent = false;
+    // posting = false;
     constructor(private state: ReviewStateService,
                 private cdr: ChangeDetectorRef) {}
 
@@ -36,20 +36,19 @@ export class SetAnnotationListComponent implements OnInit, OnDestroy {
 
     isPosting(flag: boolean, defn: CohortAnnotationDefinition): void {
         const id = defn.cohortAnnotationDefinitionId;
-        this.cancelFlag = false;
-        this.saveButtonEvent = false;
-        this.cdr.detectChanges();
+        // this.cancelFlag = false;
+        // this.saveButtonEvent = false;
+        // this.cdr.detectChanges();
         if (flag) {
             this.postSet.add(id);
-           // this.saveButtonEvent = false;
         } else if (this.postSet.has(id)) {
             this.postSet.delete(id);
         }
     }
 
-    // get posting() {
-    //     return this.postSet.size > 0;
-    // }
+    get posting() {
+        return this.postSet.size > 0;
+    }
 
     get openEdit() {
         return this.state.editAnnotationManagerOpen.getValue();
@@ -60,13 +59,16 @@ export class SetAnnotationListComponent implements OnInit, OnDestroy {
     }
 
     cancelFromChange () {
-        this.cancelFlag = true;
+      //  this.cancelFlag = true;
         this.openEdit = false;
-        this.saveButtonEvent = false;
+      //  this.saveButtonEvent = false;
     }
 
+
     saveFromChange() {
-        this.saveButtonEvent = true;
-        this.openEdit = false;
+      //  this.saveButtonEvent = true;
+        setTimeout(()=>{
+           this.cancelFromChange ();
+            },5000);
     }
 }

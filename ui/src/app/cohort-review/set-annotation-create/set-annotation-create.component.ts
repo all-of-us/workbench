@@ -37,6 +37,7 @@ export class SetAnnotationCreateComponent {
   @Output() onFinish = new EventEmitter<boolean>();
   posting = false;
   enumValues = <string[]>[];
+ annotationOptions = '';
 
   form = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -80,6 +81,13 @@ export class SetAnnotationCreateComponent {
         this.onFinish.emit(true);
       });
   }
+    get open() {
+        return this.state.annotationManagerOpen.getValue();
+    }
+
+    set open(value: boolean) {
+        this.state.annotationManagerOpen.next(value);
+    }
 
   cancel() {
     this.onFinish.emit(true);
@@ -106,4 +114,11 @@ export class SetAnnotationCreateComponent {
     const isEmptyEnum = this.isEnum && !(this.enumValues.length > 0);
     return (this.form.invalid || isEmptyEnum);
   }
+
+    selectDropdownChange(val){
+    this.annotationOptions = val.displayName ;
+    this.kind.patchValue(val.value);
+    this.create();
+    }
+
 }

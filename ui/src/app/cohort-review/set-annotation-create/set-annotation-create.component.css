@@ -22,7 +22,7 @@ input[type=text]:not([readonly]):focus {
 }
 
 .footer-button {
-  margin-left: 10rem;
+  margin-left: 9rem;
   margin-top: 4rem;
 }
 .footer-button .cancel{

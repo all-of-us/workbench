@@ -29,8 +29,8 @@ import {
 export class SetAnnotationItemComponent implements OnChanges {
     @Input() definition: CohortAnnotationDefinition;
     @Output() isPosting = new EventEmitter<boolean>();
-    @Input() cancelEvent: false;
-    @Input() saveEvent: false;
+    // @Input() cancelEvent: false;
+    // @Input() saveEvent: false;
     editing = false;
     name = new FormControl('', Validators.required);
 
@@ -45,12 +45,12 @@ export class SetAnnotationItemComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges) {
         // if(this.cancelEvent){
-        //     this.cancelEdit();
+        //     this.editing = false;
         // }
-
-        if (this.saveEvent) {
-            this.saveEdit();
-        }
+        //
+        // if (this.saveEvent) {
+        //     this.saveEdit();
+        // }
     }
     edit(): void {
         this.editing = true;
@@ -73,81 +73,53 @@ export class SetAnnotationItemComponent implements OnChanges {
         });
     }
 
-    saveEdit(): void {
-        const columnName = this.name.value.trim();
-        const oldColumnName = this.definition.columnName.trim();
+  saveEdit(): void {
+    const columnName = this.name.value.trim();
+    const oldColumnName = this.definition.columnName.trim();
 
-        if (this.name.invalid || (columnName === oldColumnName)) {
-         //   this.cancelEdit();
-            return ;
-        }
-
-        const request = <ModifyCohortAnnotationDefinitionRequest>{columnName};
-        const {ns, wsid, cid} = this.route.snapshot.params;
-        const id = this.definition.cohortAnnotationDefinitionId;
-        this.isPosting.emit(true);
-
-        this.annotationAPI
-            .updateCohortAnnotationDefinition(ns, wsid, cid, id, request)
-            .switchMap(_ => this.annotationAPI
-                .getCohortAnnotationDefinitions(ns, wsid, cid)
-                .pluck('items'))
-            .do((defns: CohortAnnotationDefinition[]) =>
-                this.state.annotationDefinitions.next(defns))
-            .subscribe(_ => {
-                this.editing = false;
-                this.isPosting.emit(false);
-            });
+    if (this.name.invalid || (columnName === oldColumnName)) {
+      // this.cancelEdit();
+      return ;
     }
 
-    cancelEdit(event?) {
-       // const columnName = this.name.value.trim();
-       // const oldColumnName = this.definition.columnName.trim();
-       // console.log(columnName);
-      //  console.log(oldColumnName)
-        this.name.setValue(this.definition.columnName);
+    const request = <ModifyCohortAnnotationDefinitionRequest>{columnName};
+    const {ns, wsid, cid} = this.route.snapshot.params;
+    const id = this.definition.cohortAnnotationDefinitionId;
+    this.isPosting.emit(true);
+
+    this.annotationAPI
+      .updateCohortAnnotationDefinition(ns, wsid, cid, id, request)
+      .switchMap(_ => this.annotationAPI
+        .getCohortAnnotationDefinitions(ns, wsid, cid)
+        .pluck('items'))
+      .do((defns: CohortAnnotationDefinition[]) =>
+        this.state.annotationDefinitions.next(defns))
+      .subscribe(_ => {
         this.editing = false;
-        if (event) {
-            event.stopPropagation();
-        }
-    }
-    // cancelEdit(event?) {
-    //       const columnName = this.name.value.trim();
-    //       const oldColumnName = this.definition.columnName.trim();
-    //      console.log(oldColumnName);
-    //      console.log(columnName);
-    //     // // if (this.name.invalid || (columnName === oldColumnName)) {
-    //
-    //         if(this.cancelEvent){
-    //             console.log(this.cancelEvent);
-    //             this.name.setValue(oldColumnName);
-    //             console.log(oldColumnName);
-    //         }
-    //         this.editing = false;
-    //         if (event) {
-    //             event.stopPropagation();
-    //         }
-    //        // return ;
-    //    // }
-    //   // if(this.cancelEvent){
-    //
-    //   // } else {
-    //   //   console.log('checking');
-    //   // }
-    //
-    // }
-    delete(): void {
-        const {ns, wsid, cid} = this.route.snapshot.params;
-        const id = this.definition.cohortAnnotationDefinitionId;
-        this.isPosting.emit(true);
+        this.isPosting.emit(false);
+      });
+  }
 
-        this.annotationAPI
-            .deleteCohortAnnotationDefinition(ns, wsid, cid, id)
-            .switchMap(_ => this.annotationAPI
-                .getCohortAnnotationDefinitions(ns, wsid, cid)
-                .pluck('items'))
-            .do((defns: CohortAnnotationDefinition[]) =>
-                this.state.annotationDefinitions.next(defns))
-            .subscribe(_ => this.isPosting.emit(false));
+  cancelEdit(event?) {
+    this.name.setValue(this.definition.columnName);
+    this.editing = false;
+    if (event) {
+      event.stopPropagation();
     }
+  }
+
+  delete(): void {
+    const {ns, wsid, cid} = this.route.snapshot.params;
+    const id = this.definition.cohortAnnotationDefinitionId;
+    this.isPosting.emit(true);
+
+    this.annotationAPI
+      .deleteCohortAnnotationDefinition(ns, wsid, cid, id)
+      .switchMap(_ => this.annotationAPI
+        .getCohortAnnotationDefinitions(ns, wsid, cid)
+        .pluck('items'))
+      .do((defns: CohortAnnotationDefinition[]) =>
+        this.state.annotationDefinitions.next(defns))
+      .subscribe(_ => this.isPosting.emit(false));
+  }
 }
