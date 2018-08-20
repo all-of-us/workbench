@@ -8,6 +8,7 @@ import {
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
   UpdateWorkspaceRequest,
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceListResponse,
@@ -28,6 +29,32 @@ export class WorkspacesServiceStub {
   // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
   workspacesForReview: Workspace[];
+  sharingProfilesList: UserRole[] = [
+    {
+      email: 'sampleuser1@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User1',
+      role: WorkspaceAccessLevel.OWNER
+    },
+    {
+      email: 'sampleuser2@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User2',
+      role: WorkspaceAccessLevel.WRITER
+    },
+    {
+      email: 'sampleuser3@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User3',
+      role: WorkspaceAccessLevel.READER
+    },
+    {
+      email: 'sampleuser4@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User4',
+      role: WorkspaceAccessLevel.WRITER
+    }
+  ];
 
   constructor() {
 
@@ -59,14 +86,20 @@ export class WorkspacesServiceStub {
       userRoles: [
         {
           email: 'sampleuser1@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.OWNER
         },
         {
           email: 'sampleuser2@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.WRITER
         },
         {
           email: 'sampleuser3@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.READER
         },
       ]
@@ -229,9 +262,14 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
+        let responseItems: UserRole[] = [];
+        responseItems = request.items.map(
+          userRole => this.sharingProfilesList.find(
+            current => userRole.email === current.email));
+
         observer.next({
           workspaceEtag: request.workspaceEtag,
-          items: request.items
+          items: responseItems
         });
         observer.complete();
       }, 0);

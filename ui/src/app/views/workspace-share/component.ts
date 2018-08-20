@@ -99,8 +99,9 @@ export class WorkspaceShareComponent implements OnInit {
       if (this.checkUnique(email, role)) {
         this.usersLoading = true;
         // A user can only have one role on a workspace so we replace them in the list
-        const updateList = Array.from(this.workspace.userRoles)
-          .filter(r => r.email !== email);
+        const updateList = this.workspace.userRoles
+          .filter(r => r.email !== email)
+          .map((userRole) => ({email: userRole.email, role: userRole.role}));
         updateList.push({
           email: email,
           role: role
@@ -134,7 +135,8 @@ export class WorkspaceShareComponent implements OnInit {
   removeCollaborator(user: UserRole): void {
     if (!this.usersLoading) {
       this.usersLoading = true;
-      const updateList = Array.from(this.workspace.userRoles);
+      const updateList = this.workspace.userRoles
+        .map((userRole) => ({email: userRole.email, role: userRole.role}));
       const position = updateList.findIndex((userRole) => {
         if (user.email === userRole.email) {
           return true;

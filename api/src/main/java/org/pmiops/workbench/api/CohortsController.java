@@ -281,15 +281,8 @@ public class CohortsController implements CohortsApiDelegate {
       request.setPageSize(MAX_PAGE_SIZE);
     }
 
-    SearchRequest searchRequest;
-    try {
-      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
-    } catch (JsonSyntaxException e) {
-      throw new BadRequestException("Invalid cohort spec");
-    }
-
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
-        cohortReview, searchRequest, request);
+        cohortReview, cohortSpec, request);
     return ResponseEntity.ok(response);
   }
 
