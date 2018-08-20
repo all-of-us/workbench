@@ -63,7 +63,7 @@ public class ProfileService {
     return profile;
   }
 
-  // This function is similar to above, but reduces the number of DB calls and external
+  // This function is a reduced getProfile, lowering the number of DB calls and external
   // api calls to improve performance.
   public Profile getTrimmedProfile(User user) {
     Profile profile = new Profile();
