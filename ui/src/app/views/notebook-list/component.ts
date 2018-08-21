@@ -48,6 +48,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
   firstVisit = true;
   notebookInFocus: String;
+  notebookRenameConflictError: boolean = false;
+  duplicateName: String = '';
 
 
   @ViewChild(BugReportComponent)
@@ -177,6 +179,12 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     let newName = rename.newName;
     if (!(new RegExp('^.+\.ipynb$').test(newName))) {
       newName = rename.newName + '.ipynb';
+    }
+    if (this.notebookList.filter((nb) => nb.name === newName).length > 0) {
+      this.renameModal.close();
+      this.notebookRenameConflictError = true;
+      this.duplicateName = newName;
+      return;
     }
    this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename).subscribe(() => {
      this.notebookList.filter((nb) => nb.name === rename.name).map((nb) => {

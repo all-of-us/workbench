@@ -72,6 +72,10 @@
     <button type="button" class="btn btn-primary" (click)="localizeNotebooksError = false">Ok</button>
   </div>
 </clr-modal>
+<clr-modal [(clrModalOpen)]="notebookRenameConflictError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">You already have a notebook named {{duplicateName}}. Please choose another name.</div>
+</clr-modal>
 <app-bug-report></app-bug-report>
 
 <app-rename-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveRename)="receiveRename($event)"></app-rename-modal>
