@@ -161,6 +161,5 @@ public class UserRecentResourceServiceTest {
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 0);
   }
-
 }
 

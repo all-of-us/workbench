@@ -427,7 +427,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(String workspaceNamespace,
       String workspaceId) {
-    final List<FileDetail> fileList;
+    List<FileDetail> fileList = new ArrayList<>();
     try {
       org.pmiops.workbench.firecloud.model.Workspace fireCloudWorkspace =
           fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
