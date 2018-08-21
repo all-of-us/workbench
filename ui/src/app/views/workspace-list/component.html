@@ -43,14 +43,14 @@
             <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical" [class.disabled]="actionsDisabled"></clr-icon>
           </button>
           <clr-dropdown-menu *clrIfOpen>
-            <button class="action-item"
+            <button class="action-item clone-item"
                     routerLink="/workspaces/{{workspacePermissions.workspace.namespace}}/{{workspacePermissions.workspace.id}}/clone"
                     routerLinkActive="active">
               <clr-icon shape="copy"></clr-icon>
               Clone
             </button>
             <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
-              <button class="action-item"
+              <button class="action-item edit-item"
                       [disabled]="!workspacePermissions.canWrite"
                       [class.disabled]="!workspacePermissions.canWrite"
                       routerLink="/workspaces/{{workspacePermissions.workspace.namespace}}/{{workspacePermissions.workspace.id}}/edit"

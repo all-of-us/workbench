@@ -1,8 +1,8 @@
-import {DebugElement} from '@angular/core';
+import {Component, DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
-import {UrlSegment} from '@angular/router';
+import {Router, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
@@ -19,7 +19,7 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
-  updateAndTick
+  simulateClick, updateAndTick
 } from 'testing/test-helpers';
 
 import {
@@ -49,19 +49,38 @@ class WorkspaceListPage {
   }
 }
 
+@Component({
+  selector: 'app-fake-edit',
+  template: '<div class="fake-edit"></div>'
+})
+class FakeEditComponent {}
+
+@Component({
+  selector: 'app-fake-clone',
+  template: '<div class="fake-clone"></div>'
+})
+class FakeCloneComponent {}
+
 
 describe('WorkspaceListComponent', () => {
   let workspaceListPage: WorkspaceListPage;
+  let routerStub: Router;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
-        RouterTestingModule,
+        RouterTestingModule.withRoutes([
+          {path: 'workspaces', component: WorkspaceListComponent},
+          {path: 'workspaces/:ns/:wsid/edit', component: FakeEditComponent},
+          {path: 'workspaces/:ns/:wsid/clone', component: FakeCloneComponent},
+        ]),
         ClarityModule
       ],
       declarations: [
         BugReportComponent,
         ConfirmDeleteModalComponent,
+        FakeCloneComponent,
+        FakeEditComponent,
         WorkspaceListComponent,
         WorkspaceShareComponent,
       ],
@@ -78,6 +97,7 @@ describe('WorkspaceListComponent', () => {
         },
       ] }).compileComponents().then(() => {
         workspaceListPage = new WorkspaceListPage(TestBed);
+        routerStub = TestBed.get(Router);
       });
       tick();
   }));
@@ -93,4 +113,40 @@ describe('WorkspaceListComponent', () => {
     expect(workspaceListPage.workspaceCards.length).toEqual(expectedWorkspaces);
   }));
 
+
+  it('enables editing workspaces', fakeAsync(() => {
+    const firstWorkspace = workspaceListPage.fixture.componentInstance.workspaceList[0].workspace;
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
+    updateAndTick(workspaceListPage.fixture);
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.edit-item')));
+    updateAndTick(workspaceListPage.fixture);
+
+    expect(routerStub.url)
+      .toEqual('/workspaces/' + firstWorkspace.namespace +
+        '/' + firstWorkspace.id + '/edit');
+  }));
+
+  it('enables deleting workspaces', fakeAsync(() => {
+
+  }));
+
+  it('enables cloning workspaces', fakeAsync(() => {
+    const firstWorkspace = workspaceListPage.fixture.componentInstance.workspaceList[0].workspace;
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
+    updateAndTick(workspaceListPage.fixture);
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.clone-item')));
+    updateAndTick(workspaceListPage.fixture);
+    let router: Router = TestBed.get(Router);
+    expect(routerStub.url)
+      .toEqual('/workspaces/' + firstWorkspace.namespace +
+        '/' + firstWorkspace.id + '/clone');
+  }));
+
+  it('enables sharing workspaces', fakeAsync(() => {
+
+  }));
 });
