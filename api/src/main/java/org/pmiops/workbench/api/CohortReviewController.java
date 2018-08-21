@@ -289,6 +289,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     if (request.getCohortAnnotationDefinitionId() == null) {
       throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
     }
+    if (request.getCohortReviewId() == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid cohort review id.");
+    }
+    if (request.getParticipantId() == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
+    }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
@@ -296,7 +302,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
       FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
 
-    participantCohortAnnotation = cohortReviewService.saveParticipantCohortAnnotation(cohortReview.getCohortReviewId(), participantCohortAnnotation);
+    participantCohortAnnotation = cohortReviewService.saveParticipantCohortAnnotation(request.getCohortReviewId(), participantCohortAnnotation);
 
     return ResponseEntity.ok(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
   }
@@ -311,6 +317,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     if (annotationId == null) {
       throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+    }
+    if (participantId == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
     }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
@@ -332,26 +341,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                     Long cdrVersionId,
                                                                     String domain) {
     return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
-  }
-
-  @Override
-  public ResponseEntity<ParticipantData> getDetailParticipantData(String workspaceNamespace,
-                                                                  String workspaceId,
-                                                                  Long cohortId,
-                                                                  Long cdrVersionId,
-                                                                  Long dataId,
-                                                                  String domain) {
-    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
-      cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
-
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      reviewTabQueryBuilder.buildDetailsQuery(dataId, DomainType.fromValue(domain))));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
-    ParticipantData response =
-      convertRowToParticipantData(rm, result.getValues().iterator().next(), DomainType.fromValue(domain));
-
-    return ResponseEntity.ok(response);
   }
 
   @Override
@@ -438,17 +427,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     //this validates that the participant is in the requested review.
     cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
-    boolean invalidDomain = true;
     DomainType domain = ((ReviewFilter) request).getDomain();
-    for (DomainType domainType : DomainType.values()) {
-      if (domainType.name().equals(domain.name())) {
-        invalidDomain = false;
-      }
-    }
-    if (invalidDomain) {
-      throw new BadRequestException("Invalid Domain: " + domain.toString() +
-        " Please provide a valid Domain.");
-    }
     PageRequest pageRequest = createPageRequest(request);
 
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(

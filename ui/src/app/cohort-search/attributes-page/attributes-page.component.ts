@@ -53,7 +53,7 @@ export class AttributesPageComponent implements OnChanges, OnDestroy, OnInit {
     if (changes.node.currentValue.size) {
       const currentNode = changes.node.currentValue;
       if (currentNode.get('subtype').substring(0, 2) === 'BP') {
-        this.attrs = currentNode.get('predefinedAttributes').toJS();
+        this.attrs = currentNode.get('attributes');
         this.attrs.map(attr => {
           attr.operator = '';
           attr.operands = [null];

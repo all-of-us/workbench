@@ -1,4 +1,4 @@
-"id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","predefined_attributes"
+"id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","path"
 316234,0,"VISIT","","","Emergency Room Visit",1,1,501263,"Visit",9203,0,""
 316235,0,"VISIT","","","Emergency Room and Inpatient Visit",0,1,0,"Visit",262,0,""
 316236,0,"VISIT","","","Inpatient Visit",1,1,432068,"Visit",9201,0,""
