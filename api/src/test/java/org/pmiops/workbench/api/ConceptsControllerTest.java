@@ -164,7 +164,7 @@ public class ConceptsControllerTest {
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
     ConceptService conceptService = new ConceptService(entityManager);
-    conceptsController = new ConceptsController(conceptService, workspaceService, conceptDao);
+    conceptsController = new ConceptsController(conceptService, workspaceService);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");

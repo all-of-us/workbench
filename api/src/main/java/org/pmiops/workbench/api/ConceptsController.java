@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
@@ -21,9 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ConceptsController implements ConceptsApiDelegate {
-
-  @Autowired
-  private ConceptDao conceptDao;
 
   // TODO: consider putting this in CDM config, fetching it from there
   private static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
@@ -66,10 +62,9 @@ public class ConceptsController implements ConceptsApiDelegate {
             .vocabularyId(concept.getVocabularyId());
 
   @Autowired
-  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,ConceptDao conceptDao) {
+  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
-    this.conceptDao = conceptDao;
   }
 
   @Override
