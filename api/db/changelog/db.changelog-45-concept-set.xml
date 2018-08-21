@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="danrodney" id="changelog-45">
+
+    <createTable tableName="concept_set">
+      <column name="concept_set_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="clob">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="creator_id" type="bigint">
+        <constraints nullable="true"/>
+      </column>
+      <column name="creation_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_modified_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+      <column name="version" type="smallint" defaultValue="1">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <addForeignKeyConstraint baseColumnNames="creator_id"
+        baseTableName="concept_set"
+        constraintName="fk_concept_set_creator_id"
+        onDelete="SET NULL"
+        referencedColumnNames="user_id"
+        referencedTableName="user"/>
+    <addForeignKeyConstraint baseColumnNames="workspace_id"
+        baseTableName="concept_set"
+        constraintName="fk_concept_set_workspace_id"
+        onDelete="CASCADE"
+        referencedColumnNames="workspace_id"
+        referencedTableName="workspace"/>
+    <createIndex
+        indexName="idx_concept_set_workspace_id_name"
+        tableName="concept_set"
+        unique="true">
+      <column name="workspace_id"/>
+      <column name="name"/>
+    </createIndex>
+
+    <createTable tableName="concept_set_concept_id">
+      <column name="concept_set_id" type="bigint">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_id" type="bigint">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseColumnNames="concept_set_id"
+        baseTableName="concept_set_concept_id"
+        constraintName="fk_concept_set_concept_id_concept_set_id"
+        onDelete="CASCADE"
+        referencedColumnNames="concept_set_id"
+        referencedTableName="concept_set"/>
+
+  </changeSet>
