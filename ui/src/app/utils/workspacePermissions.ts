@@ -1,4 +1,4 @@
-import {Workspace, WorkspaceAccessLevel, WorkspaceResponse} from '../../generated';
+import {Workspace, WorkspaceAccessLevel, WorkspaceResponse} from 'generated';
 
 /**
  * Composite class with helper functions useful in the UI.
