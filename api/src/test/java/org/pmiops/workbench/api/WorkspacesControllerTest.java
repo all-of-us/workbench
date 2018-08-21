@@ -1250,33 +1250,6 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testAsyncCallFromNotebookFileList() throws Exception {
-    when(fireCloudService.getWorkspace("project", "workspace")).thenReturn(
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse()
-            .workspace(
-                new org.pmiops.workbench.firecloud.model.Workspace()
-                    .bucketName("bucket")));
-    doNothing()
-        .when(userRecentResourceService)
-        .deleteOrphanNotebookEntries(anyLong(), anyLong(), anyList());
-    Blob mockBlob1 = mock(Blob.class);
-    Blob mockBlob2 = mock(Blob.class);
-    when(mockBlob1.getName()).thenReturn("notebooks/mockFile.ipynb");
-    when(mockBlob2.getName()).thenReturn("notebooks/two words.ipynb");
-    when(cloudStorageService.getBlobList("bucket", "notebooks")).thenReturn(
-        ImmutableList.of(mockBlob1, mockBlob2));
-    workspacesController
-        .getNoteBookList("project", "workspace").getBody();
-
-    CompletableFuture<Void> asyncHandleOrphanNotebook = workspacesController.getAsyncHandleOrphanNotebooks();
-    Thread.sleep(5000);
-    assertEquals(asyncHandleOrphanNotebook.isDone(), true);
-    asyncHandleOrphanNotebook.thenAccept(result -> {
-      verify(userRecentResourceService).deleteOrphanNotebookEntries(anyLong(), anyLong(), anyList());
-    });
-  }
-
-  @Test
   public void testNotebookFileListOmitsExtraDirectories() throws Exception {
     when(fireCloudService.getWorkspace("project", "workspace")).thenReturn(
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse()

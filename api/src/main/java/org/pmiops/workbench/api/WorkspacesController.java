@@ -23,7 +23,6 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -81,13 +80,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final UserService userService;
-  private final UserRecentResourceService userRecentResourceService;
-  private CompletableFuture<Void> asyncHandleOrphanNotebooks;
-
-  @VisibleForTesting
-  public CompletableFuture<Void> getAsyncHandleOrphanNotebooks() {
-    return asyncHandleOrphanNotebooks;
-  }
 
   @Autowired
   WorkspacesController(
@@ -99,8 +91,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
-      UserService userService,
-      UserRecentResourceService userRecentResourceService) {
+      UserService userService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
@@ -110,7 +101,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
     this.userService = userService;
-    this.userRecentResourceService = userRecentResourceService;
   }
 
   @VisibleForTesting
@@ -445,16 +435,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               .getWorkspace();
       String bucketName = fireCloudWorkspace.getBucketName();
       fileList = getFilesFromNotebooks(bucketName);
-      if (fileList != null && fileList.size() > 0) {
-        long userId = userProvider.get().getUserId();
-        asyncHandleOrphanNotebooks = CompletableFuture.runAsync(() -> {
-          long wId = workspaceService.getRequired(workspaceNamespace, workspaceId).getWorkspaceId();
-          List<String> notebookNameList = fileList.stream()
-              .map(notebook -> notebook.getName())
-              .collect(Collectors.toList());
-          userRecentResourceService.deleteOrphanNotebookEntries(wId, userId, notebookNameList);
-        });
-      }
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == 404) {
         throw new NotFoundException(String.format("Workspace %s/%s not found",
