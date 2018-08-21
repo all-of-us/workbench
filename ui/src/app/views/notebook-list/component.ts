@@ -48,8 +48,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
   firstVisit = true;
   notebookInFocus: String;
-  notebookRenameConflictError: boolean = false;
-  duplicateName: String = '';
+  notebookRenameConflictError = false;
+  duplicateName = '';
 
 
   @ViewChild(BugReportComponent)
