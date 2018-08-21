@@ -86,6 +86,7 @@
     border : 1px solid #C3C3C3;
     height: 1.4rem;
     text-align: center;
+    width:6rem;
 }
 .modifier-calender .datepicker-trigger .datepicker-trigger-icon {
    height: 30px;
@@ -111,3 +112,6 @@
     padding-top: 0.2rem;
 }
 
+.date-container {
+    width:8rem!important;
+}

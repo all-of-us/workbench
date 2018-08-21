@@ -36,7 +36,8 @@
               <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
             </div>
             <div *ngIf="mod.inputType === 'date'" >
-              <input class="modifier-calender" formControlName="valueA" [type]="mod.inputType" type="date" clrDate>
+              <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
+                     (ngModelChange)="myDate = $event" formControlName="valueA" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
             </div>
             <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
               <div class="and-text">
@@ -51,7 +52,8 @@
                 <div>and</div>
               </div>
               <div>
-                <input *ngIf="mod.inputType === 'date'" class="modifier-calender" formControlName="valueB" [type]="mod.inputType" type="date" clrDate>
+                <input *ngIf = "mod.inputType === 'date'" [ngModel]="selectedDate | date:'yyyy-MM-dd'"
+                       (ngModelChange)="selectedDate = $event"  class="modifier-calender" formControlName="valueB" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
               </div>
             </ng-container>
           </ng-container>

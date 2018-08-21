@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import { DomainType, ModifierType } from 'generated';
 import {fromJS, List, Map} from 'immutable';
@@ -21,7 +21,7 @@ import {
     templateUrl: './modifier-page.component.html',
     styleUrls: ['./modifier-page.component.css']
 })
-export class ModifierPageComponent implements OnInit, OnDestroy {
+export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChecked {
   @select(activeCriteriaType) ctype$;
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
@@ -31,6 +31,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   ctype: string;
   existing = List();
   preview = Map();
+  myDate: any;
+  selectedDate: any;
   subscription: Subscription;
   dropdownOption = {
     selected: ['', '', '', '']
@@ -98,6 +100,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private actions: CohortSearchActions,
+    private cdref: ChangeDetectorRef,
     private ngRedux: NgRedux<CohortSearchState>
   ) {}
 
@@ -180,6 +183,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       })
     );
   }
+    ngAfterContentChecked() {
+        this.cdref.detectChanges();
+    }
     selectChange(opt, index, e, mod) {
       this.dropdownOption.selected[index] = opt.name;
       if (e.target.value || this.form.controls.valueA) {
