@@ -350,47 +350,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             }
         }
 
-
-
         List<String> domainIds = null;
         if (searchConceptsRequest.getDomain() != null) {
             domainIds = DOMAIN_MAP.get(searchConceptsRequest.getDomain()).asList();
         }
 
-
-        List<Long> conceptCodeIdMatchConcepts = new ArrayList<>();
-        /*
-        if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
-            conceptCodeIdMatchConcepts = conceptDao.findConceptByCode(searchConceptsRequest.getQuery());
-            try{
-                Long conceptIdQuery = Long.parseLong(searchConceptsRequest.getQuery());
-                conceptCodeIdMatchConcepts.addAll(conceptDao.findConceptById(conceptIdQuery));
-            }catch(NumberFormatException nfe){
-
-            }
-        }
-        List<Long> synonymConceptIds = new ArrayList<>();
-        if (searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()) {
-                synonymConceptIds = conceptDao.findConceptByNameOrSynonymName(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
-        }
-        */
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());;
 
         Slice<Concept> concepts = null;
-        /*
-        if(conceptCodeIdMatchConcepts.size() > 0){
-            concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                    searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
-        }
-        if(synonymConceptIds.size() > 0 && (concepts==null || concepts.getNumberOfElements()==0)){
-            concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                    searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, synonymConceptIds);
-        }
-        if((concepts == null || concepts.getNumberOfElements() == 0) && (searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty())){
-            concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                    searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, new ArrayList<Long>());
-        }
-        */
         concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                 searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
         ConceptListResponse response = new ConceptListResponse();

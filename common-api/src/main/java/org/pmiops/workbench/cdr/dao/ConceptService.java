@@ -121,27 +121,6 @@ public class ConceptService {
                                 csJoin.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
                     }
 
-                    // Apply the matched concepts filter if any matched concepts are found
-                    /*
-                    if(matchedConceptIds.size() > 0){
-                        List<Predicate> conceptFetchPredicate = new ArrayList<>();
-                        Expression<Long> conceptIdCheck = root.get("conceptId");
-                        conceptFetchPredicate.add(conceptIdCheck.in(matchedConceptIds));
-                        predicates.add(criteriaBuilder.or(conceptFetchPredicate.toArray(new Predicate[0])));
-                    }
-
-
-                    // Optionally filter on standard concept, vocabulary ID, domain ID
-                    if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS) || standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
-                        predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
-                    }else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
-                        predicates.add(
-                                criteriaBuilder.or(
-                                        criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
-                                        criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))
-                                ));
-                    }
-                    */
 
                     if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
 
