@@ -19,6 +19,7 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
 
 @Service
 public class ConceptService {
@@ -76,13 +77,11 @@ public class ConceptService {
     public static final String STANDARD_CONCEPT_CODE = "S";
     public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
-    public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount, List<Long> matchedConceptIds) {
+    public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount) {
 
 
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
-
-                    root.fetch("synonyms",JoinType.LEFT);
 
                     List<Predicate> predicates = new ArrayList<>();
                     List<Predicate> standardConceptPredicates = new ArrayList<>();
@@ -97,14 +96,40 @@ public class ConceptService {
                     nonStandardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                             criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
-                    // Apply the matched concepts filter if any matched concepts are found
+                    Expression<Collection<ConceptSynonym>> conceptSynonyms = root.get("synonyms");
+                    Expression<Double> matchExp = null;
+                    Expression<Double> matchSynonymExp = null;
 
+                    Join<Concept, ConceptSynonym> csJoin = root.join("synonyms");
+                    List<Predicate> conceptCodeIDName = new ArrayList<>();
+
+                    final String keyword = modifyMultipleMatchKeyword(query);
+
+                    if(keyword != null){
+                        conceptCodeIDName.add(criteriaBuilder.equal(root.get("conceptCode"),
+                                criteriaBuilder.literal(query)));
+                        try {
+                            long conceptId = Long.parseLong(query);
+                            conceptCodeIDName.add(criteriaBuilder.equal(root.get("conceptId"),
+                                    criteriaBuilder.literal(conceptId)));
+                        } catch (NumberFormatException e) {
+                            // Not a long, don't try to match it to a concept ID.
+                        }
+                        matchExp = criteriaBuilder.function("match", Double.class,
+                                root.get("conceptName"), criteriaBuilder.literal(keyword));
+                        matchSynonymExp = criteriaBuilder.function("match", Double.class,
+                                csJoin.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
+                    }
+
+                    // Apply the matched concepts filter if any matched concepts are found
+                    /*
                     if(matchedConceptIds.size() > 0){
                         List<Predicate> conceptFetchPredicate = new ArrayList<>();
                         Expression<Long> conceptIdCheck = root.get("conceptId");
                         conceptFetchPredicate.add(conceptIdCheck.in(matchedConceptIds));
                         predicates.add(criteriaBuilder.or(conceptFetchPredicate.toArray(new Predicate[0])));
                     }
+
 
                     // Optionally filter on standard concept, vocabulary ID, domain ID
                     if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS) || standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
@@ -116,7 +141,70 @@ public class ConceptService {
                                         criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))
                                 ));
                     }
+                    */
 
+                    if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
+
+                        if(keyword != null) {
+                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            predicates.add(
+                                    criteriaBuilder.or(
+                                            conceptCodeIDName.toArray(new Predicate[0])
+                                    )
+                            );
+                        }
+
+                        predicates.add(
+                                criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0]))
+                        );
+
+                    }else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
+
+                        if(keyword != null) {
+                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            predicates.add(
+                                    criteriaBuilder.or(
+                                            conceptCodeIDName.toArray(new Predicate[0])
+                                    )
+                            );
+                        }
+
+
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
+                                        criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))
+                                ));
+
+                    }else if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
+
+                        List<Predicate> conceptNameFilter = new ArrayList<>();
+                        List<Predicate> matchFilter = new ArrayList<>();
+                        matchFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                        matchFilter.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                        conceptNameFilter.add(criteriaBuilder.or(matchFilter.toArray(new Predicate[0])));
+                        conceptNameFilter.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
+
+                        predicates.add(
+                                criteriaBuilder.or(
+                                        criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])),
+                                        criteriaBuilder.and(conceptNameFilter.toArray(new Predicate[0]))
+                                ));
+                    } else {
+
+                        if (keyword != null) {
+
+                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            predicates.add(
+                                    criteriaBuilder.or(
+                                            conceptCodeIDName.toArray(new Predicate[0])
+                                    )
+                            );
+                        }
+                    }
 
                     if (vocabularyIds != null) {
                         predicates.add(root.get("vocabularyId").in(vocabularyIds));
@@ -133,7 +221,7 @@ public class ConceptService {
                         predicates.add(criteriaBuilder.or(
                                 countPredicates.toArray(new Predicate[0])));
                     }
-
+                    criteriaQuery.distinct(true);
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
         // Return up to limit results, sorted in descending count value order.

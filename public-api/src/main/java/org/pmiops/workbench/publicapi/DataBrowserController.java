@@ -359,6 +359,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
 
         List<Long> conceptCodeIdMatchConcepts = new ArrayList<>();
+        /*
         if(searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()){
             conceptCodeIdMatchConcepts = conceptDao.findConceptByCode(searchConceptsRequest.getQuery());
             try{
@@ -372,13 +373,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         if (searchConceptsRequest.getQuery() != null && !searchConceptsRequest.getQuery().isEmpty()) {
                 synonymConceptIds = conceptDao.findConceptByNameOrSynonymName(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
         }
-
+        */
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());;
 
         Slice<Concept> concepts = null;
+        /*
         if(conceptCodeIdMatchConcepts.size() > 0){
             concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
-                    searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, conceptCodeIdMatchConcepts);
+                    searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
         }
         if(synonymConceptIds.size() > 0 && (concepts==null || concepts.getNumberOfElements()==0)){
             concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
@@ -388,8 +390,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                     searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount, new ArrayList<Long>());
         }
-
-
+        */
+        concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
+                searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
         ConceptListResponse response = new ConceptListResponse();
         List<Concept> matchedConcepts = new ArrayList<>();
         if(concepts != null){

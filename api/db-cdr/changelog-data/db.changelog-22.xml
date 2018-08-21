@@ -10,25 +10,12 @@
 
     <validCheckSum>ANY</validCheckSum>
 
-    <delete tableName="achilles_results_dist"/>
+    <delete tableName="concept_synonym"/>
 
-    <loadData tableName="achilles_results_dist" file="csv/achilles_results_dist.csv" encoding="UTF-8" quotchar='"'>
-      <column name="analysis_id" type="NUMERIC"/>
-      <column name="stratum_1" type="STRING"/>
-      <column name="stratum_2" type="STRING"/>
-      <column name="stratum_3" type="STRING"/>
-      <column name="stratum_4" type="STRING"/>
-      <column name="stratum_5" type="STRING"/>
-      <column name="count_value" type="NUMERIC"/>
-      <column name="min_value" type="COMPUTED"/>
-      <column name="max_value" type="COMPUTED"/>
-      <column name="avg_value" type="COMPUTED"/>
-      <column name="stdev_value" type="COMPUTED"/>
-      <column name="median_value" type="COMPUTED"/>
-      <column name="p10_value" type="COMPUTED"/>
-      <column name="p25_value" type="COMPUTED"/>
-      <column name="p75_value" type="COMPUTED"/>
-      <column name="p90_value" type="COMPUTED"/>
+    <loadData tableName="concept_synonym" file="csv/concept_synonym.csv" encoding="UTF-8" quotchar='"'>
+      <column name="concept_id" type="NUMERIC"/>
+      <column name="concept_synonym_name" type="STRING"/>
+      <column name="language_concept_id" type="NUMERIC"/>
     </loadData>
 
   </changeSet>
