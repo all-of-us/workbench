@@ -72,3 +72,4 @@
         referencedTableName="concept_set"/>
 
   </changeSet>
+</databaseChangeLog>
