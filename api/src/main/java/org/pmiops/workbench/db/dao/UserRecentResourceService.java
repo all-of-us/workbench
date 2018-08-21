@@ -3,7 +3,6 @@ package org.pmiops.workbench.db.dao;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 @Service
 public interface UserRecentResourceService {

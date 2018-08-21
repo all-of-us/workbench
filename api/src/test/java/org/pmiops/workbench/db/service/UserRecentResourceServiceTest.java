@@ -26,8 +26,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
