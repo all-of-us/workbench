@@ -144,7 +144,6 @@ describe('WorkspaceShareComponent', () => {
         = WorkspaceAccessLevel.OWNER;
     workspaceSharePage.readPageData();
     const de = workspaceSharePage.fixture.debugElement;
-    console.log(de.queryAll(By.css('.user')));
     de.queryAll(By.css('.remove-button')).forEach((removeButton) => {
       simulateClick(workspaceSharePage.fixture, removeButton);
     });

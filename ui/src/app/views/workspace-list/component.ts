@@ -74,14 +74,15 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
           this.firstSignIn = new Date(profile.firstSignInTime);
         }
         if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-          this.billingProjectInitialized = true;
+
           // Only once we know the billing project status do we request/display
           // workspaces for two reasons:
-          // - If the FC user is not yet initialized, getWorkspaces() may fail
-          //   with a 401.
+          // - If the FC user is not yet initialized, getWorkspaces() (called
+          //   inside reload workspaces) may fail with a 401.
           // - While the billing project is being initialized, we want to keep the
           //   big spinner on the page to provide obvious messaging to the user
           //   about the expected wait time.
+          this.billingProjectInitialized = true;
           this.reloadWorkspaces();
           // This may execute synchronously, no guarantee this has been assigned above yet.
           if (this.profileSubscription) {
