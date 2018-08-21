@@ -40,6 +40,7 @@ public abstract class AbstractQueryBuilder {
   public static final String AGE_AT_EVENT_PREFIX = "age";
   public static final String EVENT_DATE_PREFIX = "event";
   public static final String OCCURRENCES_PREFIX = "occ";
+  public static final String ENCOUNTER_PREFIX = "enc";
   public static final String ANY = "ANY";
 
   public static final String WHERE = " where ";
@@ -55,7 +56,7 @@ public abstract class AbstractQueryBuilder {
   private static final String ENCOUNTERS_SQL_TEMPLATE = "and visit_occurrence_id in (\n" +
     "       select descendant_concept_id\n" +
     "           from `${projectId}.${dataSetId}.concept_ancestor`\n" +
-    "           where ancestor_concept_id ${encounterOperator} (${encounterConceptId}))\n";
+    "           where ancestor_concept_id ${encounterOperator} unnest(${encounterConceptId}))\n";
 
   /**
    * Build a {@link QueryJobConfiguration} from the specified
@@ -76,7 +77,7 @@ public abstract class AbstractQueryBuilder {
       Modifier eventDate = getModifier(modifiers, ModifierType.EVENT_DATE);
       Modifier occurrences = getModifier(modifiers, ModifierType.NUM_OF_OCCURRENCES);
       Modifier encounters = getModifier(modifiers, ModifierType.ENCOUNTERS);
-      encounterSql = buildEncountersSql(encounters);
+      encounterSql = buildEncountersSql(queryParams, encounters);
       modifierSql = buildAgeAtEventAndEventDateModifierSql(queryParams, Arrays.asList(ageAtEvent, eventDate));
       //Number of Occurrences has to be last because of the group by
       modifierSql = modifierSql + buildNumOfOccurrencesModifierSql(queryParams, occurrences);
@@ -182,7 +183,7 @@ public abstract class AbstractQueryBuilder {
     return modifierSql;
   }
 
-  private String buildEncountersSql(Modifier modifier) {
+  private String buildEncountersSql(Map<String, QueryParameterValue> queryParams, Modifier modifier) {
     if (modifier == null) {
       return "";
     } else if (modifier.getName().equals(ModifierType.ENCOUNTERS)) {
@@ -200,9 +201,12 @@ public abstract class AbstractQueryBuilder {
           exceptionText.get(modifier.getName())));
       }
     }
+    String modifierParameter = ENCOUNTER_PREFIX + getUniqueNamedParameterPostfix();
+    Long[] operands = modifier.getOperands().stream().map(Long::new).toArray(Long[]::new);
+    queryParams.put(modifierParameter, QueryParameterValue.array(operands, Long.class));
     return ENCOUNTERS_SQL_TEMPLATE
       .replace("${encounterOperator}", OperatorUtils.getSqlOperator(modifier.getOperator()))
-      .replace( "${encounterConceptId}", modifier.getOperands().get(0));
+      .replace( "${encounterConceptId}", "@" + modifierParameter);
   }
 
   private void validateOperands(Modifier modifier) {
