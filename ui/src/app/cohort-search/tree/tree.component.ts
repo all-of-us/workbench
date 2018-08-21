@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
-import {DOMAIN_TYPES} from "../constant";
+
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
