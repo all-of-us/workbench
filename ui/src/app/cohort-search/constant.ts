@@ -29,7 +29,7 @@ export const PROGRAM_TYPES = [
 
 export const DOMAIN_TYPES = [
     { name: 'Demographics', type: CRITERIA_TYPES.DEMO },
-    { name: 'Conditions',    type: DomainType.CONDITION, disabled: true },
+    { name: 'Conditions',    type: DomainType.CONDITION},
     { name: 'Procedures',    type: DomainType.PROCEDURE, disabled: true },
     { name: 'Drugs',    type: DomainType.DRUG, fullTree: true },
     { name: 'Measurements',    type: DomainType.MEASUREMENT, disabled: true },

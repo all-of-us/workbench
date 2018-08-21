@@ -13,3 +13,34 @@
 .error {
   color: red;
 }
+
+.dropdown-search-container {
+  display: flex;
+}
+
+.condition-dropdown{
+  padding-right: 3rem;
+  width:30%;
+}
+
+.search-container {
+  width:70%;
+}
+
+.search-width {
+  width:100%;
+}
+
+.dropdown, .dropdown .dropdown-toggle{
+  text-align: left;
+  width: 8.5rem;
+}
+
+/*.btn-info-outline .btn, .btn-outline .btn, .btn.btn-info-outline, .btn.btn-outline, .btn.btn-outline-info, .btn.btn-outline .btn {*/
+  /*border : 1px solid #C3C3C3;*/
+  /*color: #4A4A4A;*/
+/*}*/
+
+.dropdown .dropdown-toggle.btn clr-icon[shape^=caret] {
+  color: #C3C3C3;
+}

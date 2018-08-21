@@ -3,10 +3,36 @@
 </div>
 <!-- TODO: This error handling is a stub until we can get a designer to look at it -->
 <div *ngIf="error" class="error">
+  <h1>hi</h1>
   <clr-icon shape="error-standard"></clr-icon>
   <em>Failed to Load Criteria</em>
 </div>
-<app-search-bar *ngIf="showSearch() && !loading" [_type]="_type"></app-search-bar>
+
+<!--dropdown for conditions start-->
+<div class="dropdown-search-container">
+  <div [ngClass]="{'condition-dropdown' : showdropDown()}">
+    <ng-container *ngIf = "showdropDown() && !loading">
+      <clr-dropdown>
+        <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
+          Dropdown
+          <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu *clrIfOpen>
+          <label class="dropdown-header">Dropdown header</label>
+          <button type="button" clrDropdownItem>Action 1</button>
+          <button type="button" disabled clrDropdownItem>Disabled Action</button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+    </ng-container>
+  </div>
+
+
+<div [ngClass]="showdropDown()? 'search-container' :'search-width'" >
+  <app-search-bar *ngIf="showSearch() && !loading" [_type]="_type"></app-search-bar>
+</div>
+
+</div>
+
 <div *ngIf="numMatches > 1">
   <b>Note:</b> There are {{numMatches}} matches for your search
 </div>
