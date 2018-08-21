@@ -31,7 +31,6 @@ export class WorkspaceNavBarComponent implements OnInit {
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
-  awaitingReview = false;
   private accessLevel: WorkspaceAccessLevel;
   deleting = false;
   workspaceDeletionError = false;
@@ -50,7 +49,6 @@ export class WorkspaceNavBarComponent implements OnInit {
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
     const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.awaitingReview = reviewRequested && !approved;
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
   }

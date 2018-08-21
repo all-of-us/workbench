@@ -1054,6 +1054,10 @@ definitions:
     properties:
       email:
         type: string
+      givenName:
+        type: string
+      familyName:
+        type: string
       role:
         $ref: "#/definitions/WorkspaceAccessLevel"
 
@@ -1080,6 +1084,10 @@ definitions:
         type: string
         description: >
           Updated workspace etag after the share request has been applied.
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/UserRole"
 
   CloneWorkspaceRequest:
     type: object
@@ -1355,7 +1363,6 @@ definitions:
     type: object
     required:
       - username
-      - enabledInFireCloud
       - dataAccessLevel
     properties:
       userId:
@@ -1374,9 +1381,6 @@ definitions:
       firstSignInTime:
         type: integer
         format: int64
-      enabledInFireCloud:
-        description: true if the user is enabled in FireCloud, false if they are not
-        type: boolean
       freeTierBillingProjectName:
         description: name of the AllOfUs free tier billing project created for this user
         type: string

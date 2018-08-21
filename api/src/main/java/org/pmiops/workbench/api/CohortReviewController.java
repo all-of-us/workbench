@@ -95,7 +95,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       public org.pmiops.workbench.model.ParticipantCohortStatus apply(ParticipantCohortStatus participant) {
         return new org.pmiops.workbench.model.ParticipantCohortStatus()
           .participantId(participant.getParticipantKey().getParticipantId())
-          .status(participant.getStatus())
+          .status(participant.getStatusEnum())
           .birthDate(participant.getBirthDate().toString())
           .ethnicityConceptId(participant.getEthnicityConceptId())
           .ethnicity(participant.getEthnicity())
@@ -122,7 +122,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           .creationTime(cohortReview.getCreationTime().toString())
           .matchedParticipantCount(cohortReview.getMatchedParticipantCount())
           .reviewedCount(cohortReview.getReviewedCount())
-          .reviewStatus(cohortReview.getReviewStatus())
+          .reviewStatus(cohortReview.getReviewStatusEnum())
           .reviewSize(cohortReview.getReviewSize())
           .page(pageRequest.getPage())
           .pageSize(pageRequest.getPageSize())
@@ -215,7 +215,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
     } catch (NotFoundException nfe) {
       cohortReview = initializeCohortReview(cdrVersionId, cohort)
-        .reviewStatus(ReviewStatus.NONE)
+        .reviewStatusEnum(ReviewStatus.NONE)
         .reviewSize(0L);
       cohortReviewService.saveCohortReview(cohortReview);
     }
@@ -237,7 +237,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     cohortReview
       .reviewSize(participantCohortStatuses.size())
-      .reviewStatus(ReviewStatus.CREATED);
+      .reviewStatusEnum(ReviewStatus.CREATED);
 
     //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
     cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
@@ -272,6 +272,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     if (request.getCohortAnnotationDefinitionId() == null) {
       throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
     }
+    if (request.getCohortReviewId() == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid cohort review id.");
+    }
+    if (request.getParticipantId() == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
+    }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
@@ -279,7 +285,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
       FROM_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(request);
 
-    participantCohortAnnotation = cohortReviewService.saveParticipantCohortAnnotation(cohortReview.getCohortReviewId(), participantCohortAnnotation);
+    participantCohortAnnotation = cohortReviewService.saveParticipantCohortAnnotation(request.getCohortReviewId(), participantCohortAnnotation);
 
     return ResponseEntity.ok(TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
   }
@@ -294,6 +300,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     if (annotationId == null) {
       throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+    }
+    if (participantId == null) {
+      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
     }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
@@ -315,26 +324,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                     Long cdrVersionId,
                                                                     String domain) {
     return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
-  }
-
-  @Override
-  public ResponseEntity<ParticipantData> getDetailParticipantData(String workspaceNamespace,
-                                                                  String workspaceId,
-                                                                  Long cohortId,
-                                                                  Long cdrVersionId,
-                                                                  Long dataId,
-                                                                  String domain) {
-    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
-      cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
-
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      reviewTabQueryBuilder.buildDetailsQuery(dataId, DomainType.fromValue(domain))));
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
-    ParticipantData response =
-      convertRowToParticipantData(rm, result.getValues().iterator().next(), DomainType.fromValue(domain));
-
-    return ResponseEntity.ok(response);
   }
 
   @Override
@@ -419,17 +408,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     //this validates that the participant is in the requested review.
     cohortReviewService.findParticipantCohortStatus(review.getCohortReviewId(), participantId);
 
-    boolean invalidDomain = true;
     DomainType domain = ((ReviewFilter) request).getDomain();
-    for (DomainType domainType : DomainType.values()) {
-      if (domainType.name().equals(domain.name())) {
-        invalidDomain = false;
-      }
-    }
-    if (invalidDomain) {
-      throw new BadRequestException("Invalid Domain: " + domain.toString() +
-        " Please provide a valid Domain.");
-    }
     PageRequest pageRequest = createPageRequest(request);
 
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
@@ -485,7 +464,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     ParticipantCohortStatus participantCohortStatus
       = cohortReviewService.findParticipantCohortStatus(cohortReview.getCohortReviewId(), participantId);
 
-    participantCohortStatus.setStatus(cohortStatusRequest.getStatus());
+    participantCohortStatus.setStatusEnum(cohortStatusRequest.getStatus());
     cohortReviewService.saveParticipantCohortStatus(participantCohortStatus);
     lookupGenderRaceEthnicityValues(Arrays.asList(participantCohortStatus));
 
@@ -549,7 +528,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       participantCohortStatuses.add(
         new ParticipantCohortStatus()
           .participantKey(new ParticipantCohortStatusKey(cohortReviewId, bigQueryService.getLong(row, rm.get("person_id"))))
-          .status(CohortStatus.NOT_REVIEWED)
+          .statusEnum(CohortStatus.NOT_REVIEWED)
           .birthDate(new Date(birthDate.getTime()))
           .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
           .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
@@ -589,7 +568,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     cohortReview.matchedParticipantCount(cohortCount);
     cohortReview.setCreationTime(new Timestamp(System.currentTimeMillis()));
     cohortReview.reviewedCount(0L);
-    cohortReview.reviewStatus(ReviewStatus.NONE);
+    cohortReview.reviewStatusEnum(ReviewStatus.NONE);
     return cohortReview;
   }
 

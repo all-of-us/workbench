@@ -3,7 +3,9 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -29,10 +31,15 @@ public abstract class AbstractQueryBuilder {
     .put(ModifierType.EVENT_DATE, "event date")
     .put(ModifierType.NUM_OF_OCCURRENCES, "number of occurrences")
     .build();
+  private static final List<Operator> OPERATOR_ANY_EQUALS =
+    Arrays.asList(Operator.LESS_THAN_OR_EQUAL_TO,
+      Operator.GREATER_THAN_OR_EQUAL_TO, Operator.GREATER_THAN,
+      Operator.LESS_THAN, Operator.EQUAL, Operator.NOT_EQUAL);
 
   public static final String AGE_AT_EVENT_PREFIX = "age";
   public static final String EVENT_DATE_PREFIX = "event";
   public static final String OCCURRENCES_PREFIX = "occ";
+  public static final String ANY = "ANY";
 
   public static final String WHERE = " where ";
   public static final String AND = " and ";
@@ -43,7 +50,7 @@ public abstract class AbstractQueryBuilder {
     "CAST(FLOOR(DATE_DIFF(criteria.entry_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64)\n";
   private static final String EVENT_DATE_SQL_TEMPLATE = "criteria.entry_date\n";
   private static final String OCCURRENCES_SQL_TEMPLATE = "group by criteria.person_id\n" +
-    "having count(criteria.person_id)";
+    "having count(criteria.person_id) ";
 
   /**
    * Build a {@link QueryJobConfiguration} from the specified
@@ -53,6 +60,8 @@ public abstract class AbstractQueryBuilder {
    * @return
    */
   public abstract QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters);
+
+  public abstract FactoryKey getType();
 
   public String buildModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
     String modifierSql = "";
@@ -68,7 +77,34 @@ public abstract class AbstractQueryBuilder {
       modifierSql;
   }
 
-  public abstract FactoryKey getType();
+  protected static boolean isNameAny(Attribute attribute) {
+    return attribute.getName() != null
+      && attribute.getName().equals(ANY);
+  }
+
+  protected static boolean isOperatorBetween(Attribute attribute) {
+    return attribute.getOperator() != null
+      && attribute.getOperator().equals(Operator.BETWEEN)
+      && attribute.getOperands().size() == 2
+      && NumberUtils.isNumber(attribute.getOperands().get(0))
+      && NumberUtils.isNumber(attribute.getOperands().get(1));
+  }
+
+  protected static boolean isOperatorAnyEquals(Attribute attribute) {
+    return attribute.getOperator() != null
+      && OPERATOR_ANY_EQUALS.contains(attribute.getOperator())
+      && attribute.getOperands().size() == 1
+      && NumberUtils.isNumber(attribute.getOperands().get(0));
+  }
+
+  protected static boolean isOperatorIn(Attribute attribute) {
+    return attribute.getOperator() != null
+      && attribute.getOperator().equals(Operator.IN)
+      && attribute.getOperands().size() >= 0
+      && attribute.getOperands().stream()
+      .filter(o -> NumberUtils.isNumber(o))
+      .collect(Collectors.toList()).size() > 0;
+  }
 
   protected String getUniqueNamedParameterPostfix() {
     return UUID.randomUUID().toString().replaceAll("-", "");

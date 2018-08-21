@@ -85,7 +85,11 @@ else
   bq --project=$PUBLIC_PROJECT mk $PUBLIC_DATASET
 fi
 
+<<<<<<< HEAD
 copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary concept_synonym)
+=======
+copy_tables=(achilles_analysis achilles_results concept concept_relationship criteria criteria_attribute db_domain domain vocabulary )
+>>>>>>> 3dbb71ac673c5f84400492afa536f322458e78b7
 for t in "${copy_tables[@]}"
 do
   bq --project=$WORKBENCH_PROJECT rm -f $PUBLIC_PROJECT:$PUBLIC_DATASET.$t

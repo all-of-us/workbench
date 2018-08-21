@@ -1,6 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, OnInit, Pipe} from '@angular/core';
-import {DomSanitizer} from '@angular/platform-browser';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
@@ -99,6 +98,7 @@ export class WorkspaceEditComponent implements OnInit {
   nameNotEntered = false;
   notFound = false;
   workspaceCreationError = false;
+  workspaceCreationConflictError = false;
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
   private accessLevel: WorkspaceAccessLevel;
@@ -276,6 +276,7 @@ export class WorkspaceEditComponent implements OnInit {
 
   resetWorkspaceEditor(): void {
     this.workspaceCreationError = false;
+    this.workspaceCreationConflictError = false;
     this.workspaceUpdateError = false;
     this.workspaceUpdateConflictError = false;
     this.savingWorkspace = false;
@@ -306,7 +307,11 @@ export class WorkspaceEditComponent implements OnInit {
           this.router.navigate(['workspaces', workspace.namespace, workspace.id]);
         },
         (error) => {
-          this.workspaceCreationError = true;
+          if (error.status === 409) {
+            this.workspaceCreationConflictError = true;
+          } else {
+            this.workspaceCreationError = true;
+          }
         });
   }
 

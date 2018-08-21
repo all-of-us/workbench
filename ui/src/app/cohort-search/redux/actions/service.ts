@@ -52,6 +52,7 @@ export class CohortSearchActions {
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
+  @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
@@ -432,14 +433,12 @@ export class CohortSearchActions {
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
-      attributes: []
+      attributes: immParam.get('attributes'),
     };
 
     if (immParam.get('hasAttributes') || param.type === CRITERIA_TYPES.DEMO) {
       param.attributes = typeof immParam.get('attributes') !== 'undefined'
         ? immParam.get('attributes') : [];
-    } else if (immParam.get('predefinedAttributes')) {
-      param.attributes = immParam.get('predefinedAttributes') ;
     }
 
     if (param.type === CRITERIA_TYPES.DEMO

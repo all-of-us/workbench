@@ -3,7 +3,6 @@ package org.pmiops.workbench.auth;
 import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -58,7 +57,6 @@ public class ProfileService {
       user = userWithAuthoritiesAndPageVisits;
     }
 
-    boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
@@ -67,8 +65,7 @@ public class ProfileService {
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
-    profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatus());
-    profile.setEnabledInFireCloud(enabledInFireCloud);
+    profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatusEnum());
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
     profile.setRequestedIdVerification(user.getRequestedIdVerification());
@@ -94,20 +91,21 @@ public class ProfileService {
     if (user.getFirstSignInTime() != null) {
       profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
     }
-    if (user.getDataAccessLevel() != null) {
-      profile.setDataAccessLevel(user.getDataAccessLevel());
+    if (user.getDataAccessLevelEnum() != null) {
+      profile.setDataAccessLevel(user.getDataAccessLevelEnum());
     }
-    if (user.getAuthorities() != null) {
-      profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
+    if (user.getAuthoritiesEnum() != null) {
+      profile.setAuthorities(new ArrayList<>(user.getAuthoritiesEnum()));
     }
     if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
       profile.setPageVisits(user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
-        .collect(Collectors.toList()));
+          .collect(Collectors.toList()));
     }
     profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
         .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
         .collect(Collectors.toList()));
-    profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
+    profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
+
     return profile;
   }
 }

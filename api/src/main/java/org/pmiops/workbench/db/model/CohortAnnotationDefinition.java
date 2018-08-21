@@ -1,8 +1,8 @@
 package org.pmiops.workbench.db.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.pmiops.workbench.model.AnnotationType;
-
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,9 +13,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import javax.persistence.Transient;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.model.AnnotationType;
 
 @Entity
 @Table(name = "cohort_annotation_definition")
@@ -24,7 +24,7 @@ public class CohortAnnotationDefinition {
     private long cohortAnnotationDefinitionId;
     private long cohortId;
     private String columnName;
-    private AnnotationType annotationType;
+    private Short annotationType;
     private SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<>();
 
     @Id
@@ -72,17 +72,30 @@ public class CohortAnnotationDefinition {
     }
 
     @Column(name = "annotation_type")
-    public AnnotationType getAnnotationType() {
+    public Short getAnnotationType() {
         return annotationType;
     }
 
-    public void setAnnotationType(AnnotationType annotationType) {
+    public void setAnnotationType(Short annotationType) {
         this.annotationType = annotationType;
     }
 
-    public CohortAnnotationDefinition annotationType(AnnotationType annotationType) {
+    public CohortAnnotationDefinition annotationType(Short annotationType) {
         this.annotationType = annotationType;
         return this;
+    }
+
+    @Transient
+    public AnnotationType getAnnotationTypeEnum() {
+        return StorageEnums.annotationTypeFromStorage(getAnnotationType());
+    }
+
+    public void setAnnotationTypeEnum(AnnotationType annotationType) {
+        setAnnotationType(StorageEnums.annotationTypeToStorage(annotationType));
+    }
+
+    public CohortAnnotationDefinition annotationTypeEnum(AnnotationType annotationType) {
+        return this.annotationType(StorageEnums.annotationTypeToStorage(annotationType));
     }
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "cohortAnnotationDefinition", orphanRemoval = true, cascade = CascadeType.ALL)

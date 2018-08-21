@@ -50,7 +50,7 @@ if [[ $DATASET == *public* ]] || [[ $DATASET == *PUBLIC* ]];
 then
     tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary concept_synonym)
 else
-    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary concept_ancestor concept_synonym)
+    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_ancestor concept_synonym)
 fi
 
 for table in ${tables[@]}; do
