@@ -13,7 +13,5 @@ public interface UserRecentResourceService {
   void updateCohortEntry(long workspaceId, long userId, long cohortId, Timestamp lastAccessDateTime);
 
   void deleteNotebookEntry(long workspaceId, long userId, String notebookName);
-
-  void deleteOrphanNotebookEntries(long workspaceId, long userId, List<String> notebookNameList);
 }
 

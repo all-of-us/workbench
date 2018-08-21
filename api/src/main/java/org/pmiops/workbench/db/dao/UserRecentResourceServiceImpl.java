@@ -81,20 +81,6 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
-   * Deletes all the notebook entries for workspace and userId
-   * from user_recent_resource that are not IN the notebookNameList
-   */
-  @Override
-  public void deleteOrphanNotebookEntries(long workspaceId, long userId, List<String> notebookNameList) {
-    List<UserRecentResource> orphanNotebooks =
-        getDao().findUserRecentResourceByUserIdAndWorkspaceIdAndCohortIdIsNullAndNotebookNameNotIn
-            (userId, workspaceId, notebookNameList);
-    for (UserRecentResource resource : orphanNotebooks) {
-      getDao().delete(resource);
-    }
-  }
-
-  /**
    * Check number of entries in user_recent_resource for user,
    * If it exceeds USER_ENTRY_COUNT, delete the one with earliest lastAccessTime
    */
