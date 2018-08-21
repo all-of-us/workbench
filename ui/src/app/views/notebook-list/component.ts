@@ -47,7 +47,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   cohortsError: boolean;
   newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
   firstVisit = true;
-  notebookInFocus: String;
+  notebookInFocus: FileDetail;
   notebookRenameConflictError = false;
   duplicateName = '';
 
@@ -166,7 +166,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.openNotebook();
   }
 
-  renameThis(notebook: String): void {
+  renameThis(notebook: FileDetail): void {
     this.notebookInFocus = notebook;
     this.renameModal.open();
   }
@@ -186,11 +186,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       this.duplicateName = newName;
       return;
     }
-   this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename).subscribe(() => {
-     this.notebookList.filter((nb) => nb.name === rename.name).map((nb) => {
-       nb.name = newName;
-       nb.path = nb.path.replace(rename.name, newName);
-     });
+   this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename).subscribe((newNb) => {
+      this.notebookList.splice(
+        this.notebookList.indexOf(this.notebookInFocus), 1, newNb
+      );
      this.renameModal.close();
    });
   }

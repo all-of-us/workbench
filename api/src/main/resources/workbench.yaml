@@ -810,6 +810,7 @@ paths:
         - in: body
           name: NotebookRename
           description: new name for notebook
+          required: true
           schema:
             type: object
             properties:
@@ -821,7 +822,7 @@ paths:
         200:
           description: Successful rename
           schema:
-            $ref: "#/definitions/EmptyResponse"
+            $ref: "#/definitions/FileDetail"
 
 
   /v1/notebooks/{workspaceNamespace}/{workspaceId}/{notebookName}/clone:
