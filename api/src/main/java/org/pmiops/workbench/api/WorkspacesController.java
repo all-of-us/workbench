@@ -771,7 +771,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       .getWorkspace()
       .getBucketName();
     String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
-    String newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/Clone " + notebookName;
+    String newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
     BlobId blobId = BlobId.of(fromBucket, origPath);
     cloudStorageService.copyBlob(blobId, BlobId.of(fromBucket, newPath));
     return ResponseEntity.ok(new EmptyResponse());
