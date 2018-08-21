@@ -16,7 +16,6 @@ export class ProfileStubVariables {
   static PROFILE_STUB = {
     username: 'testers',
     contactEmail: 'tester@mactesterson.edu🀓⚚><script>alert("hello");</script>',
-    enabledInFireCloud: true,
     freeTierBillingProjectName: 'all-of-us-free-abcdefg',
     freeTierBillingProjectStatus: BillingProjectStatus.Ready,
     dataAccessLevel: DataAccessLevel.Registered,
