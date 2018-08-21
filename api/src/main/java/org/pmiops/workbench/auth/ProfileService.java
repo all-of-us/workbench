@@ -57,9 +57,7 @@ public class ProfileService {
       user = userWithAuthoritiesAndPageVisits;
     }
 
-    boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = getTrimmedProfile(user);
-    profile.setEnabledInFireCloud(enabledInFireCloud);
     return profile;
   }
 
