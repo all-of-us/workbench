@@ -93,7 +93,7 @@ public class CriteriaAttribute {
     return this;
   }
 
-  @Column(name = "estCount")
+  @Column(name = "est_count")
   public String getEstCount() {
     return estCount;
   }

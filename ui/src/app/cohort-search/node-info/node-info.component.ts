@@ -14,6 +14,7 @@ import {Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
+import {stripHtml} from '../utils';
 
 /*
  * Stub function - some criteria types will have "attributes" that help define
@@ -24,7 +25,7 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  */
 function needsAttributes(node: any) {
   // will change soon to check for attributes property instead of id
-  return node.get('hasAttributes') === true;
+  return node.get('hasAttributes') === true || node.get('type') === CRITERIA_TYPES.MEAS;
 }
 
 
@@ -95,6 +96,10 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       || this.node.get('type', '') === CRITERIA_TYPES.PM;
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
     return (noCode || nameIsCode) ? '' : this.node.get('name', '');
+  }
+
+  get popperName() {
+    return stripHtml(this.displayName);
   }
 
   get displayCode() {

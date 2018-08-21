@@ -10,7 +10,10 @@
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
     <div *ngIf="node.get('type') === criteriaTypes.MEAS">
-      <div class="attr-name-color">Labs</div>
+      <div class="attr-name-color">
+        {{displayName}}
+        <clr-icon shape="refresh" class="is-success" (click)=""></clr-icon>
+      </div>
       <div class="radio" (click)="toggleRadio()">
         <input type="radio" [value]="true" name="labExists" [(ngModel)]="attrs.EXISTS">
         <label>Any value (lab exists)</label>

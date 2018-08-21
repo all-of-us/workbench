@@ -13,13 +13,11 @@
   </button>
 
   <!-- CODE -->
-  <div class="code font-weight-bold" [innerHTML]="displayCode | safeHtml">
-    {{ displayCode }}
-  </div>
+  <div class="code font-weight-bold" [innerHTML]="displayCode | safeHtml"></div>
 
   <!-- NAME -->
   <div #name
-    [popper]="displayName"
+    [popper]="popperName"
     [popperTrigger]="'hover'"
     [popperPlacement]="'bottom'"
     [popperDisabled]="!isTruncated"
