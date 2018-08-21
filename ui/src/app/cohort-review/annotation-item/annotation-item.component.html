@@ -3,69 +3,51 @@
 
     <!-- STRING, DATE, INTEGER all rely on the blur event to update the annotation -->
     <div *ngSwitchCase="kinds.STRING">
-      <div>
-        <label [for]="machineName" class="flex-container ">
+      <div class="text-container">
+        <label [for]="machineName" >
         <span class="flex-content-main items-text">
           {{ annotation.definition.columnName }}
-          <!--<em>{{datatypeDisplay | titlecase }}</em>-->
         </span>
-          <!--<clr-icon shape="caret" dir="down" (click)="toggleExpandText()"></clr-icon>-->
+            <span  *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+           <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
         </label>
-        <!--<div class="spin-top-padding">-->
-          <!--<span  class="spinner spinner-inline"> Loading...   </span>-->
-        <!--</div>-->
       </div>
-
-      <!--*ngIf="!expandText"-->
-      <!--<input-->
-        <!--class="text-wrapper"-->
-        <!--type="text"-->
-        <!--(blur)="handleInput()"-->
-        <!--[name]="machineName"-->
-        <!--[id]="machineName"-->
-        <!--[formControl]="control">-->
         <textarea
           class="textarea-wrapper"
-          (blur)="handleInput()"
+          (blur)="textBlur()"
           [name]="machineName"
           [id]="machineName"
           [formControl]="control">
         </textarea>
-
     </div>
 
     <div *ngSwitchCase="kinds.DATE">
-      <label [for]="machineName" class="flex-container">
+        <div class="text-container">
+            <label [for]="machineName" class="">
         <span class="flex-content-main items-date">
           {{ annotation.definition.columnName }}
-          <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
         </span>
-      </label>
-      <!--<input type="date" id="myDate" name="myDate" [(ngModel)]="myDate" [formControl]="control"  clrDate>-->
+                <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+                <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
+            </label>
+        </div>
       <div (click)=" dateChange(myDate)" >
         <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
                (ngModelChange)="myDate = $event" [name]="machineName" [id]="machineName" [formControl]="control"  type="date" clrDate>
       </div>
-
-      <!--<input-->
-              <!--[ngModel]="myDate | date:'yyyy-MM-dd'"-->
-              <!--(ngModelChange)="myDate = $event"-->
-        <!--(blur)="dateChange($event)"-->
-        <!--type="date"-->
-        <!--[id]="machineName"-->
-        <!--[formControl]="control"  clrDate>-->
     </div>
 
-    <div *ngSwitchCase="kinds.INTEGER">
-      <label [for]="machineName" class="flex-container">
+    <div *ngSwitchCase="kinds.INTEGER" class="text-container">
+      <label [for]="machineName" class="">
         <span class="flex-content-main items-Integer">
           {{ annotation.definition.columnName }}
-          <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
         </span>
+          <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+          <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
       </label>
       <input
-              class="integer-style"
-        (blur)="handleInput()"
+         class="integer-style"
+        (blur)="textBlur()"
         type="number"
         [name]="machineName"
         [id]="machineName"
@@ -74,13 +56,13 @@
 
     <!-- ENUM and BOOLEAN rely on the change event to update the annotation -->
     <div *ngSwitchCase="kinds.ENUM">
-      <label [for]="machineName" class="flex-container">
+      <label [for]="machineName" class="">
         <span class="flex-content-main items-enum">
           {{ annotation.definition.columnName }}
-          <!--<em>{{ datatypeDisplay | titlecase }}</em>s-->
         </span>
+        <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+          <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
       </label>
-      <!--<h1>check</h1>-->
       <div>
         <clr-dropdown  class="participant-dropdown">
           <button type="button" class="btn btn-outline" clrDropdownTrigger>
@@ -100,32 +82,22 @@
           </clr-dropdown-menu>
         </clr-dropdown>
       </div>
-      <!--<div class="select">-->
-        <!--<select-->
-          <!--(change)="handleInput()"-->
-          <!--[name]="machineName"-->
-          <!--[id]="machineName"-->
-          <!--[formControl]="control">-->
-          <!--<option value=''><em>No Selection</em></option>-->
-          <!--<option *ngFor="let value of annotation.definition.enumValues" [value]="value">-->
-            <!--{{ value | titlecase }}-->
-          <!--</option>-->
-        <!--</select>-->
-      <!--</div>-->
     </div>
-
     <div class="checkbox-container" *ngSwitchCase="kinds.BOOLEAN">
       <label [for]="machineName" class="flex-content-main items-check">
         {{ annotation.definition.columnName }}
         <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
       </label>
         <input class="checkbox-style"
-          (change)="handleInput()"
+          (change)="textBlur()"
           type="checkbox"
           [name]="machineName"
           [id]="machineName"
           [formControl]="control">
+        <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+        <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
 
     </div>
 </div>
 </div>
+

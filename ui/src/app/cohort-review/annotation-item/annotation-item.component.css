@@ -130,3 +130,12 @@ input[type=text]:not([readonly]):focus {
   width: 2rem;
   height: 1rem;
 }
+
+.text-container {
+  padding-top: 0.5rem;
+  padding-bottom: 0.15rem;
+}
+
+.success {
+  color: #0077b7;
+}

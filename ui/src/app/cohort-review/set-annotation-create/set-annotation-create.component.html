@@ -8,7 +8,7 @@
       <label
         aria-haspopup="true"
         role="tooltip"
-        class="tooltip tooltip-validation tooltip-sm tooltip-right"
+        class="tooltip tooltip-validation tooltip-sm tooltip-bottom-left"
         [class.invalid]="name.invalid && (name.dirty || name.touched)">
         <input id="name"
                class="annotation-name-input"
@@ -98,7 +98,7 @@
     <button
             type="button"
             class="btn btn-link cancel"
-            (click)="open = false">
+            (click)="closeModal()">
       Cancel
     </button>
 

@@ -79,6 +79,11 @@ export class SetAnnotationCreateComponent {
       .subscribe(_ => {
           this.open = false;
         this.posting = false;
+          this.annotationOptions = '';
+          // this.isEnum = false;
+          this.kind.patchValue('');
+          this.enumValues.length = 0
+         this.name.patchValue('');
         this.onFinish.emit(true);
       });
   }
@@ -122,4 +127,12 @@ export class SetAnnotationCreateComponent {
    // this.create();
     }
 
+
+    closeModal() {
+        this.annotationOptions = '';
+        this.open = false;
+        this.kind.patchValue('');
+        this.enumValues.length = 0
+       this.name.patchValue('');
+    }
 }
