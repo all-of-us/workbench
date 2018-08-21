@@ -295,7 +295,7 @@ export class CohortSearchActions {
         .toJS();
     const groupItem = <SearchGroupItem>{
       id: itemId,
-      type: 'PM',
+      type: searchParam[0].type,
       searchParameters: searchParam,
       modifiers: [],
     };
@@ -460,6 +460,7 @@ export class CohortSearchActions {
     if (param.type === CRITERIA_TYPES.DEMO
       || param.type === DomainType[DomainType.VISIT]
       || param.type === CRITERIA_TYPES.PM
+      || param.type === CRITERIA_TYPES.MEAS
       || param.type === DomainType[DomainType.DRUG]) {
         param.conceptId = immParam.get('conceptId');
     } else if (param.type === CRITERIA_TYPES.ICD9

@@ -1,7 +1,7 @@
 
 .dropdown-container{
     border: 1px solid grey;
-    border-radius: .2rem;
+    border-radius: 0.2rem;
     padding-top: 0.4rem;
     margin-top:-0.2rem;
 }
@@ -13,6 +13,9 @@
     background-color: #E4F3FC;
     padding:0.5rem;
     margin-top: 1rem;
+    position: absolute;
+    width: 93%;
+    bottom: 1rem;
 }
 .count-preview  .calculate-btn{
     background-color: #2691D0;
@@ -45,7 +48,6 @@
     font-size: 14px;
     font-weight: 500;
     line-height: 17px;
-
 }
 
 button.btn:focus {
@@ -79,7 +81,7 @@ button.btn:focus {
 
 .attr-name-color {
     color: #262262;
-    padding: .5rem;
+    padding: 0.5rem;
     font-weight: 500;
 }
 .dropdown, .dropdown .dropdown-toggle{
@@ -102,7 +104,7 @@ button.btn:focus {
 
 .container {
     display: flex;
-    padding-top: 0.5rem;
+    padding-top: 0.2rem;
 }
 
 .container .dropdown-width {
@@ -117,5 +119,31 @@ button.btn:focus {
 }
 
 .form-group {
-    padding-left: 0;
+    padding-left: 0.5rem;
+}
+
+.attr-refresh {
+    margin-left: 0.5rem;
+    color: #7EC79B;
+    cursor: pointer;
+}
+
+.radio {
+    padding-left: 0.5rem;
+}
+
+input[type=radio] {
+    margin-left: 0.5rem;
+    z-index: 1000;
+}
+
+.or-circle {
+    background-color: rgb(226, 226, 233);
+    border-radius: 50%;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0.75rem 3rem 0.25rem;
+    line-height: 2.25rem;
+    text-align: center;
+    font-size: 0.45rem;
 }

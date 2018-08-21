@@ -28,7 +28,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   @select(nodeAttributes) node$;
   node: Map<any, any>;
   units = PM_UNITS;
-  attrs = {EXISTS: true, NUM: [], CAT: []};
+  attrs = {EXISTS: false, NUM: [], CAT: []};
   attributes: any;
   dropdowns = {
       selected: ['', ''],
@@ -37,9 +37,14 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   };
   preview = Map();
   subscription: Subscription;
-  negativeAlert = false;
+  rangeAlert = false;
   loading: boolean;
-  options: any;
+  options = [
+    {value: 'EQUAL', name: 'Equals'},
+    {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to'},
+    {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to'},
+    {value: 'BETWEEN', name: 'Between'},
+  ];
 
   readonly criteriaTypes = CRITERIA_TYPES;
 
@@ -78,15 +83,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       }
     ]
 
-  constructor(private actions: CohortSearchActions) {
-    this.options = [
-      {value: 'ANY', name: 'Any'},
-      {value: 'EQUAL', name: 'Equals'},
-      {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to'},
-      {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to'},
-      {value: 'BETWEEN', name: 'Between'},
-    ];
-  }
+  constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
     this.subscription = this.preview$.subscribe(prev => this.preview = prev);
@@ -101,9 +98,10 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
               if (this.attrs.NUM.length) {
                 this.attrs.NUM[0][attr.conceptName] = attr.estCount;
               } else {
+                this.dropdowns.labels[0] = 'Numeric Values';
                 this.attrs.NUM.push({
                   name: 'NUM',
-                  operator: '',
+                  operator: null,
                   operands: [null],
                   conceptId: attr.conceptId
                 });
@@ -118,6 +116,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           }
         });
       } else {
+        this.options.unshift({value: 'ANY', name: 'Any'});
         this.attrs.NUM = this.node.get('attributes');
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
           this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
@@ -130,12 +129,11 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.subscription.unsubscribe();
   }
 
-  toggleRadio() {
-    this.attrs.EXISTS = !this.attrs.EXISTS;
+  radioChange() {
+    this.preview = this.preview.set('count', this.node.get('count'));
   }
 
   selectChange(index: number, option: any) {
-      this.attrs.EXISTS = false;
     this.attrs.NUM[index].operator = option.value;
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
@@ -152,13 +150,26 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   inputChange() {
-    this.negativeAlert = false;
+    this.rangeAlert = false;
     this.attrs.NUM.forEach(attr => {
       attr.operands.forEach(operand => {
-        if (operand < 0) {
-          this.negativeAlert = true;
+        if (operand < attr.MIN
+          || (this.node.get('type') === CRITERIA_TYPES.PM ? false : operand > attr.MAX)) {
+          this.rangeAlert = true;
         }
       });
+    });
+  }
+
+  refresh() {
+    this.preview = Map();
+    this.attrs.EXISTS = false;
+    this.attrs.NUM.forEach(num => {
+      num.operator = null;
+      num.operands = [null];
+    });
+    this.attrs.CAT.forEach(cat => {
+      cat.checked = false;
     });
   }
 
@@ -173,64 +184,74 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   getParamWithAttributes(values: any) {
     let name = this.node.get('name', '') + ' (';
     let attrs = [];
-    this.attrs.NUM.forEach((attr, i) => {
-      const paramAttr = {
-        name: attr.name,
-        operator: attr.operator,
-        operands: attr.operands,
-        conceptId: attr.conceptId
-      };
-      if (i > 0) {
-        name += ' / ';
-      }
-      name += (attr.name !== '' && values['operator' + i] !== 'ANY') ? attr.name + ' ' : '';
-      switch (values['operator' + i]) {
-        case 'ANY':
-          paramAttr.operands = [];
-          paramAttr.name = 'ANY';
-          name += 'Any';
-          break;
-        case 'BETWEEN':
-          paramAttr.operator = Operator.BETWEEN;
-          paramAttr.operands = [values['valueA' + i], values['valueB' + i]];
-          name += values['valueA' + i] + '-' + values['valueB' + i];
-          break;
-        case 'EQUAL':
-          paramAttr.operator = Operator.EQUAL;
-          paramAttr.operands = [values['valueA' + i]];
-          name += '= ' + values['valueA' + i];
-          break;
-        case 'LESS_THAN_OR_EQUAL_TO':
-          paramAttr.operator = Operator.LESSTHANOREQUALTO;
-          paramAttr.operands = [values['valueA' + i]];
-          name += '<= ' + values['valueA' + i];
-          break;
-        case 'GREATER_THAN_OR_EQUAL_TO':
-          paramAttr.operator = Operator.GREATERTHANOREQUALTO;
-          paramAttr.operands = [values['valueA' + i]];
-          name += '>= ' + values['valueA' + i];
-          break;
-      }
-      attrs.push(paramAttr);
-    });
-    const catAttr = {name: 'CAT', operator: Operator.IN, operands: []};
-    this.attrs.CAT.forEach(attr => {
-      if (attr.checked) {
-        catAttr.operands.push(attr.valueAsConceptId);
-      }
-    });
-    if (catAttr.operands.length) {
-      attrs.push(catAttr);
-    }
-    if (this.attrs.NUM.length && this.attrs.CAT.length) {
-      attrs = attrs.map(attr => {
-        attr.name = 'BOTH';
-        return attr;
+    if (this.attrs.EXISTS) {
+      name += 'Any)';
+      attrs.push({
+        name: 'ANY',
+        operator: null,
+        operands: [null],
+        conceptId: this.node.get('conceptId')
       });
+    } else {
+      this.attrs.NUM.forEach((attr, i) => {
+        const paramAttr = {
+          name: attr.name,
+          operator: attr.operator,
+          operands: attr.operands,
+          conceptId: attr.conceptId
+        };
+        if (i > 0) {
+          name += ' / ';
+        }
+        name += (attr.name !== '' && values['operator' + i] !== 'ANY') ? attr.name + ' ' : '';
+        switch (values['operator' + i]) {
+          case 'ANY':
+            paramAttr.operands = [];
+            paramAttr.name = 'ANY';
+            name += 'Any';
+            break;
+          case 'BETWEEN':
+            paramAttr.operator = Operator.BETWEEN;
+            paramAttr.operands = [values['valueA' + i], values['valueB' + i]];
+            name += values['valueA' + i] + '-' + values['valueB' + i];
+            break;
+          case 'EQUAL':
+            paramAttr.operator = Operator.EQUAL;
+            paramAttr.operands = [values['valueA' + i]];
+            name += '= ' + values['valueA' + i];
+            break;
+          case 'LESS_THAN_OR_EQUAL_TO':
+            paramAttr.operator = Operator.LESSTHANOREQUALTO;
+            paramAttr.operands = [values['valueA' + i]];
+            name += '<= ' + values['valueA' + i];
+            break;
+          case 'GREATER_THAN_OR_EQUAL_TO':
+            paramAttr.operator = Operator.GREATERTHANOREQUALTO;
+            paramAttr.operands = [values['valueA' + i]];
+            name += '>= ' + values['valueA' + i];
+            break;
+        }
+        attrs.push(paramAttr);
+      });
+      const catAttr = {name: 'CAT', operator: Operator.IN, operands: []};
+      this.attrs.CAT.forEach(attr => {
+        if (attr.checked) {
+          catAttr.operands.push(attr.valueAsConceptId);
+        }
+      });
+      if (catAttr.operands.length) {
+        attrs.push(catAttr);
+      }
+      if (this.attrs.NUM.length && this.attrs.CAT.length) {
+        attrs = attrs.map(attr => {
+          attr.name = 'BOTH';
+          return attr;
+        });
+      }
+      name += (attrs[0].name !== 'ANY'
+        ? this.units[this.node.get('subtype')]
+        : '') + ')';
     }
-    name += (attrs[0].name !== 'ANY'
-      ? this.units[this.node.get('subtype')]
-      : '') + ')';
     return this.node
       .set('parameterId', this.paramId)
       .set('name', name)

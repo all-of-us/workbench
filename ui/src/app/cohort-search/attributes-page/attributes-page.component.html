@@ -1,7 +1,10 @@
-<div *ngIf="negativeAlert" class="alert alert-danger alert-sm">
+<div *ngIf="rangeAlert" class="alert alert-danger alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
-      <div class="alert-text">
+      <div *ngIf="node.get('type') === criteriaTypes.MEAS" class="alert-text">
+        Form cannot accept values outside range {{attrs.NUM[0].MIN}} - {{attrs.NUM[0].MAX}}
+      </div>
+      <div *ngIf="node.get('type') === criteriaTypes.PM" class="alert-text">
         Form cannot accept negative values
       </div>
     </div>
@@ -12,85 +15,89 @@
     <div *ngIf="node.get('type') === criteriaTypes.MEAS">
       <div class="attr-name-color">
         {{displayName}}
-        <clr-icon shape="refresh" class="is-success" (click)=""></clr-icon>
+        <clr-icon shape="refresh" size="20" class="attr-refresh" (click)="refresh()"></clr-icon>
       </div>
-      <div class="radio" (click)="toggleRadio()">
-        <input type="radio" [value]="true" name="labExists" [(ngModel)]="attrs.EXISTS">
+      <div class="radio">
+        <input type="radio" name="labExists" [value]="true" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
         <label>Any value (lab exists)</label>
       </div>
+      <div *ngIf="!attrs.EXISTS && attrs.NUM.length" class="or-circle">OR</div>
     </div>
-    <div *ngFor="let attr of attrs.NUM; let i = index">
-      <div class="attr-name-color">{{dropdowns.labels[i]}}</div>
-        <div class="container">
-          <div class="dropdown-width">
-            <clr-dropdown>
-              <button type="button" class="btn btn-outline" clrDropdownTrigger>
-                <span *ngIf="!attr.operator">Select Operator</span>
-                <span *ngIf="attr.operator">{{dropdowns.selected[i]}}</span>
-                <clr-icon shape="caret down"></clr-icon>
-              </button>
-              <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-                <button
-                *ngFor="let option of options"
-                [name]="'operator'+i"
-                (click)="selectChange(i, option)"
-                class="dropdown-item"
-                type="button"
-                clrDropdownItem>{{option.name}}</button>
-              </clr-dropdown-menu>
-            </clr-dropdown>
-            <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" required>
+    <ng-container *ngIf="!attrs.EXISTS">
+      <div *ngFor="let attr of attrs.NUM; let i = index">
+        <div class="attr-name-color">{{dropdowns.labels[i]}}</div>
+          <div class="container">
+            <div class="dropdown-width">
+              <clr-dropdown>
+                <button type="button" class="btn btn-outline" clrDropdownTrigger>
+                  <span *ngIf="!attr.operator">Select Operator</span>
+                  <span *ngIf="attr.operator">{{dropdowns.selected[i]}}</span>
+                  <clr-icon shape="caret down"></clr-icon>
+                </button>
+                <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+                  <button
+                  *ngFor="let option of options"
+                  [name]="'operator'+i"
+                  (click)="selectChange(i, option)"
+                  class="dropdown-item"
+                  type="button"
+                  clrDropdownItem>{{option.name}}</button>
+                </clr-dropdown-menu>
+              </clr-dropdown>
+              <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" required>
+            </div>
+            <div *ngIf="attr.operator && attrForm.value['operator'+i] !== 'ANY'" class="form-group range-container">
+              <input class="number-container"
+                type="number"
+                [min]="attr.MIN"
+                [max]="attr.MAX"
+                [name]="'valueA'+i"
+                [(ngModel)]="attr.operands[0]"
+                (ngModelChange)="inputChange()"
+                required>
+              <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
+              <span *ngIf="node.get('type') === criteriaTypes.MEAS">
+                Range: {{attr.MIN}} - {{attr.MAX}}
+              </span>
+            </div>
+            <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group and-text">
+              <div>and</div>
+            </div>
+            <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group range-container">
+              <input class="number-container"
+                type="number"
+                [min]="attr.MIN"
+                [max]="attr.MAX"
+                [name]="'valueB'+i"
+                [(ngModel)]="attr.operands[1]"
+                (ngModelChange)="inputChange()"
+                required>
+              <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
+              <span *ngIf="node.get('type') === criteriaTypes.MEAS">
+                Range: {{attr.MIN}} - {{attr.MAX}}
+              </span>
+            </div>
           </div>
-          <div *ngIf="attrForm.value['operator'+i] !== 'ANY'" class="form-group range-container">
-            <input class="number-container"
-              type="number"
-              [min]="attr.MIN"
-              [max]="attr.MAX"
-              [name]="'valueA'+i"
-              [(ngModel)]="attr.operands[0]"
-              (ngModelChange)="inputChange()"
-              required>
-            <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
-            <span *ngIf="node.get('type') === criteriaTypes.MEAS">
-              Range: {{attr.MIN}} - {{attr.MAX}}
-            </span>
-          </div>
-          <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group and-text">
-            <div>and</div>
-          </div>
-          <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group range-container">
-            <input class="number-container"
-              type="number"
-              [min]="attr.MIN"
-              [max]="attr.MAX"
-              [name]="'valueB'+i"
-              [(ngModel)]="attr.operands[1]"
-              (ngModelChange)="inputChange()"
-              required>
-            <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
-            <span *ngIf="node.get('type') === criteriaTypes.MEAS">
-              Range: {{attr.MIN}} - {{attr.MAX}}
-            </span>
-          </div>
-        </div>
-    </div>
-    <ng-container *ngIf="attrs.CAT.length">
-      <div class="attr-name-color">Categorical Values</div>
-      <div class="form-group">
-        <clr-checkbox *ngFor="let attr of attrs.CAT" [(clrChecked)]="attr.checked" [clrInline]="true">
-          {{attr.conceptName}}
-          <span class="badge badge-info">
-            {{ attr.estCount }}
-          </span>
-        </clr-checkbox>
       </div>
+      <ng-container *ngIf="attrs.CAT.length">
+        <div class="or-circle">OR</div>
+        <div class="attr-name-color">Categorical Values</div>
+        <div class="form-group">
+          <clr-checkbox *ngFor="let attr of attrs.CAT" [(clrChecked)]="attr.checked" [clrInline]="true">
+            {{attr.conceptName}}
+            <span class="badge badge-info">
+              {{ attr.estCount }}
+            </span>
+          </clr-checkbox>
+        </div>
+      </ng-container>
     </ng-container>
-    <div class="count-preview ">
+    <div *ngIf="attrForm.valid || attrs.EXISTS" class="count-preview ">
       <div class="row">
-        <div class="col-lg-2 ">
+        <div *ngIf="!attrs.EXISTS" class="col-lg-3">
           <button type="button"
             class="btn calculate-btn"
-            [disabled]="!attrForm.valid || negativeAlert"
+            [disabled]="!attrForm.valid || rangeAlert"
             (click)="requestPreview(attrForm)">
             Calculate
           </button>
@@ -98,7 +105,7 @@
         <div class="spin-top-padding">
           <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading...   </span>
         </div>
-        <div class="col-lg-7 text-padding" *ngIf="preview.get('count') >= 0">
+        <div class="col-lg-5 text-padding" *ngIf="preview.get('count') >= 0">
           <div class="result-text">
             Results
           </div>
@@ -110,7 +117,7 @@
           </div>
         </div>
         <div class="col-lg-3 button-padding" *ngIf="preview.get('count')">
-          <button class="btn add-button " type="submit" [disabled]="!attrForm.valid || negativeAlert"> ADD THIS RESULT</button>
+          <button class="btn add-button " type="submit" [disabled]="!attrForm.valid || rangeAlert"> ADD THIS RESULT</button>
         </div>
       </div>
     </div>

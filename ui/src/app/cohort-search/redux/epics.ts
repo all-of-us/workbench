@@ -188,16 +188,17 @@ export class CohortSearchEpics {
 
   fetchCount: CSEpic = (action$) => (
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
-      ({cdrVersionId, entityType, entityId, request}: CountRequestAction) =>
-      this.service.countParticipants(cdrVersionId, request)
-        .map(response => typeof response === 'number' ? response : 0)
-        .map(count => loadCountRequestResults(entityType, entityId, count))
-        .race(action$
-          .ofType(CANCEL_COUNT_REQUEST)
-          .filter(compare({entityType, entityId}))
-          .first())
-        .catch(e => Observable.of(countRequestError(entityType, entityId, e)))
-    )
+      ({cdrVersionId, entityType, entityId, request}: CountRequestAction) => {
+        console.log(request);
+        return this.service.countParticipants(cdrVersionId, request)
+          .map(response => typeof response === 'number' ? response : 0)
+          .map(count => loadCountRequestResults(entityType, entityId, count))
+          .race(action$
+            .ofType(CANCEL_COUNT_REQUEST)
+            .filter(compare({entityType, entityId}))
+            .first())
+          .catch(e => Observable.of(countRequestError(entityType, entityId, e)))
+      })
   )
 
   previewCount: CSEpic = (action$) => (

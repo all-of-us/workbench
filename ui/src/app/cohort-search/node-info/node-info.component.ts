@@ -138,7 +138,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
             operands: [null],
             conceptId: this.node.get('conceptId', null),
             MIN: 0,
-            MAX: 1000
+            MAX: 10000
           }];
         this.actions.loadAttributes(this.node, attributes);
       }
