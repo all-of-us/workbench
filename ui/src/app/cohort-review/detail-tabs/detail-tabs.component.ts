@@ -284,30 +284,8 @@ export class DetailTabsComponent {
     }
   }];
 
-  detailsLoading = false;
-  details;
-
   constructor(
     private route: ActivatedRoute,
     private reviewApi: CohortReviewService,
   ) {}
-
-  detailView(datum) {
-    this.detailsLoading = true;
-    const {participant} = this.route.snapshot.data;
-    const {cohort, workspace} = this.route.parent.snapshot.data;
-    this.reviewApi.getDetailParticipantData(
-      workspace.namespace,
-      workspace.id,
-      cohort.id,
-      workspace.cdrVersionId,
-      datum.dataId,
-      datum.domain
-    ).subscribe(
-        details => {
-          this.details = details;
-          this.detailsLoading = false;
-        }
-    );
-  }
 }

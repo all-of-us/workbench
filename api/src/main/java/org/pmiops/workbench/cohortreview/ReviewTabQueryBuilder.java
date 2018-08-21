@@ -139,13 +139,6 @@ public class ReviewTabQueryBuilder {
       .build();
   }
 
-  public QueryJobConfiguration buildDetailsQuery(Long dataId, DomainType domain) {
-    return QueryJobConfiguration
-      .newBuilder("select * from `${projectId}.${dataSetId}.p_all_events` where person_id = -999")
-      .setUseLegacySql(false)
-      .build();
-  }
-
   private String getSqlTemplate(DomainType domainType) {
     switch (domainType) {
       case ALL_EVENTS:
