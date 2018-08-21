@@ -118,7 +118,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
           });
           this.workspaceList = workspacesReceived
             .items
-            .map( w => WorkspacePermissions.create(w));
+            .map( w => new WorkspacePermissions(w) );
           this.workspacesLoading = false;
         },
         error => {

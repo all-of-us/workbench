@@ -61,7 +61,7 @@
               <span *ngIf="!workspacePermissions.canWrite" class="tooltip-content">Requires Write Permission</span>
             </span>
             <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
-              <button class="action-item"
+              <button class="action-item share-item"
                       [disabled]="!workspacePermissions.isOwner"
                       [class.disabled]="!workspacePermissions.isOwner"
                       (click)="share(workspacePermissions.workspace, workspacePermissions.accessLevel)">
@@ -73,7 +73,7 @@
               </span>
             </span>
             <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
-              <button class="action-item"
+              <button class="action-item delete-item"
                       [disabled]="!workspacePermissions.isOwner"
                       [class.disabled]="!workspacePermissions.isOwner"
                       (click)="confirmDelete(workspacePermissions.workspace)">

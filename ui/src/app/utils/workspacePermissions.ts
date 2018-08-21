@@ -4,55 +4,40 @@ import {Workspace, WorkspaceAccessLevel, WorkspaceResponse} from '../../generate
  * Composite class with helper functions useful in the UI.
  */
 export class WorkspacePermissions {
+  workspace: Workspace;
+  accessLevel: WorkspaceAccessLevel;
 
-  static workspace(workspace: Workspace) {
-    return workspace;
+  constructor(workspaceResponse: WorkspaceResponse) {
+    this.workspace = workspaceResponse.workspace;
+    this.accessLevel = workspaceResponse.accessLevel;
   }
 
-  static accessLevel(accessLevel: WorkspaceAccessLevel) {
-    return accessLevel;
+  get isOwner(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
-  static isOwner(accessLevel: WorkspaceAccessLevel) {
-    return accessLevel === WorkspaceAccessLevel.OWNER;
+  get canWrite(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER ||
+      this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
 
-  static canWrite(accessLevel: WorkspaceAccessLevel) {
-    return accessLevel === WorkspaceAccessLevel.OWNER ||
-      accessLevel === WorkspaceAccessLevel.WRITER;
+  get canRead() {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER ||
+      this.accessLevel === WorkspaceAccessLevel.WRITER ||
+      this.accessLevel === WorkspaceAccessLevel.READER;
   }
 
-  static canRead(accessLevel: WorkspaceAccessLevel) {
-    return accessLevel === WorkspaceAccessLevel.OWNER ||
-      accessLevel === WorkspaceAccessLevel.WRITER ||
-      accessLevel === WorkspaceAccessLevel.READER;
+  get isReadOnly() {
+    return this.accessLevel === WorkspaceAccessLevel.READER;
   }
 
-  static isReadOnly(accessLevel: WorkspaceAccessLevel) {
-    return accessLevel === WorkspaceAccessLevel.READER;
+  get isPending() {
+    return this.workspace.researchPurpose.reviewRequested === true &&
+      this.workspace.researchPurpose.approved === null;
   }
 
-  static isPending(workspace: Workspace) {
-    return workspace.researchPurpose.reviewRequested === true &&
-      workspace.researchPurpose.approved === null;
+  get isRejected() {
+    return this.workspace.researchPurpose.reviewRequested === true &&
+      this.workspace.researchPurpose.approved === false;
   }
-
-  static isRejected(workspace: Workspace) {
-    return workspace.researchPurpose.reviewRequested === true &&
-      workspace.researchPurpose.approved === false;
-  }
-
-  static create(wsResponse: WorkspaceResponse) {
-    return {
-      workspace: this.workspace(wsResponse.workspace),
-      accessLevel: this.accessLevel(wsResponse.accessLevel),
-      isOwner: this.isOwner(wsResponse.accessLevel),
-      canWrite: this.canWrite(wsResponse.accessLevel),
-      canRead: this.canRead(wsResponse.accessLevel),
-      isReadOnly: this.isReadOnly(wsResponse.accessLevel),
-      isPending: this.isPending(wsResponse.workspace),
-      isRejected: this.isRejected(wsResponse.workspace)
-    };
-  }
-
 }

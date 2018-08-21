@@ -2,6 +2,7 @@ import {Component, DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {Router, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
@@ -30,6 +31,7 @@ import {
 class WorkspaceListPage {
   fixture: ComponentFixture<WorkspaceListComponent>;
   workspacesService: WorkspacesService;
+  routerStub: Router;
   route: UrlSegment[];
   workspaceCards: DebugElement[];
   loggedOutMessage: DebugElement;
@@ -37,6 +39,7 @@ class WorkspaceListPage {
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(WorkspaceListComponent);
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
+    this.routerStub = this.fixture.debugElement.injector.get(Router);
     this.readPageData();
   }
 
@@ -64,10 +67,10 @@ class FakeCloneComponent {}
 
 describe('WorkspaceListComponent', () => {
   let workspaceListPage: WorkspaceListPage;
-  let routerStub: Router;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        BrowserAnimationsModule,
         FormsModule,
         RouterTestingModule.withRoutes([
           {path: 'workspaces', component: WorkspaceListComponent},
@@ -97,7 +100,6 @@ describe('WorkspaceListComponent', () => {
         },
       ] }).compileComponents().then(() => {
         workspaceListPage = new WorkspaceListPage(TestBed);
-        routerStub = TestBed.get(Router);
       });
       tick();
   }));
@@ -123,12 +125,32 @@ describe('WorkspaceListComponent', () => {
       workspaceListPage.workspaceCards[0].query(By.css('.edit-item')));
     updateAndTick(workspaceListPage.fixture);
 
-    expect(routerStub.url)
+    expect(workspaceListPage.routerStub.url)
       .toEqual('/workspaces/' + firstWorkspace.namespace +
         '/' + firstWorkspace.id + '/edit');
   }));
 
   it('enables deleting workspaces', fakeAsync(() => {
+    const deleteSpy = spyOn(TestBed.get(WorkspacesService), 'deleteWorkspace')
+      .and.callThrough();
+    const firstWorkspace = workspaceListPage.fixture.componentInstance.workspaceList[0].workspace;
+    const numWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
+    updateAndTick(workspaceListPage.fixture);
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.delete-item')));
+    updateAndTick(workspaceListPage.fixture);
+    expect(workspaceListPage.fixture.componentInstance.deleteModal.deleting).toBeTruthy();
+    expect(workspaceListPage.fixture.componentInstance.deleteModal.resource)
+      .toEqual(firstWorkspace);
+    const deleteModal =
+      workspaceListPage.fixture.debugElement.query(By.css('app-confirm-delete-modal'));
+    simulateClick(workspaceListPage.fixture, deleteModal.query(By.css('.confirm-delete-btn')));
+    updateAndTick(workspaceListPage.fixture);
+    expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);
+    const numNewWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
+    expect(numNewWorkspaces).toEqual(numWorkspaces - 1);
 
   }));
 
@@ -140,13 +162,22 @@ describe('WorkspaceListComponent', () => {
     simulateClick(workspaceListPage.fixture,
       workspaceListPage.workspaceCards[0].query(By.css('.clone-item')));
     updateAndTick(workspaceListPage.fixture);
-    let router: Router = TestBed.get(Router);
-    expect(routerStub.url)
+    expect(workspaceListPage.routerStub.url)
       .toEqual('/workspaces/' + firstWorkspace.namespace +
         '/' + firstWorkspace.id + '/clone');
   }));
 
   it('enables sharing workspaces', fakeAsync(() => {
-
+    const firstWorkspace = workspaceListPage.fixture.componentInstance.workspaceList[0].workspace;
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
+    updateAndTick(workspaceListPage.fixture);
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.share-item')));
+    updateAndTick(workspaceListPage.fixture);
+    expect(workspaceListPage.fixture.componentInstance.shareModal.sharing).toBeTruthy();
+    expect(workspaceListPage.fixture.componentInstance.shareModal.workspace)
+      .toEqual(firstWorkspace);
+    // Further tests in the workspace share component
   }));
 });
