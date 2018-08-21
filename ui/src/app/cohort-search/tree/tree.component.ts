@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
+import {DOMAIN_TYPES} from "../constant";
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -14,7 +15,7 @@ import {NodeComponent} from '../node/node.component';
 })
 export class TreeComponent extends NodeComponent implements OnInit {
   _type: string;
-
+    readonly domainTypes = DOMAIN_TYPES;
   ngOnInit() {
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
