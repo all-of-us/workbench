@@ -9,9 +9,11 @@ import {ClarityModule} from '@clr/angular';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceListComponent} from 'app/views/workspace-list/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
@@ -20,7 +22,10 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {WorkspacesService} from 'generated';
+import {
+  BugReportService,
+  WorkspacesService
+} from 'generated';
 
 class WorkspaceListPage {
   fixture: ComponentFixture<WorkspaceListComponent>;
@@ -55,11 +60,13 @@ describe('WorkspaceListComponent', () => {
         ClarityModule
       ],
       declarations: [
+        BugReportComponent,
         ConfirmDeleteModalComponent,
         WorkspaceListComponent,
         WorkspaceShareComponent,
       ],
       providers: [
+        { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
