@@ -262,7 +262,7 @@ public class ProfileControllerTest {
 
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, null);
     assertThat(profile.getFreeTierBillingProjectName()).isNotEmpty();
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).createAllOfUsBillingProject(anyString());
@@ -411,7 +411,7 @@ public class ProfileControllerTest {
 
     // When a conflict occurs in dev, log the exception but continue.
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, null);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).createAllOfUsBillingProject(projectName);
     verify(fireCloudService).addUserToBillingProject(PRIMARY_EMAIL, projectName);
@@ -432,7 +432,7 @@ public class ProfileControllerTest {
     // When a conflict occurs in dev, log the exception but continue.
     String projectName = BILLING_PROJECT_PREFIX + user.getUserId();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, null);
     assertThat(profile.getFreeTierBillingProjectName()).isEqualTo(projectName + "-2");
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(fireCloudService).addUserToBillingProject(
@@ -470,7 +470,7 @@ public class ProfileControllerTest {
     createUser();
     Profile profile = profileController.getMe().getBody();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, null);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     verify(fireCloudService).createAllOfUsBillingProject(profile.getFreeTierBillingProjectName());
@@ -481,7 +481,7 @@ public class ProfileControllerTest {
     clock.increment(1);
     profile = profileController.getMe().getBody();
     assertProfile(profile, PRIMARY_EMAIL, CONTACT_EMAIL, FAMILY_NAME, GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED, TIMESTAMP, true, null);
+        DataAccessLevel.UNREGISTERED, TIMESTAMP, null);
   }
 
   @Test
