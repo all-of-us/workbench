@@ -1,8 +1,7 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {fromJS, List, Map} from 'immutable';
-import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
 import {
   activeModifierList,
@@ -16,7 +15,7 @@ import {
     templateUrl: './modifier-page.component.html',
     styleUrls: ['./modifier-page.component.css']
 })
-export class ModifierPageComponent implements OnInit, OnDestroy {
+export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChecked {
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
   formChanges = false;
@@ -24,6 +23,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   dateValueB: any;
   existing = List();
   preview = Map();
+  myDate: any;
+  selectedDate: any;
   subscription: Subscription;
   dropdownOption = {
         selected: ['', '', '']
@@ -88,9 +89,11 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     }),
   });
 
-  constructor(private actions: CohortSearchActions) {}
+  constructor(private actions: CohortSearchActions,
+    private cdref: ChangeDetectorRef) {}
 
   ngOnInit() {
+      // this.ngAfterContentChecked();
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
@@ -139,6 +142,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       })
     );
   }
+    ngAfterContentChecked() {
+        this.cdref.detectChanges();
+    }
     selectChange(opt, index, e, mod) {
         this.dropdownOption.selected[index] = opt.name;
         if (e.target.value || this.form.controls.valueA) {
@@ -160,23 +166,16 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     }
 
   currentMods(vals) {
-    return this.modifiers.map(({name, inputType, modType}) => {
+      this.ngAfterContentChecked();
+      return this.modifiers.map(({name, inputType, modType}) => {
       const {operator, valueA, valueB} = vals[name];
       const between = operator === 'BETWEEN';
       if (!operator || !valueA || (between && !valueB)) {
         return ;
       }
-      if (inputType === 'date') {
-          this.dateValueA = moment(valueA, 'MM/DD/YYYY').format('YYYY-MM-DD');
-          this.dateValueB = moment(valueB, 'MM/DD/YYYY').format('YYYY-MM-DD');
-          const operands = [this.dateValueA];
-          if (between) { operands.push(this.dateValueB); }
-          return fromJS({name: modType, operator, operands});
-      } else {
           const operands = [valueA];
           if (between) { operands.push(valueB); }
           return fromJS({name: modType, operator, operands});
-      }
     });
   }
 
@@ -187,5 +186,4 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
       this.subscription.unsubscribe();
     }
-
 }
