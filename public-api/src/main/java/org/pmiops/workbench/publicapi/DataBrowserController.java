@@ -318,10 +318,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         String keyword = ConceptService.modifyMultipleMatchKeyword(query);
         List<DbDomain> domains = new ArrayList<>();
-        domains = dbDomainDao.findDomainSearchResults(keyword);
-        if(domains.size() == 0){
-            domains = dbDomainDao.findDomainSearchResults(query);
-        }
+        domains = dbDomainDao.findDomainSearchResults(keyword,query);
         DbDomainListResponse resp = new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
@@ -342,14 +339,17 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         StandardConceptFilter standardConceptFilter = searchConceptsRequest.getStandardConceptFilter();
 
+
         if(searchConceptsRequest.getQuery() == null || searchConceptsRequest.getQuery().isEmpty()){
             if(standardConceptFilter == null || standardConceptFilter == StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH){
                 standardConceptFilter = StandardConceptFilter.STANDARD_CONCEPTS;
             }
+        }else{
+            if(standardConceptFilter == null){
+                standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
+            }
         }
-        if(standardConceptFilter == null){
-            standardConceptFilter = StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH;
-        }
+
 
 
         List<String> domainIds = null;
@@ -373,7 +373,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 synonymConceptIds = conceptDao.findConceptByNameOrSynonymName(ConceptService.modifyMultipleMatchKeyword(searchConceptsRequest.getQuery()));
         }
 
-        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
+        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());;
 
         Slice<Concept> concepts = null;
         if(conceptCodeIdMatchConcepts.size() > 0){

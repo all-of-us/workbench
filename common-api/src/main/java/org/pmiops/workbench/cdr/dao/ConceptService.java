@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
 import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -12,6 +13,8 @@ import com.google.common.base.Strings;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
@@ -40,6 +43,9 @@ public class ConceptService {
 
     public static String modifyMultipleMatchKeyword(String query){
         // This function modifies the keyword to match all the words if multiple words are present(by adding + before each word to indicate match that matching each word is essential)
+        if(query == null || query.isEmpty()){
+            return null;
+        }
         String[] keywords = query.split("[,+\\s+]");
         for(int i = 0; i < keywords.length; i++){
             String key = keywords[i];
@@ -72,37 +78,12 @@ public class ConceptService {
 
     public Slice<Concept> searchConcepts(String query, StandardConceptFilter standardConceptFilter, List<String> vocabularyIds, List<String> domainIds, int limit, int minCount, List<Long> matchedConceptIds) {
 
-        /*
-        // Peter Changes : Try something like this pseuedo code
-        ConceptDao conceptDao;
-        // Can we use conceptDao here to find Code match then Synonmyns ?
-        List<Long> conceptIds;
-        if (query.length() > 0) {
-            // Try to find by Code or id
-            conceptIds = conceptDao.findConceptIdByCodeOrId(query);
-            // or if want concepts now
-            List<Concept> concepts= conceptDao.findByConceptCodeOrConceptId(query);
-            // Question -- Do we need to do anything else now with filters or does code or id trump all other
-            // filters ? If we just want to return concepts here
-            if (! conceptIds.isEmpty()) { matchType = codeorId; }
-            if (conceptIds.isEmpty() ) {
-                // Find by name or synonm
-               conceptIds = conceptDao.findConceptSynonyms(query);
-               if (! conceptIds.isEmpty()) { matchType = name; }
-            }
-        }
-
-        // Now we have our conceptIds to use in rest of stuff below and don't need to pass in synonmIds
-        // Though One thing that may be cool is if this had a conceptId arg and query  and we could search within
-        // those concept ids
-        // Search within a search ... Anyway, don't worry about that now.  But it would just work with some initialization
-        // of conceptIds and query at the right time
-        */
-
-
 
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
+
+                    root.fetch("synonyms",JoinType.LEFT);
+
                     List<Predicate> predicates = new ArrayList<>();
                     List<Predicate> standardConceptPredicates = new ArrayList<>();
                     standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
@@ -126,7 +107,7 @@ public class ConceptService {
                     }
 
                     // Optionally filter on standard concept, vocabulary ID, domain ID
-                    if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
+                    if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS) || standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
                         predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
                     }else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
                         predicates.add(
