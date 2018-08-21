@@ -57,13 +57,6 @@ public class ProfileService {
       user = userWithAuthoritiesAndPageVisits;
     }
 
-    Profile profile = getTrimmedProfile(user);
-    return profile;
-  }
-
-  // This function is a reduced getProfile, lowering the number of DB calls and external
-  // api calls to improve performance.
-  public Profile getTrimmedProfile(User user) {
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
@@ -112,6 +105,7 @@ public class ProfileService {
         .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
         .collect(Collectors.toList()));
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
+
     return profile;
   }
 }
