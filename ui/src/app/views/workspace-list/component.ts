@@ -3,10 +3,13 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {Subscription} from 'rxjs/Subscription';
-import {Workspace} from '../../../generated';
-import {WorkspacePermissions} from '../../utils/workspacePermissions';
-import {ConfirmDeleteModalComponent} from '../confirm-delete-modal/component';
-import {WorkspaceShareComponent} from '../workspace-share/component';
+
+import {Workspace} from 'generated';
+
+import {WorkspacePermissions} from 'app/utils/workspacePermissions';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   BillingProjectStatus,
@@ -51,6 +54,9 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   resource: Workspace;
   // TODO This is necessary to placate the delete error template - figure out how to remove it
   workspace: Workspace = {name: ''};
+
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
 
   constructor(
       private profileStorageService: ProfileStorageService,
@@ -163,5 +169,10 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
       return false;
     }
     return true;
+  }
+  submitWorkspaceDeleteBugReport(): void {
+    this.workspaceDeletionError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
   }
 }
