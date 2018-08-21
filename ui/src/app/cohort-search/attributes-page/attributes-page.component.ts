@@ -15,6 +15,7 @@ import {
 import {Operator} from 'generated';
 
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PM_UNITS} from '../constant';
+import {stripHtml} from '../utils';
 
 @Component({
   selector: 'crit-attributes-page',
@@ -93,7 +94,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.subscription.add(this.node$.subscribe(node => {
       this.node = node;
       if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
-        this.testAttrs.forEach(attr => {
+        console.log(this.node.get('attributes'));
+        this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
             case 'NUM':
               if (this.attrs.NUM.length) {
@@ -117,7 +119,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         });
       } else {
         this.attrs.NUM = this.node.get('attributes');
-        console.log(this.attrs.NUM);
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
           this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
         }
@@ -163,6 +164,10 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
 
   get paramId() {
     return `param${this.node.get('id')}`;
+  }
+
+  get displayName() {
+    return stripHtml(this.node.get('name'));
   }
 
   getParamWithAttributes(values: any) {

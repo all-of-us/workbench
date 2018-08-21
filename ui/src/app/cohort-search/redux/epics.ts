@@ -178,6 +178,7 @@ export class CohortSearchEpics {
     action$.ofType(SHOW_ATTRIBUTES_PAGE).mergeMap(
       ({cdrVersionId, node}: AttributeRequestAction) => {
         const conceptId = node.get('conceptId');
+        console.log(conceptId);
         return this.service.getCriteriaAttributeByConceptId(cdrVersionId, conceptId)
           .map(result => loadAttributes(node, result.items))
           .catch(e => Observable.of(attributeRequestError(e)));

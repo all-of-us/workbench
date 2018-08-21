@@ -154,6 +154,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   get attributeTitle() {
-    return stripHtml(this.attributesNode.get('name'));
+    return this.ctype === CRITERIA_TYPES.PM
+      ? stripHtml(this.attributesNode.get('name'))
+      : typeToTitle(this.ctype) + ' Detail';
   }
 }
