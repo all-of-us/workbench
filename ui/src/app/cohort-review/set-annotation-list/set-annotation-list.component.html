@@ -7,6 +7,10 @@
           (isPosting)="isPosting($event, defn)">
   </app-set-annotation-item>
 
+  <div *ngIf="definitions.length === 0">
+    <em>No review annotations defined yet.</em>
+  </div>
+
   <div *ngIf="posting" class="spinner spinner-md spin-in-overlay">
     Loading...
   </div>
@@ -22,8 +26,7 @@
   <button
           type="button"
           class="btn btn-primary"
-          (click)="openEdit = false"
-  >
+          (click)="openEdit = false">
     Save
   </button>
 </div>

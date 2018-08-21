@@ -25,7 +25,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   @Input() annotation: Annotation;
   @Input() showDataType: boolean;
-
+  textSpinnerFlag = false;
+  successIcon = false;
   private control = new FormControl();
   private expandText = false;
   defaultAnnotation = false;
@@ -51,6 +52,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
     ngOnInit() {
       this.ngAfterContentChecked();
+        this.successIcon = false;
     const oldValue = this.annotation.value[this.valuePropertyName];
     if (oldValue !== undefined) {
       this.control.setValue(oldValue);
@@ -62,7 +64,17 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     }
 
 
+    textBlur(){
+        this.successIcon = false;
+    this.textSpinnerFlag = true
+    setTimeout (() => {
+        this.handleInput() },2000);
+  }
+
+
   handleInput() {
+      this.textSpinnerFlag = false;
+      this.successIcon = true;
     /* Parameters from the path */
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
@@ -78,7 +90,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     if (newValue === this.oldValue) {
       return ;
     }
-
     // If there is an annotation ID then the annotation has already been
     // created, so this must be either delete or update
     if (annoId !== undefined) {
@@ -86,6 +97,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       if (newValue === '' || newValue === null) {
         apiCall = this.reviewAPI
           .deleteParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId);
+
       } else {
         const request = <ModifyParticipantCohortAnnotationRequest>{
           [this.valuePropertyName]: newValue,
@@ -136,18 +148,20 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.defaultAnnotation = true;
     this.control.patchValue(value);
     this.oldValue = value;
-    this.handleInput();
+    this.textBlur();
+   // this.handleInput();
 
     }
 
     dateChange(e) {
-    if (e !== null) {
-        const newDate = moment(e).format('YYYY-MM-DD');
-        this.control.patchValue(newDate);
-        this.handleInput();
+        this.successIcon = false;
+        this.textSpinnerFlag = true
+        setTimeout (() => {
+            if (e !== null) {
+                const newDate = moment(e).format('YYYY-MM-DD');
+                this.control.patchValue(newDate);
+               this.handleInput();
+            }},2000);
     }
-
-    }
-
 
 }
