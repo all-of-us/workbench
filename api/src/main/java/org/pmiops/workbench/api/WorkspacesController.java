@@ -750,7 +750,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       .getBucketName();
     String origPath = "notebooks/" + rename.getName();
     String newName = rename.getNewName();
-    if (!NOTEBOOK_PATTERN.matcher(newName).matches()) {
+    if (!newName.matches("^.+\\.ipynb")) {
       newName = newName + ".ipynb";
     }
     String newPath = "notebooks/" + newName;

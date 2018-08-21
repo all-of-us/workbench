@@ -75,6 +75,7 @@ import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
@@ -1285,4 +1286,60 @@ public class WorkspacesControllerTest {
     }
   }
 
+  @Test
+  public void testRenameNotebookinWorkspace() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+      LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    String nb1 = "notebooks/nb1.ipynb";
+    String newName = "nb2.ipynb";
+    String newPath = "notebooks/nb2.ipynb";
+    NotebookRename rename = new NotebookRename();
+    rename.setName("nb1.ipynb");
+    rename.setNewName(newName);
+    workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+  }
+
+  @Test
+  public void testRenameNotebookWoExtension() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+      LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    String nb1 = "notebooks/nb1.ipynb";
+    String newName = "nb2";
+    String newPath = "notebooks/nb2.ipynb";
+    NotebookRename rename = new NotebookRename();
+    rename.setName("nb1.ipynb");
+    rename.setNewName(newName);
+    workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+  }
+
+  @Test
+  public void testCloneNotebook() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+      LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    String nb1 = "notebooks/nb1.ipynb";
+    String newPath = "notebooks/Clone nb1.ipynb";
+    workspacesController.cloneNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+  }
+
+  @Test
+  public void testDeleteNotebook() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+      LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    String nb1 = "notebooks/nb1.ipynb";
+    workspacesController.deleteNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
+    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+  }
 }
