@@ -235,6 +235,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
           UserRole result = new UserRole();
           result.setEmail(workspaceUserRole.getUser().getEmail());
+          result.setGivenName(workspaceUserRole.getUser().getGivenName());
+          result.setFamilyName(workspaceUserRole.getUser().getFamilyName());
           result.setRole(workspaceUserRole.getRoleEnum());
           return result;
         }
@@ -699,6 +701,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .stream()
         .map(r -> new UserRole()
             .email(r.getUser().getEmail())
+            .givenName(r.getUser().getGivenName())
+            .familyName(r.getUser().getFamilyName())
             .role(r.getRoleEnum()))
         // Reverse sorting arranges the role list in a logical order - owners first, then by email.
         .sorted(Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())

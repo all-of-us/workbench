@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { DomainType } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_TYPES} from '../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
 
 /*
@@ -120,7 +120,17 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     event.stopPropagation();
     if (needsAttributes(this.node)) {
-      this.actions.showAttributesPage(this.node);
+      const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+          ? PREDEFINED_ATTRIBUTES.Normal
+          : [{
+              name: '',
+              operator: null,
+              operands: [null],
+              conceptId: this.node.get('conceptId', null),
+              MIN: 0,
+              MAX: 1000
+          }];
+      this.actions.showAttributesPage(this.node.set('attributes', attributes));
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
@@ -134,7 +144,18 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           this.selectChildren(child);
         });
       } else {
-        const param = this.node.set('parameterId', this.paramId);
+        let attributes = [];
+        if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+            for (const key in PREDEFINED_ATTRIBUTES) {
+                if (PREDEFINED_ATTRIBUTES.hasOwnProperty(key)) {
+                    if (this.node.get('name').indexOf(key) === 0) {
+                        attributes = PREDEFINED_ATTRIBUTES[key];
+                    }
+                    break;
+                }
+            }
+        }
+        const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
         this.actions.addParameter(param);
       }
     }

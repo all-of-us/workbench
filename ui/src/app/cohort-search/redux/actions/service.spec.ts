@@ -28,8 +28,7 @@ const zeroCrit = fromJS({
   type: CRITERIA_TYPES.ICD9,
   group: false,
   domainId: null,
-  attributes: [],
-});
+}).set('attributes', []);
 
 const oneCrit = fromJS({
   id: 1,
@@ -39,8 +38,7 @@ const oneCrit = fromJS({
   type: CRITERIA_TYPES.ICD9,
   group: true,
   domainId: null,
-  attributes: [],
-});
+}).set('attributes', []);
 
 const DEMO_crit = fromJS({
   id: 3,
@@ -52,8 +50,7 @@ const DEMO_crit = fromJS({
   group: false,
   conceptId: 12345,
   domainId: null,
-  attributes: [],
-});
+}).set('attributes', []);
 
 const groups = fromJS({
   include0: {

@@ -326,7 +326,6 @@ definitions:
       - group
       - selectable
       - hasAttribute
-      - predefinedAttributes
     properties:
       id:
         description: id of the criteria
@@ -377,10 +376,9 @@ definitions:
       hasAttributes:
         description: specifies if extra attributes are needed
         type: boolean
-      predefinedAttributes:
-        type: array
-        items:
-          $ref: "#/definitions/Attribute"
+      path:
+        description: full path from parent to this node with ids
+        type: string
 
   CriteriaAttributeListResponse:
     type: object
