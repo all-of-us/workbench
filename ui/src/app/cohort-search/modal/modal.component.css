@@ -167,6 +167,8 @@ button.tab.active {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 27.5rem;
+  max-height: 27.5rem;
+  overflow-y: auto;
   background-color: white;
 }
 
