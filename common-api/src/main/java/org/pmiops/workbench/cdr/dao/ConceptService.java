@@ -13,7 +13,6 @@ import com.google.common.base.Strings;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
@@ -96,7 +95,6 @@ public class ConceptService {
                     nonStandardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                             criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
-                    Expression<Collection<ConceptSynonym>> conceptSynonyms = root.get("synonyms");
                     Expression<Double> matchExp = null;
                     Expression<Double> matchSynonymExp = null;
 
