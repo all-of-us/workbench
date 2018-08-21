@@ -184,7 +184,7 @@ public class Concept {
         return this;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "concept")
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "concept")
     public List<ConceptSynonym> getSynonyms() {
         return synonyms;
     }

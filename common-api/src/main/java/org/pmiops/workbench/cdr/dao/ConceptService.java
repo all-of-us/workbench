@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.*;
@@ -81,6 +79,8 @@ public class ConceptService {
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
 
+                    //root.fetch("synonyms");
+
                     List<Predicate> predicates = new ArrayList<>();
                     List<Predicate> standardConceptPredicates = new ArrayList<>();
                     standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
@@ -97,7 +97,14 @@ public class ConceptService {
                     Expression<Double> matchExp = null;
                     Expression<Double> matchSynonymExp = null;
 
-                    Join<Concept, ConceptSynonym> csJoin = root.join("synonyms");
+                    Join<Concept, ConceptSynonym> csJoin = root.join("synonyms",JoinType.LEFT);
+                    //Fetch<Concept, ConceptSynonym> csJoin = root.fetch("synonyms", JoinType.LEFT);
+                    Fetch fetchSyns = root.fetch("synonyms", JoinType.LEFT);
+
+                    root.join("synonyms",JoinType.LEFT);
+                    //Fetch<Concept, ConceptSynonym> csJoin = root.fetch("synonyms", JoinType.LEFT);
+                    root.fetch("synonyms", JoinType.LEFT);
+
                     List<Predicate> conceptCodeIDName = new ArrayList<>();
 
                     final String keyword = modifyMultipleMatchKeyword(query);
