@@ -620,7 +620,7 @@ definitions:
   ModifierType:
     type: string
     description: possible types of modifiers
-    enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE]
+    enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE, ENCOUNTERS]
 
   ChartInfoListResponse:
     type: object
