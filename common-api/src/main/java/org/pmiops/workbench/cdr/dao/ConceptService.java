@@ -9,7 +9,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import com.google.common.base.Strings;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

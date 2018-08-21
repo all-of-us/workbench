@@ -355,7 +355,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             domainIds = DOMAIN_MAP.get(searchConceptsRequest.getDomain()).asList();
         }
 
-        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());;
+        ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
         Slice<Concept> concepts = null;
         concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,

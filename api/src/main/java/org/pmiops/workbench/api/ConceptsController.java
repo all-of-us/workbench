@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMultimap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.ConceptService;
