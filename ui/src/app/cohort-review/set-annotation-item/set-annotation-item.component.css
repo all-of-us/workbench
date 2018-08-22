@@ -29,3 +29,7 @@
   border:none!important;
   pointer-events: none;
 }
+
+.divider {
+  padding-top: 0.3rem;
+}
