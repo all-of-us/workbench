@@ -50,7 +50,7 @@ public abstract class AbstractQueryBuilder {
     "CAST(FLOOR(DATE_DIFF(criteria.entry_date, DATE(p.year_of_birth, p.month_of_birth, p.day_of_birth), MONTH)/12) as INT64)\n";
   private static final String EVENT_DATE_SQL_TEMPLATE = "criteria.entry_date\n";
   private static final String OCCURRENCES_SQL_TEMPLATE = "group by criteria.person_id\n" +
-    "having count(criteria.person_id)";
+    "having count(criteria.person_id) ";
 
   /**
    * Build a {@link QueryJobConfiguration} from the specified
