@@ -110,7 +110,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       // TODO: add recent resource entry for concept sets?
     } catch (DataIntegrityViolationException e) {
       throw new BadRequestException(String.format(
-          "Concept set \"/%s/%s/%d\" already exists.",
+          "Concept set \"/%s/%s/%s\" already exists.",
           workspaceNamespace, workspaceId, dbConceptSet.getName()));
     }
     return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
@@ -119,8 +119,12 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private ConceptSet toClientConceptSet(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
     ConceptSet result = TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
-      result.setConcepts(ImmutableList.copyOf(conceptDao.findAll(conceptSet.getConceptIds())).stream().map(
-            ConceptsController.TO_CLIENT_CONCEPT).sorted(CONCEPT_NAME_ORDERING).collect(Collectors.toList()));
+      result.setConcepts(ImmutableList.copyOf(
+          conceptDao.findAll(conceptSet.getConceptIds()))
+              .stream()
+              .map(ConceptsController.TO_CLIENT_CONCEPT)
+              .sorted(CONCEPT_NAME_ORDERING)
+              .collect(Collectors.toList()));
     }
     return result;
   }
