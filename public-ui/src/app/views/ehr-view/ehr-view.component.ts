@@ -55,7 +55,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscriptions.push(this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue));
+    // Get total participants
+    this.subscriptions.push(
+      this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue)
+    );
+
     this.items = [];
 
     // Get search text from localStorage

@@ -20,9 +20,13 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   @Input() showAge = true;
   @Input() showMeasurementGenderBins = false;
 
+  private subscriptions: ISubscription[] = [];
+  loadingStack: any = [];
+  loading() {
+    return this.loadingStack.length > 0;
+  }
+
   results;
-  loading = false;
-  // Get counts results for genders
   maleGenderResult: AchillesResult;
   femaleGenderResult: AchillesResult;
   otherGenderResult: AchillesResult;
@@ -32,41 +36,36 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   MALE_GENDER_ID = '8507';
   FEMALE_GENDER_ID = '8532';
   OTHER_GENDER_ID = '8521';
-  PREGNANCY_CONCEPT_ID = '903120';
-  WHEEL_CHAIR_CONCEPT_ID = '903111';
-
-  private subscription: ISubscription;
-  private subscription2: ISubscription;
 
   constructor(private api: DataBrowserService) { }
 
   ngOnInit() {
     // Get chart results for concept
-    console.log("Concept chart concept", this.concept);
-    this.loading = true;
+    this.loadingStack.push(true);
     const conceptIdStr = '' + this.concept.conceptId.toString();
-    this.subscription = this.api.getConceptAnalysisResults([conceptIdStr]).subscribe(results =>  {
-      console.log(results);
-      this.results = results.items;
-      this.analyses = results.items[0];
-      this.organizeGenders(this.analyses.genderAnalysis);
-      console.log('analyses: ' , this.analyses);
-      this.loading = false;
-    });
-
+    this.subscriptions.push( this.api.getConceptAnalysisResults([conceptIdStr]).subscribe(
+      results =>  {
+        this.results = results.items;
+        this.analyses = results.items[0];
+        this.organizeGenders(this.analyses.genderAnalysis);
+        this.loadingStack.pop();
+      }));
     this.getSourceConcepts();
   }
 
   ngOnDestroy() {
-    console.log('unsubscribing concept-charts');
-    this.subscription.unsubscribe();
-    this.subscription2.unsubscribe();
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
   }
 
   getSourceConcepts() {
-    this.subscription2 = this.api.getSourceConcepts(this.concept.conceptId).subscribe(
-      results => this.sourceConcepts = results.items
-      );
+    this.loadingStack.push(true);
+    this.subscriptions.push( this.api.getSourceConcepts(this.concept.conceptId).subscribe(
+      results => {
+        this.sourceConcepts = results.items;
+        this.loadingStack.pop();
+      }));
   }
 
   organizeGenders(analysis: Analysis) {
@@ -92,7 +91,8 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     // Put our gender results in order we want
     analysis.results = [this.maleGenderResult, this.femaleGenderResult];
 
-    // Make Other results in one concept if we have them. Todo -- when we get more data will will have more genders
+    // Make Other results in one concept if we have them.
+    // Todo -- when we get more data will will have more genders
     if (otherCountValue > 0) {
       this.otherGenderResult = {
         analysisId: analysis.results[0].analysisId,

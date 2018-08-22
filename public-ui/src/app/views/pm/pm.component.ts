@@ -13,6 +13,10 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   title = 'Browse Program Physical Measurements';
   pageImage = '/assets/db-images/man-standing.png';
   private subscriptions: ISubscription[] = [];
+  loadingStack: any = [];
+  loading() {
+    return this.loadingStack.length > 0;
+  }
   // Todo put constants in a class for use in other views
   chartType = 'histogram';
   MALE_GENDER_ID = '8507';
@@ -62,8 +66,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
        maleCount: 0, femaleCount: 0, otherCount: 0},
     ]}
   ];
-
-  loadingStack: any = [];
 
   // Initialize to first group and concept, adjust order in groups array above
   selectedGroup = this.conceptGroups[0];
@@ -117,11 +119,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     }
   }
 
-  loading() {
-    return this.loadingStack.length > 0;
-  }
   showMeasurement(group: any, concept: any) {
-    console.log(group, concept);
     this.selectedGroup = group;
     this.selectedConcept = concept;
 
@@ -131,7 +129,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
         [this.selectedConcept.conceptId])
         .subscribe(result => {
           this.selectedConcept.analyses = result.items[0];
-          console.log('Before organize' , this.selectedConcept.analyses);
           // Organize, massage the data for ui graphing
           // for example, pregnant has only 1 result for pregnant,
           // we add a not pregnant to make display better
@@ -139,7 +136,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
           this.loadingStack.pop();
       }));
     } else {
-      console.log('already have analyses ', this.selectedConcept.analyses);
+      // Don't get the analyses
     }
   }
 
