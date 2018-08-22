@@ -128,7 +128,7 @@ public class ConceptSet {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @ElementCollection(fetch = FetchType.EAGER)
+  @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "concept_set_concept_id", joinColumns = @JoinColumn(name = "concept_set_id"))
   @Column(name = "concept_id")
   public Set<Long> getConceptIds() {
@@ -137,5 +137,19 @@ public class ConceptSet {
 
   public void setConceptIds(Set<Long> conceptIds) {
     this.conceptIds = conceptIds;
+  }
+
+  public ConceptSet makeClone() {
+    ConceptSet c = new ConceptSet();
+    c.setDescription(getDescription());
+    c.setName(getName());
+    c.setDomain(getDomain());
+    c.setCreator(getCreator());
+    c.setWorkspaceId(getWorkspaceId());
+    // Should we actually copy these? (Same question for cohorts...)
+    c.setCreationTime(getCreationTime());
+    c.setLastModifiedTime(getLastModifiedTime());
+    c.setVersion(1);
+    return c;
   }
 }

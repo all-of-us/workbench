@@ -142,4 +142,18 @@ public class Cohort {
   public void addCohortReview(CohortReview cohortReview) {
     this.cohortReviews.add(cohortReview);
   }
+
+  public Cohort makeClone() {
+    Cohort c = new Cohort();
+    c.setCriteria(getCriteria());
+    c.setDescription(getDescription());
+    c.setName(getName());
+    c.setType(getType());
+    c.setCreator(getCreator());
+    c.setWorkspaceId(getWorkspaceId());
+    c.setCreationTime(getCreationTime());
+    c.setLastModifiedTime(getLastModifiedTime());
+    c.setVersion(1);
+    return c;
+  }
 }

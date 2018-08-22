@@ -17,7 +17,8 @@ public class CohortService {
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Transactional
-  public Cohort saveAndCloneReviews(Cohort from, Cohort to) {
+  public Cohort cloneCohortAndReviews(Cohort from) {
+    Cohort to = from.makeClone();
     Cohort saved = cohortDao.save(to);
     cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationDefinitionByCohort(
             from.getCohortId(), to.getCohortId());

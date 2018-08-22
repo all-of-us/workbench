@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConceptSetsController implements ConceptSetsApiDelegate {
 
+  private static final int MAX_CONCEPTS_PER_SET = 1000;
+
   private final WorkspaceService workspaceService;
   private final ConceptSetDao conceptSetDao;
   private final ConceptDao conceptDao;
@@ -150,29 +152,12 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     ConceptSetListResponse response = new ConceptSetListResponse();
     Set<org.pmiops.workbench.db.model.ConceptSet> conceptSets = workspace.getConceptSets();
     if (conceptSets != null) {
-      Set<Long> conceptIds = Sets.newHashSet();
-      // Get all the concept IDs for all concept sets, and look them all up at once.
-      for (org.pmiops.workbench.db.model.ConceptSet conceptSet : conceptSets) {
-        conceptIds.addAll(conceptSet.getConceptIds());
-      }
-      final Map<Long, Concept> conceptMap;
-      if (conceptIds.size() > 0) {
-        conceptMap = ImmutableList.copyOf(conceptDao.findAll(conceptIds)).stream()
-            .map(ConceptsController.TO_CLIENT_CONCEPT).collect(
-                Collectors.toMap(Concept::getConceptId, Function.identity()));
-      } else {
-        conceptMap = new HashMap<>();
-      }
-      // Look up the concepts by ID in the map constructed above.
-      for (org.pmiops.workbench.db.model.ConceptSet conceptSet : conceptSets) {
-        ConceptSet clientConceptSet = TO_CLIENT_CONCEPT_SET.apply(conceptSet);
-        if (!conceptSet.getConceptIds().isEmpty()) {
-          clientConceptSet.setConcepts(
-              conceptSet.getConceptIds().stream().map((conceptId -> conceptMap.get(conceptId)))
-                  .collect(Collectors.toList()));
-        }
-        response.addItemsItem(clientConceptSet);
-      }
+      // Concept sets in the list response will *not* have concepts under them, as this could be
+      // a lot of data... you need to open up a concept set to see what concepts are within it.
+      response.setItems(conceptSets.stream()
+          .map(TO_CLIENT_CONCEPT_SET)
+          .sorted(Comparator.comparing(c -> c.getName()))
+          .collect(Collectors.toList()));
     }
     return ResponseEntity.ok(response);
   }
@@ -223,6 +208,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (request.getRemovedIds() != null) {
       dbConceptSet.getConceptIds().removeAll(request.getRemovedIds());
     }
+    if (dbConceptSet.getConceptIds().size() > MAX_CONCEPTS_PER_SET) {
+      throw new BadRequestException("Exceeded " + MAX_CONCEPTS_PER_SET + " in concept set");
+    }
+
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setLastModifiedTime(now);
     try {
