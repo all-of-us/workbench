@@ -14,9 +14,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   pageImage = '/assets/db-images/man-standing.png';
   private subscriptions: ISubscription[] = [];
   loadingStack: any = [];
-  loading() {
-    return this.loadingStack.length > 0;
-  }
+
   // Todo put constants in a class for use in other views
   chartType = 'histogram';
   MALE_GENDER_ID = '8507';
@@ -78,8 +76,11 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
 
   constructor(private api: DataBrowserService) { }
 
-  ngOnInit() {
+  loading() {
+    return this.loadingStack.length > 0;
+  }
 
+  ngOnInit() {
     this.showMeasurement(this.selectedGroup, this.selectedConcept);
     // Get demographic totals
     this.loadingStack.push(true);
