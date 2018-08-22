@@ -1,6 +1,5 @@
 <div>
   <div [ngSwitch]="annotation.definition.annotationType">
-
     <!-- STRING, DATE, INTEGER all rely on the blur event to update the annotation -->
     <div *ngSwitchCase="kinds.STRING">
       <div class="text-container">
@@ -20,10 +19,9 @@
           [formControl]="control">
         </textarea>
     </div>
-
     <div *ngSwitchCase="kinds.DATE">
         <div class="text-container">
-            <label [for]="machineName" class="">
+            <label [for]="machineName">
         <span class="flex-content-main items-date">
           {{ annotation.definition.columnName }}
         </span>
@@ -33,21 +31,19 @@
         </div>
       <div (click)=" dateChange(myDate)" >
         <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
-               (ngModelChange)="myDate = $event" [name]="machineName" [id]="machineName" [formControl]="control"  type="date" clrDate>
+               (ngModelChange)="myDate = $event" [name]="machineName" [id]="machineName" [formControl]="control"  placeholder="YYYY-MM-DD" type="date" clrDate>
       </div>
     </div>
-
     <div *ngSwitchCase="kinds.INTEGER" class="text-container">
         <div class="integer-container">
-            <label [for]="machineName" class="">
-            <span class="flex-content-main items-Integer">
+            <label [for]="machineName">
+            <span class="flex-content-main items-integer">
               {{ annotation.definition.columnName }}
             </span>
             <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
             <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
             </label>
         </div>
-
       <input
          class="integer-style"
         (blur)="textBlur()"
@@ -56,10 +52,9 @@
         [id]="machineName"
         [formControl]="control">
     </div>
-
     <!-- ENUM and BOOLEAN rely on the change event to update the annotation -->
     <div *ngSwitchCase="kinds.ENUM">
-      <label [for]="machineName" class="">
+      <label [for]="machineName">
         <span class="flex-content-main items-enum">
           {{ annotation.definition.columnName }}
         </span>
@@ -98,7 +93,6 @@
           [formControl]="control">
         <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
         <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
-
     </div>
 </div>
 </div>
