@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
@@ -55,14 +54,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       response.add(TO_CLIENT.apply(userRecentResource));
     });
 
-    response.stream()
-        .filter(resource -> resource.getCohortId() != null)
-        .forEach(recentResource -> {
-          Cohort cohort = cohortService
-              .findCohortByWorkspaceIdAndCohortId(recentResource.getWorkspaceId(), recentResource.getCohortId());
-          recentResource.setName(cohort.getName());
-          recentResource.setDescription(cohort.getDescription());
-        });
     return ResponseEntity.ok(response);
   }
 
@@ -78,6 +69,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
           response.setDescription("");
         } else {
           response.setType("cohort");
+          Cohort cohort = cohortService
+              .findCohortByWorkspaceIdAndCohortId(response.getWorkspaceId(), response.getCohortId());
+          response.setName(cohort.getName());
+          response.setDescription(cohort.getDescription());
         }
         response.setWorkspaceId(userRecentResource.getWorkspaceId());
         Workspace workspace = workspaceService.findByWorkspaceId(response.getWorkspaceId());

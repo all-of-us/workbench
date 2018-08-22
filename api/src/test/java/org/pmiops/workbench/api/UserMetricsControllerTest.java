@@ -51,14 +51,13 @@ public class UserMetricsControllerTest {
   WorkspaceService workspaceService;
 
   private UserMetricsController userMetricsController;
-  private FakeClock clock;
   private static final Instant NOW = Instant.now();
+  private FakeClock clock = new FakeClock(NOW);
 
   @Before
   public void setUp() {
     User user = new User();
     user.setUserId(123l);
-    clock = new FakeClock(NOW);
     List<UserRecentResource> userRecentResources = new ArrayList<>();
 
     UserRecentResource resource1 = new UserRecentResource();
