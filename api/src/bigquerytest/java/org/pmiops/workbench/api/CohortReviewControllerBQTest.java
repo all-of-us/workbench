@@ -9,7 +9,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -112,7 +112,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
     BigQueryService.class,
-    ReviewTabQueryBuilder.class,
+    ReviewQueryBuilder.class,
     CohortService.class,
     ConceptSetService.class,
     ParticipantCounter.class,
