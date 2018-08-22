@@ -37,12 +37,15 @@ export class TreeComponent extends NodeComponent implements OnInit {
    // console.log(this.node.get('type'));
       return this.node.get('type') === DomainType.CONDITION || CRITERIA_TYPES.ICD9;
   }
-    launchTree(criteria) {
-console.log(criteria.name);
-                // type: criteria.type
-        this.onOptionChange.emit(criteria.name);
-        setTimeout(() => super.loadChildren(true));
-    //    check for launchwizard function
-    }
+    optionChange(flag) {
+      if(flag){
+
+      }
+// console.log(criteria.name);
+//                 // type: criteria.type
+//         this.onOptionChange.emit(criteria.name);
+//         setTimeout(() => super.loadChildren(true));
+//     //    check for launchwizard function
+//     }
 
 }
