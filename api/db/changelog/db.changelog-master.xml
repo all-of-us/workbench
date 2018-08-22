@@ -52,4 +52,5 @@
   <include file="changelog/db.changelog-42-rename-billing-project-retries.xml"/>
   <include file="changelog/db.changelog-43-add-page-visit.xml"/>
   <include file="changelog/db.changelog-44-user-recent-resource.xml"/>
+  <include file="changelog/db.changelog-45-concept-set.xml"/>
 </databaseChangeLog>
