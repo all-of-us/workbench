@@ -99,7 +99,7 @@ input[type=text]:not([readonly]):focus {
   padding-bottom: 0.15rem;
 }
 
-.items-Integer {
+.items-integer {
   color:#224F83;
   font-weight: bold;
   padding-bottom: 0.15rem;

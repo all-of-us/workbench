@@ -116,7 +116,9 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       apiCall = this.reviewAPI
         .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
     }
-
+      setTimeout (() => {
+          this.successIcon = false;
+      } , 2000 );
     apiCall.subscribe();
   }
 

@@ -83,9 +83,9 @@ export class SetAnnotationItemComponent {
             .do((defns: CohortAnnotationDefinition[]) =>
                 this.state.annotationDefinitions.next(defns))
             .subscribe(_ => {
-                this.editing = false;
-                this.isPosting.emit(false);
-            });
+            this.editing = false;
+            this.isPosting.emit(false);
+        });
     }
 
     cancelEdit(event?) {

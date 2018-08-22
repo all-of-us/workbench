@@ -1,10 +1,6 @@
 <form [formGroup]="form" ngSubmit="submit()" class="compact">
   <section class="form-block annotation-input-container">
-    <!--<label>Create a Cohort-wide Annotation</label>-->
-
-    <div class="">
-      <!--<label for="name" class="required">2 Annotation Name</label>-->
-      <!--[class.invalid]="name.invalid && (name.dirty || name.touched)"-->
+    <div>
       <label
         aria-haspopup="true"
         role="tooltip"
@@ -22,7 +18,6 @@
         </span>
       </label>
     </div>
-
     <div class="annotation-dropdown">
       <clr-dropdown >
         <button type="button" class="btn btn-outline" clrDropdownTrigger>
@@ -44,12 +39,11 @@
       </clr-dropdown>
     </div>
   </section>
-
   <!-- Specify the enumeration -->
   <ng-container *ngIf="isEnum">
     <section class="form-block">
       <label class="value-text" for="enum-values">Values</label>
-      <div class="">
+      <div>
         <ng-container *ngFor="let val of enumValues">
           <input type="text"
                  class="annotation-value-input"
@@ -60,7 +54,6 @@
             <clr-icon shape="minus-circle" size="18"></clr-icon>
           </button>
         </ng-container>
-
       </div>
       <input type="text"
              class="annotation-value-input"
@@ -76,13 +69,6 @@
 
     </section>
   </ng-container>
-
-  <!--<app-annotation-item-->
-          <!--*ngFor="let anno of (annotations$ | async)"-->
-          <!--[annotation]="anno"-->
-          <!--[showDataType]="showDataType">-->
-  <!--</app-annotation-item>-->
-
   <div class="footer-button">
     <button
             type="button"
@@ -90,7 +76,6 @@
             (click)="closeModal()">
       Cancel
     </button>
-
     <button
             type="button"
             class="btn btn-primary"
@@ -99,7 +84,5 @@
             (click)="create()">
       Create
     </button>
-
   </div>
-
 </form>
