@@ -63,6 +63,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         RecentResource response = new RecentResource();
         response.setCohortId(userRecentResource.getCohortId());
         response.setModifiedTime(userRecentResource.getLastAccessDate().toString());
+        response.setWorkspaceId(userRecentResource.getWorkspaceId());
         if (userRecentResource.getCohortId() == null) {
           response.setName(userRecentResource.getNotebookName());
           response.setType("notebook");
@@ -74,7 +75,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
           response.setName(cohort.getName());
           response.setDescription(cohort.getDescription());
         }
-        response.setWorkspaceId(userRecentResource.getWorkspaceId());
         Workspace workspace = workspaceService.findByWorkspaceId(response.getWorkspaceId());
         WorkspaceResponse workspaceResponse = fireCloudService
             .getWorkspace(workspace.getWorkspaceNamespace(),
