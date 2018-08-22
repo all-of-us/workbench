@@ -45,4 +45,5 @@
 <div *ngIf="numMatches > 1">
   <b>Note:</b> There are {{numMatches}} matches for your search
 </div>
-<crit-node *ngFor="let item of children" [node]="item" ></crit-node>
+{{testoptionChange}}
+<crit-node *ngFor="let item of children" [node]="item" [testChange] = 'testOptionChange'></crit-node>

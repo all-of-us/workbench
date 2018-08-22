@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnChanges, OnInit, Output} from '@angular/core';
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
 
@@ -13,7 +13,7 @@ import {NodeComponent} from '../node/node.component';
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css']
 })
-export class TreeComponent extends NodeComponent implements OnInit {
+export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   _type: string;
     readonly domainTypes = DOMAIN_TYPES;
   ngOnInit() {
@@ -29,6 +29,14 @@ export class TreeComponent extends NodeComponent implements OnInit {
       || this.node.get('type') === TreeType[TreeType.CONDITION]
       || this.node.get('type') === TreeType[TreeType.PM];
   }
+    optionChange(flag) {
+        if (flag) {
+            this.testOptionChange = true;
+            setTimeout(() => super.loadChildren(true));
+            // super.ngOnInit();
+            // this.openTree.emit(flag);
+        }
+    }
 
     showdropDown() {
         return this.node.get('type') === TreeType[TreeType.CONDITION];
