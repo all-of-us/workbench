@@ -112,8 +112,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       .do(console.log)
       .map(vals => this.currentMods(vals))
       .subscribe(newMods => {
-        console.log(this.existing);
-        console.log(newMods);
 
         /*
          * NOTE: the way this process works is basically as follows: 1) compute
