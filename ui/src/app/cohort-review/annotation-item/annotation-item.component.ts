@@ -143,25 +143,24 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
           : '';
       }
 
-    annotationOptionChange(value) {
+  annotationOptionChange(value) {
     this.annotationOption = value;
     this.defaultAnnotation = true;
     this.control.patchValue(value);
     this.oldValue = value;
     this.textBlur();
-   // this.handleInput();
 
-    }
+  }
 
-    dateChange(e) {
-        this.successIcon = false;
-        this.textSpinnerFlag = true
-        setTimeout (() => {
-            if (e !== null) {
-                const newDate = moment(e).format('YYYY-MM-DD');
-                this.control.patchValue(newDate);
-               this.handleInput();
-            }},2000);
-    }
+  dateChange(e) {
+    this.successIcon = false;
+    this.textSpinnerFlag = true
+    setTimeout (() => {
+        if (e !== null) {
+            const newDate = moment(e).format('YYYY-MM-DD');
+            this.control.patchValue(newDate);
+           this.handleInput();
+        }},2000);
+  }
 
 }

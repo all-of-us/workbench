@@ -87,13 +87,13 @@ export class SetAnnotationCreateComponent {
         this.onFinish.emit(true);
       });
   }
-    get open() {
-        return this.state.annotationManagerOpen.getValue();
-    }
+   get open() {
+    return this.state.annotationManagerOpen.getValue();
+  }
 
-    set open(value: boolean) {
-        this.state.annotationManagerOpen.next(value);
-    }
+  set open(value: boolean) {
+      this.state.annotationManagerOpen.next(value);
+  }
 
   cancel() {
     this.onFinish.emit(true);
@@ -121,18 +121,17 @@ export class SetAnnotationCreateComponent {
     return (this.form.invalid || isEmptyEnum);
   }
 
-    selectDropdownChange(val) {
+  selectDropdownChange(val) {
     this.annotationOptions = val.displayName ;
     this.kind.patchValue(val.value);
-   // this.create();
-    }
+  }
 
+  closeModal() {
+    this.annotationOptions = '';
+    this.open = false;
+    this.kind.patchValue('');
+    this.enumValues.length = 0
+    this.name.patchValue('');
+  }
 
-    closeModal() {
-        this.annotationOptions = '';
-        this.open = false;
-        this.kind.patchValue('');
-        this.enumValues.length = 0
-       this.name.patchValue('');
-    }
 }
