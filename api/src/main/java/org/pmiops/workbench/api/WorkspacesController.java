@@ -102,6 +102,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userService = userService;
   }
 
+  @VisibleForTesting
+  public void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
+  }
   // This does not populate the list of underserved research groups.
   private static final Workspace constructListWorkspaceFromDb(org.pmiops.workbench.db.model.Workspace workspace,
       ResearchPurpose researchPurpose) {
@@ -241,11 +245,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           return result;
         }
       };
-
-  @VisibleForTesting
-  void setUserProvider(Provider<User> userProvider) {
-    this.userProvider = userProvider;
-  }
 
   private static String generateRandomChars(String candidateChars, int length) {
     StringBuilder sb = new StringBuilder();
