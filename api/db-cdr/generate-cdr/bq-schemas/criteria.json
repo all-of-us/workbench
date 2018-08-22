@@ -57,7 +57,7 @@
       {
         "mode": "NULLABLE",
         "name": "has_attribute",
-        "type": "BOOLEAN"
+        "type": "INTEGER"
       },
       {
         "mode": "NULLABLE",

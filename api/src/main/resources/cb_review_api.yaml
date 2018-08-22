@@ -241,35 +241,6 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantDataListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/detail/{dataId}/{domain}:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortReview
-      description: Returns detailed domain data for the specified params for a participant.
-      operationId: "getDetailParticipantData"
-      parameters:
-        - in: path
-          name: dataId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which domain the details belong to.
-        - in: path
-          name: domain
-          type: string
-          required: true
-          description: specifies which domain the details belong to.
-      responses:
-        200:
-          description: A detail for the specified participant and domain
-          schema:
-            $ref: "#/definitions/ParticipantData"
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'

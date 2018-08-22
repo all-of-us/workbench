@@ -22,7 +22,6 @@ function isBlank(s: string) {
 export class AccountCreationComponent implements AfterViewInit {
   profile: Profile = {
     username: '',
-    enabledInFireCloud: false,
     dataAccessLevel: DataAccessLevel.Unregistered,
     givenName: '',
     familyName: '',
