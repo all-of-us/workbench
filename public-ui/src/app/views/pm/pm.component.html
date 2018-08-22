@@ -7,10 +7,10 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row page-align">
       <div *ngFor="let item of conceptGroups" class="button-item">
         <button (click)="showMeasurement(item, item.concepts[0])" [ngClass]="{active:selectedGroup === item}"
-                class="btn btn-primary">{{item.groupName}}</button>
+                class="btn btn-primary"> {{item.groupName}} </button>
       </div>
     </div>
 
@@ -34,15 +34,10 @@
                          [chartTitle]="makeChartTitle(gender)" [chartType]="selectedConcept.chartType"
                          [analysis]="selectedConcept.analyses.measurementValueMaleAnalysis"></app-chart>
 
-
-
-
               <app-chart *ngIf="gender.stratum2 === FEMALE_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueFemaleAnalysis"
                          [chartTitle]="makeChartTitle(gender)" [chartType]="selectedConcept.chartType"
                          [analysis]="selectedConcept.analyses.measurementValueFemaleAnalysis"></app-chart>
-
-
 
               <app-chart *ngIf="gender.stratum2 === OTHER_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueOtherGenderAnalysis"
@@ -51,15 +46,17 @@
 
         </div>
 
-
+        <!-- show Age totals -->
         <div *ngIf="selectedConcept.analyses && selectedConcept.analyses.ageAnalysis" class="col-md-4 col-xs-12 chart-wrapper" >
           <app-chart [analysis]="selectedConcept.analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
         </div>
 
+        <!-- Todo wait on design for further dev -->
+
       </div>
     </div>
 
-    <div class="row">
+    <div class="row page-align">
       <p>
         <a target="_blank" href="https://projects.invisionapp.com/d/main/default/#/console/13577480/306624424/preview" >
         Link to Mock Up

@@ -1,11 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {Analysis} from '../../../publicGenerated/model/analysis';
-import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
-import {ConceptAnalysisListResponse} from '../../../publicGenerated/model/conceptAnalysisListResponse';
 
 @Component({
   selector: 'app-physical-measurements',
@@ -16,19 +13,13 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   title = 'Browse Program Physical Measurements';
   pageImage = '/assets/db-images/man-standing.png';
   private subscriptions: ISubscription[] = [];
+  // Todo put constants in a class for use in other views
   chartType = 'histogram';
   MALE_GENDER_ID = '8507';
   FEMALE_GENDER_ID = '8532';
   OTHER_GENDER_ID = '8521';
   PREGNANCY_CONCEPT_ID = '903120';
   WHEEL_CHAIR_CONCEPT_ID = '903111';
-  // Todo put constants in a class for use in other views
-
-  // What charts to show
-  showMeasurementGenderBins = true;
-  showAge = true;
-  showGender = false;
-  showSources = false;
 
   // Total analyses
   genderAnalysis: Analysis = null;
@@ -89,7 +80,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
 
     this.showMeasurement(this.selectedGroup, this.selectedConcept);
     // Get demographic totals
-
     this.loadingStack.push(true);
     this.subscriptions.push(this.api.getGenderAnalysis()
       .subscribe(result => {
@@ -182,7 +172,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
 
     }
     if (concept.conceptId === this.WHEEL_CHAIR_CONCEPT_ID) {
-
+      // Todo What to do about this boolean concept , wait for design
     }
 
     if (concept.analyses.genderAnalysis) {

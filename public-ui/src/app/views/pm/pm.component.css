@@ -9,3 +9,8 @@
 button.active.btn-link {
     font-weight: bolder;
 }
+
+.row.page-align {
+    margin-left: 0px;
+    margin-right: 0px;
+}
