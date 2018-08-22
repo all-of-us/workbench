@@ -333,7 +333,7 @@ definitions:
 
   Operator:
     type: string
-    enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN, BETWEEN, ANY]
+    enum: [EQUAL, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL_TO, GREATER_THAN_OR_EQUAL_TO, LIKE, IN, BETWEEN]
 
   StandardConceptFilter:
     type: string
@@ -395,6 +395,11 @@ definitions:
         description: Prevalence among participants in the CDR (a percentage of the total)
         type: number
         format: float
+      conceptSynonyms:
+        description: concept synonym names
+        type: "array"
+        items:
+          type: "string"
 
   SearchConceptsRequest:
     type: object

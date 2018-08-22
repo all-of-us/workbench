@@ -1,6 +1,8 @@
 import {Router} from '@angular/router';
 import {fromJS} from 'immutable';
 
+import {DataAccessLevel} from 'generated';
+
 export const WINDOW_REF = 'window-ref';
 
 export function isBlank(toTest: String): boolean {
@@ -17,13 +19,13 @@ export function deepCopy(obj: Object): Object {
 }
 
 /**
- * Navigate a signed out user to the login page from the given relative Angular
- * path.
+ * Determine whether the given access level is >= registered. This is the
+ * minimum required level to do most things in the Workbench app (outside of
+ * local/test development).
  */
-export function navigateLogin(router: Router, fromUrl: string): Promise<boolean> {
-  const params = {};
-  if (fromUrl && fromUrl !== '/') {
-    params['from'] = fromUrl;
-  }
-  return router.navigate(['/login', params]);
+export function hasRegisteredAccess(access: DataAccessLevel): boolean {
+  return [
+    DataAccessLevel.Registered,
+    DataAccessLevel.Protected
+  ].includes(access);
 }

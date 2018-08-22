@@ -1,6 +1,7 @@
 import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {fromJS, List} from 'immutable';
+import {CRITERIA_TYPES} from '../../constant';
 
 import {CohortSearchState, initialState, SR_ID} from '../store';
 import {CohortSearchActions} from './service';
@@ -12,7 +13,7 @@ const CDR_VERSION_ID = 1;
 
 const dummyItem = fromJS({
   id: 'item001',
-  type: 'icd9',
+  type: CRITERIA_TYPES.ICD9,
   searchParameters: ['param0', 'param1'],
   modifiers: [],
   count: null,
@@ -24,22 +25,20 @@ const zeroCrit = fromJS({
   parameterId: 'param0',
   name: 'CodeA',
   code: 'CodeA',
-  type: 'icd9',
+  type: CRITERIA_TYPES.ICD9,
   group: false,
   domainId: null,
-  attributes: [],
-});
+}).set('attributes', []);
 
 const oneCrit = fromJS({
   id: 1,
   parameterId: 'param1',
   name: 'CodeB',
   code: 'CodeB',
-  type: 'icd9',
+  type: CRITERIA_TYPES.ICD9,
   group: true,
   domainId: null,
-  attributes: [],
-});
+}).set('attributes', []);
 
 const DEMO_crit = fromJS({
   id: 3,
@@ -51,8 +50,7 @@ const DEMO_crit = fromJS({
   group: false,
   conceptId: 12345,
   domainId: null,
-  attributes: [],
-});
+}).set('attributes', []);
 
 const groups = fromJS({
   include0: {
@@ -83,12 +81,12 @@ const expectedSR = {
     id: 'include0',
     items: [{
       id: 'item001',
-      type: 'ICD9',
+      type: CRITERIA_TYPES.ICD9,
       searchParameters: [{
           parameterId: 'param0',
           name: 'CodeA',
           value: 'CodeA',
-          type: 'icd9',
+          type: CRITERIA_TYPES.ICD9,
           subtype: '',
           group: false,
           domain: null,
@@ -97,7 +95,7 @@ const expectedSR = {
           parameterId: 'param1',
           name: 'CodeB',
           value: 'CodeB',
-          type: 'icd9',
+          type: CRITERIA_TYPES.ICD9,
           subtype: '',
           group: true,
           domain: null,
@@ -201,12 +199,12 @@ describe('CohortSearchActions', () => {
         id: 'include0',
         items: [{
           id: 'item001',
-          type: 'ICD9',
+          type: CRITERIA_TYPES.ICD9,
           searchParameters: [{
               parameterId: 'param0',
               name: 'CodeA',
               value: 'CodeA',
-              type: 'icd9',
+              type: CRITERIA_TYPES.ICD9,
               subtype: '',
               group: false,
               domain: null,
@@ -215,7 +213,7 @@ describe('CohortSearchActions', () => {
               parameterId: 'param1',
               name: 'CodeB',
               value: 'CodeB',
-              type: 'icd9',
+              type: CRITERIA_TYPES.ICD9,
               subtype: '',
               group: true,
               domain: null,
@@ -227,12 +225,12 @@ describe('CohortSearchActions', () => {
         id: 'include1',
         items: [{
           id: 'item002',
-          type: 'ICD9',
+          type: CRITERIA_TYPES.ICD9,
           searchParameters: [{
               parameterId: 'param0',
               name: 'CodeA',
               value: 'CodeA',
-              type: 'icd9',
+              type: CRITERIA_TYPES.ICD9,
               subtype: '',
               group: false,
               domain: null,
@@ -241,7 +239,7 @@ describe('CohortSearchActions', () => {
               parameterId: 'param1',
               name: 'CodeB',
               value: 'CodeB',
-              type: 'icd9',
+              type: CRITERIA_TYPES.ICD9,
               subtype: '',
               group: true,
               domain: null,
@@ -299,7 +297,7 @@ describe('CohortSearchActions', () => {
       parameterId: 'param0',
       name: 'CodeA',
       value: 'CodeA',
-      type: 'icd9',
+      type: CRITERIA_TYPES.ICD9,
       subtype: '',
       group: false,
       domain: null,

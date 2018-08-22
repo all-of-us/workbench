@@ -3,12 +3,12 @@ package org.pmiops.workbench.auth;
 import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
+import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +29,17 @@ public class ProfileService {
         }
       };
 
+  private static final Function<org.pmiops.workbench.db.model.PageVisit, PageVisit> TO_CLIENT_PAGE_VISIT =
+    new Function<org.pmiops.workbench.db.model.PageVisit, PageVisit>() {
+      @Override
+      public PageVisit apply(org.pmiops.workbench.db.model.PageVisit pageVisit) {
+        PageVisit result = new PageVisit();
+        result.setPage(pageVisit.getPageId());
+        result.setFirstVisit(pageVisit.getFirstVisit().getTime());
+        return result;
+      }
+    };
+
   private final FireCloudService fireCloudService;
   private final UserDao userDao;
 
@@ -40,13 +51,12 @@ public class ProfileService {
 
   public Profile getProfile(User user) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
-    User userWithAuthorities = userDao.findUserWithAuthorities(user.getUserId());
-    if (userWithAuthorities != null) {
-      // If the user is already written to the database, use it and whatever authorities are there.
-      user = userWithAuthorities;
+    User userWithAuthoritiesAndPageVisits = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
+    if (userWithAuthoritiesAndPageVisits != null) {
+      // If the user is already written to the database, use it and whatever authorities and page visits are there.
+      user = userWithAuthoritiesAndPageVisits;
     }
 
-    boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
@@ -55,8 +65,7 @@ public class ProfileService {
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
-    profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatus());
-    profile.setEnabledInFireCloud(enabledInFireCloud);
+    profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatusEnum());
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
     profile.setRequestedIdVerification(user.getRequestedIdVerification());
@@ -82,16 +91,21 @@ public class ProfileService {
     if (user.getFirstSignInTime() != null) {
       profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
     }
-    if (user.getDataAccessLevel() != null) {
-      profile.setDataAccessLevel(user.getDataAccessLevel());
+    if (user.getDataAccessLevelEnum() != null) {
+      profile.setDataAccessLevel(user.getDataAccessLevelEnum());
     }
-    if (user.getAuthorities() != null) {
-      profile.setAuthorities(new ArrayList<>(user.getAuthorities()));
+    if (user.getAuthoritiesEnum() != null) {
+      profile.setAuthorities(new ArrayList<>(user.getAuthoritiesEnum()));
+    }
+    if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
+      profile.setPageVisits(user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
+          .collect(Collectors.toList()));
     }
     profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
         .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
         .collect(Collectors.toList()));
-    profile.setEmailVerificationStatus(user.getEmailVerificationStatus());
+    profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
+
     return profile;
   }
 }

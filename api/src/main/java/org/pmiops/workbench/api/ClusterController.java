@@ -1,7 +1,8 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
-
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,10 +10,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import javax.inject.Provider;
-
 import org.json.JSONObject;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -83,6 +83,8 @@ public class ClusterController implements ClusterApiDelegate {
   private final FireCloudService fireCloudService;
   private final String apiHostName;
   private UserService userService;
+  private UserRecentResourceService userRecentResourceService;
+  private Clock clock;
 
   @Autowired
   ClusterController(NotebooksService notebooksService,
@@ -90,13 +92,17 @@ public class ClusterController implements ClusterApiDelegate {
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       @Qualifier("apiHostName") String apiHostName,
-      UserService userService) {
+      UserService userService,
+      UserRecentResourceService userRecentResourceService,
+      Clock clock) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
     this.apiHostName = apiHostName;
     this.userService = userService;
+    this.userRecentResourceService = userRecentResourceService;
+    this.clock = clock;
   }
 
   @VisibleForTesting
@@ -111,11 +117,11 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<ClusterListResponse> listClusters() {
-    if (userProvider.get().getFreeTierBillingProjectStatus() != BillingProjectStatus.READY) {
+    User user = this.userProvider.get();
+    if (user.getFreeTierBillingProjectStatusEnum() != BillingProjectStatus.READY) {
       throw new FailedPreconditionException(
           "User billing project is not yet initialized, cannot list/create clusters");
     }
-    User user = this.userProvider.get();
     String project = user.getFreeTierBillingProjectName();
 
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
@@ -164,6 +170,14 @@ public class ClusterController implements ClusterApiDelegate {
     try {
       fcWorkspace = fireCloudService.getWorkspace(body.getWorkspaceNamespace(),
           body.getWorkspaceId()).getWorkspace();
+      long workspaceId = workspaceService
+          .getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
+          .getWorkspaceId();
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      body.getNotebookNames().forEach(
+          notebook ->
+              userRecentResourceService.updateNotebookEntry(workspaceId, userProvider.get().getUserId(), notebook, now)
+      );
     } catch (NotFoundException e) {
       throw new NotFoundException(String.format("workspace %s/%s not found or not accessible",
           body.getWorkspaceNamespace(), body.getWorkspaceId()));

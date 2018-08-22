@@ -106,7 +106,7 @@ public class CohortAnnotationDefinitionDaoTest {
         return new CohortAnnotationDefinition()
                 .cohortId(COHORT_ID)
                 .columnName("annotation name")
-                .annotationType(AnnotationType.BOOLEAN);
+                .annotationTypeEnum(AnnotationType.BOOLEAN);
     }
 
 }

@@ -15,8 +15,9 @@ const COHORT_TYPE = 'AoU_Discover';
   selector: 'app-overview',
   templateUrl: './overview.component.html',
   styleUrls: [
-    './overview.component.css',
     '../../styles/buttons.css',
+    '../../styles/errors.css',
+    './overview.component.css'
   ]
 })
 export class OverviewComponent {
@@ -32,6 +33,7 @@ export class OverviewComponent {
   stackChart = false;
   showGenderChart = true;
   showComboChart = true;
+  showConflictError = false;
 
   constructor(
     private actions: CohortSearchActions,
@@ -47,6 +49,7 @@ export class OverviewComponent {
   modalChange(value) {
     if (!value) {
       this.cohortForm.reset();
+      this.showConflictError = false;
     }
   }
 
@@ -60,6 +63,10 @@ export class OverviewComponent {
     const cohort = <Cohort>{name, description, criteria, type: COHORT_TYPE};
     this.cohortApi.createCohort(ns, wsid, cohort).subscribe((_) => {
       this.router.navigate(['workspaces', ns, wsid, 'cohorts']);
+    }, (error) => {
+      if (error.status === 400) {
+        this.showConflictError = true;
+      }
     });
   }
 

@@ -43,7 +43,8 @@
         id="min-age"
         [min]="minAge" [max]="maxAge"
         formControlName="ageMin"
-        class="number-display">
+        class="number-display"
+        (blur)="checkMin()">
       <div class="slider">
         <nouislider
           [min]="minAge" [max]="maxAge" [step]="1"
@@ -56,7 +57,8 @@
         id="max-age"
         [min]="minAge" [max]="maxAge"
         formControlName="ageMax"
-        class="number-display">
+        class="number-display"
+        (blur)="checkMax()">
     </div>
   </div>
 
@@ -73,7 +75,7 @@
         [options]="genderNodes"
         [includeSearchBox]="false"
         [initialSelection]="initialGenders"
-        >
+        [loading]="loading">
       </crit-multi-select>
     </div>
   </div>
@@ -90,7 +92,7 @@
       <crit-multi-select
         [options]="raceNodes"
         [initialSelection]="initialRaces"
-        >
+        [loading]="loading">
       </crit-multi-select>
     </div>
   </div>
@@ -107,7 +109,7 @@
       <crit-multi-select
         [options]="ethnicityNodes"
         [initialSelection]="initialEthnicities"
-        >
+        [loading]="loading">
       </crit-multi-select>
     </div>
   </div>
@@ -139,8 +141,7 @@
     </button>
     <button type="submit"
       class="btn btn-primary"
-      (click)="finish.emit(true)"
-      [disabled]="demoForm.invalid || !hasSelection">
+      (click)="finish.emit(true)">
       Finish
     </button>
   </div>

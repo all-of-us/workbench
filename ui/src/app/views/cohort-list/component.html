@@ -5,12 +5,11 @@
 <div class="card-area">
   <div *ngIf="!cohortsLoading">
     <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
-         [class.disabled]="awaitingReview || !writePermission" (click)="awaitingReview || !writePermission || buildCohort()">
+         [class.disabled]="!writePermission" (click)="!writePermission || buildCohort()">
       <div class="create-text">
         Create a <br/>New Cohort
         <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
       </div>
-      <span *ngIf="awaitingReview" class="tooltip-content">Workspace is awaiting review</span>
       <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
     </div>
   </div>
@@ -18,8 +17,8 @@
     <div>
       <div class="header-area">
         <clr-dropdown [clrCloseMenuOnItemClick]="false">
-          <button type="button" clrDropdownTrigger>
-            <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+          <button type="button" [disabled]="actionsDisabled" clrDropdownTrigger>
+            <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical" [class.disabled]="actionsDisabled"></clr-icon>
           </button>
           <clr-dropdown-menu *clrIfOpen>
             <button class="action-item"
@@ -45,7 +44,7 @@
               Review
             </button>
             <button class="action-item delete-button"
-                    (click)="deleteCohort(cohort)"
+                    (click)="confirmDelete(cohort)"
                     [class.disabled]="actionsDisabled"
                     [disabled]="actionsDisabled">
               <clr-icon shape="trash"></clr-icon>
@@ -53,7 +52,11 @@
             </button>
           </clr-dropdown-menu>
         </clr-dropdown>
-        <div class="name">{{cohort.name}}</div>
+        <div class="name"
+             [class.disabled]="actionsDisabled"
+             (click)="openCohort(cohort)">
+          {{cohort.name}}
+        </div>
       </div>
       <div class="description">{{cohort.description}}</div>
     </div>
@@ -63,3 +66,5 @@
     </div>
   </div>
 </div>
+
+<app-confirm-delete-modal [resourceType]="'cohort'" [resource]="cohortInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>

@@ -32,6 +32,10 @@ const standardName = {
   name: 'standardName',
   displayName: 'Standard Name',
 };
+const standardCode = {
+  name: 'standardCode',
+  displayName: 'Standard Code',
+};
 const sourceVocabulary = {
   name: 'sourceVocabulary',
   classNames: ['vocab-col'],
@@ -45,14 +49,70 @@ const signature = {
     name: 'signature',
     displayName: 'Signature',
 };
-const sourceValue = {
-  name: 'sourceValue',
+const valueConcept = {
+  name: 'valueConcept',
+  displayName: 'Concept Value',
+};
+const valueSource = {
+  name: 'valueSource',
   displayName: 'Source Value',
 };
+const valueNumber = {
+  name: 'valueNumber',
+  displayName: 'Value As Number',
+};
+const sourceCode = {
+  name: 'sourceCode',
+  displayName: 'Source Code',
+};
 const ageAtEvent = {
-  name: 'age',
+  name: 'ageAtEvent',
   notField: true,
   displayName: 'Age At Event',
+};
+const visitType = {
+  name: 'visitType',
+  displayName: 'Visit Type',
+};
+const visitId = {
+  name: 'visitId',
+  displayName: 'Visit ID',
+};
+const numMentions = {
+  name: 'numMentions',
+  displayName: 'Number Of Mentions',
+};
+const firstMention = {
+  name: 'firstMention',
+  displayName: 'Date First Mention',
+};
+const lastMention = {
+  name: 'lastMention',
+  displayName: 'Date Last Mention',
+};
+const quantity = {
+  name: 'quantity',
+  displayName: 'Quantity',
+};
+const refills = {
+  name: 'refills',
+  displayName: 'Refills',
+};
+const strength = {
+  name: 'strength',
+  displayName: 'Strength',
+};
+const dataRoute = {
+  name: 'route',
+  displayName: 'Route',
+};
+const units = {
+  name: 'units',
+  displayName: 'Units',
+};
+const labRefRange = {
+  name: 'labRefRange',
+  displayName: 'Lab Reference Range',
 };
 
 
@@ -64,168 +124,168 @@ const ageAtEvent = {
 export class DetailTabsComponent {
 
   readonly stubs = [
-    'physical-measurements',
-    'ppi',
+    'survey',
   ];
 
   readonly allEvents = {
     name: 'All Events',
-    domain: DomainType.Master,
+    domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, domain, standardVocabulary, standardName, sourceVocabulary, sourceValue,
+      itemDate, standardName, standardCode, ageAtEvent, visitType, numMentions,
+        firstMention, lastMention, valueSource, sourceName, sourceCode, sourceVocabulary
     ],
     reverseEnum: {
       itemDate: itemDate,
-      domain: domain,
-      standardVocabulary: standardVocabulary,
       standardName: standardName,
-      sourceValue: sourceValue,
+      standardCode: standardCode,
+      age: ageAtEvent,
+      visitType: visitType,
+      numMentions: numMentions,
+      firstMention: firstMention,
+      lastMention: lastMention,
+      valueSource: valueSource,
+      sourceName: sourceName,
+      sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
     }
   };
 
   readonly tabs = [{
     name: 'Conditions',
-    domain: DomainType.Condition,
+    domain: DomainType.CONDITION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue, ageAtEvent,
+      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
+      firstMention, lastMention, standardCode, standardName, standardVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceValue: sourceValue,
+      sourceName: sourceName,
+      sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
       age: ageAtEvent,
+      numMentions: numMentions,
+      firstMention: firstMention,
+      lastMention: lastMention,
+      standardCode: standardCode,
+      standardName: standardName,
+      standardVocabulary: standardVocabulary,
+      visitId: visitId,
     }
   }, {
     name: 'Procedures',
-    domain: DomainType.Procedure,
+    domain: DomainType.PROCEDURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue, ageAtEvent,
+      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
+      firstMention, lastMention, standardCode, standardName, standardVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceValue: sourceValue,
+      sourceName: sourceName,
+      sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
       age: ageAtEvent,
+      numMentions: numMentions,
+      firstMention: firstMention,
+      lastMention: lastMention,
+      standardCode: standardCode,
+      standardName: standardName,
+      standardVocabulary: standardVocabulary,
+      visitId: visitId,
     }
   }, {
     name: 'Drugs',
-    domain: DomainType.Drug,
+    domain: DomainType.DRUG,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue,
-        ageAtEvent, signature,
+      itemDate, standardName, standardCode, ageAtEvent, numMentions, firstMention,
+        lastMention, quantity, refills, strength, dataRoute, sourceName, sourceCode,
+        sourceVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
       standardName: standardName,
-      sourceValue: sourceValue,
-      sourceVocabulary: sourceVocabulary,
+      standardCode: standardCode,
       age: ageAtEvent,
-      signature: signature,
-    }
-  }, {
-    name: 'Observations',
-    domain: DomainType.Observation,
-    filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary, sourceValue, ageAtEvent,
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceValue: sourceValue,
-      sourceVocabulary: sourceVocabulary,
+      numMentions: numMentions,
+      firstMention: firstMention,
+      lastMention: lastMention,
+      quantity: quantity,
+      refills: refills,
+      strength: strength,
+      route: dataRoute,
       sourceName: sourceName,
-      age: ageAtEvent,
-    }
-  }, {
-    name: 'Visits',
-    domain: DomainType.Visit,
-    filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, endDate, standardVocabulary, standardName, sourceVocabulary,
-      sourceValue, ageAtEvent,
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      endDate: endDate,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceValue: sourceValue,
+      sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
-      sourceName: sourceName,
-      age: ageAtEvent,
-    }
-  }, {
-    name: 'Devices',
-    domain: DomainType.Device,
-    filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary,
-      sourceValue, ageAtEvent,
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceValue: sourceValue,
-      sourceVocabulary: sourceVocabulary,
-      sourceName: sourceName,
-      age: ageAtEvent,
+      visitId: visitId,
     }
   }, {
     name: 'Measurements',
-    domain: DomainType.Measurement,
+    domain: DomainType.MEASUREMENT,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardVocabulary, standardName, sourceVocabulary,
-      sourceValue, ageAtEvent,
+      itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
+      valueSource, units, ageAtEvent, labRefRange, sourceName, sourceCode, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardVocabulary: standardVocabulary,
       standardName: standardName,
-      sourceValue: sourceValue,
-      sourceVocabulary: sourceVocabulary,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      valueConcept: valueConcept,
+      valueNumber: valueNumber,
+      valueSource: valueSource,
+      units: units,
+      age: ageAtEvent,
+      labRefRange: labRefRange,
       sourceName: sourceName,
+      sourceCode: sourceCode,
+      visitId: visitId,
+    }
+  }, {
+    name: 'Observations',
+    domain: DomainType.OBSERVATION,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, sourceName,
+        sourceCode, sourceVocabulary, visitId
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      standardName: standardName,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      age: ageAtEvent,
+      sourceName: sourceName,
+      sourceCode: sourceCode,
+      sourceVocabulary: sourceVocabulary,
+      visitId: visitId,
+    }
+  }, {
+    name: 'Physical Measurements',
+    domain: DomainType.PHYSICALMEASURE,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
+      valueSource, units, ageAtEvent
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      standardName: standardName,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      valueConcept: valueConcept,
+      valueNumber: valueNumber,
+      valueSource: valueSource,
+      units: units,
       age: ageAtEvent,
     }
   }];
-
-  detailsLoading = false;
-  details;
 
   constructor(
     private route: ActivatedRoute,
     private reviewApi: CohortReviewService,
   ) {}
-
-  detailView(datum) {
-    this.detailsLoading = true;
-    const {participant} = this.route.snapshot.data;
-    const {cohort, workspace} = this.route.parent.snapshot.data;
-    this.reviewApi.getDetailParticipantData(
-      workspace.namespace,
-      workspace.id,
-      cohort.id,
-      workspace.cdrVersionId,
-      datum.dataId,
-      datum.domain
-    ).subscribe(
-        details => {
-          this.details = details;
-          this.detailsLoading = false;
-        }
-    );
-  }
 }

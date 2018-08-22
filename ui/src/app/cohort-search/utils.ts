@@ -1,10 +1,11 @@
+import {DomainType} from 'generated';
 import {List} from 'immutable';
+import {CRITERIA_TYPES} from './constant';
 
 
 export function typeDisplay(parameter): string {
   const subtype = parameter.get('subtype', '');
   const _type = parameter.get('type', '');
-
   if (_type.match(/^DEMO.*/i)) {
     return {
       'GEN': 'Gender',
@@ -23,7 +24,7 @@ export function nameDisplay(parameter): string {
   if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
     return '';
   } else {
-    return parameter.get('name', '');
+    return parameter.get('name', '').replace(/<(.|\n)*?>/g, '');
   }
 }
 
@@ -51,16 +52,37 @@ export function attributeDisplay(parameter): string {
   }
 }
 
-
 export function typeToTitle(_type: string): string {
-  if (_type.match(/^DEMO.*/i)) {
-    _type = 'Demographics';
-  } else if (_type.match(/^(ICD|CPT).*/i)) {
-    _type = _type.toUpperCase();
-  } else if (_type.match(/^PM.*/i)) {
-    _type = 'Physical Measurement';
-  } else if (_type.match(/^VISIT.*/i)) {
-    _type = 'Visit';
+  switch (_type) {
+    case CRITERIA_TYPES.DEMO:
+      _type = 'Demographics';
+      break;
+    case CRITERIA_TYPES.PM:
+      _type = 'Physical Measurements';
+      break;
+    case DomainType[DomainType.VISIT]:
+      _type = 'Visit';
+      break;
+    case DomainType[DomainType.DRUG]:
+      _type = 'Drug';
+      break;
   }
   return _type;
+}
+
+export function highlightMatches(terms: Array<string>, name: string) {
+  terms.forEach(term => {
+    const start = name.toLowerCase().indexOf(term.toLowerCase());
+    if (start > -1) {
+      const end = start + term.length;
+      name = name.slice(0, start)
+        + '<span style="color: #659F3D;'
+        + 'font-weight: bolder;'
+        + 'background-color: rgba(101,159,61,0.2);'
+        + 'padding: 2px 0;">'
+        + name.slice(start, end) + '</span>'
+        + name.slice(end);
+    }
+  });
+  return name;
 }

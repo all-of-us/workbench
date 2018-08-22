@@ -15,7 +15,7 @@ import {SignInService} from 'app/services/sign-in.service';
   templateUrl: './component.html'
 })
 export class LoginComponent implements OnInit {
-  currentUrl: string;
+  showCreateAccount = false;
   backgroundImgSrc = '/assets/images/login-group.png';
   smallerBackgroundImgSrc = '/assets/images/login-standing.png';
   googleIcon = '/assets/icons/google-icon.png';
@@ -24,26 +24,15 @@ export class LoginComponent implements OnInit {
     /* Ours */
     private signInService: SignInService,
     /* Angular's */
-    private activatedRoute: ActivatedRoute,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.currentUrl = this.router.url;
     document.body.style.backgroundColor = '#e2e3e5';
 
     this.signInService.isSignedIn$.subscribe((signedIn) => {
-      if (signedIn === true) {
-        if (this.activatedRoute.snapshot.params.from === undefined) {
-          this.router.navigateByUrl('/');
-        } else {
-          this.router.navigateByUrl(this.activatedRoute.snapshot.params.from)
-            .catch(() => {
-              // "from" might be invalid, e.g. if we just changed users; just
-              // ignore failed navigates in this particular case.
-              this.router.navigateByUrl('/');
-            });
-        }
+      if (signedIn) {
+        this.router.navigateByUrl('/');
       }
     });
   }

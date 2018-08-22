@@ -6,4 +6,8 @@
   <clr-icon shape="error-standard"></clr-icon>
   <em>Failed to Load Criteria</em>
 </div>
+<app-search-bar *ngIf="showSearch() && !loading" [_type]="_type"></app-search-bar>
+<div *ngIf="numMatches > 1">
+  <b>Note:</b> There are {{numMatches}} matches for your search
+</div>
 <crit-node *ngFor="let item of children" [node]="item"></crit-node>

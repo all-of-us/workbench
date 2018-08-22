@@ -13,6 +13,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -21,6 +22,7 @@ import {
   BugReportService,
   ClusterService,
   CohortsService,
+  ProfileService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -35,6 +37,7 @@ import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
 import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
+import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
@@ -111,6 +114,7 @@ describe('WorkspaceComponent', () => {
       ],
       declarations: [
         BugReportComponent,
+        ConfirmDeleteModalComponent,
         WorkspaceComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
@@ -126,6 +130,7 @@ describe('WorkspaceComponent', () => {
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
+        { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
@@ -137,37 +142,6 @@ describe('WorkspaceComponent', () => {
       });
       tick();
   }));
-
-
-  // it('displays correct information when cohorts selected.', fakeAsync(() => {
-  //   workspacePage.fixture.componentRef.instance.tabOpen =
-  //     workspacePage.fixture.componentRef.instance.Tabs.Cohorts;
-  //   tick();
-  //   let expectedCohorts: number;
-  //   workspacePage.cohortsService.getCohortsInWorkspace(
-  //       workspacePage.workspaceNamespace,
-  //       workspacePage.workspaceId)
-  //     .subscribe(cohorts => {
-  //     expectedCohorts = cohorts.items.length;
-  //   });
-  //   tick();
-  //   workspacePage.readPageData();
-  //   expect(workspacePage.cohortsTableRows.length).toEqual(expectedCohorts);
-  // }));
-
-  // it('displays correct information when notebooks selected.', fakeAsync(() => {
-  //   workspacePage.readPageData();
-  //   tick();
-  //   expect(workspacePage.notebookTableRows.length).toEqual(1);
-  // }));
-  //
-  // it('fetches the correct workspace', fakeAsync(() => {
-  //   workspacePage.fixture.componentRef.instance.ngOnInit();
-  //   updateAndTick(workspacePage.fixture);
-  //   updateAndTick(workspacePage.fixture);
-  //   expect(workspacePage.workspaceDescription.nativeElement.innerText)
-  //     .toMatch(WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION);
-  // }));
 
   it('displays correct notebook information', fakeAsync(() => {
     // Mock notebook service in workspace stub will be called as part of ngInit

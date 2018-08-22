@@ -86,8 +86,8 @@
 
 .app-container {
   width: 100%;
-  margin-right: 0.6rem;
-  margin-left: 1rem;
+  padding-right: 0.6rem;
+  padding-left: 1rem;
 }
 
 .background-image {
@@ -100,4 +100,8 @@
   width: 50%;
   position: absolute;
   height: 90%;
+}
+
+button.btn:focus {
+  outline: none;
 }

@@ -7,12 +7,12 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -53,6 +52,7 @@ import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
@@ -143,7 +143,8 @@ public class WorkspacesControllerTest {
     BigQueryService.class,
     DomainLookupService.class,
     ParticipantCounter.class,
-    UserService.class
+    UserService.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean
@@ -185,6 +186,8 @@ public class WorkspacesControllerTest {
   @Autowired
   CohortsController cohortsController;
   @Autowired
+  UserRecentResourceService userRecentResourceService;
+  @Autowired
   CohortReviewController cohortReviewController;
 
   private CdrVersion cdrVersion;
@@ -197,11 +200,12 @@ public class WorkspacesControllerTest {
     user.setUserId(123L);
     user.setFreeTierBillingProjectName("TestBillingProject1");
     user.setDisabled(false);
-    user.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);
-
+    cohortsController.setUserProvider(userProvider);
+    cohortReviewController.setUserProvider(userProvider);
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
     //set the db name to be empty since test cases currently
@@ -1243,6 +1247,28 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testNotebookFileListOmitsExtraDirectories() throws Exception {
+    when(fireCloudService.getWorkspace("project", "workspace")).thenReturn(
+        new org.pmiops.workbench.firecloud.model.WorkspaceResponse()
+        .workspace(
+            new org.pmiops.workbench.firecloud.model.Workspace()
+            .bucketName("bucket")));
+    Blob mockBlob1 = mock(Blob.class);
+    Blob mockBlob2 = mock(Blob.class);
+    when(mockBlob1.getName()).thenReturn("notebooks/extra/nope.ipynb");
+    when(mockBlob2.getName()).thenReturn("notebooks/foo.ipynb");
+    when(cloudStorageService.getBlobList("bucket", "notebooks")).thenReturn(
+        ImmutableList.of(mockBlob1, mockBlob2));
+
+    List<String> gotNames = workspacesController
+        .getNoteBookList("project", "workspace").getBody()
+        .stream()
+        .map(details -> details.getName())
+        .collect(Collectors.toList());
+    assertEquals(gotNames, ImmutableList.of("foo.ipynb"));
+  }
+
+  @Test
   public void testNotebookFileListNotFound() throws Exception {
     when(fireCloudService.getWorkspace("mockProject", "mockWorkspace")).thenThrow(new NotFoundException());
     try {
@@ -1263,5 +1289,4 @@ public class WorkspacesControllerTest {
       fail();
     }
   }
-
 }

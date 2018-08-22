@@ -1,8 +1,10 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+import {CRITERIA_SUBTYPES} from '../constant';
 
 import {
   activeCriteriaTreeType,
@@ -10,8 +12,11 @@ import {
   CohortSearchState,
   criteriaChildren,
   criteriaError,
+  criteriaSearchTerms,
   isCriteriaLoading,
 } from '../redux';
+
+import {highlightMatches} from '../utils';
 
 @Component({
   selector: 'crit-node',
@@ -40,6 +45,11 @@ export class NodeComponent implements OnInit, OnDestroy {
    */
   expanded = false;
   children: any;
+  expandedTree: any;
+  originalTree: any;
+  modifiedTree = false;
+  searchTerms: Array<string>;
+  numMatches = 0;
   loading = false;
   error = false;
   fullTree: boolean;
@@ -53,7 +63,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
     if (!this.fullTree || this.node.get('id') === 0) {
-      const _type = this.node.get('type').toLowerCase();
+      const _type = this.node.get('type');
       const parentId = this.node.get('id');
       const errorSub = this.ngRedux
         .select(criteriaError(_type, parentId))
@@ -83,10 +93,24 @@ export class NodeComponent implements OnInit, OnDestroy {
           }
         });
 
+      const searchSub = this.ngRedux
+        .select(criteriaSearchTerms())
+        .subscribe(searchTerms => {
+          this.searchTerms = searchTerms;
+          this.numMatches = 0;
+          if (searchTerms && searchTerms.length) {
+            this.searchTree();
+          } else {
+            this.clearSearchTree();
+          }
+        });
+
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
+      this.subscription.add(searchSub);
     }
+    this.expanded = this.node.get('expanded', false);
   }
 
   ngOnDestroy() {
@@ -116,12 +140,14 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   loadChildren(event) {
     if (!event) { return ; }
-    const _type = this.node.get('type').toLowerCase();
+    const _type = this.node.get('type');
     const parentId = this.node.get('id');
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops
      */
-    if (this.fullTree) {
+    if (_type === DomainType.DRUG) {
+      this.actions.fetchDrugCriteria(_type, parentId, CRITERIA_SUBTYPES.ATC);
+    } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
@@ -130,5 +156,72 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   toggleExpanded() {
     this.expanded = !this.expanded;
+  }
+
+  searchTree() {
+    if (!this.modifiedTree) {
+      this.modifiedTree = true;
+      this.originalTree = this.children;
+    }
+    this.expandedTree = this.originalTree.toJS();
+    const filtered = this.filterTree(this.originalTree.toJS(), []);
+    this.children = fromJS(this.mergeExpanded(filtered, this.expandedTree));
+  }
+
+  clearSearchTree() {
+    if (this.modifiedTree) {
+      this.children = this.originalTree;
+      this.modifiedTree = false;
+    }
+  }
+
+  filterTree(tree: Array<any>, path: Array<number>) {
+    return tree.map((item, i) => {
+      path.push(i);
+      const matches = this.matchFound(item);
+      if (matches.length) {
+        item.name = highlightMatches(matches, item.name);
+        if (path.length > 1) {
+          this.setExpanded(path, 0);
+        }
+        if (this.searchTerms.length === 1) {
+          this.numMatches++;
+        }
+      }
+      if (item.children.length) {
+        item.children = this.filterTree(item.children, path);
+      }
+      path.pop();
+      return item;
+    });
+  }
+
+  matchFound(item: any) {
+    return this.searchTerms.filter(term => {
+      return item.name.toLowerCase().includes(term.toLowerCase());
+    });
+  }
+
+  setExpanded(path: Array<number>, end: number) {
+    let obj = this.expandedTree[path[0]];
+    for (let x = 1; x < end; x++) {
+        obj = obj.children[path[x]];
+    }
+    if (obj.children.length) {
+      obj.expanded = true;
+    }
+    if (typeof path[end + 1] !== 'undefined') {
+      this.setExpanded(path, end + 1);
+    }
+  }
+
+  mergeExpanded(filtered: Array<any>, expanded: Array<any>) {
+    expanded.forEach((item, i) => {
+      filtered[i].expanded = item.expanded || false;
+      if (filtered[i].children.length) {
+        filtered[i].children = this.mergeExpanded(filtered[i].children, item.children);
+      }
+    });
+    return filtered;
   }
 }

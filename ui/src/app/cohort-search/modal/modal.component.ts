@@ -1,9 +1,10 @@
 import {select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {DomainType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-
+import {CRITERIA_TYPES, DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {
   activeCriteriaTreeType,
   activeCriteriaType,
@@ -14,7 +15,6 @@ import {
 } from '../redux';
 import {typeToTitle} from '../utils';
 
-import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 
 @Component({
   selector: 'app-modal',
@@ -31,6 +31,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeParameterList) selection$: Observable<any>;
   @select(attributesPage) attributes$: Observable<any>;
 
+  readonly domainType = DomainType;
+  readonly criteriaTypes = CRITERIA_TYPES;
   ctype: string;
   fullTree: boolean;
   subscription: Subscription;
@@ -54,7 +56,6 @@ export class ModalComponent implements OnInit, OnDestroy {
 
     this.subscription.add(this.criteriaType$
       .filter(ctype => !!ctype)
-      .map(ctype => ctype.toLowerCase())
       .subscribe(ctype => {
         this.ctype = ctype;
         this.title = 'Codes';
@@ -103,20 +104,13 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.actions.cancelWizard();
   }
 
+  back() {
+    this.actions.hideAttributesPage();
+  }
+
   finish() {
     this.open = false;
     this.actions.finishWizard();
-  }
-
-  get hasNextPage() {
-    if (this.ctype !== 'demo' && this.mode === 'tree') {
-      return true;
-    }
-    return false;
-  }
-
-  nextPage() {
-    this.mode = 'modifiers';
   }
 
   /* Used to bootstrap the criteria tree */
@@ -131,7 +125,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
     return title
-      ? `Selected ${title} Codes`
+      ? `Add Selected ${title} Criteria to Cohort`
       : 'No Selection';
   }
 }

@@ -14,6 +14,8 @@ import {
   Cohort,
   CohortsService,
   FileDetail,
+  PageVisit,
+  ProfileService,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService
@@ -27,7 +29,7 @@ import {
 })
 export class NotebookListComponent implements OnInit, OnDestroy {
 
-  awaitingReview: boolean;
+  private static PAGE_ID = 'notebook';
   notebooksLoading: boolean;
   notebookList: FileDetail[] = [];
   workspace: Workspace;
@@ -42,6 +44,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   showTip: boolean;
   cohortsLoading: boolean;
   cohortsError: boolean;
+  newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
+  firstVisit = true;
 
 
   @ViewChild(BugReportComponent)
@@ -51,15 +55,14 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
+    private profileService: ProfileService,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
-    const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.awaitingReview = reviewRequested && !approved;
-    this.showTip = true;
+    this.showTip = false;
     this.cohortsLoading = true;
     this.cohortsError = false;
   }
@@ -81,6 +84,20 @@ export class NotebookListComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
+    this.profileService.getMe().subscribe(
+      profile => {
+        if (profile.pageVisits) {
+          this.firstVisit = !profile.pageVisits.some(v =>
+            v.page === NotebookListComponent.PAGE_ID);
+        }
+      },
+      error => {},
+      () => {
+        if (this.firstVisit) {
+          this.showTip = true;
+        }
+        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
+      });
   }
 
   private loadNotebookList() {
@@ -151,7 +168,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   get createDisabled(): boolean {
-    return this.awaitingReview || !this.writePermission;
+    return !this.writePermission;
   }
 
   submitNotebooksLoadBugReport(): void {

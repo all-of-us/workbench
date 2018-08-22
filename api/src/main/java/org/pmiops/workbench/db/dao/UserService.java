@@ -79,26 +79,26 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
-    if (user.getDataAccessLevel() == DataAccessLevel.UNREGISTERED
+    if (DataAccessLevel.UNREGISTERED.equals(user.getDataAccessLevelEnum())
         && user.getIdVerificationIsValid() != null
         && user.getIdVerificationIsValid()
         && user.getDemographicSurveyCompletionTime() != null
         && user.getEthicsTrainingCompletionTime() != null
         && user.getTermsOfServiceCompletionTime() != null
-        && user.getEmailVerificationStatus().equals(EmailVerificationStatus.SUBSCRIBED)) {
+        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum())) {
       this.fireCloudService.addUserToGroup(user.getEmail(),
           configProvider.get().firecloud.registeredDomainName);
-      user.setDataAccessLevel(DataAccessLevel.REGISTERED);
+      user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     }
   }
 
   public User createServiceAccountUser(String email) {
     User user = new User();
-    user.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     user.setEmail(email);
     user.setDisabled(false);
-    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.NONE);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
+    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -117,7 +117,7 @@ public class UserService {
       String email,
       String contactEmail) {
     User user = new User();
-    user.setDataAccessLevel(DataAccessLevel.UNREGISTERED);
+    user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     user.setEmail(email);
     user.setContactEmail(contactEmail);
     user.setFamilyName(familyName);
@@ -125,8 +125,8 @@ public class UserService {
     user.setDisabled(false);
     user.setAboutYou(null);
     user.setAreaOfResearch(null);
-    user.setEmailVerificationStatus(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.NONE);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
+    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -198,7 +198,7 @@ public class UserService {
       @Override
       public User apply(User user) {
         user.setFreeTierBillingProjectName(name);
-        user.setFreeTierBillingProjectStatus(status);
+        user.setFreeTierBillingProjectStatusEnum(status);
         return user;
       }
     });

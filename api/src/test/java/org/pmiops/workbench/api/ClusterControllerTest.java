@@ -2,12 +2,19 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Map;
 import javax.inject.Provider;
@@ -22,6 +29,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -63,6 +71,8 @@ public class ClusterControllerTest {
   private static final String WORKSPACE_ID = "wsid";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
+  private static final Instant NOW = Instant.now();
+  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @TestConfiguration
   @Import({
@@ -73,6 +83,7 @@ public class ClusterControllerTest {
     NotebooksService.class,
     WorkspaceService.class,
     UserService.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean
@@ -80,7 +91,10 @@ public class ClusterControllerTest {
     String apiHostName() {
       return "https://api.blah.com";
     }
-
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
     @Bean
     User user() {
       // Allows for wiring of the initial Provider<User>; actual mocking of the
@@ -108,11 +122,14 @@ public class ClusterControllerTest {
   Provider<User> userProvider;
   @Autowired
   ClusterController clusterController;
+  @Autowired
+  UserRecentResourceService userRecentResourceService;
+  @Autowired
+  Clock clock;
   @Mock
   private Provider<WorkbenchConfig> configProvider;
 
   private CdrVersion cdrVersion;
-  private FakeClock clock;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
 
@@ -122,11 +139,11 @@ public class ClusterControllerTest {
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
     user.setFreeTierBillingProjectName(WORKSPACE_NS);
-    user.setFreeTierBillingProjectStatus(BillingProjectStatus.READY);
+    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
 
-    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
+    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, CLOCK, fireCloudService, configProvider);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();
@@ -234,6 +251,7 @@ public class ClusterControllerTest {
     assertThat(delocJson.getString("destination")).isEqualTo("gs://workspace-bucket/notebooks");
     JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
+    verify(userRecentResourceService, times(1)).updateNotebookEntry(anyLong(), anyLong() , anyString(), any(Timestamp.class));
   }
 
   @Test

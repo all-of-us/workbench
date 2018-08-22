@@ -2,8 +2,6 @@ import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
-import {UrlSegment} from '@angular/router';
-import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
@@ -20,6 +18,7 @@ import {
 import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 
+import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 import {AccountCreationSuccessComponent} from '../account-creation-success/component';
 import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
@@ -29,7 +28,6 @@ import {RoutingSpinnerComponent} from '../routing-spinner/component';
 
 class InvitationKeyPage {
   fixture: ComponentFixture<InvitationKeyComponent>;
-  route: UrlSegment[];
   form: DebugElement;
 
   constructor(testBed: typeof TestBed) {
@@ -52,13 +50,13 @@ describe('InvitationKeyComponent', () => {
     profileServiceStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
         LoginComponent,
         AccountCreationComponent,
+        AccountCreationModalsComponent,
         AccountCreationSuccessComponent,
         InvitationKeyComponent,
         PageTemplateSignedOutComponent,

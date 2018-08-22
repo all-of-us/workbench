@@ -8,8 +8,10 @@ import {
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
   UpdateWorkspaceRequest,
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
+  WorkspaceListResponse,
   WorkspaceResponse,
   WorkspaceResponseListResponse,
 } from 'generated';
@@ -26,11 +28,39 @@ export class WorkspacesServiceStub {
   workspaces: Workspace[];
   // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
+  workspacesForReview: Workspace[];
+  sharingProfilesList: UserRole[] = [
+    {
+      email: 'sampleuser1@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User1',
+      role: WorkspaceAccessLevel.OWNER
+    },
+    {
+      email: 'sampleuser2@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User2',
+      role: WorkspaceAccessLevel.WRITER
+    },
+    {
+      email: 'sampleuser3@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User3',
+      role: WorkspaceAccessLevel.READER
+    },
+    {
+      email: 'sampleuser4@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User4',
+      role: WorkspaceAccessLevel.WRITER
+    }
+  ];
 
   constructor() {
 
     this.workspaces = [WorkspacesServiceStub.stubWorkspace()];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
+    this.workspacesForReview = WorkspacesServiceStub.stubWorkspacesForReview();
   }
 
   static stubWorkspace(): Workspace {
@@ -56,18 +86,30 @@ export class WorkspacesServiceStub {
       userRoles: [
         {
           email: 'sampleuser1@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.OWNER
         },
         {
           email: 'sampleuser2@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.WRITER
         },
         {
           email: 'sampleuser3@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.READER
         },
       ]
     };
+  }
+
+  static stubWorkspacesForReview(): Workspace[] {
+    const stubWorkspace = this.stubWorkspace();
+    stubWorkspace.researchPurpose.reviewRequested = true;
+    return [stubWorkspace];
   }
 
   private clone(w: Workspace): Workspace {
@@ -80,7 +122,10 @@ export class WorkspacesServiceStub {
   createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
     return new Observable<Workspace>(observer => {
       setTimeout(() => {
-        if (this.workspaces.find(w => w.id === newWorkspace.id)) {
+        if (this.workspaces.find(w => w.name === newWorkspace.name)) {
+          observer.error({message: 'Error', status: 409});
+          return;
+        } else if (this.workspaces.find(w => w.id === newWorkspace.id)) {
           observer.error(new Error(`Error creating. Workspace with `
                                    + `id: ${newWorkspace.id} already exists.`));
           return;
@@ -153,6 +198,14 @@ export class WorkspacesServiceStub {
     });
   }
 
+  getWorkspacesForReview(): Observable<WorkspaceListResponse> {
+    return new Observable(observer => {
+      observer.next({
+        items: this.workspacesForReview
+      });
+    });
+  }
+
   updateWorkspace(workspaceNamespace: string,
                   workspaceId: string,
                   newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
@@ -209,8 +262,15 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
-        this.workspaces[updateIndex].userRoles = request.items;
-        observer.next({});
+        let responseItems: UserRole[] = [];
+        responseItems = request.items.map(
+          userRole => this.sharingProfilesList.find(
+            current => userRole.email === current.email));
+
+        observer.next({
+          workspaceEtag: request.workspaceEtag,
+          items: responseItems
+        });
         observer.complete();
       }, 0);
     });

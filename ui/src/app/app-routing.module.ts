@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
@@ -14,6 +15,8 @@ import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {StigmatizationPageComponent} from './views/stigmatization-page/component';
+import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
@@ -34,13 +37,25 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard],
+    canActivateChild: [SignInGuard, RegistrationGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',
         component: HomepageComponent,
         data: {title: 'Homepage'},
+      }, {
+        path: 'unregistered',
+        component: UnregisteredComponent,
+        data: {
+          title: 'Awaiting ID Verification'
+        }
+      }, {
+        path: 'definitions/stigmatization',
+        component: StigmatizationPageComponent,
+        data: {
+          title: 'Stigmatization Definition'
+        }
       }, {
       path: 'workspaces',
       data: {breadcrumb: 'Workspaces'},
@@ -99,34 +114,45 @@ const routes: Routes = [
             },
             {
               path: 'cohorts',
-              component: CohortListComponent,
-              data: {
-                title: 'View Cohorts',
-                breadcrumb: 'Cohorts'
-              }
-            },
-            {
-              path: 'cohorts/build',
-              loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-              data: {
-                breadcrumb: 'Add a Cohort'
-              }
-            }, {
-              path: 'cohorts/:cid/review',
-              loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
-              data: {
-                breadcrumb: 'Cohort'
-              }
-            }, {
-              path: 'cohorts/:cid/edit',
-              component: CohortEditComponent,
-              data: {
-                title: 'Edit Cohort',
-                breadcrumb: 'Edit Cohort'
-              },
-              resolve: {
-                cohort: CohortResolver,
-              },
+              data: { breadcrumb: 'Cohorts' },
+              children: [
+                {
+                  path: '',
+                  component: CohortListComponent,
+                  data: {
+                    title: 'View Cohorts',
+                  },
+                },
+                {
+                  path: 'build',
+                  loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+                  data: {
+                    breadcrumb: 'Add a Cohort'
+                  }
+                },
+                {
+                  path: ':cid/review',
+                  loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+                  data: {
+                    title: 'Cohort',
+                    breadcrumb: 'Param: Cohort Name'
+                  },
+                  resolve: {
+                    cohort: CohortResolver,
+                  }
+                },
+                {
+                  path: ':cid/edit',
+                  component: CohortEditComponent,
+                  data: {
+                    title: 'Edit Cohort',
+                    breadcrumb: 'Param: Cohort Name'
+                  },
+                  resolve: {
+                    cohort: CohortResolver,
+                  }
+                }
+              ]
             }]
           }
         ]
@@ -176,6 +202,7 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
+    RegistrationGuard,
     SignInGuard,
     WorkspaceResolver,
   ]

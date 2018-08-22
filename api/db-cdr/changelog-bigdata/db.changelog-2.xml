@@ -154,4 +154,26 @@
     />
   </changeSet>
 
+  <changeSet author="srushtigangireddy" id="drop concept_synonym_name_index" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="concept_synonym_name_index"/>
+    </preConditions>
+    <dropIndex
+            tableName="concept_synonym"
+            indexName="concept_synonym_name_index"
+    />
+  </changeSet>
+
+  <changeSet author="srushtigangireddy" id="drop idx_concept_id" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="idx_concept_id"/>
+    </preConditions>
+    <dropIndex
+            tableName="concept_synonym"
+            indexName="idx_concept_id"
+    />
+  </changeSet>
+
 </databaseChangeLog>

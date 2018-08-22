@@ -14,6 +14,8 @@ import {
   Cohort,
   CohortsService,
   FileDetail,
+  PageVisit,
+  ProfileService,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService,
@@ -74,17 +76,14 @@ enum Tabs {
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
+  private static PAGE_ID = 'workspace';
+
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
-
-
-
-  greeting: string;
   showTip: boolean;
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
-  awaitingReview = false;
   cohortsLoading = true;
   cohortsError = false;
   cohortList: Cohort[] = [];
@@ -97,6 +96,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   researchPurposeArray: String[] = [];
   leftResearchPurposes: String[];
   rightResearchPurposes: String[];
+  newPageVisit: PageVisit = { page: WorkspaceComponent.PAGE_ID};
+  firstVisit = true;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -104,19 +105,21 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
-    private http: Http,
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
+    private profileService: ProfileService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
-    const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.awaitingReview = reviewRequested && !approved;
     Object.keys(ResearchPurposeItems).forEach((key) => {
       if (this.workspace.researchPurpose[key]) {
-        this.researchPurposeArray.push(ResearchPurposeItems[key].shortDescription);
+        let shortDescription = ResearchPurposeItems[key].shortDescription;
+        if (key === 'diseaseFocusedResearch') {
+          shortDescription += ': ' + this.workspace.researchPurpose.diseaseOfFocus;
+        }
+        this.researchPurposeArray.push(shortDescription);
       }
     });
     this.leftResearchPurposes =
@@ -125,12 +128,27 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       this.researchPurposeArray.slice(
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
-    this.showTip = true;
+    this.showTip = false;
   }
 
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    // TODO: RW-1057
+    this.profileService.getMe().subscribe(
+      profile => {
+        if (profile.pageVisits) {
+          this.firstVisit = !profile.pageVisits.some(v =>
+            v.page === WorkspaceComponent.PAGE_ID);
+        }
+      },
+      error => {},
+      () => {
+        if (this.firstVisit) {
+          this.showTip = true;
+        }
+        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
+      });
     this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
       .subscribe(
         cohortsReceived => {
@@ -144,12 +162,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
-
-    if (this.newWorkspace) {
-      this.greeting = 'Get Started';
-    } else {
-      this.greeting = 'Recent Work';
-    }
   }
 
   private loadNotebookList() {
@@ -211,9 +223,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   buildCohort(): void {
-    if (!this.awaitingReview) {
-      this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
-    }
+    this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
   }
 
   get workspaceCreationTime(): string {
@@ -233,10 +243,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   get ownerPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
-  }
-
-  get newWorkspace(): boolean {
-    return this.cohortList.length === 0 && this.notebookList.length === 0 && this.showTip;
   }
 
   share(): void {

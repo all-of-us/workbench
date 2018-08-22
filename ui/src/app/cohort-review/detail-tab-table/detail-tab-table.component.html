@@ -4,6 +4,7 @@
 
   <clr-dg-column *ngFor="let col of columns"
     [clrDgField]="col.notField ? null : col.name"
+    [clrDgSortBy]="sortByColumn(col.name)"
     [ngClass]="col.classNames"
     >
     {{ col.displayName }}
@@ -11,21 +12,21 @@
 
   <clr-dg-row *clrDgItems="let datum of data">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
-      <ng-container [ngSwitch]="col.name">
-        <span *ngSwitchCase="'itemDate'">
-          {{ datum.itemDate }}
+      <ng-container [ngSwitch]="true">
+        <span *ngSwitchCase="col.name === 'itemDate'
+          || col.name === 'endDate'
+          || col.name === 'firstMention'
+          || col.name === 'lastMention'">
+          {{ datum[col.name] | date: 'yyyy-MM-dd HH:mm' }}
         </span>
-        <span *ngSwitchCase="'endDate'">
-          {{ datum.endDate | date:'yyyy-MM-dd HH:mm:ss' }}
-        </span>
-        <span *ngSwitchCase="'sourceVocabulary'"
+        <span *ngSwitchCase="col.name === 'sourceVocabulary'"
           [style.width.%]="100"
           [style.height.%]="100"
           [popper]="datum.sourceName || ''"
           [popperTrigger]="'hover'"
           [popperPlacement]="'left'"
-          [popperTarget]="sourceValue">
-          <span #sourceValue>{{ datum.sourceVocabulary }}</span>
+          [popperTarget]="valueSource">
+          <span #valueSource>{{ datum.sourceVocabulary }}</span>
         </span>
         <span *ngSwitchDefault >
           {{ datum[col.name] }}

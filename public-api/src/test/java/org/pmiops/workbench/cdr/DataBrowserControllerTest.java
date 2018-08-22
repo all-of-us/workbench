@@ -6,27 +6,36 @@ import java.util.function.Function;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import java.util.List;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.Analysis;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.DbDomainDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
 import org.pmiops.workbench.model.StandardConceptFilter;
-//import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
-//import org.pmiops.workbench.cdr.dao.AchillesResultDao;
-//import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
+import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDao;
+import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.cdr.model.DbDomain;
+import org.pmiops.workbench.cdr.model.AchillesAnalysis;
+import org.pmiops.workbench.cdr.model.AchillesResult;
 import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.ConceptAnalysisListResponse;
+import org.pmiops.workbench.model.ConceptAnalysis;
 import org.pmiops.workbench.model.DbDomainListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -167,6 +176,21 @@ public class DataBrowserControllerTest {
             .sourceCountValue(0L)
             .prevalence(0.0F);
 
+    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_1 = new ConceptSynonym()
+            .conceptId(7892L)
+            .conceptSynonymName("cstest 1")
+            .languageConceptId(0L);
+
+    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_2 = new ConceptSynonym()
+            .conceptId(7892L)
+            .conceptSynonymName("cstest 2")
+            .languageConceptId(0L);
+
+    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_3 = new ConceptSynonym()
+            .conceptId(7892L)
+            .conceptSynonymName("cstest 3")
+            .languageConceptId(0L);
+
     private static final DbDomain CLIENT_DB_DOMAIN_1 = new DbDomain()
             .domainId("Condition")
             .domainDisplay("Diagnoses")
@@ -207,6 +231,169 @@ public class DataBrowserControllerTest {
             .countValue(567437L)
             .participantCount(0L);
 
+    private static final AchillesAnalysis CLIENT_ANALYSIS_1 = new AchillesAnalysis()
+            .analysisId(1900L)
+            .analysisName("Measurement Response Gender Distribution")
+            .stratum1Name("Measurement Concept Id")
+            .stratum2Name("Gender Concept Id")
+            .stratum4Name("value")
+            .stratum5Name("unit source value")
+            .chartType("column")
+            .dataType("counts");
+
+
+    private static final AchillesAnalysis CLIENT_ANALYSIS_2 = new AchillesAnalysis()
+            .analysisId(1901L)
+            .analysisName("Measurement Response Age Distribution")
+            .stratum1Name("Measurement Concept Id")
+            .stratum2Name("Age Decile")
+            .stratum4Name("value")
+            .stratum5Name("unit source value")
+            .chartType("column")
+            .dataType("counts");
+
+    private static final AchillesAnalysis CLIENT_ANALYSIS_3 = new AchillesAnalysis()
+            .analysisId(1911L)
+            .analysisName("Measurement Response Male Distribution")
+            .stratum1Name("Measurement Concept Id")
+            .stratum2Name("Gender Concept Id")
+            .stratum4Name("value")
+            .stratum5Name("unit source value")
+            .chartType("column")
+            .dataType("counts");
+
+
+    private static final AchillesAnalysis CLIENT_ANALYSIS_4 = new AchillesAnalysis()
+            .analysisId(1912L)
+            .analysisName("Measurement Response Female Distribution")
+            .stratum1Name("Measurement Concept Id")
+            .stratum2Name("Gender Concept Id")
+            .stratum4Name("value")
+            .stratum5Name("unit source value")
+            .chartType("column")
+            .dataType("counts");
+
+    private static final AchillesAnalysis CLIENT_ANALYSIS_5 = new AchillesAnalysis()
+            .analysisId(3101L)
+            .analysisName("Gender Distribution")
+            .stratum1Name("Concept Id")
+            .stratum2Name("Gender Concept Id")
+            .stratum3Name("DomainId")
+            .chartType("pie")
+            .dataType("counts");
+    private static final AchillesAnalysis CLIENT_ANALYSIS_6 = new AchillesAnalysis()
+            .analysisId(3102L)
+            .analysisName("Age Distribution")
+            .stratum1Name("Concept Id")
+            .stratum2Name("Age decile")
+            .stratum3Name("DomainId")
+            .chartType("column")
+            .dataType("counts");
+
+    private static final AchillesAnalysis ACHILLES_ANALYSIS_1 = makeAchillesAnalysis(CLIENT_ANALYSIS_1);
+    private static final AchillesAnalysis ACHILLES_ANALYSIS_2 = makeAchillesAnalysis(CLIENT_ANALYSIS_2);
+    private static final AchillesAnalysis ACHILLES_ANALYSIS_3 = makeAchillesAnalysis(CLIENT_ANALYSIS_3);
+    private static final AchillesAnalysis ACHILLES_ANALYSIS_4 = makeAchillesAnalysis(CLIENT_ANALYSIS_4);
+    private static final AchillesAnalysis ACHILLES_ANALYSIS_5 = makeAchillesAnalysis(CLIENT_ANALYSIS_5);
+    private static final AchillesAnalysis ACHILLES_ANALYSIS_6 = makeAchillesAnalysis(CLIENT_ANALYSIS_6);
+
+    private static final AchillesResult CLIENT_RESULT_1 = new AchillesResult()
+            .id(1L)
+            .analysisId(1900L)
+            .stratum1("137989")
+            .stratum2("8532")
+            .stratum4("Abnormal results of cardiovascular function studies")
+            .countValue(12L)
+            .sourceCountValue(34L);
+
+
+    private static final AchillesResult CLIENT_RESULT_2 = new AchillesResult()
+            .id(2L)
+            .analysisId(1900L)
+            .stratum1("137989")
+            .stratum2("8507")
+            .stratum4("Abnormal results of cardiovascular function studies")
+            .countValue(22L)
+            .sourceCountValue(34L);
+
+
+    private static final AchillesResult CLIENT_RESULT_3 = new AchillesResult()
+            .id(3L)
+            .analysisId(1901L)
+            .stratum1("137989")
+            .stratum2("2")
+            .stratum4("Abnormal results of cardiovascular function studies")
+            .countValue(2L)
+            .sourceCountValue(34L);
+
+
+    private static final AchillesResult CLIENT_RESULT_4 = new AchillesResult()
+            .id(4L)
+            .analysisId(1901L)
+            .stratum1("137989")
+            .stratum2("4")
+            .stratum4("Abnormal results of cardiovascular function studies")
+            .countValue(2L)
+            .sourceCountValue(34L);
+
+
+    private static final AchillesResult CLIENT_RESULT_5 = new AchillesResult()
+            .id(5L)
+            .analysisId(1901L)
+            .stratum1("137989")
+            .stratum2("3")
+            .stratum4("Abnormal results of cardiovascular function studies")
+            .countValue(1L)
+            .sourceCountValue(34L);
+
+
+    private static final AchillesResult CLIENT_RESULT_6 = new AchillesResult()
+            .id(6L)
+            .analysisId(3101L)
+            .stratum1("1586134")
+            .stratum2("8507")
+            .stratum3("Survey")
+            .countValue(251780L)
+            .sourceCountValue(251780L);
+
+    private static final AchillesResult CLIENT_RESULT_7 = new AchillesResult()
+            .id(7L)
+            .analysisId(3101L)
+            .stratum1("1586134")
+            .stratum2("8532")
+            .stratum3("Survey")
+            .countValue(316080L)
+            .sourceCountValue(316080L);
+
+    private static final AchillesResult CLIENT_RESULT_8 = new AchillesResult()
+            .id(8L)
+            .analysisId(3102L)
+            .stratum1("1586134")
+            .stratum2("2")
+            .stratum3("Survey")
+            .countValue(93020L)
+            .sourceCountValue(93020L);
+
+    private static final AchillesResult CLIENT_RESULT_9 = new AchillesResult()
+            .id(9L)
+            .analysisId(3102L)
+            .stratum1("1586134")
+            .stratum2("3")
+            .stratum3("Survey")
+            .countValue(93480L)
+            .sourceCountValue(93480L);
+
+
+    private static final AchillesResult ACHILLES_RESULT_1 = makeAchillesResult(CLIENT_RESULT_1);
+    private static final AchillesResult ACHILLES_RESULT_2 = makeAchillesResult(CLIENT_RESULT_2);
+    private static final AchillesResult ACHILLES_RESULT_3 = makeAchillesResult(CLIENT_RESULT_3);
+    private static final AchillesResult ACHILLES_RESULT_4 = makeAchillesResult(CLIENT_RESULT_4);
+    private static final AchillesResult ACHILLES_RESULT_5 = makeAchillesResult(CLIENT_RESULT_5);
+    private static final AchillesResult ACHILLES_RESULT_6 = makeAchillesResult(CLIENT_RESULT_6);
+    private static final AchillesResult ACHILLES_RESULT_7 = makeAchillesResult(CLIENT_RESULT_7);
+    private static final AchillesResult ACHILLES_RESULT_8 = makeAchillesResult(CLIENT_RESULT_8);
+    private static final AchillesResult ACHILLES_RESULT_9 = makeAchillesResult(CLIENT_RESULT_9);
+
     private static final Concept CONCEPT_1 =
             makeConcept(CLIENT_CONCEPT_1);
     private static final Concept CONCEPT_2 =
@@ -221,6 +408,10 @@ public class DataBrowserControllerTest {
             makeConcept(CLIENT_CONCEPT_6);
     private static final Concept CONCEPT_7 =
             makeConcept(CLIENT_CONCEPT_7);
+
+    private static final ConceptSynonym CONCEPT_SYNONYM_1 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_1);
+    private static final ConceptSynonym CONCEPT_SYNONYM_2 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_2);
+    private static final ConceptSynonym CONCEPT_SYNONYM_3 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_3);
 
     private static final DbDomain DBDOMAIN_1 =
             makeDbDomain(CLIENT_DB_DOMAIN_1);
@@ -237,14 +428,16 @@ public class DataBrowserControllerTest {
     ConceptRelationshipDao conceptRelationshipDao;
     @Autowired
     private DbDomainDao dbDomainDao;
-    /*
     @Autowired
     private QuestionConceptDao  questionConceptDao;
     @Autowired
     private AchillesAnalysisDao achillesAnalysisDao;
     @Autowired
     private AchillesResultDao achillesResultDao;
-    */
+    @Autowired
+    private ConceptSynonymDao conceptSynonymDao;
+    @Autowired
+    private AchillesResultDistDao achillesResultDistDao;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -254,14 +447,14 @@ public class DataBrowserControllerTest {
 
     @Before
     public void setUp() {
+        saveData();
         ConceptService conceptService = new ConceptService(entityManager);
-        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao);
+        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao);
     }
 
 
     @Test
     public void testGetParentConcepts() throws Exception {
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.getParentConcepts(1234L);
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
@@ -272,7 +465,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testGetSourceConcepts() throws Exception {
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.getSourceConcepts(7890L, 15);
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
@@ -282,7 +474,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testGetDomainFilters() throws Exception {
-        saveData();
         ResponseEntity<DbDomainListResponse> response = dataBrowserController.getDomainFilters();
         List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
         assertThat(domains)
@@ -291,7 +482,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testGetSurveyList() throws Exception{
-        saveData();
         ResponseEntity<DbDomainListResponse> response = dataBrowserController.getSurveyList();
         List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
         assertThat(domains).containsExactly(DBDOMAIN_3, DBDOMAIN_4);
@@ -299,19 +489,17 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testGetDbDomains() throws Exception{
-        saveData();
         ResponseEntity<DbDomainListResponse> response = dataBrowserController.getDbDomains();
         List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
         assertThat(domains)
-        .containsExactly(DBDOMAIN_1, DBDOMAIN_2, DBDOMAIN_3, DBDOMAIN_4);
+                .containsExactly(DBDOMAIN_1, DBDOMAIN_2, DBDOMAIN_3, DBDOMAIN_4);
     }
 
     @Test
     public void testAllConceptSearchEmptyQuery() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
-        .domain(Domain.CONDITION)
-        .minCount(0));
+                .domain(Domain.CONDITION)
+                .minCount(0));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
                 .containsExactly(CONCEPT_1, CONCEPT_5, CONCEPT_6, CONCEPT_7)
@@ -320,7 +508,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testConceptSearchMaxResults() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .domain(Domain.CONDITION)
                 .maxResults(1)
@@ -331,7 +518,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testCountConceptSearchEmptyQuery() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .domain(Domain.CONDITION));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
@@ -342,17 +528,22 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testConceptSearchStandardConcept() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("002")
-        .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
                 .doesNotContain(CONCEPT_2);
     }
 
     @Test
+    public void testConceptSynonymSearch() throws Exception{
+        assertResults(
+                dataBrowserController.searchConcepts(new SearchConceptsRequest().domain(Domain.CONDITION).query("cstest")
+                        .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)),CLIENT_CONCEPT_7);
+    }
+
+    @Test
     public void testConceptSearchStandardCodeIdMatchFilter() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
@@ -363,7 +554,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testConceptSearchEmptyQuery() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
@@ -374,7 +564,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testNonStandardEmptyQuerySearch() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .query("")
                 .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
@@ -385,7 +574,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testConceptSearchNonStandardConcepts() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("7891")
                 .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
@@ -398,7 +586,6 @@ public class DataBrowserControllerTest {
     @Test
     public void testConceptSearchEmptyCount() throws Exception{
         // We can't test limiting to count > 0 with a concept name search because the match function does not work in hibernate. So we make several concepts with same concept code and one with count 0. The limit > 0 works the same weather it is code or name match.
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("004")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
@@ -409,7 +596,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testConceptIdSearch() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("456")
                 .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
@@ -420,7 +606,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testConceptSearchDomainFilter() throws Exception{
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("004").domain(Domain.CONDITION));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
         assertThat(concepts)
@@ -431,7 +616,6 @@ public class DataBrowserControllerTest {
 
     @Test
     public void testConceptCodeMatch() throws Exception {
-        saveData();
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("002")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
         List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
@@ -447,6 +631,41 @@ public class DataBrowserControllerTest {
                 .containsExactly(CONCEPT_2)
                 .inOrder();
     }
+
+    @Test
+    public void testGetMeasurementAnalysisNoMatch() throws Exception{
+        ArrayList<String> queryConceptIds = new ArrayList<String>();
+        queryConceptIds.add("137990");
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(queryConceptIds);
+        List<ConceptAnalysis> conceptAnalysisList = response.getBody().getItems();
+        Analysis ageAnalysis = conceptAnalysisList.get(0).getMeasurementValueAgeAnalysis();
+        assertThat(ageAnalysis).isEqualTo(null);
+    }
+
+    @Test
+    public void testGetSurveyDemographicAnalysesMatch() throws Exception{
+        List<String> conceptsIds = new ArrayList<>();
+        conceptsIds.add("1586134");
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(conceptsIds);
+        List<ConceptAnalysis> conceptAnalysis = response.getBody().getItems();
+        Analysis ageAnalysis = conceptAnalysis.get(0).getAgeAnalysis();
+        Analysis genderAnalysis = conceptAnalysis.get(0).getGenderAnalysis();
+        assertThat(ageAnalysis).isNotEqualTo(null);
+        assertThat(genderAnalysis).isNotEqualTo(null);
+    }
+
+    @Test
+    public void testGetSurveyDemographicAnalysesNoMatch() throws Exception{
+        List<String> conceptsIds = new ArrayList<>();
+        conceptsIds.add("1585855");
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(conceptsIds);
+        List<ConceptAnalysis> conceptAnalysis = response.getBody().getItems();
+        Analysis ageAnalysis = conceptAnalysis.get(0).getAgeAnalysis();
+        Analysis genderAnalysis = conceptAnalysis.get(0).getGenderAnalysis();
+        assertThat(ageAnalysis).isEqualTo(null);
+        assertThat(genderAnalysis).isEqualTo(null);
+    }
+
 
 
     private static Concept makeConcept(Concept concept) {
@@ -488,6 +707,40 @@ public class DataBrowserControllerTest {
         return dbd;
     }
 
+    private static AchillesAnalysis makeAchillesAnalysis(AchillesAnalysis achillesAnalysis){
+        AchillesAnalysis aa = new AchillesAnalysis();
+        aa.setAnalysisId(achillesAnalysis.getAnalysisId());
+        aa.setAnalysisName(achillesAnalysis.getAnalysisName());
+        aa.setStratum1Name(achillesAnalysis.getStratum1Name());
+        aa.setStratum2Name(achillesAnalysis.getStratum2Name());
+        aa.setStratum4Name(achillesAnalysis.getStratum4Name());
+        aa.setStratum5Name(achillesAnalysis.getStratum5Name());
+        aa.setChartType(achillesAnalysis.getChartType());
+        aa.setDataType(achillesAnalysis.getDataType());
+        return aa;
+    }
+
+    private static ConceptSynonym makeConceptSynonym(ConceptSynonym conceptSynonym){
+        ConceptSynonym cs = new ConceptSynonym();
+        cs.setConceptId(conceptSynonym.getConceptId());
+        cs.setConceptSynonymName(conceptSynonym.getConceptSynonymName());
+        cs.setLanguageConceptId(conceptSynonym.getLanguageConceptId());
+        return cs;
+    }
+
+    private static AchillesResult makeAchillesResult(AchillesResult achillesResult){
+        AchillesResult ar = new AchillesResult();
+        ar.setId(achillesResult.getId());
+        ar.setAnalysisId(achillesResult.getAnalysisId());
+        ar.setStratum1(achillesResult.getStratum1());
+        ar.setStratum2(achillesResult.getStratum2());
+        ar.setStratum4(achillesResult.getStratum3());
+        ar.setStratum5(achillesResult.getStratum5());
+        ar.setCountValue(achillesResult.getCountValue());
+        ar.setSourceCountValue(achillesResult.getSourceCountValue());
+        return ar;
+    }
+
     private void saveData() {
         conceptDao.save(CONCEPT_1);
         conceptDao.save(CONCEPT_2);
@@ -504,6 +757,32 @@ public class DataBrowserControllerTest {
         dbDomainDao.save(DBDOMAIN_2);
         dbDomainDao.save(DBDOMAIN_3);
         dbDomainDao.save(DBDOMAIN_4);
+
+        achillesAnalysisDao.save(ACHILLES_ANALYSIS_1);
+        achillesAnalysisDao.save(ACHILLES_ANALYSIS_2);
+        achillesAnalysisDao.save(ACHILLES_ANALYSIS_3);
+        achillesAnalysisDao.save(ACHILLES_ANALYSIS_4);
+        achillesAnalysisDao.save(ACHILLES_ANALYSIS_5);
+        achillesAnalysisDao.save(ACHILLES_ANALYSIS_6);
+
+        achillesResultDao.save(ACHILLES_RESULT_1);
+        achillesResultDao.save(ACHILLES_RESULT_2);
+        achillesResultDao.save(ACHILLES_RESULT_3);
+        achillesResultDao.save(ACHILLES_RESULT_4);
+        achillesResultDao.save(ACHILLES_RESULT_5);
+        achillesResultDao.save(ACHILLES_RESULT_6);
+        achillesResultDao.save(ACHILLES_RESULT_7);
+        achillesResultDao.save(ACHILLES_RESULT_8);
+        achillesResultDao.save(ACHILLES_RESULT_9);
+
+        conceptSynonymDao.save(CONCEPT_SYNONYM_1);
+        conceptSynonymDao.save(CONCEPT_SYNONYM_2);
+        conceptSynonymDao.save(CONCEPT_SYNONYM_3);
+    }
+
+    private void assertResults(ResponseEntity<ConceptListResponse> response,
+                               Concept... expectedConcepts) {
+        assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
     }
 
 }

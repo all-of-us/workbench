@@ -258,8 +258,9 @@ public class ConceptsControllerTest {
     saveConcepts();
     ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query("conceptB"));
-    Concept concept = response.getBody().getItems().get(0);
-    assertThat(concept.getConceptCode()).isEqualTo("conceptB");
+    assertResults(
+            conceptsController.searchConcepts("ns", "name",
+                    new SearchConceptsRequest().query("conceptB")), CLIENT_CONCEPT_2);
   }
 
   @Test

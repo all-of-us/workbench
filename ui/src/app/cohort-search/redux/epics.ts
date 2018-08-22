@@ -7,6 +7,9 @@ import {Observable} from 'rxjs/Observable';
 import {
   BEGIN_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
+  BEGIN_DRUG_CRITERIA_REQUEST,
+  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_INGREDIENT_REQUEST,
   CANCEL_CRITERIA_REQUEST,
 
   BEGIN_COUNT_REQUEST,
@@ -35,6 +38,11 @@ import {
   loadPreviewRequestResults,
   loadAttributePreviewRequestResults,
   previewRequestError,
+
+  loadAutocompleteOptions,
+  autocompleteRequestError,
+
+  loadIngredients,
 } from './actions/creators';
 
 import {CohortSearchState} from './store';
@@ -44,6 +52,9 @@ import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
+type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
+type AutocompleteRequestAction = ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST];
+type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
 type PreviewRequestAction = ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST];
@@ -67,8 +78,7 @@ export class CohortSearchEpics {
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
-        return this.service.getCriteriaByTypeAndParentId(cdrVersionId, _type, parentId)
+        return this.service.getCriteriaByTypeAndParentId(cdrVersionId, kind, parentId)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -82,14 +92,47 @@ export class CohortSearchEpics {
   fetchAllCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_ALL_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        const _type = kind.match(/^DEMO.*/i) ? 'DEMO' : kind;
-        return this.service.getCriteriaByType(cdrVersionId, _type)
+        return this.service.getCriteriaByType(cdrVersionId, kind)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
             .filter(compare({kind, parentId}))
             .first())
           .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
+      }
+    )
+  )
+
+  fetchDrugCriteria: CSEpic = (action$) => (
+    action$.ofType(BEGIN_DRUG_CRITERIA_REQUEST).mergeMap(
+      ({cdrVersionId, kind, parentId, subtype}: DrugCritRequestAction) => {
+        return this.service.getCriteriaByTypeAndSubtype(cdrVersionId, kind, subtype)
+          .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
+          .race(action$
+            .ofType(CANCEL_CRITERIA_REQUEST)
+            .filter(compare({kind, parentId}))
+            .first())
+          .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
+      }
+    )
+  )
+
+  fetchAutocompleteOptions: CSEpic = (action$) => (
+    action$.ofType(BEGIN_DRUG_AUTOCOMPLETE_REQUEST).mergeMap(
+      ({cdrVersionId, searchTerms}: AutocompleteRequestAction) => {
+        return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
+          .map(result => loadAutocompleteOptions(result.items))
+          .catch(e => Observable.of(autocompleteRequestError(e)));
+      }
+    )
+  )
+
+  fetchIngredientsForBrand: CSEpic = (action$) => (
+    action$.ofType(BEGIN_INGREDIENT_REQUEST).mergeMap(
+      ({cdrVersionId, conceptId}: IngredientRequestAction) => {
+        return this.service.getDrugIngredientByConceptId(cdrVersionId, conceptId)
+          .map(result => loadIngredients(result.items))
+          .catch(e => Observable.of(autocompleteRequestError(e)));
       }
     )
   )

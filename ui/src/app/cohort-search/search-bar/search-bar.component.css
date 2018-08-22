@@ -1,0 +1,54 @@
+.search-box {
+    height: 40px;
+    width: 100%;
+    padding: 7px 14px;
+    border-radius: 5px;
+    background-color: #DFF0FA;
+}
+clr-icon {
+    height: 18px;
+    width: 18px;
+}
+input {
+    border: 0;
+    width: 70%;
+}
+.btn.btn-outline {
+    float: right;
+    height: 26px;
+    margin: 0;
+    font-size: 12px;
+    line-height: 1rem;
+}
+.btn.btn-warning-outline {
+    float: right;
+    height: 26px;
+    margin: 0 0 0 5px;
+    padding: 0;
+    min-width: auto;
+}
+
+.no-border{
+    border: none!important;
+    background: none!important;
+}
+
+.dropdown {
+    width: 100%;
+    margin-top: 0;
+}
+.dropdown-menu {
+    display: block;
+    max-height: 15rem;
+    min-height: 30px;
+    overflow-y: auto;
+}
+.dropdown-item {
+    height: 25px;
+    line-height: 0px;
+}
+.search-keyword {
+    color: #659F3D;
+    font-weight: bolder;
+    background-color: rgba(101,159,61,0.2);
+}

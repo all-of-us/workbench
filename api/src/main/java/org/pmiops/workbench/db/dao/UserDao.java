@@ -13,13 +13,7 @@ public interface UserDao extends CrudRepository<User, Long> {
   User findUserByEmail(String email);
   User findUserByUserId(long userId);
 
-  /**
-   * We know that there is no unique constraint in the DB currently,
-   * it is only enforced in code, but we intend to support multiple
-   * accounts for the same contact email at some point in the future.
-   */
   List<User> findUserByContactEmail(String contactEmail);
-
 
   /**
    * Returns the users who's identities have not been validated
@@ -36,4 +30,10 @@ public interface UserDao extends CrudRepository<User, Long> {
   @Query("SELECT DISTINCT user.freeTierBillingProjectName FROM User user\n" +
       "WHERE user.freeTierBillingProjectName IS NOT NULL")
   Set<String> getAllUserProjects();
+
+  /**
+   * Returns the user with the page visits and authorities loaded.
+   */
+  @Query("Select user FROM User user LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
+  User findUserWithAuthoritiesAndPageVisits(@Param("id") long id);
 }

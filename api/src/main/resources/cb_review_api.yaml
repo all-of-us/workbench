@@ -241,35 +241,6 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantDataListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/detail/{dataId}/{domain}:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortReview
-      description: Returns detailed domain data for the specified params for a participant.
-      operationId: "getDetailParticipantData"
-      parameters:
-        - in: path
-          name: dataId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which domain the details belong to.
-        - in: path
-          name: domain
-          type: string
-          required: true
-          description: specifies which domain the details belong to.
-      responses:
-        200:
-          description: A detail for the specified participant and domain
-          schema:
-            $ref: "#/definitions/ParticipantData"
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -506,7 +477,7 @@ definitions:
 
   DomainType:
     type: string
-    enum: [Condition, Procedure, Observation, Drug, Master, Device, Visit, Measurement]
+    enum: [CONDITION, PROCEDURE, OBSERVATION, DRUG, ALL_EVENTS, DEVICE, VISIT, MEASUREMENT, PHYSICAL_MEASURE]
 
   SortOrder:
     type: string
@@ -723,31 +694,14 @@ definitions:
     discriminator: domainType
     required:
       - itemDate
-      - standardVocabulary
-      - standardName
-      - sourceValue
-      - sourceVocabulary
-      - sourceName
       - domainType # required for inheritance to work
     properties:
       itemDate:
         type: string
-        description: The date of the data
-      standardVocabulary:
+        description: The date of the event
+      numMentions:
         type: string
-        description: The standard vocabulary of this data
-      standardName:
-        type: string
-        description: The standard name of this data
-      sourceValue:
-        type: string
-        description: The source value of this data
-      sourceVocabulary:
-        type: string
-        description: The source vocabulary of this data
-      sourceName:
-        type: string
-        description: The source name of this data.
+        description: Number of mentions
       domainType:
         $ref: "#/definitions/DomainType"
 
@@ -755,38 +709,160 @@ definitions:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
-          age:
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The source vocabulary type of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceCode:
+            type: string
+            description: The source code of this data
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
+            description: The age at event for the participant
+          numMentions:
+            type: string
+            description: The number of mentions of this data
+          firstMention:
+            type: string
+            description: The date of first mention of this data
+          lastMention:
+            type: string
+            description: The date of last mention of this data
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
 
   Procedure:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
-          age:
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The source vocabulary type of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceCode:
+            type: string
+            description: The source code of this data
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
+            description: The age at event for the participant
+          numMentions:
+            type: string
+            description: The number of mentions of this data
+          firstMention:
+            type: string
+            description: The date of first mention of this data
+          lastMention:
+            type: string
+            description: The date of last mention of this data
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
 
   Observation:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
-          age:
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary type of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The source vocabulary type of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceCode:
+            type: string
+            description: The source code of this data
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
+            description: The age at event for the participant
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
 
   Drug:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
-          age:
-            type: integer
-            description: The age of event for the participant
-          signature:
+          standardName:
             type: string
-            description: signature of drug
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The source vocabulary type of this data
+          sourceName:
+            type: string
+            description: The source name of this data.
+          sourceCode:
+            type: string
+            description: The source code of this data
+          ageAtEvent:
+            type: integer
+            description: The age at event for the participant
+          numMentions:
+            type: string
+            description: The number of mentions of this data
+          firstMention:
+            type: string
+            description: The date of first mention of this data
+          lastMention:
+            type: string
+            description: The date of last mention of this data
+          quantity:
+            type: string
+            description: The quantity of this data
+          refills:
+            type: string
+            description: The refills of this data
+          strength:
+            type: string
+            description: The strength of this data
+          route:
+            type: string
+            description: The route of this data
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
 
-  Master:
+
+  AllEvents:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
@@ -797,33 +873,114 @@ definitions:
           domain:
             type: string
             description: the domain of this data.
-
-  Device:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          age:
-            type: integer
-            description: The age of event for the participant
-
-  Visit:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          age:
-            type: integer
-            description: The age of event for the participant
-          endDate:
+          standardVocabulary:
             type: string
-            description: The end date of the visit occurrence
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceVocabulary:
+            type: string
+            description: The source vocabulary type of this data
+          sourceName:
+            type: string
+            description: The source name of this data.
+          sourceCode:
+            type: string
+            description: The source code of this data
+          sourceValue:
+            type: string
+            description: The source value of this data
+          ageAtEvent:
+            type: integer
+            description: The age at event for the participant
+          numMentions:
+            type: string
+            description: The number of mentions of this data
+          firstMention:
+            type: string
+            description: The date of first mention of this data
+          lastMention:
+            type: string
+            description: The date of last mention of this data
+          visitType:
+            type: string
+            description: The visit type of this data
 
   Measurement:
     allOf:
       - $ref: '#/definitions/ParticipantData'
       - properties: # extra properties
-          age:
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          sourceName:
+            type: string
+            description: The source name of this data
+          sourceCode:
+            type: string
+            description: The source code of this data
+          ageAtEvent:
             type: integer
-            description: The age of event for the participant
+            description: The age at event for the participant
+          valueConcept:
+            type: string
+            description: The value of this data
+          valueSource:
+            type: string
+            description: The value of this data
+          valueNumber:
+            type: string
+            description: The value of this data
+          units:
+            type: string
+            description: The units of this data
+          labRefRange:
+            type: string
+            description: The lab reference range of this data
+          visitId:
+            type: integer
+            format: int64
+            description: The visit Id of this data
+
+  PhysicalMeasurement:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          standardVocabulary:
+            type: string
+            description: The standard vocabulary of this data
+          standardName:
+            type: string
+            description: The standard name of this data
+          standardCode:
+            type: string
+            description: The standard code of this data
+          ageAtEvent:
+            type: integer
+            description: The age at event for the participant
+          valueConcept:
+            type: string
+            description: The value of this data
+          valueSource:
+            type: string
+            description: The value of this data
+          valueNumber:
+            type: string
+            description: The value of this data
+          units:
+            type: string
+            description: The units of this data
+
 
   AnnotationType:
     type: string

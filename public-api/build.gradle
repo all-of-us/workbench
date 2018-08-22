@@ -36,6 +36,8 @@ configurations {
   generatedCompile
 }
 
+project.ext.GAE_VERSION = '1.9.64'
+
 buildscript {    // Configuration for building
   repositories {
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more
@@ -93,11 +95,11 @@ dependencies {
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
   compile project(":common-api")
-  compile 'mysql:mysql-connector-java:+'
-  compile 'com.google.cloud.sql:mysql-socket-factory:+'
-  compile 'com.google.appengine:appengine:+'
-  compile 'com.google.appengine:appengine-api-1.0-sdk:+'
-  compile('org.springframework.boot:spring-boot-starter-web:+') {
+  compile 'mysql:mysql-connector-java:8.0.11'
+  compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
+  compile "com.google.appengine:appengine:${GAE_VERSION}"
+  compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
+  compile('org.springframework.boot:spring-boot-starter-web') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
@@ -105,30 +107,30 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile('org.springframework.boot:spring-boot-starter-actuator:+') {
+  compile('org.springframework.boot:spring-boot-starter-actuator') {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
-  compile 'org.springframework.security:spring-security-web:+'
+  compile 'org.springframework.security:spring-security-web:4.2.2.RELEASE'
 
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
-  compile 'joda-time:joda-time:+'
+  compile 'joda-time:joda-time:2.10'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
-  compile 'com.google.guava:guava:25.1-jre'
+  compile 'com.google.guava:guava:26.0-jre'
 
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:1.+'
-  testCompile 'com.google.truth:truth:+'
-  testCompile 'org.springframework.boot:spring-boot-starter-test:+'
-  testCompile 'com.h2database:h2:+'
-  testCompile 'org.liquibase:liquibase-core:+'
+  testCompile 'org.mockito:mockito-core:1.10.19'
+  testCompile 'com.google.truth:truth:0.42'
+  testCompile 'org.springframework.boot:spring-boot-starter-test'
+  testCompile 'com.h2database:h2:1.4.194'
+  testCompile 'org.liquibase:liquibase-core:3.5.3'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
 
   // For Swagger generation. These should include dependencies found in the Swagger codegen
@@ -139,9 +141,9 @@ dependencies {
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
   generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
   generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
-  generatedCompile 'com.google.code.gson:gson:+'
-  generatedCompile 'joda-time:joda-time:+'
-  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:+'
+  generatedCompile 'com.google.code.gson:gson:2.8.5'
+  generatedCompile 'joda-time:joda-time:2.10'
+  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
 
 }
 

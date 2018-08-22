@@ -15,7 +15,7 @@
   </div>
 </div>
 <div style="display: flex; justify-content: flex-start;">
-  <img [src]="profileImage" style="border-radius: 100px; width: 140px; height: 140px; margin-right: 1rem;">
+  <img *ngIf="profileImage !== null" [src]="profileImage" style="border-radius: 100px; width: 140px; height: 140px; margin-right: 1rem;">
   <div style="display: block">
     <div class="field-wrapper">
       <div class="field">

@@ -70,3 +70,7 @@ button.btn.btn-link {
   color: #4a4a4a;
   font-size: 14px;
 }
+
+button:focus {
+  outline: none;
+}

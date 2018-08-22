@@ -11,28 +11,39 @@
               [routerLinkActiveOptions]="{exact: true}">
     Cohorts
   </clr-button>
-  <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-    <clr-button [clrInMenu]="true" class="btn" [disabled]="!writePermission" [routerLink]="['/workspaces', wsNamespace, wsId, 'edit']"
-            routerLinkActive="active">
-      Edit
-    </clr-button>
-    <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
-  </span>
-  <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
-    <clr-button [clrInMenu]="true" class="btn" [disabled]="!ownerPermission" (click)="share()">Share</clr-button>
-    <span *ngIf="!ownerPermission" class="tooltip-content">
-      Owner access is required to share the workspace.
-    </span>
-  </span>
-  <clr-button [clrInMenu]="true" class="btn" [routerLink]="['/workspaces', wsNamespace, wsId, 'clone']" routerLinkActive="active">
-    Clone
+  <clr-button class="btn btn-primary btn-top btn-dropdown">
+    <clr-dropdown class="nav-bar-dropdown">
+      <button type="button" class="btn-dropdown-trigger" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
+        <label class="dropdown-header">Workspace Actions</label>
+        <button class="btn" routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/clone" routerLinkActive="active">
+          Clone
+        </button>
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
+          <button class="btn" [disabled]="!writePermission" routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/edit"
+                      routerLinkActive="active">
+            Edit
+          </button>
+          <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
+        </span>
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
+          <button class="btn" [disabled]="!ownerPermission" (click)="share()">Share</button>
+          <span *ngIf="!ownerPermission" class="tooltip-content">
+            Owner access is required to share the workspace.
+          </span>
+        </span>
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
+          <button class="btn" [disabled]="!ownerPermission" (click)="confirmDelete()">
+            Delete
+          </button>
+          <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>
+        </span>
+      </clr-dropdown-menu>
+    </clr-dropdown>
   </clr-button>
-  <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-    <clr-button [clrInMenu]="true" class="btn" [disabled]="!ownerPermission" (click)="delete()">
-      Delete
-    </clr-button>
-    <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>
-  </span>
+
 </clr-button-group>
 <clr-modal [(clrModalOpen)]="workspaceDeletionError">
   <h3 class="modal-title">Error:</h3>
@@ -43,5 +54,6 @@
 </clr-modal>
 
 <app-workspace-share></app-workspace-share>
+<app-confirm-delete-modal [resourceType]="'workspace'" [resource]="workspace" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
 <app-bug-report></app-bug-report>
 <router-outlet></router-outlet>

@@ -2,8 +2,17 @@
 import {
   BEGIN_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
+  BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
+  LOAD_DEMO_CRITERIA_RESULTS,
   CANCEL_CRITERIA_REQUEST,
+  SET_CRITERIA_SEARCH,
+  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_INGREDIENT_REQUEST,
+  LOAD_AUTOCOMPLETE_OPTIONS,
+  CLEAR_AUTOCOMPLETE_OPTIONS,
+  LOAD_INGREDIENT_LIST,
+  AUTOCOMPLETE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
 
   BEGIN_COUNT_REQUEST,
@@ -61,15 +70,59 @@ export const requestAllCriteria =
   ): ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST] =>
   ({type: BEGIN_ALL_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
 
+export const requestDrugCriteria =
+  (cdrVersionId: number, kind: string, parentId: number, subtype: string
+  ): ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST] =>
+  ({type: BEGIN_DRUG_CRITERIA_REQUEST, cdrVersionId, kind, parentId, subtype});
+
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
   ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
 
+export const loadDemoCriteriaRequestResults =
+  (kind: string, subtype: string, results: any
+  ): ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS] =>
+  ({type: LOAD_DEMO_CRITERIA_RESULTS, kind, subtype, results});
+
 export const cancelCriteriaRequest =
   (kind: string, parentId: number
   ): ActionTypes[typeof CANCEL_CRITERIA_REQUEST] =>
   ({type: CANCEL_CRITERIA_REQUEST, kind, parentId});
+
+export const setCriteriaSearchTerms =
+  (searchTerms: Array<string>
+  ): ActionTypes[typeof SET_CRITERIA_SEARCH] =>
+  ({type: SET_CRITERIA_SEARCH, searchTerms});
+
+export const requestAutocompleteOptions =
+  (cdrVersionId: number, searchTerms: string
+  ): ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST] =>
+  ({type: BEGIN_DRUG_AUTOCOMPLETE_REQUEST, cdrVersionId, searchTerms});
+
+export const requestIngredientsForBrand =
+  (cdrVersionId: number, conceptId: number
+  ): ActionTypes[typeof BEGIN_INGREDIENT_REQUEST] =>
+  ({type: BEGIN_INGREDIENT_REQUEST, cdrVersionId, conceptId});
+
+export const loadAutocompleteOptions =
+  (options: any
+  ): ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS] =>
+  ({type: LOAD_AUTOCOMPLETE_OPTIONS, options});
+
+export const clearAutocompleteOptions =
+  (): ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS] =>
+  ({type: CLEAR_AUTOCOMPLETE_OPTIONS});
+
+export const autocompleteRequestError =
+  (error?: any
+  ): ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR] =>
+  ({type: AUTOCOMPLETE_REQUEST_ERROR, error});
+
+export const loadIngredients =
+  (ingredients: any
+  ): ActionTypes[typeof LOAD_INGREDIENT_LIST] =>
+  ({type: LOAD_INGREDIENT_LIST, ingredients});
 
 export const criteriaRequestError =
   (kind: string, parentId: number, error?: any

@@ -85,13 +85,59 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/search:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns matches on criteria table by code or name
+      operationId: "getCriteriaByTypeForCodeOrName"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: query
+          name: value
+          type: string
+          required: true
+          description: the value to search for
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/subtree/{id}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns subtree for the specified id.
+      operationId: "getCriteriaById"
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          format: int64
+          required: true
+          description: the id of the subtree to find
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/subtype/{subtype}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
-      description: Returns builder criteria tree with the specified criteria type and parentId
+      description: Returns builder criteria tree with the specified criteria type and subtype
       operationId: "getCriteriaByTypeAndSubtype"
       parameters:
         - in: path
@@ -109,6 +155,68 @@ paths:
           description: A collection of criteria
           schema:
             $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/drug:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns criteria tree with the specified name
+      operationId: "getDrugBrandOrIngredientByName"
+      parameters:
+        - in: query
+          name: name
+          type: string
+          required: true
+          description: name of ingredient or brand
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/drug/ingredient/{conceptId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns criteria tree with the specified name
+      operationId: "getDrugIngredientByConceptId"
+      parameters:
+        - in: path
+          name: conceptId
+          type: integer
+          format: int64
+          required: true
+          description: conceptId of brand
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/attribute/{conceptId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns criteria tree with the specified name
+      operationId: "getCriteriaAttributeByConceptId"
+      parameters:
+        - in: path
+          name: conceptId
+          type: integer
+          format: int64
+          required: true
+          description: conceptId of brand
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaAttributeListResponse"
 
   /v1/cohortbuilder/{cdrVersionId}/search:
     parameters:
@@ -218,7 +326,6 @@ definitions:
       - group
       - selectable
       - hasAttribute
-      - predefinedAttributes
     properties:
       id:
         description: id of the criteria
@@ -269,10 +376,51 @@ definitions:
       hasAttributes:
         description: specifies if extra attributes are needed
         type: boolean
-      predefinedAttributes:
-        type: array
+      path:
+        description: full path from parent to this node with ids
+        type: string
+
+  CriteriaAttributeListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
         items:
-          $ref: "#/definitions/Attribute"
+          $ref: "#/definitions/CriteriaAttribute"
+
+  CriteriaAttribute:
+    type: object
+    required:
+      - id
+      - conceptId
+      - valueAsConceptId
+      - conceptName
+      - type
+      - estCount
+    properties:
+      id:
+        description: id of the criteria
+        type: integer
+        format: int64
+      conceptId:
+        description: conceptId of the concept
+        type: integer
+        format: int64
+      valueAsConceptId:
+        description: categorical concept id
+        type: integer
+        format: int64
+      conceptName:
+        description: name of concept
+        type: string
+      type:
+        description: numerical or categorical
+        type: string
+      estCount:
+        description: possible count
+        type: string
 
   SearchRequest:
     description: >
@@ -422,7 +570,6 @@ definitions:
   Attribute:
     type: object
     required:
-      - operator
       - operands
     properties:
       name:
@@ -473,7 +620,7 @@ definitions:
   ModifierType:
     type: string
     description: possible types of modifiers
-    enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE]
+    enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE, ENCOUNTERS]
 
   ChartInfoListResponse:
     type: object

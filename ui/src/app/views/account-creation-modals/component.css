@@ -1,0 +1,12 @@
+.error {
+    padding: 0 0.5rem;
+    font-weight: 500;
+    color: #2F2E7E;
+    margin-top: 0.2rem;
+}
+
+.is-solid.info-icon {
+    color: #302C71;
+    height: 22px;
+    width: 22px;
+}

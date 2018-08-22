@@ -1,8 +1,10 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
+import {DomainType} from 'generated';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
+import {CRITERIA_TYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -15,6 +17,7 @@ import {
   getSearchRequest,
   groupList,
   includeGroups,
+  isAutocompleteLoading,
   isCriteriaLoading,
   isRequesting,
   SR_ID,
@@ -48,7 +51,13 @@ export class CohortSearchActions {
    */
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
+  @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
+  @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
+  @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
+  @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
+  @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
+  @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
@@ -201,7 +210,6 @@ export class CohortSearchActions {
     if (isLoaded || isLoading) {
       return;
     }
-    const fullTree = this.state.getIn(['wizard', 'fullTree']);
     this.requestCriteria(this.cdrVersionId, kind, parentId);
   }
 
@@ -211,8 +219,29 @@ export class CohortSearchActions {
     if (isLoaded || isLoading) {
       return;
     }
-    const fullTree = this.state.getIn(['wizard', 'fullTree']);
     this.requestAllCriteria(this.cdrVersionId, kind, parentId);
+  }
+
+  fetchDrugCriteria(kind: string, parentId: number, subtype: string): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
+  }
+
+  fetchAutocompleteOptions(terms: string): void {
+    this.requestAutocompleteOptions(this.cdrVersionId, terms);
+  }
+
+  fetchIngredientsForBrand(conceptId: number): void {
+    const isLoading = isAutocompleteLoading()(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'search', 'autocomplete']);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
   requestPreview(): void {
@@ -404,20 +433,24 @@ export class CohortSearchActions {
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
-      attributes: []
+      attributes: immParam.get('attributes'),
     };
 
-    if (immParam.get('hasAttributes') || param.type.match(/^DEMO.*/i)) {
+    if (immParam.get('hasAttributes') || param.type === CRITERIA_TYPES.DEMO) {
       param.attributes = typeof immParam.get('attributes') !== 'undefined'
         ? immParam.get('attributes') : [];
-    } else if (immParam.get('predefinedAttributes')) {
-      param.attributes = immParam.get('predefinedAttributes') ;
     }
 
-    if (param.type.match(/^DEMO|VISIT|PM.*/i)) {
-      param.conceptId = immParam.get('conceptId');
-    } else if (param.type.match(/^ICD|CPT|PHECODE.*/i)) {
-      param.domain = immParam.get('domainId');
+    if (param.type === CRITERIA_TYPES.DEMO
+      || param.type === DomainType[DomainType.VISIT]
+      || param.type === CRITERIA_TYPES.PM
+      || param.type === DomainType[DomainType.DRUG]) {
+        param.conceptId = immParam.get('conceptId');
+    } else if (param.type === CRITERIA_TYPES.ICD9
+      || param.type === CRITERIA_TYPES.ICD10
+      || param.type === CRITERIA_TYPES.CPT
+      || param.type === CRITERIA_TYPES.PHECODE) {
+        param.domain = immParam.get('domainId');
     }
 
     return param;
@@ -445,6 +478,7 @@ export class CohortSearchActions {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
             param.code = param.value;
+            param.hasAttributes = param.attributes.length > 0;
             entities.parameters[param.parameterId] = param;
             this.addId(param.parameterId);
             return param.parameterId;
@@ -462,7 +496,6 @@ export class CohortSearchActions {
         return group.id;
       });
     }
-
     return fromJS(entities);
   }
 

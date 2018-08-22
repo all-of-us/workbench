@@ -21,48 +21,57 @@ export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 export const ResearchPurposeItems = {
   methodsDevelopment: {
     shortDescription: 'Methods development/validation study',
-    longDescription: 'The primary purpose of the research is to develop and/or \
-    validate new methods/tools for analyzing or interpreting data (for example, \
-    developing more powerful methods to detect epistatic, gene-environment, or \
-    other types of complex interactions in genome-wide association studies). \
-    Data will be used for developing and/or validating new methods.'
+    longDescription: 'The primary purpose of the research is to develop and/or validate new \
+    methods/tools for analyzing or interpreting data (for example, developing more powerful \
+    methods to detect epistatic, gene-environment, or other types of complex interactions in \
+    genome-wide association studies). Data will be used for developing and/or validating new \
+    methods.'
   },
   diseaseFocusedResearch: {
-    shortDescription: 'Disease focused research',
-    longDescription: 'The primary purpose of the research is to learn more about a \
-    particular disease or disorder (for example, type 2 diabetes), a trait \
-    (for example, blood pressure), or a set of related conditions\
-    (for example, autoimmune diseases, psychiatric disorders).'
+    shortDescription: 'Disease-focused research',
+    longDescription: 'The primary purpose of the research is to learn more about a particular \
+    disease or disorder (for example, type 2 diabetes), a trait (for example, blood pressure), \
+    or a set of related conditions (for example, autoimmune diseases, psychiatric disorders).'
   },
   aggregateAnalysis: {
     shortDescription: 'Aggregate analysis to understand variation in general population',
-    longDescription: 'The primary purpose of the research is to understand variation in the\
+    longDescription: 'The primary purpose of the research is to understand variation in the \
     general population (for example, genetic substructure of a population).'
   },
   controlSet: {
-    shortDescription: 'Control Set',
-    longDescription: 'All of Us data will be used  increase the number of controls available for a\
-    comparison group (for example, a case-control study) to another dataset.'
+    shortDescription: 'Control set',
+    longDescription: 'All of Us data will be used to increase the number of controls \
+    available for a comparison group (for example, a case-control study) to another \
+    dataset.'
   },
   ancestry: {
     shortDescription: 'Population origins or ancestry',
-    longDescription: 'The primary purpose of the research is to study the ancestry or origins\
-    of a specific population.'
+    longDescription: 'The primary purpose of the research is to study the ancestry \
+    or origins of a specific population.'
   },
   population: {
     shortDescription: 'Restricted to a specific population',
-    longDescription: 'This research will focus on a specific population group. For example: a\
-    specific gender, age group or ethnic group.'
+    longDescription: 'This research will focus on a specific population group. \
+    For example: a specific gender, age group or ethnic group.'
   },
   commercialPurpose: {
-    shortDescription: 'Commercial Purpose/entity',
-    longDescription: 'The study is conducted by a for-profit entity and/or in\
+    shortDescription: 'Commercial purpose/entity',
+    longDescription: 'The study is conducted by a for-profit entity and/or in \
     support of a commercial activity.'
   },
   containsUnderservedPopulation: {
-    shortDescription: 'Includes an underserved population',
+    shortDescription: 'Focus on an underserved population',
     longDescription: 'This research will focus on, or include findings on, distinguishing \
     characteristics related to one or more underserved populations'
+  },
+  requestReview: {
+    shortDescription: 'Request a review of your research purpose',
+    /*
+     * The request review description includes a hyperlink, so needs to be coded
+     * inside the html, rather than as text here. There are ways to have it render
+     * html, but it strips out unsafe content, so was removing the click behavior
+     */
+    longDescription: 'SEE HTML'
   }
 };
 
@@ -85,12 +94,15 @@ export class WorkspaceEditComponent implements OnInit {
   oldWorkspaceName: string;
   oldWorkspaceNamespace: string;
   savingWorkspace = false;
+  descriptionNotEntered = false;
   nameNotEntered = false;
   notFound = false;
   workspaceCreationError = false;
+  workspaceCreationConflictError = false;
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
   private accessLevel: WorkspaceAccessLevel;
+  isBlank = isBlank;
   raceList = {
     'American Indian or Alaska Native': UnderservedPopulationEnum.RACEAMERICANINDIANORALASKANATIVE,
     'Hispanic or Latino': UnderservedPopulationEnum.RACEHISPANICORLATINO,
@@ -264,6 +276,7 @@ export class WorkspaceEditComponent implements OnInit {
 
   resetWorkspaceEditor(): void {
     this.workspaceCreationError = false;
+    this.workspaceCreationConflictError = false;
     this.workspaceUpdateError = false;
     this.workspaceUpdateConflictError = false;
     this.savingWorkspace = false;
@@ -275,6 +288,10 @@ export class WorkspaceEditComponent implements OnInit {
     }
     this.nameNotEntered = isBlank(this.workspace.name);
     if (this.nameNotEntered) {
+      return false;
+    }
+    this.descriptionNotEntered = isBlank(this.workspace.description);
+    if (this.descriptionNotEntered) {
       return false;
     }
     return true;
@@ -290,7 +307,11 @@ export class WorkspaceEditComponent implements OnInit {
           this.router.navigate(['workspaces', workspace.namespace, workspace.id]);
         },
         (error) => {
-          this.workspaceCreationError = true;
+          if (error.status === 409) {
+            this.workspaceCreationConflictError = true;
+          } else {
+            this.workspaceCreationError = true;
+          }
         });
   }
 
@@ -348,10 +369,10 @@ export class WorkspaceEditComponent implements OnInit {
     return Object.keys(input);
   }
 
-  bucketAsTwo(input: Array<string>): Array<Array<string>> {
+  bucketAsThree(input: Array<string>): Array<Array<string>> {
     const output = [];
-    for (let i = 0; i < input.length; i += 2) {
-      output.push(input.slice(i, i + 2));
+    for (let i = 0; i < input.length; i += 3) {
+      output.push(input.slice(i, i + 3));
     }
     return output;
   }
@@ -376,10 +397,19 @@ export class WorkspaceEditComponent implements OnInit {
     return this.workspace.researchPurpose.underservedPopulationDetails;
   }
 
+  get isValidWorkspace() {
+    return !isBlank(this.workspace.name) && !isBlank(this.workspace.description);
+  }
+
   get allowSave() {
     if (this.savingWorkspace) {
       return false;
     }
-    return !isBlank(this.workspace.name);
+    return this.isValidWorkspace;
+  }
+
+  openStigmatizationLink() {
+    const stigmatizationURL = `/definitions/stigmatization`;
+    const stigmatizationPage = window.open(stigmatizationURL, '_blank');
   }
 }

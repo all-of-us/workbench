@@ -3,13 +3,11 @@ package org.pmiops.workbench.firecloud;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-
-import com.google.common.collect.ImmutableList;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
@@ -103,23 +101,6 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   private boolean systemOkay(JSONObject systemList, String systemName) {
     return systemList.getJSONObject(systemName).getBoolean("ok");
-  }
-
-  @Override
-  public boolean isRequesterEnabledInFirecloud() {
-    ProfileApi profileApi = profileApiProvider.get();
-    try {
-      Me me = retryHandler.runAndThrowChecked((context) -> profileApi.me());
-      // Users can only use FireCloud if the Google and LDAP flags are enabled.
-      return me.getEnabled() != null
-          && isTrue(me.getEnabled().getGoogle()) && isTrue(me.getEnabled().getLdap());
-    } catch (ApiException e) {
-      if (e.getCode() == NOT_FOUND.value() || e.getCode() == UNAUTHORIZED.value()) {
-        return false;
-      }
-      ExceptionUtils.convertFirecloudException(e);
-      return false;
-    }
   }
 
   @Override
