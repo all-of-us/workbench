@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnInit} from '@angular/core';
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
 

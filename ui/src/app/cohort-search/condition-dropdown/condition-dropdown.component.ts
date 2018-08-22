@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {DomainType} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, DOMAIN_TYPES} from '../constant';
@@ -32,6 +32,7 @@ export class ConditionDropdownComponent implements OnInit, OnDestroy {
     multiIngredient = false;
     error = false;
     subscription: Subscription;
+    @Output() onOptionChange = new EventEmitter<string>();
     readonly domainTypes = DOMAIN_TYPES;
     constructor(
         private ngRedux: NgRedux<CohortSearchState>,
@@ -46,8 +47,16 @@ export class ConditionDropdownComponent implements OnInit, OnDestroy {
         // this.options = [];
         // this.subscription.unsubscribe();
     }
+    launchTree(criteria) {
+        console.log(criteria.name);
+        // type: criteria.type
+        this.onOptionChange.emit(criteria.name);
+        this.getTree(criteria);
+        //    check for launchwizard function
+    }
 
-    launchTree(criteria: any) {
+
+    getTree(criteria: any) {
         const itemId = this.actions.generateId('items');
       //  const groupId = this.actions.generateId(this.role);
         const criteriaType = criteria.type;
