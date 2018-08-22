@@ -8,8 +8,8 @@ import {ParticipantStatusComponent} from './participant-status.component';
 
 import {CohortReviewService, CohortStatus} from 'generated';
 import {ReviewStateService} from '../review-state.service';
-import {updateAndTick} from '../../../testing/test-helpers';
 import {Participant} from '../participant.model';
+import {updateAndTick} from '../../../testing/test-helpers';
 
 class StubRoute {
   snapshot = {
