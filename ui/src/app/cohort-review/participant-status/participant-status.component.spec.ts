@@ -1,13 +1,13 @@
 import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
+import {ClarityModule} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
 
 import {ParticipantStatusComponent} from './participant-status.component';
 
 import {CohortReviewService, CohortStatus} from 'generated';
 import {ReviewStateService} from '../review-state.service';
-
 import {updateAndTick} from '../../../testing/test-helpers';
 import {Participant} from '../participant.model';
 
@@ -47,7 +47,7 @@ describe('ParticipantStatusComponent', () => {
 
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule],
+      imports: [ReactiveFormsModule, ClarityModule],
       declarations: [ParticipantStatusComponent],
       providers: [
         {provide: ReviewStateService, useClass: ReviewStateService},
