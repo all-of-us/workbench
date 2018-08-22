@@ -9,7 +9,7 @@
           {{ annotation.definition.columnName }}
         </span>
             <span  *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-           <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
+           <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
         </label>
       </div>
         <textarea
@@ -28,7 +28,7 @@
           {{ annotation.definition.columnName }}
         </span>
                 <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-                <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
+                <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
             </label>
         </div>
       <div (click)=" dateChange(myDate)" >
@@ -43,7 +43,7 @@
           {{ annotation.definition.columnName }}
         </span>
           <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-          <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
+          <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
       </label>
       <input
          class="integer-style"
@@ -61,7 +61,7 @@
           {{ annotation.definition.columnName }}
         </span>
         <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-          <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
+          <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
       </label>
       <div>
         <clr-dropdown  class="participant-dropdown">
@@ -86,7 +86,6 @@
     <div class="checkbox-container" *ngSwitchCase="kinds.BOOLEAN">
       <label [for]="machineName" class="flex-content-main items-check">
         {{ annotation.definition.columnName }}
-        <!--<em>{{ datatypeDisplay | titlecase }}</em>-->
       </label>
         <input class="checkbox-style"
           (change)="textBlur()"
@@ -95,7 +94,7 @@
           [id]="machineName"
           [formControl]="control">
         <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-        <span><clr-icon *ngIf="successIcon" class="success" shape="success-standard" ></clr-icon></span>
+        <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
 
     </div>
 </div>

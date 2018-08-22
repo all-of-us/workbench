@@ -35,11 +35,13 @@
   margin-left: 10rem;
   margin-top: 3rem;
 }
+
 .footer-button .cancel{
   color:black;
   font-weight: 500;
   font-size: 14px;
 }
+
 .save-disable {
   pointer-events: none;
   opacity: 0.3;

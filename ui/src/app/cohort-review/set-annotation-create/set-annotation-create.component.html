@@ -42,14 +42,6 @@
                   clrDropdownItem>{{ dt.displayName }}</button>
         </clr-dropdown-menu>
       </clr-dropdown>
-      <!--<label for="kind" class="required">3 Annotation Data Type</label>-->
-      <!--<div class="select">-->
-        <!--<select id="kind" name="kind" formControlName="kind">-->
-          <!--<option *ngFor="let dt of datatypes" [value]="dt.value">-->
-              <!--{{ dt.displayName }}-->
-          <!--</option>-->
-        <!--</select>-->
-      <!--</div>-->
     </div>
   </section>
 
@@ -67,12 +59,9 @@
                   (click)="removeEnumValue(val)">
             <clr-icon shape="minus-circle" size="18"></clr-icon>
           </button>
-          <!--{{ val }}-->
         </ng-container>
-        <!--<label for="add-value">Add a Value</label>-->
 
       </div>
-      <!--<ul>-->
       <input type="text"
              class="annotation-value-input"
              placeholder="ADD A VALUE"
@@ -85,7 +74,6 @@
         <clr-icon shape="plus-circle" size="18"></clr-icon>
       </button>
 
-      <!--</ul>-->
     </section>
   </ng-container>
   <app-annotation-item
@@ -107,8 +95,7 @@
             class="btn btn-primary"
             [clrLoading]="posting"
             [disabled]="formIsInvalid"
-            (click)="create()"
-            >
+            (click)="create()">
       Create
     </button>
 
