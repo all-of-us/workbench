@@ -1,5 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.springframework.data.domain.PageRequest;
@@ -78,9 +80,6 @@ public class ConceptService {
 
         Specification<Concept> conceptSpecification =
                 (root, criteriaQuery, criteriaBuilder) -> {
-
-                    //root.fetch("synonyms");
-
                     List<Predicate> predicates = new ArrayList<>();
                     List<Predicate> standardConceptPredicates = new ArrayList<>();
                     standardConceptPredicates.add(criteriaBuilder.equal(root.get("standardConcept"),
@@ -97,13 +96,7 @@ public class ConceptService {
                     Expression<Double> matchExp = null;
                     Expression<Double> matchSynonymExp = null;
 
-                    Join<Concept, ConceptSynonym> csJoin = root.join("synonyms",JoinType.LEFT);
-                    //Fetch<Concept, ConceptSynonym> csJoin = root.fetch("synonyms", JoinType.LEFT);
-                    Fetch fetchSyns = root.fetch("synonyms", JoinType.LEFT);
-
-                    root.join("synonyms",JoinType.LEFT);
-                    //Fetch<Concept, ConceptSynonym> csJoin = root.fetch("synonyms", JoinType.LEFT);
-                    root.fetch("synonyms", JoinType.LEFT);
+                    Join<Concept, ConceptSynonym> csJoin = (Join)root.fetch("synonyms",JoinType.LEFT);
 
                     List<Predicate> conceptCodeIDName = new ArrayList<>();
 
