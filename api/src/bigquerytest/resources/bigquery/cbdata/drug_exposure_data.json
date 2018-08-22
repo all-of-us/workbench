@@ -18,7 +18,7 @@
     "dose_unit_concept_id":11,
     "lot_number":"1",
     "provider_id":11,
-    "visit_occurrence_id":11,
+    "visit_occurrence_id":1,
     "drug_source_value":"11",
     "drug_source_concept_id":11,
     "route_source_value":"11",
