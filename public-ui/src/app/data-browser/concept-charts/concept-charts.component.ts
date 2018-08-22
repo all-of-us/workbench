@@ -22,10 +22,6 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
 
   private subscriptions: ISubscription[] = [];
   loadingStack: any = [];
-  loading() {
-    return this.loadingStack.length > 0;
-  }
-
   results;
   maleGenderResult: AchillesResult;
   femaleGenderResult: AchillesResult;
@@ -38,6 +34,10 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   OTHER_GENDER_ID = '8521';
 
   constructor(private api: DataBrowserService) { }
+
+  loading() {
+    return this.loadingStack.length > 0;
+  }
 
   ngOnInit() {
     // Get chart results for concept
