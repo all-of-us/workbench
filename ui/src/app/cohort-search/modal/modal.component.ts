@@ -106,20 +106,20 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
 
     changedRootNode(flag: string) {
 
-        if (flag) {
+        // if (flag) {
             console.log(flag);
-            this.icdFlag = true;
-            console.log(this.rootNode);
-            ;
-            // return Map({
-            //
-            //     type: 'ICD9',
-            //     fullTree: this.fullTree,
-            //     id: 0,    // root parent ID is always 0
-            // });
-            // console.log(flag);
-            // console.log('hi');
-        }
+        //     this.icdFlag = true;
+        //     this.rootNode;
+        //     ;
+        //     // return Map({
+        //     //
+        //     //     type: 'ICD9',
+        //     //     fullTree: this.fullTree,
+        //     //     id: 0,    // root parent ID is always 0
+        //     // });
+        //     // console.log(flag);
+        //     // console.log('hi');
+        // }
     }
 
   cancel() {
@@ -140,28 +140,28 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   get rootNode() {
 
 
-      // return Map({
+      return Map({
+
+          type: this.ctype,
+          fullTree: this.fullTree,
+          id: 0,    // root parent ID is always 0
+      });
+      // if( this.icdFlag){
+      //     return Map({
       //
-      //     type: this.ctype,
-      //     fullTree: this.fullTree,
-      //     id: 0,    // root parent ID is always 0
-      // });
-      if( this.icdFlag){
-          return Map({
-
-              type: 'ICD9',
-              fullTree: this.fullTree,
-              id: 0,    // root parent ID is always 0
-          });
-
-      }else{
-          return Map({
-
-              type: this.ctype,
-              fullTree: this.fullTree,
-              id: 0,    // root parent ID is always 0
-          });
-      }
+      //         type: 'ICD9',
+      //         fullTree: this.fullTree,
+      //         id: 0,    // root parent ID is always 0
+      //     });
+      //
+      // }else{
+      //     return Map({
+      //
+      //         type: this.ctype,
+      //         fullTree: this.fullTree,
+      //         id: 0,    // root parent ID is always 0
+      //     });
+      // }
 
   }
 

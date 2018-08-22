@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnChanges, OnInit, Output} from '@angular/core';
 import {DomainType} from 'generated';
 import {CRITERIA_TYPES, DOMAIN_TYPES} from '../constant';
 import {NodeComponent} from '../node/node.component';
@@ -17,10 +17,21 @@ import {Map} from "immutable";
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css']
 })
-export class TreeComponent extends NodeComponent implements OnInit {
+export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   _type: string;
     readonly domainTypes = DOMAIN_TYPES;
-    @Output() onOptionChange = new EventEmitter<string>();
+    @Output() openTree = new EventEmitter<string>();
+     testOptionChange= false;
+
+    ngOnChanges(){
+        super.ngOnInit();
+        // if(this.optionChange){
+        //     console.log('checked----------->>')
+        //     super.ngOnInit();
+        //     setTimeout(() => super.loadChildren(true));
+        // }
+        // this.optionChange()
+    }
   ngOnInit() {
 
     super.ngOnInit();
@@ -38,9 +49,14 @@ export class TreeComponent extends NodeComponent implements OnInit {
       return this.node.get('type') === DomainType.CONDITION || CRITERIA_TYPES.ICD9;
   }
     optionChange(flag) {
-      if(flag){
+        if (flag) {
+           this.testOptionChange = true;
+            setTimeout(() => super.loadChildren(true));
+           // super.ngOnInit();
+           // this.openTree.emit(flag);
 
-      }
+        }
+    }
 // console.log(criteria.name);
 //                 // type: criteria.type
 //         this.onOptionChange.emit(criteria.name);

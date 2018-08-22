@@ -63,7 +63,7 @@
                   <!-- Tree Page -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
                     <h1>helloo{{rootNode}}</h1>
-                    <crit-tree (onOptionChange)="changedRootNode($event)" [node]="rootNode"></crit-tree>
+                    <crit-tree (openTree)="changedRootNode($event)" [node]="rootNode"></crit-tree>
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">

@@ -50,21 +50,22 @@ export class ConditionDropdownComponent implements OnInit, OnDestroy {
     launchTree(criteria) {
         console.log(criteria.name);
         // type: criteria.type
-        this.onOptionChange.emit(criteria.name);
         this.getTree(criteria);
+        this.onOptionChange.emit(criteria.name);
+
         //    check for launchwizard function
     }
 
 
     getTree(criteria: any) {
         const itemId = this.actions.generateId('items');
-      //  const groupId = this.actions.generateId(this.role);
+        const groupId = this.actions.generateId("excludes");
         const criteriaType = criteria.type;
         const fullTree = criteria.fullTree || false;
-      //  this.actions.initGroup(this.role, groupId);
-      //  const role = this.role;
-       const context = {criteriaType, itemId, fullTree};
-          this.actions.openWizard(itemId, context);
+       this.actions.initGroup("excludes", groupId);
+        const role = "excludes";
+       const context = {criteriaType, role, groupId, itemId, fullTree};
+          this.actions.setWizardContext(context);
     }
 
 }

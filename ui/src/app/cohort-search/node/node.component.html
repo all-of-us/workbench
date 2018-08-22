@@ -1,5 +1,6 @@
 <clr-tree-node >
-
+<h1>hi</h1>
+  <h1>hello{{testChange}}</h1>
   <div class="clr-treenode-link container" (click)="toggleExpanded()">
     <crit-node-info [node]="node"></crit-node-info>
   </div>
@@ -30,7 +31,7 @@
           <clr-icon shape="error-standard"></clr-icon>
           <em>Failed to Load Criteria</em>
         </div>
-        <crit-node *ngFor="let item of node.get('children')" [node]="item"></crit-node>
+        <crit-node *ngFor="let item of node.get('children')" [node]="item" []></crit-node>
       </div>
     </ng-container>
   </ng-template>

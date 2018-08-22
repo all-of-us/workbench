@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -23,8 +23,9 @@ import {highlightMatches} from '../utils';
   templateUrl: './node.component.html',
   styleUrls: ['./node.component.css']
 })
-export class NodeComponent implements OnInit, OnDestroy {
+export class NodeComponent implements OnInit, OnDestroy, OnChanges {
   @Input() node;
+  @Input() testChange = false;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
 
   /*
@@ -59,7 +60,13 @@ export class NodeComponent implements OnInit, OnDestroy {
     private ngRedux: NgRedux<CohortSearchState>,
     private actions: CohortSearchActions,
   ) {}
+ngOnChanges(){
+    if( this.testChange) {
+      console.log("testingg------>>>")
+      this.ngOnInit();
+    }
 
+}
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
     if (!this.fullTree || this.node.get('id') === 0) {
