@@ -57,11 +57,11 @@ public class UserRecentResource {
   }
 
   @Column(name = "lastAccessDate")
-  public Timestamp getLastAccessTime() {
+  public Timestamp getLastAccessDate() {
     return lastAccessDate;
   }
 
-  public void setLastAccessTime(Timestamp lastAccessDate) {
+  public void setLastAccessDate(Timestamp lastAccessDate) {
     this.lastAccessDate = lastAccessDate;
   }
 }

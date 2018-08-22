@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Service
 public class UserRecentResourceServiceImpl implements UserRecentResourceService {
@@ -45,7 +46,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       resource.setCohortId(null);
       resource.setNotebookName(notebookName);
     }
-    resource.setLastAccessTime(lastAccessDateTime);
+    resource.setLastAccessDate(lastAccessDateTime);
     getDao().save(resource);
   }
 
@@ -67,7 +68,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       resource.setCohortId(cohortId);
       resource.setNotebookName(null);
     }
-    resource.setLastAccessTime(lastAccessDateTime);
+    resource.setLastAccessDate(lastAccessDateTime);
     getDao().save(resource);
   }
 
@@ -80,13 +81,22 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   /**
+   * Retrieves the list of all resources recently accessed by user in descending order of last access date
+   * @param userId : User id for whom the resources are returned
+   */
+  @Override
+  public List<UserRecentResource> findAllResourcesByUser(long userId) {
+    return getDao().findUserRecentResourcesByUserIdOrderByLastAccessDateDesc(userId);
+  }
+
+  /**
    * Check number of entries in user_recent_resource for user,
    * If it exceeds USER_ENTRY_COUNT, delete the one with earliest lastAccessTime
    */
   private void handleUserLimit(long userId) {
     long count = getDao().countUserRecentResourceByUserId(userId);
     while (count-- >= USER_ENTRY_COUNT) {
-      UserRecentResource resource = getDao().findTopByUserIdOrderByLastAccessTime(userId);
+      UserRecentResource resource = getDao().findTopByUserIdOrderByLastAccessDate(userId);
       getDao().delete(resource);
     }
   }

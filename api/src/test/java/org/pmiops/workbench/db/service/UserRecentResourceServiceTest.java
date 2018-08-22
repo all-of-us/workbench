@@ -26,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -158,6 +159,20 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.deleteNotebookEntry(workspaceId, userId, "notebook");
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 0);
+  }
+  @Test
+  public void testFindAllResources() {
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook1", new Timestamp(clock.millis() - 10000));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook2", new Timestamp(clock.millis() + 10000));
+    userRecentResourceService.updateCohortEntry(workspaceId, userId, cohortId, new Timestamp(clock.millis()));
+    newUser.setUserId(78l);
+    userDao.save(newUser);
+    userRecentResourceService.updateCohortEntry(workspaceId, 78l, cohortId, new Timestamp(clock.millis()));
+    List<UserRecentResource> resources = userRecentResourceService.findAllResourcesByUser(userId);
+    assertEquals(resources.size(), 3);
+    assertEquals(resources.get(0).getNotebookName(), "notebook2");
+    assertEquals(resources.get(1).getCohortId(), cohortId);
+    assertEquals(resources.get(2).getNotebookName(), "notebook1");
   }
 }
 
