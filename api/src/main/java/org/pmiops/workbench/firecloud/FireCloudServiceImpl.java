@@ -104,23 +104,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public boolean isRequesterEnabledInFirecloud() {
-    ProfileApi profileApi = profileApiProvider.get();
-    try {
-      Me me = retryHandler.runAndThrowChecked((context) -> profileApi.me());
-      // Users can only use FireCloud if the Google and LDAP flags are enabled.
-      return me.getEnabled() != null
-          && isTrue(me.getEnabled().getGoogle()) && isTrue(me.getEnabled().getLdap());
-    } catch (ApiException e) {
-      if (e.getCode() == NOT_FOUND.value() || e.getCode() == UNAUTHORIZED.value()) {
-        return false;
-      }
-      ExceptionUtils.convertFirecloudException(e);
-      return false;
-    }
-  }
-
-  @Override
   public Me getMe() {
     ProfileApi profileApi = profileApiProvider.get();
     return retryHandler.run((context) -> profileApi.me());

@@ -22,7 +22,7 @@
       <column name="domain_id" type="STRING"/>
       <column name="concept_id" type="STRING"/>
       <column name="has_attribute" type="BOOLEAN"/>
-      <column name="predefined_attributes" type="STRING"/>
+      <column name="path" type="STRING"/>
     </loadData>
 
   </changeSet>
