@@ -73,6 +73,7 @@ public class Workspace {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Set<Cohort> cohorts = new HashSet<Cohort>();
+  private Set<ConceptSet> conceptSets = new HashSet<ConceptSet>();
 
   private boolean diseaseFocusedResearch;
   private String diseaseOfFocus;
@@ -376,6 +377,15 @@ public class Workspace {
 
   public void addCohort(Cohort cohort) {
     this.cohorts.add(cohort);
+  }
+
+  @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
+  public Set<ConceptSet> getConceptSets() {
+    return conceptSets;
+  }
+
+  public void setConceptSets(Set<ConceptSet> cohorts) {
+    this.conceptSets = conceptSets;
   }
 
   @Transient

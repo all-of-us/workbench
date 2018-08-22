@@ -6,6 +6,7 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.ConceptSetDomain;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
@@ -49,6 +50,26 @@ public final class StorageEnums {
 
   public static Short authorityToStorage(Authority authority) {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
+  }
+
+  private static final BiMap<ConceptSetDomain, Short> CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN =
+      ImmutableBiMap.<ConceptSetDomain, Short>builder()
+      .put(ConceptSetDomain.CONDITION, (short) 0)
+      .put(ConceptSetDomain.DEATH, (short) 1)
+      .put(ConceptSetDomain.DEVICE, (short) 2)
+      .put(ConceptSetDomain.DRUG, (short) 3)
+      .put(ConceptSetDomain.MEASUREMENT, (short) 4)
+      .put(ConceptSetDomain.OBSERVATION, (short) 5)
+      .put(ConceptSetDomain.PROCEDURE, (short) 6)
+      .put(ConceptSetDomain.VISIT, (short) 7)
+      .build();
+
+  public static ConceptSetDomain conceptSetDomainFromStorage(Short domain) {
+    return CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN.inverse().get(domain);
+  }
+
+  public static Short conceptSetDomainToStorage(ConceptSetDomain domain) {
+    return CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN.get(domain);
   }
 
   private static final BiMap<BillingProjectStatus, Short> CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS =

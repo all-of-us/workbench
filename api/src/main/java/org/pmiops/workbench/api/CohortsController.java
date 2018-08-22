@@ -292,7 +292,7 @@ public class CohortsController implements CohortsApiDelegate {
 
     org.pmiops.workbench.db.model.Cohort cohort =
         cohortDao.findOne(cohortId);
-    if (cohort == null) {
+    if (cohort == null || cohort.getWorkspaceId() != workspace.getWorkspaceId()) {
       throw new NotFoundException(String.format(
           "No cohort with name %s in workspace %s.", cohortId, workspace.getFirecloudName()));
     }

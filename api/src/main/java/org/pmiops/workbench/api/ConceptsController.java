@@ -48,7 +48,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptService conceptService;
   private final WorkspaceService workspaceService;
 
-  private static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
+  static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->  new Concept()
             .conceptClassId(concept.getConceptClassId())
             .conceptCode(concept.getConceptCode())

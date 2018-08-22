@@ -581,6 +581,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
         workspaceNamespace, workspaceId);
+    // CLONE concept sets
     if (fromWorkspace == null) {
       throw new NotFoundException(String.format(
           "Workspace %s/%s not found", workspaceNamespace, workspaceId));
