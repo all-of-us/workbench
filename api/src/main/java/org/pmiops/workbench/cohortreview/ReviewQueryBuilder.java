@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class ReviewTabQueryBuilder {
+public class ReviewQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String TABLE_PREFIX = "p_";
@@ -107,6 +107,18 @@ public class ReviewTabQueryBuilder {
       "from `${projectId}.${dataSetId}.%s`\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
 
+  private static final String CHART_DATA_TEMPLATE =
+    "select distinct a.standard_name, a.standard_vocabulary, DATE(a.start_datetime) as start_date, a.age_at_event, rnk\n" +
+      "from `${projectId}.${dataSetId}.%s` a\n" +
+      "left join (select standard_code, RANK() OVER(ORDER BY COUNT(*) DESC) as rnk\n" +
+      "from `${projectId}.${dataSetId}.%s`\n" +
+      "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+      "group by standard_code\n" +
+      "LIMIT 5) b on a.standard_code = b.standard_code\n" +
+      "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+      "and rnk <= 5\n" +
+      "order by rnk, a.standard_name, start_date\n";
+
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
                                           PageRequest pageRequest) {
@@ -130,6 +142,19 @@ public class ReviewTabQueryBuilder {
                                                DomainType domain) {
     String tableName = TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(COUNT_TEMPLATE, tableName);
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
+    return QueryJobConfiguration
+      .newBuilder(finalSql)
+      .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
+  }
+
+  public QueryJobConfiguration buildChartDataQuery(Long participantId,
+                                               DomainType domain) {
+    String tableName = TABLE_PREFIX + domain.toString().toLowerCase();
+    String finalSql = String.format(CHART_DATA_TEMPLATE, tableName);
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
     return QueryJobConfiguration
