@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, OnChanges} from '@angular/core';
 import {DomainType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -14,6 +14,7 @@ import {
   wizardOpen,
 } from '../redux';
 import {typeToTitle} from '../utils';
+import {CohortAnnotationDefinition} from "../../../generated";
 
 
 @Component({
@@ -24,7 +25,7 @@ import {typeToTitle} from '../utils';
     '../../styles/buttons.css',
   ]
 })
-export class ModalComponent implements OnInit, OnDestroy {
+export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
@@ -37,13 +38,17 @@ export class ModalComponent implements OnInit, OnDestroy {
   fullTree: boolean;
   subscription: Subscription;
   attributesNode: any;
-
   open = false;
   noSelection = true;
+    icdFlag= false;
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
   constructor(private actions: CohortSearchActions) {}
+
+  ngOnChanges(){
+
+  }
 
   ngOnInit() {
     this.subscription = this.open$
@@ -99,6 +104,24 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+    changedRootNode(flag: string) {
+
+        if (flag) {
+            console.log(flag);
+            this.icdFlag = true;
+            console.log(this.rootNode);
+            ;
+            // return Map({
+            //
+            //     type: 'ICD9',
+            //     fullTree: this.fullTree,
+            //     id: 0,    // root parent ID is always 0
+            // });
+            // console.log(flag);
+            // console.log('hi');
+        }
+    }
+
   cancel() {
     this.open = false;
     this.actions.cancelWizard();
@@ -115,11 +138,31 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-    return Map({
-      type: this.ctype,
-      fullTree: this.fullTree,
-      id: 0,    // root parent ID is always 0
-    });
+
+
+      // return Map({
+      //
+      //     type: this.ctype,
+      //     fullTree: this.fullTree,
+      //     id: 0,    // root parent ID is always 0
+      // });
+      if( this.icdFlag){
+          return Map({
+
+              type: 'ICD9',
+              fullTree: this.fullTree,
+              id: 0,    // root parent ID is always 0
+          });
+
+      }else{
+          return Map({
+
+              type: this.ctype,
+              fullTree: this.fullTree,
+              id: 0,    // root parent ID is always 0
+          });
+      }
+
   }
 
   get selectionTitle() {

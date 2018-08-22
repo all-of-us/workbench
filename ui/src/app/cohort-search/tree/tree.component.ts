@@ -1,8 +1,11 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {DomainType} from 'generated';
-import {DOMAIN_TYPES} from '../constant';
+import {CRITERIA_TYPES, DOMAIN_TYPES} from '../constant';
 import {NodeComponent} from '../node/node.component';
-
+import {NgRedux} from "@angular-redux/store";
+import {CohortSearchActions, CohortSearchState} from "../redux";
+import {Map} from "immutable";
+// import {CohortSearchActions} from '../redux';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -17,10 +20,12 @@ import {NodeComponent} from '../node/node.component';
 export class TreeComponent extends NodeComponent implements OnInit {
   _type: string;
     readonly domainTypes = DOMAIN_TYPES;
+    @Output() onOptionChange = new EventEmitter<string>();
   ngOnInit() {
+
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
-    this._type = this.node.get('type', '');
+   // this._type = this.node.get('type', '');
   }
 
   showSearch() {
@@ -29,6 +34,15 @@ export class TreeComponent extends NodeComponent implements OnInit {
   }
 
   showDropDown() {
-      return this.node.get('type') === DomainType.CONDITION;
+   // console.log(this.node.get('type'));
+      return this.node.get('type') === DomainType.CONDITION || CRITERIA_TYPES.ICD9;
   }
+    launchTree(criteria) {
+console.log(criteria.name);
+                // type: criteria.type
+        this.onOptionChange.emit(criteria.name);
+        setTimeout(() => super.loadChildren(true));
+    //    check for launchwizard function
+    }
+
 }

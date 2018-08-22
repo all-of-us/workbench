@@ -12,6 +12,8 @@
 <div class="dropdown-search-container">
   <div [ngClass]="{'condition-dropdown' : showDropDown()}">
     <ng-container *ngIf = "showDropDown() && !loading">
+
+
       <clr-dropdown>
         <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
           Dropdown
@@ -20,15 +22,16 @@
         <clr-dropdown-menu *clrIfOpen>
           <ng-container *ngFor="let criteria of domainTypes">
             <button *ngIf="criteria.name ==='ICD9 Codes' || criteria.name ==='ICD10 Codes' "
-
                     id="criteria.type"
                     class="dropdown-item"
                     type="button"
+                    (click)="launchTree(criteria)"
                     clrDropdownItem>{{criteria.name}}</button>
           </ng-container>
 
         </clr-dropdown-menu>
       </clr-dropdown>
+<!--<app-crit-dropdown></app-crit-dropdown>-->
     </ng-container>
   </div>
 
@@ -42,4 +45,4 @@
 <div *ngIf="numMatches > 1">
   <b>Note:</b> There are {{numMatches}} matches for your search
 </div>
-<crit-node *ngFor="let item of children" [node]="item"></crit-node>
+<crit-node *ngFor="let item of children" [node]="item" ></crit-node>

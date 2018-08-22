@@ -48,7 +48,11 @@
             </button>
           </div>
           <div class="content" *ngIf="open">
+            <!--<h1>1 {{ctype}}</h1>-->
+            <!--<h1>{{mode}}</h1>-->
             <ng-container [ngSwitch]="ctype">
+
+
               <crit-demographics *ngSwitchCase="criteriaTypes.DEMO"
                                  (cancel)="cancel()"
                                  (finish)="finish()">
@@ -58,7 +62,8 @@
                 <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes'">
                   <!-- Tree Page -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
-                    <crit-tree [node]="rootNode"></crit-tree>
+                    <h1>helloo{{rootNode}}</h1>
+                    <crit-tree (onOptionChange)="changedRootNode($event)" [node]="rootNode"></crit-tree>
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
@@ -75,6 +80,7 @@
         </div>
 
         <div class="col col-sm-4 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO">
+          <h1>2 {{ctype}}</h1>
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>
