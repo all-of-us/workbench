@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, OnChanges} from '@angular/core';
 import {DomainType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -25,7 +25,7 @@ import {stripHtml, typeToTitle} from '../utils';
     '../../styles/buttons.css',
   ]
 })
-export class ModalComponent implements OnInit, OnDestroy {
+export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
@@ -42,12 +42,17 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   open = false;
   noSelection = true;
+    icdFlag= false;
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
   scrollTime: number;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
+
+  ngOnChanges(){
+
+  }
 
   ngOnInit() {
     this.subscription = this.open$

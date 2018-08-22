@@ -1,0 +1,17 @@
+<clr-dropdown>
+    <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
+        Dropdown
+        <clr-icon shape="caret down"></clr-icon>
+    </button>
+    <clr-dropdown-menu *clrIfOpen>
+        <ng-container *ngFor="let criteria of domainTypes">
+            <button *ngIf="criteria.name ==='ICD9 Codes' || criteria.name ==='ICD10 Codes' "
+                    id="criteria.type"
+                    class="dropdown-item"
+                    type="button"
+                    (click)="launchTree(criteria.name)"
+                    clrDropdownItem>{{criteria.name}}</button>
+        </ng-container>
+
+    </clr-dropdown-menu>
+</clr-dropdown>

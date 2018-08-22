@@ -25,7 +25,7 @@ import {SearchGroupSelectComponent} from './search-group-select/search-group-sel
 import {SearchGroupComponent} from './search-group/search-group.component';
 import {SelectionInfoComponent} from './selection-info/selection-info.component';
 import {TreeComponent} from './tree/tree.component';
-
+import {ConditionDropdownComponent} from './condition-dropdown/condition-dropdown.component';
 import {CohortCommonModule} from '../cohort-common/module';
 
 /* Other Objects */
@@ -59,6 +59,7 @@ const routes: Routes = [{
   ],
   declarations: [
     CohortSearchComponent,
+      ConditionDropdownComponent,
     DemographicsComponent,
     GenderChartComponent,
     ModalComponent,
