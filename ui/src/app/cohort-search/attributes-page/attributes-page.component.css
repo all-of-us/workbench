@@ -147,3 +147,8 @@ input[type=radio] {
     text-align: center;
     font-size: 0.45rem;
 }
+
+.form-group > .checkbox-inline {
+    width: 24%;
+    margin-right: 1%;
+}

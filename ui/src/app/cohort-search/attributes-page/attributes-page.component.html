@@ -44,7 +44,7 @@
                   clrDropdownItem>{{option.name}}</button>
                 </clr-dropdown-menu>
               </clr-dropdown>
-              <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" required>
+              <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" [required]="node.get('type') === criteriaTypes.PM">
             </div>
             <div *ngIf="attr.operator && attrForm.value['operator'+i] !== 'ANY'" class="form-group range-container">
               <input class="number-container"
@@ -83,7 +83,7 @@
         <div class="or-circle">OR</div>
         <div class="attr-name-color">Categorical Values</div>
         <div class="form-group">
-          <clr-checkbox *ngFor="let attr of attrs.CAT" [(clrChecked)]="attr.checked" [clrInline]="true">
+          <clr-checkbox *ngFor="let attr of attrs.CAT" class="" [(clrChecked)]="attr.checked" [clrInline]="true">
             {{attr.conceptName}}
             <span class="badge badge-info">
               {{ attr.estCount }}
@@ -92,12 +92,12 @@
         </div>
       </ng-container>
     </ng-container>
-    <div *ngIf="attrForm.valid || attrs.EXISTS" class="count-preview ">
+    <div *ngIf="isValid(attrForm) || attrs.EXISTS" class="count-preview ">
       <div class="row">
         <div *ngIf="!attrs.EXISTS" class="col-lg-3">
           <button type="button"
             class="btn calculate-btn"
-            [disabled]="!attrForm.valid || rangeAlert"
+            [disabled]="rangeAlert"
             (click)="requestPreview(attrForm)">
             Calculate
           </button>
@@ -109,15 +109,15 @@
           <div class="result-text">
             Results
           </div>
-           <div >
+           <div>
               Number Participants:
              <span class="text-bold" *ngIf="!preview.get('requesting')">
              {{ preview.get('count', 0)  | number }}
              </span>
           </div>
         </div>
-        <div class="col-lg-3 button-padding" *ngIf="preview.get('count')">
-          <button class="btn add-button " type="submit" [disabled]="!attrForm.valid || rangeAlert"> ADD THIS RESULT</button>
+        <div class="col-lg-3 button-padding" *ngIf="preview.get('count') && !preview.get('requesting')">
+          <button class="btn add-button " type="submit" [disabled]="rangeAlert"> ADD THIS RESULT</button>
         </div>
       </div>
     </div>

@@ -25,7 +25,7 @@ import {stripHtml} from '../utils';
  */
 function needsAttributes(node: any) {
   // will change soon to check for attributes property instead of id
-  return node.get('hasAttributes') === true || node.get('type') === CRITERIA_TYPES.MEAS;
+  return node.get('hasAttributes') === true;
 }
 
 
@@ -129,7 +129,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
         this.actions.fetchAttributes(this.node);
       } else {
-        console.log(PREDEFINED_ATTRIBUTES.BP_DETAIL);
         const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{

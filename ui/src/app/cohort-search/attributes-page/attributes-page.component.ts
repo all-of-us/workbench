@@ -69,7 +69,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         id: 3,
         conceptId: 12345,
         valueAsConceptId: 2345,
-        conceptName: 'POSITIVE',
+        conceptName: 'Detected',
         type: 'CAT',
         estCount: '465'
       },
@@ -77,9 +77,49 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         id: 4,
         conceptId: 12345,
         valueAsConceptId: 2346,
-        conceptName: 'PRESENT',
+        conceptName: 'No',
         type: 'CAT',
         estCount: '287'
+      },
+      {
+        id: 5,
+        conceptId: 12345,
+        valueAsConceptId: 2347,
+        conceptName: 'Positive',
+        type: 'CAT',
+        estCount: '46'
+      },
+      {
+        id: 6,
+        conceptId: 12345,
+        valueAsConceptId: 2348,
+        conceptName: 'Yes',
+        type: 'CAT',
+        estCount: '297'
+      },
+      {
+        id: 7,
+        conceptId: 12345,
+        valueAsConceptId: 2349,
+        conceptName: 'Negative',
+        type: 'CAT',
+        estCount: '16'
+      },
+      {
+        id: 8,
+        conceptId: 12345,
+        valueAsConceptId: 2350,
+        conceptName: 'Normal',
+        type: 'CAT',
+        estCount: '93'
+      },
+      {
+        id: 9,
+        conceptId: 12345,
+        valueAsConceptId: 2351,
+        conceptName: 'Present',
+        type: 'CAT',
+        estCount: '4912'
       }
     ]
 
@@ -91,7 +131,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.subscription.add(this.node$.subscribe(node => {
       this.node = node;
       if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
-        console.log(this.node.get('attributes'));
         this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
             case 'NUM':
@@ -152,7 +191,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   inputChange() {
     this.rangeAlert = false;
     this.attrs.NUM.forEach(attr => {
-      attr.operands.forEach(operand => {
+      attr.operands.filter(operand => !!operand)
+        .forEach(operand => {
         if (operand < attr.MIN
           || (this.node.get('type') === CRITERIA_TYPES.PM ? false : operand > attr.MAX)) {
           this.rangeAlert = true;
@@ -161,8 +201,27 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     });
   }
 
+  isValid(form: NgForm) {
+    if (this.node.get('type') === CRITERIA_TYPES.PM || !form.valid) {
+      return form.valid;
+    }
+    let valid = false;
+    this.attrs.NUM.forEach(num => {
+      if (num.operator) {
+        valid = true;
+      }
+    });
+    this.attrs.CAT.forEach(cat => {
+      if (cat.checked) {
+        valid = true;
+      }
+    });
+    return valid;
+  }
+
   refresh() {
     this.preview = Map();
+    this.rangeAlert = false;
     this.attrs.EXISTS = false;
     this.attrs.NUM.forEach(num => {
       num.operator = null;
@@ -203,7 +262,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         if (i > 0) {
           name += ' / ';
         }
-        name += (attr.name !== '' && values['operator' + i] !== 'ANY') ? attr.name + ' ' : '';
+        name += (this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+          && values['operator' + i] !== 'ANY')
+          ? attr.name + ' ' : '';
         switch (values['operator' + i]) {
           case 'ANY':
             paramAttr.operands = [];
@@ -248,7 +309,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           return attr;
         });
       }
-      name += (attrs[0].name !== 'ANY'
+      name += (this.node.get('type') === CRITERIA_TYPES.PM && attrs[0].name !== 'ANY'
         ? this.units[this.node.get('subtype')]
         : '') + ')';
     }

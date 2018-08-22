@@ -178,7 +178,6 @@ export class CohortSearchEpics {
     action$.ofType(SHOW_ATTRIBUTES_PAGE).mergeMap(
       ({cdrVersionId, node}: AttributeRequestAction) => {
         const conceptId = node.get('conceptId');
-        console.log(conceptId);
         return this.service.getCriteriaAttributeByConceptId(cdrVersionId, conceptId)
           .map(result => loadAttributes(node, result.items))
           .catch(e => Observable.of(attributeRequestError(e)));
@@ -188,9 +187,8 @@ export class CohortSearchEpics {
 
   fetchCount: CSEpic = (action$) => (
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
-      ({cdrVersionId, entityType, entityId, request}: CountRequestAction) => {
-        console.log(request);
-        return this.service.countParticipants(cdrVersionId, request)
+      ({cdrVersionId, entityType, entityId, request}: CountRequestAction) =>
+        this.service.countParticipants(cdrVersionId, request)
           .map(response => typeof response === 'number' ? response : 0)
           .map(count => loadCountRequestResults(entityType, entityId, count))
           .race(action$
@@ -198,7 +196,7 @@ export class CohortSearchEpics {
             .filter(compare({entityType, entityId}))
             .first())
           .catch(e => Observable.of(countRequestError(entityType, entityId, e)))
-      })
+      )
   )
 
   previewCount: CSEpic = (action$) => (
