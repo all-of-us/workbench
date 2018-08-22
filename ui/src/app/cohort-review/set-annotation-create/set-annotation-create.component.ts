@@ -82,7 +82,7 @@ export class SetAnnotationCreateComponent {
           this.annotationOptions = '';
           // this.isEnum = false;
           this.kind.patchValue('');
-          this.enumValues.length = 0
+          this.enumValues.length = 0;
          this.name.patchValue('');
         this.onFinish.emit(true);
       });
@@ -130,7 +130,7 @@ export class SetAnnotationCreateComponent {
     this.annotationOptions = '';
     this.open = false;
     this.kind.patchValue('');
-    this.enumValues.length = 0
+    this.enumValues.length = 0;
     this.name.patchValue('');
   }
 

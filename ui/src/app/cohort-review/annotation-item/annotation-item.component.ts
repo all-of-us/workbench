@@ -64,11 +64,11 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     }
 
 
-    textBlur(){
+    textBlur() {
         this.successIcon = false;
-    this.textSpinnerFlag = true
+    this.textSpinnerFlag = true;
     setTimeout (() => {
-        this.handleInput() },2000);
+        this.handleInput(); },2000);
   }
 
 
@@ -154,7 +154,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   dateChange(e) {
     this.successIcon = false;
-    this.textSpinnerFlag = true
+    this.textSpinnerFlag = true;
     setTimeout (() => {
         if (e !== null) {
             const newDate = moment(e).format('YYYY-MM-DD');
