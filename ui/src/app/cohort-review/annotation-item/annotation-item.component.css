@@ -139,3 +139,7 @@ input[type=text]:not([readonly]):focus {
 .success {
   color: #7CC79B;
 }
+
+.integer-container {
+  padding-bottom: 0.15rem;
+}

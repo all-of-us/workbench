@@ -38,13 +38,16 @@
     </div>
 
     <div *ngSwitchCase="kinds.INTEGER" class="text-container">
-      <label [for]="machineName" class="">
-        <span class="flex-content-main items-Integer">
-          {{ annotation.definition.columnName }}
-        </span>
-          <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-          <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
-      </label>
+        <div class="integer-container">
+            <label [for]="machineName" class="">
+            <span class="flex-content-main items-Integer">
+              {{ annotation.definition.columnName }}
+            </span>
+            <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+            <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
+            </label>
+        </div>
+
       <input
          class="integer-style"
         (blur)="textBlur()"
