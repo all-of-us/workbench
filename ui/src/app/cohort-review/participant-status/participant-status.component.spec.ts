@@ -3,12 +3,12 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
-
+import {Participant} from '../participant.model';
 import {ParticipantStatusComponent} from './participant-status.component';
 
 import {CohortReviewService, CohortStatus} from 'generated';
 import {ReviewStateService} from '../review-state.service';
-import {Participant} from '../participant.model';
+
 
 class StubRoute {
   snapshot = {
