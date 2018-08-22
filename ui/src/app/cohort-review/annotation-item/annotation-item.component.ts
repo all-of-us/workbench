@@ -69,7 +69,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.textSpinnerFlag = true;
     setTimeout (() => {
         this.handleInput();
-        } , 9000 );
+        } , 2000 );
   }
 
 
