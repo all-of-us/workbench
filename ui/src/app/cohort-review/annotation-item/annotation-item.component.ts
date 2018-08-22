@@ -68,7 +68,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
         this.successIcon = false;
     this.textSpinnerFlag = true;
     setTimeout (() => {
-        this.handleInput() ; },2000 );
+        this.handleInput() ; } ,2000 );
   }
 
 
@@ -160,7 +160,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
             const newDate = moment(e).format('YYYY-MM-DD');
             this.control.patchValue(newDate);
            this.handleInput();
-        } },2000);
+        } }, 2000);
   }
 
 }
