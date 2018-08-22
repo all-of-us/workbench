@@ -13,7 +13,7 @@
     "range_low":1.0,
     "range_high":10.0,
     "provider_id":3,
-    "visit_occurrence_id":3,
+    "visit_occurrence_id":1,
     "measurement_source_value":"val",
     "measurement_source_concept_id":3,
     "unit_source_value":"val",

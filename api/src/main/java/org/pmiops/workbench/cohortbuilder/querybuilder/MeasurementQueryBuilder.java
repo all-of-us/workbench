@@ -30,7 +30,8 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   private static final String MEASUREMENT_SQL_TEMPLATE =
     "select person_id, measurement_date as entry_date\n" +
       "from `${projectId}.${dataSetId}.measurement`\n" +
-      "where measurement_concept_id = ${conceptId}\n";
+      "where measurement_concept_id = ${conceptId}\n" +
+      "${encounterSql}";
   private static final String VALUE_AS_NUMBER =
     "value_as_number ${operator} ${value}\n";
   private static final String VALUE_AS_CONCEPT_ID =

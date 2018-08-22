@@ -182,6 +182,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsICD9ConditionOccurrenceChildrenEncounter() throws Exception {
+    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+    SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
+    Modifier modifier = new Modifier()
+      .name(ModifierType.ENCOUNTERS)
+      .operator(Operator.IN)
+      .operands(Arrays.asList("1"));
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+      Arrays.asList(icd9, icd9Proc), Arrays.asList(modifier));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventInvalidLong() throws Exception {
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     String operand = "zz";
@@ -550,6 +563,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsICD10ConditionOccurrenceChildEncounter() throws Exception {
+    SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
+    Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("1"));
+    SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10), Arrays.asList(modifier));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsICD10ConditionOccurrenceChild() throws Exception {
     SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
     SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10), new ArrayList<>());
@@ -599,6 +620,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsCPTProcedureOccurrenceEncounter() throws Exception {
+    SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
+    Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("1"));
+    SearchRequest searchRequest = createSearchRequests(cptProcedure.getType(), Arrays.asList(cpt), Arrays.asList(modifier));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsCPTObservation() throws Exception {
     SearchParameter cpt = createSearchParameter(cptObservation, "0001Z");
     SearchRequest searchRequest = createSearchRequests(cptObservation.getType(), Arrays.asList(cpt), new ArrayList<>());
@@ -632,7 +661,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(true).conceptId("1");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
     SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -680,6 +709,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsDrugChildEncounter() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    Modifier modifier = new Modifier()
+      .name(ModifierType.ENCOUNTERS)
+      .operator(Operator.IN)
+      .operands(Arrays.asList("1"));
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsDrugChildModifiers() throws Exception {
     Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
@@ -689,6 +730,57 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .operands(Arrays.asList("25"));
     SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsLabTextAnyEncounter() throws Exception {
+    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    SearchParameter lab = createSearchParameter(labCriteria, null);
+    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    Modifier modifier = new Modifier()
+      .name(ModifierType.ENCOUNTERS)
+      .operator(Operator.IN)
+      .operands(Arrays.asList("1"));
+    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsLabTextAnyEncounterNoInOperator() throws Exception {
+    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    SearchParameter lab = createSearchParameter(labCriteria, null);
+    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    Modifier modifier = new Modifier()
+      .name(ModifierType.ENCOUNTERS)
+      .operator(Operator.EQUAL)
+      .operands(Arrays.asList("1"));
+    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Please provide IN operator for visit type.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsLabTextAnyEncounterConceptIdNotANumber() throws Exception {
+    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    SearchParameter lab = createSearchParameter(labCriteria, null);
+    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    Modifier modifier = new Modifier()
+      .name(ModifierType.ENCOUNTERS)
+      .operator(Operator.IN)
+      .operands(Arrays.asList("x"));
+    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Please provide valid conceptId for visit type.", bre.getMessage());
+    }
   }
 
   @Test
