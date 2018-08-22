@@ -1,7 +1,5 @@
 package org.pmiops.workbench.cdr.dao;
 
-import org.hibernate.criterion.ProjectionList;
-import org.hibernate.criterion.Projections;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.springframework.data.domain.PageRequest;
