@@ -41,10 +41,8 @@ public class ConceptSet {
     setDomain(cs.getDomain());
     setCreator(cs.getCreator());
     setWorkspaceId(cs.getWorkspaceId());
-    // Should we actually copy these? (Same question for cohorts...)
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());
-    setVersion(1);
   }
 
   @Id

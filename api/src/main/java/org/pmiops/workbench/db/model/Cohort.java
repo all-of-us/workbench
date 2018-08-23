@@ -42,7 +42,6 @@ public class Cohort {
     setWorkspaceId(c.getWorkspaceId());
     setCreationTime(c.getCreationTime());
     setLastModifiedTime(c.getLastModifiedTime());
-    setVersion(1);
   }
 
   @Id

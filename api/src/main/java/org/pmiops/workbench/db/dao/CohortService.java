@@ -24,6 +24,7 @@ public class CohortService {
     to.setCreator(targetWorkspace.getCreator());
     to.setLastModifiedTime(targetWorkspace.getLastModifiedTime());
     to.setCreationTime(targetWorkspace.getCreationTime());
+    to.setVersion(1);
     Cohort saved = cohortDao.save(to);
     cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationDefinitionByCohort(
             from.getCohortId(), to.getCohortId());
