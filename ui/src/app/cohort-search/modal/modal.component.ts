@@ -133,4 +133,8 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
       ? `Add Selected ${title} Criteria to Cohort`
       : 'No Selection';
   }
+
+    showTitle() {
+        return this.title === 'Drugs' || this.title == 'Visits' || this.title == 'CPT Codes' || this.title == 'Demographics';
+    }
 }

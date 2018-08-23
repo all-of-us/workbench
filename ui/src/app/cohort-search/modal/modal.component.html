@@ -5,26 +5,38 @@
         <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === criteriaTypes.DEMO}">
           <div class="title-bar">
             <div class="btn-group btn-link">
-              <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
-
-                <button *ngIf="title !=='Physical Measurements' " type="button" class="btn tab"
-                        [class.active]="mode === 'tree'"
-                        (click)="mode = 'tree'">
+              <!--to show demographic title-->
+              <ng-container *ngIf="ctype === criteriaTypes.DEMO">
+                <button  type="button" class="btn tab-node">
                   {{ title }}
                 </button>
+              </ng-container>
+              <!--to show other title-->
+              <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
+                <ng-container *ngIf="showTitle()">
+                  <button  type="button" class="btn tab"
+                          [class.active]="mode === 'tree'"
+                          (click)="mode = 'tree'">
+                     {{ title }}
+                  </button>
+                </ng-container>
                 <ng-container *ngIf="title ==='Physical Measurements' ">
                   <button  *ngIf="attributesNode.size === 0"  type="button" class="btn tab"
                           [class.active]="mode === 'tree'"
                           (click)="mode = 'tree'">
-                    {{ title }}
+                  {{ title }}
                   </button>
                   <button  *ngIf="attributesNode.size > 0" type="button" class="btn tab-node"
                            (click)="mode = 'tree'">
                    {{attributesNode.get('name')}}
                   </button>
                 </ng-container>
-
-
+                  <button  *ngIf="(title === 'ICD9 Codes') || (title === 'ICD10 Codes') || (title === 'Conditions')"
+                           type="button" class="btn tab"
+                           [class.active]="mode === 'tree'"
+                           (click)="mode = 'tree'">
+                    Conditions
+                  </button>
                 <div *ngIf="ctype !== criteriaTypes.PM" class="vbar"></div>
                 <button type="button" class="btn tab"
                         *ngIf="ctype !== criteriaTypes.PM"
@@ -48,16 +60,11 @@
             </button>
           </div>
           <div class="content" *ngIf="open">
-            <!--<h1>1 {{ctype}}</h1>-->
-            <!--<h1>{{mode}}</h1>-->
             <ng-container [ngSwitch]="ctype">
-
-
               <crit-demographics *ngSwitchCase="criteriaTypes.DEMO"
                                  (cancel)="cancel()"
                                  (finish)="finish()">
               </crit-demographics>
-
               <ng-container *ngSwitchDefault>
                 <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes'">
                   <!-- Tree Page -->
@@ -77,7 +84,6 @@
             </ng-container>
           </div>
         </div>
-
         <div class="col col-sm-4 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO">
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
@@ -108,7 +114,6 @@
               </ng-container>
             </ng-container>
           </div>
-
         </div>
       </div>
     </div>
