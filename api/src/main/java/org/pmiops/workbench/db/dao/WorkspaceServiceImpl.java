@@ -209,10 +209,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // Save the workspace first to allocate an ID.
     Workspace saved = workspaceDao.save(to);
     for (Cohort fromCohort : from.getCohorts()) {
-      cohortService.cloneCohortAndReviews(fromCohort);
+      cohortService.cloneCohortAndReviews(fromCohort, to);
     }
     for (ConceptSet conceptSet : from.getConceptSets()) {
-      conceptSetService.cloneConceptSetAndConceptIds(conceptSet);
+      conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to);
     }
     return saved;
   }

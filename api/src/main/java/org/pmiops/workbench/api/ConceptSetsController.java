@@ -221,18 +221,13 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       final Domain domainEnum = dbConceptSet.getDomainEnum();
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(request.getAddedIds());
       List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
-          ImmutableList.copyOf(concepts).stream().filter(new Predicate<org.pmiops.workbench.cdr.model.Concept>() {
-
-        @Override
-        public boolean test(org.pmiops.workbench.cdr.model.Concept concept) {
+          ImmutableList.copyOf(concepts).stream().filter(concept -> {
           Collection<Domain> domain = ConceptsController.DOMAIN_MAP.inverse().get(concept.getDomainId());
           return domain == null || !domain.contains(domainEnum);
-        }
-      }).collect(Collectors.toList());
+        }).collect(Collectors.toList());
       if (!mismatchedConcepts.isEmpty()) {
         String mismatchedConceptIds = Joiner.on(", ").join(mismatchedConcepts.stream()
-            .map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList()),
-            " ,");
+            .map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList()));
         throw new BadRequestException(
             String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
       }

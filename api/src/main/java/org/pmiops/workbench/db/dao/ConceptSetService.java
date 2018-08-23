@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +15,12 @@ public class ConceptSetService {
   @Autowired private ConceptSetDao conceptSetDao;
 
   @Transactional
-  public ConceptSet cloneConceptSetAndConceptIds(ConceptSet conceptSet) {
-    ConceptSet c = conceptSet.makeClone();
+  public ConceptSet cloneConceptSetAndConceptIds(ConceptSet conceptSet, Workspace targetWorkspace) {
+    ConceptSet c = new ConceptSet(conceptSet);
+    c.setWorkspaceId(targetWorkspace.getWorkspaceId());
+    c.setCreator(targetWorkspace.getCreator());
+    c.setLastModifiedTime(targetWorkspace.getLastModifiedTime());
+    c.setCreationTime(targetWorkspace.getCreationTime());
     ConceptSet saved = conceptSetDao.save(c);
     conceptSetDao.bulkCopyConceptIds(conceptSet.getConceptSetId(), saved.getConceptSetId());
     return saved;
