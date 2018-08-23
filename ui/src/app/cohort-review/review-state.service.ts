@@ -25,4 +25,5 @@ export class ReviewStateService {
 
   /* Flags */
   annotationManagerOpen = new BehaviorSubject<boolean>(false);
+  editAnnotationManagerOpen = new BehaviorSubject<boolean>(false);
 }

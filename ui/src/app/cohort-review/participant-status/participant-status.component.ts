@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -25,9 +25,14 @@ const validStatuses = [
   templateUrl: './participant-status.component.html',
   styleUrls: ['./participant-status.component.css']
 })
-export class ParticipantStatusComponent implements OnInit, OnDestroy {
+export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges {
 
-  readonly cohortStatusList = validStatuses.map(status => ({
+    participantOption: any;
+    defaultOption = false;
+    test: any;
+
+
+    readonly cohortStatusList = validStatuses.map(status => ({
     value: status,
     display: Participant.formatStatusForText(status),
   }));
@@ -52,11 +57,26 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
   ) {}
 
+  ngOnChanges() {
+
+    if (this.statusControl.value) {
+        this.defaultOption = true;
+        if (this.statusControl.value === 'NEEDS_FURTHER_REVIEW') {
+            this.participantOption = 'NEEDS FURTHER REVIEW';
+        } else {
+            this.participantOption = this.statusControl.value;
+        }
+    } else {
+        this.defaultOption = false;
+    }
+  }
+
   ngOnInit() {
     this.subscription = this.statusControl.valueChanges
       .filter(status => validStatuses.includes(status))
       .switchMap(status => this.updateStatus(status))
       .subscribe();
+
   }
 
   ngOnDestroy() {
@@ -69,5 +89,12 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
+  }
+
+  participantOptionChange(status) {
+    this.participantOption = status.display;
+    this.statusControl.patchValue(status.value);
+    this.defaultOption = true;
+    this.updateStatus(status.value);
   }
 }
