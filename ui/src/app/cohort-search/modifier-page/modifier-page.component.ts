@@ -94,7 +94,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     private cdref: ChangeDetectorRef) {}
 
   ngOnInit() {
-      // this.ngAfterContentChecked();
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
@@ -169,22 +168,22 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   currentMods(vals) {
       this.ngAfterContentChecked();
       return this.modifiers.map(({name, inputType, modType}) => {
-      const {operator, valueA, valueB} = vals[name];
-      const between = operator === 'BETWEEN';
-      if (!operator || !valueA || (between && !valueB)) {
-        return ;
-      }
-      if (inputType === 'date') {
-          this.dateValueA = moment(valueA).format('YYYY-MM-DD');
-          this.dateValueB = moment(valueB).format('YYYY-MM-DD');
-          const operands = [this.dateValueA];
-          if (between) { operands.push(this.dateValueB); }
-          return fromJS({name: modType, operator, operands});
-      } else {
-          const operands = [valueA];
-          if (between) { operands.push(valueB); }
-          return fromJS({name: modType, operator, operands});
-      }
+          const {operator, valueA, valueB} = vals[name];
+          const between = operator === 'BETWEEN';
+          if (!operator || !valueA || (between && !valueB)) {
+            return ;
+          }
+          if (inputType === 'date') {
+              this.dateValueA = moment(valueA).format('YYYY-MM-DD');
+              this.dateValueB = moment(valueB).format('YYYY-MM-DD');
+              const operands = [this.dateValueA];
+              if (between && this.dateValueB) { operands.push(this.dateValueB); }
+              return fromJS({name: modType, operator, operands});
+          } else {
+              const operands = [valueA];
+              if (between) { operands.push(valueB); }
+              return fromJS({name: modType, operator, operands});
+          }
     });
   }
 
