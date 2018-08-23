@@ -2,10 +2,6 @@ import {Component, EventEmitter, OnChanges, OnInit, Output} from '@angular/core'
 import {DomainType} from 'generated';
 import {CRITERIA_TYPES, DOMAIN_TYPES} from '../constant';
 import {NodeComponent} from '../node/node.component';
-import {NgRedux} from "@angular-redux/store";
-import {CohortSearchActions, CohortSearchState} from "../redux";
-import {Map} from "immutable";
-// import {CohortSearchActions} from '../redux';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -18,25 +14,17 @@ import {Map} from "immutable";
   styleUrls: ['./tree.component.css']
 })
 export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
-  _type: string;
-    readonly domainTypes = DOMAIN_TYPES;
-    @Output() openTree = new EventEmitter<string>();
+     _type: string;
      testOptionChange= false;
+     name: string;
 
-    ngOnChanges(){
-        super.ngOnInit();
-        // if(this.optionChange){
-        //     console.log('checked----------->>')
-        //     super.ngOnInit();
-        //     setTimeout(() => super.loadChildren(true));
-        // }
-        // this.optionChange()
-    }
+  ngOnChanges() {
+    super.ngOnInit();
+  }
+
   ngOnInit() {
-
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
-   // this._type = this.node.get('type', '');
   }
 
   showSearch() {
@@ -47,23 +35,15 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   }
 
   showDropDown() {
-   // console.log(this.node.get('type'));
-      return this.node.get('type') === DomainType.CONDITION || this.node.get('type') === CRITERIA_TYPES.ICD9 || this.node.get('type') === CRITERIA_TYPES.ICD10;
+    return this.node.get('type') === DomainType.CONDITION || this.node.get('type') === CRITERIA_TYPES.ICD9 || this.node.get('type') === CRITERIA_TYPES.ICD10;
   }
-    optionChange(flag) {
-        if (flag) {
-           this.testOptionChange = true;
-            setTimeout(() => super.loadChildren(true));
-           // super.ngOnInit();
-           // this.openTree.emit(flag);
 
+  optionChange(flag) {
+    if (flag) {
+        this.name = flag;
+        this.testOptionChange = true;
+        setTimeout(() => super.loadChildren(true));
         }
     }
-// console.log(criteria.name);
-//                 // type: criteria.type
-//         this.onOptionChange.emit(criteria.name);
-//         setTimeout(() => super.loadChildren(true));
-//     //    check for launchwizard function
-//     }
 
 }

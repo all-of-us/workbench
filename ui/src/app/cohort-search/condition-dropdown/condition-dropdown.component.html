@@ -1,6 +1,9 @@
 <clr-dropdown>
     <button type="button" class="btn btn-outline-primary" clrDropdownTrigger>
-        Dropdown
+        <span *ngIf = "dropDownSelected !== ''; else elseBlock">{{dropDownSelected}}</span>
+        <ng-template #elseBlock>
+            <span>Select Vocabulary</span>
+        </ng-template>
         <clr-icon shape="caret down"></clr-icon>
     </button>
     <clr-dropdown-menu *clrIfOpen>
@@ -12,6 +15,5 @@
                     (click)="launchTree(criteria)"
                     clrDropdownItem>{{criteria.name}}</button>
         </ng-container>
-
     </clr-dropdown-menu>
 </clr-dropdown>

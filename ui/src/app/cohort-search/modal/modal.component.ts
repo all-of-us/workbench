@@ -40,7 +40,6 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   attributesNode: any;
   open = false;
   noSelection = true;
-    icdFlag= false;
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
@@ -104,24 +103,6 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
     this.subscription.unsubscribe();
   }
 
-    changedRootNode(flag: string) {
-
-        // if (flag) {
-            console.log(flag);
-        //     this.icdFlag = true;
-        //     this.rootNode;
-        //     ;
-        //     // return Map({
-        //     //
-        //     //     type: 'ICD9',
-        //     //     fullTree: this.fullTree,
-        //     //     id: 0,    // root parent ID is always 0
-        //     // });
-        //     // console.log(flag);
-        //     // console.log('hi');
-        // }
-    }
-
   cancel() {
     this.open = false;
     this.actions.cancelWizard();
@@ -138,31 +119,12 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-
-
       return Map({
 
           type: this.ctype,
           fullTree: this.fullTree,
           id: 0,    // root parent ID is always 0
       });
-      // if( this.icdFlag){
-      //     return Map({
-      //
-      //         type: 'ICD9',
-      //         fullTree: this.fullTree,
-      //         id: 0,    // root parent ID is always 0
-      //     });
-      //
-      // }else{
-      //     return Map({
-      //
-      //         type: this.ctype,
-      //         fullTree: this.fullTree,
-      //         id: 0,    // root parent ID is always 0
-      //     });
-      // }
-
   }
 
   get selectionTitle() {
