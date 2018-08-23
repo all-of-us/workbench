@@ -15,13 +15,13 @@ import {
   Cohort,
   CohortsService,
   FileDetail,
+  NotebookRename,
   PageVisit,
   ProfileService,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {NotebookRename} from "../../../generated/model/notebookRename";
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -183,7 +183,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       newName = rename.newName + '.ipynb';
       rename.newName = newName;
     }
-    if((new RegExp('.*\/.*').test(newName))) {
+    if (new RegExp('.*\/.*').test(newName)) {
       this.renameModal.close();
       this.notebookRenameError = true;
       return;
