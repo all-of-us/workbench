@@ -46,7 +46,7 @@
               </clr-dropdown>
               <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" [required]="node.get('type') === criteriaTypes.PM">
             </div>
-            <div *ngIf="attr.operator && attrForm.value['operator'+i] !== 'ANY'" class="form-group range-container">
+            <div *ngIf="showInput(i, attrForm)" class="form-group range-container">
               <input class="number-container"
                 type="number"
                 [min]="attr.MIN"
@@ -55,15 +55,15 @@
                 [(ngModel)]="attr.operands[0]"
                 (ngModelChange)="inputChange()"
                 required>
-              <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
-              <span *ngIf="node.get('type') === criteriaTypes.MEAS">
+              <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
+              <span *ngIf="isMeasurement()">
                 Range: {{attr.MIN}} - {{attr.MAX}}
               </span>
             </div>
-            <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group and-text">
+            <div *ngIf="isBetween(i, attrForm)" class="form-group and-text">
               <div>and</div>
             </div>
-            <div *ngIf="attrForm.value['operator'+i] === 'BETWEEN'" class="form-group range-container">
+            <div *ngIf="isBetween(i, attrForm)" class="form-group range-container">
               <input class="number-container"
                 type="number"
                 [min]="attr.MIN"
@@ -72,8 +72,8 @@
                 [(ngModel)]="attr.operands[1]"
                 (ngModelChange)="inputChange()"
                 required>
-              <span *ngIf="units[node.get('subtype')]">{{units[node.get('subtype')]}}</span>
-              <span *ngIf="node.get('type') === criteriaTypes.MEAS">
+              <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
+              <span *ngIf="isMeasurement()">
                 Range: {{attr.MIN}} - {{attr.MAX}}
               </span>
             </div>
@@ -116,7 +116,7 @@
              </span>
           </div>
         </div>
-        <div class="col-lg-3 button-padding" *ngIf="preview.get('count') && !preview.get('requesting')">
+        <div class="col-lg-3 button-padding" *ngIf="showAdd()">
           <button class="btn add-button " type="submit" [disabled]="rangeAlert"> ADD THIS RESULT</button>
         </div>
       </div>
