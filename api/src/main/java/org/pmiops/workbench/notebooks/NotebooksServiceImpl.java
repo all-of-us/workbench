@@ -56,7 +56,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .combinedExtensions(ImmutableMap.<String, String>of()))
         .machineConfig(new MachineConfig()
             .masterDiskSize(20 /* GB */)
-            .masterMachineType("n1-standard-1"));
+            .masterMachineType("n1-standard-2"));
   }
 
   @Override
