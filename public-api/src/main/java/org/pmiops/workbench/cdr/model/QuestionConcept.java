@@ -24,24 +24,22 @@ public class QuestionConcept {
     public static final long SURVEY_COUNT_ANALYSIS_ID = 3110;
     public static final long SURVEY_GENDER_ANALYSIS_ID = 3111;
     public static final long SURVEY_AGE_ANALYSIS_ID = 3112;
+
     public static Map<String, String> ageStratumNameMap  = new HashMap<String, String>();
     public static Map<String, String> genderStratumNameMap = new HashMap<String, String>();
+    public static Map<String, String> raceStratumNameMap = new HashMap<String, String>();
+    public static Map<String, String> ethnicityStratumNameMap = new HashMap<String, String>();
 
     /* Todo Find right place for these static things to be generated from db if possible and live */
     public static void setAgeStratumNameMap() {
-        ageStratumNameMap.put("1", "0-18 yrs old");
-        ageStratumNameMap.put("2", "18-29 yrs old");
-        ageStratumNameMap.put("3", "30-39 yrs old");
-        ageStratumNameMap.put("4", "40-49 yrs old");
-        ageStratumNameMap.put("5", "50-59 yrs old");
-        ageStratumNameMap.put("6", "60-69 yrs old");
-        ageStratumNameMap.put("7", "70-79 yrs old");
-        ageStratumNameMap.put("8", "80-89 yrs old");
-        ageStratumNameMap.put("9", "90-99 yrs old");
-        ageStratumNameMap.put("10", "100-109 yrs old");
-        ageStratumNameMap.put("11", "110-119 yrs old");
-        ageStratumNameMap.put("12", "120-129 yrs old");
-        ageStratumNameMap.put("13", "130-139 yrs old");
+        ageStratumNameMap.put("1", "0-18");
+        ageStratumNameMap.put("2", "18-29");
+        ageStratumNameMap.put("3", "30-39");
+        ageStratumNameMap.put("4", "40-49");
+        ageStratumNameMap.put("5", "50-59");
+        ageStratumNameMap.put("6", "60-69");
+        ageStratumNameMap.put("7", "70-79");
+        ageStratumNameMap.put("8", "80-89");
     }
     public static void setGenderStratumNameMap() {
         /* This is to slow to use the db */
@@ -52,9 +50,74 @@ public class QuestionConcept {
         genderStratumNameMap.put("8570", "Ambiguous");
     }
 
+    public static void setRaceStratumNameMap(){
+        raceStratumNameMap.put("8515", "Asian");
+        raceStratumNameMap.put("8516", "Black or African American");
+        raceStratumNameMap.put("8522", "Other Race");
+        raceStratumNameMap.put("8527", "White");
+        raceStratumNameMap.put("8552", "Unknown");
+        raceStratumNameMap.put("8557", "Native Hawaiian or Other Pacific Islander");
+        raceStratumNameMap.put("8657", "American Indian or Alaska Native");
+        raceStratumNameMap.put("9178", "Non-white");
+        raceStratumNameMap.put("38003572", "American Indian");
+        raceStratumNameMap.put("38003573", "Alaska Native");
+        raceStratumNameMap.put("38003574", "Asian Indian");
+        raceStratumNameMap.put("38003575", "Bangladeshi");
+        raceStratumNameMap.put("38003576", "Bhutanese");
+        raceStratumNameMap.put("38003577", "Burmese");
+        raceStratumNameMap.put("38003578", "Cambodian");
+        raceStratumNameMap.put("38003579", "Chinese");
+        raceStratumNameMap.put("38003580", "Taiwanese");
+        raceStratumNameMap.put("38003581", "Filipino");
+        raceStratumNameMap.put("38003582", "Hmong");
+        raceStratumNameMap.put("38003583", "Indonesian");
+        raceStratumNameMap.put("38003584", "Japanese");
+        raceStratumNameMap.put("38003585", "Korean");
+        raceStratumNameMap.put("38003586", "Laotian");
+        raceStratumNameMap.put("38003587", "Malaysian");
+        raceStratumNameMap.put("38003588", "Okinawan");
+        raceStratumNameMap.put("38003589", "Pakistani");
+        raceStratumNameMap.put("38003590", "Sri Lankan");
+        raceStratumNameMap.put("38003591", "Thai");
+        raceStratumNameMap.put("38003592", "Vietnamese");
+        raceStratumNameMap.put("38003593", "Iwo Jiman");
+        raceStratumNameMap.put("38003594", "Maldivian");
+        raceStratumNameMap.put("38003595", "Nepalese");
+        raceStratumNameMap.put("38003596", "Singaporean");
+        raceStratumNameMap.put("38003597", "Madagascar");
+        raceStratumNameMap.put("38003598", "Black");
+        raceStratumNameMap.put("38003599", "African American");
+        raceStratumNameMap.put("38003600", "African");
+        raceStratumNameMap.put("38003601", "Bahamian");
+        raceStratumNameMap.put("38003602", "Barbadian");
+        raceStratumNameMap.put("38003603", "Dominican");
+        raceStratumNameMap.put("38003604", "Dominica Islander");
+        raceStratumNameMap.put("38003605", "Haitian");
+        raceStratumNameMap.put("38003606", "Jamaican");
+        raceStratumNameMap.put("38003607", "Tobagoan");
+        raceStratumNameMap.put("38003608", "Trinidadian");
+        raceStratumNameMap.put("38003609", "West Indian");
+        raceStratumNameMap.put("38003610", "Polynesian");
+        raceStratumNameMap.put("38003611", "Micronesian");
+        raceStratumNameMap.put("38003612", "Melanesian");
+        raceStratumNameMap.put("38003613", "Other Pacific Islander");
+        raceStratumNameMap.put("38003614", "European");
+        raceStratumNameMap.put("38003615", "Middle Eastern or North African");
+        raceStratumNameMap.put("38003616", "Arab");
+    }
+
+    public static void setEthnicityStratumNameMap(){
+
+        ethnicityStratumNameMap.put("38003564","Not Hispanic or Latino");
+        ethnicityStratumNameMap.put("38003563", "Hispanic or Latino");
+
+    }
+
     static {
         setAgeStratumNameMap();
         setGenderStratumNameMap();
+        setRaceStratumNameMap();
+        setEthnicityStratumNameMap();
     }
 
     /* Take analysis list with results and put them on the list of questions.
