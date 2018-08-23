@@ -20,11 +20,12 @@
   <div class="card item-card notebook-card" *ngFor="let notebook of notebookList">
     <div class="header-area">
       <clr-dropdown [clrCloseMenuOnItemClick]="false">
-        <button type="button" [disabled]="actionsDisabled" clrDropdownTrigger>
+        <button type="button" class="notebook-menu" [disabled]="actionsDisabled" clrDropdownTrigger>
           <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical" [class.disabled]="actionsDisabled"></clr-icon>
         </button>
         <clr-dropdown-menu *clrIfOpen>
           <button class="action-item"
+                  id="rename-{{notebook.name.replace('.ipynb', '')}}"
                   (click)="renameThis(notebook)"
                   [class.disabled]="actionsDisabled"
                   [disabled]="actionsDisabled">
@@ -32,6 +33,7 @@
             Rename
           </button>
           <button class="action-item"
+                  id="clone-{{notebook.name.replace('.ipynb', '')}}"
                   (click)="cloneThis(notebook)"
                   [class.disabled]="actionsDisabled"
                   [disabled]="actionsDisabled">
@@ -39,6 +41,7 @@
             Clone
           </button>
           <button class="action-item"
+                  id="delete-{{notebook.name.replace('.ipynb', '')}}"
                   (click)="confirmDelete(notebook)"
                   [class.disabled]="actionsDisabled"
                   [disabled]="actionsDisabled">

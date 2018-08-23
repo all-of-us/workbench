@@ -179,6 +179,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     let newName = rename.newName;
     if (!(new RegExp('^.+\.ipynb$').test(newName))) {
       newName = rename.newName + '.ipynb';
+      rename.newName = newName;
     }
     if (this.notebookList.filter((nb) => nb.name === newName).length > 0) {
       this.renameModal.close();

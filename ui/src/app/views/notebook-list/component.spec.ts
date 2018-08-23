@@ -32,7 +32,7 @@ import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-import {updateAndTick} from 'testing/test-helpers';
+import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
 class NotebookListPage {
   fixture: ComponentFixture<NotebookListComponent>;
@@ -128,7 +128,60 @@ describe('NotebookListComponent', () => {
     const fixture = notebookListPage.fixture;
     const app = fixture.debugElement.componentInstance;
     expect(app.notebookList.length).toEqual(1);
-    expect(app.notebookList[0].name).toEqual('FileDetails');
-    expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile');
+    expect(app.notebookList[0].name).toEqual('mockFile.ipynb');
+    expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile.ipynb');
+  }));
+
+  it('displays correct information when notebook renamed', fakeAsync(() => {
+    const fixture = notebookListPage.fixture;
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.notebook-menu')));
+    simulateClick(fixture, de.query(By.css('#rename-mockFile')));
+    simulateInput(fixture, de.query(By.css('#new-name')), 'testMockFile');
+    simulateClick(fixture, de.query(By.css('button#rename')));
+    updateAndTick(fixture);
+    const notebooksOnPage = de.queryAll(By.css('.item-card'));
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch("testMockFile.ipynb");
+    expect(fixture.componentInstance.notebookList[0].path).toEqual('gs://bucket/notebooks/testMockFile.ipynb');
+  }));
+
+  it('displays correct information when notebook renamed with duplicate name', fakeAsync(() => {
+    const fixture = notebookListPage.fixture;
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.notebook-menu')));
+    simulateClick(fixture, de.query(By.css('#rename-mockFile')));
+    simulateInput(fixture, de.query(By.css('#new-name')), 'mockFile');
+    simulateClick(fixture, de.query(By.css('button#rename')));
+    updateAndTick(fixture);
+    tick();
+    const errorMessage = de.queryAll(By.css('.modal-title'));
+    expect(errorMessage.map(com => com.nativeElement.innerText)[0]).toEqual("Error:");
+    simulateClick(fixture, de.query(By.css('.close')));
+    const notebooksOnPage = de.queryAll(By.css('.item-card'));
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch("mockFile.ipynb");
+  }));
+
+  it('displays correct information when notebook cloned', fakeAsync(() => {
+    const fixture = notebookListPage.fixture;
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.notebook-menu')));
+    simulateClick(fixture, de.query(By.css('#clone-mockFile')));
+    updateAndTick(fixture);
+    tick();
+    const notebooksOnPage = de.queryAll(By.css('.item-card'));
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch("mockFile Clone.ipynb");
+    expect(fixture.componentInstance.notebookList.map(nb => nb.path)).toContain('gs://bucket/notebooks/mockFile Clone.ipynb');
+  }));
+
+  it('displays correct information when notebook deleted', fakeAsync(() => {
+    const fixture = notebookListPage.fixture;
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.notebook-menu')));
+    simulateClick(fixture, de.query(By.css('#delete-mockFile')));
+    updateAndTick(fixture);
+    simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
+    updateAndTick(fixture);
+    const notebooksOnPage = de.queryAll(By.css('.item-card'));
+    expect(notebooksOnPage.length).toBe(0);
   }));
 });
