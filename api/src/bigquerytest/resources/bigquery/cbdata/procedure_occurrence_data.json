@@ -24,7 +24,7 @@
     "modifier_concept_id":4,
     "quantity":4,
     "provider_id":4,
-    "visit_occurrence_id":4,
+    "visit_occurrence_id":1,
     "procedure_source_value":"val",
     "procedure_source_concept_id":4,
     "qualifier_source_value":"val"

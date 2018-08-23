@@ -25,6 +25,7 @@ public class AchillesAnalysis {
     private String chartType;
     private String dataType;
     private List<AchillesResult> results = new ArrayList<>();
+    private List<AchillesResultDist> distResults = new ArrayList<>();
 
     public AchillesAnalysis() {}
 
@@ -39,7 +40,8 @@ public class AchillesAnalysis {
                 .stratum5Name(a.getStratum5Name())
                 .chartType(a.getChartType())
                 .dataType(a.getDataType())
-                .results(new ArrayList<>());
+                .results(new ArrayList<>())
+                .distResults(new ArrayList<>());
     }
 
     @Id
@@ -164,6 +166,21 @@ public class AchillesAnalysis {
     }
     public void addResult(AchillesResult result) {
         this.results.add(result);
+    }
+
+    @Transient
+    public List<AchillesResultDist> getDistResults() {
+        return distResults;
+    }
+    public void setDistResults(List<AchillesResultDist> distResults) {
+        this.distResults = distResults;
+    }
+    public AchillesAnalysis distResults(List<AchillesResultDist> distResults) {
+        this.distResults = distResults;
+        return this;
+    }
+    public void addDistResult(AchillesResultDist achillesResultDist) {
+        this.distResults.add(achillesResultDist);
     }
 
 
