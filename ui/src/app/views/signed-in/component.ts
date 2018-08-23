@@ -31,7 +31,7 @@ export class SignedInComponent implements OnInit {
   familyName = '';
   profileImage = '';
   sidenavToggle = false;
-  environment = environment;
+  publicUiUrl = environment.publicUiUrl;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;

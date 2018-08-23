@@ -1,9 +1,9 @@
-button, a.btn {
+.btn {
   font-weight: 500;
   font-size: 12px;
 }
 
-button.btn.btn-primary, a.btn.btn-primary {
+.btn.btn-primary {
   background-color: #262262;
   border: none;
   padding: 0rem 0.77rem;
@@ -16,21 +16,19 @@ button.btn.btn-primary, a.btn.btn-primary {
   line-height: 0.77rem;
 }
 
-button.btn.btn-primary:hover, a.btn.btn-primary:hover {
+.btn.btn-primary:hover {
   background-color: #4356A7;
   color: #fff;
 }
 
-button.btn.btn-primary:disabled, a.btn.btn-primary:disabled {
+.btn.btn-primary:disabled {
   background-color: #c3c3c3;
   color: #fff;
   cursor: auto;
 }
 
-button.btn.btn-secondary,
-button.btn.btn-outline,
-a.btn.btn-secondary,
-a.btn.btn-outline {
+.btn.btn-secondary,
+.btn.btn-outline {
   border: 2px solid #262262;
   padding: 0rem 0.77rem;
   border-radius: 0.2rem;
@@ -42,46 +40,37 @@ a.btn.btn-outline {
   line-height: 0.77rem;
 }
 
-button.btn.btn-secondary:active,
-a.btn.btn-secondary:active {
+.btn.btn-secondary:active {
   box-shadow: inset 0 2px 0 0 #4356a7;
 }
 
-button.btn.btn-secondary,
-a.btn.btn-secondary {
+.btn.btn-secondary {
   font-size: 10px;
 }
 
-button.btn.btn-secondary:hover,
-button.btn.btn-outline:hover,
-a.btn.btn-secondary:hover,
-a.btn.btn-outline:hover {
+.btn.btn-secondary:hover,
+.btn.btn-outline:hover {
   background-color: #262262;
   color: #fff;
 }
 
-button.btn.btn-secondary:disabled,
-button.btn.btn-outline:disabled,
-a.btn.btn-secondary:disabled,
-a.btn.btn-outline:disabled {
+.btn.btn-secondary:disabled,
+.btn.btn-outline:disabled {
   border: 2px solid #c3c3c3;
   background-color: #f1f2f2;
   color: #c3c3c3;
   cursor: auto;
 }
 
-button.btn.btn-lg,
-a.btn.btn-lg {
+.btn.btn-lg {
   height: 2.5rem;
 }
 
-button.btn.btn-link,
-a.btn.btn-link {
+.btn.btn-link {
   color: #4a4a4a;
   font-size: 14px;
 }
 
-button:focus,
-a.btn:focus {
+.btn:focus {
   outline: none;
 }
