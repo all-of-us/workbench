@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -51,6 +53,7 @@ import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -62,6 +65,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.verify;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,6 +102,9 @@ public class CohortReviewControllerTest {
   private ParticipantCohortStatus participantCohortStatus1;
   private ParticipantCohortStatus participantCohortStatus2;
   private Workspace workspace;
+  private static final Instant NOW = Instant.now();
+  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+
   private CohortAnnotationDefinition stringAnnotationDefinition;
   private CohortAnnotationDefinition enumAnnotationDefinition;
   private CohortAnnotationDefinition dateAnnotationDefinition;
@@ -123,6 +135,9 @@ public class CohortReviewControllerTest {
 
   @Autowired
   private WorkspaceService workspaceService;
+
+  @Autowired
+  private UserRecentResourceService userRecentResourceService;
 
   @Autowired
   private CohortReviewController cohortReviewController;
@@ -166,11 +181,17 @@ public class CohortReviewControllerTest {
     QueryBuilderFactory.class
   })
   @MockBean({
-    WorkspaceService.class,
     BigQueryService.class,
-    FireCloudService.class
+    FireCloudService.class,
+    UserRecentResourceService.class,
+    WorkspaceService.class,
+    User.class
   })
   static class Configuration {
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
 
     @Bean
     public GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
@@ -723,6 +744,7 @@ public class CohortReviewControllerTest {
         WORKSPACE_NAME, WorkspaceAccessLevel.READER)).thenReturn(workspace);
 
     assertParticipantCohortStatuses(expectedReview1, page, pageSize, SortOrder.DESC, ParticipantCohortStatusColumns.STATUS);
+    verify(userRecentResourceService).updateCohortEntry(anyLong(), anyLong(), anyLong(), any(Timestamp.class));
     assertParticipantCohortStatuses(expectedReview2, page, pageSize, SortOrder.DESC, ParticipantCohortStatusColumns.PARTICIPANTID);
     assertParticipantCohortStatuses(expectedReview3, null, null, null, ParticipantCohortStatusColumns.STATUS);
     assertParticipantCohortStatuses(expectedReview4, null, null, SortOrder.ASC, null);

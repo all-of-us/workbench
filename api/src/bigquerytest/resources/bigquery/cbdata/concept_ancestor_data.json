@@ -4,5 +4,11 @@
     "descendant_concept_id":10,
     "min_levels_of_separation":1,
     "max_levels_of_separation":1
+  },
+  {
+    "ancestor_concept_id":1,
+    "descendant_concept_id":1,
+    "min_levels_of_separation":1,
+    "max_levels_of_separation":1
   }
 ]

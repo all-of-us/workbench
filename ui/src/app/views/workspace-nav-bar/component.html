@@ -53,7 +53,7 @@
   </div>
 </clr-modal>
 
-<app-workspace-share></app-workspace-share>
+<app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
 <app-confirm-delete-modal [resourceType]="'workspace'" [resource]="workspace" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
 <app-bug-report></app-bug-report>
 <router-outlet></router-outlet>

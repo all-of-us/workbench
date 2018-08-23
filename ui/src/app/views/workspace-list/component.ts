@@ -1,14 +1,20 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {Subscription} from 'rxjs/Subscription';
 
+import {Workspace} from 'generated';
+
+import {WorkspacePermissions} from 'app/utils/workspacePermissions';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+
 import {
   BillingProjectStatus,
   ErrorResponse,
   WorkspaceAccessLevel,
-  WorkspaceResponse,
   WorkspacesService
 } from 'generated';
 
@@ -27,12 +33,30 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   billingProjectInitialized: boolean;
   billingProjectQuery: NodeJS.Timer;
   errorText: string;
-  workspaceList: WorkspaceResponse[] = [];
+  workspaceList: WorkspacePermissions[] = [];
   workspacesLoading = false;
-  workspaceAccessLevel = WorkspaceAccessLevel;
   firstSignIn: Date;
   twoFactorEnabled: boolean;
   private profileSubscription: Subscription;
+
+  // All the things related to sharing a workspace
+  @ViewChild(WorkspaceShareComponent)
+  shareModal: WorkspaceShareComponent;
+  // TODO This is necessary to placate the sharing template - figure out how to remove it
+  selectedWorkspace: Workspace = {name: ''};
+  accessLevel: WorkspaceAccessLevel;
+
+  // All the things related to deleting a workspace
+  @ViewChild(ConfirmDeleteModalComponent)
+  deleteModal: ConfirmDeleteModalComponent;
+  deleting = false;
+  workspaceDeletionError = false;
+  resource: Workspace;
+  // TODO This is necessary to placate the delete error template - figure out how to remove it
+  workspace: Workspace = {name: ''};
+
+  @ViewChild(BugReportComponent)
+  bugReportComponent: BugReportComponent;
 
   constructor(
       private profileStorageService: ProfileStorageService,
@@ -50,27 +74,16 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
           this.firstSignIn = new Date(profile.firstSignInTime);
         }
         if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-          this.billingProjectInitialized = true;
+
           // Only once we know the billing project status do we request/display
           // workspaces for two reasons:
-          // - If the FC user is not yet initialized, getWorkspaces() may fail
-          //   with a 401.
+          // - If the FC user is not yet initialized, getWorkspaces() (called
+          //   inside reload workspaces) may fail with a 401.
           // - While the billing project is being initialized, we want to keep the
           //   big spinner on the page to provide obvious messaging to the user
           //   about the expected wait time.
-          this.workspacesService.getWorkspaces()
-            .subscribe(
-              workspacesReceived => {
-                workspacesReceived.items.sort(function(a, b) {
-                  return a.workspace.name.localeCompare(b.workspace.name);
-                });
-                this.workspaceList = workspacesReceived.items;
-                this.workspacesLoading = false;
-              },
-              error => {
-                const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
-                this.errorText = (response.message) ? response.message : '';
-              });
+          this.billingProjectInitialized = true;
+          this.reloadWorkspaces();
           // This may execute synchronously, no guarantee this has been assigned above yet.
           if (this.profileSubscription) {
             this.profileSubscription.unsubscribe();
@@ -96,6 +109,52 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.router.navigate(['workspaces/build']);
   }
 
+  reloadWorkspaces(): void {
+    this.workspacesService.getWorkspaces()
+      .subscribe(
+        workspacesReceived => {
+          workspacesReceived.items.sort(function(a, b) {
+            return a.workspace.name.localeCompare(b.workspace.name);
+          });
+          this.workspaceList = workspacesReceived
+            .items
+            .map( w => new WorkspacePermissions(w) );
+          this.workspacesLoading = false;
+        },
+        error => {
+          const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
+          this.errorText = (response.message) ? response.message : '';
+        });
+  }
+
+  delete(workspace: Workspace): void {
+    this.workspaceDeletionError = false;
+    this.deleting = true;
+    this.workspaceList = [];
+    this.workspacesLoading = true;
+    this.deleteModal.close();
+    this.workspacesService.deleteWorkspace(workspace.namespace, workspace.id).subscribe(() => {
+      this.reloadWorkspaces();
+    }, (error) => {
+      this.workspaceDeletionError = true;
+    });
+  }
+
+  receiveDelete(workspace: Workspace): void {
+    this.delete(workspace);
+  }
+
+  confirmDelete(workspace: Workspace): void {
+    this.resource = workspace;
+    this.deleteModal.open();
+  }
+
+  share(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
+    this.selectedWorkspace = workspace;
+    this.accessLevel = accessLevel;
+    this.shareModal.open();
+  }
+
   get twoFactorBannerEnabled() {
     if (this.firstSignIn === undefined) {
       return false;
@@ -111,5 +170,10 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
       return false;
     }
     return true;
-}
+  }
+  submitWorkspaceDeleteBugReport(): void {
+    this.workspaceDeletionError = false;
+    this.bugReportComponent.reportBug();
+    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
+  }
 }
