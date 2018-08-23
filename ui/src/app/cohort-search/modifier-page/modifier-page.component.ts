@@ -1,10 +1,13 @@
 import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
+import { DomainType } from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
+import {CRITERIA_TYPES} from '../constant';
 import {
+  activeCriteriaType,
   activeModifierList,
   CohortSearchActions,
   previewStatus
@@ -17,11 +20,13 @@ import {
     styleUrls: ['./modifier-page.component.css']
 })
 export class ModifierPageComponent implements OnInit, OnDestroy {
+  @select(activeCriteriaType) ctype$;
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
   formChanges = false;
   dateValueA: any;
   dateValueB: any;
+  ctype: string;
   existing = List();
   preview = Map();
   subscription: Subscription;
@@ -70,6 +75,14 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     }]
   }];
 
+  readonly encounters = {
+    name: 'encounters',
+    label: 'During Visit Type',
+    inputType: null,
+    modType: 'ENCOUNTERS',
+    operators: []
+  };
+
   form = new FormGroup({
     ageAtEvent: new FormGroup({
       operator: new FormControl(),
@@ -92,6 +105,13 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
+    this.subscription.add(this.ctype$.subscribe(ctype => {
+      this.ctype = ctype;
+      if ([CRITERIA_TYPES.PM, DomainType.VISIT].indexOf(ctype) === -1) {
+        this.modifiers.push(this.encounters);
+        this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
+      }
+    }));
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
     // This reseeds the form with existing data if we're editing an existing group
