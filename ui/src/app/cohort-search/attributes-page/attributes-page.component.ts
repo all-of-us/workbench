@@ -260,4 +260,23 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.actions.hideAttributesPage();
   }
 
+  showInput(index: number, attrform: NgForm) {
+    return this.attrs.NUM[index].operator && attrform.value['operator' + index] !== 'ANY';
+  }
+
+  isBetween(index: number, attrform: NgForm) {
+    return attrform.value['operator' + index] === Operator.BETWEEN;
+  }
+
+  hasUnits() {
+    return typeof PM_UNITS[this.node.get('subtype')] !== 'undefined';
+  }
+
+  isMeasurement() {
+    return this.node.get('type') === CRITERIA_TYPES.MEAS;
+  }
+
+  showAdd() {
+    return this.preview.get('count') && !this.preview.get('requesting');
+  }
 }
