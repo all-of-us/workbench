@@ -1,4 +1,4 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {select} from '@angular-redux/store';
 import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import { DomainType, ModifierType } from 'generated';
