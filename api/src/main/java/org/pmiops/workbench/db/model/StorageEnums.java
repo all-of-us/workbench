@@ -6,8 +6,8 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.ConceptSetDomain;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
@@ -52,23 +52,25 @@ public final class StorageEnums {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
   }
 
-  private static final BiMap<ConceptSetDomain, Short> CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN =
-      ImmutableBiMap.<ConceptSetDomain, Short>builder()
-      .put(ConceptSetDomain.CONDITION, (short) 0)
-      .put(ConceptSetDomain.DEATH, (short) 1)
-      .put(ConceptSetDomain.DEVICE, (short) 2)
-      .put(ConceptSetDomain.DRUG, (short) 3)
-      .put(ConceptSetDomain.MEASUREMENT, (short) 4)
-      .put(ConceptSetDomain.OBSERVATION, (short) 5)
-      .put(ConceptSetDomain.PROCEDURE, (short) 6)
-      .put(ConceptSetDomain.VISIT, (short) 7)
+  // RACE, GENDER, and ETHNICITY are explicitly not mapped here as they are not valid domains
+  // for concept sets.
+  private static final BiMap<Domain, Short> CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN =
+      ImmutableBiMap.<Domain, Short>builder()
+      .put(Domain.CONDITION, (short) 0)
+      .put(Domain.DEATH, (short) 1)
+      .put(Domain.DEVICE, (short) 2)
+      .put(Domain.DRUG, (short) 3)
+      .put(Domain.MEASUREMENT, (short) 4)
+      .put(Domain.OBSERVATION, (short) 5)
+      .put(Domain.PROCEDURE, (short) 6)
+      .put(Domain.VISIT, (short) 7)
       .build();
 
-  public static ConceptSetDomain conceptSetDomainFromStorage(Short domain) {
+  public static Domain conceptSetDomainFromStorage(Short domain) {
     return CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN.inverse().get(domain);
   }
 
-  public static Short conceptSetDomainToStorage(ConceptSetDomain domain) {
+  public static Short conceptSetDomainToStorage(Domain domain) {
     return CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN.get(domain);
   }
 

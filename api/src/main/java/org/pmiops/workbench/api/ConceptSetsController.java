@@ -1,16 +1,21 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -29,6 +34,7 @@ import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetListResponse;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -74,6 +80,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
           org.pmiops.workbench.db.model.ConceptSet dbConceptSet =
               new org.pmiops.workbench.db.model.ConceptSet();
           dbConceptSet.setDomainEnum(conceptSet.getDomain());
+          if (dbConceptSet.getDomainEnum() == null) {
+            throw new BadRequestException(
+                "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
+          }
           dbConceptSet.setDescription(conceptSet.getDescription());
           dbConceptSet.setName(conceptSet.getName());
           return dbConceptSet;
@@ -206,7 +216,27 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (dbConceptSet.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated concept set version");
     }
+
     if (request.getAddedIds() != null) {
+      final Domain domainEnum = dbConceptSet.getDomainEnum();
+      Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(request.getAddedIds());
+      List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
+          ImmutableList.copyOf(concepts).stream().filter(new Predicate<org.pmiops.workbench.cdr.model.Concept>() {
+
+        @Override
+        public boolean test(org.pmiops.workbench.cdr.model.Concept concept) {
+          Collection<Domain> domain = ConceptsController.DOMAIN_MAP.inverse().get(concept.getDomainId());
+          return domain == null || !domain.contains(domainEnum);
+        }
+      }).collect(Collectors.toList());
+      if (!mismatchedConcepts.isEmpty()) {
+        String mismatchedConceptIds = Joiner.on(", ").join(mismatchedConcepts.stream()
+            .map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList()),
+            " ,");
+        throw new BadRequestException(
+            String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
+      }
+
       dbConceptSet.getConceptIds().addAll(request.getAddedIds());
     }
     if (request.getRemovedIds() != null) {

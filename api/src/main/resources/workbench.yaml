@@ -1079,21 +1079,6 @@ definitions:
         REVIEW_ID_VERIFICATION
     ]
 
-  ConceptSetDomain:
-    type: string
-    description: >
-      Domains for concept sets; corresponds to tables in OMOP with person_id columns.
-    enum: [
-        CONDITION,
-        DEATH,
-        DEVICE,
-        DRUG,
-        MEASUREMENT,
-        OBSERVATION,
-        PROCEDURE,
-        VISIT
-    ]
-
   PageVisit:
     type: object
     properties:
@@ -1449,7 +1434,12 @@ definitions:
       name:
         type: string
       domain:
-        $ref: "#/definitions/ConceptSetDomain"
+        description: >
+          Domain corresponding to an OMOP table that can contain rows for the concepts in this
+          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
+          here; it makes sense to specify concepts in these domains in cohort criteria, but
+          there isn't much value in having concept sets defined for them.
+        $ref: "#/definitions/Domain"
       description:
         type: string
       creator:

@@ -18,8 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.ConceptSetDomain;
+import org.pmiops.workbench.model.Domain;
 
 @Entity
 @Table(name = "concept_set")
@@ -74,11 +73,11 @@ public class ConceptSet {
   }
 
   @Transient
-  public ConceptSetDomain getDomainEnum() {
+  public Domain getDomainEnum() {
     return StorageEnums.conceptSetDomainFromStorage(domain);
   }
 
-  public void setDomainEnum(ConceptSetDomain domain) {
+  public void setDomainEnum(Domain domain) {
     this.domain = StorageEnums.conceptSetDomainToStorage(domain);
   }
 

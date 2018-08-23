@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMultimap;
 import java.util.List;
 import java.util.function.Function;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConceptsController implements ConceptsApiDelegate {
 
   // TODO: consider putting this in CDM config, fetching it from there
-  private static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
+  static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
       ImmutableMultimap.<Domain, String>builder()
           .put(Domain.CONDITION, "Condition")
           .put(Domain.CONDITION, "Condition/Meas")
