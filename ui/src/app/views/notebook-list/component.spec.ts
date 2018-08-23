@@ -171,7 +171,8 @@ describe('NotebookListComponent', () => {
     tick();
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone.ipynb');
-    expect(fixture.componentInstance.notebookList.map(nb => nb.path)).toContain('gs://bucket/notebooks/mockFile Clone.ipynb');
+    expect(fixture.componentInstance.notebookList.map(nb => nb.path))
+        .toContain('gs://bucket/notebooks/mockFile Clone.ipynb');
   }));
 
   it('displays correct information when notebook deleted', fakeAsync(() => {
