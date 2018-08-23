@@ -363,7 +363,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     for (List<FieldValue> row : result.iterateAll()) {
       response.addItemsItem(convertRowToChartData(rm, row));
     }
-    return null;
+    return ResponseEntity.ok(response);
   }
 
   @Override
