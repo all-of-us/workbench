@@ -175,7 +175,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         return ;
       }
       if (inputType === 'date') {
-          console.log(valueA)
           this.dateValueA = moment(valueA).format('YYYY-MM-DD');
           this.dateValueB = moment(valueB).format('YYYY-MM-DD');
           const operands = [this.dateValueA];
