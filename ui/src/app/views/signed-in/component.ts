@@ -11,6 +11,8 @@ import {SignInService} from 'app/services/sign-in.service';
 import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
 
+import {environment} from 'environments/environment';
+
 import {Authority} from 'generated';
 
 @Component({
@@ -29,6 +31,7 @@ export class SignedInComponent implements OnInit {
   familyName = '';
   profileImage = '';
   sidenavToggle = false;
+  environment = environment;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -95,16 +98,23 @@ export class SignedInComponent implements OnInit {
 
 
   get reviewWorkspaceActive(): boolean {
-    return this.locationService.path().startsWith('/admin/review-workspace');
+    return this.locationService.path() === '/admin/review-workspace';
   }
 
   get reviewIdActive(): boolean {
-    return this.locationService.path().startsWith('/admin/review-id-verification');
+    return this.locationService.path() === '/admin/review-id-verification';
+  }
+
+  get homeActive(): boolean {
+    return this.locationService.path() === '';
   }
 
   get workspacesActive(): boolean {
-    return this.locationService.path() === ''
-      || this.locationService.path().startsWith('/workspace');
+    return this.locationService.path() === '/workspaces';
+  }
+
+  get createWorkspaceActive(): boolean {
+    return this.locationService.path() === '/workspaces/build';
   }
 
 }
