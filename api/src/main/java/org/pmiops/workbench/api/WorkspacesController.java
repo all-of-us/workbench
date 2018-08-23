@@ -745,21 +745,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<FileDetail> renameNotebook(String workspace, String workspaceName, NotebookRename rename) {
-    String fromBucket = fireCloudService.getWorkspace(workspace, workspaceName)
+    String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
       .getWorkspace()
       .getBucketName();
-    String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY+ "/" + rename.getName();
+    String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + rename.getName();
     String newName = rename.getNewName();
     if (!newName.matches("^.+\\.ipynb")) {
       newName = newName + ".ipynb";
     }
     String newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
-    BlobId blobId = BlobId.of(fromBucket, origPath);
-    cloudStorageService.copyBlob(blobId, BlobId.of(fromBucket, newPath));
+    BlobId blobId = BlobId.of(bucket, origPath);
+    cloudStorageService.copyBlob(blobId, BlobId.of(bucket, newPath));
     cloudStorageService.deleteBlob(blobId);
     FileDetail fileDetail = new FileDetail();
     fileDetail.setName(newName);
-    fileDetail.setPath("gs://" + fromBucket + "/" + NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName);
+    fileDetail.setPath("gs://" + bucket + "/" + NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
     return ResponseEntity.ok(fileDetail);
@@ -767,23 +767,23 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> cloneNotebook(String workspace, String workspaceName, String notebookName) {
-    String fromBucket = fireCloudService.getWorkspace(workspace, workspaceName)
+    String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
       .getWorkspace()
       .getBucketName();
     String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
     String newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
-    BlobId blobId = BlobId.of(fromBucket, origPath);
-    cloudStorageService.copyBlob(blobId, BlobId.of(fromBucket, newPath));
+    BlobId blobId = BlobId.of(bucket, origPath);
+    cloudStorageService.copyBlob(blobId, BlobId.of(bucket, newPath));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName, String notebookName) {
-    String fromBucket = fireCloudService.getWorkspace(workspace, workspaceName)
+    String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
       .getWorkspace()
       .getBucketName();
     String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
-    BlobId blobId = BlobId.of(fromBucket, origPath);
+    BlobId blobId = BlobId.of(bucket, origPath);
     cloudStorageService.deleteBlob(blobId);
     return ResponseEntity.ok(new EmptyResponse());
   }

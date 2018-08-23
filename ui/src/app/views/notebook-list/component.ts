@@ -21,6 +21,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {NotebookRename} from "../../../generated/model/notebookRename";
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -49,6 +50,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   firstVisit = true;
   notebookInFocus: FileDetail;
   notebookRenameConflictError = false;
+  notebookRenameError = false;
   duplicateName = '';
 
 
@@ -171,15 +173,20 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.renameModal.open();
   }
 
-  receiveRename($event): void {
+  receiveRename($event: NotebookRename): void {
     this.renameNotebook($event);
   }
 
-  renameNotebook(rename): void {
+  renameNotebook(rename: NotebookRename): void {
     let newName = rename.newName;
     if (!(new RegExp('^.+\.ipynb$').test(newName))) {
       newName = rename.newName + '.ipynb';
       rename.newName = newName;
+    }
+    if((new RegExp('.*\/.*').test(newName))) {
+      this.renameModal.close();
+      this.notebookRenameError = true;
+      return;
     }
     if (this.notebookList.filter((nb) => nb.name === newName).length > 0) {
       this.renameModal.close();
@@ -195,24 +202,24 @@ export class NotebookListComponent implements OnInit, OnDestroy {
    });
   }
 
-  cloneThis(notebook): void {
-    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, notebook.name)
+  cloneThis(notebook: string): void {
+    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, notebook)
       .subscribe(() => {
       this.loadNotebookList();
     });
   }
 
-  confirmDelete(notebook): void {
+  confirmDelete(notebook: FileDetail): void {
     this.notebookInFocus = notebook;
     this.deleteModal.open();
   }
 
-  receiveDelete($event): void {
+  receiveDelete($event: FileDetail): void {
     this.deleteNotebook($event);
     this.deleteModal.close();
   }
 
-  public deleteNotebook(notebook): void {
+  public deleteNotebook(notebook: FileDetail): void {
     this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, notebook.name)
       .subscribe(() => {
       this.loadNotebookList();

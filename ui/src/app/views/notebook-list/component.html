@@ -34,7 +34,7 @@
           </button>
           <button class="action-item"
                   id="clone-{{notebook.name.replace('.ipynb', '')}}"
-                  (click)="cloneThis(notebook)"
+                  (click)="cloneThis(notebook.name)"
                   [class.disabled]="actionsDisabled"
                   [disabled]="actionsDisabled">
             <clr-icon shape="copy"></clr-icon>
@@ -78,6 +78,13 @@
 <clr-modal [(clrModalOpen)]="notebookRenameConflictError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">You already have a notebook named {{duplicateName}}. Please choose another name.</div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="notebookRenameError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">The name you entered has a '/' in it. This is currently not allowed. Please choose another name.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="notebookRenameError = false">Dismiss</button>
+  </div>
 </clr-modal>
 <app-bug-report></app-bug-report>
 

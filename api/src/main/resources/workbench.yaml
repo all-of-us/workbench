@@ -797,7 +797,7 @@ paths:
 
   # Notebooks ############################################################################
 
-  /v1/notebooks/{workspaceNamespace}/{workspaceId}/renameNotebook:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/renameNotebook:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -825,7 +825,7 @@ paths:
             $ref: "#/definitions/FileDetail"
 
 
-  /v1/notebooks/{workspaceNamespace}/{workspaceId}/{notebookName}/clone:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/clone:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -845,7 +845,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  /v1/notebooks/{workspaceNamespace}/{workspaceId}/{notebookName}/delete:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
