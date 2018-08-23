@@ -31,7 +31,7 @@ export class WorkspaceNavBarComponent implements OnInit {
   workspace: Workspace;
   wsId: string;
   wsNamespace: string;
-  private accessLevel: WorkspaceAccessLevel;
+  accessLevel: WorkspaceAccessLevel;
   deleting = false;
   workspaceDeletionError = false;
 
