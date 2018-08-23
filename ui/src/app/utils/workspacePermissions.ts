@@ -1,8 +1,5 @@
 import {Workspace, WorkspaceAccessLevel, WorkspaceResponse} from 'generated';
 
-/**
- * Composite class with helper functions useful in the UI.
- */
 export class WorkspacePermissions {
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
