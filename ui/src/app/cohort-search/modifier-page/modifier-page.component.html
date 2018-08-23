@@ -17,7 +17,7 @@
               </button>
               <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
                 <button
-                  *ngFor="let opt of mod.operators"
+                  *ngFor="let opt of mod.options"
                   [value]="opt.value"
                   (click)="selectChange(opt, i, $event, mod)"
                   class="dropdown-item"
