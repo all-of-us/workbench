@@ -115,13 +115,6 @@ export class WorkspacesServiceStub {
     return [stubWorkspace];
   }
 
-  private clone(w: Workspace): Workspace {
-    if (w == null) {
-      return w;
-    }
-    return JSON.parse(JSON.stringify(w));
-  }
-
   static stubNotebookList(): FileDetail[] {
     return [
       {
@@ -130,6 +123,13 @@ export class WorkspacesServiceStub {
         'lastModifiedTime': 100
       }
     ];
+  }
+
+  private clone(w: Workspace): Workspace {
+    if (w == null) {
+      return w;
+    }
+    return JSON.parse(JSON.stringify(w));
   }
 
   createWorkspace(newWorkspace: Workspace): Observable<Workspace> {
@@ -303,30 +303,30 @@ export class WorkspacesServiceStub {
       rename: NotebookRename): Observable<FileDetail> {
     return new Observable<FileDetail>(observer => {
       setTimeout(() => {
-        let responseItems: FileDetail = {
+        const responseItems: FileDetail = {
           'name': rename.newName,
           'path': 'gs://bucket/notebooks/' + rename.newName,
           'lastModifiedTime': 100
         };
         observer.next(responseItems);
         observer.complete();
-      })
-    })
+      });
+    });
   }
 
   cloneNotebook(workspaceNamespace: string, workspaceId: string,
       notebookName: String): Observable<any> {
     return new Observable<any>(observer => {
       setTimeout(() => {
-        let cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
+        const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
         this.notebookList.push({
           'name': cloneName,
           'path': 'gs://bucket/notebooks/' + cloneName,
           'lastModifiedTime': 100
         });
         observer.complete();
-      })
-    })
+      });
+    });
   }
 
   deleteNotebook(workspaceNamespace: string, workspaceId: string,
@@ -337,7 +337,7 @@ export class WorkspacesServiceStub {
       });
       observer.next();
       observer.complete();
-    })
+    });
   }
 
   localizeAllFiles(workspaceNamespace: string, workspaceId: string,
