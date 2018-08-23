@@ -14,8 +14,13 @@ import {NodeComponent} from '../node/node.component';
   styleUrls: ['./tree.component.css']
 })
 export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
-  _type: string;
-    readonly domainTypes = DOMAIN_TYPES;
+     _type: string;
+     name: string;
+
+  ngOnChanges() {
+    super.ngOnInit();
+  }
+
   ngOnInit() {
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
@@ -29,12 +34,12 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
       || this.node.get('type') === TreeType[TreeType.CONDITION]
       || this.node.get('type') === TreeType[TreeType.PM];
   }
-    optionChange(flag) {
-        if (flag) {
-            this.testOptionChange = true;
-            setTimeout(() => super.loadChildren(true));
-            // super.ngOnInit();
-            // this.openTree.emit(flag);
+
+  optionChange(flag) {
+    if (flag) {
+        this.name = flag;
+        this.testOptionChange = true;
+        setTimeout(() => super.loadChildren(true));
         }
     }
 

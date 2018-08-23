@@ -42,7 +42,6 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
 
   open = false;
   noSelection = true;
-    icdFlag= false;
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
@@ -144,11 +143,11 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-    return Map({
-      type: this.ctype,
-      fullTree: this.fullTree,
-      id: 0,    // root parent ID is always 0
-    });
+      return Map({
+          type: this.ctype,
+          fullTree: this.fullTree,
+          id: 0,    // root parent ID is always 0
+      });
   }
 
   get selectionTitle() {
