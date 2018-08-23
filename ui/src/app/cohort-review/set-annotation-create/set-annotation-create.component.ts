@@ -37,6 +37,7 @@ export class SetAnnotationCreateComponent {
   @Output() onFinish = new EventEmitter<boolean>();
   posting = false;
   enumValues = <string[]>[];
+ annotationOptions = '';
 
   form = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -76,9 +77,22 @@ export class SetAnnotationCreateComponent {
       .do((defns: CohortAnnotationDefinition[]) =>
         this.state.annotationDefinitions.next(defns))
       .subscribe(_ => {
+          this.open = false;
         this.posting = false;
+          this.annotationOptions = '';
+          // this.isEnum = false;
+          this.kind.patchValue('');
+          this.enumValues.length = 0;
+         this.name.patchValue('');
         this.onFinish.emit(true);
       });
+  }
+   get open() {
+    return this.state.annotationManagerOpen.getValue();
+  }
+
+  set open(value: boolean) {
+      this.state.annotationManagerOpen.next(value);
   }
 
   cancel() {
@@ -106,4 +120,18 @@ export class SetAnnotationCreateComponent {
     const isEmptyEnum = this.isEnum && !(this.enumValues.length > 0);
     return (this.form.invalid || isEmptyEnum);
   }
+
+  selectDropdownChange(val) {
+    this.annotationOptions = val.displayName ;
+    this.kind.patchValue(val.value);
+  }
+
+  closeModal() {
+    this.annotationOptions = '';
+    this.open = false;
+    this.kind.patchValue('');
+    this.enumValues.length = 0;
+    this.name.patchValue('');
+  }
+
 }

@@ -1,79 +1,88 @@
 <form [formGroup]="form" ngSubmit="submit()" class="compact">
-  <section class="form-block">
-    <label>Create a new Cohort-wide Annotation</label>
-
-    <div class="form-group">
-      <label for="name" class="required">Annotation Name</label>
+  <section class="form-block annotation-input-container">
+    <div>
       <label
         aria-haspopup="true"
         role="tooltip"
-        class="tooltip tooltip-validation tooltip-sm tooltip-right"
+        class="tooltip tooltip-validation tooltip-sm tooltip-bottom-left"
         [class.invalid]="name.invalid && (name.dirty || name.touched)">
         <input id="name"
+               class="annotation-name-input"
           name="name"
           formControlName="name"
           type="text"
+               placeholder="ANNOTATION NAME"
           autofocus >
         <span class="tooltip-content">
           A Name is required
         </span>
       </label>
     </div>
-
-    <div class="form-group">
-      <label for="kind" class="required">Annotation Data Type</label>
-      <div class="select">
-        <select id="kind" name="kind" formControlName="kind">
-          <option *ngFor="let dt of datatypes" [value]="dt.value">
-              {{ dt.displayName }}
-          </option>
-        </select>
-      </div>
+    <div class="annotation-dropdown">
+      <clr-dropdown >
+        <button type="button" class="btn btn-outline" clrDropdownTrigger>
+          <span *ngIf = "annotationOptions !== ''; else elseBlock">{{annotationOptions}}</span>
+            <ng-template #elseBlock>
+            <span class="annotation-data-type">ANNOTATION DATA TYPE</span>
+          </ng-template>
+          <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
+          <button id="kind" name="kind"
+                  *ngFor="let dt of datatypes"
+                  [value]="dt.value"
+                  (click)="selectDropdownChange(dt)"
+                  class="dropdown-item"
+                  type="button"
+                  clrDropdownItem>{{ dt.displayName }}</button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
     </div>
   </section>
-
   <!-- Specify the enumeration -->
   <ng-container *ngIf="isEnum">
-    <hr />
     <section class="form-block">
-      <label for="enum-values">Values</label>
-      <div class="form-group">
-        <label for="add-value">Add a Value</label>
-        <input type="text"
-          name="add-value"
-          id="add-value"
-          formControlName="addValue">
-        <button type="button"
-          class="btn btn-icon btn-sm"
-          (click)="addEnumValue()">
-          <clr-icon shape="plus" size="18"></clr-icon>
-        </button>
-      </div>
-      <ul>
-        <li *ngFor="let val of enumValues">
+      <label class="value-text" for="enum-values">Values</label>
+      <div>
+        <ng-container *ngFor="let val of enumValues">
+          <input type="text"
+                 class="annotation-value-input"
+                 value= {{val}}>
           <button type="button"
-            class="btn btn-icon btn-link btn-sm text-danger"
-            (click)="removeEnumValue(val)">
-            <clr-icon shape="close" size="18"></clr-icon>
+                  class="btn btn-icon btn-link btn-sm text-danger"
+                  (click)="removeEnumValue(val)">
+            <clr-icon shape="minus-circle" size="18"></clr-icon>
           </button>
-          {{ val }}
-        </li>
-      </ul>
+        </ng-container>
+      </div>
+      <input type="text"
+             class="annotation-value-input"
+             placeholder="ADD A VALUE"
+             name="add-value"
+             id="add-value"
+             formControlName="addValue">
+      <button type="button"
+              class="btn btn-icon btn-link"
+              (click)="addEnumValue()">
+        <clr-icon shape="plus-circle" size="18"></clr-icon>
+      </button>
+
     </section>
   </ng-container>
-
-  <button
-    type="button"
-    class="btn btn-primary-outline"
-    (click)="create()"
-    [clrLoading]="posting"
-    [disabled]="formIsInvalid">
-    Create
-  </button>
-  <button
-    type="button"
-    class="btn btn-danger-outline"
-    (click)="cancel()">
-    Cancel
-  </button>
+  <div class="footer-button">
+    <button
+            type="button"
+            class="btn btn-link cancel"
+            (click)="closeModal()">
+      Cancel
+    </button>
+    <button
+            type="button"
+            class="btn btn-primary"
+            [clrLoading]="posting"
+            [disabled]="formIsInvalid"
+            (click)="create()">
+      Create
+    </button>
+  </div>
 </form>
