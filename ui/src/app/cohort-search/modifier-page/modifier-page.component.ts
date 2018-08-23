@@ -197,6 +197,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }
 
   currentMods(vals) {
+      this.ngAfterContentChecked();
     return this.modifiers.map(({name, inputType, modType}) => {
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {
@@ -210,8 +211,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           return;
         }
         if (inputType === 'date') {
-          this.dateValueA = moment(valueA, 'MM/DD/YYYY').format('YYYY-MM-DD');
-          this.dateValueB = moment(valueB, 'MM/DD/YYYY').format('YYYY-MM-DD');
+          this.dateValueA = moment(valueA).format('YYYY-MM-DD');
+          this.dateValueB = moment(valueB).format('YYYY-MM-DD');
           const operands = [this.dateValueA];
           if (between) {
             operands.push(this.dateValueB);
