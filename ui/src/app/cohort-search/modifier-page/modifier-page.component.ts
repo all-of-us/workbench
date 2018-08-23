@@ -2,6 +2,7 @@ import {select} from '@angular-redux/store';
 import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import {fromJS, List, Map} from 'immutable';
+import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
 import {
   activeModifierList,
@@ -173,9 +174,18 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       if (!operator || !valueA || (between && !valueB)) {
         return ;
       }
+      if (inputType === 'date') {
+          console.log(valueA)
+          this.dateValueA = moment(valueA).format('YYYY-MM-DD');
+          this.dateValueB = moment(valueB).format('YYYY-MM-DD');
+          const operands = [this.dateValueA];
+          if (between) { operands.push(this.dateValueB); }
+          return fromJS({name: modType, operator, operands});
+      } else {
           const operands = [valueA];
           if (between) { operands.push(valueB); }
           return fromJS({name: modType, operator, operands});
+      }
     });
   }
 
