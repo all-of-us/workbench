@@ -3,7 +3,6 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -13,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -34,6 +32,20 @@ public class ConceptSet {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Set<Long> conceptIds;
+
+  public ConceptSet() {}
+
+  public ConceptSet(ConceptSet cs) {
+    setDescription(cs.getDescription());
+    setName(cs.getName());
+    setDomain(cs.getDomain());
+    setCreator(cs.getCreator());
+    setWorkspaceId(cs.getWorkspaceId());
+    // Should we actually copy these? (Same question for cohorts...)
+    setCreationTime(cs.getCreationTime());
+    setLastModifiedTime(cs.getLastModifiedTime());
+    setVersion(1);
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -136,19 +148,5 @@ public class ConceptSet {
 
   public void setConceptIds(Set<Long> conceptIds) {
     this.conceptIds = conceptIds;
-  }
-
-  public ConceptSet makeClone() {
-    ConceptSet c = new ConceptSet();
-    c.setDescription(getDescription());
-    c.setName(getName());
-    c.setDomain(getDomain());
-    c.setCreator(getCreator());
-    c.setWorkspaceId(getWorkspaceId());
-    // Should we actually copy these? (Same question for cohorts...)
-    c.setCreationTime(getCreationTime());
-    c.setLastModifiedTime(getLastModifiedTime());
-    c.setVersion(1);
-    return c;
   }
 }

@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,6 +30,20 @@ public class Cohort {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Set<CohortReview> cohortReviews;
+
+  public Cohort() {}
+
+  public Cohort(Cohort c) {
+    setCriteria(c.getCriteria());
+    setDescription(c.getDescription());
+    setName(c.getName());
+    setType(c.getType());
+    setCreator(c.getCreator());
+    setWorkspaceId(c.getWorkspaceId());
+    setCreationTime(c.getCreationTime());
+    setLastModifiedTime(c.getLastModifiedTime());
+    setVersion(1);
+  }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -141,19 +154,5 @@ public class Cohort {
 
   public void addCohortReview(CohortReview cohortReview) {
     this.cohortReviews.add(cohortReview);
-  }
-
-  public Cohort makeClone() {
-    Cohort c = new Cohort();
-    c.setCriteria(getCriteria());
-    c.setDescription(getDescription());
-    c.setName(getName());
-    c.setType(getType());
-    c.setCreator(getCreator());
-    c.setWorkspaceId(getWorkspaceId());
-    c.setCreationTime(getCreationTime());
-    c.setLastModifiedTime(getLastModifiedTime());
-    c.setVersion(1);
-    return c;
   }
 }

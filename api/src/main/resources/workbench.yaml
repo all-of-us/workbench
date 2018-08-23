@@ -1467,7 +1467,7 @@ definitions:
         type: string
         description: >
           Etag of the concept set being modified.
-          Validates that the workspace (and its user roles) has not been modified since this
+          Validates that the concept set (and its user roles) has not been modified since this
           etag was retrieved.
       addedIds:
         type: array
