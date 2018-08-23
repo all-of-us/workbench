@@ -31,11 +31,12 @@
 
         <!--</clr-dropdown-menu>-->
       <!--</clr-dropdown>-->
+
 <app-crit-dropdown (onOptionChange)="optionChange($event)"></app-crit-dropdown>
     </ng-container>
   </div>
 
-
+  {{showDropDown()}}
 <div [ngClass]="showDropDown()? 'search-container' :'search-width'" >
   <app-search-bar *ngIf="showSearch() && !loading" [_type]="_type"></app-search-bar>
 </div>
@@ -45,5 +46,4 @@
 <div *ngIf="numMatches > 1">
   <b>Note:</b> There are {{numMatches}} matches for your search
 </div>
-{{testoptionChange}}
 <crit-node *ngFor="let item of children" [node]="item" [testChange] = 'testOptionChange'></crit-node>

@@ -62,7 +62,6 @@
                 <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes'">
                   <!-- Tree Page -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
-                    <h1>helloo{{rootNode}}</h1>
                     <crit-tree (openTree)="changedRootNode($event)" [node]="rootNode"></crit-tree>
                   </div>
                   <!-- Modifiers Page -->
@@ -80,7 +79,6 @@
         </div>
 
         <div class="col col-sm-4 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO">
-          <h1>2 {{ctype}}</h1>
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>

@@ -41,12 +41,14 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
 
   showSearch() {
     return this.node.get('type') === DomainType.VISIT || this.node.get('type') === DomainType.DRUG
-        || this.node.get('type') === DomainType.CONDITION;
+        || this.node.get('type') === DomainType.CONDITION || this.node.get('type') === CRITERIA_TYPES.ICD9
+      || this.node.get('type') === CRITERIA_TYPES.ICD10;
+
   }
 
   showDropDown() {
    // console.log(this.node.get('type'));
-      return this.node.get('type') === DomainType.CONDITION || CRITERIA_TYPES.ICD9;
+      return this.node.get('type') === DomainType.CONDITION || this.node.get('type') === CRITERIA_TYPES.ICD9 || this.node.get('type') === CRITERIA_TYPES.ICD10;
   }
     optionChange(flag) {
         if (flag) {
