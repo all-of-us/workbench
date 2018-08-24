@@ -15,7 +15,9 @@ import {
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
+  ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
   SET_SCROLL_ID,
 
@@ -142,6 +144,16 @@ export const loadIngredients =
   (ingredients: any
   ): ActionTypes[typeof LOAD_INGREDIENT_LIST] =>
   ({type: LOAD_INGREDIENT_LIST, ingredients});
+
+export const loadAttributes =
+  (node: any, attributes: any
+  ): ActionTypes[typeof LOAD_ATTRIBUTE_LIST] =>
+  ({type: LOAD_ATTRIBUTE_LIST, node, attributes});
+
+export const attributeRequestError =
+  (error?: any
+  ): ActionTypes[typeof ATTRIBUTE_REQUEST_ERROR] =>
+    ({type: ATTRIBUTE_REQUEST_ERROR, error});
 
 export const criteriaRequestError =
   (kind: string, parentId: number, error?: any
@@ -271,10 +283,10 @@ export const removeGroupItem =
   ): ActionTypes[typeof REMOVE_ITEM] =>
   ({type: REMOVE_ITEM, groupId, itemId});
 
-export const showAttributesPage =
-  (node: any
+export const requestAttributes =
+  (cdrVersionId: number, node: any
   ): ActionTypes[typeof SHOW_ATTRIBUTES_PAGE] =>
-  ({type: SHOW_ATTRIBUTES_PAGE, node});
+  ({type: SHOW_ATTRIBUTES_PAGE, cdrVersionId, node});
 
 export const hideAttributesPage =
   (): ActionTypes[typeof HIDE_ATTRIBUTES_PAGE] =>

@@ -29,7 +29,9 @@ import {
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
+  ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
   SET_SCROLL_ID,
 
@@ -163,10 +165,23 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['criteria', 'search', 'ingredients'], action.ingredients)
           .deleteIn(['criteria', 'search', 'autocomplete']);
 
+      case LOAD_ATTRIBUTE_LIST:
+        const node = action.node.set('attributes', action.attributes);
+        return state
+          .setIn(['wizard', 'item', 'attributes', 'node'], node)
+          .deleteIn(['wizard', 'item', 'attributes', 'loading']);
+
       case AUTOCOMPLETE_REQUEST_ERROR:
         return state
           .deleteIn(['criteria', 'search', 'autocomplete'])
           .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
+
+      case ATTRIBUTE_REQUEST_ERROR:
+        return state
+          .deleteIn(['wizard', 'item', 'attributes', 'loading'])
+          .setIn(
+            ['wizard', 'item', 'attributes', 'errors'], fromJS({error: action.error})
+          );
 
       case CRITERIA_REQUEST_ERROR:
         return state
@@ -314,11 +329,13 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SHOW_ATTRIBUTES_PAGE:
         return state
-          .setIn(['wizard', 'item', 'attributes'], action.node)
-          .deleteIn(['wizard', 'calculate', 'count']);
+          .setIn(['wizard', 'item', 'attributes', 'loading'], true);
 
       case HIDE_ATTRIBUTES_PAGE:
-        return state.setIn(['wizard', 'item', 'attributes'], Map());
+        console.log('hide');
+        return state
+          .setIn(['wizard', 'item', 'attributes', 'node'], Map())
+          .deleteIn(['wizard', 'calculate', 'count']);
 
         case REMOVE_ITEM: {
         state = state

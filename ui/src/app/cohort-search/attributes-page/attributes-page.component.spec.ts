@@ -60,7 +60,6 @@ describe('AttributesPageComponent', () => {
       id: 316305,
       name: 'Height Detail',
       parentId: 0,
-      predefinedAttributes: null,
       selectable: true,
       subtype: 'HEIGHT',
       type: 'PM'

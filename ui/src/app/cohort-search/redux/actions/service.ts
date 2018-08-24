@@ -17,6 +17,7 @@ import {
   getSearchRequest,
   groupList,
   includeGroups,
+  isAttributeLoading,
   isAutocompleteLoading,
   isCriteriaLoading,
   isRequesting,
@@ -84,7 +85,8 @@ export class CohortSearchActions {
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
-  @dispatch() showAttributesPage = ActionFuncs.showAttributesPage;
+  @dispatch() requestAttributes = ActionFuncs.requestAttributes;
+  @dispatch() loadAttributes = ActionFuncs.loadAttributes;
   @dispatch() hideAttributesPage = ActionFuncs.hideAttributesPage;
 
   @dispatch() openWizard = ActionFuncs.openWizard;
@@ -256,6 +258,14 @@ export class CohortSearchActions {
     this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
   }
 
+  fetchAttributes(node: any): void {
+    const isLoading = isAttributeLoading()(this.state);
+    if (isLoading) {
+      return;
+    }
+    this.requestAttributes(this.cdrVersionId, node);
+  }
+
   requestPreview(): void {
     const params = activeParameterList(this.state)
       .valueSeq()
@@ -286,7 +296,7 @@ export class CohortSearchActions {
         .toJS();
     const groupItem = <SearchGroupItem>{
       id: itemId,
-      type: 'PM',
+      type: searchParam[0].type,
       searchParameters: searchParam,
       modifiers: [],
     };
@@ -445,17 +455,13 @@ export class CohortSearchActions {
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
-      attributes: immParam.get('attributes'),
+      attributes: immParam.get('attributes')
     };
-
-    if (immParam.get('hasAttributes') || param.type === CRITERIA_TYPES.DEMO) {
-      param.attributes = typeof immParam.get('attributes') !== 'undefined'
-        ? immParam.get('attributes') : [];
-    }
 
     if (param.type === CRITERIA_TYPES.DEMO
       || param.type === DomainType[DomainType.VISIT]
       || param.type === CRITERIA_TYPES.PM
+      || param.type === CRITERIA_TYPES.MEAS
       || param.type === DomainType[DomainType.DRUG]) {
         param.conceptId = immParam.get('conceptId');
     } else if (param.type === CRITERIA_TYPES.ICD9

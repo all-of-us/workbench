@@ -90,8 +90,12 @@ export const previewStatus = (state) =>
 export const attributesPreviewStatus = (state) =>
   state.getIn(['wizard', 'calculate'], Map());
 
-export const attributesPage = (state) =>
-  state.getIn(['wizard', 'item', 'attributes'], Map());
+export const nodeAttributes = (state): any =>
+    state.getIn(['wizard', 'item', 'attributes', 'node'], Map());
+
+export const isAttributeLoading =
+  () => (state): boolean =>
+    state.getIn(['wizard', 'item', 'attributes', 'loading'], false);
 
 
 /**
