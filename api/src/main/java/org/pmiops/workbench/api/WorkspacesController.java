@@ -765,15 +765,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> cloneNotebook(String workspace, String workspaceName, String notebookName) {
+  public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName, String notebookName) {
     String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
       .getWorkspace()
       .getBucketName();
     String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
-    String newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
+    String newName = notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
+    String newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
     BlobId blobId = BlobId.of(bucket, origPath);
     cloudStorageService.copyBlob(blobId, BlobId.of(bucket, newPath));
-    return ResponseEntity.ok(new EmptyResponse());
+    FileDetail fileDetail = new FileDetail();
+    fileDetail.setName(newName);
+    fileDetail.setPath("gs://" + bucket + "/" + newPath);
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    fileDetail.setLastModifiedTime(now.getTime());
+    return ResponseEntity.ok(fileDetail);
   }
 
   @Override

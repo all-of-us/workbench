@@ -843,7 +843,7 @@ paths:
         200:
           description: Successful clone
           schema:
-            $ref: "#/definitions/EmptyResponse"
+            $ref: "#/definitions/FileDetail"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete:
     parameters:
