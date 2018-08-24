@@ -35,6 +35,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   dropdownOption = {
     selected: ['', '', '', '']
   };
+  visitCounts: any;
 
   readonly modifiers = [{
     name: 'ageAtEvent',
@@ -119,9 +120,11 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       .filter(visiTypes => visiTypes.size > 0)
       .subscribe(visitTypes => {
         if (this.modifiers[3]) {
+          this.visitCounts = {};
           visitTypes.toJS().forEach(option => {
             if (option.parentId === 0) {
               this.modifiers[3].operators.push({name: option.name, value: option.conceptId});
+              this.visitCounts[option.conceptId] = option.count;
             }
           });
         }
