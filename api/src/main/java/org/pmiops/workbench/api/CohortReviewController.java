@@ -79,6 +79,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public static final Integer PAGE = 0;
   public static final Integer PAGE_SIZE = 25;
   public static final Integer MAX_REVIEW_SIZE = 10000;
+  public static final Integer MIN_LIMIT = 1;
+  public static final Integer MAX_LIMIT = 20;
   public static final Integer DEFAULT_LIMIT = 5;
   public static final List<String> GENDER_RACE_ETHNICITY_TYPES =
     ImmutableList.of(ParticipantCohortStatusColumns.ETHNICITY.name(),
@@ -355,8 +357,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                   String domain,
                                                                                   Integer limit) {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    if (chartLimit < 1 || chartLimit > 100) {
-      throw new BadRequestException("Please provide a chart limit between 1 and 100.");
+    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
+      throw new BadRequestException(
+        String.format("Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
     }
     validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
