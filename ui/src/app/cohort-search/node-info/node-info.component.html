@@ -13,7 +13,11 @@
   </button>
 
   <!-- CODE -->
-  <div class="code font-weight-bold" [innerHTML]="displayCode | safeHtml"></div>
+  <div class="code font-weight-bold"
+       [class.search-keyword]="matched"
+       [innerHTML]="displayCode | safeHtml">
+    {{ displayCode }}
+  </div>
 
   <!-- NAME -->
   <div #name
@@ -22,6 +26,7 @@
     [popperPlacement]="'bottom'"
     [popperDisabled]="!isTruncated"
     class="name text-muted"
+    [class.search-keyword]="matched"
     [innerHTML]="displayName | safeHtml"></div>
 
   <!-- COUNT -->
