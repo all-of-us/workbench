@@ -5,9 +5,10 @@ import 'highcharts/adapters/standalone-framework.src';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
+import {DbConstants} from '../../utils/db-constants';
 
 /* CONSTANTS */
-const COUNT_ANALYSIS_ID = 3000;
+/*const COUNT_ANALYSIS_ID = 3000;
 const GENDER_ANALYSIS_ID = 3101;
 const AGE_ANALYSIS_ID = 3102;
 const SURVEY_COUNT_ANALYSIS_ID = 3110;
@@ -15,10 +16,15 @@ const SURVEY_GENDER_ANALYSIS_ID = 3111;
 const SURVEY_AGE_ANALYSIS_ID = 3112;
 const MEASUREMENT_AGE_ANALYSIS_ID = 3112;
 const MEASUREMENT_VALUE_ANALYSIS_ID = 1900;
+*/
+
 const GENDER_COLORS = {
   '8507': '#8DC892',
   '8532': '#6CAEE3'
 };
+
+constants : DbConstants = new DbConstants;
+/* These are designers Age colors however we use only one color below now until further design */
 const AGE_COLORS = {
   '1': '#252660',
   '2': '#4259A5',
@@ -40,6 +46,7 @@ const DATA_LABEL_STYLE = {
   'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px',
   'font-weight': '300', 'textOutline': 'none'
 };
+const AXIS_LINE_COLOR = '#979797';
 
 @Component({
   selector: 'app-chart',
@@ -49,28 +56,20 @@ const DATA_LABEL_STYLE = {
 export class ChartComponent implements OnChanges {
   @Input() analysis: Analysis;
   @Input() concepts: Concept[] = []; // Can put in analysis or concepts to chart. Don't put both
-  @Input() selectedResult: any;
-  // For ppi question answers analysis , we select an answer from the results
+  @Input() selectedResult: any; // For ppi question, this is selected answer.
   @Input() pointWidth = 10;   // Optional width of bar or point or box plot
   @Input() backgroundColor = '#FFFFFF'; // Optional background color
   @Input() chartTitle: string;
-  @Input() chartType;
+  @Input() chartType: string;
   @Input() sources = false;
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any;
-  chartInstance: any;
 
-
-  constructor() {
+  constructor(private dbc: DbConstants) {
     highcharts.setOptions({
       lang: {thousandsSep: ','},
     });
   }
-
-  /* Todo -- maybe use this in future
-  saveInstance(chartInstance: any) {
-    this.chartInstance = chartInstance;
-  }*/
 
   // Render new chart on changes
   ngOnChanges() {
@@ -80,14 +79,6 @@ export class ChartComponent implements OnChanges {
       this.chartOptions = this.hcChartOptions();
     }
   }
-
-  public chartClick(e) {
-    console.log('Chart clicked ', e);
-  }
-
-  columnClick = function (e) {
-    console.log('Column clicked ', e);
-  };
 
   public hcChartOptions(): any {
     const options = this.makeChartOptions();
@@ -160,7 +151,7 @@ export class ChartComponent implements OnChanges {
           text: null
         },
         lineWidth: 1,
-        lineColor: '#979797',
+        lineColor: AXIS_LINE_COLOR,
         gridLineColor: this.backgroundColor
       },
       xAxis: {
@@ -175,26 +166,22 @@ export class ChartComponent implements OnChanges {
           }
         },
         lineWidth: 1,
-        lineColor: '#979797'
+        lineColor: AXIS_LINE_COLOR
       },
       zAxis: {},
       legend: {
-        enabled: false // this.seriesLegend()
+        enabled: false
       },
       series: [options.series],
     };
   }
 
   /* For ppi answers we have to filter the results to that answer because all answers
-   * for each question come in the analyses results
+   * for each question come in the analyses results. Stratum 4 has the answer value
   */
   public getSelectedResults(selectedResult: any) {
-    const results = [];
-    for (const r of this.analysis.results) {
-      if (r.stratum4 === selectedResult.stratum4) {
-        results.push(r);
-      }
-    }
+    const results =
+
     return results;
   }
 
@@ -327,15 +314,16 @@ export class ChartComponent implements OnChanges {
   }
 
   public makeGenderChartOptions() {
-    // For ppi we need to filter the results to the particular answer that the user selected
-    // because we only show the breakdown for one answer on this chart
     let results = [];
     let seriesName = '';
-    if (this.analysis.analysisId === GENDER_ANALYSIS_ID) {
+    if (this.analysis.analysisId === dbc.GENDER_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
     } else {
-      results = this.getSelectedResults(this.selectedResult);
+      // For ppi we need to filter the results to the particular answer that the user selected
+      // because we only show the breakdown for one answer on this chart
+      // results = this.getSelectedResults(this.selectedResult);
+      results = this.analysis.results.filter( r => r.stratum4 === this.selectedResult.stratum4);
       // Series name for answers is the answer selected which is in stratum4
       seriesName = this.selectedResult.stratum4;
     }
@@ -343,7 +331,7 @@ export class ChartComponent implements OnChanges {
     let cats = [];
     for (const a  of results) {
       // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
-      const color = a.analysisId === GENDER_ANALYSIS_ID ?
+      const color = a.analysisId === dbc.GENDER_ANALYSIS_ID ?
         GENDER_COLORS[a.stratum2] : GENDER_COLORS[a.stratum5];
       data.push({
         name: a.analysisStratumName
@@ -387,21 +375,33 @@ export class ChartComponent implements OnChanges {
     let seriesName = '';
 
     // Question/answers have a different data structure than other concepts
-    if (this.analysis.analysisId === AGE_ANALYSIS_ID) {
+    if (this.analysis.analysisId === dbc.AGE_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
     } else {
-      results = this.getSelectedResults(this.selectedResult);
+      // For ppi we need to filter the results to the particular answer that the user selected
+      // because we only show the breakdown for one answer on this chart
+      //results = this.getSelectedResults(this.selectedResult);
+      results = this.analysis.results.filter( r => r.stratum4 === this.selectedResult.stratum4);
       // Series name for answers is the answer selected which is in stratum4
       seriesName = this.selectedResult.stratum4;
     }
     // Age results have two stratum-- 1 is concept, 2 is age decile
-    // Sort by age decile (stratum2)
+    // Sort by age decile (stratum2) or stratum5
+    console.log("Results for age ", results);
+
     results = results.sort((a, b) => {
-        if (Number(a.stratum2) > Number(b.stratum2)) {
+        let anum = Number(a.stratum2);
+        let bnum = Number(b.stratum2);
+        if (this.analysis.analysisId != dbc.AGE_ANALYSIS_ID) {
+          anum = Number(a.stratum5);
+          bnum = Number(b.stratum5);
+        }
+
+        if (anum > bnum) {
           return 1;
         }
-        if (Number(a.stratum2) < Number(b.stratum2)) {
+        if (anum < bnum) {
           return -1;
         }
         return 0;
@@ -411,8 +411,10 @@ export class ChartComponent implements OnChanges {
     const cats = [];
     for (const a  of results) {
       // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
+      /* Only use one color for now
       const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] :
         AGE_COLORS[a.stratum5];
+        */
       data.push({
         name: a.analysisStratumName
         , y: a.countValue, color: color
@@ -431,17 +433,6 @@ export class ChartComponent implements OnChanges {
     };
   }
 
-  // Todo maybe use something like this
- /* public makeMeasurementChartOptions() {
-    if (this.analysis.chartType === 'histogram') {
-      return this.makeHistogramChartOptions();
-    }
-    if (this.analysis.chartType === 'column') {
-      return this.makeCountChartOptions();
-    }
-
-  }
-*/
   // Histogram data analyses come already binned
   // The value is in stratum 4, the unit in stratum5, the countValue in the bin is countValue
   // and we also have
@@ -477,7 +468,7 @@ export class ChartComponent implements OnChanges {
       cats.push(d.name);
     }
 
-    // Todo later
+    // Todo we will use this later in drill downs and such
     const seriesClick = function(event) {
       const thisCtrl = event.point.options.thisCtrl;
       // console.log('Histogram plot Clicked point :',  event.point);
@@ -498,8 +489,7 @@ export class ChartComponent implements OnChanges {
       }};
 
     // Note that our data is binned already so we use a column chart to show histogram.
-    // How ever some boolean measurements like pregnancy but two bins , Yes and No. So
-    // they will pass the chartType="column" to this component
+    // But we need to style it to make it look like a histogram.
     if (this.chartType === 'histogram') {
       // Make column chart look like  a histogram with these options
       series.pointPadding = 0;
