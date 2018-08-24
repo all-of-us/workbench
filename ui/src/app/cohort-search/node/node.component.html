@@ -1,11 +1,11 @@
 <clr-tree-node >
 
-  <div class="clr-treenode-link container" (click)="toggleExpanded()">
+  <div [id]="nodeId" class="clr-treenode-link container" (click)="toggleExpanded()">
     <crit-node-info [node]="node"></crit-node-info>
   </div>
 
   <ng-template *ngIf="node.get('group') && !fullTree"
-    [clrIfExpanded]="expanded"
+    [(clrIfExpanded)]="expanded"
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
       <div class="node-list">

@@ -88,7 +88,7 @@ clr-dropdown-menu {
 
 .card.item-card .name {
   cursor: pointer;
-  word-wrap: break-word;
+  word-break: break-all;
 }
 
 .card.item-card .name.disabled {

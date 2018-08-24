@@ -1,14 +1,18 @@
 import {Injectable} from '@angular/core';
+import {DomainType} from 'generated';
 import {Map} from 'immutable';
 import {Epic} from 'redux-observable';
 import {Observable} from 'rxjs/Observable';
 
+import {CohortSearchActions} from './actions';
+
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
-  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   CANCEL_CRITERIA_REQUEST,
 
@@ -20,6 +24,8 @@ import {
 
   BEGIN_PREVIEW_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
+
+  SHOW_ATTRIBUTES_PAGE,
 
   RootAction,
   ActionTypes,
@@ -43,6 +49,12 @@ import {
   autocompleteRequestError,
 
   loadIngredients,
+  loadCriteriaSubtree,
+
+  loadSubtreeItems,
+
+  loadAttributes,
+  attributeRequestError,
 } from './actions/creators';
 
 import {CohortSearchState} from './store';
@@ -52,13 +64,15 @@ import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
+type CritSubRequestAction = ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
-type AutocompleteRequestAction = ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST];
+type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
 type CountRequestAction = ActionTypes[typeof BEGIN_COUNT_REQUEST];
 type ChartRequestAction = ActionTypes[typeof BEGIN_CHARTS_REQUEST];
 type PreviewRequestAction = ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST];
 type AttributePreviewRequestAction = ActionTypes[typeof BEGIN_PREVIEW_REQUEST];
+type AttributeRequestAction = ActionTypes[typeof SHOW_ATTRIBUTES_PAGE];
 const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
 
 /**
@@ -73,7 +87,10 @@ const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
  */
 @Injectable()
 export class CohortSearchEpics {
-  constructor(private service: CohortBuilderService) {}
+  constructor(
+    private service: CohortBuilderService,
+    private actions: CohortSearchActions
+  ) {}
 
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
@@ -85,6 +102,20 @@ export class CohortSearchEpics {
             .filter(compare({kind, parentId}))
             .first())
           .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
+      }
+    )
+  )
+
+  fetchCriteriaSubtree: CSEpic = (action$) => (
+    action$.ofType(BEGIN_CRITERIA_SUBTREE_REQUEST).mergeMap(
+      ({cdrVersionId, kind, id}: CritSubRequestAction) => {
+        return this.service.getCriteriaById(cdrVersionId, id)
+          .map(result => loadSubtreeItems(kind, id, result.items))
+          .race(action$
+            .ofType(CANCEL_CRITERIA_REQUEST)
+            .filter(compare({kind, id}))
+            .first())
+          .catch(e => Observable.of(criteriaRequestError(kind, id, e)));
       }
     )
   )
@@ -118,11 +149,17 @@ export class CohortSearchEpics {
   )
 
   fetchAutocompleteOptions: CSEpic = (action$) => (
-    action$.ofType(BEGIN_DRUG_AUTOCOMPLETE_REQUEST).mergeMap(
-      ({cdrVersionId, searchTerms}: AutocompleteRequestAction) => {
-        return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
-          .map(result => loadAutocompleteOptions(result.items))
-          .catch(e => Observable.of(autocompleteRequestError(e)));
+    action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
+      ({cdrVersionId, kind, searchTerms}: AutocompleteRequestAction) => {
+        if (kind === DomainType[DomainType.DRUG]) {
+          return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
+            .map(result => loadAutocompleteOptions(result.items))
+            .catch(e => Observable.of(autocompleteRequestError(e)));
+        } else {
+          return this.service.getCriteriaByTypeForCodeOrName(cdrVersionId, kind, searchTerms)
+            .map(result => loadAutocompleteOptions(result.items))
+            .catch(e => Observable.of(autocompleteRequestError(e)));
+        }
       }
     )
   )
@@ -137,18 +174,29 @@ export class CohortSearchEpics {
     )
   )
 
+  fetchAttributes: CSEpic = (action$) => (
+    action$.ofType(SHOW_ATTRIBUTES_PAGE).mergeMap(
+      ({cdrVersionId, node}: AttributeRequestAction) => {
+        const conceptId = node.get('conceptId');
+        return this.service.getCriteriaAttributeByConceptId(cdrVersionId, conceptId)
+          .map(result => loadAttributes(node, result.items))
+          .catch(e => Observable.of(attributeRequestError(e)));
+      }
+    )
+  )
+
   fetchCount: CSEpic = (action$) => (
     action$.ofType(BEGIN_COUNT_REQUEST).mergeMap(
       ({cdrVersionId, entityType, entityId, request}: CountRequestAction) =>
-      this.service.countParticipants(cdrVersionId, request)
-        .map(response => typeof response === 'number' ? response : 0)
-        .map(count => loadCountRequestResults(entityType, entityId, count))
-        .race(action$
-          .ofType(CANCEL_COUNT_REQUEST)
-          .filter(compare({entityType, entityId}))
-          .first())
-        .catch(e => Observable.of(countRequestError(entityType, entityId, e)))
-    )
+        this.service.countParticipants(cdrVersionId, request)
+          .map(response => typeof response === 'number' ? response : 0)
+          .map(count => loadCountRequestResults(entityType, entityId, count))
+          .race(action$
+            .ofType(CANCEL_COUNT_REQUEST)
+            .filter(compare({entityType, entityId}))
+            .first())
+          .catch(e => Observable.of(countRequestError(entityType, entityId, e)))
+      )
   )
 
   previewCount: CSEpic = (action$) => (
