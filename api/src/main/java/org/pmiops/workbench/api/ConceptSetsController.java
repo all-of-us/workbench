@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -54,6 +55,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final Provider<User> userProvider;
   private final Clock clock;
 
+  @VisibleForTesting
+  int maxConceptsPerSet;
+
   private static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
       new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
         @Override
@@ -101,6 +105,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     this.conceptDao = conceptDao;
     this.userProvider = userProvider;
     this.clock = clock;
+    this.maxConceptsPerSet = MAX_CONCEPTS_PER_SET;
   }
 
   @Override
@@ -241,8 +246,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (request.getRemovedIds() != null) {
       dbConceptSet.getConceptIds().removeAll(request.getRemovedIds());
     }
-    if (dbConceptSet.getConceptIds().size() > MAX_CONCEPTS_PER_SET) {
-      throw new BadRequestException("Exceeded " + MAX_CONCEPTS_PER_SET + " in concept set");
+    if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
+      throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
     }
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());

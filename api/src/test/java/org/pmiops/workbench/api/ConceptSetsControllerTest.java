@@ -1,8 +1,10 @@
 package org.pmiops.workbench.api;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -26,13 +28,18 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -57,6 +64,60 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ConceptSetsControllerTest {
+
+  private static final Concept CLIENT_CONCEPT_1 = new Concept()
+      .conceptId(123L)
+      .conceptName("a concept")
+      .standardConcept(true)
+      .conceptCode("conceptA")
+      .conceptClassId("classId")
+      .vocabularyId("V1")
+      .domainId("Condition")
+      .countValue(123L)
+      .prevalence(0.2F);
+
+  private static final Concept CLIENT_CONCEPT_2 = new Concept()
+      .conceptId(456L)
+      .standardConcept(false)
+      .conceptName("b concept")
+      .conceptCode("conceptB")
+      .conceptClassId("classId2")
+      .vocabularyId("V2")
+      .domainId("Measurement")
+      .countValue(456L)
+      .prevalence(0.3F);
+
+  private static final Concept CLIENT_CONCEPT_3 = new Concept()
+      .conceptId(789L)
+      .standardConcept(false)
+      .conceptName("multi word concept")
+      .conceptCode("conceptC")
+      .conceptClassId("classId3")
+      .vocabularyId("V3")
+      .domainId("Condition/Device")
+      .countValue(789L)
+      .prevalence(0.4F);
+
+  private static final Concept CLIENT_CONCEPT_4 = new Concept()
+      .conceptId(7890L)
+      .standardConcept(false)
+      .conceptName("conceptD test concept")
+      .standardConcept(true)
+      .conceptCode("conceptE")
+      .conceptClassId("classId5")
+      .vocabularyId("V5")
+      .domainId("Condition/Procedure")
+      .countValue(7890L)
+      .prevalence(0.9F);
+
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
+      makeConcept(CLIENT_CONCEPT_1);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
+      makeConcept(CLIENT_CONCEPT_2);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
+      makeConcept(CLIENT_CONCEPT_3);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4 =
+      makeConcept(CLIENT_CONCEPT_4);
 
   private static final String USER_EMAIL = "bob@gmail.com";
   private static final String WORKSPACE_NAMESPACE = "ns";
@@ -234,11 +295,166 @@ public class ConceptSetsControllerTest {
         .getBody().getItems()).isEmpty();
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testUpdateConceptSetDomainChange() {
+    ConceptSet conceptSet = makeConceptSet1();
+    conceptSet.setDescription("new description");
+    conceptSet.setName("new name");
+    conceptSet.setDomain(Domain.DEATH);
+    conceptSetsController.updateConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId(),
+        conceptSet);
+  }
+
+  @Test(expected = ConflictException.class)
+  public void testUpdateConceptSetWrongEtag() {
+    ConceptSet conceptSet = makeConceptSet1();
+    conceptSet.setDescription("new description");
+    conceptSet.setName("new name");
+    conceptSet.setEtag(Etags.fromVersion(2));
+    conceptSetsController.updateConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId(),
+        conceptSet);
+  }
+
+  @Test
+  public void testUpdateConceptSetConceptsAddAndRemove() {
+    saveConcepts();
+    ConceptSet conceptSet = makeConceptSet1();
+    ConceptSet updated =
+        conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+            conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(),
+                CLIENT_CONCEPT_1.getConceptId())).getBody();
+    assertThat(updated.getConcepts()).containsExactly(CLIENT_CONCEPT_1);
+    assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
+
+    ConceptSet removed =
+        conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+          conceptSet.getId(), removeConceptsRequest(updated.getEtag(),
+              CLIENT_CONCEPT_1.getConceptId())).getBody();
+    assertThat(removed.getConcepts()).isNull();
+    assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
+    assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
+  }
+
+  @Test
+  public void testUpdateConceptSetConceptsAddMany() {
+    saveConcepts();
+    ConceptSet conceptSet = makeConceptSet1();
+    ConceptSet updated =
+        conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+            conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(),
+                CLIENT_CONCEPT_1.getConceptId(),
+                CLIENT_CONCEPT_3.getConceptId(),
+                CLIENT_CONCEPT_4.getConceptId())).getBody();
+    assertThat(updated.getConcepts()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_4,
+        CLIENT_CONCEPT_3);
+    assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
+
+    ConceptSet removed =
+        conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+            conceptSet.getId(), removeConceptsRequest(updated.getEtag(),
+                CLIENT_CONCEPT_3.getConceptId(),
+                CLIENT_CONCEPT_4.getConceptId())).getBody();
+    assertThat(removed.getConcepts()).containsExactly(CLIENT_CONCEPT_1);
+    assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
+    assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUpdateConceptSetConceptsAddTooMany() {
+    saveConcepts();
+    ConceptSet conceptSet = makeConceptSet1();
+    conceptSetsController.maxConceptsPerSet = 2;
+    conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(),
+            CLIENT_CONCEPT_1.getConceptId(),
+            CLIENT_CONCEPT_3.getConceptId(),
+            CLIENT_CONCEPT_4.getConceptId())).getBody();
+  }
+
+  @Test(expected = ConflictException.class)
+  public void testUpdateConceptSetConceptsWrongEtag() {
+    saveConcepts();
+    ConceptSet conceptSet = makeConceptSet1();
+    conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+              conceptSet.getId(), addConceptsRequest(Etags.fromVersion(2),
+            CLIENT_CONCEPT_1.getConceptId()));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUpdateConceptSetConceptsAddWrongDomain() {
+    saveConcepts();
+    ConceptSet conceptSet = makeConceptSet1();
+    conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(),
+            CLIENT_CONCEPT_1.getConceptId(),
+            CLIENT_CONCEPT_2.getConceptId()));
+  }
+
+  @Test
+  public void testDeleteConceptSet() {
+    saveConcepts();
+    ConceptSet conceptSet = makeConceptSet1();
+    ConceptSet conceptSet2 = makeConceptSet2();
+    ConceptSet updatedConceptSet =
+        conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+            conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(),
+                CLIENT_CONCEPT_1.getConceptId(),
+                CLIENT_CONCEPT_3.getConceptId(),
+                CLIENT_CONCEPT_4.getConceptId())).getBody();
+    ConceptSet updatedConceptSet2 =
+        conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+            conceptSet2.getId(), addConceptsRequest(conceptSet2.getEtag(),
+                CLIENT_CONCEPT_2.getConceptId())).getBody();
+    assertThat(updatedConceptSet.getConcepts()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_3,
+        CLIENT_CONCEPT_4);
+    assertThat(updatedConceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
+
+    conceptSetsController.deleteConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId());
+    try {
+      conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId());
+      fail("NotFoundException expected");
+    } catch (org.pmiops.workbench.exceptions.NotFoundException e) {
+      // expected
+    }
+    conceptSet2 = conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        conceptSet2.getId()).getBody();
+    assertThat(conceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
+  }
+
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testDeleteConceptSetNotFound() {
+    conceptSetsController.deleteConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, 1L);
+  }
+
+  private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {
+    UpdateConceptSetRequest request = new UpdateConceptSetRequest();
+    request.setEtag(etag);
+    request.setAddedIds(ImmutableList.copyOf(conceptIds));
+    return request;
+  }
+
+  private UpdateConceptSetRequest removeConceptsRequest(String etag, Long... conceptIds) {
+    UpdateConceptSetRequest request = new UpdateConceptSetRequest();
+    request.setEtag(etag);
+    request.setRemovedIds(ImmutableList.copyOf(conceptIds));
+    return request;
+  }
+
   private ConceptSet makeConceptSet1() {
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
     conceptSet.setDomain(Domain.CONDITION);
+    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
+        .getBody();
+
+  }
+
+  private ConceptSet makeConceptSet2() {
+    ConceptSet conceptSet = new ConceptSet();
+    conceptSet.setDescription("desc 2");
+    conceptSet.setName("concept set 2");
+    conceptSet.setDomain(Domain.MEASUREMENT);
     return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
         .getBody();
 
@@ -260,4 +476,25 @@ public class ConceptSetsControllerTest {
     );
   }
 
+  private static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
+    org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
+    result.setConceptId(concept.getConceptId());
+    result.setConceptName(concept.getConceptName());
+    result.setStandardConcept(concept.getStandardConcept() == null ? null :
+        (concept.getStandardConcept() ? "S" : "C"));
+    result.setConceptCode(concept.getConceptCode());
+    result.setConceptClassId(concept.getConceptClassId());
+    result.setVocabularyId(concept.getVocabularyId());
+    result.setDomainId(concept.getDomainId());
+    result.setCountValue(concept.getCountValue());
+    result.setPrevalence(concept.getPrevalence());
+    return result;
+  }
+
+  private void saveConcepts() {
+    conceptDao.save(CONCEPT_1);
+    conceptDao.save(CONCEPT_2);
+    conceptDao.save(CONCEPT_3);
+    conceptDao.save(CONCEPT_4);
+  }
 }
