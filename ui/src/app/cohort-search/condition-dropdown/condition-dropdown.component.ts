@@ -40,7 +40,7 @@ export class ConditionDropdownComponent implements  OnChanges {
         const itemId = this.actions.generateId('items');
         const criteriaType = criteria.type;
         const context = {criteriaType, itemId};
-        this.actions.openWizard(itemId, context);
+        this.actions.setWizardContext(context);
     }
 
 }
