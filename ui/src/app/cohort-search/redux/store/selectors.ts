@@ -111,6 +111,10 @@ export const criteriaSearchTerms =
   () => (state): Array<string> =>
   state.getIn(['criteria', 'search', 'terms'], null);
 
+export const criteriaSubtree =
+  (kind: string) => (state): List<any> =>
+  state.getIn(['criteria', 'subtree', kind], List());
+
 export const isCriteriaLoading =
   (kind: string, parentId: number) =>
   (state): boolean =>
@@ -140,6 +144,9 @@ export const criteriaError =
 export const criteriaLoadErrors =
   (state): any =>
   state.getIn(['criteria', 'errors'], Map());
+
+export const subtreeSelected = (state) =>
+  state.getIn(['criteria', 'subtree', 'selected'], null);
 
 /**
  * Other

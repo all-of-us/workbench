@@ -31,7 +31,7 @@ export const DOMAIN_TYPES = [
     { name: 'Demographics', type: CRITERIA_TYPES.DEMO },
     { name: 'Conditions',    type: DomainType.CONDITION, disabled: true },
     { name: 'Procedures',    type: DomainType.PROCEDURE, disabled: true },
-    { name: 'Drugs',    type: DomainType.DRUG, fullTree: true },
+    { name: 'Drugs',    type: DomainType.DRUG },
     { name: 'Measurements',    type: DomainType.MEASUREMENT, disabled: true },
     { name: 'Visits',    type: DomainType.VISIT, fullTree: true },
     { name: 'ICD9 Codes',   type: CRITERIA_TYPES.ICD9 },

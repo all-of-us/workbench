@@ -1,19 +1,23 @@
 import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
+export const BEGIN_CRITERIA_SUBTREE_REQUEST = 'BEGIN_CRITERIA_SUBTREE_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
+export const LOAD_SUBTREE_RESULTS = 'LOAD_SUBTREE_RESULTS';
+export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
-export const BEGIN_DRUG_AUTOCOMPLETE_REQUEST = 'BEGIN_DRUG_AUTOCOMPLETE_REQUEST';
+export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
 export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
 export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
 export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
 export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
+export const SET_SCROLL_ID = 'SET_SCROLL_ID';
 
 export const BEGIN_COUNT_REQUEST = 'BEGIN_COUNT_REQUEST';
 export const BEGIN_ATTR_PREVIEW_REQUEST = 'BEGIN_ATTR_PREVIEW_REQUEST';
@@ -68,6 +72,12 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
   };
+  BEGIN_CRITERIA_SUBTREE_REQUEST: {
+    type: typeof BEGIN_CRITERIA_SUBTREE_REQUEST;
+    cdrVersionId: number;
+    kind: string;
+    id: number;
+  };
   BEGIN_ALL_CRITERIA_REQUEST: {
     type: typeof BEGIN_ALL_CRITERIA_REQUEST;
     cdrVersionId: number;
@@ -87,6 +97,18 @@ export interface ActionTypes {
     parentId: number;
     results: Criteria[];
   };
+  LOAD_SUBTREE_RESULTS: {
+    type: typeof LOAD_SUBTREE_RESULTS;
+    kind: string;
+    id: number;
+    results: any;
+  };
+  LOAD_CRITERIA_SUBTREE: {
+    type: typeof LOAD_CRITERIA_SUBTREE;
+    kind: string;
+    id: number;
+    path: string;
+  };
   LOAD_DEMO_CRITERIA_RESULTS: {
     type: typeof LOAD_DEMO_CRITERIA_RESULTS;
     kind: string;
@@ -102,9 +124,10 @@ export interface ActionTypes {
     type: typeof SET_CRITERIA_SEARCH;
     searchTerms: Array<string>;
   };
-  BEGIN_DRUG_AUTOCOMPLETE_REQUEST: {
-    type: typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST;
+  BEGIN_AUTOCOMPLETE_REQUEST: {
+    type: typeof BEGIN_AUTOCOMPLETE_REQUEST;
     cdrVersionId: number;
+    kind: string;
     searchTerms: string;
   };
   BEGIN_INGREDIENT_REQUEST: {
@@ -132,6 +155,10 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
     error?: any;
+  };
+  SET_SCROLL_ID: {
+    type: typeof SET_SCROLL_ID;
+    nodeId: string;
   };
 
   BEGIN_COUNT_REQUEST: {
@@ -291,19 +318,23 @@ export interface ActionTypes {
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
+  | ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
+  | ActionTypes[typeof LOAD_SUBTREE_RESULTS]
+  | ActionTypes[typeof LOAD_CRITERIA_SUBTREE]
   | ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]
-  | ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST]
+  | ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST]
   | ActionTypes[typeof BEGIN_INGREDIENT_REQUEST]
   | ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof LOAD_INGREDIENT_LIST]
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
+  | ActionTypes[typeof SET_SCROLL_ID]
 
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]
   | ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST]
