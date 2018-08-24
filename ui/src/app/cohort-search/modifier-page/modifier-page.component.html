@@ -6,64 +6,71 @@
     <div *ngFor="let mod of modifiers; let i = index" [formGroupName]="mod.name">
       <label class="modifier-event-header" [for]="mod.name">{{ mod.label }}</label>
         <div class="modifier-container">
-              <div class="dropdown-width ">
-                <clr-dropdown >
-                  <button type="button" class="btn btn-outline" clrDropdownTrigger>
-                    <span *ngIf = "dropdownOption.selected[i] !== ''; else elseBlock">{{dropdownOption.selected[i]}}</span>
-                    <ng-template #elseBlock>
-                      <span>Select Operator</span>
-                    </ng-template>
-                    <clr-icon shape="caret down"></clr-icon>
-                  </button>
-                  <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
-                      <button
-                              *ngFor="let opt of mod.operators"
-                              [value]="opt.value"
-                              (click)="selectChange(opt, i, $event, mod)"
-                              class="dropdown-item"
-                              type="button"
-                              clrDropdownItem>{{ opt.name}}</button>
-                  </clr-dropdown-menu>
-                </clr-dropdown>
+          <div class="dropdown-width ">
+            <clr-dropdown >
+              <button type="button" class="btn btn-outline" clrDropdownTrigger>
+                <span *ngIf = "dropdownOption.selected[i] !== ''; else elseBlock">{{dropdownOption.selected[i]}}</span>
+                <ng-template #elseBlock>
+                  <span>Select Operator</span>
+                </ng-template>
+                <clr-icon shape="caret down"></clr-icon>
+              </button>
+              <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
+                <button
+                  *ngFor="let opt of mod.operators"
+                  [value]="opt.value"
+                  (click)="selectChange(opt, i, $event, mod)"
+                  class="dropdown-item"
+                  type="button"
+                  clrDropdownItem>
+                  {{ opt.name}}
+                  <span *ngIf="mod.name === 'encounters'" class="badge badge-info">
+                    {{ visitCounts[opt.value] | number }}
+                  </span>
+                </button>
+              </clr-dropdown-menu>
+            </clr-dropdown>
+          </div>
+          <ng-container *ngIf="mod.inputType">
+            <div>
+              <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
+            </div>
+            <div *ngIf="mod.inputType === 'date'" >
+              <input class="modifier-calender" formControlName="valueA" [type]="mod.inputType" type="date" clrDate>
+            </div>
+            <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
+              <div class="and-text">
+                <div>and</div>
               </div>
               <div>
-                <input *ngIf = "mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
+                <input *ngIf="mod.inputType !== 'date'"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
               </div>
-              <div *ngIf = "mod.inputType === 'date'" >
-                <input class="modifier-calender" formControlName="valueA" [type]="mod.inputType" type="date" clrDate>
+            </ng-container>
+            <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
+              <div class="and-text" >
+                <div>and</div>
               </div>
-             <ng-container  *ngIf = "dropdownOption.selected[i] === 'Between'">
-               <div class="and-text">
-                 <div>and</div>
-               </div>
-               <div>
-                 <input *ngIf = "mod.inputType !== 'date'"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
-               </div>
-             </ng-container>
-              <ng-container *ngIf = "dropdownOption.selected[i] === 'Is Between'">
-                <div class="and-text" >
-                  <div>and</div>
-                </div>
-                <div>
-                  <input *ngIf = "mod.inputType === 'date'" class="modifier-calender" formControlName="valueB" [type]="mod.inputType" type="date" clrDate>
-                </div>
-              </ng-container>
+              <div>
+                <input *ngIf="mod.inputType === 'date'" class="modifier-calender" formControlName="valueB" [type]="mod.inputType" type="date" clrDate>
+              </div>
+            </ng-container>
+          </ng-container>
         </div>
     </div>
   </section>
 </form>
-<div class="container count-preview ">
+<div class="container count-preview">
   <div class="row">
     <div class="col-lg-2 ">
       <button type="button"
-              class="btn calculate-btn"
-              (click)="requestPreview()"
-              [disabled] = "!formChanges">
+        class="btn calculate-btn"
+        (click)="requestPreview()"
+        [disabled] = "!formChanges">
         Calculate
       </button>
     </div>
     <div class="spin-top-padding">
-      <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading...   </span>
+      <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading... </span>
     </div>
     <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
       <div class="result-text">
@@ -72,7 +79,7 @@
       <div>
         Number Participants:
         <span class="text-bold" *ngIf="!preview.get('requesting')">
-             {{ preview.get('count', 0) | number}}
+         {{ preview.get('count', 0) | number}}
         </span>
       </div>
     </div>
