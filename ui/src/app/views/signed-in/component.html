@@ -36,6 +36,18 @@
   <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
     <section class="sidenav-content">
       <button class="btn btn-primary nav-link"
+          [class.active]="homeActive"
+          routerLink="/"
+          (click)="sidenavToggle = false">Home</button>
+      <!--Data browser won't show the sidenav, so active is irrelevant-->
+      <a class="btn btn-primary nav-link"
+          [attr.href]="publicUiUrl">Browse Data</a>
+      <button class="btn btn-primary nav-link"
+          [class.active]="createWorkspaceActive"
+          routerLink="/workspaces/build"
+          [attr.disabled]="hasDataAccess ? null : true"
+          (click)="sidenavToggle = false">Create Workspace</button>
+      <button class="btn btn-primary nav-link"
           [class.active]="workspacesActive"
           routerLink="/workspaces"
           [attr.disabled]="hasDataAccess ? null : true"
@@ -50,6 +62,8 @@
           *ngIf="hasReviewIdVerification"
           routerLink="/admin/review-id-verification"
           (click)="sidenavToggle = false">Review ID Verifications</button>
+      <button class="btn btn-secondary btn-bug-report"
+          (click)="bugReportComponent.reportBug(); sidenavToggle = false;">Report a Bug</button>
     </section>
   </nav>
   <div class="app-container">
