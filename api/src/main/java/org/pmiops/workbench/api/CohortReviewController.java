@@ -79,6 +79,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public static final Integer PAGE = 0;
   public static final Integer PAGE_SIZE = 25;
   public static final Integer MAX_REVIEW_SIZE = 10000;
+  public static final Integer DEFAULT_LIMIT = 5;
   public static final List<String> GENDER_RACE_ETHNICITY_TYPES =
     ImmutableList.of(ParticipantCohortStatusColumns.ETHNICITY.name(),
       ParticipantCohortStatusColumns.GENDER.name(),
@@ -351,12 +352,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                   Long cohortId,
                                                                                   Long cdrVersionId,
                                                                                   Long participantId,
-                                                                                  String domain) {
+                                                                                  String domain,
+                                                                                  Integer limit) {
+    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    if (chartLimit < 1 || chartLimit > 100) {
+      throw new BadRequestException("Please provide a chart limit between 1 and 100.");
+    }
     validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      reviewQueryBuilder.buildChartDataQuery(participantId, DomainType.fromValue(domain))));
+      reviewQueryBuilder.buildChartDataQuery(participantId, DomainType.fromValue(domain), chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     ParticipantChartDataListResponse response = new ParticipantChartDataListResponse();
