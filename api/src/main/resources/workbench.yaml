@@ -797,7 +797,7 @@ paths:
 
   # Notebooks ############################################################################
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/renameNotebook:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'

@@ -173,11 +173,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.renameModal.open();
   }
 
-  receiveRename($event: NotebookRename): void {
-    this.renameNotebook($event);
-  }
-
-  renameNotebook(rename: NotebookRename): void {
+  receiveRename(rename: NotebookRename): void {
     let newName = rename.newName;
     if (!(new RegExp('^.+\.ipynb$').test(newName))) {
       newName = rename.newName + '.ipynb';
