@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
@@ -90,10 +91,12 @@ public class AchillesAnalysisDaoTest {
 
     @Test
     public void findConceptAnalysisResults() throws Exception{
-        AchillesAnalysis aa1=dao.findConceptAnalysisResults("104567",3101L);
-        AchillesAnalysis aa2=dao.findConceptAnalysisResults("104567",3102L);
-        Assert.assertNotEquals(aa1,null);
-        Assert.assertNotEquals(aa2,null);
+        List<Long> analysisIds = new ArrayList<>();
+        analysisIds.add(3101L);
+        analysisIds.add(3102L);
+        List<AchillesAnalysis> aa = dao.findConceptAnalysisResults("104567",analysisIds);
+        Assert.assertNotEquals(aa.get(0),null);
+        Assert.assertNotEquals(aa.get(1),null);
     }
 
     private AchillesAnalysis createAnalysis(Long analysisId,String analysisName,String stratum1Name,String stratum2Name,String stratum3Name,String stratum4Name,String stratum5Name,String chartType,String dataType) {

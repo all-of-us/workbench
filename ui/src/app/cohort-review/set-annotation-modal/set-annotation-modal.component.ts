@@ -22,7 +22,7 @@ export class SetAnnotationModalComponent {
    * sent through the app-global state service and bind it to the clr-modal
    * component.
    */
-  private _open = false;
+  // private _open = false;
 
   get open() {
     return this.state.annotationManagerOpen.getValue();
@@ -32,10 +32,18 @@ export class SetAnnotationModalComponent {
     this.state.annotationManagerOpen.next(value);
   }
 
+    get openEdit() {
+        return this.state.editAnnotationManagerOpen.getValue();
+    }
+
+    set openEdit(value: boolean) {
+        this.state.editAnnotationManagerOpen.next(value);
+    }
+
   get modalTitle() {
     return {
-      'list': 'Cohort Annotation Definitions',
-      'create': 'Create New Annotation Definition',
+      'list': 'Edit Cohort-wide Annotation',
+      'create': 'Create a Cohort-wide Annotation',
     }[this.mode];
   }
 

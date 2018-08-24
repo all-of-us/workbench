@@ -11,8 +11,10 @@ import java.util.Map;
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
   private static final String DRUG_SQL_TEMPLATE =
-    "select distinct person_id, drug_exposure_start_date as entry_date from `${projectId}.${dataSetId}.drug_exposure` " +
-      "where drug_concept_id in unnest(${conceptIds})";
+    "select distinct person_id, drug_exposure_start_date as entry_date\n" +
+      "from `${projectId}.${dataSetId}.drug_exposure`\n" +
+      "where drug_concept_id in unnest(${conceptIds})\n" +
+      "${encounterSql}";
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {

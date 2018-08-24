@@ -57,7 +57,6 @@ public class ProfileService {
       user = userWithAuthoritiesAndPageVisits;
     }
 
-    boolean enabledInFireCloud = fireCloudService.isRequesterEnabledInFirecloud();
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
@@ -67,7 +66,6 @@ public class ProfileService {
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());
     profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatusEnum());
-    profile.setEnabledInFireCloud(enabledInFireCloud);
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
     profile.setRequestedIdVerification(user.getRequestedIdVerification());
@@ -101,12 +99,13 @@ public class ProfileService {
     }
     if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
       profile.setPageVisits(user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT)
-        .collect(Collectors.toList()));
+          .collect(Collectors.toList()));
     }
     profile.setInstitutionalAffiliations(user.getInstitutionalAffiliations()
         .stream().map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
         .collect(Collectors.toList()));
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
+
     return profile;
   }
 }

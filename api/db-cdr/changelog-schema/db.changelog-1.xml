@@ -51,5 +51,6 @@
       <column name="parent_id"/>
     </createIndex>
 
+
   </changeSet>
 </databaseChangeLog>
