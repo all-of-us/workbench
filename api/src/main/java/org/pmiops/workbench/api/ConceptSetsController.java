@@ -42,8 +42,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final WorkspaceService workspaceService;
   private final ConceptSetDao conceptSetDao;
   private final ConceptDao conceptDao;
-  private final Provider<User> userProvider;
   private final Clock clock;
+
+  private Provider<User> userProvider;
 
   @VisibleForTesting
   int maxConceptsPerSet;
@@ -96,6 +97,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     this.userProvider = userProvider;
     this.clock = clock;
     this.maxConceptsPerSet = MAX_CONCEPTS_PER_SET;
+  }
+
+  @VisibleForTesting
+  public void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
   }
 
   @Override

@@ -154,14 +154,18 @@ public class ConceptSetsControllerTest {
   @Autowired
   FireCloudService fireCloudService;
 
+  @Autowired
+  WorkspacesController workspacesController;
+
+  @Autowired
+  ConceptSetsController conceptSetsController;
+
   @Mock
   Provider<User> userProvider;
 
-  private ConceptSetsController conceptSetsController;
-
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, ConceptSetService.class,
-      UserService.class, ConceptSetsController.class})
+      UserService.class, ConceptSetsController.class, WorkspacesController.class})
   @MockBean({FireCloudService.class, CloudStorageService.class})
   static class Configuration {
     @Bean
@@ -201,9 +205,9 @@ public class ConceptSetsControllerTest {
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
-    WorkspacesController workspacesController = new WorkspacesController(workspaceService,
-        cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
-        userService);
+    workspacesController.setUserProvider(userProvider);
+    conceptSetsController.setUserProvider(userProvider);
+
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
     workspacesController.createWorkspace(workspace);
@@ -216,9 +220,6 @@ public class ConceptSetsControllerTest {
         .thenReturn(fcResponse);
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2))
         .thenReturn(fcResponse);
-
-    conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
-        userProvider, CLOCK);
   }
 
   @Test
@@ -390,11 +391,11 @@ public class ConceptSetsControllerTest {
   @Test
   public void testDeleteConceptSet() {
     saveConcepts();
-    ConceptSet conceptSet = makeConceptSet1();
+    ConceptSet conceptSet1 = makeConceptSet1();
     ConceptSet conceptSet2 = makeConceptSet2();
     ConceptSet updatedConceptSet =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
-            conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(),
+            conceptSet1.getId(), addConceptsRequest(conceptSet1.getEtag(),
                 CLIENT_CONCEPT_1.getConceptId(),
                 CLIENT_CONCEPT_3.getConceptId(),
                 CLIENT_CONCEPT_4.getConceptId())).getBody();
@@ -406,9 +407,9 @@ public class ConceptSetsControllerTest {
         CLIENT_CONCEPT_4);
     assertThat(updatedConceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
 
-    conceptSetsController.deleteConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId());
+    conceptSetsController.deleteConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet1.getId());
     try {
-      conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId());
+      conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet1.getId());
       fail("NotFoundException expected");
     } catch (NotFoundException e) {
       // expected
