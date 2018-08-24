@@ -41,7 +41,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     label: 'Age At Event',
     inputType: 'number',
     modType: ModifierType.AGEATEVENT,
-    options: [{
+    operators: [{
       name: 'Greater Than or Equal To',
       value: 'GREATER_THAN_OR_EQUAL_TO',
     }, {
@@ -56,7 +56,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     label: 'Event Date',
     inputType: 'date',
     modType: ModifierType.EVENTDATE,
-    options: [{
+    operators: [{
       name: 'Is On or Before',
       value: 'LESS_THAN_OR_EQUAL_TO',
     }, {
@@ -71,7 +71,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     label: 'Has Occurrences',
     inputType: 'number',
     modType: ModifierType.NUMOFOCCURRENCES,
-    options: [{
+    operators: [{
       name: 'N or More',
       value: 'GREATER_THAN_OR_EQUAL_TO',
     }]
@@ -79,17 +79,17 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
 
   form = new FormGroup({
     ageAtEvent: new FormGroup({
-      option: new FormControl(),
+      operator: new FormControl(),
       valueA: new FormControl(),
       valueB: new FormControl(),
     }),
     hasOccurrences: new FormGroup({
-      option: new FormControl(),
+      operator: new FormControl(),
       valueA: new FormControl(),
       valueB: new FormControl(),
     }),
     eventDate: new FormGroup({
-      option: new FormControl(),
+      operator: new FormControl(),
       valueA: new FormControl(),
       valueB: new FormControl(),
     }),
@@ -110,9 +110,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
           label: 'During Visit Type',
           inputType: null,
           modType: ModifierType.ENCOUNTERS,
-          options: []
+          operators: []
         })
-        this.form.addControl('encounters', new FormGroup({option: new FormControl()}));
+        this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
       }
     }));
     this.subscription.add(this.ngRedux.select(criteriaChildren(DomainType[DomainType.VISIT], 0))
@@ -121,7 +121,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
         if (this.modifiers[3]) {
           visitTypes.toJS().forEach(option => {
             if (option.parentId === 0) {
-              this.modifiers[3].options.push({name: option.name, value: option.conceptId});
+              this.modifiers[3].operators.push({name: option.name, value: option.conceptId});
             }
           });
         }
@@ -134,7 +134,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
         const meta = this.modifiers.find(_mod => mod.get('name') === _mod.modType);
         if (meta) {
           this.form.get(meta.name).patchValue({
-            option: mod.get('option'),
+            operator: mod.get('operator'),
             valueA: mod.getIn(['operands', 0]),
             valueB: mod.getIn(['operands', 1]),
           }, {emitEvent: false});
@@ -174,51 +174,43 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     );
   }
     selectChange(opt, index, e, mod) {
-        this.dropdownOption.selected[index] = opt.name;
-        if (e.target.value || this.form.controls.valueA) {
-            this.formChanges = true;
-        }
-        console.log(mod);
-        const modForm = <FormArray>this.form.controls[mod.name];
-        const valueForm = <FormArray>modForm;
-        valueForm.get('option').patchValue(opt.value);
-        // if (mod.modType === 'AGE_AT_EVENT') {
-        //     const ageAtEventForm = <FormArray>this.form.controls.ageAtEvent;
-        //     const valueForm = <FormArray>ageAtEventForm;
-        //     valueForm.get('option').patchValue(opt.value);
-        // } else if (mod.modType === 'EVENT_DATE') {
-        //     const eventDateForm = <FormArray>this.form.controls.eventDate;
-        //     const valueForm = <FormArray>eventDateForm;
-        //     valueForm.get('option').patchValue(opt.value);
-        // } else if (mod.modType === 'NUM_OF_OCCURRENCES') {
-        //     const hasOccurrencesForm = <FormArray>this.form.controls.hasOccurrences;
-        //   console.log(hasOccurrencesForm);
-        //     const valueForm = <FormArray>hasOccurrencesForm;
-        //     valueForm.get('option').patchValue(opt.value);
-        // } else if (mod.modType === 'ENCOUNTERS') {
-        //     const encountersForm = <FormArray>this.form.controls.encounters;
-        //     const valueForm = <FormArray>encountersForm;
-        //     valueForm.get('option').patchValue(opt.value);
-        // }
+      this.dropdownOption.selected[index] = opt.name;
+      if (e.target.value || this.form.controls.valueA) {
+        this.formChanges = true;
+      }
+      const modForm = <FormArray>this.form.controls[mod.name];
+      const valueForm = <FormArray>modForm;
+      valueForm.get('operator').patchValue(opt.value);
     }
 
   currentMods(vals) {
     return this.modifiers.map(({name, inputType, modType}) => {
-      const {option, valueA, valueB} = vals[name];
-      const between = option === 'BETWEEN';
-      if (!option || !valueA || (between && !valueB)) {
-        return ;
-      }
-      if (inputType === 'date') {
+      if (modType === ModifierType.ENCOUNTERS) {
+        if (!vals[name].operator) {
+          return;
+        }
+        return fromJS({name: modType, operator: 'IN', operands: [vals[name].operator.toString()]});
+      } else {
+        const {operator, valueA, valueB} = vals[name];
+        const between = operator === 'BETWEEN';
+        if (!operator || !valueA || (between && !valueB)) {
+          return;
+        }
+        if (inputType === 'date') {
           this.dateValueA = moment(valueA, 'MM/DD/YYYY').format('YYYY-MM-DD');
           this.dateValueB = moment(valueB, 'MM/DD/YYYY').format('YYYY-MM-DD');
           const operands = [this.dateValueA];
-          if (between) { operands.push(this.dateValueB); }
-          return fromJS({name: modType, option, operands});
-      } else {
+          if (between) {
+            operands.push(this.dateValueB);
+          }
+          return fromJS({name: modType, operator, operands});
+        } else {
           const operands = [valueA];
-          if (between) { operands.push(valueB); }
-          return fromJS({name: modType, option, operands});
+          if (between) {
+            operands.push(valueB);
+          }
+          return fromJS({name: modType, operator, operands});
+        }
       }
     });
   }
