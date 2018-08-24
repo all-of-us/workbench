@@ -112,7 +112,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
           inputType: null,
           modType: ModifierType.ENCOUNTERS,
           operators: []
-        })
+        });
         this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
       }
     }));
