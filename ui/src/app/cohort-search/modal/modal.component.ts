@@ -129,9 +129,16 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
 
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
-    return title
-      ? `Add Selected ${title} Criteria to Cohort`
-      : 'No Selection';
+    if((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')){
+        return title
+            ? `Add Selected CONDITION Criteria to Cohort`
+            : 'No Selection';
+    } else {
+        return title
+            ? `Add Selected ${title} Criteria to Cohort`
+            : 'No Selection';
+    }
+
   }
 
     showTitle() {
