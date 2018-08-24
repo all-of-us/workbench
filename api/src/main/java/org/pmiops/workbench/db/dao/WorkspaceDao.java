@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.Query;
 
 
 /**
@@ -23,11 +23,6 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   @Query("SELECT w FROM Workspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews" +
       " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)")
   Workspace findByFirecloudWithEagerCohorts(
-      @Param("ns") String workspaceNamespace, @Param("fcName") String fcName);
-
-  @Query("SELECT w FROM Workspace w LEFT JOIN FETCH w.conceptSets" +
-      " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)")
-  Workspace findByFirecloudWithEagerConceptSets(
       @Param("ns") String workspaceNamespace, @Param("fcName") String fcName);
 
   List<Workspace> findByWorkspaceNamespace(String workspaceNamespace);

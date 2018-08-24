@@ -92,17 +92,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  @Transactional
-  public Workspace getRequiredWithConceptSets(String ns, String firecloudName) {
-    Workspace workspace = workspaceDao.findByFirecloudWithEagerConceptSets(ns, firecloudName);
-    if (workspace == null) {
-      throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
-    }
-    return workspace;
-  }
-
-
-  @Override
   public Workspace saveWithLastModified(Workspace workspace) {
     return saveWithLastModified(workspace, new Timestamp(clock.instant().toEpochMilli()));
   }
@@ -211,7 +200,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     for (Cohort fromCohort : from.getCohorts()) {
       cohortService.cloneCohortAndReviews(fromCohort, to);
     }
-    for (ConceptSet conceptSet : from.getConceptSets()) {
+    for (ConceptSet conceptSet : conceptSetService.getConceptSets(from)) {
       conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to);
     }
     return saved;

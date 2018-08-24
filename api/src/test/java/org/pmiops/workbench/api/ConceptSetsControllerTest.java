@@ -1,8 +1,9 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
-import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
@@ -14,14 +15,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -42,7 +41,6 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -160,7 +158,6 @@ public class ConceptSetsControllerTest {
   Provider<User> userProvider;
 
   private ConceptSetsController conceptSetsController;
-  private User user;
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, ConceptSetService.class,
@@ -190,7 +187,7 @@ public class ConceptSetsControllerTest {
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    Workspace workspace = new org.pmiops.workbench.model.Workspace();
+    Workspace workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
     workspace.setNamespace(WORKSPACE_NAMESPACE);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
@@ -230,12 +227,12 @@ public class ConceptSetsControllerTest {
         .getBody().getItems()).isEmpty();
   }
 
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testGetConceptSetNotExists() {
     conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, 1L);
   }
 
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testUpdateConceptSetNotExists() {
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 1");
@@ -413,7 +410,7 @@ public class ConceptSetsControllerTest {
     try {
       conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId());
       fail("NotFoundException expected");
-    } catch (org.pmiops.workbench.exceptions.NotFoundException e) {
+    } catch (NotFoundException e) {
       // expected
     }
     conceptSet2 = conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -421,7 +418,7 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
   }
 
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void testDeleteConceptSetNotFound() {
     conceptSetsController.deleteConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, 1L);
   }
@@ -474,21 +471,6 @@ public class ConceptSetsControllerTest {
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(
         fcResponse
     );
-  }
-
-  private static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
-    org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
-    result.setConceptId(concept.getConceptId());
-    result.setConceptName(concept.getConceptName());
-    result.setStandardConcept(concept.getStandardConcept() == null ? null :
-        (concept.getStandardConcept() ? "S" : "C"));
-    result.setConceptCode(concept.getConceptCode());
-    result.setConceptClassId(concept.getConceptClassId());
-    result.setVocabularyId(concept.getVocabularyId());
-    result.setDomainId(concept.getDomainId());
-    result.setCountValue(concept.getCountValue());
-    result.setPrevalence(concept.getPrevalence());
-    return result;
   }
 
   private void saveConcepts() {

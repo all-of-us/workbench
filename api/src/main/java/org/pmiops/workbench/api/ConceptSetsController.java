@@ -5,33 +5,23 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetListResponse;
@@ -164,12 +154,13 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<ConceptSetListResponse> getConceptSetsInWorkspace(String workspaceNamespace,
       String workspaceId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId,
-        WorkspaceAccessLevel.READER);
+    Workspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId,
+          WorkspaceAccessLevel.READER);
 
-    Workspace workspace = workspaceService.getRequiredWithConceptSets(workspaceNamespace, workspaceId);
+    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
+        conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
     ConceptSetListResponse response = new ConceptSetListResponse();
-    Set<org.pmiops.workbench.db.model.ConceptSet> conceptSets = workspace.getConceptSets();
     // Concept sets in the list response will *not* have concepts under them, as this could be
     // a lot of data... you need to open up a concept set to see what concepts are within it.
     response.setItems(conceptSets.stream()
@@ -197,10 +188,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (conceptSet.getDescription() != null) {
       dbConceptSet.setDescription(conceptSet.getDescription());
     }
-    if (conceptSet.getDomain() != null) {
-      if (conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
-        throw new BadRequestException("Cannot modify the domain of an existing concept set");
-      }
+    if (conceptSet.getDomain() != null && conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
+      throw new BadRequestException("Cannot modify the domain of an existing concept set");
     }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setLastModifiedTime(now);

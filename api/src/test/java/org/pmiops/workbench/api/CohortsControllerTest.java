@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -113,7 +114,8 @@ public class CohortsControllerTest {
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
-  @MockBean({FireCloudService.class, NotebooksService.class, CloudStorageService.class, UserRecentResourceService.class})
+  @MockBean({FireCloudService.class, NotebooksService.class, CloudStorageService.class,
+      ConceptSetService.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {

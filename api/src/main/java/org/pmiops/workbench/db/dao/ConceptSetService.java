@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
-import org.pmiops.workbench.db.model.Cohort;
+import java.util.List;
+import java.util.logging.Logger;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ConceptSetService {
+
+  private static final Logger logger = Logger.getLogger("ConceptSetService");
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
@@ -24,6 +27,13 @@ public class ConceptSetService {
     c.setVersion(1);
     ConceptSet saved = conceptSetDao.save(c);
     conceptSetDao.bulkCopyConceptIds(conceptSet.getConceptSetId(), saved.getConceptSetId());
+    logger.info("FOOOOOOOO! = " + conceptSet.getConceptSetId() + ", " + saved.getConceptSetId());
     return saved;
+  }
+
+  public List<ConceptSet> getConceptSets(Workspace workspace) {
+    // Allows for fetching concept sets for a workspace once its collection is no longer
+    // bound to a session.
+    return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
   }
 }
