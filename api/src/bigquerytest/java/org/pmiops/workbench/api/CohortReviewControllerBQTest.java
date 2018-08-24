@@ -1193,7 +1193,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Please provide a chart limit between 1 and 100.");
+        .isEqualTo("Please provide a chart limit between 1 and 20.");
     }
   }
 
@@ -1215,7 +1215,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Please provide a chart limit between 1 and 100.");
+        .isEqualTo("Please provide a chart limit between 1 and 20.");
     }
   }
 
