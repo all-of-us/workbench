@@ -13,13 +13,11 @@
   </button>
 
   <!-- CODE -->
-  <div class="code font-weight-bold" [innerHTML]="displayCode | safeHtml">
-    {{ displayCode }}
-  </div>
+  <div class="code font-weight-bold" [innerHTML]="displayCode | safeHtml"></div>
 
   <!-- NAME -->
   <div #name
-    [popper]="displayName"
+    [popper]="popperName"
     [popperTrigger]="'hover'"
     [popperPlacement]="'bottom'"
     [popperDisabled]="!isTruncated"
@@ -27,7 +25,7 @@
     [innerHTML]="displayName | safeHtml"></div>
 
   <!-- COUNT -->
-  <div *ngIf="node.get('selectable') && node.get('count') " class="count">
+  <div *ngIf="node.get('selectable')" class="count">
     <span class="text-muted">&#124;</span>
     <span class="badge badge-info">
       <span *ngIf="node.get('group')">~</span>

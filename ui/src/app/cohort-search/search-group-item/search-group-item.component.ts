@@ -77,7 +77,8 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
         funcs = [typeDisplay, nameDisplay, attributeDisplay];
       } else if (_type === CRITERIA_TYPES.PM
         || _type === DomainType.VISIT
-        || _type === DomainType.DRUG) {
+        || _type === DomainType.DRUG
+        || _type === CRITERIA_TYPES.MEAS) {
         funcs = [nameDisplay];
       }
       return funcs.map(f => f(param)).join(' ').trim();
