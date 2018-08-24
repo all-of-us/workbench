@@ -22,7 +22,12 @@
                   (click)="selectChange(opt, i, $event, mod)"
                   class="dropdown-item"
                   type="button"
-                  clrDropdownItem>{{ opt.name}}</button>
+                  clrDropdownItem>
+                  {{ opt.name}}
+                  <span *ngIf="mod.name === 'encounters'" class="badge badge-info">
+                    {{ visitCounts[opt.value] | number }}
+                  </span>
+                </button>
               </clr-dropdown-menu>
             </clr-dropdown>
           </div>
