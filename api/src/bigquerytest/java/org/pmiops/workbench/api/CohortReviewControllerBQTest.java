@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -117,7 +118,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortQueryBuilder.class
   })
   @MockBean({
-    FireCloudService.class
+    FireCloudService.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean

@@ -10,9 +10,11 @@ import {
   ViewChild
 } from '@angular/core';
 import { DomainType } from 'generated';
+import {Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
+import {stripHtml} from '../utils';
 
 /*
  * Stub function - some criteria types will have "attributes" that help define
@@ -23,7 +25,7 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  */
 function needsAttributes(node: any) {
   // will change soon to check for attributes property instead of id
-  return node.get('hasAttributes', '') === true;
+  return node.get('hasAttributes') === true;
 }
 
 
@@ -96,6 +98,10 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return (noCode || nameIsCode) ? '' : this.node.get('name', '');
   }
 
+  get popperName() {
+    return stripHtml(this.displayName);
+  }
+
   get displayCode() {
     if ((this.node.get('type', '') === DomainType.DRUG && this.node.get('group'))
       || this.node.get('type', '') === CRITERIA_TYPES.PM) {
@@ -120,17 +126,21 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     event.stopPropagation();
     if (needsAttributes(this.node)) {
-      const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
-          ? PREDEFINED_ATTRIBUTES.Normal
+      if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+        this.actions.fetchAttributes(this.node);
+      } else {
+        const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{
-              name: '',
-              operator: null,
-              operands: [null],
-              conceptId: this.node.get('conceptId', null),
-              MIN: 0,
-              MAX: 1000
+            name: '',
+            operator: null,
+            operands: [null],
+            conceptId: this.node.get('conceptId', null),
+            MIN: 0,
+            MAX: 10000
           }];
-      this.actions.showAttributesPage(this.node.set('attributes', attributes));
+        this.actions.loadAttributes(this.node, attributes);
+      }
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
@@ -146,14 +156,11 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         let attributes = [];
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
-            for (const key in PREDEFINED_ATTRIBUTES) {
-                if (PREDEFINED_ATTRIBUTES.hasOwnProperty(key)) {
-                    if (this.node.get('name').indexOf(key) === 0) {
-                        attributes = PREDEFINED_ATTRIBUTES[key];
-                    }
-                    break;
-                }
+          Object.keys(PREDEFINED_ATTRIBUTES).forEach(name => {
+            if (this.node.get('name').indexOf(name) === 0) {
+              attributes = PREDEFINED_ATTRIBUTES[name];
             }
+          });
         }
         const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
         this.actions.addParameter(param);
@@ -161,7 +168,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  selectChildren(node) {
+  selectChildren(node: Map<string, any>) {
     if (node.get('group')) {
       node.get('children').forEach(child => {
         this.selectChildren(child);

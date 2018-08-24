@@ -1,19 +1,25 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
+  LOAD_SUBTREE_RESULTS,
+  LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
-  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
+  ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
@@ -65,6 +71,11 @@ export const requestCriteria =
   ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
   ({type: BEGIN_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
 
+export const requestCriteriaSubtree =
+  (cdrVersionId: number, kind: string, id: number
+  ): ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST] =>
+  ({type: BEGIN_CRITERIA_SUBTREE_REQUEST, cdrVersionId, kind, id});
+
 export const requestAllCriteria =
   (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST] =>
@@ -79,6 +90,16 @@ export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
   ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
+
+export const loadSubtreeItems =
+  (kind: string, id: number, results: any
+  ): ActionTypes[typeof LOAD_SUBTREE_RESULTS] =>
+  ({type: LOAD_SUBTREE_RESULTS, kind, id, results});
+
+export const loadCriteriaSubtree =
+  (kind: string, results: Criteria[]
+  ): ActionTypes[typeof LOAD_CRITERIA_SUBTREE] =>
+  ({type: LOAD_CRITERIA_SUBTREE, kind, results});
 
 export const loadDemoCriteriaRequestResults =
   (kind: string, subtype: string, results: any
@@ -96,9 +117,9 @@ export const setCriteriaSearchTerms =
   ({type: SET_CRITERIA_SEARCH, searchTerms});
 
 export const requestAutocompleteOptions =
-  (cdrVersionId: number, searchTerms: string
-  ): ActionTypes[typeof BEGIN_DRUG_AUTOCOMPLETE_REQUEST] =>
-  ({type: BEGIN_DRUG_AUTOCOMPLETE_REQUEST, cdrVersionId, searchTerms});
+  (cdrVersionId: number, kind: string, searchTerms: string
+  ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
+  ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, searchTerms});
 
 export const requestIngredientsForBrand =
   (cdrVersionId: number, conceptId: number
@@ -124,10 +145,26 @@ export const loadIngredients =
   ): ActionTypes[typeof LOAD_INGREDIENT_LIST] =>
   ({type: LOAD_INGREDIENT_LIST, ingredients});
 
+export const loadAttributes =
+  (node: any, attributes: any
+  ): ActionTypes[typeof LOAD_ATTRIBUTE_LIST] =>
+  ({type: LOAD_ATTRIBUTE_LIST, node, attributes});
+
+export const attributeRequestError =
+  (error?: any
+  ): ActionTypes[typeof ATTRIBUTE_REQUEST_ERROR] =>
+    ({type: ATTRIBUTE_REQUEST_ERROR, error});
+
 export const criteriaRequestError =
   (kind: string, parentId: number, error?: any
   ): ActionTypes[typeof CRITERIA_REQUEST_ERROR] =>
   ({type: CRITERIA_REQUEST_ERROR, kind, parentId, error});
+
+export const setScrollId =
+  (nodeId: string
+  ): ActionTypes[typeof SET_SCROLL_ID] =>
+  ({type: SET_SCROLL_ID, nodeId});
+
 
 /**
  * Count loading mgmt
@@ -246,10 +283,10 @@ export const removeGroupItem =
   ): ActionTypes[typeof REMOVE_ITEM] =>
   ({type: REMOVE_ITEM, groupId, itemId});
 
-export const showAttributesPage =
-  (node: any
+export const requestAttributes =
+  (cdrVersionId: number, node: any
   ): ActionTypes[typeof SHOW_ATTRIBUTES_PAGE] =>
-  ({type: SHOW_ATTRIBUTES_PAGE, node});
+  ({type: SHOW_ATTRIBUTES_PAGE, cdrVersionId, node});
 
 export const hideAttributesPage =
   (): ActionTypes[typeof HIDE_ATTRIBUTES_PAGE] =>

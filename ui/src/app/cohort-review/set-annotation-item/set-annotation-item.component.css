@@ -2,10 +2,14 @@
   display: flex;
   justify-content: space-between;
   align-items: middle;
+  border-bottom: 1px solid #9B9B9B;
+  padding-bottom: 0.2rem;
+  padding-top: 0.2rem;
 }
 
 .name {
   flex: 1;
+  padding-top: 0.25rem;
 }
 
 .type {
@@ -13,5 +17,20 @@
 }
 
 .name-edit {
-  width: 94%;
+  border: 1px solid #979797!important;
+  border-radius: 5px;
+  width:10rem;
+  padding:0.7rem;
+  font-size:10px;
+  font-weight: bold;
+  color: #9B9B9B;
+}
+
+.simple-input-view {
+  border:none!important;
+  pointer-events: none;
+}
+
+.divider {
+  padding-top: 0.3rem;
 }

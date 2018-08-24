@@ -87,7 +87,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   cohortsLoading = true;
   cohortsError = false;
   cohortList: Cohort[] = [];
-  private accessLevel: WorkspaceAccessLevel;
+  accessLevel: WorkspaceAccessLevel;
   notebooksLoading = true;
   notebookError = false;
   notebookList: FileDetail[] = [];
