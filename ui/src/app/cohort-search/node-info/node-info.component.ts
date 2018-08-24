@@ -15,7 +15,6 @@ import {Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive, subtreeSelected} from '../redux';
-import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
 import {stripHtml} from '../utils';
 
 /*
