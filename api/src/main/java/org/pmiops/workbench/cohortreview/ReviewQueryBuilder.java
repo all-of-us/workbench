@@ -13,6 +13,7 @@ import java.util.Map;
 public class ReviewQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
+  private static final String NAMED_LIMIT_PARAM = "limit";
   private static final String TABLE_PREFIX = "p_";
 
   private static final String VISIT_COLUMNS =
@@ -115,9 +116,9 @@ public class ReviewQueryBuilder {
       "from `${projectId}.${dataSetId}.%s`\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
       "group by standard_code\n" +
-      "LIMIT 5) b on a.standard_code = b.standard_code\n" +
+      "LIMIT @limit) b on a.standard_code = b.standard_code\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
-      "and rnk <= 5\n" +
+      "and rnk <= @limit\n" +
       "order by rank, standardName, startDate\n";
 
   public QueryJobConfiguration buildQuery(Long participantId,
@@ -153,11 +154,13 @@ public class ReviewQueryBuilder {
   }
 
   public QueryJobConfiguration buildChartDataQuery(Long participantId,
-                                               DomainType domain) {
+                                                   DomainType domain,
+                                                   Integer limit) {
     String tableName = TABLE_PREFIX + domain.toString().toLowerCase();
     String finalSql = String.format(CHART_DATA_TEMPLATE, tableName, tableName);
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
+    params.put(NAMED_LIMIT_PARAM, QueryParameterValue.int64(limit));
     return QueryJobConfiguration
       .newBuilder(finalSql)
       .setNamedParameters(params)
