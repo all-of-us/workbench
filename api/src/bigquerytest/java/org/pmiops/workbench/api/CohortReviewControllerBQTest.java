@@ -25,6 +25,8 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -47,6 +49,7 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.fail;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({TestJpaConfig.class})
@@ -295,7 +298,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .numMentions("1")
       .ageAtEvent(28)
       .standardVocabulary("SNOMED")
-      .standardName("SNOMED")
+      .standardName("name1")
       .standardCode("002")
       .sourceCode("004")
       .sourceVocabulary("ICD9CM")
@@ -309,7 +312,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .numMentions("1")
       .ageAtEvent(28)
       .standardVocabulary("SNOMED")
-      .standardName("SNOMED")
+      .standardName("name2")
       .standardCode("002")
       .sourceCode("004")
       .sourceVocabulary("ICD9CM")
@@ -1103,6 +1106,70 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         expectedAllEvents1,
         expectedAllEvents8,
         expectedAllEvents7), 8);
+  }
+
+  @Test
+  public void getParticipantChartData() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    ParticipantChartDataListResponse response =
+    controller
+      .getParticipantChartData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        DomainType.CONDITION.name())
+      .getBody();
+
+    ParticipantChartData expectedData1 = new ParticipantChartData().ageAtEvent(28).rank(1).standardName("name1").standardVocabulary("SNOMED").startDate("2008-07-22");
+    ParticipantChartData expectedData2 = new ParticipantChartData().ageAtEvent(28).rank(1).standardName("name2").standardVocabulary("SNOMED").startDate("2008-08-01");
+    assertThat(response.getItems().size()).isEqualTo(2);
+    assertThat(expectedData1).isIn(response.getItems());
+    assertThat(expectedData2).isIn(response.getItems());
+  }
+
+  @Test
+  public void getParticipantChartDataBadCohortId() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    try {
+      controller
+        .getParticipantChartData(
+          NAMESPACE,
+          NAME,
+          99L,
+          cdrVersion.getCdrVersionId(),
+          PARTICIPANT_ID,
+          DomainType.CONDITION.name());
+      fail("Should have thrown a BadRequestException!");
+    } catch (NotFoundException nfe) {
+      //Success
+      assertThat(nfe.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: 99");
+    }
+  }
+
+  @Test
+  public void getParticipantChartDataBadCdrVersionId() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    try {
+      controller
+        .getParticipantChartData(
+          NAMESPACE,
+          NAME,
+          cohort.getCohortId(),
+          99L,
+          PARTICIPANT_ID,
+          DomainType.CONDITION.name());
+      fail("Should have thrown a BadRequestException!");
+    } catch (NotFoundException nfe) {
+      //Success
+      assertThat(nfe.getMessage())
+        .isEqualTo("Not Found: Cohort Review does not exist for cohortId: "
+          + cohort.getCohortId() + ", cdrVersionId: 99");
+    }
   }
 
   private void assertResponse(ParticipantDataListResponse response, PageRequest expectedPageRequest, List<ParticipantData> expectedData, int totalCount) {

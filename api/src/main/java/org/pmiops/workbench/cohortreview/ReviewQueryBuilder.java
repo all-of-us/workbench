@@ -108,7 +108,8 @@ public class ReviewQueryBuilder {
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
 
   private static final String CHART_DATA_TEMPLATE =
-    "select distinct a.standard_name, a.standard_vocabulary, DATE(a.start_datetime) as start_date, a.age_at_event, rnk\n" +
+    "select distinct a.standard_name as standardName, a.standard_vocabulary as standardVocabulary, " +
+      "DATE(a.start_datetime) as startDate, a.age_at_event as ageAtEvent, rnk as rank\n" +
       "from `${projectId}.${dataSetId}.%s` a\n" +
       "left join (select standard_code, RANK() OVER(ORDER BY COUNT(*) DESC) as rnk\n" +
       "from `${projectId}.${dataSetId}.%s`\n" +
@@ -117,7 +118,7 @@ public class ReviewQueryBuilder {
       "LIMIT 5) b on a.standard_code = b.standard_code\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
       "and rnk <= 5\n" +
-      "order by rnk, a.standard_name, start_date\n";
+      "order by rank, standardName, startDate\n";
 
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
@@ -154,7 +155,7 @@ public class ReviewQueryBuilder {
   public QueryJobConfiguration buildChartDataQuery(Long participantId,
                                                DomainType domain) {
     String tableName = TABLE_PREFIX + domain.toString().toLowerCase();
-    String finalSql = String.format(CHART_DATA_TEMPLATE, tableName);
+    String finalSql = String.format(CHART_DATA_TEMPLATE, tableName, tableName);
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
     return QueryJobConfiguration
