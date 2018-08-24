@@ -117,7 +117,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setVersion(1);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
-      // TODO: add recent resource entry for concept sets?
+      // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (DataIntegrityViolationException e) {
       throw new BadRequestException(String.format(
           "Concept set \"/%s/%s/%s\" already exists.",
@@ -165,14 +165,12 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     Workspace workspace = workspaceService.getRequiredWithConceptSets(workspaceNamespace, workspaceId);
     ConceptSetListResponse response = new ConceptSetListResponse();
     Set<org.pmiops.workbench.db.model.ConceptSet> conceptSets = workspace.getConceptSets();
-    if (conceptSets != null) {
-      // Concept sets in the list response will *not* have concepts under them, as this could be
-      // a lot of data... you need to open up a concept set to see what concepts are within it.
-      response.setItems(conceptSets.stream()
-          .map(TO_CLIENT_CONCEPT_SET)
-          .sorted(Comparator.comparing(c -> c.getName()))
-          .collect(Collectors.toList()));
-    }
+    // Concept sets in the list response will *not* have concepts under them, as this could be
+    // a lot of data... you need to open up a concept set to see what concepts are within it.
+    response.setItems(conceptSets.stream()
+        .map(TO_CLIENT_CONCEPT_SET)
+        .sorted(Comparator.comparing(c -> c.getName()))
+        .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
@@ -198,6 +196,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setLastModifiedTime(now);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
+      // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
@@ -245,6 +244,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setLastModifiedTime(now);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
+      // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }

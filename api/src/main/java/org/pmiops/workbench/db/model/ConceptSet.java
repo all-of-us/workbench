@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -31,7 +32,7 @@ public class ConceptSet {
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private Set<Long> conceptIds;
+  private Set<Long> conceptIds = new HashSet<Long>();
 
   public ConceptSet() {}
 
@@ -137,7 +138,7 @@ public class ConceptSet {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "concept_set_concept_id", joinColumns = @JoinColumn(name = "concept_set_id"))
   @Column(name = "concept_id")
   public Set<Long> getConceptIds() {

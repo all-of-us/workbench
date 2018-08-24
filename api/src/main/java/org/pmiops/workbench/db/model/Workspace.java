@@ -384,7 +384,7 @@ public class Workspace {
     return conceptSets;
   }
 
-  public void setConceptSets(Set<ConceptSet> cohorts) {
+  public void setConceptSets(Set<ConceptSet> conceptSets) {
     this.conceptSets = conceptSets;
   }
 
