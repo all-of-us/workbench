@@ -352,7 +352,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                   Long cdrVersionId,
                                                                                   Long participantId,
                                                                                   String domain) {
-    CohortReview review = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
@@ -818,7 +818,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     return new ParticipantChartData()
       .standardName(bigQueryService.getString(row, rm.get("standardName")))
       .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-      .startDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+      .startDate(bigQueryService.getDate(row, rm.get("startDate")))
       .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
       .rank(bigQueryService.getLong(row, rm.get("rank")).intValue());
   }
