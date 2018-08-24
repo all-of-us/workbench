@@ -4,7 +4,7 @@ import {Criteria, DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES} from '../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
 
 import {
   activeCriteriaTreeType,
@@ -178,6 +178,10 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchAllCriteria(_type, parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
+    }
+    // Load options for Encounters modifier
+    if ([CRITERIA_TYPES.PM, DomainType.VISIT].indexOf(_type) === -1) {
+      this.actions.fetchCriteria(DomainType[DomainType.VISIT], 0);
     }
   }
 
