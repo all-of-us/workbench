@@ -136,11 +136,17 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       mods.forEach(mod => {
         const meta = this.modifiers.find(_mod => mod.get('name') === _mod.modType);
         if (meta) {
-          this.form.get(meta.name).patchValue({
-            operator: mod.get('operator'),
-            valueA: mod.getIn(['operands', 0]),
-            valueB: mod.getIn(['operands', 1]),
-          }, {emitEvent: false});
+          if (meta.modType === ModifierType.ENCOUNTERS) {
+            this.form.get(meta.name).patchValue({
+              operator: mod.getIn(['operands', 0]),
+            }, {emitEvent: false});
+          } else {
+            this.form.get(meta.name).patchValue({
+              operator: mod.get('operator'),
+              valueA: mod.getIn(['operands', 0]),
+              valueB: mod.getIn(['operands', 1]),
+            }, {emitEvent: false});
+          }
         }
       });
     }));
