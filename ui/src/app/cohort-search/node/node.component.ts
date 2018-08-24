@@ -118,7 +118,7 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(() =>  this.expanded = true);
 
       const subtreeSelectSub = this.selected$
-        .filter(selectedId => selectedId === parentId)
+        .filter(selectedIds => !!selectedIds && selectedIds.includes(parentId))
         .subscribe(() => {
           const displayName = highlightMatches(this.searchTerms, this.node.get('name'));
           this.node = this.node.set('name', displayName);

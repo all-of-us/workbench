@@ -1,4 +1,4 @@
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {
   AfterViewInit,
   Component,
@@ -10,9 +10,10 @@ import {
   ViewChild
 } from '@angular/core';
 import { DomainType } from 'generated';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
-import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
+import {CohortSearchActions, CohortSearchState, isParameterActive, subtreeSelected} from '../redux';
 
 /*
  * Stub function - some criteria types will have "attributes" that help define
@@ -33,6 +34,7 @@ function needsAttributes(node: any) {
   styleUrls: ['./node-info.component.css']
 })
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
+  @select(subtreeSelected) selected$: Observable<any>;
   @Input() node;
   readonly domainType = DomainType;
   readonly criteriaTypes = CRITERIA_TYPES;
@@ -40,6 +42,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
+  matched = false;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -56,6 +59,10 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(val => {
         this.isSelected = val;
       });
+
+    this.subscription.add(this.selected$
+      .filter(selectedIds => !!selectedIds)
+      .subscribe(selectedIds => this.matched = selectedIds.includes(this.node.get('id'))));
   }
 
   ngOnDestroy() {
