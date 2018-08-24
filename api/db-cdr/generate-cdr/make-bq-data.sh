@@ -97,7 +97,8 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_ancestor)
+create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_ancestor concept_synonym)
+
 for t in "${create_tables[@]}"
 do
     bq --project=$WORKBENCH_PROJECT rm -f $WORKBENCH_DATASET.$t
@@ -154,6 +155,18 @@ then
     echo "Achilles queries ran"
 else
     echo "FAILED To run achilles queries for CDR $CDR_VERSION"
+    exit 1
+fi
+
+####################
+# measurement queries #
+####################
+# Run measurement achilles count queries to fill achilles_results
+if ./generate-cdr/run-measurement-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET
+then
+    echo "Measurement achilles queries ran"
+else
+    echo "FAILED To run measurement achilles queries for CDR $CDR_VERSION"
     exit 1
 fi
 
@@ -236,5 +249,18 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  (concept_id_1, concept_id_2, relationship_id)
 SELECT c.concept_id_1, c.concept_id_2, c.relationship_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
+
+########################
+# concept_synonym #
+########################
+echo "Inserting concept_synonym"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\`
+ (concept_id, concept_synonym_name, language_concept_id)
+SELECT c.concept_id, c.concept_synonym_name, c.language_concept_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
+
+
+
 
 

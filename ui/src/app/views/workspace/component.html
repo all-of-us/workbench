@@ -96,7 +96,7 @@
     <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}">Google Bucket</a>
   </div>
 </div>
-<app-workspace-share></app-workspace-share>
+<app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not fetch notebooks from workspace. Please <a (click)="submitNotebooksLoadBugReport()">submit a bug report.</a></div>
