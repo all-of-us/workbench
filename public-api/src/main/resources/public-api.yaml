@@ -687,7 +687,7 @@ definitions:
   MatchType:
     type: string
     description: match column type on concept search
-    enum: [CONCEPT_CODE, CONCEPT_ID, CONCEPT_NAME, CONCEPT_SYNONYM]
+    enum: [CONCEPT_CODE, CONCEPT_ID, CONCEPT_NAME]
 
   SearchConceptsRequest:
     type: object
