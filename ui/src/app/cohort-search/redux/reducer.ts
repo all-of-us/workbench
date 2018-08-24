@@ -130,8 +130,10 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'requests', action.kind, action.id]);
 
       case LOAD_CRITERIA_SUBTREE:
+        const parentIds = action.path.split('.');
         return state
-          .setIn(['criteria', 'subtree', action.kind], fromJS(action.results))
+          .setIn(['criteria', 'subtree', action.kind], fromJS(parentIds))
+          .setIn(['criteria', 'subtree', 'selected'], action.id)
           .deleteIn(['criteria', 'requests', action.kind]);
 
       case CANCEL_CRITERIA_REQUEST:

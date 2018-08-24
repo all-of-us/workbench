@@ -108,7 +108,8 @@ export interface ActionTypes {
   LOAD_CRITERIA_SUBTREE: {
     type: typeof LOAD_CRITERIA_SUBTREE;
     kind: string;
-    results: Criteria[];
+    id: number;
+    path: string;
   };
   LOAD_DEMO_CRITERIA_RESULTS: {
     type: typeof LOAD_DEMO_CRITERIA_RESULTS;

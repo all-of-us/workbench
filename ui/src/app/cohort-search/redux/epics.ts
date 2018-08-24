@@ -4,8 +4,6 @@ import {Map} from 'immutable';
 import {Epic} from 'redux-observable';
 import {Observable} from 'rxjs/Observable';
 
-import {CohortSearchActions} from './actions';
-
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
@@ -49,6 +47,7 @@ import {
   autocompleteRequestError,
 
   loadIngredients,
+
   loadCriteriaSubtree,
 
   loadSubtreeItems,
@@ -87,10 +86,7 @@ const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
  */
 @Injectable()
 export class CohortSearchEpics {
-  constructor(
-    private service: CohortBuilderService,
-    private actions: CohortSearchActions
-  ) {}
+  constructor(private service: CohortBuilderService) {}
 
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
@@ -138,7 +134,9 @@ export class CohortSearchEpics {
     action$.ofType(BEGIN_DRUG_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId, subtype}: DrugCritRequestAction) => {
         return this.service.getCriteriaByTypeAndSubtype(cdrVersionId, kind, subtype)
-          .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
+          .map(result => loadCriteriaRequestResults(
+            kind, parentId, result.items.filter(item => item.parentId === parentId))
+          )
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
             .filter(compare({kind, parentId}))

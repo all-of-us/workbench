@@ -61,6 +61,7 @@ export class CohortSearchActions {
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestCriteriaSubtree = ActionFuncs.requestCriteriaSubtree;
   @dispatch() loadSubtreeItems = ActionFuncs.loadSubtreeItems;
+  @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
@@ -84,8 +85,7 @@ export class CohortSearchActions {
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
-  @dispatch() requestAttributes = ActionFuncs.requestAttributes;
-  @dispatch() loadAttributes = ActionFuncs.loadAttributes;
+  @dispatch() showAttributesPage = ActionFuncs.showAttributesPage;
   @dispatch() hideAttributesPage = ActionFuncs.hideAttributesPage;
 
   @dispatch() openWizard = ActionFuncs.openWizard;
@@ -245,7 +245,7 @@ export class CohortSearchActions {
     if (isLoading) {
       return;
     }
-    this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
+    this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
   }
 
   fetchCriteriaSubtree(kind: string, id: number): void {
@@ -257,13 +257,13 @@ export class CohortSearchActions {
     this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
   }
 
-  fetchAttributes(node: any): void {
-    const isLoading = isAttributeLoading()(this.state);
-    if (isLoading) {
-      return;
+    fetchAttributes(node: any): void {
+        const isLoading = isAttributeLoading()(this.state);
+        if (isLoading) {
+            return;
+        }
+        this.requestAttributes(this.cdrVersionId, node);
     }
-    this.requestAttributes(this.cdrVersionId, node);
-  }
 
   requestPreview(): void {
     const params = activeParameterList(this.state)

@@ -122,7 +122,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         if (option.subtype === CRITERIA_SUBTYPES.BRAND) {
           this.actions.fetchIngredientsForBrand(option.conceptId);
         } else if (option.subtype === CRITERIA_SUBTYPES.ATC) {
-            this.actions.setCriteriaSearchTerms([option.name]);
+          this.actions.setCriteriaSearchTerms([option.name]);
+          this.actions.loadCriteriaSubtree(this._type, option.id, option.path);
         }
         break;
       default:
