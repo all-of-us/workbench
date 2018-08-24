@@ -214,7 +214,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           this.dateValueA = moment(valueA).format('YYYY-MM-DD');
           this.dateValueB = moment(valueB).format('YYYY-MM-DD');
           const operands = [this.dateValueA];
-          if (between) {
+          if (between && this.dateValueB) {
             operands.push(this.dateValueB);
           }
           return fromJS({name: modType, operator, operands});
