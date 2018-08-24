@@ -15,7 +15,6 @@ import {
   wizardOpen,
 } from '../redux';
 import {stripHtml, typeToTitle} from '../utils';
-import {typeToTitle} from '../utils';
 
 
 @Component({
