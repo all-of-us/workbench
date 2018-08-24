@@ -169,6 +169,24 @@ public class ConceptSetsControllerTest {
         .getBody().getItems()).isEmpty();
   }
 
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testGetConceptSetNotExists() {
+    conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, 1L);
+  }
+
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testUpdateConceptSetNotExists() {
+    ConceptSet conceptSet = new ConceptSet();
+    conceptSet.setDescription("desc 1");
+    conceptSet.setName("concept set 1");
+    conceptSet.setDomain(Domain.CONDITION);
+    conceptSet.setId(1L);
+    conceptSet.setEtag(Etags.fromVersion(1));
+
+    conceptSetsController.updateConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, 1L,
+        conceptSet);
+  }
+
   @Test
   public void testCreateAndGetConceptSet() {
     ConceptSet conceptSet = makeConceptSet1();
@@ -185,6 +203,33 @@ public class ConceptSetsControllerTest {
         conceptSet.getId()).getBody()).isEqualTo(conceptSet);
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
         .getBody().getItems()).containsExactly(conceptSet);
+    assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+        .getBody().getItems()).isEmpty();
+  }
+
+  @Test
+  public void testUpdateConceptSet() {
+    ConceptSet conceptSet = makeConceptSet1();
+    conceptSet.setDescription("new description");
+    conceptSet.setName("new name");
+    Instant newInstant = NOW.plusMillis(1);
+    CLOCK.setInstant(newInstant);
+    ConceptSet updatedConceptSet =
+        conceptSetsController.updateConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet.getId(),
+            conceptSet).getBody();
+    assertThat(updatedConceptSet.getCreator()).isEqualTo(USER_EMAIL);
+    assertThat(updatedConceptSet.getConcepts()).isNull();
+    assertThat(updatedConceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(updatedConceptSet.getDescription()).isEqualTo("new description");
+    assertThat(updatedConceptSet.getDomain()).isEqualTo(Domain.CONDITION);
+    assertThat(updatedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(2));
+    assertThat(updatedConceptSet.getLastModifiedTime()).isEqualTo(newInstant.toEpochMilli());
+    assertThat(conceptSet.getName()).isEqualTo("new name");
+
+    assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        conceptSet.getId()).getBody()).isEqualTo(updatedConceptSet);
+    assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+        .getBody().getItems()).containsExactly(updatedConceptSet);
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
         .getBody().getItems()).isEmpty();
   }

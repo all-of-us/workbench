@@ -192,6 +192,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (conceptSet.getDescription() != null) {
       dbConceptSet.setDescription(conceptSet.getDescription());
     }
+    if (conceptSet.getDomain() != null) {
+      if (conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
+        throw new BadRequestException("Cannot modify the domain of an existing concept set");
+      }
+    }
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setLastModifiedTime(now);
     try {
