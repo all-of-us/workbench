@@ -276,6 +276,10 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     return this.node.get('type') === CRITERIA_TYPES.MEAS;
   }
 
+  isPM() {
+    return this.node.get('type') === CRITERIA_TYPES.PM;
+  }
+
   showAdd() {
     return this.preview.get('count') && !this.preview.get('requesting');
   }
