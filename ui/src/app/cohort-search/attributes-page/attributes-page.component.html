@@ -1,10 +1,10 @@
 <div *ngIf="rangeAlert" class="alert alert-danger alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
-      <div *ngIf="node.get('type') === criteriaTypes.MEAS" class="alert-text">
+      <div *ngIf="isMeasurement()" class="alert-text">
         Form cannot accept values outside range {{attrs.NUM[0].MIN}} - {{attrs.NUM[0].MAX}}
       </div>
-      <div *ngIf="node.get('type') === criteriaTypes.PM" class="alert-text">
+      <div *ngIf="isPM()" class="alert-text">
         Form cannot accept negative values
       </div>
     </div>
@@ -12,7 +12,7 @@
 </div>
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
-    <div *ngIf="node.get('type') === criteriaTypes.MEAS">
+    <div *ngIf="isMeasurement()">
       <div class="attr-name-color">
         {{displayName}}
         <clr-icon shape="refresh" size="20" class="attr-refresh" (click)="refresh()"></clr-icon>
@@ -44,7 +44,7 @@
                   clrDropdownItem>{{option.name}}</button>
                 </clr-dropdown-menu>
               </clr-dropdown>
-              <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" [required]="node.get('type') === criteriaTypes.PM">
+              <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" [required]="isPM()">
             </div>
             <div *ngIf="showInput(i, attrForm)" class="form-group range-container">
               <input class="number-container"
