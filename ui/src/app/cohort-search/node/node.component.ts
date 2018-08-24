@@ -1,6 +1,6 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
-import {DomainType} from 'generated';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Criteria, DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -13,8 +13,12 @@ import {
   criteriaChildren,
   criteriaError,
   criteriaSearchTerms,
+  criteriaSubtree,
   isCriteriaLoading,
+  subtreeSelected,
 } from '../redux';
+
+import {loadSubtreeItems} from '../redux/actions/creators';
 
 import {highlightMatches} from '../utils';
 
@@ -23,7 +27,7 @@ import {highlightMatches} from '../utils';
   templateUrl: './node.component.html',
   styleUrls: ['./node.component.css']
 })
-export class NodeComponent implements OnInit, OnDestroy, OnChanges {
+export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
   @Input() testChange = false;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
@@ -55,18 +59,13 @@ export class NodeComponent implements OnInit, OnDestroy, OnChanges {
   error = false;
   fullTree: boolean;
   subscription: Subscription;
+  @select(subtreeSelected) selected$: Observable<any>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
     private actions: CohortSearchActions,
   ) {}
-ngOnChanges(){
-    if( this.testChange) {
-      console.log("testingg------>>>")
-      this.ngOnInit();
-    }
 
-}
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
     if (!this.fullTree || this.node.get('id') === 0) {
@@ -104,26 +103,48 @@ ngOnChanges(){
         .select(criteriaSearchTerms())
         .subscribe(searchTerms => {
           this.searchTerms = searchTerms;
-          this.numMatches = 0;
-          if (searchTerms && searchTerms.length) {
-            this.searchTree();
-          } else {
-            this.clearSearchTree();
+          if (this.fullTree) {
+            this.numMatches = 0;
+            if (searchTerms && searchTerms.length) {
+              this.searchTree();
+            } else {
+              this.clearSearchTree();
+            }
           }
+        });
+
+      const subtreeSub = this.ngRedux
+        .select(criteriaSubtree(_type))
+        .filter(nodeIds => nodeIds.includes(parentId.toString()))
+        .subscribe(() =>  this.expanded = true);
+
+      const subtreeSelectSub = this.selected$
+        .filter(selectedId => selectedId === parentId)
+        .subscribe(() => {
+          const displayName = highlightMatches(this.searchTerms, this.node.get('name'));
+          this.node = this.node.set('name', displayName);
         });
 
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
+      this.subscription.add(subtreeSub);
+      this.subscription.add(subtreeSelectSub);
     }
-    this.expanded = this.node.get('expanded', false);
+    if (this.fullTree) {
+      this.expanded = this.node.get('expanded', false);
+    }
   }
 
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  get nodeId() {
+    return 'node' + this.node.get('id');
   }
 
   addChildToParent(child, itemList) {

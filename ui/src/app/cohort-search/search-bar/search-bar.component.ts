@@ -2,7 +2,7 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {DomainType} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES} from '../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
 import {
   autocompleteError,
   autocompleteOptions,
@@ -60,7 +60,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
             }
           });
 
-          this.noResults = this._type === DomainType.DRUG
+          this.noResults = (this._type === DomainType.DRUG || this._type === CRITERIA_TYPES.MEAS)
             && !this.optionSelected
             && !this.options.length;
         }
@@ -92,23 +92,24 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   inputChange(newVal: string) {
-    if (this._type === DomainType.VISIT) {
-      if (newVal.length > 2) {
-        this.actions.setCriteriaSearchTerms([newVal]);
-      } else {
-        this.actions.setCriteriaSearchTerms([]);
-      }
-    }
-    if (this._type === DomainType.DRUG) {
-      this.optionSelected = false;
-      this.multiIngredient = false;
-      this.noResults = false;
-      if (newVal.length >= 4) {
-        this.actions.fetchAutocompleteOptions(newVal);
-      } else {
-        this.actions.setCriteriaSearchTerms([]);
-        this.options = [];
-      }
+    switch (this._type) {
+      case DomainType.VISIT:
+        if (newVal.length > 2) {
+          this.actions.setCriteriaSearchTerms([newVal]);
+        } else {
+          this.actions.setCriteriaSearchTerms([]);
+        }
+        break;
+      default:
+        this.optionSelected = false;
+        this.multiIngredient = false;
+        this.noResults = false;
+        if (newVal.length >= 4) {
+          this.actions.fetchAutocompleteOptions(this._type, newVal);
+        } else {
+          this.actions.setCriteriaSearchTerms([]);
+          this.options = [];
+        }
     }
   }
 
@@ -116,10 +117,17 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.optionSelected = true;
     this.actions.clearAutocompleteOptions();
     this.searchTerm = option.name;
-    if (option.subtype === CRITERIA_SUBTYPES.BRAND) {
-      this.actions.fetchIngredientsForBrand(option.conceptId);
-    } else if (option.subtype === CRITERIA_SUBTYPES.ATC) {
-      this.actions.setCriteriaSearchTerms([option.name]);
+    switch (this._type) {
+      case DomainType.DRUG:
+        if (option.subtype === CRITERIA_SUBTYPES.BRAND) {
+          this.actions.fetchIngredientsForBrand(option.conceptId);
+        } else if (option.subtype === CRITERIA_SUBTYPES.ATC) {
+            this.actions.setCriteriaSearchTerms([option.name]);
+        }
+        break;
+      default:
+        this.actions.setCriteriaSearchTerms([option.name]);
+        this.actions.fetchCriteriaSubtree(this._type, option.id);
     }
   }
 }

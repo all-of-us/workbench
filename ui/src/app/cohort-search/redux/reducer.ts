@@ -15,19 +15,25 @@ import {
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
+  LOAD_SUBTREE_RESULTS,
+  LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
-  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
+  ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
@@ -81,6 +87,11 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
           .setIn(['criteria', 'requests', action.kind, action.parentId], true);
 
+      case BEGIN_CRITERIA_SUBTREE_REQUEST:
+        return state
+          .deleteIn(['criteria', 'errors', List([action.kind, action.id])])
+          .setIn(['criteria', 'requests', action.kind, action.id], true);
+
       case BEGIN_ALL_CRITERIA_REQUEST:
         return state
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
@@ -101,13 +112,35 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['criteria', 'tree', action.kind, action.subtype], action.results)
           .deleteIn(['criteria', 'requests', action.kind, action.subtype]);
 
+      case LOAD_SUBTREE_RESULTS:
+        const subtreeObj = {};
+        action.results.forEach(criterion => {
+          if (criterion.parentId !== 0) {
+            if (subtreeObj[criterion.parentId]) {
+              subtreeObj[criterion.parentId].push(criterion);
+            } else {
+              subtreeObj[criterion.parentId] = [criterion];
+            }
+          }
+        });
+        return state
+          .mergeIn(['criteria', 'tree', action.kind], fromJS(subtreeObj))
+          .setIn(['criteria', 'subtree', action.kind], fromJS(Object.keys(subtreeObj)))
+          .setIn(['criteria', 'subtree', 'selected'], action.id)
+          .deleteIn(['criteria', 'requests', action.kind, action.id]);
+
+      case LOAD_CRITERIA_SUBTREE:
+        return state
+          .setIn(['criteria', 'subtree', action.kind], fromJS(action.results))
+          .deleteIn(['criteria', 'requests', action.kind]);
+
       case CANCEL_CRITERIA_REQUEST:
         return state.deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
       case SET_CRITERIA_SEARCH:
         return state.setIn(['criteria', 'search', 'terms'], action.searchTerms);
 
-      case BEGIN_DRUG_AUTOCOMPLETE_REQUEST:
+      case BEGIN_AUTOCOMPLETE_REQUEST:
         return state
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
@@ -131,10 +164,23 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['criteria', 'search', 'ingredients'], action.ingredients)
           .deleteIn(['criteria', 'search', 'autocomplete']);
 
+      case LOAD_ATTRIBUTE_LIST:
+        const node = action.node.set('attributes', action.attributes);
+        return state
+          .setIn(['wizard', 'item', 'attributes', 'node'], node)
+          .deleteIn(['wizard', 'item', 'attributes', 'loading']);
+
       case AUTOCOMPLETE_REQUEST_ERROR:
         return state
           .deleteIn(['criteria', 'search', 'autocomplete'])
           .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
+
+      case ATTRIBUTE_REQUEST_ERROR:
+        return state
+          .deleteIn(['wizard', 'item', 'attributes', 'loading'])
+          .setIn(
+            ['wizard', 'item', 'attributes', 'errors'], fromJS({error: action.error})
+          );
 
       case CRITERIA_REQUEST_ERROR:
         return state
@@ -143,6 +189,9 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['criteria', 'errors', List([action.kind, action.parentId])],
             fromJS({error: action.error})
           );
+
+      case SET_SCROLL_ID:
+        return state.setIn(['criteria', 'tree', 'scroll'], action.nodeId);
 
       case BEGIN_PREVIEW_REQUEST:
         return state
@@ -279,11 +328,13 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SHOW_ATTRIBUTES_PAGE:
         return state
-          .setIn(['wizard', 'item', 'attributes'], action.node)
-          .deleteIn(['wizard', 'calculate', 'count']);
+          .setIn(['wizard', 'item', 'attributes', 'loading'], true);
 
       case HIDE_ATTRIBUTES_PAGE:
-        return state.setIn(['wizard', 'item', 'attributes'], Map());
+        console.log('hide');
+        return state
+          .setIn(['wizard', 'item', 'attributes', 'node'], Map())
+          .deleteIn(['wizard', 'calculate', 'count']);
 
         case REMOVE_ITEM: {
         state = state
@@ -376,9 +427,8 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['entities', 'items', itemId], item)
           .updateIn(['entities', 'parameters'], Map(), mergeParams)
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'search', 'terms'])
-          .deleteIn(['criteria', 'search', 'options'])
-          .deleteIn(['criteria', 'search', 'ingredients']);
+          .deleteIn(['criteria', 'subtree'])
+          .deleteIn(['criteria', 'search']);
       }
 
       case WIZARD_CANCEL: {
@@ -395,9 +445,8 @@ export const rootReducer: Reducer<CohortSearchState> =
         }
         return state
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'search', 'terms'])
-          .deleteIn(['criteria', 'search', 'options'])
-          .deleteIn(['criteria', 'search', 'ingredients']);
+          .deleteIn(['criteria', 'subtree'])
+          .deleteIn(['criteria', 'search']);
       }
 
       case SET_WIZARD_CONTEXT:

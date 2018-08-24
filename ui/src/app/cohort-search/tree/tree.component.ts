@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnChanges, OnInit, Output} from '@angular/core';
 import {DomainType} from 'generated';
-import {CRITERIA_TYPES, DOMAIN_TYPES} from '../constant';
+import {CRITERIA_TYPES} from '../constant';
 import {NodeComponent} from '../node/node.component';
 
 /*
@@ -28,10 +28,12 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   }
 
   showSearch() {
-    return this.node.get('type') === DomainType.VISIT || this.node.get('type') === DomainType.DRUG
-        || this.node.get('type') === DomainType.CONDITION || this.node.get('type') === CRITERIA_TYPES.ICD9
-      || this.node.get('type') === CRITERIA_TYPES.ICD10;
-
+    return this.node.get('type') === DomainType.VISIT
+      || this.node.get('type') === DomainType.DRUG
+      || this.node.get('type') === DomainType.CONDITION
+      || this.node.get('type') === CRITERIA_TYPES.ICD9
+      || this.node.get('type') === CRITERIA_TYPES.ICD10
+      || this.node.get('type') === CRITERIA_TYPES.MEAS;
   }
 
   showDropDown() {

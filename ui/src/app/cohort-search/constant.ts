@@ -32,7 +32,7 @@ export const DOMAIN_TYPES = [
     { name: 'Conditions',    type: DomainType.CONDITION},
     { name: 'Procedures',    type: DomainType.PROCEDURE, disabled: true },
     { name: 'Drugs',    type: DomainType.DRUG, fullTree: true },
-    { name: 'Measurements',    type: DomainType.MEASUREMENT, disabled: true },
+    { name: 'Measurements',    type: CRITERIA_TYPES.MEAS},
     { name: 'Visits',    type: DomainType.VISIT, fullTree: true },
     { name: 'ICD9 Codes',   type: CRITERIA_TYPES.ICD9 },
     { name: 'ICD10 Codes',  type: CRITERIA_TYPES.ICD10 },

@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit, OnChanges} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {DomainType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -9,12 +9,13 @@ import {
   activeCriteriaTreeType,
   activeCriteriaType,
   activeParameterList,
-  attributesPage,
   CohortSearchActions,
+  nodeAttributes,
+  subtreeSelected,
   wizardOpen,
 } from '../redux';
+import {stripHtml, typeToTitle} from '../utils';
 import {typeToTitle} from '../utils';
-import {CohortAnnotationDefinition} from "../../../generated";
 
 
 @Component({
@@ -25,12 +26,13 @@ import {CohortAnnotationDefinition} from "../../../generated";
     '../../styles/buttons.css',
   ]
 })
-export class ModalComponent implements OnInit, OnDestroy, OnChanges {
+export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
   @select(activeParameterList) selection$: Observable<any>;
-  @select(attributesPage) attributes$: Observable<any>;
+  @select(nodeAttributes) attributes$: Observable<any>;
+  @select(subtreeSelected) scrollTo$: Observable<any>;
 
   readonly domainType = DomainType;
   readonly criteriaTypes = CRITERIA_TYPES;
@@ -43,11 +45,9 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
+  scrollTime: number;
+  count = 0;
   constructor(private actions: CohortSearchActions) {}
-
-  ngOnChanges(){
-
-  }
 
   ngOnInit() {
     this.subscription = this.open$
@@ -97,6 +97,26 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
         }
       })
     );
+
+    this.subscription.add(this.scrollTo$
+      .filter(nodeId => !!nodeId)
+      .subscribe(nodeId => {
+        if (nodeId) {
+          this.setScroll(nodeId);
+        }
+      })
+    );
+  }
+  setScroll(nodeId: string) {
+    let node: any;
+    Observable.interval(100)
+      .takeWhile(() => !node)
+      .subscribe(i => {
+        node = document.getElementById('node' + nodeId.toString());
+        if (node && i < 100) {
+          node.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -119,12 +139,11 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-      return Map({
-
-          type: this.ctype,
-          fullTree: this.fullTree,
-          id: 0,    // root parent ID is always 0
-      });
+    return Map({
+      type: this.ctype,
+      fullTree: this.fullTree,
+      id: 0,    // root parent ID is always 0
+    });
   }
 
   get selectionTitle() {
@@ -144,4 +163,10 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
     showTitle() {
         return this.title === 'Drugs' || this.title == 'Visits' || this.title == 'CPT Codes' || this.title == 'Demographics';
     }
+
+  get attributeTitle() {
+    return this.ctype === CRITERIA_TYPES.PM
+      ? stripHtml(this.attributesNode.get('name'))
+      : typeToTitle(this.ctype) + ' Detail';
+  }
 }

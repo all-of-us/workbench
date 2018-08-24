@@ -4,7 +4,7 @@
   </div>
 
   <ng-template *ngIf="node.get('group') && !fullTree"
-    [clrIfExpanded]="expanded"
+    [(clrIfExpanded)]="expanded"
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
       <div class="node-list">
@@ -29,7 +29,7 @@
           <clr-icon shape="error-standard"></clr-icon>
           <em>Failed to Load Criteria</em>
         </div>
-        <crit-node *ngFor="let item of node.get('children')" [node]="item" []></crit-node>
+        <crit-node *ngFor="let item of node.get('children')" [node]="item"></crit-node>
       </div>
     </ng-container>
   </ng-template>

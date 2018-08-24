@@ -51,11 +51,11 @@
               <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank">
                 Explore
               </a>
-              drugs by brand names outside of AoU
+              drugs by brand names outside of All of Us
             </div>
             <button *ngIf="attributesNode.size > 0"
-                    (click)="back()"
-                    class="btn btn-link btn-icon">
+              (click)="back()"
+              class="btn btn-link btn-icon">
               <clr-icon size="24" shape="close"></clr-icon>
             </button>
           </div>
@@ -65,11 +65,12 @@
                                  (cancel)="cancel()"
                                  (finish)="finish()">
               </crit-demographics>
+
               <ng-container *ngSwitchDefault>
                 <div id="tree" class="panel" [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes'">
                   <!-- Tree Page -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
-                    <crit-tree (openTree)="changedRootNode($event)" [node]="rootNode"></crit-tree>
+                    <crit-tree [node]="rootNode"></crit-tree>
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
@@ -77,13 +78,14 @@
                   </div>
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">
-                    <crit-attributes-page [node]="attributesNode"></crit-attributes-page>
+                    <crit-attributes-page *ngIf="mode === 'attributes'"></crit-attributes-page>
                   </div>
                 </div>
               </ng-container>
             </ng-container>
           </div>
         </div>
+
         <div class="col col-sm-4 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO">
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
