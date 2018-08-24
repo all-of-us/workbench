@@ -22,6 +22,8 @@ import {
   LOAD_SUBTREE_RESULTS,
   LOAD_CRITERIA_SUBTREE,
   LOAD_DEMO_CRITERIA_RESULTS,
+  LOAD_SUBTREE_RESULTS,
+  LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
@@ -133,6 +135,28 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(['criteria', 'tree', action.kind, action.subtype], action.results)
           .deleteIn(['criteria', 'requests', action.kind, action.subtype]);
+
+      case LOAD_SUBTREE_RESULTS:
+        const subtreeObj = {};
+        action.results.forEach(criterion => {
+          if (criterion.parentId !== 0) {
+            if (subtreeObj[criterion.parentId]) {
+              subtreeObj[criterion.parentId].push(criterion);
+            } else {
+              subtreeObj[criterion.parentId] = [criterion];
+            }
+          }
+        });
+        return state
+          .mergeIn(['criteria', 'tree', action.kind], fromJS(subtreeObj))
+          .setIn(['criteria', 'subtree', action.kind], fromJS(Object.keys(subtreeObj)))
+          .setIn(['criteria', 'subtree', 'selected'], action.id)
+          .deleteIn(['criteria', 'requests', action.kind, action.id]);
+
+      case LOAD_CRITERIA_SUBTREE:
+        return state
+          .setIn(['criteria', 'subtree', action.kind], fromJS(action.results))
+          .deleteIn(['criteria', 'requests', action.kind]);
 
       case CANCEL_CRITERIA_REQUEST:
         return state.deleteIn(['criteria', 'requests', action.kind, action.parentId]);

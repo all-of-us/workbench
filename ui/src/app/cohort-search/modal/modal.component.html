@@ -61,7 +61,7 @@
                   </div>
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">
-                    <crit-attributes-page [node]="attributesNode"></crit-attributes-page>
+                    <crit-attributes-page *ngIf="mode === 'attributes'"></crit-attributes-page>
                   </div>
                 </div>
               </ng-container>
