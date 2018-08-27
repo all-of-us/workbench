@@ -25,14 +25,12 @@ import java.util.stream.Collectors;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
-  Provider<User> userProvider;
+   Provider<User> userProvider;
   UserRecentResourceService userRecentResourceService;
   WorkspaceService workspaceService;
   FireCloudService fireCloudService;
   Map<Long, String> workspaceAccessMap = new HashMap<Long, String>();
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks/";
-  private static final Pattern NOTEBOOK_PATTERN =
-      Pattern.compile("gs://[a-zA-Z0-9]*/"+NOTEBOOKS_WORKSPACE_DIRECTORY);
 
   @Autowired
   UserMetricsController(Provider<User> userProvider,

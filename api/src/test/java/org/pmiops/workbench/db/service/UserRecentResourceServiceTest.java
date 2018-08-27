@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
@@ -49,7 +48,6 @@ public class UserRecentResourceServiceTest {
 
   private User newUser = new User();
   private Workspace newWorkspace = new Workspace();
-  private Cohort cohort;
   private Long cohortId;
   private long workspaceId = 1l;
   private long userId = 1l;
@@ -62,7 +60,7 @@ public class UserRecentResourceServiceTest {
     userDao.save(newUser);
     newWorkspace.setWorkspaceId(workspaceId);
     workspaceDao.save(newWorkspace);
-    cohort = new Cohort();
+    Cohort cohort = new Cohort();
     cohort.setWorkspaceId(workspaceId);
     cohortId = cohortDao.save(cohort).getCohortId();
     userRecentResourceService = new UserRecentResourceServiceImpl();
