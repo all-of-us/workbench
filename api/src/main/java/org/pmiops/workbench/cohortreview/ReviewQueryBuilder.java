@@ -10,9 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class ReviewTabQueryBuilder {
+public class ReviewQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
+  private static final String NAMED_LIMIT_PARAM = "limit";
   private static final String TABLE_PREFIX = "p_";
 
   private static final String VISIT_COLUMNS =
@@ -107,6 +108,19 @@ public class ReviewTabQueryBuilder {
       "from `${projectId}.${dataSetId}.%s`\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
 
+  private static final String CHART_DATA_TEMPLATE =
+    "select distinct a.standard_name as standardName, a.standard_vocabulary as standardVocabulary, " +
+      "DATE(a.start_datetime) as startDate, a.age_at_event as ageAtEvent, rnk as rank\n" +
+      "from `${projectId}.${dataSetId}.%s` a\n" +
+      "left join (select standard_code, RANK() OVER(ORDER BY COUNT(*) DESC) as rnk\n" +
+      "from `${projectId}.${dataSetId}.%s`\n" +
+      "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+      "group by standard_code\n" +
+      "LIMIT @" + NAMED_LIMIT_PARAM + ") b on a.standard_code = b.standard_code\n" +
+      "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+      "and rnk <= @" + NAMED_LIMIT_PARAM + "\n" +
+      "order by rank, standardName, startDate\n";
+
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
                                           PageRequest pageRequest) {
@@ -132,6 +146,21 @@ public class ReviewTabQueryBuilder {
     String finalSql = String.format(COUNT_TEMPLATE, tableName);
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
+    return QueryJobConfiguration
+      .newBuilder(finalSql)
+      .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
+  }
+
+  public QueryJobConfiguration buildChartDataQuery(Long participantId,
+                                                   DomainType domain,
+                                                   Integer limit) {
+    String tableName = TABLE_PREFIX + domain.toString().toLowerCase();
+    String finalSql = String.format(CHART_DATA_TEMPLATE, tableName, tableName);
+    Map<String, QueryParameterValue> params = new HashMap<>();
+    params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
+    params.put(NAMED_LIMIT_PARAM, QueryParameterValue.int64(limit));
     return QueryJobConfiguration
       .newBuilder(finalSql)
       .setNamedParameters(params)
