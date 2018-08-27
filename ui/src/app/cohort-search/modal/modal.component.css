@@ -50,11 +50,13 @@
 .vbar {
   align-self: center;
   display: inline-block;
-  margin: 0 0.75rem;
+  margin-left:0.75rem;
+  margin-right:0.75rem;
   box-sizing: border-box;
-  height: 0.99rem;
+  height:26px;
   width: 1px;
   border: 1px solid #979797;
+  margin-bottom: 0.5rem
 }
 
 .nav-link.active {
