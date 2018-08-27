@@ -130,3 +130,18 @@ input.alreadyTaken {
   width: 0.8rem;
   height: 0.8rem;
 }
+
+.count-header {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.header-text {
+  color: #302C71;
+  font-size: 13px;
+  font-weight: 500;
+}
+.overview-header .btn.btn-primary {
+  line-height: 0.2rem !important;
+  padding: 1rem 0.77rem !important;
+}

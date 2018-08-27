@@ -14,22 +14,23 @@
       [popperPlacement]="'bottom'"
       class="trigger padding-right">
       <span *ngIf="itemIndex > 0" class="font-weight-bold">OR</span>
-      <span class="text-muted">Contains</span>
-      <span class="font-weight-bold">{{ codeTypeDisplay }}</span>
+      <span class="code-text">Contains</span>
+      <span class="code-text">{{ codeTypeDisplay }}</span>
     </small>
 
-    <small class="text-muted padding-right">|</small>
+    <small class="code-text padding-right">|</small>
 
     <span *ngIf="isRequesting" class="spinner spinner-inline">
       Loading...
     </span>
-    <small *ngIf="!isRequesting" class="font-weight-bold">
+    <small *ngIf="!isRequesting" class="code-text">
       {{ item.get('count', 0) | number }}
     </small>
   </div>
 
   <div>
     <button
+      type="button"
       type="button"
       class="btn btn-link btn-sm"
       id="close-button"
