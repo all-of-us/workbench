@@ -13,11 +13,21 @@ export class ConfirmDeleteModalComponent {
   @Output() receiveDelete = new EventEmitter<any>();
   @Input() resource: any;
 
+  loading = false;
+
   open(): void {
     this.deleting = true;
+    this.loading = false;
   }
 
   close(): void {
     this.deleting = false;
+  }
+
+  emitDelete(resource: any): void {
+    if (!this.loading) {
+      this.loading = true;
+      this.receiveDelete.emit(resource);
+    }
   }
 }
