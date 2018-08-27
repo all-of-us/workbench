@@ -1937,7 +1937,6 @@ definitions:
         description: >
           Number of clusters deleted during the check.
 
-
   RecentResourceResponse:
     type: array
     items:

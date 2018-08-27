@@ -57,8 +57,4 @@ public class CohortService {
     }
     return saved;
   }
-
-  public Cohort findCohortByWorkspaceIdAndCohortId(long workspaceId, long cohortId) {
-    return cohortDao.findCohortByCohortIdAndWorkspaceId(cohortId, workspaceId);
-  }
 }
