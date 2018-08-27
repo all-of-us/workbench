@@ -10,8 +10,8 @@ import {
   ViewChild
 } from '@angular/core';
 import { DomainType } from 'generated';
-import {Observable} from 'rxjs/Observable';
 import {Map} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
 import {CohortSearchActions, CohortSearchState, isParameterActive, subtreeSelected} from '../redux';
