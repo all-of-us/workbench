@@ -74,7 +74,7 @@ public class ConceptSet {
     this.name = name;
   }
 
-  @Column(name = "type")
+  @Column(name = "domain")
   public short getDomain() {
     return domain;
   }

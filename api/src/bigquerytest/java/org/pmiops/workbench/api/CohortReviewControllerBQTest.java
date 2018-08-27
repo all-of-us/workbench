@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -113,6 +114,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     BigQueryService.class,
     ReviewTabQueryBuilder.class,
     CohortService.class,
+    ConceptSetService.class,
     ParticipantCounter.class,
     DomainLookupService.class,
     CohortQueryBuilder.class
