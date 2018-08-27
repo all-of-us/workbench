@@ -116,9 +116,9 @@ public class ReviewQueryBuilder {
       "from `${projectId}.${dataSetId}.%s`\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
       "group by standard_code\n" +
-      "LIMIT @limit) b on a.standard_code = b.standard_code\n" +
+      "LIMIT @" + NAMED_LIMIT_PARAM + ") b on a.standard_code = b.standard_code\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
-      "and rnk <= @limit\n" +
+      "and rnk <= @" + NAMED_LIMIT_PARAM + "\n" +
       "order by rank, standardName, startDate\n";
 
   public QueryJobConfiguration buildQuery(Long participantId,
