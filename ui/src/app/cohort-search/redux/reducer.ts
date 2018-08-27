@@ -27,6 +27,7 @@ import {
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_CHILDREN_LIST,
   LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
@@ -140,6 +141,20 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(['criteria', 'search', 'ingredients'], action.ingredients)
           .deleteIn(['criteria', 'search', 'autocomplete']);
+
+      case LOAD_CHILDREN_LIST:
+        action.children.forEach(child => {
+          child.parameterId = `param${child.id}`;
+          state = state
+            .setIn(['wizard', 'selections', child.parameterId], fromJS(child))
+            .updateIn(
+              ['wizard', 'item', 'searchParameters'],
+              List(),
+              paramList => paramList.includes(child.parameterId)
+                ? paramList
+                : paramList.push(child.parameterId);
+        });
+        return state;
 
       case LOAD_ATTRIBUTE_LIST:
         const node = action.node.set('attributes', action.attributes);
