@@ -15,12 +15,10 @@ import {
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
-  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
-  LOAD_SUBTREE_RESULTS,
   LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
@@ -87,11 +85,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
           .setIn(['criteria', 'requests', action.kind, action.parentId], true);
 
-      case BEGIN_CRITERIA_SUBTREE_REQUEST:
-        return state
-          .deleteIn(['criteria', 'errors', List([action.kind, action.id])])
-          .setIn(['criteria', 'requests', action.kind, action.id], true);
-
       case BEGIN_ALL_CRITERIA_REQUEST:
         return state
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
@@ -111,23 +104,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(['criteria', 'tree', action.kind, action.subtype], action.results)
           .deleteIn(['criteria', 'requests', action.kind, action.subtype]);
-
-      case LOAD_SUBTREE_RESULTS:
-        const subtreeObj = {};
-        action.results.forEach(criterion => {
-          if (criterion.parentId !== 0) {
-            if (subtreeObj[criterion.parentId]) {
-              subtreeObj[criterion.parentId].push(criterion);
-            } else {
-              subtreeObj[criterion.parentId] = [criterion];
-            }
-          }
-        });
-        return state
-          .mergeIn(['criteria', 'tree', action.kind], fromJS(subtreeObj))
-          .setIn(['criteria', 'subtree', action.kind], fromJS(Object.keys(subtreeObj)))
-          .setIn(['criteria', 'subtree', 'selected'], action.id)
-          .deleteIn(['criteria', 'requests', action.kind, action.id]);
 
       case LOAD_CRITERIA_SUBTREE:
         return state

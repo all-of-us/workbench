@@ -59,8 +59,6 @@ export class CohortSearchActions {
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
-  @dispatch() requestCriteriaSubtree = ActionFuncs.requestCriteriaSubtree;
-  @dispatch() loadSubtreeItems = ActionFuncs.loadSubtreeItems;
   @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
@@ -245,25 +243,16 @@ export class CohortSearchActions {
     if (isLoading) {
       return;
     }
-    this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
+    this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
-  fetchCriteriaSubtree(kind: string, id: number): void {
-    const isLoading = isAutocompleteLoading()(this.state);
-    const isLoaded = this.state.getIn(['criteria', 'subtree', kind, id]);
-    if (isLoaded || isLoading) {
+  fetchAttributes(node: any): void {
+    const isLoading = isAttributeLoading()(this.state);
+    if (isLoading) {
       return;
     }
-    this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
+    this.requestAttributes(this.cdrVersionId, node);
   }
-
-    fetchAttributes(node: any): void {
-        const isLoading = isAttributeLoading()(this.state);
-        if (isLoading) {
-            return;
-        }
-        this.requestAttributes(this.cdrVersionId, node);
-    }
 
   requestPreview(): void {
     const params = activeParameterList(this.state)

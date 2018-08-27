@@ -1,14 +1,12 @@
 import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
-export const BEGIN_CRITERIA_SUBTREE_REQUEST = 'BEGIN_CRITERIA_SUBTREE_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
-export const LOAD_SUBTREE_RESULTS = 'LOAD_SUBTREE_RESULTS';
-export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
+export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
 export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
 export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
@@ -74,12 +72,6 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
   };
-  BEGIN_CRITERIA_SUBTREE_REQUEST: {
-    type: typeof BEGIN_CRITERIA_SUBTREE_REQUEST;
-    cdrVersionId: number;
-    kind: string;
-    id: number;
-  };
   BEGIN_ALL_CRITERIA_REQUEST: {
     type: typeof BEGIN_ALL_CRITERIA_REQUEST;
     cdrVersionId: number;
@@ -98,12 +90,6 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
     results: Criteria[];
-  };
-  LOAD_SUBTREE_RESULTS: {
-    type: typeof LOAD_SUBTREE_RESULTS;
-    kind: string;
-    id: number;
-    results: any;
   };
   LOAD_CRITERIA_SUBTREE: {
     type: typeof LOAD_CRITERIA_SUBTREE;
@@ -330,11 +316,9 @@ export interface ActionTypes {
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
-  | ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
-  | ActionTypes[typeof LOAD_SUBTREE_RESULTS]
   | ActionTypes[typeof LOAD_CRITERIA_SUBTREE]
   | ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
