@@ -198,7 +198,10 @@ export class ChartComponent implements OnChanges {
     };
     // Override tooltip and colors and such
     const series = {
-      name: this.analysis.analysisName, colorByPoint: true, data: data, colors: [this.dbc.COLUMN_COLOR],
+      name: this.analysis.analysisName,
+      colorByPoint: true,
+      data: data,
+      colors: [this.dbc.COLUMN_COLOR],
       tooltip: {pointFormat: '<b>{point.y} </b>'},
       events: {
         click: seriesClick
