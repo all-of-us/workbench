@@ -1,4 +1,7 @@
-export class DbConstants {
+import { Injectable } from '@angular/core';
+
+@Injectable()
+export class DbConstantsService {
   /* CONSTANTS */
   COUNT_ANALYSIS_ID = 3000;
   GENDER_ANALYSIS_ID = 3101;
@@ -8,4 +11,7 @@ export class DbConstants {
   SURVEY_AGE_ANALYSIS_ID = 3112;
   MEASUREMENT_AGE_ANALYSIS_ID = 3112;
   MEASUREMENT_VALUE_ANALYSIS_ID = 1900;
+
+  constructor() { }
+
 }
