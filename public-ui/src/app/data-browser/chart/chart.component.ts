@@ -5,7 +5,7 @@ import 'highcharts/adapters/standalone-framework.src';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
-import {DbConstants} from '../../utils/db-constants';
+import {DbConstantsService} from '../../utils/db-constants.service';
 
 /* CONSTANTS */
 /*const COUNT_ANALYSIS_ID = 3000;
@@ -23,7 +23,6 @@ const GENDER_COLORS = {
   '8532': '#6CAEE3'
 };
 
-constants : DbConstants = new DbConstants;
 /* These are designers Age colors however we use only one color below now until further design */
 const AGE_COLORS = {
   '1': '#252660',
@@ -65,7 +64,7 @@ export class ChartComponent implements OnChanges {
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any;
 
-  constructor(private dbc: DbConstants) {
+  constructor(private dbc: DbConstantsService) {
     highcharts.setOptions({
       lang: {thousandsSep: ','},
     });
@@ -176,32 +175,24 @@ export class ChartComponent implements OnChanges {
     };
   }
 
-  /* For ppi answers we have to filter the results to that answer because all answers
-   * for each question come in the analyses results. Stratum 4 has the answer value
-  */
-  public getSelectedResults(selectedResult: any) {
-    const results =
-
-    return results;
-  }
 
   public makeChartOptions() {
     if (this.concepts.length > 0) {
       return this.makeConceptChartOptions();
     }
-    if (this.analysis.analysisId === COUNT_ANALYSIS_ID ||
-      this.analysis.analysisId === SURVEY_COUNT_ANALYSIS_ID) {
+    if (this.analysis.analysisId === this.dbc.COUNT_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_COUNT_ANALYSIS_ID) {
       return this.makeCountChartOptions();
     }
-    if (this.analysis.analysisId === GENDER_ANALYSIS_ID ||
-      this.analysis.analysisId === SURVEY_GENDER_ANALYSIS_ID) {
+    if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
       return this.makeGenderChartOptions();
     }
-    if (this.analysis.analysisId === AGE_ANALYSIS_ID ||
-      this.analysis.analysisId === SURVEY_AGE_ANALYSIS_ID) {
+    if (this.analysis.analysisId === this.dbc.AGE_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_AGE_ANALYSIS_ID) {
       return this.makeAgeChartOptions();
     }
-    if (this.analysis.analysisId === MEASUREMENT_VALUE_ANALYSIS_ID) {
+    if (this.analysis.analysisId === this.dbc.MEASUREMENT_VALUE_ANALYSIS_ID) {
       console.log('Making histogram opts');
       const options =  this.makeMeasurementChartOptions();
       return options;
@@ -316,7 +307,7 @@ export class ChartComponent implements OnChanges {
   public makeGenderChartOptions() {
     let results = [];
     let seriesName = '';
-    if (this.analysis.analysisId === dbc.GENDER_ANALYSIS_ID) {
+    if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
     } else {
@@ -331,7 +322,7 @@ export class ChartComponent implements OnChanges {
     let cats = [];
     for (const a  of results) {
       // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
-      const color = a.analysisId === dbc.GENDER_ANALYSIS_ID ?
+      const color = a.analysisId === this.dbc.GENDER_ANALYSIS_ID ?
         GENDER_COLORS[a.stratum2] : GENDER_COLORS[a.stratum5];
       data.push({
         name: a.analysisStratumName
@@ -375,7 +366,7 @@ export class ChartComponent implements OnChanges {
     let seriesName = '';
 
     // Question/answers have a different data structure than other concepts
-    if (this.analysis.analysisId === dbc.AGE_ANALYSIS_ID) {
+    if (this.analysis.analysisId === this.dbc.AGE_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
     } else {
@@ -387,13 +378,13 @@ export class ChartComponent implements OnChanges {
       seriesName = this.selectedResult.stratum4;
     }
     // Age results have two stratum-- 1 is concept, 2 is age decile
-    // Sort by age decile (stratum2) or stratum5
+    // Sort by age decile (stratum2 or stratum5)
     console.log("Results for age ", results);
 
     results = results.sort((a, b) => {
         let anum = Number(a.stratum2);
         let bnum = Number(b.stratum2);
-        if (this.analysis.analysisId != dbc.AGE_ANALYSIS_ID) {
+        if (this.analysis.analysisId != this.dbc.AGE_ANALYSIS_ID) {
           anum = Number(a.stratum5);
           bnum = Number(b.stratum5);
         }
@@ -409,12 +400,14 @@ export class ChartComponent implements OnChanges {
     );
     const data = [];
     const cats = [];
+    const color = '#252660';
     for (const a  of results) {
       // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
       /* Only use one color for now
       const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] :
         AGE_COLORS[a.stratum5];
-        */
+      */
+
       data.push({
         name: a.analysisStratumName
         , y: a.countValue, color: color

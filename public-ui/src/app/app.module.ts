@@ -34,7 +34,7 @@ import { overriddenPublicUrlKey } from './views/app/app.component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
 import { PhysicalMeasurementsComponent } from './views/pm/pm.component';
 import { QuickSearchComponent } from './views/quick-search/quick-search.component';
-import {DbConstants} from '../utils/db-constants';
+import {DbConstantsService} from "./utils/db-constants.service";
 
 function getPublicBasePath() {
   return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
@@ -67,9 +67,9 @@ const DataBrowserServiceFactory = (http: Http) => {
     EhrViewComponent,
     HighlightSearchPipe,
     PhysicalMeasurementsComponent,
-    DbConstants
   ],
   providers: [
+    DbConstantsService,
     {
       provide: DataBrowserService,
       useFactory: DataBrowserServiceFactory,
