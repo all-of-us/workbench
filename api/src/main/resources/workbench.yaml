@@ -1945,6 +1945,9 @@ definitions:
   RecentResource:
     type: object
     properties:
+      workspaceId:
+        type: integer
+        format: int64
       permission:
         type: string
       cohort:

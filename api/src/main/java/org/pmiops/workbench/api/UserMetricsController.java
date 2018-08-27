@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -85,6 +84,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
           response.setNotebook(fileDetail);
         }
         response.setModifiedTime(userRecentResource.getLastAccessDate().toString());
+        response.setWorkspaceId(userRecentResource.getWorkspaceId());
         return response;
       };
 
