@@ -24,10 +24,10 @@
     <div class="card bg-faded">
       <div class="card-header header-text">
         Results by Gender
-        <clr-icon shape="angle"
-          [dir]="showGenderChart ? 'up' : 'down'"
-          (click)="toggleShowGender()">
-        </clr-icon>
+        <!--<clr-icon shape="angle"-->
+          <!--[dir]="showGenderChart ? 'up' : 'down'"-->
+          <!--(click)="toggleShowGender()">-->
+        <!--</clr-icon>-->
       </div>
       <div *ngIf="showGenderChart" class="card-block">
         <app-gender-chart *ngIf="chartData.size"
@@ -43,10 +43,10 @@
           [class.is-info]="stackChart"
           (click)="toggleChartMode()">
         </clr-icon>
-        <clr-icon shape="angle"
-          [dir]="showComboChart ? 'up' : 'down'"
-          (click)="toggleShowCombo()">
-        </clr-icon>
+        <!--<clr-icon shape="angle"-->
+          <!--[dir]="showComboChart ? 'up' : 'down'"-->
+          <!--(click)="toggleShowCombo()">-->
+        <!--</clr-icon>-->
       </div>
       <div *ngIf="showComboChart" class="card-block">
         <app-combo-chart *ngIf="chartData.size"
