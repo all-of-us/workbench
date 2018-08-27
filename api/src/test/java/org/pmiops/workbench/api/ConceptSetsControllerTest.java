@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -247,9 +248,13 @@ public class ConceptSetsControllerTest {
   }
 
   @Test
-  public void testCreateAndGetConceptSet() {
-    ConceptSet conceptSet = makeConceptSet1();
-    assertThat(conceptSet.getCreator()).isEqualTo(USER_EMAIL);
+  public void testCreateConceptSet() {
+    ConceptSet conceptSet = new ConceptSet();
+    conceptSet.setDescription("desc 1");
+    conceptSet.setName("concept set 1");
+    conceptSet.setDomain(Domain.CONDITION);
+    conceptSet = conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
+        .getBody();
     assertThat(conceptSet.getConcepts()).isNull();
     assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getDescription()).isEqualTo("desc 1");
@@ -264,6 +269,24 @@ public class ConceptSetsControllerTest {
         .getBody().getItems()).containsExactly(conceptSet);
     assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
         .getBody().getItems()).isEmpty();
+  }
+
+  @Test
+  public void testGetConceptSet() {
+    ConceptSet conceptSet = makeConceptSet1();
+    assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        conceptSet.getId()).getBody()).isEqualTo(conceptSet);
+    assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)
+        .getBody().getItems()).containsExactly(conceptSet);
+    assertThat(conceptSetsController.getConceptSetsInWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2)
+        .getBody().getItems()).isEmpty();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testGetConceptSetWrongWorkspace() {
+    ConceptSet conceptSet = makeConceptSet1();
+    conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2,
+        conceptSet.getId());
   }
 
   @Test
