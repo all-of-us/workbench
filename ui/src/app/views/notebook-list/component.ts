@@ -212,14 +212,14 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   receiveDelete($event: FileDetail): void {
     this.deleteNotebook($event);
-    this.deleteModal.close();
   }
 
   public deleteNotebook(notebook: FileDetail): void {
     this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, notebook.name)
       .subscribe(() => {
       this.loadNotebookList();
-    });
+      this.deleteModal.close();
+      });
   }
 
   get writePermission(): boolean {
