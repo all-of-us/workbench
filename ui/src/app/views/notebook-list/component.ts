@@ -219,7 +219,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       .subscribe(() => {
       this.loadNotebookList();
       this.deleteModal.close();
-      });
+    });
   }
 
   get writePermission(): boolean {
