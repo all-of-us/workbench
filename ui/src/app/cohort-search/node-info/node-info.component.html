@@ -14,8 +14,7 @@
 
   <!-- CODE -->
   <div class="code font-weight-bold"
-       [class.search-keyword]="matched"
-       [innerHTML]="displayCode | safeHtml">
+    [innerHTML]="displayCode | safeHtml">
     {{ displayCode }}
   </div>
 
@@ -26,7 +25,6 @@
     [popperPlacement]="'bottom'"
     [popperDisabled]="!isTruncated"
     class="name text-muted"
-    [class.search-keyword]="matched"
     [innerHTML]="displayName | safeHtml"></div>
 
   <!-- COUNT -->
