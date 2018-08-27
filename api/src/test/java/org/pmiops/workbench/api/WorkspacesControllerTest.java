@@ -169,7 +169,7 @@ public class WorkspacesControllerTest {
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
-    ReviewQueryBuilder.class
+    ReviewQueryBuilder.class,
     ConceptSetService.class,
     ConceptSetsController.class
   })
