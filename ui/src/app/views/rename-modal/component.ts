@@ -26,7 +26,7 @@ export class RenameModalComponent {
   }
 
   emitRename(resource: any): void {
-    if (this.loading === false) {
+    if (!this.loading) {
       this.loading = true;
       this.receiveRename.emit({name: resource.name, newName: this.newName});
     }
