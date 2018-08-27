@@ -94,8 +94,6 @@ public class UserMetricsControllerTest {
     workspaceResponse.setAccessLevel("READER");
 
     when(userProvider.get()).thenReturn(user);
-    when(cohortService.findCohortByWorkspaceIdAndCohortId(2l, 1l))
-        .thenReturn(cohort);
     when(userRecentResourceService.findAllResourcesByUser(123l))
         .thenReturn(userRecentResources);
     when(workspaceService.findByWorkspaceId(2l)).thenReturn(workspace);

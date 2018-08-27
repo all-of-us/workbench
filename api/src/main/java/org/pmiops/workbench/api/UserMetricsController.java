@@ -20,16 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
-   Provider<User> userProvider;
+  Provider<User> userProvider;
   UserRecentResourceService userRecentResourceService;
   WorkspaceService workspaceService;
   FireCloudService fireCloudService;
-  Map<Long, String> workspaceAccessMap = new HashMap<Long, String>();
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks/";
 
   @Autowired
@@ -50,7 +48,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<RecentResourceResponse> getUserRecentResources() {
     long userId = userProvider.get().getUserId();
-    RecentResourceResponse response = new RecentResourceResponse();
+    RecentResourceResponse recentResponse = new RecentResourceResponse();
     List<UserRecentResource> userRecentResourceList = userRecentResourceService.findAllResourcesByUser(userId);
     List<Long> workspaceIdList = userRecentResourceList
         .stream()
@@ -58,7 +56,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .distinct()
         .collect(Collectors.toList());
 
-    workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
+    Map<Long, String>  workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
       Workspace workspace = workspaceService.findByWorkspaceId((long) id);
       WorkspaceResponse workspaceResponse = fireCloudService
           .getWorkspace(workspace.getWorkspaceNamespace(),
@@ -67,10 +65,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     }));
 
     userRecentResourceList.stream().forEach(userRecentResource -> {
-      response.add(TO_CLIENT.apply(userRecentResource));
+      RecentResource resource = TO_CLIENT.apply(userRecentResource);
+      resource.setPermission(workspaceAccessMap.get(userRecentResource.getWorkspaceId()));
+      recentResponse.add(resource);
     });
-
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(recentResponse);
   }
 
   //Converts DB model to client Model
@@ -78,7 +77,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       userRecentResource -> {
         RecentResource response = new RecentResource();
         response.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
-        response.setPermission(workspaceAccessMap.get(userRecentResource.getWorkspaceId()));
         if (userRecentResource.getNotebookName() != null) {
           FileDetail fileDetail = new FileDetail();
           String[] notebookDetails = userRecentResource.getNotebookName().split(NOTEBOOKS_WORKSPACE_DIRECTORY);
