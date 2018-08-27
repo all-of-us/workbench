@@ -9,11 +9,12 @@ import {
   activeCriteriaTreeType,
   activeCriteriaType,
   activeParameterList,
-  attributesPage,
   CohortSearchActions,
+  nodeAttributes,
+  subtreeSelected,
   wizardOpen,
 } from '../redux';
-import {typeToTitle} from '../utils';
+import {stripHtml, typeToTitle} from '../utils';
 
 
 @Component({
@@ -29,7 +30,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
   @select(activeParameterList) selection$: Observable<any>;
-  @select(attributesPage) attributes$: Observable<any>;
+  @select(nodeAttributes) attributes$: Observable<any>;
+  @select(subtreeSelected) scrollTo$: Observable<any>;
 
   readonly domainType = DomainType;
   readonly criteriaTypes = CRITERIA_TYPES;
@@ -43,6 +45,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
+  scrollTime: number;
+  count = 0;
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -93,6 +97,26 @@ export class ModalComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.subscription.add(this.scrollTo$
+      .filter(nodeId => !!nodeId)
+      .subscribe(nodeId => {
+        if (nodeId) {
+          this.setScroll(nodeId);
+        }
+      })
+    );
+  }
+  setScroll(nodeId: string) {
+    let node: any;
+    Observable.interval(100)
+      .takeWhile(() => !node)
+      .subscribe(i => {
+        node = document.getElementById('node' + nodeId.toString());
+        if (node && i < 100) {
+          node.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -127,5 +151,11 @@ export class ModalComponent implements OnInit, OnDestroy {
     return title
       ? `Add Selected ${title} Criteria to Cohort`
       : 'No Selection';
+  }
+
+  get attributeTitle() {
+    return this.ctype === CRITERIA_TYPES.PM
+      ? stripHtml(this.attributesNode.get('name'))
+      : typeToTitle(this.ctype) + ' Detail';
   }
 }

@@ -101,7 +101,7 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceCreationConflictError = false;
   workspaceUpdateError = false;
   workspaceUpdateConflictError = false;
-  private accessLevel: WorkspaceAccessLevel;
+  accessLevel: WorkspaceAccessLevel;
   isBlank = isBlank;
   raceList = {
     'American Indian or Alaska Native': UnderservedPopulationEnum.RACEAMERICANINDIANORALASKANATIVE,

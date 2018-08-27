@@ -9,7 +9,7 @@
 </div>
 <div class="card-area" *ngIf="!notebooksLoading">
   <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
-       [class.disabled]="createDisabled" (click)="createDisabled || newNotebook()">
+       [class.disabled]="actionsDisabled" (click)="actionsDisabled || newNotebook()">
     <div class="create-text">
       Create a<br/>New Notebook
       <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
@@ -18,7 +18,40 @@
   </div>
 
   <div class="card item-card notebook-card" *ngFor="let notebook of notebookList">
-    <div class="name" [class.disabled]="createDisabled" (click)="createDisabled || openNotebook(notebook)">{{notebook.name}}</div>
+    <div class="header-area">
+      <clr-dropdown [clrCloseMenuOnItemClick]="false">
+        <button type="button" class="notebook-menu" [disabled]="actionsDisabled" clrDropdownTrigger>
+          <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical" [class.disabled]="actionsDisabled"></clr-icon>
+        </button>
+        <clr-dropdown-menu *clrIfOpen>
+          <button class="action-item"
+                  id="rename-{{notebook.name.replace('.ipynb', '')}}"
+                  (click)="renameThis(notebook)"
+                  [class.disabled]="actionsDisabled"
+                  [disabled]="actionsDisabled">
+            <clr-icon shape="pencil"></clr-icon>
+            Rename
+          </button>
+          <button class="action-item"
+                  id="clone-{{notebook.name.replace('.ipynb', '')}}"
+                  (click)="cloneThis(notebook.name)"
+                  [class.disabled]="actionsDisabled"
+                  [disabled]="actionsDisabled">
+            <clr-icon shape="copy"></clr-icon>
+            Clone
+          </button>
+          <button class="action-item"
+                  id="delete-{{notebook.name.replace('.ipynb', '')}}"
+                  (click)="confirmDelete(notebook)"
+                  [class.disabled]="actionsDisabled"
+                  [disabled]="actionsDisabled">
+            <clr-icon shape="trash"></clr-icon>
+            Delete
+          </button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+      <div class="name" [class.disabled]="actionsDisabled" (click)="actionsDisabled || openNotebook(notebook)">{{notebook.name}}</div>
+    </div>
     <div class="footer">
       <div class="last-modified">
         <div>Last Update<br/>{{notebook.lastModifiedTime | date}}</div>
@@ -42,4 +75,18 @@
     <button type="button" class="btn btn-primary" (click)="localizeNotebooksError = false">Ok</button>
   </div>
 </clr-modal>
+<clr-modal [(clrModalOpen)]="notebookRenameConflictError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">You already have a notebook named {{duplicateName}}. Please choose another name.</div>
+</clr-modal>
+<clr-modal [(clrModalOpen)]="notebookRenameError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">The name you entered has a '/' in it. This is currently not allowed. Please choose another name.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="notebookRenameError = false">Dismiss</button>
+  </div>
+</clr-modal>
 <app-bug-report></app-bug-report>
+
+<app-rename-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveRename)="receiveRename($event)"></app-rename-modal>
+<app-confirm-delete-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>

@@ -16,6 +16,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
@@ -136,6 +137,7 @@ public class ConceptsControllerTest {
   @MockBean({
       FireCloudService.class,
       CohortService.class,
+      ConceptSetService.class,
       Clock.class
   })
   static class Configuration {
@@ -258,8 +260,9 @@ public class ConceptsControllerTest {
     saveConcepts();
     ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query("conceptB"));
-    Concept concept = response.getBody().getItems().get(0);
-    assertThat(concept.getConceptCode()).isEqualTo("conceptB");
+    assertResults(
+            conceptsController.searchConcepts("ns", "name",
+                    new SearchConceptsRequest().query("conceptB")), CLIENT_CONCEPT_2);
   }
 
   @Test
@@ -424,7 +427,7 @@ public class ConceptsControllerTest {
         CLIENT_CONCEPT_1);
   }
 
-  private static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
+  static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
     org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());

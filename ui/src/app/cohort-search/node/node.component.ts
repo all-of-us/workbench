@@ -1,10 +1,10 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DomainType} from 'generated';
+import {Criteria, DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES} from '../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
 
 import {
   activeCriteriaTreeType,
@@ -13,8 +13,12 @@ import {
   criteriaChildren,
   criteriaError,
   criteriaSearchTerms,
+  criteriaSubtree,
   isCriteriaLoading,
+  subtreeSelected,
 } from '../redux';
+
+import {loadSubtreeItems} from '../redux/actions/creators';
 
 import {highlightMatches} from '../utils';
 
@@ -54,6 +58,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   error = false;
   fullTree: boolean;
   subscription: Subscription;
+  @select(subtreeSelected) selected$: Observable<any>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -97,26 +102,48 @@ export class NodeComponent implements OnInit, OnDestroy {
         .select(criteriaSearchTerms())
         .subscribe(searchTerms => {
           this.searchTerms = searchTerms;
-          this.numMatches = 0;
-          if (searchTerms && searchTerms.length) {
-            this.searchTree();
-          } else {
-            this.clearSearchTree();
+          if (this.fullTree) {
+            this.numMatches = 0;
+            if (searchTerms && searchTerms.length) {
+              this.searchTree();
+            } else {
+              this.clearSearchTree();
+            }
           }
+        });
+
+      const subtreeSub = this.ngRedux
+        .select(criteriaSubtree(_type))
+        .filter(nodeIds => nodeIds.includes(parentId.toString()))
+        .subscribe(() =>  this.expanded = true);
+
+      const subtreeSelectSub = this.selected$
+        .filter(selectedId => selectedId === parentId)
+        .subscribe(() => {
+          const displayName = highlightMatches(this.searchTerms, this.node.get('name'));
+          this.node = this.node.set('name', displayName);
         });
 
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
+      this.subscription.add(subtreeSub);
+      this.subscription.add(subtreeSelectSub);
     }
-    this.expanded = this.node.get('expanded', false);
+    if (this.fullTree) {
+      this.expanded = this.node.get('expanded', false);
+    }
   }
 
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  get nodeId() {
+    return 'node' + this.node.get('id');
   }
 
   addChildToParent(child, itemList) {
@@ -151,6 +178,10 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchAllCriteria(_type, parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
+    }
+    // Load options for Encounters modifier
+    if ([CRITERIA_TYPES.PM, DomainType.VISIT].indexOf(_type) === -1) {
+      this.actions.fetchCriteria(DomainType[DomainType.VISIT], 0);
     }
   }
 

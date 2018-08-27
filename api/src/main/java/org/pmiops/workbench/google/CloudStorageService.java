@@ -20,4 +20,5 @@ public interface CloudStorageService {
   public void writeFile(String bucketName, String fileName, byte[] bytes);
   public void copyBlob(BlobId from, BlobId to);
   public JSONObject getJiraCredentials();
+  public void deleteBlob(BlobId blobId);
 }

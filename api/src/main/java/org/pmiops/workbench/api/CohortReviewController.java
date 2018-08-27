@@ -10,7 +10,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.Cohort;
@@ -36,6 +36,8 @@ import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.Observation;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.PageRequest;
+import org.pmiops.workbench.model.ParticipantChartData;
+import org.pmiops.workbench.model.ParticipantChartDataListResponse;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
@@ -77,6 +79,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public static final Integer PAGE = 0;
   public static final Integer PAGE_SIZE = 25;
   public static final Integer MAX_REVIEW_SIZE = 10000;
+  public static final Integer MIN_LIMIT = 1;
+  public static final Integer MAX_LIMIT = 20;
+  public static final Integer DEFAULT_LIMIT = 5;
   public static final List<String> GENDER_RACE_ETHNICITY_TYPES =
     ImmutableList.of(ParticipantCohortStatusColumns.ETHNICITY.name(),
       ParticipantCohortStatusColumns.GENDER.name(),
@@ -85,7 +90,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private CohortReviewService cohortReviewService;
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
-  private ReviewTabQueryBuilder reviewTabQueryBuilder;
+  private ReviewQueryBuilder reviewQueryBuilder;
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private UserRecentResourceService userRecentResourceService;
   private Provider<User> userProvider;
@@ -182,7 +187,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   CohortReviewController(CohortReviewService cohortReviewService,
                          BigQueryService bigQueryService,
                          ParticipantCounter participantCounter,
-                         ReviewTabQueryBuilder reviewTabQueryBuilder,
+                         ReviewQueryBuilder reviewQueryBuilder,
                          Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
                          UserRecentResourceService userRecentResourceService,
                          Provider<User> userProvider,
@@ -190,7 +195,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
-    this.reviewTabQueryBuilder = reviewTabQueryBuilder;
+    this.reviewQueryBuilder = reviewQueryBuilder;
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
@@ -344,6 +349,33 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
+  public ResponseEntity<ParticipantChartDataListResponse> getParticipantChartData(String workspaceNamespace,
+                                                                                  String workspaceId,
+                                                                                  Long cohortId,
+                                                                                  Long cdrVersionId,
+                                                                                  Long participantId,
+                                                                                  String domain,
+                                                                                  Integer limit) {
+    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
+      throw new BadRequestException(
+        String.format("Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
+    }
+    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+      cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+
+    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+      reviewQueryBuilder.buildChartDataQuery(participantId, DomainType.fromValue(domain), chartLimit)));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    ParticipantChartDataListResponse response = new ParticipantChartDataListResponse();
+    for (List<FieldValue> row : result.iterateAll()) {
+      response.addItemsItem(convertRowToChartData(rm, row));
+    }
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
   public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(String workspaceNamespace,
                                                                                                  String workspaceId,
                                                                                                  Long cohortId,
@@ -431,7 +463,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     PageRequest pageRequest = createPageRequest(request);
 
     QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      reviewTabQueryBuilder.buildQuery(participantId, domain, pageRequest)));
+      reviewQueryBuilder.buildQuery(participantId, domain, pageRequest)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     ParticipantDataListResponse response = new ParticipantDataListResponse();
@@ -441,7 +473,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     if (result.getTotalRows() == pageRequest.getPageSize()) {
       result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-        reviewTabQueryBuilder.buildCountQuery(participantId, domain)));
+        reviewQueryBuilder.buildCountQuery(participantId, domain)));
       rm = bigQueryService.getResultMapper(result);
       response.count(bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
     } else {
@@ -788,6 +820,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.ALL_EVENTS);
     }
+  }
+
+  private ParticipantChartData convertRowToChartData(Map<String, Integer> rm,
+                                                     List<FieldValue> row) {
+    return new ParticipantChartData()
+      .standardName(bigQueryService.getString(row, rm.get("standardName")))
+      .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
+      .startDate(bigQueryService.getDate(row, rm.get("startDate")))
+      .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+      .rank(bigQueryService.getLong(row, rm.get("rank")).intValue());
   }
 
 }

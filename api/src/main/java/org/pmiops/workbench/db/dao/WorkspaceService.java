@@ -22,7 +22,7 @@ public interface WorkspaceService {
   public List<Workspace> findForReview();
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
   public Workspace updateUserRoles(Workspace workspace, Set<WorkspaceUserRole> userRoleSet);
-  public Workspace saveAndCloneCohorts(Workspace from, Workspace to);
+  public Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(String workspaceNamespace,
       String workspaceId, WorkspaceAccessLevel requiredAccess);

@@ -1,19 +1,7 @@
 package org.pmiops.workbench.api;
 
-import static com.google.common.truth.Truth.assertThat;
-import static junit.framework.TestCase.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -26,6 +14,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -66,6 +55,19 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.inject.Provider;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+
+import static com.google.common.truth.Truth.assertThat;
+import static junit.framework.TestCase.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -77,6 +79,7 @@ public class CohortsControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String CDR_VERSION_NAME = "cdrVersion";
   private static final String WORKSPACE_NAME = "workspace";
+  private static final String WORKSPACE_NAME_2 = "workspace2";
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String COHORT_NAME = "cohort";
 
@@ -113,7 +116,8 @@ public class CohortsControllerTest {
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class})
-  @MockBean({FireCloudService.class, NotebooksService.class, CloudStorageService.class, UserRecentResourceService.class})
+  @MockBean({FireCloudService.class, NotebooksService.class, CloudStorageService.class,
+      ConceptSetService.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {
@@ -145,11 +149,20 @@ public class CohortsControllerTest {
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
+    Workspace workspace2 = new Workspace();
+    workspace2.setName(WORKSPACE_NAME_2);
+    workspace2.setNamespace(WORKSPACE_NAMESPACE);
+    workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    workspace2.setResearchPurpose(new ResearchPurpose());
+    workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+
     CLOCK.setInstant(NOW);
     WorkspacesController workspacesController = new WorkspacesController(workspaceService,
         cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK,
         userService);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, "bob@gmail.com",
+        WorkspaceAccessLevel.OWNER);
+    stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
     JSONObject demoCohort = new JSONObject();
     demoCohort.put("name", "demo");
@@ -161,6 +174,7 @@ public class CohortsControllerTest {
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
+    workspacesController.createWorkspace(workspace2);
     this.cohortsController = new CohortsController(
         workspaceService, cohortDao, cdrVersionDao, cohortReviewDao, cohortMaterializationService,
         userProvider, CLOCK, cdrVersionService, userRecentResourceService);
@@ -231,6 +245,13 @@ public class CohortsControllerTest {
 
     Cohort got = cohortsController.getCohort(workspace.getNamespace(), workspace.getId(), cohort.getId()).getBody();
     assertThat(got).isEqualTo(cohort);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testGetCohortWrongWorkspace() throws Exception {
+    Cohort cohort = createDefaultCohort();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohortsController.getCohort(workspace.getNamespace(), WORKSPACE_NAME_2, cohort.getId());
   }
 
   @Test(expected = ConflictException.class)

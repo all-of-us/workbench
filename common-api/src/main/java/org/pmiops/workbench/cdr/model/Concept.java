@@ -2,11 +2,10 @@ package org.pmiops.workbench.cdr.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.*;
 
 
 @Entity
@@ -25,6 +24,24 @@ public class Concept {
     private long countValue;
     private Long sourceCountValue;
     private float prevalence;
+    private List<ConceptSynonym> synonyms = new ArrayList<>();
+
+    public Concept() {}
+
+    // Copy constructor for copying everything but synonyms
+    public Concept(Concept a) {
+        this.conceptId(a.getConceptId())
+                .conceptName(a.getConceptName())
+                .standardConcept(a.getStandardConcept())
+                .conceptCode(a.getConceptCode())
+                .conceptClassId(a.getConceptClassId())
+                .vocabularyId(a.getVocabularyId())
+                .domainId(a.getDomainId())
+                .count(a.getCountValue())
+                .sourceCountValue(a.getSourceCountValue())
+                .prevalence(a.getPrevalence())
+                .synonyms(new ArrayList<>());
+    }
 
     @Id
     @Column(name = "concept_id")
@@ -165,6 +182,21 @@ public class Concept {
     public Concept prevalence(float prevalence) {
         this.prevalence = prevalence;
         return this;
+    }
+
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "concept")
+    public List<ConceptSynonym> getSynonyms() {
+        return synonyms;
+    }
+    public void setSynonyms(List<ConceptSynonym> synonyms) {
+        this.synonyms = synonyms;
+    }
+    public Concept synonyms(List<ConceptSynonym> synonyms) {
+        this.synonyms = synonyms;
+        return this;
+    }
+    public void addSynonym(ConceptSynonym conceptSynonym) {
+        this.synonyms.add(conceptSynonym);
     }
 
 

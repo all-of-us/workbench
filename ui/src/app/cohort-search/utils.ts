@@ -24,7 +24,7 @@ export function nameDisplay(parameter): string {
   if (_type.match(/^DEMO.*/i) && subtype.match(/AGE|DEC/i)) {
     return '';
   } else {
-    return parameter.get('name', '').replace(/<(.|\n)*?>/g, '');
+    return stripHtml(parameter.get('name', ''));
   }
 }
 
@@ -57,6 +57,9 @@ export function typeToTitle(_type: string): string {
     case CRITERIA_TYPES.DEMO:
       _type = 'Demographics';
       break;
+    case CRITERIA_TYPES.MEAS:
+      _type = 'Measurements';
+      break;
     case CRITERIA_TYPES.PM:
       _type = 'Physical Measurements';
       break;
@@ -85,4 +88,8 @@ export function highlightMatches(terms: Array<string>, name: string) {
     }
   });
   return name;
+}
+
+export function stripHtml(string: string) {
+  return string.replace(/<(.|\n)*?>/g, '');
 }
