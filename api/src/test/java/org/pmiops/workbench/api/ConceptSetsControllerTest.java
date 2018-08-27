@@ -1,20 +1,10 @@
 package org.pmiops.workbench.api;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
-
 import com.google.common.collect.ImmutableList;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -55,6 +45,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.inject.Provider;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
