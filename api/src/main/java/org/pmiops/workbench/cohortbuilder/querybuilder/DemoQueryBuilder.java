@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.utils.OperatorUtils;
@@ -94,14 +95,14 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
             queryParts.add(DEMO_AGE.replace("${operator}", OperatorUtils.getSqlOperator(attribute.get().getOperator()))
               + String.join(" and ", operandParts) + "\n");
           } else {
-            throw new IllegalArgumentException("Age must provide an operator and operands.");
+            throw new BadRequestException("Age must provide an operator and operands.");
           }
           break;
         case DEC:
           if (DECEASED.equals(paramMap.get(key).get(0))) {
             queryParts.add(DEMO_DEC);
           } else {
-            throw new IllegalArgumentException("Dec must provide a value of: " + DECEASED);
+            throw new BadRequestException("Dec must provide a value of: " + DECEASED);
           }
           break;
         case ETH:
