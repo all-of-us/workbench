@@ -79,10 +79,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         RecentResource response = new RecentResource();
         response.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
         response.setPermission(workspaceAccessMap.get(userRecentResource.getWorkspaceId()));
-        if(userRecentResource.getNotebookName() != null ) {
+        if (userRecentResource.getNotebookName() != null) {
           FileDetail fileDetail = new FileDetail();
           String[] notebookDetails = userRecentResource.getNotebookName().split(NOTEBOOKS_WORKSPACE_DIRECTORY);
-          fileDetail.setPath(notebookDetails[0]+NOTEBOOKS_WORKSPACE_DIRECTORY);
+          fileDetail.setPath(notebookDetails[0] + NOTEBOOKS_WORKSPACE_DIRECTORY);
           fileDetail.setName(notebookDetails[1]);
           response.setNotebook(fileDetail);
         }
