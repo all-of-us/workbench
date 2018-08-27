@@ -7,45 +7,6 @@ import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {DbConstantsService} from '../../utils/db-constants.service';
 
-/* CONSTANTS */
-/*const COUNT_ANALYSIS_ID = 3000;
-const GENDER_ANALYSIS_ID = 3101;
-const AGE_ANALYSIS_ID = 3102;
-const SURVEY_COUNT_ANALYSIS_ID = 3110;
-const SURVEY_GENDER_ANALYSIS_ID = 3111;
-const SURVEY_AGE_ANALYSIS_ID = 3112;
-const MEASUREMENT_AGE_ANALYSIS_ID = 3112;
-const MEASUREMENT_VALUE_ANALYSIS_ID = 1900;
-*/
-
-const GENDER_COLORS = {
-  '8507': '#8DC892',
-  '8532': '#6CAEE3'
-};
-
-/* These are designers Age colors however we use only one color below now until further design */
-const AGE_COLORS = {
-  '1': '#252660',
-  '2': '#4259A5',
-  '3': '#6CAEE3',
-  '4': '#80C4EC',
-  '5': '#F8C75B',
-  '6': '#8DC892',
-  '7': '#F48673',
-  '8': '#BF85F6',
-  '9': '#BAE78A',
-  '10': '#8299A5',
-  '11': '#000000',
-  '12': '#DDDDDD'
-};
-const CHART_TITLE_STYLE = {
-  'color': '#302C71', 'font-family': 'Gotham HTF',	'font-size': '14px', 'font-weight': '300'
-};
-const DATA_LABEL_STYLE = {
-  'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px',
-  'font-weight': '300', 'textOutline': 'none'
-};
-const AXIS_LINE_COLOR = '#979797';
 
 @Component({
   selector: 'app-chart',
@@ -119,7 +80,7 @@ export class ChartComponent implements OnChanges {
           slicedOffset: 4,
           dataLabels: {
             enabled: true,
-            style: DATA_LABEL_STYLE,
+            style: this.dbc.DATA_LABEL_STYLE,
             distance: -30,
             format: '{point.name} {point.percentage:.0f}%'
           }
@@ -150,7 +111,7 @@ export class ChartComponent implements OnChanges {
           text: null
         },
         lineWidth: 1,
-        lineColor: AXIS_LINE_COLOR,
+        lineColor: this.dbc.AXIS_LINE_COLOR,
         gridLineColor: this.backgroundColor
       },
       xAxis: {
@@ -165,7 +126,7 @@ export class ChartComponent implements OnChanges {
           }
         },
         lineWidth: 1,
-        lineColor: AXIS_LINE_COLOR
+        lineColor: this.dbc.AXIS_LINE_COLOR
       },
       zAxis: {},
       legend: {
@@ -193,12 +154,10 @@ export class ChartComponent implements OnChanges {
       return this.makeAgeChartOptions();
     }
     if (this.analysis.analysisId === this.dbc.MEASUREMENT_VALUE_ANALYSIS_ID) {
-      console.log('Making histogram opts');
-      const options =  this.makeMeasurementChartOptions();
-      return options;
+      return this.makeMeasurementChartOptions();
     }
 
-
+    console.log('Error: Could not make chart options for this analysis:', this.analysis);
   }
 
   seriesClick(event) {
@@ -239,7 +198,7 @@ export class ChartComponent implements OnChanges {
     };
     // Override tooltip and colors and such
     const series = {
-      name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
+      name: this.analysis.analysisName, colorByPoint: true, data: data, colors: [this.dbc.COLUMN_COLOR],
       tooltip: {pointFormat: '<b>{point.y} </b>'},
       events: {
         click: seriesClick
@@ -295,7 +254,7 @@ export class ChartComponent implements OnChanges {
         type: 'column',
         backgroundColor: this.backgroundColor,
       },
-      title: {text: null, style: CHART_TITLE_STYLE},
+      title: {text: null, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
@@ -323,7 +282,7 @@ export class ChartComponent implements OnChanges {
     for (const a  of results) {
       // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
       const color = a.analysisId === this.dbc.GENDER_ANALYSIS_ID ?
-        GENDER_COLORS[a.stratum2] : GENDER_COLORS[a.stratum5];
+        this.dbc.GENDER_COLORS[a.stratum2] : this.dbc.GENDER_COLORS[a.stratum5];
       data.push({
         name: a.analysisStratumName
         , y: a.countValue, color: color, sliced: true
@@ -352,7 +311,7 @@ export class ChartComponent implements OnChanges {
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'pie', backgroundColor: this.backgroundColor}, // '#D9E4EA'
-      title: {text: this.analysis.analysisName, style: CHART_TITLE_STYLE},
+      title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: null,
@@ -364,31 +323,26 @@ export class ChartComponent implements OnChanges {
   public makeAgeChartOptions() {
     let results = [];
     let seriesName = '';
+    let ageDecileStratum = '';
 
     // Question/answers have a different data structure than other concepts
     if (this.analysis.analysisId === this.dbc.AGE_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
-    } else {
-      // For ppi we need to filter the results to the particular answer that the user selected
-      // because we only show the breakdown for one answer on this chart
-      //results = this.getSelectedResults(this.selectedResult);
+      ageDecileStratum = 'stratum2';
+    } else if (this.analysis.analysisId === this.dbc.SURVEY_AGE_ANALYSIS_ID) {
+      // For ppi survey we filter the results to the particular answer that the user selected
       results = this.analysis.results.filter( r => r.stratum4 === this.selectedResult.stratum4);
       // Series name for answers is the answer selected which is in stratum4
       seriesName = this.selectedResult.stratum4;
+      ageDecileStratum = 'stratum5';
     }
+
     // Age results have two stratum-- 1 is concept, 2 is age decile
     // Sort by age decile (stratum2 or stratum5)
-    console.log("Results for age ", results);
-
     results = results.sort((a, b) => {
-        let anum = Number(a.stratum2);
-        let bnum = Number(b.stratum2);
-        if (this.analysis.analysisId != this.dbc.AGE_ANALYSIS_ID) {
-          anum = Number(a.stratum5);
-          bnum = Number(b.stratum5);
-        }
-
+        const anum = Number(a[ageDecileStratum]);
+        const bnum = Number(b[ageDecileStratum]);
         if (anum > bnum) {
           return 1;
         }
@@ -400,17 +354,11 @@ export class ChartComponent implements OnChanges {
     );
     const data = [];
     const cats = [];
-    const color = '#252660';
+    const color = this.dbc.AGE_COLOR;
     for (const a  of results) {
-      // For normal AGE Analysis , the stratum2 is the age decile. For ppi it is stratum5;
-      /* Only use one color for now
-      const color = a.analysisId === AGE_ANALYSIS_ID ? AGE_COLORS[a.stratum2] :
-        AGE_COLORS[a.stratum5];
-      */
-
       data.push({
-        name: a.analysisStratumName
-        , y: a.countValue, color: color
+        name: a.analysisStratumName,
+        y: a.countValue, color: color
       });
       cats.push(a.analysisStratumName);
     }
@@ -418,7 +366,7 @@ export class ChartComponent implements OnChanges {
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
-      title: {text: this.analysis.analysisName, style: CHART_TITLE_STYLE},
+      title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
@@ -468,21 +416,22 @@ export class ChartComponent implements OnChanges {
       thisCtrl.resultClicked.emit(event.point.result);
     };
 
-    // Unit is in stratum5
+    // Unit for measurements is in stratum5
     const unit: string = this.analysis.results[0].stratum5;
-    // Override tooltip and colors and such
     const series: any = {
-      name: this.analysis.analysisName, colorByPoint: true, data: data, colors: ['#6CAEE3'],
+      name: this.analysis.analysisName,
+      colorByPoint: true,
+      data: data,
+      colors: [this.dbc.COLUMN_COLOR],
       tooltip: {
         headerFormat: '<span style="font-size: 10px">{point.key} ' + unit + '</span><br/>',
         pointFormat: '<b> {point.y} participants </b> '
       },
-      events: {
-        // Todo maybe later click: seriesClick
-      }};
+    };
 
-    // Note that our data is binned already so we use a column chart to show histogram.
-    // But we need to style it to make it look like a histogram.
+    // Note that our data is binned already so we use a column chart to show histogram
+    // however we need to style it to make it look like a histogram. Some measurements
+    // like pregnancy and wheel chair we don't want a histogram.
     if (this.chartType === 'histogram') {
       // Make column chart look like  a histogram with these options
       series.pointPadding = 0;

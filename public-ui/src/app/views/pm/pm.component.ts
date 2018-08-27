@@ -3,6 +3,7 @@ import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {Analysis} from '../../../publicGenerated/model/analysis';
+import {DbConstantsService} from '../../utils/db-constants.service';
 
 @Component({
   selector: 'app-physical-measurements',
@@ -17,16 +18,16 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
 
   // Todo put constants in a class for use in other views
   chartType = 'histogram';
-  MALE_GENDER_ID = '8507';
-  FEMALE_GENDER_ID = '8532';
-  OTHER_GENDER_ID = '8521';
-  PREGNANCY_CONCEPT_ID = '903120';
-  WHEEL_CHAIR_CONCEPT_ID = '903111';
 
   // Total analyses
   genderAnalysis: Analysis = null;
   raceAnalysis: Analysis = null;
   ethnicityAnalysis: Analysis = null;
+
+  // Chart titles for our gender histograms.
+  maleGenderChartTitle =  '';
+  femaleGenderChartTitle = '';
+  otherGenderChartTitle = '';
 
   conceptGroups = [
     { group: 'blood-pressure', groupName: 'Mean Blood Pressure', concepts: [
@@ -74,7 +75,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   maleCount = 0;
   otherCount = 0;
 
-  constructor(private api: DataBrowserService) { }
+  constructor(private api: DataBrowserService, public dbc: DbConstantsService) { }
 
   loading() {
     return this.loadingStack.length > 0;
@@ -88,9 +89,9 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
       .subscribe(result => {
         this.genderAnalysis = result;
         for (const g of this.genderAnalysis.results) {
-          if (g.stratum1 === this.FEMALE_GENDER_ID) {
+          if (g.stratum1 === this.dbc.FEMALE_GENDER_ID) {
             this.femaleCount = g.countValue;
-          } else if (g.stratum1 === this.MALE_GENDER_ID) {
+          } else if (g.stratum1 === this.dbc.MALE_GENDER_ID) {
             this.maleCount = g.countValue;
           } else {
             this.otherCount += g.countValue;
@@ -141,15 +142,15 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     }
   }
 
-  arrangeConceptAnalyses(concept) {
+  arrangeConceptAnalyses(concept: any) {
 
-    if (concept.conceptId === this.PREGNANCY_CONCEPT_ID) {
+    if (concept.conceptId === this.dbc.PREGNANCY_CONCEPT_ID) {
       // Delete any male results so we don't look dumb with dumb data
       concept.analyses.measurementValueMaleAnalysis = null;
       concept.analyses.measurementValueOtherGenderAnalysis = null;
       concept.analyses.genderAnalysis.results =
         concept.analyses.genderAnalysis.results.filter(result =>
-        result.stratum2 === this.FEMALE_GENDER_ID );
+        result.stratum2 === this.dbc.FEMALE_GENDER_ID );
 
       // Add not pregnant result to the female value results
       // because this concept is just a one value Yes
@@ -169,7 +170,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
       concept.analyses.measurementValueFemaleAnalysis.results.push(notPregnantResult);
 
     }
-    if (concept.conceptId === this.WHEEL_CHAIR_CONCEPT_ID) {
+    if (concept.conceptId === this.dbc.WHEEL_CHAIR_CONCEPT_ID) {
       // Todo What to do about this boolean concept , wait for design
     }
 
@@ -192,37 +193,36 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     }
     const results = [];
     for (const g of analysis.results) {
-      if (g.stratum2 === this.MALE_GENDER_ID) {
+      if (g.stratum2 === this.dbc.MALE_GENDER_ID) {
         male = g;
         concept.maleCount = g.countValue;
-      } else if (g.stratum2 === this.FEMALE_GENDER_ID) {
+        this.maleGenderChartTitle = g.analysisStratumName + ' - ' + g.countValue.toLocaleString();
+      } else if (g.stratum2 === this.dbc.FEMALE_GENDER_ID) {
         female = g;
+        this.femaleGenderChartTitle = g.analysisStratumName + ' - ' + g.countValue.toLocaleString();
         concept.femaleCount = g.countValue;
       } else {
         concept.otherCount += g.countValue;
       }
     }
-    // Make Other results,
-    const otherResult: AchillesResult =  {
-      analysisId: male.analysisId,
-      stratum1: male.stratum1,
-      stratum2: this.OTHER_GENDER_ID,
-      analysisStratumName: 'Other',
-      countValue: concept.otherCount
-    };
 
     // Order genders how we want to display  Male, Female , Others
     if (male) { results.push(male); }
     if (female) { results.push(female); }
     if (concept.otherCount > 0) {
+      // Make Other results,
+      const otherResult: AchillesResult =  {
+        analysisId: male.analysisId,
+        stratum1: male.stratum1,
+        stratum2: this.dbc.OTHER_GENDER_ID,
+        analysisStratumName: 'Other',
+        countValue: concept.otherCount
+      };
       results.push(otherResult);
+      this.otherGenderChartTitle = otherResult.analysisStratumName + ' - ' +
+        otherResult.countValue.toLocaleString();
     }
     analysis.results = results;
-  }
-
-  makeChartTitle(gender: any) {
-    const title = gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString();
-    return title;
   }
 
 }
