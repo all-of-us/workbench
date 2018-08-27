@@ -157,9 +157,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        */
 
       if (this.node.get('type') === DomainType.DRUG && this.node.get('group')) {
-        this.node.get('children').forEach(child => {
-          this.selectChildren(child);
-        });
+        this.actions.fetchAndSelectChildren(this.node.get('id'));
       } else {
         let attributes = [];
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {

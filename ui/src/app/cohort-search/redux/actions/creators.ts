@@ -10,9 +10,11 @@ import {
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
+  BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_CHILDREN_LIST,
   LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
@@ -114,6 +116,11 @@ export const requestIngredientsForBrand =
   ): ActionTypes[typeof BEGIN_INGREDIENT_REQUEST] =>
   ({type: BEGIN_INGREDIENT_REQUEST, cdrVersionId, conceptId});
 
+export const requestAndSelectChildren =
+  (cdrVersionId: number, id: number
+  ): ActionTypes[typeof BEGIN_CHILDREN_REQUEST] =>
+  ({type: BEGIN_CHILDREN_REQUEST, cdrVersionId, id});
+
 export const loadAutocompleteOptions =
   (options: any
   ): ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS] =>
@@ -132,6 +139,11 @@ export const loadIngredients =
   (ingredients: any
   ): ActionTypes[typeof LOAD_INGREDIENT_LIST] =>
   ({type: LOAD_INGREDIENT_LIST, ingredients});
+
+export const loadAndSelectChildren =
+  (children: any
+  ): ActionTypes[typeof LOAD_CHILDREN_LIST] =>
+  ({type: LOAD_CHILDREN_LIST, children});
 
 export const loadAttributes =
   (node: any, attributes: any
