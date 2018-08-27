@@ -53,7 +53,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       const survey = JSON.parse(obj);
       this.surveyConceptId = survey.conceptId;
     }
-    console.log(this.survey);
     this.searchText.setValue(localStorage.getItem('searchText'));
     if (!this.searchText.value) {
       this.searchText.setValue('');

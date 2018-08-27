@@ -29,19 +29,19 @@
         <div *ngFor="let gender of selectedConcept.analyses.genderAnalysis.results" class="col-md-4 col-xs-12 chart-wrapper">
 
 
-              <app-chart *ngIf="gender.stratum2 === MALE_GENDER_ID && selectedConcept.analyses &&
+              <app-chart *ngIf="gender.stratum2 === dbc.MALE_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueMaleAnalysis"
-                         [chartTitle]="makeChartTitle(gender)" [chartType]="selectedConcept.chartType"
+                         [chartTitle]="maleGenderChartTitle" [chartType]="selectedConcept.chartType"
                          [analysis]="selectedConcept.analyses.measurementValueMaleAnalysis"></app-chart>
 
-              <app-chart *ngIf="gender.stratum2 === FEMALE_GENDER_ID && selectedConcept.analyses &&
+              <app-chart *ngIf="gender.stratum2 === dbc.FEMALE_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueFemaleAnalysis"
-                         [chartTitle]="makeChartTitle(gender)" [chartType]="selectedConcept.chartType"
+                         [chartTitle]="femaleGenderChartTitle" [chartType]="selectedConcept.chartType"
                          [analysis]="selectedConcept.analyses.measurementValueFemaleAnalysis"></app-chart>
 
-              <app-chart *ngIf="gender.stratum2 === OTHER_GENDER_ID && selectedConcept.analyses &&
+              <app-chart *ngIf="gender.stratum2 === dbc.OTHER_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueOtherGenderAnalysis"
-                         [chartTitle]="makeChartTitle(gender)" [chartType]="selectedConcept.chartType"
+                         [chartTitle]="otherGenderChartTitle" [chartType]="selectedConcept.chartType"
                          [analysis]="selectedConcept.analyses.measurementValueOtherGenderAnalysis"></app-chart>
 
         </div>

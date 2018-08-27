@@ -29,12 +29,12 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 (<any>window).StackTrace = StackTrace;
 
 import {DataBrowserService} from 'publicGenerated';
+import {DbConstantsService} from './utils/db-constants.service';
 import { HighlightSearchPipe } from './utils/highlight-search.pipe';
 import { overriddenPublicUrlKey } from './views/app/app.component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
 import { PhysicalMeasurementsComponent } from './views/pm/pm.component';
 import { QuickSearchComponent } from './views/quick-search/quick-search.component';
-import {DbConstantsService} from "./utils/db-constants.service";
 
 function getPublicBasePath() {
   return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;

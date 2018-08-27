@@ -6,6 +6,7 @@ import {Analysis} from '../../../publicGenerated/model/analysis';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
+import {DbConstantsService} from '../../utils/db-constants.service';
 
 @Component({
   selector: 'app-concept-charts',
@@ -26,14 +27,13 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   maleGenderResult: AchillesResult;
   femaleGenderResult: AchillesResult;
   otherGenderResult: AchillesResult;
-  sourceConcepts = null;
+  maleGenderChartTitle =  '';
+  femaleGenderChartTitle = '';
+  otherGenderChartTitle = '';
+  sourceConcepts: Concept[] = null;
   analyses: ConceptAnalysis;
 
-  MALE_GENDER_ID = '8507';
-  FEMALE_GENDER_ID = '8532';
-  OTHER_GENDER_ID = '8521';
-
-  constructor(private api: DataBrowserService) { }
+  constructor(private api: DataBrowserService, public dbc: DbConstantsService) { }
 
   loading() {
     return this.loadingStack.length > 0;
@@ -50,16 +50,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
         this.organizeGenders(this.analyses.genderAnalysis);
         this.loadingStack.pop();
       }));
-    this.getSourceConcepts();
-  }
 
-  ngOnDestroy() {
-    for (const s of this.subscriptions) {
-      s.unsubscribe();
-    }
-  }
-
-  getSourceConcepts() {
     this.loadingStack.push(true);
     this.subscriptions.push( this.api.getSourceConcepts(this.concept.conceptId).subscribe(
       results => {
@@ -68,6 +59,13 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       }));
   }
 
+  ngOnDestroy() {
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
+  }
+
+  // Organize genders and set the chart title for the gender charts for simple display
   organizeGenders(analysis: Analysis) {
     let otherCountValue = 0;
     const others = [];
@@ -78,11 +76,12 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     }
     const results = [];
     for (const g of analysis.results) {
-      if (g.stratum2 === this.MALE_GENDER_ID) {
+      if (g.stratum2 === this.dbc.MALE_GENDER_ID) {
         this.maleGenderResult = g;
-      } else if (g.stratum2 === this.FEMALE_GENDER_ID) {
+        this.maleGenderChartTitle = g.analysisStratumName + ' - ' + g.countValue.toLocaleString();
+      } else if (g.stratum2 === this.dbc.FEMALE_GENDER_ID) {
         this.femaleGenderResult = g;
-
+        this.femaleGenderChartTitle = g.analysisStratumName + ' - ' + g.countValue.toLocaleString();
       } else {
         otherCountValue += g.countValue;
       }
@@ -97,18 +96,13 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       this.otherGenderResult = {
         analysisId: analysis.results[0].analysisId,
         stratum1: analysis.results[0].stratum1,
-        stratum2: this.OTHER_GENDER_ID,
+        stratum2: this.dbc.OTHER_GENDER_ID,
         analysisStratumName: 'Other',
         countValue: otherCountValue
       };
+      this.otherGenderChartTitle = this.otherGenderResult.analysisStratumName + ' - ' +
+        this.otherGenderResult.countValue.toLocaleString();
       analysis.results.push(this.otherGenderResult);
     }
-  }
-
-  makeChartTitle(result: AchillesResult) {
-    console.log(result);
-    const title = result.analysisStratumName + ' - ' +
-      result.countValue.toLocaleString();
-    return title;
   }
 }
