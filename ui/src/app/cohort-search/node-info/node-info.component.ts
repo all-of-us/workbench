@@ -146,21 +146,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     event.stopPropagation();
     if (needsAttributes(this.node)) {
-      if (this.isMeas()) {
-        this.actions.fetchAttributes(this.node);
-      } else {
-        const attributes = this.node.get('subtype') === TreeSubType[TreeSubType.BP]
-          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-          : [{
-            name: '',
-            operator: null,
-            operands: [null],
-            conceptId: this.node.get('conceptId', null),
-            MIN: 0,
-            MAX: 10000
-          }];
-        this.actions.loadAttributes(this.node, attributes);
-      }
+      this.getAttributes();
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
@@ -183,6 +169,24 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
         this.actions.addParameter(param);
       }
+    }
+  }
+
+  getAttributes() {
+    if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+      this.actions.fetchAttributes(this.node);
+    } else {
+      const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+        ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
+        : [{
+          name: '',
+          operator: null,
+          operands: [null],
+          conceptId: this.node.get('conceptId', null),
+          MIN: 0,
+          MAX: 10000
+        }];
+      this.actions.loadAttributes(this.node, attributes);
     }
   }
 
