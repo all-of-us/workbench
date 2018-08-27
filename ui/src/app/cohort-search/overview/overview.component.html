@@ -14,7 +14,7 @@
         type="button"
         class="btn btn-primary"
         [style.margin-left]="'0'"
-        [disabled]="!chartData.size || (total$ | async | number) === 0"
+        [disabled]="!chartData.size || (total$ | async) === 0"
         (click)="saveModal.open()">
         Save Cohort
       </button>
