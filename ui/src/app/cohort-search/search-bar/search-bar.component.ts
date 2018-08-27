@@ -83,11 +83,16 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .subscribe(ingredients => {
         this.ingredients = ingredients;
         const ingredientList = [];
+        const ids = [];
+        let path = [];
         this.ingredients.forEach(item => {
           ingredientList.push(item.name);
+          ids.push(item.id);
+          path = path.concat(item.path.split('.'));
         });
         if (ingredientList.length) {
           this.actions.setCriteriaSearchTerms(ingredientList);
+          this.actions.loadCriteriaSubtree(this._type, ids, path);
         }
         this.multiIngredient = ingredientList.length > 1;
       });
@@ -133,28 +138,19 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   selectOption(option: any) {
     this.optionSelected = true;
     this.searchTerm = option.name;
-    switch (this._type) {
-      case DomainType.DRUG:
-        if (option.subtype === CRITERIA_SUBTYPES.BRAND) {
-          this.actions.fetchIngredientsForBrand(option.conceptId);
-        } else if (option.subtype === CRITERIA_SUBTYPES.ATC) {
-          this.actions.setCriteriaSearchTerms([option.name]);
-          const ids = [option.id];
-          let path = option.path.split('.');
-          console.log(this.multiples);
-          console.log(option.name);
-          if (this.multiples[option.name]) {
-            this.multiples[option.name].forEach(multiple => {
-              ids.push(multiple.id);
-              path = path.concat(multiple.path.split('.'));
-            });
-          }
-          this.actions.loadCriteriaSubtree(this._type, ids, path);
-        }
-        break;
-      default:
-        this.actions.setCriteriaSearchTerms([option.name]);
-        this.actions.fetchCriteriaSubtree(this._type, option.id);
+    if (option.subtype === CRITERIA_SUBTYPES.BRAND) {
+      this.actions.fetchIngredientsForBrand(option.conceptId);
+    } else {
+      this.actions.setCriteriaSearchTerms([option.name]);
+      const ids = [option.id];
+      let path = option.path.split('.');
+      if (this.multiples[option.name]) {
+        this.multiples[option.name].forEach(multiple => {
+          ids.push(multiple.id);
+          path = path.concat(multiple.path.split('.'));
+        });
+      }
+      this.actions.loadCriteriaSubtree(this._type, ids, path);
     }
     this.actions.clearAutocompleteOptions();
   }

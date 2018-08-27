@@ -1,12 +1,10 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
-  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
-  LOAD_SUBTREE_RESULTS,
   LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
@@ -71,11 +69,6 @@ export const requestCriteria =
   ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
   ({type: BEGIN_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
 
-export const requestCriteriaSubtree =
-  (cdrVersionId: number, kind: string, id: number
-  ): ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST] =>
-  ({type: BEGIN_CRITERIA_SUBTREE_REQUEST, cdrVersionId, kind, id});
-
 export const requestAllCriteria =
   (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST] =>
@@ -90,11 +83,6 @@ export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
   ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
-
-export const loadSubtreeItems =
-  (kind: string, id: number, results: any
-  ): ActionTypes[typeof LOAD_SUBTREE_RESULTS] =>
-  ({type: LOAD_SUBTREE_RESULTS, kind, id, results});
 
 export const loadCriteriaSubtree =
   (kind: string, ids: Array<number>, path: Array<string>

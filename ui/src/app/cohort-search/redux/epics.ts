@@ -9,7 +9,6 @@ import {CohortSearchActions} from './actions';
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
-  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
@@ -49,9 +48,6 @@ import {
   autocompleteRequestError,
 
   loadIngredients,
-  loadCriteriaSubtree,
-
-  loadSubtreeItems,
 
   loadAttributes,
   attributeRequestError,
@@ -64,7 +60,6 @@ import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
-type CritSubRequestAction = ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
 type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
@@ -102,20 +97,6 @@ export class CohortSearchEpics {
             .filter(compare({kind, parentId}))
             .first())
           .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
-      }
-    )
-  )
-
-  fetchCriteriaSubtree: CSEpic = (action$) => (
-    action$.ofType(BEGIN_CRITERIA_SUBTREE_REQUEST).mergeMap(
-      ({cdrVersionId, kind, id}: CritSubRequestAction) => {
-        return this.service.getCriteriaById(cdrVersionId, id)
-          .map(result => loadSubtreeItems(kind, id, result.items))
-          .race(action$
-            .ofType(CANCEL_CRITERIA_REQUEST)
-            .filter(compare({kind, id}))
-            .first())
-          .catch(e => Observable.of(criteriaRequestError(kind, id, e)));
       }
     )
   )
