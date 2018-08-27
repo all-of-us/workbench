@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -105,7 +104,6 @@ public class CohortsController implements CohortsApiDelegate {
       CdrVersionDao cdrVersionDao,
       CohortReviewDao cohortReviewDao,
       ConceptSetDao conceptSetDao,
-      ConceptDao conceptDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
       Clock clock,
@@ -275,7 +273,7 @@ public class CohortsController implements CohortsApiDelegate {
     } else {
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
-    Set<Long> conceptIds;
+    Set<Long> conceptIds = null;
     if (request.getFieldSet() != null && request.getFieldSet().getTableQuery() != null) {
       String conceptSetName = request.getFieldSet().getTableQuery().getConceptSetName();
       if (conceptSetName != null) {
