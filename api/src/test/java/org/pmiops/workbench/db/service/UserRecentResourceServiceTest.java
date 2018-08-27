@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
@@ -48,6 +49,7 @@ public class UserRecentResourceServiceTest {
 
   private User newUser = new User();
   private Workspace newWorkspace = new Workspace();
+  private Cohort cohort;
   private Long cohortId;
   private long workspaceId = 1l;
   private long userId = 1l;
@@ -60,11 +62,12 @@ public class UserRecentResourceServiceTest {
     userDao.save(newUser);
     newWorkspace.setWorkspaceId(workspaceId);
     workspaceDao.save(newWorkspace);
-    Cohort cohort = new Cohort();
+    cohort = new Cohort();
     cohort.setWorkspaceId(workspaceId);
     cohortId = cohortDao.save(cohort).getCohortId();
     userRecentResourceService = new UserRecentResourceServiceImpl();
     userRecentResourceService.setDao(notebookCohortCacheDao);
+    userRecentResourceService.setCohortDao(cohortDao);
     clock = new FakeClock(NOW);
   }
 
@@ -164,14 +167,14 @@ public class UserRecentResourceServiceTest {
   public void testFindAllResources() {
     userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook1", new Timestamp(clock.millis() - 10000));
     userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook2", new Timestamp(clock.millis() + 10000));
-    userRecentResourceService.updateCohortEntry(workspaceId, userId, cohortId, new Timestamp(clock.millis()));
+    userRecentResourceService.updateCohortEntry(workspaceId, userId, cohortId , new Timestamp(clock.millis()));
     newUser.setUserId(78l);
     userDao.save(newUser);
     userRecentResourceService.updateCohortEntry(workspaceId, 78l, cohortId, new Timestamp(clock.millis()));
     List<UserRecentResource> resources = userRecentResourceService.findAllResourcesByUser(userId);
     assertEquals(resources.size(), 3);
     assertEquals(resources.get(0).getNotebookName(), "notebook2");
-    assertEquals(resources.get(1).getCohortId(), cohortId);
+    assertEquals(resources.get(1).getCohort().getCohortId(), cohortId.longValue());
     assertEquals(resources.get(2).getNotebookName(), "notebook1");
   }
 }

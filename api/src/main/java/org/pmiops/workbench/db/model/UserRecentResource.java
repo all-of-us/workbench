@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.sql.Timestamp;
 
@@ -13,10 +15,10 @@ import java.sql.Timestamp;
 public class UserRecentResource {
   private Timestamp lastAccessDate;
   private int id;
-  private Long cohortId;
   private String notebookName;
   private Long userId;
   private Long workspaceId;
+  private Cohort cohort;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,15 +40,6 @@ public class UserRecentResource {
 
   public void setWorkspaceId(long workspaceId ) {this.workspaceId = workspaceId;}
 
-  @Column(name = "cohort_id")
-  public Long getCohortId() {
-    return cohortId;
-  }
-
-  public void setCohortId(Long cohortId) {
-    this.cohortId = cohortId;
-  }
-
   @Column(name = "notebook_name")
   public String getNotebookName() {
     return this.notebookName;
@@ -64,5 +57,11 @@ public class UserRecentResource {
   public void setLastAccessDate(Timestamp lastAccessDate) {
     this.lastAccessDate = lastAccessDate;
   }
+
+  @ManyToOne
+  @JoinColumn(name = "cohort_id")
+  public Cohort getCohort() { return cohort;}
+
+  public void setCohort(Cohort cohort) {this.cohort = cohort;}
 }
 

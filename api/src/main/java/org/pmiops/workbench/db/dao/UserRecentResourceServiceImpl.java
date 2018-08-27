@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Autowired
   UserRecentResourceDao userRecentResourceDao;
 
+  @Autowired
+  CohortDao cohortDao;
+
   public UserRecentResourceDao getDao() {
     return userRecentResourceDao;
   }
@@ -24,6 +28,12 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public void setDao(UserRecentResourceDao dao) {
     this.userRecentResourceDao = dao;
   }
+
+  @VisibleForTesting
+  public void setCohortDao(CohortDao cohortDao) {
+    this.cohortDao = cohortDao;
+  }
+
 
   @VisibleForTesting
   public int getUserEntryCount() {return USER_ENTRY_COUNT;}
@@ -43,7 +53,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       resource = new UserRecentResource();
       resource.setUserId(userId);
       resource.setWorkspaceId(workspaceId);
-      resource.setCohortId(null);
+      resource.setCohort(null);
       resource.setNotebookName(notebookName);
     }
     resource.setLastAccessDate(lastAccessDateTime);
@@ -59,13 +69,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void updateCohortEntry(long workspaceId, long userId, long cohortId,
       Timestamp lastAccessDateTime) {
-    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndCohortId(userId, workspaceId, cohortId);
+    Cohort cohort = cohortDao.findOne(cohortId);
+    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
     if (resource == null) {
       handleUserLimit(userId);
       resource = new UserRecentResource();
       resource.setUserId(userId);
       resource.setWorkspaceId(workspaceId);
-      resource.setCohortId(cohortId);
+      resource.setCohort(cohort);
       resource.setNotebookName(null);
     }
     resource.setLastAccessDate(lastAccessDateTime);

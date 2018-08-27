@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import org.pmiops.workbench.db.dao.CohortService;
@@ -61,26 +62,29 @@ public class UserMetricsControllerTest {
     List<UserRecentResource> userRecentResources = new ArrayList<>();
 
     UserRecentResource resource1 = new UserRecentResource();
-    resource1.setNotebookName("notebook1");
-    resource1.setCohortId(null);
+    resource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
+    resource1.setCohort(null);
     resource1.setLastAccessDate(new Timestamp(clock.millis()));
     resource1.setUserId(123l);
     resource1.setWorkspaceId(2l);
 
-    UserRecentResource resource2 = new UserRecentResource();
-    resource2.setNotebookName(null);
-    resource2.setCohortId(1l);
-    resource2.setLastAccessDate(new Timestamp(clock.millis() - 10000));
-    resource2.setUserId(123l);
-    resource2.setWorkspaceId(2l);
 
     userRecentResources.add(resource1);
-    userRecentResources.add(resource2);
 
     Cohort cohort = new Cohort();
     cohort.setName("Cohort Name");
     cohort.setCohortId(1l);
     cohort.setDescription("Cohort description");
+    cohort.setLastModifiedTime(new Timestamp(clock.millis()));
+    cohort.setCreationTime(new Timestamp(clock.millis()));
+    UserRecentResource resource2 = new UserRecentResource();
+    resource2.setNotebookName(null);
+    resource2.setCohort(cohort);
+    resource2.setLastAccessDate(new Timestamp(clock.millis() - 10000));
+    resource2.setUserId(123l);
+    resource2.setWorkspaceId(2l);
+
+    userRecentResources.add(resource2);
 
     Workspace workspace  = new Workspace();
     workspace.setWorkspaceId(2l);
@@ -101,22 +105,24 @@ public class UserMetricsControllerTest {
     userMetricsController = new UserMetricsController(
         userProvider,
         userRecentResourceService,
-        cohortService,
         workspaceService,
         fireCloudService);
   }
 
   @Test
-  public void testGetUserMetrics() {
+  public void testGetUserRecentResource() {
     RecentResourceResponse recentResources = userMetricsController
-        .getUserMetrics().getBody();
+        .getUserRecentResources().getBody();
     assertNotNull(recentResources);
     assertEquals(2, recentResources.size());
-    assertEquals(recentResources.get(0).getName(), "notebook1");
-    assertEquals(recentResources.get(0).getType(), "notebook");
-    assertEquals(recentResources.get(1).getName(), "Cohort Name");
-    assertEquals(recentResources.get(1).getDescription(), "Cohort description");
-    assertEquals(recentResources.get(1).getType(), "cohort");
+    assertNull(recentResources.get(0).getCohort());
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/");
+
+    assertEquals(recentResources.get(0).getNotebook().getName(), "notebook1.ipynb");
+    assertNotNull(recentResources.get(1).getCohort());
+    assertEquals(recentResources.get(1).getCohort().getName(), "Cohort Name");
+
+
   }
 }
 

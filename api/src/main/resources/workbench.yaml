@@ -877,7 +877,7 @@ paths:
       tags:
         - userMetrics
       description: Returns the resources accessed by user order by access time desc
-      operationId: getUserMetrics
+      operationId: getUserRecentResources
       responses:
         200:
           description: A list of resources order by last access time desc order
@@ -1691,20 +1691,11 @@ definitions:
   RecentResource:
     type: object
     properties:
-      name:
-        type: string
-      type:
-        type: string
-      modifiedTime:
-        type: string
-      description:
-        type: string
-      workspaceId:
-        type: integer
-        format: int64
-      cohortId:
-        type: integer
-        format: int64
       permission:
         type: string
-
+      cohort:
+        $ref: "#/definitions/Cohort"
+      notebook:
+        $ref: '#/definitions/FileDetail'
+      modifiedTime:
+        type: string
