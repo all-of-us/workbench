@@ -450,7 +450,7 @@ public class WorkspacesControllerTest {
 
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testDeleteWorkspace() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
@@ -460,7 +460,12 @@ public class WorkspacesControllerTest {
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
+    try {
+      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
+      fail("NotFoundException expected");
+    } catch (NotFoundException e) {
+      // expected
+    }
   }
 
   @Test
@@ -884,6 +889,14 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.size()).isEqualTo(2);
     assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned);
     assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned);
+
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId());
+    try {
+      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
+      fail("NotFoundException expected");
+    } catch (NotFoundException e) {
+      // expected
+    }
   }
 
   private void assertConceptSetClone(ConceptSet clonedConceptSet, ConceptSet originalConceptSet,
