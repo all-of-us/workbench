@@ -658,7 +658,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.addWorkspaceUserRole(permissions);
 
-    dbWorkspace = workspaceService.saveAndCloneCohorts(fromWorkspace, dbWorkspace);
+    dbWorkspace = workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
     CloneWorkspaceResponse resp = new CloneWorkspaceResponse();
     resp.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, toFcWorkspace));
     return ResponseEntity.ok(resp);

@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
 import { DomainType, ModifierType } from 'generated';
 import {fromJS, List, Map} from 'immutable';
@@ -21,7 +21,7 @@ import {
     templateUrl: './modifier-page.component.html',
     styleUrls: ['./modifier-page.component.css']
 })
-export class ModifierPageComponent implements OnInit, OnDestroy {
+export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChecked {
   @select(activeCriteriaType) ctype$;
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
@@ -31,6 +31,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
   ctype: string;
   existing = List();
   preview = Map();
+  myDate: any;
+  selectedDate: any;
   subscription: Subscription;
   dropdownOption = {
     selected: ['', '', '', '']
@@ -98,6 +100,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private actions: CohortSearchActions,
+    private cdref: ChangeDetectorRef,
     private ngRedux: NgRedux<CohortSearchState>
   ) {}
 
@@ -180,6 +183,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
       })
     );
   }
+    ngAfterContentChecked() {
+        this.cdref.detectChanges();
+    }
     selectChange(opt, index, e, mod) {
       this.dropdownOption.selected[index] = opt.name;
       if (e.target.value || this.form.controls.valueA) {
@@ -191,6 +197,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
     }
 
   currentMods(vals) {
+      this.ngAfterContentChecked();
     return this.modifiers.map(({name, inputType, modType}) => {
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {
@@ -204,10 +211,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy {
           return;
         }
         if (inputType === 'date') {
-          this.dateValueA = moment(valueA, 'MM/DD/YYYY').format('YYYY-MM-DD');
-          this.dateValueB = moment(valueB, 'MM/DD/YYYY').format('YYYY-MM-DD');
+          this.dateValueA = moment(valueA).format('YYYY-MM-DD');
+          this.dateValueB = moment(valueB).format('YYYY-MM-DD');
           const operands = [this.dateValueA];
-          if (between) {
+          if (between && this.dateValueB) {
             operands.push(this.dateValueB);
           }
           return fromJS({name: modType, operator, operands});

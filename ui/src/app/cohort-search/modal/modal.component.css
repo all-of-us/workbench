@@ -22,7 +22,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: calc(100vw - calc(26rem + 60px));
+  width: calc(100vw - calc(19rem + 60px));
   background-color: white;
   border-radius: 4px;
   display: flex;
@@ -167,6 +167,8 @@ button.tab.active {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 27.5rem;
+  max-height: 27.5rem;
+  overflow-y: auto;
   background-color: white;
 }
 
