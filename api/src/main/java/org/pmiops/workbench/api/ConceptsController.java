@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConceptsController implements ConceptsApiDelegate {
 
   // TODO: consider putting this in CDM config, fetching it from there
-  private static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
+  static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
       ImmutableMultimap.<Domain, String>builder()
           .put(Domain.CONDITION, "Condition")
           .put(Domain.CONDITION, "Condition/Meas")
@@ -48,7 +48,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptService conceptService;
   private final WorkspaceService workspaceService;
 
-  private static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
+  static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->  new Concept()
             .conceptClassId(concept.getConceptClassId())
             .conceptCode(concept.getConceptCode())

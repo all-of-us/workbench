@@ -343,7 +343,7 @@ definitions:
   Domain:
     type: string
     description: filter on the domain in which concepts should be returned
-    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, RACE, GENDER, ETHNICITY]
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, RACE, GENDER, ETHNICITY]
 
   MatchType:
     type: string
