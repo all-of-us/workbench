@@ -12,6 +12,9 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-outline" (click)="renaming=false">Cancel</button>
-        <button type="button" class="btn btn-primary confirm-rename-btn" id="rename" (click)="this.receiveRename.emit({name: resource.name, newName: newName});">Rename {{resourceType}}</button>
+        <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
+                (click)="this.emitRename(resource);" [clrLoading]="loading" [disabled]="loading">
+            Rename {{resourceType}}
+        </button>
     </div>
 </clr-modal>
