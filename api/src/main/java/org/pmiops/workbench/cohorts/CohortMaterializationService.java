@@ -41,6 +41,7 @@ import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.ResultFilters;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
@@ -203,18 +204,22 @@ public class CohortMaterializationService {
     List<Long> standardConceptIds = Lists.newArrayList();
     List<Long> sourceConceptIds = Lists.newArrayList();
     for (Concept concept : concepts) {
-      if (concept.getStandardConcept() != null &&
-          concept.getStandardConcept().equals(ConceptService.STANDARD_CONCEPT_CODE)) {
+      if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())) {
         standardConceptIds.add(concept.getConceptId());
       } else {
         // We may need to handle classification / concept hierarchy here eventually...
         sourceConceptIds.add(concept.getConceptId());
       }
     }
+    if (standardConceptIds.isEmpty() && sourceConceptIds.isEmpty()) {
+      throw new BadRequestException("Concept set contains no valid concepts");
+    }
+
     ResultFilters conceptFilters = null;
     if (!standardConceptIds.isEmpty()) {
       ColumnFilter standardConceptFilter =
           new ColumnFilter().columnName(standardConceptColumn)
+              .operator(Operator.IN)
               .valueNumbers(standardConceptIds.stream().map(id -> new BigDecimal(id))
                   .collect(Collectors.toList()));
       conceptFilters = new ResultFilters().columnFilter(standardConceptFilter);
@@ -222,6 +227,7 @@ public class CohortMaterializationService {
     if (!sourceConceptIds.isEmpty()) {
       ColumnFilter sourceConceptFilter =
           new ColumnFilter().columnName(sourceConceptColumn)
+              .operator(Operator.IN)
               .valueNumbers(sourceConceptIds.stream().map(id -> new BigDecimal(id))
                   .collect(Collectors.toList()));
       ResultFilters sourceResultFilters = new ResultFilters().columnFilter(sourceConceptFilter);

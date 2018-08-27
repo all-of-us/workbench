@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -22,7 +23,10 @@ import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
@@ -92,6 +96,9 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Autowired
   private CohortReviewDao cohortReviewDao;
+
+  @Autowired
+  private ConceptDao conceptDao;
 
   @Autowired
   private ParticipantCohortStatusDao participantCohortStatusDao;
@@ -1368,6 +1375,140 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     assertThat(response2.getNextPageToken()).isNull();
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testMaterializeCohortProcedureConceptSetNoConcepts() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("person_id", "condition_concept_id", "condition_source_concept_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(123456L), 0, makeRequest(fieldSet, 1000));
+  }
+
+  @Test
+  public void testMaterializeCohortProcedureConceptSetNoMatchingConcepts() {
+    Concept concept = new Concept();
+    concept.setConceptId(2L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("person_id", "condition_concept_id", "condition_source_concept_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(2L), 0, makeRequest(fieldSet, 1000));
+    assertResults(response);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortProcedureConceptSetOneStandardConcept() {
+    Concept concept = new Concept();
+    concept.setConceptId(192819L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(192819L), 0, makeRequest(fieldSet, 1000));
+    assertConditionOccurrenceIds(response, 12751439L, 12751440L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortProcedureConceptSetOneStandardConceptMismatch() {
+    Concept concept = new Concept();
+    concept.setConceptId(44829697L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(44829697L), 0, makeRequest(fieldSet, 1000));
+    assertResults(response);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortProcedureConceptSetOneSourceConcept() {
+    Concept concept = new Concept();
+    concept.setConceptId(44829697L);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(44829697L), 0, makeRequest(fieldSet, 1000));
+    assertConditionOccurrenceIds(response, 12751439L, 12751440L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortProcedureConceptSetOneSourceConceptMismatch() {
+    Concept concept = new Concept();
+    concept.setConceptId(192819L);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(192819L), 0, makeRequest(fieldSet, 1000));
+    assertResults(response);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortProcedureConceptSetLotsOfConceptsPaging() {
+    Concept concept = new Concept();
+    concept.setConceptId(1L);
+    conceptDao.save(concept);
+    concept = new Concept();
+    concept.setConceptId(6L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    concept = new Concept();
+    concept.setConceptId(7L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    concept = new Concept();
+    concept.setConceptId(192819L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    concept = new Concept();
+    concept.setConceptId(44829697L);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    tableQuery.setOrderBy(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortRequest request = makeRequest(fieldSet, 4);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(1L, 6L, 7L, 192819L, 44829697L, 12345L),
+        0, request);
+    assertConditionOccurrenceIds(response, 1L, 6L, 7L, 12751439L);
+    assertThat(response.getNextPageToken()).isNotNull();
+    request.setPageToken(response.getNextPageToken());
+    MaterializeCohortResponse response2 = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(1L, 6L, 7L, 192819L, 44829697L, 12345L),
+        0, request);
+    assertConditionOccurrenceIds(response2, 12751440L);
+    assertThat(response2.getNextPageToken()).isNull();
+  }
+
   private ResultFilters makeResultFilters(ColumnFilter columnFilter) {
     ResultFilters result = new ResultFilters();
     result.setColumnFilter(columnFilter);
@@ -1411,6 +1552,15 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     List<Object> expectedResults = new ArrayList<>();
     for (long personId : personIds) {
       expectedResults.add(ImmutableMap.of(CohortMaterializationService.PERSON_ID, personId));
+    }
+    assertThat(response.getResults()).isEqualTo(expectedResults);
+  }
+
+  private void assertConditionOccurrenceIds(MaterializeCohortResponse response,
+      long... conditionOccurrenceIds) {
+    List<Object> expectedResults = new ArrayList<>();
+    for (long conditionOccurrenceId : conditionOccurrenceIds) {
+      expectedResults.add(ImmutableMap.of("condition_occurrence_id", conditionOccurrenceId));
     }
     assertThat(response.getResults()).isEqualTo(expectedResults);
   }
