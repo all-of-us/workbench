@@ -1,11 +1,14 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
+import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 
 import {
   Cohort,
+  CohortListResponse,
   CohortsService,
   Workspace,
   WorkspaceAccessLevel,
@@ -31,6 +34,9 @@ export class CohortListComponent implements OnInit, OnDestroy {
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
 
+  @ViewChild(CohortEditModalComponent)
+  editModal: CohortEditModalComponent;
+
   constructor(
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
@@ -47,9 +53,11 @@ export class CohortListComponent implements OnInit, OnDestroy {
     this.reloadCohorts();
   }
 
-  reloadCohorts(): void {
+  reloadCohorts(): Observable<CohortListResponse> {
     this.cohortsLoading = true;
-    this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
+    this.cohortList = [];
+    const call = this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId);
+    call
       .subscribe(
         cohortsReceived => {
           this.cohortList = cohortsReceived.items.map(function(cohorts) {
@@ -61,6 +69,7 @@ export class CohortListComponent implements OnInit, OnDestroy {
           this.cohortsLoading = false;
           this.cohortsError = true;
         });
+    return call;
   }
 
   ngOnDestroy(): void {
@@ -90,6 +99,13 @@ export class CohortListComponent implements OnInit, OnDestroy {
     this.deleteModal.open();
   }
 
+  beginEdit(cohort: Cohort): void {
+    this.cohortInFocus = cohort;
+
+    // This ensures the cohort binding is picked up before the open resolves.
+    setTimeout(_ => this.editModal.open(), 0);
+  }
+
   receiveDelete($event): void {
     this.deleteCohort($event);
   }
@@ -101,5 +117,10 @@ export class CohortListComponent implements OnInit, OnDestroy {
 
   get actionsDisabled(): boolean {
     return !this.writePermission;
+  }
+
+  updateFinished(): void {
+    this.editModal.close();
+    this.reloadCohorts();
   }
 }

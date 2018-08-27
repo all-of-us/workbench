@@ -1,6 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
@@ -15,6 +15,7 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
+import {CohortEditModalComponent} from '../cohort-edit-modal/component';
 import {CohortListComponent} from '../cohort-list/component';
 import {ConfirmDeleteModalComponent} from '../confirm-delete-modal/component';
 
@@ -68,10 +69,11 @@ describe('CohortListComponent', () => {
       imports: [
         BrowserAnimationsModule,
         RouterTestingModule,
-        FormsModule,
+        ReactiveFormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
+        CohortEditModalComponent,
         CohortListComponent,
         ConfirmDeleteModalComponent
       ],
