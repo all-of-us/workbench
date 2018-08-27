@@ -197,6 +197,14 @@ h5.selection-title {
   padding-bottom: 0.5rem;
 }
 
+.explore-link {
+  padding-bottom: 0.8rem;
+}
+
+.explore-link >a:visited {
+  color: #007cbb;
+}
+
 @media all and (max-width: 900px) {
   .panel {
     flex-flow: column nowrap;
