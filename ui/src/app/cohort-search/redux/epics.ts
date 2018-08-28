@@ -122,10 +122,9 @@ export class CohortSearchEpics {
   fetchDrugCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_DRUG_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId, subtype}: DrugCritRequestAction) => {
-        return this.service.getCriteriaByTypeAndSubtype(cdrVersionId, kind, subtype)
-          .map(result => loadCriteriaRequestResults(
-            kind, parentId, result.items.filter(item => item.parentId === parentId))
-          )
+        return this.service
+          .getCriteriaByTypeAndSubtypeAndParentId(cdrVersionId, kind, subtype, parentId)
+          .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
             .filter(compare({kind, parentId}))
@@ -161,12 +160,12 @@ export class CohortSearchEpics {
     )
   )
 
-  fetchAndSelectChildren: CSEpic = (action$) => (
+  fetchAllChildren: CSEpic = (action$) => (
     action$.ofType(BEGIN_CHILDREN_REQUEST).mergeMap(
-      ({cdrVersionId, id}: ChildrenRequestAction) => {
-        return this.service.getCriteriaByTypeAndParentId(cdrVersionId, 'MEAS', id)
-          .map(result => loadAndSelectChildren(result.items))
-          .catch(e => Observable.of(criteriaRequestError('MEAS', id, e)));
+      ({cdrVersionId, kind, parentId}: ChildrenRequestAction) => {
+        return this.service.getCriteriaChildrenByTypeAndParentId(cdrVersionId, kind, parentId)
+          .map(result => loadAndSelectChildren(parentId, result.items))
+          .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
       }
     )
   )

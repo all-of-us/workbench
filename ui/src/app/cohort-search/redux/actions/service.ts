@@ -59,7 +59,7 @@ export class CohortSearchActions {
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
-  @dispatch() requestAndSelectChildren = ActionFuncs.requestAndSelectChildren;
+  @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
   @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
@@ -248,8 +248,8 @@ export class CohortSearchActions {
     this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
-  fetchAndSelectChildren(id: number): void {
-    this.requestAndSelectChildren(this.cdrVersionId, id);
+  fetchAllChildren(kind: string, parentId: number): void {
+    this.requestAllChildren(this.cdrVersionId, kind, parentId);
   }
 
   fetchAttributes(node: any): void {
