@@ -521,8 +521,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 }
             }
 
-            System.out.println(unitName);
-
             conceptAnalysis.setConceptId(conceptId);
             Iterator it = analysisHashMap.entrySet().iterator();
             while(it.hasNext()) {
