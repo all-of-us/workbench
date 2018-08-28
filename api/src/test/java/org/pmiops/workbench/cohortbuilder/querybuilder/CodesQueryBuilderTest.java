@@ -1,8 +1,5 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.common.collect.ListMultimap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,14 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @Import({CodesQueryBuilder.class})
