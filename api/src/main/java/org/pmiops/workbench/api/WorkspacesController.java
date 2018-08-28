@@ -22,6 +22,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -80,6 +81,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final UserService userService;
+  private final UserRecentResourceService userRecentResourceService;
 
   @Autowired
   WorkspacesController(
@@ -91,7 +93,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
-      UserService userService) {
+      UserService userService,
+      UserRecentResourceService userRecentResourceService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
@@ -101,6 +104,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
     this.userService = userService;
+    this.userRecentResourceService = userRecentResourceService;
   }
 
   @VisibleForTesting
@@ -744,54 +748,60 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<FileDetail> renameNotebook(String workspace, String workspaceName, NotebookRename rename) {
-    String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
-      .getWorkspace()
-      .getBucketName();
-    String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + rename.getName();
     String newName = rename.getNewName();
     if (!newName.matches("^.+\\.ipynb")) {
       newName = newName + ".ipynb";
     }
-    String newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
-    BlobId blobId = BlobId.of(bucket, origPath);
-    cloudStorageService.copyBlob(blobId, BlobId.of(bucket, newPath));
-    cloudStorageService.deleteBlob(blobId);
-    FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(newName);
-    fileDetail.setPath("gs://" + bucket + "/" + NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    fileDetail.setLastModifiedTime(now.getTime());
+    FileDetail fileDetail = performNotebookOperation("rename", workspace, workspaceName, rename.getName(), newName);
     return ResponseEntity.ok(fileDetail);
   }
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName, String notebookName) {
-    String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
-      .getWorkspace()
-      .getBucketName();
-    String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
     String newName = notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
-    String newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
-    BlobId blobId = BlobId.of(bucket, origPath);
-    cloudStorageService.copyBlob(blobId, BlobId.of(bucket, newPath));
-    FileDetail fileDetail = new FileDetail();
-    fileDetail.setName(newName);
-    fileDetail.setPath("gs://" + bucket + "/" + newPath);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    fileDetail.setLastModifiedTime(now.getTime());
+    FileDetail fileDetail = performNotebookOperation("copy", workspace, workspaceName, notebookName, newName);
     return ResponseEntity.ok(fileDetail);
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName, String notebookName) {
+    FileDetail fileDetail = performNotebookOperation("delete", workspace, workspaceName, notebookName, "");
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private FileDetail performNotebookOperation(String operation, String workspace, String workspaceName, String notebookName, String newName) {
     String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
       .getWorkspace()
       .getBucketName();
     String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+    String newPath = "";
+    String fullPath = "";
+    if (!newName.isEmpty()) {
+      newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
+      fullPath = "gs://" + bucket + "/" + newPath;
+    } else {
+      fullPath = "gs://" + bucket + "/" + origPath;
+    }
     BlobId blobId = BlobId.of(bucket, origPath);
-    cloudStorageService.deleteBlob(blobId);
-    return ResponseEntity.ok(new EmptyResponse());
+    long workspaceId;
+    workspaceId = workspaceService.getRequired(workspace, workspaceName).getWorkspaceId();
+    User user = userProvider.get();
+    FileDetail fileDetail = new FileDetail();
+    if (operation == "rename" || operation == "copy") {
+      cloudStorageService.copyBlob(blobId, BlobId.of(bucket, newPath));
+      fileDetail.setName(newName);
+      fileDetail.setPath(fullPath);
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      fileDetail.setLastModifiedTime(now.getTime());
+      userRecentResourceService.updateNotebookEntry(workspaceId, user.getUserId(), fullPath, now);
+    }
+    if (operation == "delete" || operation == "rename") {
+      cloudStorageService.deleteBlob(blobId);
+      userRecentResourceService.deleteNotebookEntry(workspaceId, user.getUserId(), fullPath);
+    }
+    return fileDetail;
   }
+
   /**
    * Returns List of python fileDetails from notebooks folder
    * @param bucketName
