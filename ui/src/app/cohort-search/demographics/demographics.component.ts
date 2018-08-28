@@ -298,7 +298,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         return ;
       }
       includeDeceased
-        ? this.actions.addParameter(this.deceasedNode.set('value', this.deceasedNode.get('name')))
+        ? this.actions.addParameter(this.deceasedNode)
         : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
     }));
   }
