@@ -161,6 +161,7 @@ public class UserRecentResourceServiceTest {
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 0);
   }
+  
   @Test
   public void testFindAllResources() {
     userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory1/notebooks/notebook1", new Timestamp(clock.millis() - 10000));
