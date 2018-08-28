@@ -4,7 +4,23 @@
       The Following Modifiers are Optional
     </div>
     <div *ngFor="let mod of modifiers; let i = index" [formGroupName]="mod.name">
-      <label class="modifier-event-header" [for]="mod.name">{{ mod.label }}</label>
+      <div class="label-flex">
+        <label class="modifier-event-header" [for]="mod.name">{{ mod.label }}</label>
+        <ng-container *ngIf = "mod.label === 'Shifted Event Date'">
+          <small class="name"
+                 [popper]="codesPopper"
+                 [popperTrigger]="'hover'"
+                 [popperPlacement]="'top'">
+            <clr-icon  class="label-info is-solid" shape="info-standard"></clr-icon>
+          </small>
+          <popper-content #codesPopper>
+            <p class="tooltip-text" [style.margin]="'0'">
+              Dates are consistently shifted within a participant’s record
+              by a time period of up to 364 days backwards.
+              The date shift differs across participants.</p>
+          </popper-content>
+        </ng-container>
+      </div>
         <div class="modifier-container">
           <div class="dropdown-width ">
             <clr-dropdown >

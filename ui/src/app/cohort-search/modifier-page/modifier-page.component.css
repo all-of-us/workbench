@@ -32,8 +32,6 @@
 .modifier-event-header {
     color: #262262;
     font-weight: 500;
-    padding-bottom: 0.1rem;
-    padding-top: 1.4rem;
 }
 .modifier-event-indicator {
     border-radius:0.15rem;
@@ -77,8 +75,6 @@
     color: #262262;
     font-size: 14px;
     font-weight: 500;
-    /*line-height: 17px;*/
-
 }
 
 .modifier-calender {
@@ -114,4 +110,18 @@
 
 .date-container {
     width: 8rem !important;
+}
+
+.label-flex {
+    display: flex;
+    padding-top: 1.4rem;
+    padding-bottom: 0.1rem;
+}
+
+.label-flex .label-info {
+    color: #0077b7;
+    margin-left: 0.4rem;
+    width: 1rem;
+    height: 0.7rem;
+
 }
