@@ -4,10 +4,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +19,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
@@ -30,10 +35,14 @@ import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.ResultFilters;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.utils.PaginationToken;
@@ -42,6 +51,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CohortMaterializationService {
+
+  private static final String DOMAIN_CONCEPT_STANDARD = "standard";
+  private static final String DOMAIN_CONCEPT_SOURCE = "source";
 
   @VisibleForTesting
   static final String PERSON_ID = "person_id";
@@ -56,17 +68,20 @@ public class CohortMaterializationService {
   private final AnnotationQueryBuilder annotationQueryBuilder;
   private final ParticipantCohortStatusDao participantCohortStatusDao;
   private final Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider;
+  private final ConceptDao conceptDao;
 
   @Autowired
   public CohortMaterializationService(
       FieldSetQueryBuilder fieldSetQueryBuilder,
       AnnotationQueryBuilder annotationQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao,
-      Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider) {
+      Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider,
+      ConceptDao conceptDao) {
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
     this.annotationQueryBuilder = annotationQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;
     this.cdrSchemaConfigProvider = cdrSchemaConfigProvider;
+    this.conceptDao = conceptDao;
   }
 
   private Set<Long> getParticipantIdsWithStatus(@Nullable CohortReview cohortReview, List<CohortStatus> statusFilter) {
@@ -94,7 +109,8 @@ public class CohortMaterializationService {
     throw new IllegalStateException("Table lacks primary key!");
   }
 
-  private TableQueryAndConfig getTableQueryAndConfig(FieldSet fieldSet) {
+  private TableQueryAndConfig getTableQueryAndConfig(FieldSet fieldSet,
+      @Nullable Set<Long> conceptIds) {
     TableQuery tableQuery;
     if (fieldSet == null) {
       tableQuery = new TableQuery();
@@ -136,6 +152,9 @@ public class CohortMaterializationService {
         tableQuery.setOrderBy(ImmutableList.of(PERSON_ID, primaryKey.name));
       }
     }
+    if (conceptIds != null) {
+      addFilterOnConcepts(tableQuery, conceptIds, tableConfig);
+    }
     return new TableQueryAndConfig(tableQuery, cdrSchemaConfig);
   }
 
@@ -159,29 +178,105 @@ public class CohortMaterializationService {
     }
   }
 
+  private void addFilterOnConcepts(TableQuery tableQuery, Set<Long> conceptIds,
+      TableConfig tableConfig) {
+    String standardConceptColumn = null;
+    String sourceConceptColumn = null;
+    for (ColumnConfig columnConfig : tableConfig.columns) {
+      if (DOMAIN_CONCEPT_STANDARD.equals(columnConfig.domainConcept)) {
+        standardConceptColumn = columnConfig.name;
+        if (sourceConceptColumn != null) {
+          break;
+        }
+      } else if (DOMAIN_CONCEPT_SOURCE.equals(columnConfig.domainConcept)) {
+        sourceConceptColumn = columnConfig.name;
+        if (standardConceptColumn != null) {
+          break;
+        }
+      }
+    }
+    if (standardConceptColumn == null || sourceConceptColumn == null) {
+      throw new ServerErrorException("Couldn't find standard and source concept columns for " +
+          tableQuery.getTableName());
+    }
+
+    Iterable<Concept> concepts = conceptDao.findAll(conceptIds);
+    List<Long> standardConceptIds = Lists.newArrayList();
+    List<Long> sourceConceptIds = Lists.newArrayList();
+    for (Concept concept : concepts) {
+      if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())) {
+        standardConceptIds.add(concept.getConceptId());
+      } else {
+        // We may need to handle classification / concept hierarchy here eventually...
+        sourceConceptIds.add(concept.getConceptId());
+      }
+    }
+    if (standardConceptIds.isEmpty() && sourceConceptIds.isEmpty()) {
+      throw new BadRequestException("Concept set contains no valid concepts");
+    }
+
+    ResultFilters conceptFilters = null;
+    if (!standardConceptIds.isEmpty()) {
+      ColumnFilter standardConceptFilter =
+          new ColumnFilter().columnName(standardConceptColumn)
+              .operator(Operator.IN)
+              .valueNumbers(standardConceptIds.stream().map(id -> new BigDecimal(id))
+                  .collect(Collectors.toList()));
+      conceptFilters = new ResultFilters().columnFilter(standardConceptFilter);
+    }
+    if (!sourceConceptIds.isEmpty()) {
+      ColumnFilter sourceConceptFilter =
+          new ColumnFilter().columnName(sourceConceptColumn)
+              .operator(Operator.IN)
+              .valueNumbers(sourceConceptIds.stream().map(id -> new BigDecimal(id))
+                  .collect(Collectors.toList()));
+      ResultFilters sourceResultFilters = new ResultFilters().columnFilter(sourceConceptFilter);
+      if (conceptFilters == null) {
+        conceptFilters = sourceResultFilters;
+      } else {
+        // If both source and standard concepts are present, match either.
+        conceptFilters = new ResultFilters().anyOf(ImmutableList.of(conceptFilters, sourceResultFilters));
+      }
+    }
+    if (conceptFilters != null) {
+      if (tableQuery.getFilters() == null) {
+        tableQuery.setFilters(conceptFilters);
+      } else {
+        // If both concept filters and other filters are requested, require results to match both.
+        tableQuery.setFilters(new ResultFilters().allOf(
+            ImmutableList.of(tableQuery.getFilters(), conceptFilters)));
+      }
+    }
+  }
+
 
   /**
    * Materializes a cohort.
    * @param cohortReview {@link CohortReview} representing a manual review of participants in the cohort.
    * @param cohortSpec JSON representing the cohort criteria.
+   * @param conceptIds an optional set of IDs for concepts used to filter results by
+   * (in addition to the filtering specified in {@param cohortSpec})
    * @param request {@link MaterializeCohortRequest} representing the request options
    * @return {@link MaterializeCohortResponse} containing the results of cohort materialization
    */
   public MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
-      String cohortSpec, MaterializeCohortRequest request) {
+      String cohortSpec, @Nullable Set<Long> conceptIds, MaterializeCohortRequest request) {
     SearchRequest searchRequest;
     try {
       searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
     } catch (JsonSyntaxException e) {
       throw new BadRequestException("Invalid cohort spec");
     }
-    return materializeCohort(cohortReview, searchRequest, cohortSpec.hashCode(), request);
+    return materializeCohort(cohortReview, searchRequest, conceptIds,
+        Objects.hash(cohortSpec, conceptIds), request);
   }
 
   /**
    * Materializes a cohort.
    * @param cohortReview {@link CohortReview} representing a manual review of participants in the cohort.
    * @param searchRequest {@link SearchRequest} representing the cohort criteria
+   * @param conceptIds an optional set of IDs for concepts used to filter results by
+   *    * (in addition to the filtering specified in {@param searchRequest})
    * @param requestHash a number representing a stable hash of the request; used to enforce that pagination
    *   tokens are used appropriately
    * @param request {@link MaterializeCohortRequest} representing the request
@@ -189,7 +284,8 @@ public class CohortMaterializationService {
    */
   @VisibleForTesting
   MaterializeCohortResponse materializeCohort(@Nullable CohortReview cohortReview,
-      SearchRequest searchRequest, int requestHash, MaterializeCohortRequest request) {
+      SearchRequest searchRequest, @Nullable Set<Long> conceptIds,
+      int requestHash, MaterializeCohortRequest request) {
     long offset = 0L;
     FieldSet fieldSet = request.getFieldSet();
     List<CohortStatus> statusFilter = request.getStatusFilter();
@@ -231,8 +327,8 @@ public class CohortMaterializationService {
         // return an empty response.
         return response;
       }
-      results = fieldSetQueryBuilder.materializeTableQuery(getTableQueryAndConfig(fieldSet),
-          criteria, limit, offset);
+      results = fieldSetQueryBuilder.materializeTableQuery(getTableQueryAndConfig(fieldSet,
+          conceptIds), criteria, limit, offset);
     } else if (fieldSet.getAnnotationQuery() != null) {
       if (cohortReview == null) {
         // There is no cohort review, so there are no annotations; return empty results.
