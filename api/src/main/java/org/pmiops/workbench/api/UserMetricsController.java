@@ -28,6 +28,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   WorkspaceService workspaceService;
   FireCloudService fireCloudService;
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks/";
+  private final int DISTINCT_WORKSPACE_LIMIT = 5;
 
   @Autowired
   UserMetricsController(Provider<User> userProvider,
@@ -42,6 +43,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   /**
    * Gets the list of all resources recently access by user in order of access date time
+   *
    * @return
    */
   @Override
@@ -53,9 +55,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .stream()
         .map(UserRecentResource::getWorkspaceId)
         .distinct()
+        .limit(DISTINCT_WORKSPACE_LIMIT)
         .collect(Collectors.toList());
 
-    Map<Long, String>  workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
+    Map<Long, String> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
       Workspace workspace = workspaceService.findByWorkspaceId((long) id);
       WorkspaceResponse workspaceResponse = fireCloudService
           .getWorkspace(workspace.getWorkspaceNamespace(),
@@ -74,26 +77,27 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   //Converts DB model to client Model
   private final Function<UserRecentResource, RecentResource> TO_CLIENT =
       userRecentResource -> {
-        RecentResource response = new RecentResource();
-        response.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
+        RecentResource resource = new RecentResource();
+        resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
         if (userRecentResource.getNotebookName() != null) {
           FileDetail fileDetail = new FileDetail();
           String[] notebookDetails = userRecentResource.getNotebookName().split(NOTEBOOKS_WORKSPACE_DIRECTORY);
           fileDetail.setPath(notebookDetails[0] + NOTEBOOKS_WORKSPACE_DIRECTORY);
           fileDetail.setName(notebookDetails[1]);
-          response.setNotebook(fileDetail);
+          resource.setNotebook(fileDetail);
         }
-        response.setModifiedTime(userRecentResource.getLastAccessDate().toString());
-        response.setWorkspaceId(userRecentResource.getWorkspaceId());
-        return response;
+        resource.setModifiedTime(userRecentResource.getLastAccessDate().toString());
+        resource.setWorkspaceId(userRecentResource.getWorkspaceId());
+        return resource;
       };
 
   private static final Function<org.pmiops.workbench.db.model.Cohort, Cohort> TO_CLIENT_COHORT =
       new Function<org.pmiops.workbench.db.model.Cohort, Cohort>() {
         @Override
         public Cohort apply(org.pmiops.workbench.db.model.Cohort cohort) {
-          if(cohort == null)
+          if (cohort == null) {
             return null;
+          }
           Cohort result = new Cohort()
               .etag(Etags.fromVersion(cohort.getVersion()))
               .lastModifiedTime(cohort.getLastModifiedTime().getTime())
