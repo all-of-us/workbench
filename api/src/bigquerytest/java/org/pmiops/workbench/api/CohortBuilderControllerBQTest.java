@@ -531,9 +531,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoAgeNoAttribute() throws Exception {
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    Period period = new Period(birthDate, now);
     Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
     SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
@@ -548,9 +545,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoAgeNoAttributeOperands() throws Exception {
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    Period period = new Period(birthDate, now);
     Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
     SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
     demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL)));
