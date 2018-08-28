@@ -1,31 +1,48 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 
 import {Cohort, CohortsService, Workspace} from 'generated';
 
-@Component({templateUrl: './component.html'})
-export class CohortEditComponent {
+@Component({
+  selector: 'app-cohort-edit-modal',
+  styleUrls: ['./component.css',
+    '../../styles/buttons.css',
+    '../../styles/inputs.css'],
+  templateUrl: './component.html'
+})
+export class CohortEditModalComponent {
   /* Properties */
   loading = false;
   form: FormGroup;
+  @Input() cohort: any;
+  @Output() updateFinished = new EventEmitter<any>();
+  editing = false;
 
   /* Convenience property aliases */
   get name(): FormControl         { return this.form.get('name') as FormControl; }
   get description(): FormControl  { return this.form.get('description') as FormControl; }
-  get cohort(): Cohort            { return this.route.snapshot.data.cohort; }
   get workspace(): Workspace      { return this.route.snapshot.data.workspace; }
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private fb: FormBuilder,
     private cohortService: CohortsService,
   ) {
     this.form = fb.group({
-      name: [this.cohort.name, Validators.required],
-      description: this.cohort.description || '',
+      name: ['', Validators.required],
+      description: '',
     });
+  }
+
+  open(): void {
+    this.editing = true;
+    this.loading = false;
+    this.form.setValue({name: this.cohort.name, description: this.cohort.description});
+  }
+
+  close(): void {
+    this.editing = false;
   }
 
   save(): void {
@@ -45,21 +62,16 @@ export class CohortEditComponent {
     );
 
     call.do(_ => this.loading = false)
-      .subscribe(_ => this.backToWorkspace());
-  }
-
-  revert(): void {
-    this.name.setValue(this.cohort.name);
-    this.description.setValue(this.cohort.description);
-  }
-
-  backToWorkspace(): void {
-    this.router.navigate(['workspaces', this.workspace.namespace, this.workspace.id]);
+      .subscribe(_ => this.updateFinished.emit());
   }
 
   get canSave(): boolean {
-    const nameHasChanged = this.name.value !== this.cohort.name;
-    const descHasChanged = this.description.value !== this.cohort.description;
-    return this.form.valid && (nameHasChanged || descHasChanged);
+    if (this.editing) {
+      const nameHasChanged = this.name.value !== this.cohort.name;
+      const descHasChanged = this.description.value !== this.cohort.description;
+      return this.form.valid && (nameHasChanged || descHasChanged) && !this.loading;
+    } else {
+      return false;
+    }
   }
 }
