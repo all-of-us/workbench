@@ -73,7 +73,9 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     ListMultimap<DemoType, Object> paramMap = getMappedParameters(parameters.getParameters());
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     List<String> queryParts = new ArrayList<>();
-    boolean containsAge = false;
+    if (paramMap.keySet().contains(DemoType.AGE) && paramMap.keySet().contains(DemoType.DEC)) {
+      throw new BadRequestException("Cannot select age and deceased in the same context.");
+    }
 
     for (DemoType key : paramMap.keySet()) {
       String namedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
