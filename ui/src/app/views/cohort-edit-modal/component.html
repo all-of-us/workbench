@@ -10,6 +10,7 @@
         <input autofocus
                type="text"
                name="name"
+               class="name-input"
                formControlName="name">
       </div>
       <div class="section">
@@ -29,7 +30,7 @@
         </button>
         <button
             type="submit"
-            class="btn btn-primary"
+            class="btn btn-primary btn-save"
             title="{{ canSave ? 'Save Edits' : 'Edits are invalid or have not been made'}}"
             [clrLoading]="loading"
             [disabled]="!canSave"
