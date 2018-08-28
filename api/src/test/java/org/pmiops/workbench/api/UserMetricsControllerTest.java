@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
-import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
@@ -45,8 +44,6 @@ public class UserMetricsControllerTest {
   private UserRecentResourceService userRecentResourceService;
   @Mock
   private Provider<User> userProvider;
-  @Mock
-  private CohortService cohortService;
   @Mock
   private FireCloudService fireCloudService;
   @Mock
