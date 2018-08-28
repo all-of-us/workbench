@@ -280,7 +280,7 @@ public class CohortsController implements CohortsApiDelegate {
         ConceptSet conceptSet = conceptSetDao.findConceptSetByNameAndWorkspaceId(conceptSetName,
             workspace.getWorkspaceId());
         if (conceptSet == null) {
-          throw new BadRequestException(
+          throw new NotFoundException(
               String.format("Couldn't find concept set with name %s in workspace %s/%s",
                  conceptSetName, workspaceNamespace, workspaceId));
         }

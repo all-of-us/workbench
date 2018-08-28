@@ -486,7 +486,7 @@ public class CohortsControllerTest {
         request);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = NotFoundException.class)
   public void testMaterializeCohortNamedCohortWithConceptSetNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();

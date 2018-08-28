@@ -1376,7 +1376,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testMaterializeCohortProcedureConceptSetNoConcepts() {
+  public void testMaterializeCohortConceptSetNoConcepts() {
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("condition_occurrence");
     tableQuery.setColumns(ImmutableList.of("person_id", "condition_concept_id", "condition_source_concept_id"));
@@ -1387,7 +1387,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortProcedureConceptSetNoMatchingConcepts() {
+  public void testMaterializeCohortConceptSetNoMatchingConcepts() {
     Concept concept = new Concept();
     concept.setConceptId(2L);
     concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
@@ -1404,7 +1404,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortProcedureConceptSetOneStandardConcept() {
+  public void testMaterializeCohortConceptSetOneStandardConcept() {
     Concept concept = new Concept();
     concept.setConceptId(192819L);
     concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
@@ -1421,7 +1421,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortProcedureConceptSetOneStandardConceptMismatch() {
+  public void testMaterializeCohortConceptSetOneStandardConceptMismatch() {
     Concept concept = new Concept();
     concept.setConceptId(44829697L);
     concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
@@ -1438,7 +1438,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortProcedureConceptSetOneSourceConcept() {
+  public void testMaterializeCohortConceptSetOneSourceConcept() {
     Concept concept = new Concept();
     concept.setConceptId(44829697L);
     conceptDao.save(concept);
@@ -1454,7 +1454,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortProcedureConceptSetOneSourceConceptMismatch() {
+  public void testMaterializeCohortConceptSetOneSourceConceptMismatch() {
     Concept concept = new Concept();
     concept.setConceptId(192819L);
     conceptDao.save(concept);
@@ -1470,7 +1470,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void testMaterializeCohortProcedureConceptSetLotsOfConceptsPaging() {
+  public void testMaterializeCohortConceptSetLotsOfConceptsPaging() {
     Concept concept = new Concept();
     concept.setConceptId(1L);
     conceptDao.save(concept);
