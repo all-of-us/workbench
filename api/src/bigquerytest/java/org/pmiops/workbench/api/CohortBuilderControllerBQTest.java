@@ -534,7 +534,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
     Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
     SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
@@ -552,7 +551,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
     Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
     SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
     demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL)));
