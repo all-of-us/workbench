@@ -233,8 +233,6 @@ public class WorkspacesControllerTest {
   UserRecentResourceService userRecentResourceService;
   @Autowired
   CohortReviewController cohortReviewController;
-  @Mock
-  WorkspaceService workspaceService;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
