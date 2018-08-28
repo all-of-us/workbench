@@ -29,7 +29,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   WorkspaceService workspaceService;
   FireCloudService fireCloudService;
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks/";
-  private int distinctworkspacelimit = 5;
+  private int distinctWorkspacelimit = 5;
 
   @Autowired
   UserMetricsController(Provider<User> userProvider,
@@ -44,7 +44,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   @VisibleForTesting
   public void setDistinctWorkspaceLimit(int limit) {
-    distinctworkspacelimit = limit;
+    distinctWorkspacelimit = limit;
   }
 
   /**
@@ -60,7 +60,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .stream()
         .map(UserRecentResource::getWorkspaceId)
         .distinct()
-        .limit(distinctworkspacelimit)
+        .limit(distinctWorkspacelimit)
         .collect(Collectors.toList());
 
     Map<Long, String> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
