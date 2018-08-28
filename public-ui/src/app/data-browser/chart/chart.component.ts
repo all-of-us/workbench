@@ -6,6 +6,7 @@ import 'highcharts/adapters/standalone-framework.src';
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {DbConstantsService} from '../../utils/db-constants.service';
+import {hasOwnProperty} from "tslint/lib/utils";
 
 
 @Component({
@@ -420,7 +421,7 @@ export class ChartComponent implements OnChanges {
     };
 
     // Unit for measurements is in stratum5
-    const unit: string = this.analysis.results[0].stratum5;
+    const unit: string = this.hasOwnProperty('unitName') ? this.analysis.unitName : '';
     const series: any = {
       name: this.analysis.analysisName,
       colorByPoint: true,
