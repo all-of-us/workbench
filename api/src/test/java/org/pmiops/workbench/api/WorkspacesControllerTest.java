@@ -1394,6 +1394,7 @@ public class WorkspacesControllerTest {
     String newName = "nb2.ipynb";
     String newPath = "notebooks/nb2.ipynb";
     String fullPath = "gs://workspace-bucket/" + newPath;
+    String origFullPath = "gs://workspace-bucket/" + nb1;
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
@@ -1401,7 +1402,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(1, 1, fullPath, Timestamp.from(NOW));
-    verify(userRecentResourceService).deleteNotebookEntry(1, 1, fullPath);
+    verify(userRecentResourceService).deleteNotebookEntry(1, 1, origFullPath);
   }
 
   @Test
@@ -1414,6 +1415,7 @@ public class WorkspacesControllerTest {
     String newName = "nb2";
     String newPath = "notebooks/nb2.ipynb";
     String fullPath = "gs://workspace-bucket/" + newPath;
+    String origFullPath = "gs://workspace-bucket/" + nb1;
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
@@ -1421,7 +1423,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(1, 1, fullPath, Timestamp.from(NOW));
-    verify(userRecentResourceService).deleteNotebookEntry(1, 1, fullPath);
+    verify(userRecentResourceService).deleteNotebookEntry(1, 1, origFullPath);
   }
 
   @Test

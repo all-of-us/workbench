@@ -8,8 +8,10 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -752,54 +754,63 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (!newName.matches("^.+\\.ipynb")) {
       newName = newName + ".ipynb";
     }
-    FileDetail fileDetail = performNotebookOperation("rename", workspace, workspaceName, rename.getName(), newName);
+    FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, rename.getName(), newName);
+    notebookDeleteOperation(workspace, workspaceName, rename.getName());
     return ResponseEntity.ok(fileDetail);
   }
 
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName, String notebookName) {
     String newName = notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
-    FileDetail fileDetail = performNotebookOperation("copy", workspace, workspaceName, notebookName, newName);
+    FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, notebookName, newName);
     return ResponseEntity.ok(fileDetail);
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName, String notebookName) {
-    performNotebookOperation("delete", workspace, workspaceName, notebookName, "");
+    notebookDeleteOperation(workspace, workspaceName, notebookName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  private FileDetail performNotebookOperation(String operation, String workspace, String workspaceName, String notebookName, String newName) {
+  private FileDetail notebookCloneOperation(String workspace, String workspaceName, String notebookName, String newName) {
+    Map<String, Object> map = notebookOpSetup(workspace, workspaceName, notebookName, newName);
+    FileDetail fileDetail = new FileDetail();
+    cloudStorageService.copyBlob((BlobId) map.get("blobId"), (BlobId) map.get("newBlobId"));
+    fileDetail.setName(newName);
+    fileDetail.setPath(map.get("fullPath").toString());
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    fileDetail.setLastModifiedTime(now.getTime());
+    userRecentResourceService.updateNotebookEntry(objToLong(map.get("workspaceId")), objToLong(map.get("userId")), map.get("fullPath").toString(), now);
+    return fileDetail;
+  }
+
+  private void notebookDeleteOperation(String workspace, String workspaceName, String notebookName) {
+    Map<String, Object> map = notebookOpSetup(workspace, workspaceName, notebookName, "");
+    cloudStorageService.deleteBlob((BlobId) map.get("blobId"));
+    userRecentResourceService.deleteNotebookEntry(objToLong(map.get("workspaceId")), objToLong(map.get("userId")), map.get("fullPath").toString());
+  }
+
+  private long objToLong(Object object) {
+    return Long.parseLong(String.valueOf(object));
+  }
+
+  private Map<String, Object> notebookOpSetup(String workspace, String workspaceName, String notebookName, String newName) {
+    Map<String, Object> response = new HashMap<>();
     String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
       .getWorkspace()
       .getBucketName();
-    String origPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
-    String newPath = "";
-    String fullPath = "";
-    if (!newName.isEmpty()) {
-      newPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
-      fullPath = "gs://" + bucket + "/" + newPath;
-    } else {
-      fullPath = "gs://" + bucket + "/" + origPath;
-    }
-    BlobId blobId = BlobId.of(bucket, origPath);
-    long workspaceId;
-    workspaceId = workspaceService.getRequired(workspace, workspaceName).getWorkspaceId();
-    User user = userProvider.get();
-    FileDetail fileDetail = new FileDetail();
-    if ("rename".equals(operation) || "copy".equals(operation)) {
-      cloudStorageService.copyBlob(blobId, BlobId.of(bucket, newPath));
-      fileDetail.setName(newName);
-      fileDetail.setPath(fullPath);
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      fileDetail.setLastModifiedTime(now.getTime());
-      userRecentResourceService.updateNotebookEntry(workspaceId, user.getUserId(), fullPath, now);
-    }
-    if ("delete".equals(operation) || "rename".equals(operation)) {
-      cloudStorageService.deleteBlob(blobId);
-      userRecentResourceService.deleteNotebookEntry(workspaceId, user.getUserId(), fullPath);
-    }
-    return fileDetail;
+    String origBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+    String newBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
+    String pathStart = "gs://" + bucket + "/";
+    String origPath = pathStart + origBlobPath;
+    String newPath = pathStart + newBlobPath;
+    String fullPath = (newName.isEmpty()) ? origPath : newPath;
+    response.put("blobId", BlobId.of(bucket, origBlobPath));
+    response.put("newBlobId", BlobId.of(bucket, newBlobPath));
+    response.put("fullPath", fullPath);
+    response.put("userId", userProvider.get().getUserId());
+    response.put("workspaceId", workspaceService.getRequired(workspace, workspaceName).getWorkspaceId());
+    return response;
   }
 
   /**
