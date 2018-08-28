@@ -159,6 +159,8 @@ public class WorkspacesControllerTest {
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   private WorkspacesController workspacesController;
+  @Mock
+  WorkspaceService workspaceService;
 
   @TestConfiguration
   @Import({
@@ -231,8 +233,6 @@ public class WorkspacesControllerTest {
   UserRecentResourceService userRecentResourceService;
   @Autowired
   CohortReviewController cohortReviewController;
-  @Mock
-  WorkspaceService workspaceService;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
