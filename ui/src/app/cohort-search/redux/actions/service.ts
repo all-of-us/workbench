@@ -4,11 +4,7 @@ import {DomainType} from 'generated';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-<<<<<<< HEAD
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../../constant';
-=======
-import {CRITERIA_TYPES, CRITERIA_SUBTYPES} from '../../constant';
->>>>>>> RW-1240 adding more tests.
 
 import {
   activeGroupId,
