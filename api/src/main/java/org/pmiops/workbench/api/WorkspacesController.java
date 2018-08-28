@@ -8,8 +8,10 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -780,7 +782,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fileDetail.setLastModifiedTime(now.getTime());
     userRecentResourceService.updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
     return fileDetail;
-  }
+ }
 
   private void notebookDeleteOperation(String workspace, String workspaceName, String notebookName) {
     NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, "");

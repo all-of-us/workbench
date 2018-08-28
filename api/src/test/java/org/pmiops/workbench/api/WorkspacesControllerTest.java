@@ -1396,25 +1396,17 @@ public class WorkspacesControllerTest {
     String newName = "nb2.ipynb";
     String newPath = "notebooks/nb2.ipynb";
     String fullPath = "gs://workspace-bucket/" + newPath;
-<<<<<<< HEAD
     String origFullPath = "gs://workspace-bucket/" + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
-=======
->>>>>>> first attempt
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-<<<<<<< HEAD
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
     verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
-=======
-    verify(userRecentResourceService).updateNotebookEntry(1, 1, fullPath, Timestamp.from(NOW));
-    verify(userRecentResourceService).deleteNotebookEntry(1, 1, fullPath);
->>>>>>> first attempt
   }
 
   @Test
@@ -1427,25 +1419,17 @@ public class WorkspacesControllerTest {
     String newName = "nb2";
     String newPath = "notebooks/nb2.ipynb";
     String fullPath = "gs://workspace-bucket/" + newPath;
-<<<<<<< HEAD
     String origFullPath = "gs://workspace-bucket/" + nb1;
     long workspaceIdInDb = 1;
     long userIdInDb = 1;
-=======
->>>>>>> first attempt
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-<<<<<<< HEAD
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
     verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
-=======
-    verify(userRecentResourceService).updateNotebookEntry(1, 1, fullPath, Timestamp.from(NOW));
-    verify(userRecentResourceService).deleteNotebookEntry(1, 1, fullPath);
->>>>>>> first attempt
   }
 
   @Test
