@@ -116,10 +116,10 @@ export const requestIngredientsForBrand =
   ): ActionTypes[typeof BEGIN_INGREDIENT_REQUEST] =>
   ({type: BEGIN_INGREDIENT_REQUEST, cdrVersionId, conceptId});
 
-export const requestAndSelectChildren =
-  (cdrVersionId: number, id: number
+export const requestAllChildren =
+  (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_CHILDREN_REQUEST] =>
-  ({type: BEGIN_CHILDREN_REQUEST, cdrVersionId, id});
+  ({type: BEGIN_CHILDREN_REQUEST, cdrVersionId, kind, parentId});
 
 export const loadAutocompleteOptions =
   (options: any
@@ -141,9 +141,9 @@ export const loadIngredients =
   ({type: LOAD_INGREDIENT_LIST, ingredients});
 
 export const loadAndSelectChildren =
-  (children: any
+  (parentId: number, children: any
   ): ActionTypes[typeof LOAD_CHILDREN_LIST] =>
-  ({type: LOAD_CHILDREN_LIST, children});
+  ({type: LOAD_CHILDREN_LIST, parentId, children});
 
 export const loadAttributes =
   (node: any, attributes: any

@@ -24,6 +24,7 @@ import {
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
+  BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
@@ -128,6 +129,9 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
 
+      case BEGIN_CHILDREN_REQUEST:
+        return state;
+
       case LOAD_AUTOCOMPLETE_OPTIONS:
         return state
           .setIn(['criteria', 'search', 'options'], action.options)
@@ -143,6 +147,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'search', 'autocomplete']);
 
       case LOAD_CHILDREN_LIST:
+        console.log(action.parentId);
         action.children.forEach(child => {
           child.parameterId = `param${child.id}`;
           state = state
@@ -152,7 +157,18 @@ export const rootReducer: Reducer<CohortSearchState> =
               List(),
               paramList => paramList.includes(child.parameterId)
                 ? paramList
-                : paramList.push(child.parameterId);
+                : paramList.push(child.parameterId));
+          const path = child.path.split('.');
+          const parents = path.slice(path.indexOf(action.parentId.toString()));
+          parents.forEach(parentId => {
+            state = state
+              .updateIn(
+                ['wizard', 'item', 'selectedParents'],
+                List(),
+                parentIdList => parentIdList.includes(parentId)
+                  ? parentIdList
+                  : parentIdList.push(parentId));
+          });
         });
         return state;
 

@@ -65,7 +65,7 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/children/{id}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/children/{parentId}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:

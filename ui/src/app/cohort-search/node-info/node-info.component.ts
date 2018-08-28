@@ -14,7 +14,13 @@ import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
-import {CohortSearchActions, CohortSearchState, isParameterActive, subtreeSelected} from '../redux';
+import {
+  CohortSearchActions,
+  CohortSearchState,
+  isParameterActive,
+  isSelectedParent,
+  subtreeSelected
+} from '../redux';
 import {stripHtml} from '../utils';
 
 /*
@@ -41,6 +47,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly domainType = DomainType;
   readonly criteriaTypes = CRITERIA_TYPES;
   private isSelected: boolean;
+  private isSelectedParent: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
@@ -60,6 +67,13 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .map(val => noAttr && val)
       .subscribe(val => {
         this.isSelected = val;
+      });
+
+    this.subscription = this.ngRedux
+      .select(isSelectedParent(this.node.get('id')))
+      .map(val => noAttr && val)
+      .subscribe(val => {
+        this.isSelectedParent = val;
       });
 
     this.subscription.add(this.selected$
@@ -157,7 +171,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        */
 
       if (this.node.get('type') === DomainType.DRUG && this.node.get('group')) {
-        this.actions.fetchAndSelectChildren(this.node.get('id'));
+        this.actions.fetchAllChildren(DomainType[DomainType.DRUG], this.node.get('id'));
       } else {
         let attributes = [];
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {

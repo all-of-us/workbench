@@ -128,7 +128,8 @@ export interface ActionTypes {
   BEGIN_CHILDREN_REQUEST: {
     type: typeof BEGIN_CHILDREN_REQUEST;
     cdrVersionId: number;
-    id: number;
+    kind: string;
+    parentId: number;
   };
   LOAD_AUTOCOMPLETE_OPTIONS: {
     type: typeof LOAD_AUTOCOMPLETE_OPTIONS;
@@ -151,6 +152,7 @@ export interface ActionTypes {
   };
   LOAD_CHILDREN_LIST: {
     type: typeof LOAD_CHILDREN_LIST;
+    parentId: number;
     children: any;
   };
   LOAD_ATTRIBUTE_LIST: {
