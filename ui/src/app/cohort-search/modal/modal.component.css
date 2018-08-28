@@ -75,6 +75,7 @@
 .nav-link {
   margin-bottom: -4px!important;
 }
+
 button{
   font-weight:300!important;
 }
@@ -195,6 +196,14 @@ h5.selection-title {
   color: #262262;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.explore-link {
+  padding-bottom: 0.8rem;
+}
+
+.explore-link >a:visited {
+  color: #007cbb;
 }
 
 @media all and (max-width: 900px) {

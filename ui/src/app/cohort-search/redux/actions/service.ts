@@ -4,7 +4,7 @@ import {DomainType} from 'generated';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {CRITERIA_TYPES} from '../../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -450,7 +450,8 @@ export class CohortSearchActions {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
       name: immParam.get('name', ''),
-      value: immParam.get('code'),
+      value: CRITERIA_SUBTYPES.DEC === immParam.get('subtype')
+          ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
