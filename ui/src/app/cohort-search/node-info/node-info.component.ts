@@ -105,7 +105,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get paramId() {
-    return `param${this.node.get('id')}`;
+    return `param${this.node.get('conceptId') ? this.node.get('conceptId') : this.node.get('id')}`;
   }
 
   get selectable() {
@@ -193,7 +193,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selectChildren(child);
       });
     } else {
-      const param = node.set('parameterId', `param${node.get('id')}`);
+      const param = node.set('parameterId', `param${(node.get('conceptId')
+        ? node.get('conceptId') : node.get('id'))}`);
       this.actions.addParameter(param);
     }
   }
