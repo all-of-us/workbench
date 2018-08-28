@@ -482,6 +482,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsDemoDecNoValue() throws Exception {
+    Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
+    SearchParameter demo = createSearchParameter(demoGender, "");
+    SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Dec must provide a value of: Deceased");
+    }
+  }
+
+  @Test
   public void countSubjectsDemoAge() throws Exception {
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
@@ -492,6 +506,64 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+  }
+
+  @Test
+  public void countSubjectsDemoAgeAndDeceased() throws Exception {
+    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime now = new DateTime();
+    Period period = new Period(birthDate, now);
+    Integer age = period.getYears();
+    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoDec = createDemoCriteria("DEMO", "DEC", null);
+    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
+    SearchParameter demoDecParameter = createSearchParameter(demoDec, null);
+    demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
+    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter, demoDecParameter), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Cannot select age and deceased in the same context.");
+    }
+  }
+
+  @Test
+  public void countSubjectsDemoAgeNoAttribute() throws Exception {
+    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime now = new DateTime();
+    Period period = new Period(birthDate, now);
+    Integer age = period.getYears();
+    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
+    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Age must provide an operator and operands.");
+    }
+  }
+
+  @Test
+  public void countSubjectsDemoAgeNoAttributeOperands() throws Exception {
+    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime now = new DateTime();
+    Period period = new Period(birthDate, now);
+    Integer age = period.getYears();
+    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
+    demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL)));
+    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Age must provide an operator and operands.");
+    }
   }
 
   @Test
