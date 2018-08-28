@@ -81,16 +81,17 @@
   <div class="row">
     <div class="col-lg-2 ">
       <button type="button"
-        class="btn calculate-btn"
+        class="btn calculate-btn btn-primary"
+        [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
-        [disabled] = "!formChanges">
+        [disabled] = "!formChanges || preview.get('requesting')">
         Calculate
       </button>
     </div>
-    <div class="spin-top-padding">
-      <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading... </span>
-    </div>
-    <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
+    <!--<div class="spin-top-padding">-->
+      <!--<span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading... </span>-->
+    <!--</div>-->
+    <div class="col-lg-8 text-padding" *ngIf="preview.get('requesting') || preview.get('count') >= 0">
       <div class="result-text">
         Results
       </div>
