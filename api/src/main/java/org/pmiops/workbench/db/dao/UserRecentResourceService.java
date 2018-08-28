@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public interface UserRecentResourceService {
 
-  void updateNotebookEntry(long workspaceId, long userId, String notebookName, Timestamp lastAccessDateTime);
+  void updateNotebookEntry(long workspaceId, long userId, String notebookNameWithPath, Timestamp lastAccessDateTime);
 
   void updateCohortEntry(long workspaceId, long userId, long cohortId, Timestamp lastAccessDateTime);
 

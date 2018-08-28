@@ -84,10 +84,10 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testInsertNotebookEntry() {
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook1", new Timestamp(clock.millis()));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory/notebooks/notebook1", new Timestamp(clock.millis()));
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 1);
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook2", new Timestamp(clock.millis()));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory/notebooks/notebook2", new Timestamp(clock.millis()));
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 2);
 
@@ -107,11 +107,11 @@ public class UserRecentResourceServiceTest {
   @Test
   public void testUpdateNotebookAccessTime() {
 
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook1", new Timestamp(clock.millis()));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory/notebooks/notebook1", new Timestamp(clock.millis()));
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 1);
     clock.increment(200);
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook1", new Timestamp(clock.millis()));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory/notebooks/notebook1", new Timestamp(clock.millis()));
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 1);
   }
@@ -121,14 +121,14 @@ public class UserRecentResourceServiceTest {
     Workspace newWorkspace = new Workspace();
     newWorkspace.setWorkspaceId(2l);
     workspaceDao.save(newWorkspace);
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook", new Timestamp(clock.millis()));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory1/notebooks/notebook", new Timestamp(clock.millis()));
     clock.increment(2000);
     userRecentResourceService.updateNotebookEntry(2l, userId, "notebooks", new Timestamp(clock.millis()));
     userRecentResourceService.updateCohortEntry(workspaceId, userId, cohortId, new Timestamp(clock.millis()));
     int count = userRecentResourceService.getUserEntryCount() - 3;
     while(count-- >= 0 ){
       clock.increment(2000);
-      userRecentResourceService.updateNotebookEntry(workspaceId,userId, "notebook"+count,
+      userRecentResourceService.updateNotebookEntry(workspaceId,userId, "gs://someDirectory1/notebooks/notebook"+count,
           new Timestamp(clock.millis()));
     }
 
@@ -136,19 +136,19 @@ public class UserRecentResourceServiceTest {
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount,  userRecentResourceService.getUserEntryCount());
 
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebookExtra", new Timestamp(clock.millis()));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory/notebooks/notebookExtra", new Timestamp(clock.millis()));
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount,  userRecentResourceService.getUserEntryCount());
-    UserRecentResource cache = userRecentResourceService.getDao().findByUserIdAndWorkspaceIdAndNotebookName(workspaceId, userId, "notebook");
+    UserRecentResource cache = userRecentResourceService.getDao().findByUserIdAndWorkspaceIdAndNotebookName(workspaceId, userId, "gs://someDirectory1/notebooks/notebook");
     assertNull(cache);
   }
 
   @Test
   public void testDeleteNotebookEntry() {
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook1", new Timestamp(clock.millis()));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory1/notebooks/notebook1", new Timestamp(clock.millis()));
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 1);
-    userRecentResourceService.deleteNotebookEntry(workspaceId, userId, "notebook1");
+    userRecentResourceService.deleteNotebookEntry(workspaceId, userId, "gs://someDirectory1/notebooks/notebook1");
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 0);
   }
@@ -157,23 +157,23 @@ public class UserRecentResourceServiceTest {
   public void testDeleteNonExistentNotebookEntry() {
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 0);
-    userRecentResourceService.deleteNotebookEntry(workspaceId, userId, "notebook");
+    userRecentResourceService.deleteNotebookEntry(workspaceId, userId, "gs://someDirectory1/notebooks/notebook");
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 0);
   }
   @Test
   public void testFindAllResources() {
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook1", new Timestamp(clock.millis() - 10000));
-    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "notebook2", new Timestamp(clock.millis() + 10000));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory1/notebooks/notebook1", new Timestamp(clock.millis() - 10000));
+    userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory1/notebooks/notebook2", new Timestamp(clock.millis() + 10000));
     userRecentResourceService.updateCohortEntry(workspaceId, userId, cohortId , new Timestamp(clock.millis()));
     newUser.setUserId(78l);
     userDao.save(newUser);
     userRecentResourceService.updateCohortEntry(workspaceId, 78l, cohortId, new Timestamp(clock.millis()));
     List<UserRecentResource> resources = userRecentResourceService.findAllResourcesByUser(userId);
     assertEquals(resources.size(), 3);
-    assertEquals(resources.get(0).getNotebookName(), "notebook2");
+    assertEquals(resources.get(0).getNotebookName(), "gs://someDirectory1/notebooks/notebook2");
     assertEquals(resources.get(1).getCohort().getCohortId(), cohortId.longValue());
-    assertEquals(resources.get(2).getNotebookName(), "notebook1");
+    assertEquals(resources.get(2).getNotebookName(), "gs://someDirectory1/notebooks/notebook1");
   }
 }
 

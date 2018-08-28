@@ -45,16 +45,16 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    * if it is above config userEntrycount, delete the row(s) with least lastAccessTime and add a new entry
    */
   @Override
-  public void updateNotebookEntry(long workspaceId, long userId, String notebookName,
+  public void updateNotebookEntry(long workspaceId, long userId, String notebookNameWithPath,
       Timestamp lastAccessDateTime) {
-    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookName);
+    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookNameWithPath);
     if (resource == null) {
       handleUserLimit(userId);
       resource = new UserRecentResource();
       resource.setUserId(userId);
       resource.setWorkspaceId(workspaceId);
       resource.setCohort(null);
-      resource.setNotebookName(notebookName);
+      resource.setNotebookName(notebookNameWithPath);
     }
     resource.setLastAccessDate(lastAccessDateTime);
     getDao().save(resource);
