@@ -61,7 +61,7 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_source_concep
 )
 select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
 cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
-'Measurement binned' as stratum_3,
+'Measurement' as stratum_3,
 (case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
 (case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else 'unknown' end)end)
 as stratum_4,
@@ -74,7 +74,7 @@ group by  co1.measurement_concept_id,stratum_4
 union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
 cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
-'Measurement binned' as stratum_3,
+'Measurement' as stratum_3,
 (case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
 (case when co1.measurement_source_concept_id in (select measurement_source_concept_id from single_unit_measurement_source_concepts) then co1.unit_source_value else 'unknown' end)end)
 as stratum_4,
@@ -99,7 +99,7 @@ single_unit_measurement_source_concepts as
 from  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_source_concept_id != 0 and measurement_concept_id != measurement_source_concept_id group by measurement_source_concept_id having cnt=1
 )
 select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
-'Measurement un-binned' as stratum_3,
+'Measurement' as stratum_3,
 (case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
 (case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else 'unknown' end)end)
 as stratum_4,
@@ -111,7 +111,7 @@ and co1.value_as_number is null and co1.value_source_value is not null
 group by  co1.measurement_concept_id,stratum_4
 union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
-'Measurement un-binned' as stratum_3,
+'Measurement' as stratum_3,
 (case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
 (case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_source_concepts) then co1.unit_source_value else 'unknown' end)end)
 as stratum_4,

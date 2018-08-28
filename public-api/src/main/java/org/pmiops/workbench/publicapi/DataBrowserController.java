@@ -521,12 +521,15 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 }
             }
 
+            System.out.println(unitName);
+
             conceptAnalysis.setConceptId(conceptId);
             Iterator it = analysisHashMap.entrySet().iterator();
             while(it.hasNext()) {
                     Map.Entry pair = (Map.Entry)it.next();
                     Long analysisId = (Long)pair.getKey();
                     AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
+                    aa.setUnit(unitName);
                     if(analysisId == GENDER_ANALYSIS_ID){
                         for(AchillesResult ar: aa.getResults()){
                             String analysisStratumName =ar.getAnalysisStratumName();
@@ -604,11 +607,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         AchillesAnalysis otherAnalysis = new AchillesAnalysis(aa);
 
                         maleAnalysis.setResults(maleResults);
-                        maleAnalysis.setUnit(unitName);
                         femaleAnalysis.setResults(femaleResults);
-                        femaleAnalysis.setUnit(unitName);
                         otherAnalysis.setResults(otherResults);
-                        otherAnalysis.setUnit(unitName);
 
                         conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                         conceptAnalysis.setMeasurementValueMaleAnalysis(TO_CLIENT_ANALYSIS.apply(maleAnalysis));
@@ -625,7 +625,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
                             }
                         }
-                        aa.setUnit(unitName);
                         conceptAnalysis.setMeasurementValueAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                     }
             }

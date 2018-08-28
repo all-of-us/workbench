@@ -154,18 +154,22 @@ public class ConceptService {
 
                     }else if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
 
-                        List<Predicate> conceptNameFilter = new ArrayList<>();
-                        List<Predicate> matchFilter = new ArrayList<>();
-                        matchFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                        matchFilter.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
-                        conceptNameFilter.add(criteriaBuilder.or(matchFilter.toArray(new Predicate[0])));
-                        conceptNameFilter.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
+                        if(keyword != null){
+                            List<Predicate> conceptNameFilter = new ArrayList<>();
+                            List<Predicate> matchFilter = new ArrayList<>();
+                            matchFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                            matchFilter.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            conceptNameFilter.add(criteriaBuilder.or(matchFilter.toArray(new Predicate[0])));
+                            conceptNameFilter.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
 
-                        predicates.add(
-                                criteriaBuilder.or(
-                                        criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])),
-                                        criteriaBuilder.and(conceptNameFilter.toArray(new Predicate[0]))
-                                ));
+                            predicates.add(
+                                    criteriaBuilder.or(
+                                            criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])),
+                                            criteriaBuilder.and(conceptNameFilter.toArray(new Predicate[0]))
+                                    ));
+                        }
+
+
                     } else {
 
                         if (keyword != null) {
