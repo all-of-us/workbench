@@ -4,7 +4,7 @@ import {DomainType} from 'generated';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {CRITERIA_TYPES, CRITERIA_SUBTYPES} from '../../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../../constant';
 
 import {
   activeGroupId,
