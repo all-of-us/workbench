@@ -121,4 +121,5 @@
     opacity: 0.3;
     background-color: #c3c3c3!important;
     border-radius: 0.125rem;
+    border: transparent!important;
 }
