@@ -69,7 +69,7 @@
 
 .header-area {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .header-area .name {
