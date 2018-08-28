@@ -38,6 +38,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     selected: ['', '', '', '']
   };
   visitCounts: any;
+    valueForm: any;
 
   readonly modifiers = [{
     name: 'ageAtEvent',
@@ -56,7 +57,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }]
   }, {
     name: 'eventDate',
-    label: 'Event Date',
+    label: 'Shifted Event Date',
     inputType: 'date',
     modType: ModifierType.EVENTDATE,
     operators: [{
@@ -192,8 +193,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         this.formChanges = true;
       }
       const modForm = <FormArray>this.form.controls[mod.name];
-      const valueForm = <FormArray>modForm;
-      valueForm.get('operator').patchValue(opt.value);
+      this.valueForm = <FormArray>modForm;
+      this.valueForm.get('operator').patchValue(opt.value);
     }
 
   currentMods(vals) {
