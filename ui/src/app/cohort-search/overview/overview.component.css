@@ -4,7 +4,7 @@
   flex-flow: row wrap;
   align-items: center;
   justify-content: space-between;
-  margin: 0 0 0.125rem 0;
+ margin-bottom: 0.6rem;
   height: 2rem;
 }
 
@@ -15,8 +15,10 @@
 
 .card {
   background-color: white;
-  margin-top: 0.6rem;
-  margin-bottom: 0.6rem;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  border-top: none;
+  border-bottom: none;
 }
 
 /* Save Cohort Modal */
@@ -129,4 +131,22 @@ input.alreadyTaken {
   top: 16px;
   width: 0.8rem;
   height: 0.8rem;
+}
+
+.count-header {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.header-text {
+  color: #302C71;
+  font-size: 13px;
+  font-weight: 500;
+}
+.overview-header .btn.btn-primary {
+  line-height: 0.2rem !important;
+  padding: 1rem 0.77rem !important;
+}
+.card-header {
+    border-bottom: none;
 }

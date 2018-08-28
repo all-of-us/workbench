@@ -22,7 +22,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: calc(100vw - calc(26rem + 60px));
+  width: calc(100vw - calc(19rem + 60px));
   background-color: white;
   border-radius: 4px;
   display: flex;
@@ -37,7 +37,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  height:59px;
+  height: 59px;
   margin-top: 0.5rem;
 }
 
@@ -50,11 +50,13 @@
 .vbar {
   align-self: center;
   display: inline-block;
-  margin: 0 0.75rem;
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
   box-sizing: border-box;
-  height: 0.99rem;
+  height: 26px;
   width: 1px;
   border: 1px solid #979797;
+  margin-bottom: 0.5rem
 }
 
 .nav-link.active {
@@ -167,6 +169,8 @@ button.tab.active {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 27.5rem;
+  max-height: 27.5rem;
+  overflow-y: auto;
   background-color: white;
 }
 

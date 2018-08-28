@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryResult;
@@ -45,12 +46,14 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -73,9 +76,13 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.CohortReview;
+import org.pmiops.workbench.model.Concept;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
@@ -85,6 +92,7 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
 import org.pmiops.workbench.model.ShareWorkspaceResponse;
+import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -119,6 +127,33 @@ public class WorkspacesControllerTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
 
+  private static final Concept CLIENT_CONCEPT_1 = new Concept()
+      .conceptId(123L)
+      .conceptName("a concept")
+      .standardConcept(true)
+      .conceptCode("conceptA")
+      .conceptClassId("classId")
+      .vocabularyId("V1")
+      .domainId("Condition")
+      .countValue(123L)
+      .prevalence(0.2F);
+
+  private static final Concept CLIENT_CONCEPT_2 = new Concept()
+      .conceptId(456L)
+      .standardConcept(false)
+      .conceptName("b concept")
+      .conceptCode("conceptB")
+      .conceptClassId("classId2")
+      .vocabularyId("V2")
+      .domainId("Condition/Device")
+      .countValue(456L)
+      .prevalence(0.3F);
+
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
+      makeConcept(CLIENT_CONCEPT_1);
+  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
+      makeConcept(CLIENT_CONCEPT_2);
+
   @Autowired
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
@@ -134,7 +169,9 @@ public class WorkspacesControllerTest {
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
-    ReviewTabQueryBuilder.class
+    ReviewQueryBuilder.class,
+    ConceptSetService.class,
+    ConceptSetsController.class
   })
   @MockBean({
     FireCloudService.class,
@@ -180,11 +217,15 @@ public class WorkspacesControllerTest {
   @Autowired
   UserDao userDao;
   @Autowired
+  ConceptDao conceptDao;
+  @Autowired
   CdrVersionDao cdrVersionDao;
   @Mock
   Provider<User> userProvider;
   @Autowired
   CohortsController cohortsController;
+  @Autowired
+  ConceptSetsController conceptSetsController;
   @Autowired
   UserRecentResourceService userRecentResourceService;
   @Autowired
@@ -213,6 +254,9 @@ public class WorkspacesControllerTest {
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
+
+    conceptDao.save(CONCEPT_1);
+    conceptDao.save(CONCEPT_2);
 
     JSONObject demoCohort = new JSONObject();
     demoCohort.put("name", "demo");
@@ -406,7 +450,7 @@ public class WorkspacesControllerTest {
 
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testDeleteWorkspace() throws Exception {
     Workspace workspace = createDefaultWorkspace();
     workspacesController.createWorkspace(workspace);
@@ -416,7 +460,12 @@ public class WorkspacesControllerTest {
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
+    try {
+      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
+      fail("NotFoundException expected");
+    } catch (NotFoundException e) {
+      // expected
+    }
   }
 
   @Test
@@ -640,7 +689,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneWorkspaceWithCohorts() throws Exception {
+  public void testCloneWorkspaceWithCohortsAndConceptSets() throws Exception {
     Long participantId = 1L;
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createDefaultWorkspace();
@@ -749,6 +798,18 @@ public class WorkspacesControllerTest {
                             .participantId(participantId)
                             .cohortReviewId(cr1.getCohortReviewId())).getBody();
 
+    ConceptSet conceptSet1 = conceptSetsController.createConceptSet(workspace.getNamespace(),
+        workspace.getId(), new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+            .getBody();
+    ConceptSet conceptSet2 = conceptSetsController.createConceptSet(workspace.getNamespace(),
+        workspace.getId(), new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT))
+            .getBody();
+    conceptSet1 =
+        conceptSetsController.updateConceptSetConcepts(workspace.getNamespace(), workspace.getId(),
+            conceptSet1.getId(), new UpdateConceptSetRequest().etag(conceptSet1.getEtag())
+                .addedIds(ImmutableList.of(CLIENT_CONCEPT_1.getConceptId(),
+                    CLIENT_CONCEPT_2.getConceptId()))).getBody();
+
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -762,6 +823,7 @@ public class WorkspacesControllerTest {
     req.setWorkspace(modWorkspace);
     stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+
     Workspace cloned = workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(), req).getBody().getWorkspace();
 
@@ -821,6 +883,35 @@ public class WorkspacesControllerTest {
 
     assertThat(ImmutableSet.of(gotCr1.getCohortReviewId(), gotCr2.getCohortReviewId()))
         .containsNoneOf(cr1.getCohortReviewId(), cr2.getCohortReviewId());
+
+    List<ConceptSet> conceptSets = conceptSetsController.getConceptSetsInWorkspace(cloned.getNamespace(),
+        cloned.getId()).getBody().getItems();
+    assertThat(conceptSets.size()).isEqualTo(2);
+    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned);
+    assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned);
+
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId());
+    try {
+      workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
+      fail("NotFoundException expected");
+    } catch (NotFoundException e) {
+      // expected
+    }
+  }
+
+  private void assertConceptSetClone(ConceptSet clonedConceptSet, ConceptSet originalConceptSet,
+      Workspace clonedWorkspace) {
+    // Get the full concept set in order to retrieve the concepts.
+    clonedConceptSet = conceptSetsController.getConceptSet(clonedWorkspace.getNamespace(),
+        clonedWorkspace.getId(), clonedConceptSet.getId()).getBody();
+    assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
+    assertThat(clonedConceptSet.getDescription()).isEqualTo(originalConceptSet.getDescription());
+    assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
+    assertThat(clonedConceptSet.getConcepts()).isEqualTo(originalConceptSet.getConcepts());
+    assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreator());
+    assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
+    assertThat(clonedConceptSet.getLastModifiedTime()).isEqualTo(clonedWorkspace.getLastModifiedTime());
+    assertThat(clonedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
   }
 
   private void assertCohortAnnotationDefinitions(CohortAnnotationDefinitionListResponse responseList,
@@ -1288,5 +1379,62 @@ public class WorkspacesControllerTest {
     } catch (Exception ex) {
       fail();
     }
+  }
+
+  @Test
+  public void testRenameNotebookinWorkspace() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+      LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    String nb1 = "notebooks/nb1.ipynb";
+    String newName = "nb2.ipynb";
+    String newPath = "notebooks/nb2.ipynb";
+    NotebookRename rename = new NotebookRename();
+    rename.setName("nb1.ipynb");
+    rename.setNewName(newName);
+    workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+  }
+
+  @Test
+  public void testRenameNotebookWoExtension() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+      LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    String nb1 = "notebooks/nb1.ipynb";
+    String newName = "nb2";
+    String newPath = "notebooks/nb2.ipynb";
+    NotebookRename rename = new NotebookRename();
+    rename.setName("nb1.ipynb");
+    rename.setNewName(newName);
+    workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+  }
+
+  @Test
+  public void testCloneNotebook() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+      LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    String nb1 = "notebooks/nb1.ipynb";
+    String newPath = "notebooks/nb1 Clone.ipynb";
+    workspacesController.cloneNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+  }
+
+  @Test
+  public void testDeleteNotebook() throws Exception {
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+      LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    String nb1 = "notebooks/nb1.ipynb";
+    workspacesController.deleteNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
+    verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
   }
 }
