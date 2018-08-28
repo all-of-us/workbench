@@ -42,15 +42,15 @@ import java.util.List;
 public class UserMetricsControllerTest {
 
   @Mock
-  UserRecentResourceService userRecentResourceService;
+  private UserRecentResourceService userRecentResourceService;
   @Mock
-  Provider<User> userProvider;
+  private Provider<User> userProvider;
   @Mock
-  CohortService cohortService;
+  private CohortService cohortService;
   @Mock
-  FireCloudService fireCloudService;
+  private FireCloudService fireCloudService;
   @Mock
-  WorkspaceService workspaceService;
+  private WorkspaceService workspaceService;
 
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();

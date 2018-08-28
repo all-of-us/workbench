@@ -24,62 +24,12 @@ import java.util.stream.Collectors;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
-  Provider<User> userProvider;
-  UserRecentResourceService userRecentResourceService;
-  WorkspaceService workspaceService;
-  FireCloudService fireCloudService;
+  private Provider<User> userProvider;
+  private UserRecentResourceService userRecentResourceService;
+  private WorkspaceService workspaceService;
+  private FireCloudService fireCloudService;
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks/";
   private int distinctWorkspacelimit = 5;
-
-  @Autowired
-  UserMetricsController(Provider<User> userProvider,
-      UserRecentResourceService userRecentResourceService,
-      WorkspaceService workspaceService,
-      FireCloudService fireCloudService) {
-    this.userProvider = userProvider;
-    this.userRecentResourceService = userRecentResourceService;
-    this.workspaceService = workspaceService;
-    this.fireCloudService = fireCloudService;
-  }
-
-  @VisibleForTesting
-  public void setDistinctWorkspaceLimit(int limit) {
-    distinctWorkspacelimit = limit;
-  }
-
-  /**
-   * Gets the list of all resources recently access by user in order of access date time
-   * @return
-   */
-  @Override
-  public ResponseEntity<RecentResourceResponse> getUserRecentResources() {
-    long userId = userProvider.get().getUserId();
-    RecentResourceResponse recentResponse = new RecentResourceResponse();
-    List<UserRecentResource> userRecentResourceList = userRecentResourceService.findAllResourcesByUser(userId);
-    List<Long> workspaceIdList = userRecentResourceList
-        .stream()
-        .map(UserRecentResource::getWorkspaceId)
-        .distinct()
-        .limit(distinctWorkspacelimit)
-        .collect(Collectors.toList());
-
-    Map<Long, String> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
-      Workspace workspace = workspaceService.findByWorkspaceId((long) id);
-      WorkspaceResponse workspaceResponse = fireCloudService
-          .getWorkspace(workspace.getWorkspaceNamespace(),
-              workspace.getFirecloudName());
-      return workspaceResponse.getAccessLevel();
-    }));
-
-    userRecentResourceList.stream()
-        .filter(userRecentResource -> { return workspaceAccessMap.containsKey(userRecentResource.getWorkspaceId());})
-        .forEach(userRecentResource -> {
-          RecentResource resource = TO_CLIENT.apply(userRecentResource);
-          resource.setPermission(workspaceAccessMap.get(userRecentResource.getWorkspaceId()));
-          recentResponse.add(resource);
-    });
-    return ResponseEntity.ok(recentResponse);
-  }
 
   //Converts DB model to client Model
   private final Function<UserRecentResource, RecentResource> TO_CLIENT =
@@ -120,6 +70,61 @@ public class UserMetricsController implements UserMetricsApiDelegate {
           return result;
         }
       };
+
+  @Autowired
+  UserMetricsController(Provider<User> userProvider,
+      UserRecentResourceService userRecentResourceService,
+      WorkspaceService workspaceService,
+      FireCloudService fireCloudService) {
+    this.userProvider = userProvider;
+    this.userRecentResourceService = userRecentResourceService;
+    this.workspaceService = workspaceService;
+    this.fireCloudService = fireCloudService;
+  }
+
+  @VisibleForTesting
+  public void setDistinctWorkspaceLimit(int limit) {
+    distinctWorkspacelimit = limit;
+  }
+
+  /**
+   * Gets the list of all resources recently access by user in order of access date time
+   *
+   * @return
+   */
+  @Override
+  public ResponseEntity<RecentResourceResponse> getUserRecentResources() {
+    long userId = userProvider.get().getUserId();
+    RecentResourceResponse recentResponse = new RecentResourceResponse();
+    List<UserRecentResource> userRecentResourceList = userRecentResourceService.findAllResourcesByUser(userId);
+    List<Long> workspaceIdList = userRecentResourceList
+        .stream()
+        .map(UserRecentResource::getWorkspaceId)
+        .distinct()
+        .limit(distinctWorkspacelimit)
+        .collect(Collectors.toList());
+
+    Map<Long, String> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
+      Workspace workspace = workspaceService.findByWorkspaceId((long) id);
+      WorkspaceResponse workspaceResponse = fireCloudService
+          .getWorkspace(workspace.getWorkspaceNamespace(),
+              workspace.getFirecloudName());
+      return workspaceResponse.getAccessLevel();
+    }));
+
+    userRecentResourceList.stream()
+        .filter(userRecentResource -> {
+          return workspaceAccessMap.containsKey(userRecentResource.getWorkspaceId());
+        })
+        .forEach(userRecentResource -> {
+          RecentResource resource = TO_CLIENT.apply(userRecentResource);
+          resource.setPermission(workspaceAccessMap.get(userRecentResource.getWorkspaceId()));
+          recentResponse.add(resource);
+        });
+    return ResponseEntity.ok(recentResponse);
+  }
+
+
 }
 
 
