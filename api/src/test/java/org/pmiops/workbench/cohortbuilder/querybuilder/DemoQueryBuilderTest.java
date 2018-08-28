@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @Import({DemoQueryBuilder.class})
@@ -73,7 +75,8 @@ public class DemoQueryBuilderTest {
         try {
             queryBuilder
                     .buildQueryJobConfig(new QueryParameters().type("DEMO").parameters(params));
-        } catch (IllegalArgumentException ex) {
+            fail("Should have thrown a BadRequestException!");
+        } catch (BadRequestException ex) {
             assertEquals("Age must provide an operator and operands.", ex.getMessage());
         }
     }
@@ -86,7 +89,8 @@ public class DemoQueryBuilderTest {
         try {
             queryBuilder
                     .buildQueryJobConfig(new QueryParameters().type("DEMO").parameters(params));
-        } catch (IllegalArgumentException ex) {
+            fail("Should have thrown a BadRequestException!");
+        } catch (BadRequestException ex) {
             assertEquals("Age must provide an operator and operands.", ex.getMessage());
         }
     }
