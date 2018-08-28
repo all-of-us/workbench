@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
@@ -28,7 +29,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   WorkspaceService workspaceService;
   FireCloudService fireCloudService;
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks/";
-  private final int DISTINCT_WORKSPACE_LIMIT = 5;
+  private int DISTINCT_WORKSPACE_LIMIT = 5;
 
   @Autowired
   UserMetricsController(Provider<User> userProvider,
@@ -41,9 +42,13 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     this.fireCloudService = fireCloudService;
   }
 
+  @VisibleForTesting
+  public void setDistinctWorkspaceLimit(int limit ){
+    DISTINCT_WORKSPACE_LIMIT = limit;
+  }
+
   /**
    * Gets the list of all resources recently access by user in order of access date time
-   *
    * @return
    */
   @Override
@@ -66,10 +71,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       return workspaceResponse.getAccessLevel();
     }));
 
-    userRecentResourceList.stream().forEach(userRecentResource -> {
-      RecentResource resource = TO_CLIENT.apply(userRecentResource);
-      resource.setPermission(workspaceAccessMap.get(userRecentResource.getWorkspaceId()));
-      recentResponse.add(resource);
+    userRecentResourceList.stream()
+        .filter(userRecentResource -> { return workspaceAccessMap.containsKey(userRecentResource.getWorkspaceId());})
+        .forEach(userRecentResource -> {
+          RecentResource resource = TO_CLIENT.apply(userRecentResource);
+          resource.setPermission(workspaceAccessMap.get(userRecentResource.getWorkspaceId()));
+          recentResponse.add(resource);
     });
     return ResponseEntity.ok(recentResponse);
   }
