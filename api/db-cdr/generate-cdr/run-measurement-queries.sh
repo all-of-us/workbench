@@ -35,6 +35,7 @@ if [ -z "${WORKBENCH_PROJECT}" ]
 then
   echo "Usage: $USAGE"
   exit 1
+
 fi
 
 if [ -z "${WORKBENCH_DATASET}" ]
