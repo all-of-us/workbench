@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,7 +67,7 @@ public class UserMetricsControllerTest {
     resource1.setCohort(null);
     resource1.setLastAccessDate(new Timestamp(clock.millis()));
     resource1.setUserId(123l);
-    resource1.setWorkspaceId(2l);
+    resource1.setWorkspaceId(1l);
 
 
     userRecentResources.add(resource1);
@@ -77,6 +78,7 @@ public class UserMetricsControllerTest {
     cohort.setDescription("Cohort description");
     cohort.setLastModifiedTime(new Timestamp(clock.millis()));
     cohort.setCreationTime(new Timestamp(clock.millis()));
+
     UserRecentResource resource2 = new UserRecentResource();
     resource2.setNotebookName(null);
     resource2.setCohort(cohort);
@@ -86,25 +88,52 @@ public class UserMetricsControllerTest {
 
     userRecentResources.add(resource2);
 
-    Workspace workspace  = new Workspace();
-    workspace.setWorkspaceId(2l);
-    workspace.setWorkspaceNamespace("workspaceNamespace");
-    workspace.setFirecloudName("Firecloudname");
+    UserRecentResource resource3 = new UserRecentResource();
+    resource3.setNotebookName("gs://bucketFile/notebooks/notebook2.ipynb");
+    resource3.setCohort(null);
+    resource3.setLastAccessDate(new Timestamp(clock.millis() - 10000));
+    resource3.setUserId(123l);
+    resource3.setWorkspaceId(2l);
+
+    userRecentResources.add(resource3);
+
+    Workspace workspace = new Workspace();
+    workspace.setWorkspaceId(1l);
+    workspace.setWorkspaceNamespace("workspaceNamespace1");
+    workspace.setFirecloudName("Firecloudname1");
+
+
+    Workspace workspace2 = new Workspace();
+    workspace2.setWorkspaceId(2l);
+    workspace2.setWorkspaceNamespace("workspaceNamespace");
+    workspace2.setFirecloudName("Firecloudname");
+
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
-    workspaceResponse.setAccessLevel("READER");
+    workspaceResponse.setAccessLevel("OWNER");
+
+    WorkspaceResponse workspaceResponse2 = new WorkspaceResponse();
+    workspaceResponse2.setAccessLevel("READER");
 
     when(userProvider.get()).thenReturn(user);
     when(userRecentResourceService.findAllResourcesByUser(123l))
         .thenReturn(userRecentResources);
-    when(workspaceService.findByWorkspaceId(2l)).thenReturn(workspace);
-    when(fireCloudService.getWorkspace("workspaceNamespace", "Firecloudname"))
+    when(workspaceService.findByWorkspaceId(1l)).thenReturn(workspace);
+
+    when(workspaceService.findByWorkspaceId(2l)).thenReturn(workspace2);
+
+    when(fireCloudService.getWorkspace("workspaceNamespace1", "Firecloudname1"))
         .thenReturn(workspaceResponse);
+
+    when(fireCloudService.getWorkspace("workspaceNamespace", "Firecloudname"))
+        .thenReturn(workspaceResponse2);
 
     userMetricsController = new UserMetricsController(
         userProvider,
         userRecentResourceService,
         workspaceService,
         fireCloudService);
+    userMetricsController.setDistinctWorkspaceLimit(5);
+
   }
 
   @Test
@@ -112,15 +141,25 @@ public class UserMetricsControllerTest {
     RecentResourceResponse recentResources = userMetricsController
         .getUserRecentResources().getBody();
     assertNotNull(recentResources);
-    assertEquals(2, recentResources.size());
+    assertEquals(3, recentResources.size());
     assertNull(recentResources.get(0).getCohort());
     assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/");
 
     assertEquals(recentResources.get(0).getNotebook().getName(), "notebook1.ipynb");
     assertNotNull(recentResources.get(1).getCohort());
     assertEquals(recentResources.get(1).getCohort().getName(), "Cohort Name");
+  }
 
+  @Test
+  public void testWorkspaceLimit() {
+    userMetricsController.setDistinctWorkspaceLimit(1);
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
 
+    assertNotNull(recentResources);
+    assertEquals(1, recentResources.size());
+    assertNull(recentResources.get(0).getCohort());
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/");
   }
 }
 
