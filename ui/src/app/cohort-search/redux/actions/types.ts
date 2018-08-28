@@ -261,6 +261,7 @@ export interface ActionTypes {
   REMOVE_PARAMETER: {
     type: typeof REMOVE_PARAMETER;
     parameterId: string;
+    path: string;
   };
   ADD_MODIFIER: {
     type: typeof ADD_MODIFIER;

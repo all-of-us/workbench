@@ -147,28 +147,21 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'search', 'autocomplete']);
 
       case LOAD_CHILDREN_LIST:
-        console.log(action.parentId);
         action.children.forEach(child => {
           child.parameterId = `param${child.id}`;
+          const path = child.path.split('.');
+          const parents = path.slice(path.indexOf(action.parentId.toString()));
           state = state
             .setIn(['wizard', 'selections', child.parameterId], fromJS(child))
+            .updateIn(['wizard', 'item', 'selectedParents'],
+              List(),
+              parentIdList => parentIdList.merge(fromJS(parents)))
             .updateIn(
               ['wizard', 'item', 'searchParameters'],
               List(),
               paramList => paramList.includes(child.parameterId)
                 ? paramList
                 : paramList.push(child.parameterId));
-          const path = child.path.split('.');
-          const parents = path.slice(path.indexOf(action.parentId.toString()));
-          parents.forEach(parentId => {
-            state = state
-              .updateIn(
-                ['wizard', 'item', 'selectedParents'],
-                List(),
-                parentIdList => parentIdList.includes(parentId)
-                  ? parentIdList
-                  : parentIdList.push(parentId));
-          });
         });
         return state;
 
@@ -308,6 +301,11 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['wizard', 'item', 'searchParameters'],
             List(),
             paramList => paramList.filterNot(id => id === action.parameterId)
+          )
+          .updateIn(
+            ['wizard', 'item', 'selectedParents'],
+            List(),
+            parentIdList => parentIdList.filterNot(id => action.path.split('.').includes(id))
           );
 
       case ADD_MODIFIER:
@@ -339,7 +337,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['wizard', 'item', 'attributes', 'loading'], true);
 
       case HIDE_ATTRIBUTES_PAGE:
-        console.log('hide');
         return state
           .setIn(['wizard', 'item', 'attributes', 'node'], Map())
           .deleteIn(['wizard', 'calculate', 'count']);
