@@ -129,9 +129,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
 
-      case BEGIN_CHILDREN_REQUEST:
-        return state;
-
       case LOAD_AUTOCOMPLETE_OPTIONS:
         return state
           .setIn(['criteria', 'search', 'options'], action.options)
