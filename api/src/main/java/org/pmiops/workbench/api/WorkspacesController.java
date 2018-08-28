@@ -787,7 +787,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceId = workspaceService.getRequired(workspace, workspaceName).getWorkspaceId();
     User user = userProvider.get();
     FileDetail fileDetail = new FileDetail();
-    if (operation.equals("rename") || operation.equals("copy")) {
+    if ("rename".equals(operation) || "copy".equals(operation)) {
       cloudStorageService.copyBlob(blobId, BlobId.of(bucket, newPath));
       fileDetail.setName(newName);
       fileDetail.setPath(fullPath);
@@ -795,7 +795,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       fileDetail.setLastModifiedTime(now.getTime());
       userRecentResourceService.updateNotebookEntry(workspaceId, user.getUserId(), fullPath, now);
     }
-    if (operation.equals("delete") || operation.equals("rename")) {
+    if ("delete".equals(operation) || "rename".equals(operation)) {
       cloudStorageService.deleteBlob(blobId);
       userRecentResourceService.deleteNotebookEntry(workspaceId, user.getUserId(), fullPath);
     }
