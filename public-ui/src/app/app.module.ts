@@ -29,6 +29,7 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 (<any>window).StackTrace = StackTrace;
 
 import {DataBrowserService} from 'publicGenerated';
+import {DbConstantsService} from './utils/db-constants.service';
 import { HighlightSearchPipe } from './utils/highlight-search.pipe';
 import { overriddenPublicUrlKey } from './views/app/app.component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
@@ -68,6 +69,7 @@ const DataBrowserServiceFactory = (http: Http) => {
     PhysicalMeasurementsComponent,
   ],
   providers: [
+    DbConstantsService,
     {
       provide: DataBrowserService,
       useFactory: DataBrowserServiceFactory,

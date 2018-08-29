@@ -1,0 +1,16 @@
+.measurement.white-card-box {
+    min-height: 400px;
+}
+.chart-wrapper {
+    width: 336px;
+}
+
+/* Style the active sub buttons */
+button.active.btn-link {
+    font-weight: bolder;
+}
+
+.row.page-align {
+    margin-left: 0px;
+    margin-right: 0px;
+}
