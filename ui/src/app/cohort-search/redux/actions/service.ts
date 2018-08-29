@@ -255,7 +255,7 @@ export class CohortSearchActions {
     if (kind === DomainType[DomainType.DRUG]) {
       this.requestAllChildren(this.cdrVersionId, kind, id);
     } else {
-      const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`
+      const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`;
       const param = node.set('parameterId', paramId);
       this.addParameter(param);
       this.selectChildren(kind, id);
