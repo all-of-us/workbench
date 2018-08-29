@@ -147,7 +147,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return ResponseEntity.ok(recentResponse);
   }
 
-  //Retrieves Database workspace ID  on the basis of workspace namespace and fireclud workspace ID
+  //Retrieves Database workspace ID
   private long getWorkspaceId(String workspaceNamespace, String workspaceId) {
     Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
