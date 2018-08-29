@@ -70,6 +70,7 @@ public class CriteriaDaoTest {
   private Criteria childIcd10;
   private Criteria pmCriteria;
   private Criteria drugCriteriaIngredient;
+  private Criteria drugCriteriaIngredient1;
   private Criteria drugCriteriaBrand;
   private Criteria labCriteria;
 
@@ -89,7 +90,8 @@ public class CriteriaDaoTest {
     parentIcd10 = createCriteria(TYPE_ICD10, SUBTYPE_ICD10PCS, "003", "name", 0, true, true, null);
     pmCriteria = createCriteria(TYPE_PM, SUBTYPE_BP, "1", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true,
       "[{'name':'Systolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['90']},{'name':'Diastolic','operator':'LESS_THAN_OR_EQUAL_TO','operands':['60']}]");
-    drugCriteriaIngredient = createCriteria(TYPE_DRUG, SUBTYPE_ATC, "", "ACETAMIN", 0, false, true, "").conceptId("1");
+    drugCriteriaIngredient = createCriteria(TYPE_DRUG, SUBTYPE_ATC, "", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
+    drugCriteriaIngredient1 = createCriteria(TYPE_DRUG, SUBTYPE_ATC, "", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
     drugCriteriaBrand = createCriteria(TYPE_DRUG, SUBTYPE_BRAND, "", "BLAH", 0, false, true, "");
     labCriteria = createCriteria(TYPE_MEASUREMENT, SUBTYPE_LAB, "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
 
@@ -111,6 +113,7 @@ public class CriteriaDaoTest {
     criteriaDao.save(childIcd10);
     criteriaDao.save(pmCriteria);
     criteriaDao.save(drugCriteriaIngredient);
+    criteriaDao.save(drugCriteriaIngredient1);
     criteriaDao.save(drugCriteriaBrand);
     criteriaDao.save(labCriteria);
 
@@ -140,6 +143,7 @@ public class CriteriaDaoTest {
     criteriaDao.delete(childIcd10);
     criteriaDao.delete(pmCriteria);
     criteriaDao.delete(drugCriteriaIngredient);
+    criteriaDao.delete(drugCriteriaIngredient1);
     criteriaDao.delete(drugCriteriaBrand);
     criteriaDao.delete(labCriteria);
   }
@@ -160,6 +164,20 @@ public class CriteriaDaoTest {
 
     final List<Criteria> pmList = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(TYPE_PM, 0L);
     assertEquals(pmCriteria, pmList.get(0));
+  }
+
+  @Test
+  public void findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc() throws Exception {
+    final List<Criteria> drugList = criteriaDao.findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc(TYPE_DRUG, SUBTYPE_ATC, 0L);
+    assertEquals(drugCriteriaIngredient, drugList.get(0));
+    assertEquals(drugCriteriaIngredient1, drugList.get(1));
+  }
+
+  @Test
+  public void findCriteriaChildrenByTypeAndParentId() throws Exception {
+    final List<Criteria> drugList = criteriaDao.findCriteriaChildrenByTypeAndParentId(TYPE_DRUG, 2L);
+    assertEquals(drugCriteriaIngredient, drugList.get(0));
+    assertEquals(drugCriteriaIngredient1, drugList.get(1));
   }
 
   @Test
