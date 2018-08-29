@@ -360,6 +360,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         ConceptService.StandardConceptFilter convertedConceptFilter = ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
 
+
         Slice<Concept> concepts = null;
         concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                 searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);

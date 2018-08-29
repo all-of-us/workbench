@@ -1,11 +1,10 @@
 package org.pmiops.workbench.cdr.dao;
 
+import org.hibernate.criterion.Restrictions;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -93,8 +92,11 @@ public class ConceptService {
 
                     Expression<Double> matchExp = null;
                     Expression<Double> matchSynonymExp = null;
+                    Join<Concept, ConceptSynonym> csJoin = null;
 
-                    Join<Concept, ConceptSynonym> csJoin = (Join)root.fetch("synonyms",JoinType.LEFT);
+                    if (Long.class != criteriaQuery.getResultType()) {
+                        csJoin = (Join)root.fetch("synonyms",JoinType.LEFT);
+                    }
 
                     List<Predicate> conceptCodeIDName = new ArrayList<>();
 
@@ -112,8 +114,11 @@ public class ConceptService {
                         }
                         matchExp = criteriaBuilder.function("match", Double.class,
                                 root.get("conceptName"), criteriaBuilder.literal(keyword));
-                        matchSynonymExp = criteriaBuilder.function("match", Double.class,
-                                csJoin.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
+                        if (csJoin != null) {
+                            matchSynonymExp = criteriaBuilder.function("match", Double.class,
+                                    csJoin.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
+                        }
+
                     }
 
 
@@ -203,6 +208,7 @@ public class ConceptService {
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
         // Return up to limit results, sorted in descending count value order.
+
         Pageable pageable = new PageRequest(0, limit,
                 new Sort(Direction.DESC, "countValue"));
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
