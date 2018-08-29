@@ -35,6 +35,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   top10Results: any[] = []; // We graph top10 results
   private searchRequest: SearchConceptsRequest;
   private subscriptions: ISubscription[] = [];
+  private initSearchSubscription: ISubscription = null;
 
   /* Show different graphs depending on domain we are in */
   // defaults,  most domains
@@ -84,8 +85,10 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.setGraphsToDisplay();
       // Run search initially to filter to domain,
       // a empty search returns top ordered by count_value desc
-      this.subscriptions.push(this.searchDomain(this.prevSearchText).subscribe(results =>
-        this.searchCallback(results)));
+      // Note, we save this in its own subscription so we can unsubscribe when they start typing
+      // and these results don't trump the search results in case they come back slower
+      this.initSearchSubscription = this.searchDomain(this.prevSearchText).subscribe(results =>
+        this.searchCallback(results));
 
       // Add value changed event to search when value changes
       this.subscriptions.push(this.searchText.valueChanges
@@ -104,6 +107,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
+    this.initSearchSubscription.unsubscribe();
   }
 
   private setGraphsToDisplay() {
@@ -124,6 +128,10 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
   private searchDomain(query: string) {
+    // Unsubscribe from our initial search subscription if this is called again
+    if (this.initSearchSubscription) {
+      this.initSearchSubscription.unsubscribe();
+    }
     const maxResults = 100;
     this.loading = true;
 

@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import * as highcharts from 'highcharts';
-import 'highcharts/adapters/standalone-framework.src';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
@@ -21,7 +20,7 @@ export class ChartComponent implements OnChanges {
   @Input() chartType: string;
   @Input() sources = false;
   @Output() resultClicked = new EventEmitter<any>();
-  chartOptions: any;
+  chartOptions: any = null;
 
   constructor(private dbc: DbConstantsService) {
     highcharts.setOptions({
@@ -52,6 +51,15 @@ export class ChartComponent implements OnChanges {
 
     return {
       chart: options.chart,
+      lang: {
+        noData: {
+        style: {
+          fontWeight: 'bold',
+          fontSize: '15px',
+          color: '#303030'
+        }
+        }
+      },
       credits: {
         enabled: false
       },
