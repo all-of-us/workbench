@@ -1,18 +1,18 @@
 import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
-export const BEGIN_CRITERIA_SUBTREE_REQUEST = 'BEGIN_CRITERIA_SUBTREE_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
-export const LOAD_SUBTREE_RESULTS = 'LOAD_SUBTREE_RESULTS';
-export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
+export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
 export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
 export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
+export const BEGIN_CHILDREN_REQUEST = 'BEGIN_CHILDREN_REQUEST';
 export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
+export const LOAD_CHILDREN_LIST = 'LOAD_CHILDREN_LIST';
 export const LOAD_ATTRIBUTE_LIST = 'LOAD_ATTRIBUTE_LIST';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
 export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
@@ -74,12 +74,6 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
   };
-  BEGIN_CRITERIA_SUBTREE_REQUEST: {
-    type: typeof BEGIN_CRITERIA_SUBTREE_REQUEST;
-    cdrVersionId: number;
-    kind: string;
-    id: number;
-  };
   BEGIN_ALL_CRITERIA_REQUEST: {
     type: typeof BEGIN_ALL_CRITERIA_REQUEST;
     cdrVersionId: number;
@@ -99,16 +93,11 @@ export interface ActionTypes {
     parentId: number;
     results: Criteria[];
   };
-  LOAD_SUBTREE_RESULTS: {
-    type: typeof LOAD_SUBTREE_RESULTS;
-    kind: string;
-    id: number;
-    results: any;
-  };
   LOAD_CRITERIA_SUBTREE: {
     type: typeof LOAD_CRITERIA_SUBTREE;
     kind: string;
-    results: Criteria[];
+    ids: Array<number>;
+    path: Array<string>;
   };
   LOAD_DEMO_CRITERIA_RESULTS: {
     type: typeof LOAD_DEMO_CRITERIA_RESULTS;
@@ -136,6 +125,12 @@ export interface ActionTypes {
     cdrVersionId: number;
     conceptId: number;
   };
+  BEGIN_CHILDREN_REQUEST: {
+    type: typeof BEGIN_CHILDREN_REQUEST;
+    cdrVersionId: number;
+    kind: string;
+    parentId: number;
+  };
   LOAD_AUTOCOMPLETE_OPTIONS: {
     type: typeof LOAD_AUTOCOMPLETE_OPTIONS;
     options: any;
@@ -154,6 +149,11 @@ export interface ActionTypes {
   LOAD_INGREDIENT_LIST: {
     type: typeof LOAD_INGREDIENT_LIST;
     ingredients: any;
+  };
+  LOAD_CHILDREN_LIST: {
+    type: typeof LOAD_CHILDREN_LIST;
+    parentId: number;
+    children: any;
   };
   LOAD_ATTRIBUTE_LIST: {
     type: typeof LOAD_ATTRIBUTE_LIST;
@@ -261,6 +261,7 @@ export interface ActionTypes {
   REMOVE_PARAMETER: {
     type: typeof REMOVE_PARAMETER;
     parameterId: string;
+    path: string;
   };
   ADD_MODIFIER: {
     type: typeof ADD_MODIFIER;
@@ -329,20 +330,20 @@ export interface ActionTypes {
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
-  | ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
-  | ActionTypes[typeof LOAD_SUBTREE_RESULTS]
   | ActionTypes[typeof LOAD_CRITERIA_SUBTREE]
   | ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]
   | ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST]
   | ActionTypes[typeof BEGIN_INGREDIENT_REQUEST]
+  | ActionTypes[typeof BEGIN_CHILDREN_REQUEST]
   | ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof LOAD_INGREDIENT_LIST]
+  | ActionTypes[typeof LOAD_CHILDREN_LIST]
   | ActionTypes[typeof LOAD_ATTRIBUTE_LIST]
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof ATTRIBUTE_REQUEST_ERROR]

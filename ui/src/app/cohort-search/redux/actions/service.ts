@@ -59,8 +59,8 @@ export class CohortSearchActions {
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
-  @dispatch() requestCriteriaSubtree = ActionFuncs.requestCriteriaSubtree;
-  @dispatch() loadSubtreeItems = ActionFuncs.loadSubtreeItems;
+  @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
+  @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
@@ -248,13 +248,8 @@ export class CohortSearchActions {
     this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
-  fetchCriteriaSubtree(kind: string, id: number): void {
-    const isLoading = isAutocompleteLoading()(this.state);
-    const isLoaded = this.state.getIn(['criteria', 'subtree', kind, id]);
-    if (isLoaded || isLoading) {
-      return;
-    }
-    this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
+  fetchAllChildren(kind: string, parentId: number): void {
+    this.requestAllChildren(this.cdrVersionId, kind, parentId);
   }
 
   fetchAttributes(node: any): void {

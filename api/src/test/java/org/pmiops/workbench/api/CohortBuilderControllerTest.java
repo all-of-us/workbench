@@ -54,6 +54,7 @@ public class CohortBuilderControllerTest {
   private Criteria demoCriteria;
   private Criteria labMeasurement;
   private Criteria drugATCCriteria;
+  private Criteria drugATCCriteriaChild;
   private Criteria drugBrandCriteria;
   private CriteriaAttribute criteriaAttributeMin;
   private CriteriaAttribute criteriaAttributeMax;
@@ -105,6 +106,9 @@ public class CohortBuilderControllerTest {
     drugBrandCriteria = criteriaDao.save(
       createCriteria(TYPE_DRUG, SUBTYPE_BRAND, 0L, "LP12345", "brandName", DomainType.DRUG.name(), "1235", true)
     );
+    drugATCCriteriaChild = criteriaDao.save(
+      createCriteria(TYPE_DRUG, SUBTYPE_ATC, 0L, "LP12345", "differentName", DomainType.DRUG.name(), "12345", false)
+    );
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
       new ConceptRelationship().conceptRelationshipId(
@@ -136,6 +140,30 @@ public class CohortBuilderControllerTest {
       createResponseCriteria(icd9CriteriaChild),
       controller
         .getCriteriaByTypeAndParentId(1L, TYPE_ICD9, icd9CriteriaParent.getId())
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void getCriteriaByTypeAndSubtypeAndParentId() throws Exception {
+    assertEquals(
+      createResponseCriteria(drugATCCriteria),
+      controller
+        .getCriteriaByTypeAndSubtypeAndParentId(1L, TYPE_DRUG, SUBTYPE_ATC, 0L)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void getCriteriaChildrenByTypeAndParentId() throws Exception {
+    assertEquals(
+      createResponseCriteria(drugATCCriteriaChild),
+      controller
+        .getCriteriaChildrenByTypeAndParentId(1L, TYPE_DRUG, 2L)
         .getBody()
         .getItems()
         .get(0)
@@ -232,7 +260,8 @@ public class CohortBuilderControllerTest {
       .selectable(true)
       .count("16")
       .domainId(domain)
-      .conceptId(conceptId);
+      .conceptId(conceptId)
+      .path("1.2.3.4");
   }
 
   private org.pmiops.workbench.model.Criteria createResponseCriteria(Criteria criteria) {
@@ -248,7 +277,8 @@ public class CohortBuilderControllerTest {
       .parentId(criteria.getParentId())
       .selectable(criteria.getSelectable())
       .subtype(criteria.getSubtype())
-      .type(criteria.getType());
+      .type(criteria.getType())
+      .path(criteria.getPath());
   }
 
   private org.pmiops.workbench.model.CriteriaAttribute createResponseCriteriaAttribute(CriteriaAttribute criteriaAttribute) {
