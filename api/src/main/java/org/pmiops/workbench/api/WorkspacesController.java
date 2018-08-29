@@ -773,44 +773,46 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private FileDetail notebookCloneOperation(String workspace, String workspaceName, String notebookName, String newName) {
-    Map<String, Object> map = notebookOpSetup(workspace, workspaceName, notebookName, newName);
+    NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, newName);
     FileDetail fileDetail = new FileDetail();
-    cloudStorageService.copyBlob((BlobId) map.get("blobId"), (BlobId) map.get("newBlobId"));
+    cloudStorageService.copyBlob(opDto.blobId, opDto.newBlobId);
     fileDetail.setName(newName);
-    fileDetail.setPath(map.get("fullPath").toString());
+    fileDetail.setPath(opDto.fullPath);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
-    userRecentResourceService.updateNotebookEntry(objToLong(map.get("workspaceId")), objToLong(map.get("userId")), map.get("fullPath").toString(), now);
+    userRecentResourceService.updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
     return fileDetail;
   }
 
   private void notebookDeleteOperation(String workspace, String workspaceName, String notebookName) {
-    Map<String, Object> map = notebookOpSetup(workspace, workspaceName, notebookName, "");
-    cloudStorageService.deleteBlob((BlobId) map.get("blobId"));
-    userRecentResourceService.deleteNotebookEntry(objToLong(map.get("workspaceId")), objToLong(map.get("userId")), map.get("fullPath").toString());
+    NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, "");
+    cloudStorageService.deleteBlob(opDto.blobId);
+    userRecentResourceService.deleteNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath);
   }
 
-  private long objToLong(Object object) {
-    return Long.parseLong(String.valueOf(object));
-  }
+  private class NotebookOpSetup {
+    BlobId blobId;
+    BlobId newBlobId;
+    String fullPath;
+    long userId;
+    long workspaceId;
 
-  private Map<String, Object> notebookOpSetup(String workspace, String workspaceName, String notebookName, String newName) {
-    Map<String, Object> response = new HashMap<>();
-    String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
-      .getWorkspace()
-      .getBucketName();
-    String origBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
-    String newBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
-    String pathStart = "gs://" + bucket + "/";
-    String origPath = pathStart + origBlobPath;
-    String newPath = pathStart + newBlobPath;
-    String fullPath = (newName.isEmpty()) ? origPath : newPath;
-    response.put("blobId", BlobId.of(bucket, origBlobPath));
-    response.put("newBlobId", BlobId.of(bucket, newBlobPath));
-    response.put("fullPath", fullPath);
-    response.put("userId", userProvider.get().getUserId());
-    response.put("workspaceId", workspaceService.getRequired(workspace, workspaceName).getWorkspaceId());
-    return response;
+    public NotebookOpSetup(String workspace, String workspaceName, String notebookName, String newName) {
+      String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
+        .getWorkspace()
+        .getBucketName();
+      String origBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+      String newBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
+      String pathStart = "gs://" + bucket + "/";
+      String origPath = pathStart + origBlobPath;
+      String newPath = pathStart + newBlobPath;
+      String fullPath = (newName.isEmpty()) ? origPath : newPath;
+      this.blobId = BlobId.of(bucket, origBlobPath);
+      this.newBlobId = BlobId.of(bucket, newBlobPath);
+      this.fullPath = fullPath;
+      this.userId = userProvider.get().getUserId();
+      this.workspaceId = workspaceService.getRequired(workspace, workspaceName).getWorkspaceId();
+    }
   }
 
   /**
