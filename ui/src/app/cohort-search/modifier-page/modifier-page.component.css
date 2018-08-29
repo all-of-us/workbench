@@ -53,7 +53,7 @@
 
 .count-preview  .disable-link {
     pointer-events: none;
-    opavity: 0.3;
+    opacity: 0.3;
 }
 .count-preview  .add-button {
     border-color:transparent;
