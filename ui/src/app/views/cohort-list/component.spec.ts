@@ -1,6 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
@@ -12,11 +12,13 @@ import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
   simulateClick,
+  simulateInput,
   updateAndTick
 } from 'testing/test-helpers';
 
-import {CohortListComponent} from '../cohort-list/component';
-import {ConfirmDeleteModalComponent} from '../confirm-delete-modal/component';
+import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
+import {CohortListComponent} from 'app/views/cohort-list/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 
 import {
   Cohort,
@@ -68,10 +70,11 @@ describe('CohortListComponent', () => {
       imports: [
         BrowserAnimationsModule,
         RouterTestingModule,
-        FormsModule,
+        ReactiveFormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
+        CohortEditModalComponent,
         CohortListComponent,
         ConfirmDeleteModalComponent
       ],
@@ -110,5 +113,31 @@ describe('CohortListComponent', () => {
     expect(app).toBeTruthy();
     expect(app.cohortList.length).toBe(1);
     expect(app.cohortList).not.toContain(deletedCohort);
+  }));
+
+  it('updates the page on edit', fakeAsync(() => {
+    const fixture = TestBed.createComponent(CohortListComponent);
+    const app = fixture.debugElement.componentInstance;
+    const editValue = 'edited name';
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
+    simulateClick(fixture, fixture.debugElement.query(By.css('.dropdown-toggle')));
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.edit-button')));
+    updateAndTick(fixture);
+    simulateInput(fixture, fixture.debugElement.query(By.css('.name-input')), editValue);
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-save')));
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    expect(app).toBeTruthy();
+    expect(app.cohortList.length).toBe(2);
+    const listOfNames = fixture.debugElement
+      .queryAll(By.css('.name')).map(el => el.nativeNode.innerText);
+    expect(listOfNames).toContain(editValue);
+    expect(listOfNames).not.toContain(firstCohortName);
   }));
 });

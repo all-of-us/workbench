@@ -133,7 +133,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
                 items.sort(sortByCountThenName);
                 const nodes = fromJS(items).map(node => {
                   if (node.get('subtype') !== CRITERIA_SUBTYPES.AGE) {
-                    const paramId = `param${node.get('id', node.get('code'))}`;
+                    const paramId = `param${node.get('conceptId', node.get('code'))}`;
                     node = node.set('parameterId', paramId);
                   }
                   return node;
