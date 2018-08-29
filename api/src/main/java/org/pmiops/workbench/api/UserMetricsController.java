@@ -13,7 +13,6 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.model.RenameNotebook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -104,7 +103,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteNotebookEntry(String workspaceNamespace, String workspaceId, String notebook) {
+  public ResponseEntity<EmptyResponse> deleteRecentResource(String workspaceNamespace, String workspaceId, String notebook) {
     userRecentResourceService.deleteNotebookEntry(
         getWorkspaceId(workspaceNamespace, workspaceId), userProvider.get().getUserId(), notebook);
     return ResponseEntity.ok(new EmptyResponse());

@@ -174,7 +174,7 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testDeleteNotebook() {
-    userMetricsController.deleteNotebookEntry(WORKSPACE_NAMESPACE, FIRECLOUD_WORKSPACE_ID,
+    userMetricsController.deleteRecentResource(WORKSPACE_NAMESPACE, FIRECLOUD_WORKSPACE_ID,
         "gs://bucketFile/notebooks/notebook1.ipynb");
     verify(userRecentResourceService).deleteNotebookEntry(WORKSPACE_2_ID, USER_ID, "gs://bucketFile/notebooks/notebook1.ipynb");
   }

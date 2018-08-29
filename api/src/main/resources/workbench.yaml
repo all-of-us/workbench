@@ -981,7 +981,7 @@ paths:
           schema:
             $ref: "#/definitions/RecentResource"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/recent-resource/{notebook}/delete-notebook:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/recent-resource/deleteEntry:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -989,12 +989,12 @@ paths:
       tags:
         - userMetrics
       description: Deletes Notebook entry from recent resource
-      operationId: deleteNotebookEntry
+      operationId: deleteRecentResource
       parameters:
-        - in: path
+        - in: body
           name: notebook
-          required: true
-          type: string
+          schema:
+            type: string
       responses:
         200:
           description: Successfully deleted
