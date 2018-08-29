@@ -17,6 +17,7 @@ java_defaults: &java_defaults
 
 jobs:
   api-build-test:
+    parallelism: 2
     <<: *java_defaults
     steps:
       - checkout
