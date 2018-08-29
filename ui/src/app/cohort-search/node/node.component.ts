@@ -18,9 +18,7 @@ import {
   subtreeSelected,
 } from '../redux';
 
-import {loadSubtreeItems} from '../redux/actions/creators';
-
-import {highlightMatches} from '../utils';
+import {highlightMatches, stripHtml} from '../utils';
 
 @Component({
   selector: 'crit-node',
@@ -118,9 +116,11 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(() =>  this.expanded = true);
 
       const subtreeSelectSub = this.selected$
-        .filter(selectedId => selectedId === parentId)
-        .subscribe(() => {
-          const displayName = highlightMatches(this.searchTerms, this.node.get('name'));
+        .filter(selectedIds => !!selectedIds && parentId !== 0)
+        .subscribe(selectedIds => {
+          const displayName = selectedIds.includes(parentId)
+            ? highlightMatches(this.searchTerms, this.node.get('name'))
+            : stripHtml(this.node.get('name'));
           this.node = this.node.set('name', displayName);
         });
 

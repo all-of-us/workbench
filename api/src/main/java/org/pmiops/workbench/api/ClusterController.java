@@ -170,14 +170,6 @@ public class ClusterController implements ClusterApiDelegate {
     try {
       fcWorkspace = fireCloudService.getWorkspace(body.getWorkspaceNamespace(),
           body.getWorkspaceId()).getWorkspace();
-      long workspaceId = workspaceService
-          .getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
-          .getWorkspaceId();
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      body.getNotebookNames().forEach(
-          notebook ->
-              userRecentResourceService.updateNotebookEntry(workspaceId, userProvider.get().getUserId(), notebook, now)
-      );
     } catch (NotFoundException e) {
       throw new NotFoundException(String.format("workspace %s/%s not found or not accessible",
           body.getWorkspaceNamespace(), body.getWorkspaceId()));
@@ -190,6 +182,16 @@ public class ClusterController implements ClusterApiDelegate {
     // include the namespace in the directory name to avoid possible conflicts
     // in workspace IDs.
     String gcsNotebooksDir = "gs://" + fcWorkspace.getBucketName() + "/notebooks";
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    long workspaceId = workspaceService
+        .getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
+        .getWorkspaceId();
+
+    body.getNotebookNames().forEach(
+        notebook ->
+            userRecentResourceService.updateNotebookEntry(workspaceId, userProvider.get().getUserId(),
+                gcsNotebooksDir + "/" + notebook, now)
+    );
     String workspacePath = body.getWorkspaceId();
     if (!projectName.equals(body.getWorkspaceNamespace())) {
       workspacePath = body.getWorkspaceNamespace() + ":" + body.getWorkspaceId();

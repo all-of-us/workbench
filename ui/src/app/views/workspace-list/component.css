@@ -110,12 +110,11 @@
 
 .header-area {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .workspace-name {
   color: #216FB4;
-  padding-top: 0.5rem;
   margin-bottom: 0.5rem;
   font-weight: 500;
   font-size: 18px;

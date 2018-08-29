@@ -4,7 +4,7 @@ import {DomainType} from 'generated';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {CRITERIA_TYPES} from '../../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -59,8 +59,8 @@ export class CohortSearchActions {
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
-  @dispatch() requestCriteriaSubtree = ActionFuncs.requestCriteriaSubtree;
-  @dispatch() loadSubtreeItems = ActionFuncs.loadSubtreeItems;
+  @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
+  @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
@@ -248,13 +248,8 @@ export class CohortSearchActions {
     this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
-  fetchCriteriaSubtree(kind: string, id: number): void {
-    const isLoading = isAutocompleteLoading()(this.state);
-    const isLoaded = this.state.getIn(['criteria', 'subtree', kind, id]);
-    if (isLoaded || isLoading) {
-      return;
-    }
-    this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
+  fetchAllChildren(kind: string, parentId: number): void {
+    this.requestAllChildren(this.cdrVersionId, kind, parentId);
   }
 
   fetchAttributes(node: any): void {
@@ -450,7 +445,8 @@ export class CohortSearchActions {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
       name: immParam.get('name', ''),
-      value: immParam.get('code'),
+      value: CRITERIA_SUBTYPES.DEC === immParam.get('subtype')
+          ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),

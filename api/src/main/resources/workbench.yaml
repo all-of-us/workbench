@@ -949,6 +949,17 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
+  /v1/workspaces/user-recent-resources:
+    get:
+      tags:
+        - userMetrics
+      description: Returns the resources accessed by user order by access time desc
+      operationId: getUserRecentResources
+      responses:
+        200:
+          description: A list of resources order by last access time desc order
+          schema:
+            $ref: "#/definitions/RecentResourceResponse"
 # Concept sets ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:
@@ -1925,3 +1936,23 @@ definitions:
         format: int32
         description: >
           Number of clusters deleted during the check.
+
+  RecentResourceResponse:
+    type: array
+    items:
+      $ref: "#/definitions/RecentResource"
+
+  RecentResource:
+    type: object
+    properties:
+      workspaceId:
+        type: integer
+        format: int64
+      permission:
+        type: string
+      cohort:
+        $ref: "#/definitions/Cohort"
+      notebook:
+        $ref: '#/definitions/FileDetail'
+      modifiedTime:
+        type: string

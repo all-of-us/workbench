@@ -78,6 +78,11 @@ export const isParameterActive = paramId => (state): boolean =>
     .getIn(['wizard', 'item', 'searchParameters'], List())
     .includes(paramId);
 
+export const isSelectedParent = id => (state): boolean =>
+  state
+    .getIn(['wizard', 'item', 'selectedParents'], List())
+    .includes(id.toString());
+
 export const activeItem = (state) =>
   state.getIn(['wizard', 'item'], Map());
 

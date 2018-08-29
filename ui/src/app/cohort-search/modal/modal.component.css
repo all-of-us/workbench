@@ -37,7 +37,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  height:59px;
+  height: 59px;
   margin-top: 0.5rem;
 }
 
@@ -50,11 +50,13 @@
 .vbar {
   align-self: center;
   display: inline-block;
-  margin: 0 0.75rem;
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
   box-sizing: border-box;
-  height: 0.99rem;
+  height: 26px;
   width: 1px;
   border: 1px solid #979797;
+  margin-bottom: 0.5rem
 }
 
 .nav-link.active {
@@ -73,6 +75,7 @@
 .nav-link {
   margin-bottom: -4px!important;
 }
+
 button{
   font-weight:300!important;
 }
@@ -193,6 +196,14 @@ h5.selection-title {
   color: #262262;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.explore-link {
+  padding-bottom: 0.8rem;
+}
+
+.explore-link >a:visited {
+  color: #007cbb;
 }
 
 @media all and (max-width: 900px) {
