@@ -948,7 +948,7 @@ paths:
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
-
+######### USER RECENT RESOURCES ########################################
   /v1/workspaces/user-recent-resources:
     get:
       tags:
@@ -960,6 +960,54 @@ paths:
           description: A list of resources order by last access time desc order
           schema:
             $ref: "#/definitions/RecentResourceResponse"
+
+  /v1/notebook/recentResource/{workspaceId}/{workspaceName}/{notebook}/delete-notebook:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    delete:
+      tags:
+        - userMetrics
+      description: Deletes Notebook entry from recent resource
+      operationId: deleteNotebookEntry
+      parameters:
+        - in: path
+          name: notebook
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
+  /v1/notebook/recentResource/{workspaceId}/{workspaceName}/rename-notebook:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - userMetrics
+      description: Rename Notebook entry from recent resource
+      operationId: renameNotebookEntry
+      parameters:
+        - in: body
+          name: RenameNotebook
+          description: Rename notebook information
+          required: true
+          schema:
+            type: object
+            properties:
+              oldName:
+                type: string
+              newName:
+                type: string
+      responses:
+        200:
+          description: Successfully renamed
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
 # Concept sets ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:

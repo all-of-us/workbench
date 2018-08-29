@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -21,6 +22,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 
+import org.pmiops.workbench.model.RenameNotebookEntry;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -118,6 +120,9 @@ public class UserMetricsControllerTest {
 
     when(workspaceService.findByWorkspaceId(2l)).thenReturn(workspace2);
 
+    when(workspaceService.getRequired("workspaceNamespace", "Firecloudname"))
+        .thenReturn(workspace2);
+
     when(fireCloudService.getWorkspace("workspaceNamespace1", "Firecloudname1"))
         .thenReturn(workspaceResponse);
 
@@ -128,7 +133,8 @@ public class UserMetricsControllerTest {
         userProvider,
         userRecentResourceService,
         workspaceService,
-        fireCloudService);
+        fireCloudService,
+        clock);
     userMetricsController.setDistinctWorkspaceLimit(5);
 
   }
@@ -157,6 +163,24 @@ public class UserMetricsControllerTest {
     assertEquals(1, recentResources.size());
     assertNull(recentResources.get(0).getCohort());
     assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/");
+  }
+
+  @Test
+  public void testDeleteNotebook() {
+    userMetricsController.deleteNotebook("workspaceNamespace", "Firecloudname",
+        "gs://bucketFile/notebooks/notebook1.ipynb");
+    verify(userRecentResourceService).deleteNotebookEntry(2l, 123l, "gs://bucketFile/notebooks/notebook1.ipynb");
+  }
+
+  @Test
+  public void testRenameNotebook() {
+    RenameNotebook renameNotebookEntry = new RenameNotebook();
+    renameNotebookEntry.setOldName("gs://oldbucket/oldName.ipynb");
+    renameNotebookEntry.setNewName("gs://newBucket/newName.ipynb");
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    userMetricsController.renameNotebookEntry("workspaceNamespace", "Firecloudname", renameNotebookEntry);
+    verify(userRecentResourceService).deleteNotebookEntry(2l, 123l, renameNotebookEntry.getOldName());
+    verify(userRecentResourceService).updateNotebookEntry(2l, 123l, renameNotebookEntry.getNewName(), now);
   }
 }
 

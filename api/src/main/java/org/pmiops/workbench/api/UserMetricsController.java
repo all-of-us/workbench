@@ -8,15 +8,22 @@ import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.NotebookRename1;
+import org.pmiops.workbench.model.NotebookRenameInfo;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.model.RenameNotebook;
+import org.pmiops.workbench.model.RenameNotebookEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -30,6 +37,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private FireCloudService fireCloudService;
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks/";
   private int distinctWorkspacelimit = 5;
+  private Clock clock;
 
   //Converts DB model to client Model
   private final Function<UserRecentResource, RecentResource> TO_CLIENT =
@@ -75,16 +83,26 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   UserMetricsController(Provider<User> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
-      FireCloudService fireCloudService) {
+      FireCloudService fireCloudService,
+      Clock clock) {
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
+    this.clock = clock;
   }
 
   @VisibleForTesting
   public void setDistinctWorkspaceLimit(int limit) {
     distinctWorkspacelimit = limit;
+  }
+
+
+  @Override
+  public ResponseEntity<EmptyResponse> deleteNotebookEntry(String workspaceNamespace, String workspaceId, String notebook) {
+    Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    userRecentResourceService.deleteNotebookEntry(dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), notebook);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   /**
@@ -122,6 +140,18 @@ public class UserMetricsController implements UserMetricsApiDelegate {
           recentResponse.add(resource);
         });
     return ResponseEntity.ok(recentResponse);
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> renameNotebookEntry(String workspaceNamespace, String workspaceId, RenameNotebook renameNotebook) {
+    Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    userRecentResourceService.deleteNotebookEntry(
+        dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), renameNotebook.getOldName());
+    Timestamp lastModifiedTime = new Timestamp(clock.instant().toEpochMilli());
+
+    userRecentResourceService.updateNotebookEntry(dbWorkspace.getWorkspaceId(),
+        userProvider.get().getUserId(), renameNotebook.getNewName(), lastModifiedTime);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
 
