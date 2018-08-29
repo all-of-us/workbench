@@ -961,27 +961,7 @@ paths:
           schema:
             $ref: "#/definitions/RecentResourceResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/recent-resource/{notebook}/update-notebook:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-    post:
-      tags:
-        - userMetrics
-      description: Add/update Notebook entry to recent resource
-      operationId: updateNotebookEntry
-      parameters:
-        - in: path
-          name: notebook
-          required: true
-          type: string
-      responses:
-        200:
-          description: Successfully added
-          schema:
-            $ref: "#/definitions/RecentResource"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/recent-resource/{notebook}/delete-notebook:
+  /v1/recentResource/{workspaceId}/{workspaceName}/{notebook}/delete-notebook:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -1001,6 +981,32 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  /v1/recentResource/{workspaceId}/{workspaceName}/rename-notebook:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - userMetrics
+      description: Rename Notebook entry from recent resource
+      operationId: renameNotebookEntry
+      parameters:
+        - in: body
+          name: RenameNotebook
+          description: Rename notebook information
+          required: true
+          schema:
+            type: object
+            properties:
+              oldName:
+                type: string
+              newName:
+                type: string
+      responses:
+        200:
+          description: Successfully renamed
+          schema:
+            $ref: "#/definitions/EmptyResponse"
 
 # Concept sets ##############################################################################
 
