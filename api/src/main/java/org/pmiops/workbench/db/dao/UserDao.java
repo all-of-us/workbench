@@ -35,13 +35,13 @@ public interface UserDao extends CrudRepository<User, Long> {
   /**
    * Returns the user with the page visits and authorities loaded.
    */
-  @Query("Select user FROM User user LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
+  @Query("SELECT user FROM User user LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
   User findUserWithAuthoritiesAndPageVisits(@Param("id") long id);
 
   /**
    * Find users matching the user's name or email
    */
-  @Query("Select user FROM User user WHERE lower(user.email) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%'))")
+  @Query("SELECT user FROM User user WHERE lower(user.email) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%'))")
   List<User> findUsersBySearchString(@Param("term") String term, Pageable pageable);
 
 }
