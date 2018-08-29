@@ -8,10 +8,8 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -791,11 +789,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private class NotebookOpSetup {
-    BlobId blobId;
-    BlobId newBlobId;
-    String fullPath;
-    long userId;
-    long workspaceId;
+    private BlobId blobId;
+    private BlobId newBlobId;
+    private String fullPath;
+    private long userId;
+    private long workspaceId;
 
     public NotebookOpSetup(String workspace, String workspaceName, String notebookName, String newName) {
       String bucket = fireCloudService.getWorkspace(workspace, workspaceName)

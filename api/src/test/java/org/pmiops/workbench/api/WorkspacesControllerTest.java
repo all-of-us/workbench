@@ -1395,14 +1395,16 @@ public class WorkspacesControllerTest {
     String newPath = "notebooks/nb2.ipynb";
     String fullPath = "gs://workspace-bucket/" + newPath;
     String origFullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-    verify(userRecentResourceService).updateNotebookEntry(1, 1, fullPath, Timestamp.from(NOW));
-    verify(userRecentResourceService).deleteNotebookEntry(1, 1, origFullPath);
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
@@ -1416,14 +1418,16 @@ public class WorkspacesControllerTest {
     String newPath = "notebooks/nb2.ipynb";
     String fullPath = "gs://workspace-bucket/" + newPath;
     String origFullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-    verify(userRecentResourceService).updateNotebookEntry(1, 1, fullPath, Timestamp.from(NOW));
-    verify(userRecentResourceService).deleteNotebookEntry(1, 1, origFullPath);
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
@@ -1435,9 +1439,11 @@ public class WorkspacesControllerTest {
     String nb1 = "notebooks/nb1.ipynb";
     String newPath = "notebooks/nb1 Clone.ipynb";
     String fullPath = "gs://workspace-bucket/" + newPath;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     workspacesController.cloneNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
-    verify(userRecentResourceService).updateNotebookEntry(1, 1, fullPath, Timestamp.from(NOW));
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
   }
 
   @Test
@@ -1448,8 +1454,10 @@ public class WorkspacesControllerTest {
       LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     String nb1 = "notebooks/nb1.ipynb";
     String fullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     workspacesController.deleteNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-    verify(userRecentResourceService).deleteNotebookEntry(1, 1, fullPath);
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 }
