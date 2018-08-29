@@ -28,7 +28,7 @@
               </clr-dropdown-menu>
             </clr-dropdown>
           </div>
-          <ng-container *ngIf = "dropdownOption.selected[i] !== 'Any'">
+          <div *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
               <div>
                 <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
@@ -41,7 +41,7 @@
                 <div class="and-text">
                   <div>and</div>
                 </div>
-                <div *ngIf="dropdownOption.selected[i] !== 'ANY'">
+                <div>
                   <input *ngIf="mod.inputType !== 'date'"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
                 </div>
               </ng-container>
@@ -49,13 +49,13 @@
                 <div class="and-text" >
                   <div>and</div>
                 </div>
-                <div *ngIf="dropdownOption.selected[i] !== ''">
+                <div>
                   <input *ngIf = "mod.inputType === 'date'" [ngModel]="selectedDate | date:'yyyy-MM-dd'"
                          (ngModelChange)="selectedDate = $event"  class="modifier-calender" formControlName="valueB" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
                 </div>
               </ng-container>
             </ng-container>
-          </ng-container>
+          </div>
         </div>
     </div>
   </section>
