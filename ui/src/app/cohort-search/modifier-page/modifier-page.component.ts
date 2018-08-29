@@ -59,7 +59,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }]
   }, {
     name: 'eventDate',
-    label: 'Shifted Event Date',
+    label: 'Event Date',
     inputType: 'date',
     modType: ModifierType.EVENTDATE,
     operators: [{

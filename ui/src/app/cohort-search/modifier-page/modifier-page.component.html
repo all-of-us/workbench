@@ -79,26 +79,26 @@
 <div class="container count-preview">
   <div class="row">
     <div class="col-lg-2 ">
-      <button type="button"
-        class="btn calculate-btn"
+      <button type="button" [ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"
+        class="btn "
+        [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
         [disabled] = "!formChanges">
         Calculate
       </button>
     </div>
-    <div class="spin-top-padding">
-      <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading... </span>
-    </div>
-    <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
-      <div class="result-text">
-        Results
-      </div>
-      <div>
-        Number Participants:
-        <span class="text-bold" *ngIf="!preview.get('requesting')">
+    <ng-container *ngIf="!preview.get('requesting')" >
+      <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
+        <div class="result-text">
+          Results
+        </div>
+        <div>
+          Number Participants:
+          <span class="text-bold" *ngIf="!preview.get('requesting')">
          {{ preview.get('count', 0) | number}}
         </span>
+        </div>
       </div>
-    </div>
+    </ng-container>
   </div>
 </div>
