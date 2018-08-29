@@ -158,7 +158,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   get paramId() {
-    return `param${this.node.get('id')}`;
+    return `param${this.node.get('conceptId') ? this.node.get('conceptId') : this.node.get('id')}`;
   }
 
   get displayName() {
