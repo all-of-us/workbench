@@ -988,7 +988,7 @@ paths:
     delete:
       tags:
         - userMetrics
-      description: Deletes Notebook entry from recent resource
+      description: Deletes entry from recent resource
       operationId: deleteRecentResource
       parameters:
         - in: body
