@@ -73,9 +73,9 @@
                 (ngModelChange)="inputChange()"
                 required>
               <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
-              <span *ngIf="isMeasurement()">
-                Range: {{attr.MIN}} - {{attr.MAX}}
-              </span>
+              <!--<span *ngIf="isMeasurement()">-->
+                <!--Range: {{attr.MIN}} - {{attr.MAX}}-->
+              <!--</span>-->
             </div>
           </div>
       </div>
