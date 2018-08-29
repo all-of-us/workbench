@@ -96,9 +96,17 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
 
   @Override
+  public ResponseEntity<RecentResource> updateNotebookEntry(String workspaceNamespace, String workspaceId, String notebook) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    UserRecentResource addedEntry = userRecentResourceService.updateNotebookEntry
+        (getWorkspaceId(workspaceNamespace, workspaceId), userProvider.get().getUserId(), notebook, now);
+    return ResponseEntity.ok(TO_CLIENT.apply(addedEntry));
+  }
+
+  @Override
   public ResponseEntity<EmptyResponse> deleteNotebookEntry(String workspaceNamespace, String workspaceId, String notebook) {
-    Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    userRecentResourceService.deleteNotebookEntry(dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), notebook);
+    userRecentResourceService.deleteNotebookEntry(
+        getWorkspaceId(workspaceNamespace, workspaceId), userProvider.get().getUserId(), notebook);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -139,19 +147,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return ResponseEntity.ok(recentResponse);
   }
 
-  @Override
-  public ResponseEntity<EmptyResponse> renameNotebookEntry(String workspaceNamespace, String workspaceId, RenameNotebook renameNotebook) {
+  //Retrieves Database workspace ID  on the basis of workspace namespace and fireclud workspace ID
+  private long getWorkspaceId(String workspaceNamespace, String workspaceId) {
     Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    userRecentResourceService.deleteNotebookEntry(
-        dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(), renameNotebook.getOldName());
-    Timestamp lastModifiedTime = new Timestamp(clock.instant().toEpochMilli());
-
-    userRecentResourceService.updateNotebookEntry(dbWorkspace.getWorkspaceId(),
-        userProvider.get().getUserId(), renameNotebook.getNewName(), lastModifiedTime);
-    return ResponseEntity.ok(new EmptyResponse());
+    return dbWorkspace.getWorkspaceId();
   }
-
-
 }
 
 
