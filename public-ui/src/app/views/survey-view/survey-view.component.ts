@@ -34,7 +34,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   questions: any = [];
   searchText: FormControl = new FormControl();
   searchMethod = 'or';
-  noResultsMessage = 'No questions match your search term.';
 
   /* Show answers toggle */
   showAnswer = {};
@@ -62,7 +61,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       next: x => {
         this.surveyResult = x;
         this.survey = this.surveyResult.survey;
-
 
         // Add Did not answer to each question
         for (const q of this.surveyResult.items) {
