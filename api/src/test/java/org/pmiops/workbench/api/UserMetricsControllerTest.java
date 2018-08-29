@@ -23,7 +23,6 @@ import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 
-import org.pmiops.workbench.model.RenameNotebook;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
