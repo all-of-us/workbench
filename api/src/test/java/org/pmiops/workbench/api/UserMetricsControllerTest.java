@@ -22,7 +22,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 
-import org.pmiops.workbench.model.RenameNotebookEntry;
+import org.pmiops.workbench.model.RenameNotebook;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -167,7 +167,7 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testDeleteNotebook() {
-    userMetricsController.deleteNotebook("workspaceNamespace", "Firecloudname",
+    userMetricsController.deleteNotebookEntry("workspaceNamespace", "Firecloudname",
         "gs://bucketFile/notebooks/notebook1.ipynb");
     verify(userRecentResourceService).deleteNotebookEntry(2l, 123l, "gs://bucketFile/notebooks/notebook1.ipynb");
   }
