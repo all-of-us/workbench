@@ -425,6 +425,41 @@ paths:
       summary: remove a user from an auth domain if you have manage groups permission
       operationId: removeUserFromAuthDomain
 
+  /v1/user/{term}:
+    get:
+      tags:
+        - user
+      description: Returns user information matching search terms
+      operationId: user
+      responses:
+        200:
+          description: The user information matching supplied search terms
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/UserResponse"
+      parameters:
+        - in: path
+          name: term
+          description: String to find in user's name or email address
+          required: true
+          type: string
+        - in: query
+          name: page
+          description: Results you want to retrieve (0..N), default is the first page, 0
+          type: integer
+          required: false
+        - in: query
+          name: size
+          description: Number of records per page, default is 10
+          type: integer
+          required: false
+        - in: query
+          name: sort
+          description: Sorting direction, either 'asc' or 'desc', default is 'asc' on the user's email
+          type: string
+          required: false
+
   # Notebook clusters ####################################################################
 
   /v1/clusters:
@@ -1936,6 +1971,19 @@ definitions:
         format: int32
         description: >
           Number of clusters deleted during the check.
+
+  UserResponse:
+    type: object
+    properties:
+      email:
+        description: researchallofus email address
+        type: string
+      givenName:
+        description: the user's given name (e.g. Alice)
+        type: string
+      familyName:
+        description: the user's family  name (e.g. Jones)
+        type: string
 
   RecentResourceResponse:
     type: array

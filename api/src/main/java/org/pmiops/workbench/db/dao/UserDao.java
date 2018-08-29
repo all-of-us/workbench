@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.pmiops.workbench.db.model.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -36,4 +37,11 @@ public interface UserDao extends CrudRepository<User, Long> {
    */
   @Query("Select user FROM User user LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
   User findUserWithAuthoritiesAndPageVisits(@Param("id") long id);
+
+  /**
+   * Find users matching the user's name or email
+   */
+  @Query("Select user FROM User user WHERE lower(user.email) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%'))")
+  List<User> findUsersBySearchString(@Param("term") String term, Pageable pageable);
+
 }
