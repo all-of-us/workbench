@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
