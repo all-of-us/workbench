@@ -16,6 +16,7 @@
 
 .padding-right {
   padding-right: 10px;
+  font-size: 12px;
 }
 
 .hidden {
@@ -29,4 +30,10 @@
 
 #close-button:hover {
   color: rgb(255, 186, 164);
+}
+
+.code-text {
+  font-weight: 300;
+  font-size: 12px;
+  color: #333333;
 }

@@ -15,20 +15,20 @@ import {
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
-  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
-  LOAD_SUBTREE_RESULTS,
   LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
+  BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_CHILDREN_LIST,
   LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
@@ -87,11 +87,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
           .setIn(['criteria', 'requests', action.kind, action.parentId], true);
 
-      case BEGIN_CRITERIA_SUBTREE_REQUEST:
-        return state
-          .deleteIn(['criteria', 'errors', List([action.kind, action.id])])
-          .setIn(['criteria', 'requests', action.kind, action.id], true);
-
       case BEGIN_ALL_CRITERIA_REQUEST:
         return state
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
@@ -112,26 +107,10 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['criteria', 'tree', action.kind, action.subtype], action.results)
           .deleteIn(['criteria', 'requests', action.kind, action.subtype]);
 
-      case LOAD_SUBTREE_RESULTS:
-        const subtreeObj = {};
-        action.results.forEach(criterion => {
-          if (criterion.parentId !== 0) {
-            if (subtreeObj[criterion.parentId]) {
-              subtreeObj[criterion.parentId].push(criterion);
-            } else {
-              subtreeObj[criterion.parentId] = [criterion];
-            }
-          }
-        });
-        return state
-          .mergeIn(['criteria', 'tree', action.kind], fromJS(subtreeObj))
-          .setIn(['criteria', 'subtree', action.kind], fromJS(Object.keys(subtreeObj)))
-          .setIn(['criteria', 'subtree', 'selected'], action.id)
-          .deleteIn(['criteria', 'requests', action.kind, action.id]);
-
       case LOAD_CRITERIA_SUBTREE:
         return state
-          .setIn(['criteria', 'subtree', action.kind], fromJS(action.results))
+          .setIn(['criteria', 'subtree', action.kind], fromJS(action.path))
+          .setIn(['criteria', 'subtree', 'selected'], action.ids)
           .deleteIn(['criteria', 'requests', action.kind]);
 
       case CANCEL_CRITERIA_REQUEST:
@@ -163,6 +142,25 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(['criteria', 'search', 'ingredients'], action.ingredients)
           .deleteIn(['criteria', 'search', 'autocomplete']);
+
+      case LOAD_CHILDREN_LIST:
+        action.children.forEach(child => {
+          child.parameterId = `param${(child.conceptId ? child.conceptId : child.id)}`;
+          const path = child.path.split('.');
+          const parents = path.slice(path.indexOf(action.parentId.toString()));
+          state = state
+            .setIn(['wizard', 'selections', child.parameterId], fromJS(child))
+            .updateIn(['wizard', 'item', 'selectedParents'],
+              List(),
+              parentIdList => parentIdList.merge(fromJS(parents)))
+            .updateIn(
+              ['wizard', 'item', 'searchParameters'],
+              List(),
+              paramList => paramList.includes(child.parameterId)
+                ? paramList
+                : paramList.push(child.parameterId));
+        });
+        return state;
 
       case LOAD_ATTRIBUTE_LIST:
         const node = action.node.set('attributes', action.attributes);
@@ -300,6 +298,11 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['wizard', 'item', 'searchParameters'],
             List(),
             paramList => paramList.filterNot(id => id === action.parameterId)
+          )
+          .updateIn(
+            ['wizard', 'item', 'selectedParents'],
+            List(),
+            parentIdList => parentIdList.filterNot(id => action.path.split('.').includes(id))
           );
 
       case ADD_MODIFIER:
@@ -331,7 +334,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['wizard', 'item', 'attributes', 'loading'], true);
 
       case HIDE_ATTRIBUTES_PAGE:
-        console.log('hide');
         return state
           .setIn(['wizard', 'item', 'attributes', 'node'], Map())
           .deleteIn(['wizard', 'calculate', 'count']);

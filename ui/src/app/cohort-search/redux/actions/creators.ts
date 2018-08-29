@@ -1,20 +1,20 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
-  BEGIN_CRITERIA_SUBTREE_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
-  LOAD_SUBTREE_RESULTS,
   LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
+  BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_CHILDREN_LIST,
   LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
@@ -71,11 +71,6 @@ export const requestCriteria =
   ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
   ({type: BEGIN_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
 
-export const requestCriteriaSubtree =
-  (cdrVersionId: number, kind: string, id: number
-  ): ActionTypes[typeof BEGIN_CRITERIA_SUBTREE_REQUEST] =>
-  ({type: BEGIN_CRITERIA_SUBTREE_REQUEST, cdrVersionId, kind, id});
-
 export const requestAllCriteria =
   (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST] =>
@@ -91,15 +86,10 @@ export const loadCriteriaRequestResults =
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
   ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
 
-export const loadSubtreeItems =
-  (kind: string, id: number, results: any
-  ): ActionTypes[typeof LOAD_SUBTREE_RESULTS] =>
-  ({type: LOAD_SUBTREE_RESULTS, kind, id, results});
-
 export const loadCriteriaSubtree =
-  (kind: string, results: Criteria[]
+  (kind: string, ids: Array<number>, path: Array<string>
   ): ActionTypes[typeof LOAD_CRITERIA_SUBTREE] =>
-  ({type: LOAD_CRITERIA_SUBTREE, kind, results});
+  ({type: LOAD_CRITERIA_SUBTREE, kind, ids, path});
 
 export const loadDemoCriteriaRequestResults =
   (kind: string, subtype: string, results: any
@@ -126,6 +116,11 @@ export const requestIngredientsForBrand =
   ): ActionTypes[typeof BEGIN_INGREDIENT_REQUEST] =>
   ({type: BEGIN_INGREDIENT_REQUEST, cdrVersionId, conceptId});
 
+export const requestAllChildren =
+  (cdrVersionId: number, kind: string, parentId: number
+  ): ActionTypes[typeof BEGIN_CHILDREN_REQUEST] =>
+  ({type: BEGIN_CHILDREN_REQUEST, cdrVersionId, kind, parentId});
+
 export const loadAutocompleteOptions =
   (options: any
   ): ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS] =>
@@ -144,6 +139,11 @@ export const loadIngredients =
   (ingredients: any
   ): ActionTypes[typeof LOAD_INGREDIENT_LIST] =>
   ({type: LOAD_INGREDIENT_LIST, ingredients});
+
+export const loadAndSelectChildren =
+  (parentId: number, children: any
+  ): ActionTypes[typeof LOAD_CHILDREN_LIST] =>
+  ({type: LOAD_CHILDREN_LIST, parentId, children});
 
 export const loadAttributes =
   (node: any, attributes: any
@@ -250,9 +250,9 @@ export const addParameter =
   ({type: ADD_PARAMETER, parameter});
 
 export const removeParameter =
-  (parameterId: string
+  (parameterId: string, path?: string
   ): ActionTypes[typeof REMOVE_PARAMETER] =>
-  ({type: REMOVE_PARAMETER, parameterId});
+  ({type: REMOVE_PARAMETER, parameterId, path});
 
 export const addModifier =
   (modifier: any

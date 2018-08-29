@@ -4,7 +4,7 @@ import {Criteria, DomainType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES} from '../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
 
 import {
   activeCriteriaTreeType,
@@ -18,9 +18,7 @@ import {
   subtreeSelected,
 } from '../redux';
 
-import {loadSubtreeItems} from '../redux/actions/creators';
-
-import {highlightMatches} from '../utils';
+import {highlightMatches, stripHtml} from '../utils';
 
 @Component({
   selector: 'crit-node',
@@ -119,9 +117,11 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(() =>  this.expanded = true);
 
       const subtreeSelectSub = this.selected$
-        .filter(selectedId => selectedId === parentId)
-        .subscribe(() => {
-          const displayName = highlightMatches(this.searchTerms, this.node.get('name'));
+        .filter(selectedIds => !!selectedIds && parentId !== 0)
+        .subscribe(selectedIds => {
+          const displayName = selectedIds.includes(parentId)
+            ? highlightMatches(this.searchTerms, this.node.get('name'))
+            : stripHtml(this.node.get('name'));
           this.node = this.node.set('name', displayName);
         });
 
@@ -179,6 +179,10 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchAllCriteria(_type, parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
+    }
+    // Load options for Encounters modifier
+    if ([CRITERIA_TYPES.PM, DomainType.VISIT].indexOf(_type) === -1) {
+      this.actions.fetchCriteria(DomainType[DomainType.VISIT], 0);
     }
   }
 

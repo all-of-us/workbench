@@ -29,11 +29,11 @@ export class ConfigureStore {
       createEpicMiddleware(
         combineEpics(
           epics.fetchCriteria,
-          epics.fetchCriteriaSubtree,
           epics.fetchAllCriteria,
           epics.fetchDrugCriteria,
           epics.fetchAutocompleteOptions,
           epics.fetchIngredientsForBrand,
+          epics.fetchAllChildren,
           epics.fetchAttributes,
           epics.fetchCount,
           epics.fetchChartData,

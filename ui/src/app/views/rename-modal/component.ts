@@ -14,11 +14,21 @@ export class RenameModalComponent {
   @Output() receiveRename = new EventEmitter<object>();
   @Input() resource: any;
 
+  loading = false;
+
   open(): void {
     this.renaming = true;
+    this.loading = false;
   }
 
   close(): void {
     this.renaming = false;
+  }
+
+  emitRename(resource: any): void {
+    if (!this.loading) {
+      this.loading = true;
+      this.receiveRename.emit({name: resource.name, newName: this.newName});
+    }
   }
 }

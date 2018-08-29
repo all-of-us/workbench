@@ -101,7 +101,9 @@ export class CohortsServiceStub {
           return false;
         });
         if (index !== -1) {
-          this.cohorts[index] = new CohortStub(newCohort, wsid);
+          const newCohortStub = new CohortStub(newCohort, wsid);
+          this.cohorts[index] = newCohortStub;
+          observer.next(newCohortStub);
           observer.complete();
         } else {
           observer.error(new Error(`Error updating. No cohort with id: ${cid} `

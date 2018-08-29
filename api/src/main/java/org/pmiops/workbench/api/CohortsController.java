@@ -2,8 +2,6 @@ package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
@@ -19,21 +17,23 @@ import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -90,6 +90,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final CohortDao cohortDao;
   private final CdrVersionDao cdrVersionDao;
   private final CohortReviewDao cohortReviewDao;
+  private final ConceptSetDao conceptSetDao;
   private final CohortMaterializationService cohortMaterializationService;
   private Provider<User> userProvider;
   private final Clock clock;
@@ -102,6 +103,7 @@ public class CohortsController implements CohortsApiDelegate {
       CohortDao cohortDao,
       CdrVersionDao cdrVersionDao,
       CohortReviewDao cohortReviewDao,
+      ConceptSetDao conceptSetDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<User> userProvider,
       Clock clock,
@@ -111,6 +113,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortReviewDao = cohortReviewDao;
+    this.conceptSetDao = conceptSetDao;
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -270,6 +273,32 @@ public class CohortsController implements CohortsApiDelegate {
     } else {
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
+    Set<Long> conceptIds = null;
+    if (request.getFieldSet() != null && request.getFieldSet().getTableQuery() != null) {
+      String conceptSetName = request.getFieldSet().getTableQuery().getConceptSetName();
+      if (conceptSetName != null) {
+        ConceptSet conceptSet = conceptSetDao.findConceptSetByNameAndWorkspaceId(conceptSetName,
+            workspace.getWorkspaceId());
+        if (conceptSet == null) {
+          throw new NotFoundException(
+              String.format("Couldn't find concept set with name %s in workspace %s/%s",
+                 conceptSetName, workspaceNamespace, workspaceId));
+        }
+        String tableName = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
+        if (tableName == null) {
+          throw new ServerErrorException("Couldn't find table for domain: " +
+              conceptSet.getDomainEnum());
+        }
+        if (tableName != request.getFieldSet().getTableQuery().getTableName()) {
+          throw new BadRequestException(
+              String.format("Can't use concept set for domain %s with table %s",
+                  conceptSet.getDomainEnum(),
+                  request.getFieldSet().getTableQuery().getTableName()));
+        }
+        conceptIds = conceptSet.getConceptIds();
+      }
+    }
+
     Integer pageSize = request.getPageSize();
     if (pageSize == null || pageSize == 0) {
       request.setPageSize(DEFAULT_PAGE_SIZE);
@@ -282,7 +311,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
 
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
-        cohortReview, cohortSpec, request);
+        cohortReview, cohortSpec, conceptIds, request);
     return ResponseEntity.ok(response);
   }
 
@@ -292,7 +321,7 @@ public class CohortsController implements CohortsApiDelegate {
 
     org.pmiops.workbench.db.model.Cohort cohort =
         cohortDao.findOne(cohortId);
-    if (cohort == null) {
+    if (cohort == null || cohort.getWorkspaceId() != workspace.getWorkspaceId()) {
       throw new NotFoundException(String.format(
           "No cohort with name %s in workspace %s.", cohortId, workspace.getFirecloudName()));
     }

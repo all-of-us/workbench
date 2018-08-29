@@ -1,58 +1,60 @@
 package org.pmiops.workbench.db.model;
 
+
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.model.Domain;
 
 @Entity
-@Table(name = "cohort")
-public class Cohort {
+@Table(name = "concept_set")
+public class ConceptSet {
 
-  private long cohortId;
+  private long conceptSetId;
   private int version;
   private String name;
-  private String type;
+  private short domain;
   private String description;
   private long workspaceId;
-  private String criteria;
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private Set<CohortReview> cohortReviews;
+  private Set<Long> conceptIds = new HashSet<Long>();
 
-  public Cohort() {}
+  public ConceptSet() {}
 
-  public Cohort(Cohort c) {
-    setCriteria(c.getCriteria());
-    setDescription(c.getDescription());
-    setName(c.getName());
-    setType(c.getType());
-    setCreator(c.getCreator());
-    setWorkspaceId(c.getWorkspaceId());
-    setCreationTime(c.getCreationTime());
-    setLastModifiedTime(c.getLastModifiedTime());
+  public ConceptSet(ConceptSet cs) {
+    setDescription(cs.getDescription());
+    setName(cs.getName());
+    setDomain(cs.getDomain());
+    setCreator(cs.getCreator());
+    setWorkspaceId(cs.getWorkspaceId());
+    setCreationTime(cs.getCreationTime());
+    setLastModifiedTime(cs.getLastModifiedTime());
   }
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "cohort_id")
-  public long getCohortId() {
-    return cohortId;
+  @Column(name = "concept_set_id")
+  public long getConceptSetId() {
+    return conceptSetId;
   }
 
-  public void setCohortId(long cohortId) {
-    this.cohortId = cohortId;
+  public void setConceptSetId(long conceptSetId) {
+    this.conceptSetId = conceptSetId;
   }
 
   @Version
@@ -72,13 +74,22 @@ public class Cohort {
     this.name = name;
   }
 
-  @Column(name = "type")
-  public String getType() {
-    return type;
+  @Column(name = "domain")
+  public short getDomain() {
+    return domain;
   }
 
-  public void setType(String type) {
-    this.type = type;
+  public void setDomain(short domain) {
+    this.domain = domain;
+  }
+
+  @Transient
+  public Domain getDomainEnum() {
+    return StorageEnums.conceptSetDomainFromStorage(domain);
+  }
+
+  public void setDomainEnum(Domain domain) {
+    this.domain = StorageEnums.conceptSetDomainToStorage(domain);
   }
 
   @Column(name = "description")
@@ -97,16 +108,6 @@ public class Cohort {
 
   public void setWorkspaceId(long workspaceId) {
     this.workspaceId = workspaceId;
-  }
-
-  @Lob
-  @Column(name = "criteria")
-  public String getCriteria() {
-    return criteria;
-  }
-
-  public void setCriteria(String criteria) {
-    this.criteria = criteria;
   }
 
   @ManyToOne
@@ -137,21 +138,14 @@ public class Cohort {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @OneToMany(mappedBy = "cohortId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<CohortReview> getCohortReviews() {
-    return cohortReviews;
-  }
-  
-  public void setCohortReviews(Set<CohortReview> cohortReviews) {
-    if (this.cohortReviews == null) {
-      this.cohortReviews = cohortReviews;
-      return;
-    }
-    this.cohortReviews.clear();
-    this.cohortReviews.addAll(cohortReviews);
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "concept_set_concept_id", joinColumns = @JoinColumn(name = "concept_set_id"))
+  @Column(name = "concept_id")
+  public Set<Long> getConceptIds() {
+    return conceptIds;
   }
 
-  public void addCohortReview(CohortReview cohortReview) {
-    this.cohortReviews.add(cohortReview);
+  public void setConceptIds(Set<Long> conceptIds) {
+    this.conceptIds = conceptIds;
   }
 }

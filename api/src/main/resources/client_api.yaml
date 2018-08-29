@@ -207,8 +207,15 @@ definitions:
       filters:
         description: >
           Filters on the results. Only results matching the criteria specified in the filters
-          will be returned
+          will be returned. If both filters and conceptSetName are specified, results must match
+          both.
         $ref: "#/definitions/ResultFilters"
+      conceptSetName:
+        description: >
+          A name of a concept set in the workspace used to filter results; results must match one
+          of the concepts in the named concept set. If both filters and conceptSetName are
+          specified, results must match both.
+        type: string
       orderBy:
         description: >
           An array of columns to sort the resulting data by, taken from the table specified above,
@@ -343,7 +350,7 @@ definitions:
   Domain:
     type: string
     description: filter on the domain in which concepts should be returned
-    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, RACE, GENDER, ETHNICITY]
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, RACE, GENDER, ETHNICITY]
 
   MatchType:
     type: string
