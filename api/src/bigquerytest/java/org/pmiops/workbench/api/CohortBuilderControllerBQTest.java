@@ -1010,7 +1010,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-    SearchParameter heartRateIrr = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "irregularity-detected");
+    SearchParameter heartRateIrr = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "4262985");
     SearchGroupItem heartRateIrrSearchGroupItem = new SearchGroupItem().type(TYPE_PM).searchParameters(Arrays.asList(heartRateIrr)).modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
@@ -1020,7 +1020,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsHeartRateNoIrr() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "no-irregularity-detected");
+    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "4297303");
     SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1083,15 +1083,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectPregnant() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_PREG, "Pregnancy", "903120", "pregnant");
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
-
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectNotPregnant() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_PREG, "Pregnancy", "903120", "not-pregnant");
+    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_PREG, "Pregnancy", "903120", "45877994");
     SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1099,18 +1091,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectWheelChairUser() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", "wheelchair-user");
+    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", "4023190");
     SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectNotWheelChairUser() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", "not-wheelchair-user");
+  public void countSubjectWheelChairUserBadValue() throws Exception {
+    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", null);
     SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Please provide valid conceptId and value for Wheel Chair User.");
+    }
   }
 
   @Test
