@@ -1,0 +1,117 @@
+[
+  {
+    "type": "integer",
+    "name": "drug_exposure_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "required"
+  },
+  {
+    "type": "integer",
+    "name": "drug_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "drug_exposure_start_date",
+    "mode": "required"
+  },
+  {
+    "type": "timestamp",
+    "name": "drug_exposure_start_datetime",
+    "mode": "required"
+  },
+  {
+    "type": "date",
+    "name": "drug_exposure_end_date",
+    "mode": "nullable"
+  },
+  {
+    "type": "timestamp",
+    "name": "drug_exposure_end_datetime",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "drug_type_concept_id",
+    "mode": "required"
+  },
+  {
+    "type": "string",
+    "name": "stop_reason",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "refills",
+    "mode": "nullable"
+  },
+  {
+    "type": "float",
+    "name": "quantity",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "days_supply",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "sig",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "route_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "float",
+    "name": "effective_drug_dose",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "dose_unit_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "lot_number",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "provider_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "drug_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "drug_source_concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "route_source_value",
+    "mode": "nullable"
+  },
+  {
+    "type": "string",
+    "name": "dose_unit_source_value",
+    "mode": "nullable"
+  }
+]

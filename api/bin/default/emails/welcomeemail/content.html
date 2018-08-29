@@ -1,0 +1,115 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background-color: #F1F1F1;
+      padding-left: 1rem;
+      padding-top: 1rem;
+      width: 600px;
+    }
+    * {
+      font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+    }
+    .welcome-message {
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #302C71;
+      font-size: 30px;
+      font-weight: 300;
+      line-height: 36px;
+    }
+
+    .text {
+      color: rgba(0,0,0,0.87);
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 22px;
+      margin-bottom: 1rem;
+    }
+
+    .text.user-field {
+      display: inline-block;
+      margin-bottom: 0;
+    }
+    .user-info {
+      font-weight: bold;
+      display: inline-block;
+      margin-left: 6px;
+    }
+    .card {
+      display: block;
+      cursor: pointer;
+      line-height: 38px;
+      margin-bottom: 27px;
+      text-decoration: none;
+    }
+    div.card {
+      cursor: default;
+    }
+    .after {
+      padding-top: 15px;
+    }
+
+    .bullet {
+      display: inline-block;
+      height: 31px;
+      margin-left: 1rem;
+      margin-right: 1rem;
+      width: 31px;
+      border-radius: 15px;
+      background-color: #302C71;
+      color: #FFFFFF;
+      vertical-align: middle;
+    }
+
+    .card-text {
+      color: rgba(0,0,0,0.87);
+      display: inline-block;
+      line-height: 22px;
+      font-size: 16px;
+      font-weight: 300;
+      vertical-align: middle;
+      width: 460px;
+    }
+    .link {
+      display: inline;
+      color: #2691D0;
+    }
+    .button {
+      height: 52px;
+      width: 178px;
+      border-radius: 5px;
+      background-color: #302C71;
+      font-size: 16px;
+      font-weight: 500;
+      color: #FFFFFF !important;
+      display: inline-block;
+      justify-content: space-around;
+      align-items: center;
+      text-align: center;
+      line-height: 52px;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <img src="${HEADER_IMG}">
+  <div class="welcome-message">Welcome to the All of Us Researcher Workbench!</div>
+  <div><div class="text user-field">Your Username: </div><div class="user-info">${USERNAME}</div></div>
+  <div><div class="text user-field">Your Temporary Password: </div><div class="user-info">${PASSWORD}</div></div>
+  <br>
+  <div class="text">Quick guide on how to get started:</div>
+  <a class="card" href="https://myaccount.google.com/signinoptions/two-step-verification">
+    <img class="bullet" src="${BULLET_1}">
+    <div class="card-text"><div class="link">Sign into Google</div> with your new account, change your password, and set up 2-Step Verification</div>
+  </a>
+  <a class="card" href="https://myaccount.google.com/intro/recovery/email?hl=en-US">
+    <img class="bullet" src="${BULLET_2}">
+    <div class="card-text"><div class="link">Add</div> your recovery email address</div>
+  </a>
+  <div class="after text">After these steps are completed, you are ready to use the Researcher Workbench</div>
+  <a class="button" href="${URL}">Get Started</a>
+</body>

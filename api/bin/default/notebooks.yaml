@@ -1,0 +1,1054 @@
+# Copied from https://github.com/broadinstitute/leonardo/blob/develop/src/main/resources/swagger/api-docs.yaml
+swagger: '2.0'
+info:
+  title: Leonardo
+  description: |
+    Workbench notebooks service.
+  version: '0.1'
+  license:
+    name: BSD
+    url: 'http://opensource.org/licenses/BSD-3-Clause'
+  termsOfService: 'https://github.com/broadinstitute/leonardo'
+host:  notebooks.firecloud.org
+basePath: /
+produces:
+  - application/json
+tags:
+  - name: test
+    description: Test API
+  - name: cluster
+    description: Clusters API
+  - name: notebooks
+    description: Notebooks API
+  - name: status
+    description: Status API
+
+security:
+  - googleoauth:
+      - openid
+      - email
+      - profile
+
+securityDefinitions:
+  googleoauth:
+    type: oauth2
+    authorizationUrl: 'https://accounts.google.com/o/oauth2/auth'
+    flow: implicit
+    scopes:
+      openid: open id authorization
+      email: email authorization
+      profile: profile authorization
+
+##########################################################################################
+## PATHS
+##########################################################################################
+paths:
+
+  '/ping':
+    get:
+      summary: Ping
+      responses:
+        '200':
+          description: Pong
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      operationId: ping
+      tags:
+        - test
+
+  '/status':
+    get:
+      summary: Gets system status
+      responses:
+        '200':
+          description: 'System ok'
+          schema:
+            $ref: '#/definitions/SystemStatus'
+        '500':
+          description: 'One or more subsystems down'
+          schema:
+            $ref: '#/definitions/SystemStatus'
+      operationId: getSystemStatus
+      tags:
+        - status
+      security: [] # no security
+
+  '/api/clusters':
+    get:
+      summary: List all active clusters
+      description: List all active clusters, optionally filtering on a set of labels
+      operationId: listClusters
+      tags:
+        - cluster
+      parameters:
+        - in: query
+          name: _labels
+          description: |
+            Optional label key-value pairs to filter results by. Example: key1=val1,key2=val2.
+            Note: this string format is a workaround because Swagger doesn't support free-form
+            query string parameters. The recommended way to use this endpoint is to specify the
+            labels as top-level query string parameters. For instance: GET /api/clusters?key1=val1&key2=val2.
+          required: false
+          type: string
+        - in: query
+          name: includeDeleted
+          description: Optional filter that includes any clusters with a Deleted status.
+          required: false
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: List of clusters
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cluster'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+
+  '/api/cluster/{googleProject}/{clusterName}':
+    get:
+      summary: Get details of a Dataproc cluster
+      description: Returns information about an existing Dataproc cluster managed by Leo. Poll this to find out when your cluster has finished starting up.
+      operationId: getCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Cluster found, here are the details
+          schema:
+            $ref: '#/definitions/Cluster'
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+    put:
+      summary: Creates a new Dataproc cluster in the given project with the given name
+      description: Default labels clusterName, googleProject, serviceAccount, and notebookExtension cannot be overridden.
+      operationId: createCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+        - in: body
+          description: Request for new cluster
+          name: clusterRequest
+          required: true
+          schema:
+            $ref: '#/definitions/ClusterRequest'
+      responses:
+        '200':
+          description: Cluster creation successful
+          schema:
+            $ref: '#/definitions/Cluster'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+    delete:
+      summary: Deletes an existing Dataproc cluster in the given project
+      description: deletes a Dataproc cluster
+      operationId: deleteCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Cluster deletion request accepted
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  '/api/cluster/{googleProject}/{clusterName}/stop':
+    post:
+      summary: Stops a Dataproc cluster
+      description: |
+        Stops the instances of a Dataproc cluster, but retains any data persisted on disk. The
+        cluster may be restarted with the /start endpoint.
+      operationId: stopCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Cluster stop request accepted
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '409':
+          description: Cluster cannot be stopped
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  '/api/cluster/{googleProject}/{clusterName}/start':
+    post:
+      summary: Starts a Dataproc cluster
+      description: |
+        Starts the instances of a stopped Dataproc cluster.
+      operationId: startCluster
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '202':
+          description: Cluster start request accepted
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '409':
+          description: Cluster cannot be started
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  '/notebooks/{googleProject}/{clusterName}':
+    get:
+      summary: Access Jupyter notebooks on a Dataproc cluster
+      description: |
+        This URI supports all HTTP methods, not just GET as implied by this Swagger.
+        Proxies all requests through to the Jupyter notebook server running on the given cluster.
+      operationId: proxyCluster
+      tags:
+        - notebooks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxy connection successful
+        '401':
+          description: Proxy connection unauthorized
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '420':
+          description: Cluster not ready
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '422':
+          description: Cluster is stopped
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+  '/notebooks/{googleProject}/{clusterName}/api/localize':
+    post:
+      summary: Localize files to/from a Jupyter notebook server
+      description: |
+        Sends a command to a Jupyter notebook server to localize files to/from the server. Supports GCS paths and [Data URIs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs).
+        Output, including any errors, will appear in `localization.log` in the working directory of the Jupyter notebook server.
+        By default this operation will happen synchronously and the response status will reflect any errors encountered in the copy.
+        However, if the `async` parameter is specfied then the localization will happen asynchronously to the request, and the API will always return 200.
+      operationId: proxyLocalize
+      tags:
+        - notebooks
+      parameters:
+        - in: path
+          name: googleProject
+          description: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+        - in: query
+          name: async
+          description: |
+            If true, the copy will happen asynchronously to the request and the API will always return 200.
+            If false (the default), the copy will happen synchronously and the response will reflect any errors encountered during the copy.
+          required: false
+          type: boolean
+          default: false
+        - in: body
+          description: |
+            JSON object. Keys represent destinations, values represent sources. The following rules apply:
+            * If either the source or destination is a GCS path, it will be sent to [gsutil cp](https://cloud.google.com/storage/docs/gsutil/commands/cp). Therefore
+              this can be used to localize a file _from_ a bucket _to_ the notebook server; or delocalize a file _from_ the notebook server _to_ a bucket.
+            * If the source is a Data URI, then the destination file will be created with the decoded data URI contents. This mode can only be used to localize
+              files to the notebook server.
+            In both cases all paths will be quoted & sanitized, and intermediate local directories will be made.
+            Note that duplicate keys will lead to unexpected behaviour, so specify the destination filename explicitly if you want to localize multiple files to the same directory.
+          name: filesToLocalize
+          required: true
+          schema:
+            type: object
+            description: ''
+            example:
+              "~/file.txt" : "gs://somebucket/file.txt"
+              "~/directory" : "gs://somebucket/*"
+              "gs://upload/to/this/bucketdir" : "~/file.txt"
+              "~/data.txt" : "data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D"
+      responses:
+        '200':
+          description: Proxy connection successful
+        '400':
+          description: "Bad request. Your POST body is probably malformed: it should be a string/string JSON object."
+        '401':
+          description: Proxy connection unauthorized
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '420':
+          description: Cluster not ready
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '422':
+          description: Cluster is stopped
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  '/notebooks/{googleProject}/{clusterName}/setCookie':
+    get:
+      summary: Sets a browser cookie needed to authorize connections to a Jupyter notebook
+      description: |
+        If using Google token-based authorization to a Jupyter notebook, the Leo proxy accepts a
+        Google token passed as a cookie value. This endpoint facilitates setting that cookie.
+        It accepts a bearer token in an Authorization header and responds with a Set-Cookie header.
+      operationId: setCookie
+      tags:
+        - notebooks
+      parameters:
+        - in: path
+          name: googleProject
+          required: true
+          type: string
+        - in: path
+          name: clusterName
+          description: clusterName
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successfully set a cookie
+        '401':
+          description: Proxy connection unauthorized
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '404':
+          description: Cluster not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  '/notebooks/invalidateToken':
+    get:
+      summary: Invalidates a token
+      description: |
+        If using Google token-based auth, call this endpoint when a user's Google token is invalidated
+        (e.g. when logging out of the application). This ensures that the token is also invalidated in Leo
+        and that the user's proxied notebook connections stop working.
+      operationId: invalidateToken
+      tags:
+        - notebooks
+      responses:
+        '200':
+          description: Successfully invalidated a token
+        '500':
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+##########################################################################################
+## Subset of the Jupyter API
+## https://github.com/jupyter/notebook/blob/master/notebook/services/api/api.yaml
+##########################################################################################
+
+  # In Swagger 2, path params are escaped so we need to hardcode any known "/"
+  # delimiters. With Swagger 3, allowReserved would allow us to collapse the
+  # "workspaces/..." fragment into a single "path" var, as is used in Jupyter's
+  # own Swagger definition. Note: this does not initialize any parent
+  # directories. The Leo proxy localize API can be used for this purpose.
+  /notebooks/{googleProject}/{clusterName}/api/contents/{fileName}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: fileName
+        description: fileName
+        required: true
+        type: string
+    get:
+      summary: Get contents of file or directory
+      description: "A client can optionally specify a type and/or format argument via URL parameter. When given, the Contents service shall return a model in the requested type and/or format. If the request cannot be satisfied, e.g. type=text is requested, but the file is binary, then the request shall fail with 400 and have a JSON response containing a 'reason' field, with the value 'bad format' or 'bad type', depending on what was requested."
+      tags:
+        - jupyter
+      operationId: getRootContents
+      parameters:
+        - name: type
+          in: query
+          description: File type ('file', 'directory')
+          type: string
+          enum:
+            - file
+            - directory
+        - name: format
+          in: query
+          description: "How file content should be returned ('text', 'base64')"
+          type: string
+          enum:
+            - text
+            - base64
+        - name: content
+          in: query
+          description: "Return content (0 for no content, 1 for return content)"
+          type: integer
+      responses:
+        404:
+          description: No item found
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+        200:
+          description: Contents of file or directory
+          headers:
+            Last-Modified:
+              description: Last modified date for file
+              type: string
+              format: dateTime
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        500:
+          description: Model key error
+  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: workspaceDir
+        description: workspaceDir
+        required: true
+        type: string
+    post:
+      summary: Create a new file in the specified path
+      description: "A POST to /api/contents/path creates a New untitled, empty file or directory. A POST to /api/contents/path with body {'copy_from': '/path/to/OtherNotebook.ipynb'} creates a new copy of OtherNotebook in path."
+      tags:
+        - jupyter
+      operationId: postContents
+      parameters:
+        - name: model
+          in: body
+          description: Path of file to copy
+          schema:
+            type: object
+            properties:
+              ext:
+                type: string
+              type:
+                type: string
+      responses:
+        201:
+          description: File created
+          headers:
+            Location:
+              description: URL for the new file
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        404:
+          description: No item found
+        400:
+          description: Bad request
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+  /notebooks/{googleProject}/{clusterName}/api/contents/workspaces/{workspaceDir}/{fileName}:
+    parameters:
+      - in: path
+        name: googleProject
+        description: googleProject
+        required: true
+        type: string
+      - in: path
+        name: clusterName
+        description: clusterName
+        required: true
+        type: string
+      - in: path
+        name: workspaceDir
+        description: workspaceDir
+        required: true
+        type: string
+      - in: path
+        name: fileName
+        description: fileName
+        required: true
+        type: string
+    put:
+      summary: Save or upload file.
+      description: "Saves the file in the location specified by name and path.  PUT is very similar to POST, but the requester specifies the name, whereas with POST, the server picks the name."
+      tags:
+        - jupyter
+      operationId: putContents
+      parameters:
+        - name: model
+          in: body
+          description: New path for file or directory
+          schema:
+            $ref: '#/definitions/JupyterModel'
+      responses:
+        200:
+          description: File saved
+          headers:
+            Location:
+              description: Updated URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        201:
+          description: Path created
+          headers:
+            Location:
+              description: URL for the file or directory
+              type: string
+              format: url
+          schema:
+            $ref: '#/definitions/JupyterContents'
+        400:
+          description: No data provided
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error condition
+              reason:
+                type: string
+                description: Explanation of error reason
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+  ClusterStatus:
+    type: string
+    enum: &CLUSTERSTATUS
+      - Creating
+      - Running
+      - Updating
+      - Error
+      - Stopping
+      - Stopped
+      - Starting
+      - Deleting
+      - Deleted
+      - Unknown
+
+  InstanceStatus:
+    type: string
+    enum: &INSTANCESTATUS
+      - Provisioning
+      - Staging
+      - Running
+      - Stopping
+      - Stopped
+      - Suspending
+      - Suspended
+      - Terminated
+
+  ErrorReport:
+    description: ''
+    required:
+      - source
+      - message
+      - causes
+      - stackTrace
+    properties:
+      source:
+        type: string
+        description: service causing error
+      message:
+        type: string
+        description: what went wrong
+      exceptionClass:
+        type: string
+        description: class of exception thrown
+      statusCode:
+        type: integer
+        description: HTTP status code
+      causes:
+        type: array
+        description: errors triggering this one
+        items:
+          $ref: '#/definitions/ErrorReport'
+      stackTrace:
+        type: array
+        description: stack trace
+        items:
+          $ref: '#/definitions/StackTraceElement'
+
+  StackTraceElement:
+    description: ''
+    required:
+      - className
+      - methodName
+      - fileName
+      - lineNumber
+    properties:
+      className:
+        type: string
+        description: class name
+      methodName:
+        type: string
+        description: method name
+      fileName:
+        type: string
+        description: source file name
+      lineNumber:
+        type: integer
+        description: line number
+
+  Cluster:
+    description: ''
+    required:
+      - clusterName
+      - googleId
+      - googleProject
+      - googleServiceAccount
+      - machineConfig
+      - operationName
+      - status
+      - createdDate
+      - labels
+      - dateAccessed
+    properties:
+      clusterName:
+        type: string
+        description: The user-supplied name for the cluster
+      googleId:
+        type: string
+        description: Google's UUID for the cluster
+      googleProject:
+        type: string
+        description: The Google Project used to create the cluster
+      googleServiceAccount:
+        type: string
+        description: The Google Service Account used to create the cluster
+      machineConfig:
+        description: The machine configurations for the master and worker nodes
+        $ref: '#/definitions/MachineConfig'
+      operationName:
+        type: string
+        description: Google's operation ID for the cluster
+      status:
+        $ref: "#/definitions/ClusterStatus"
+      hostIp:
+        type: string
+        description: The IP address of the cluster master node
+      createdDate:
+        type: string
+        description: The date and time the cluster was created, in ISO-8601 format
+      destroyedDate:
+        type: string
+        description: The date and time the cluster was destroyed, in ISO-8601 format
+      labels:
+        type: object
+        description: The labels to be placed on the cluster. Of type Map[String,String]
+      errors:
+        type: array
+        description: The list of errors that were encountered on cluster create. Each error consists of the error message, code and timestamp
+        items:
+          $ref: "#/definitions/ClusterError"
+      instances:
+        description: Array of instances belonging to this cluster
+        type: array
+        items:
+          $ref: '#/definitions/Instance'
+      dateAccessed:
+        type: string
+        description: |
+          The date and time the cluster was last accessed, in ISO-8601 format.
+          Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
+
+  InstanceKey:
+    description: ''
+    required:
+      - project
+      - zone
+      - name
+    properties:
+      project:
+        type: string
+        description: The Google Project the instance belongs to
+      zone:
+        type: string
+        description: The Google zone the instance belongs to
+      name:
+        type: string
+        description: The name of the instance
+
+  Instance:
+    description: ''
+    required:
+      - key
+      - googleId
+      - status
+    properties:
+      key:
+        description: Unique identifier of (project, zone, name) for this instance
+        $ref: '#/definitions/InstanceKey'
+      googleId:
+        type: string
+        description: Google's unique id for this instance
+      status:
+        $ref: "#/definitions/InstanceStatus"
+      ip:
+        type: string
+        description: The public IP address of the instance, if any
+      dataprocRole:
+        type: string
+        description: The dataproc role (master, worker, preemptible worker) of this instance, if any
+      createdDate:
+        type: string
+        description: The date and time the instance was created, in ISO-8601 format
+
+  ClusterRequest:
+    description: ''
+    properties:
+      labels:
+        type: object
+        description: The labels to be placed on the cluster. Of type Map[String,String]
+      userJupyterExtensionConfig:
+        $ref: "#/definitions/UserJupyterExtensionConfig"
+        description: Jupyter extensions to be installed in the notebook
+      jupyterExtensionUri:
+        type: string
+        description: |
+          Optional bucket URI to an archive containing Jupyter notebook extension files.
+          The archive must be in tar.gz format, must not include a parent directory, and
+          must have an entry point named 'main'. For more information on notebook extensions,
+          see http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
+      jupyterUserScriptUri:
+        type: string
+        description: |
+          Optional bucket URI to a bash script the user wishes to run inside their jupyter docker.
+      machineConfig:
+        description: The machine configurations for the master and worker nodes
+        $ref: '#/definitions/MachineConfig'
+      stopAfterCreation:
+        description: |
+          If true, Leo will immediately stop the cluster once it's created, with the end result being a
+          a cluster in Stopped state. Otherwise, the end result will be a cluster in Running state.
+          Defaults to false.
+        type: boolean
+        default: false
+
+  ClusterError:
+    description: 'Errors encountered on cluster create'
+    properties:
+      errorMessage:
+        type: string
+        description: Error message
+      errorCode:
+        type: integer
+        description: Error code
+      timestamp:
+        type: string
+        description: timestamp for error in ISO 8601 format
+
+  MachineConfig:
+    description: 'The configuration for a single Dataproc cluster'
+    properties:
+      numberOfWorkers:
+        type: integer
+        description: |
+          Optional, number of workers in the cluster. Can be 0 (default), 2 or more. Google Dataproc does not allow 1 worker.
+      masterMachineType:
+        type: string
+        description: |
+          Optional, the machine type determines the number of CPUs and memory for the master node. For example "n1-standard-16"
+          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+          see https://cloud.google.com/compute/docs/machine-types
+      masterDiskSize:
+        type: integer
+        description: |
+          Optional, the size in megabytes of the disk on the master node. Minimum size is 10GB. If unspecified, default size is 100GB.
+      workerMachineType:
+        type: string
+        description: |
+          Optional, the machine type determines the number of CPUs and memory for the worker nodes. For example "n1-standard-16"
+          or "n1-highmem-64". If unspecified, defaults to creating a "n1-standard-4" machine. To decide which is right for you,
+          see https://cloud.google.com/compute/docs/machine-types. Ignored if numberOfWorkers is 0.
+      workerDiskSize:
+        type: integer
+        description: |
+          Optional, the size in megabytes of the disk on the master node. Minimum size is 10GB. If unspecified, default size is 100GB.
+          Ignored if numberOfWorkers is 0.
+      numberOfWorkerLocalSSDs:
+        type: integer
+        description: |
+          Optional, the number of local solid state disks for workers. If unspecified, the default number is 0.
+          Ignored if numberOfWorkers is 0.
+      numberOfPreemptibleWorkers:
+        type: integer
+        description: |
+          Optional, the number of preemptible workers. If unspecified, the default number is 0. Ignored if numberOfWorkers is 0.
+          For more information, see https://cloud.google.com/compute/docs/instances/preemptible
+  UserJupyterExtensionConfig:
+    description: 'Specification of Jupyter Extensions to be installed on the cluster'
+    properties:
+      nbExtensions:
+        type: object
+        description: |
+          Optional, map of extension name and nbExtension. The nbExtension can either be a tar.gz file on google storage or a python package.
+          Example, {"ext1":"gs://bucket/extension.tar.gz", "pipExt":"python-package"}
+      serverExtensions:
+        type: object
+        description: |
+          Optional, map of extension name and server extension. The serverExtensions can either be a tar.gz file on google storage or a python package.
+          Example, {"ext1":"gs://bucket/extension.tar.gz", "pipExt":"python-package"}
+      combinedExtensions:
+        type: object
+        description: |
+          Optional, map of extension name and notebook plus server extension. The extension can either be a tar.gz file on google storage or a python package.
+          Example, {"ext1":"gs://bucket/extension.tar.gz", "pipExt":"python-package"}
+  SubsystemStatus:
+    description: status of a subsystem Leonardo depends on
+    type: object
+    required:
+      - ok
+    properties:
+      ok:
+        type: boolean
+        description: whether this system is up or down from Leonardo's point of view
+      messages:
+        type: array
+        items:
+          type: string
+
+  SystemStatus:
+    description: status of each subsystem Leonardo depends on
+    type: object
+    required:
+      - ok
+      - systems
+    properties:
+      ok:
+        type: boolean
+        description: true if everything is ok, false if anything is amiss
+      systems:
+        type: object
+        description: Map[String, SubsystemStatus]
+
+  # Jupyter API definitions
+  JupyterModel:
+    type: object
+    properties:
+      name:
+        type: string
+        description: The new filename if changed
+      path:
+        type: string
+        description: New path for file or directory
+      type:
+        type: string
+        description: Path dtype ('notebook', 'file', 'directory')
+      format:
+        type: string
+        description: File format ('json', 'text', 'base64')
+      content:
+        type: string
+        description: The actual body of the document excluding directory type
+
+  JupyterContents:
+    description: "A contents object.  The content and format keys may be null if content is not contained.  If type is 'file', then the mimetype will be null."
+    type: object
+    required:
+      - type
+      - name
+      - path
+      - writable
+      - created
+      - last_modified
+      - mimetype
+      - format
+      - content
+    properties:
+      name:
+        type: string
+        description: "Name of file or directory, equivalent to the last part of the path"
+      path:
+        type: string
+        description: Full path for file or directory
+      type:
+        type: string
+        description: Type of content
+        enum:
+          - directory
+          - file
+          - notebook
+      writable:
+        type: boolean
+        description: indicates whether the requester has permission to edit the file
+      created:
+        type: string
+        description: Creation timestamp
+        format: dateTime
+      last_modified:
+        type: string
+        description: Last modified timestamp
+        format: dateTime
+      mimetype:
+        type: string
+        description: "The mimetype of a file.  If content is not null, and type is 'file', this will contain the mimetype of the file, otherwise this will be null."
+      content:
+        type: string
+        description: "The content, if requested (otherwise null).  Will be an array if type is 'directory'"
+      format:
+        type: string
+        description: Format of content (one of null, 'text', 'base64', 'json')

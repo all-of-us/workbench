@@ -1,0 +1,45 @@
+{
+  "firecloud": {
+    "baseUrl": "https:\/\/api.firecloud.org",
+    "billingAccountId": "014D91-FCB792-33D2C0",
+    "billingProjectPrefix": "aou-rw-stable-",
+    "clusterMaxAgeDays": 14,
+    "clusterIdleMaxAgeDays": 7,
+    "debugEndpoints": false,
+    "enforceRegistered": true,
+    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-stable-scripts/setup_notebook_cluster.sh",
+    "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
+    "registeredDomainName": "all-of-us-registered-stable",
+    "billingRetryCount": 2
+  },
+  "auth": {
+    "serviceAccountApiUsers": [ "all-of-us-rw-stable@appspot.gserviceaccount.com" ]
+  },
+  "cdr": {
+    "defaultCdrVersion": "Test Registered CDR",
+    "debugQueries": true
+  },
+  "googleCloudStorageService": {
+    "credentialsBucketName": "all-of-us-rw-stable-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
+    "demosBucketName": "all-of-us-rw-stable-demos"
+  },
+  "googleDirectoryService": {
+    "gSuiteDomain": "stable.fake-research-aou.org"
+  },
+  "server": {
+    "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
+    "projectId": "all-of-us-rw-stable"
+  },
+  "admin": {
+    "loginUrl": "http:\/\/all-of-us-rw-stable.appspot.com/login",
+    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
+  },
+  "jira": {
+    "projectKey": "RW"
+  },
+  "mandrill": {
+    "fromEmail": "donotreply@fake-research-aou.org",
+    "sendRetries": 3
+  }
+}

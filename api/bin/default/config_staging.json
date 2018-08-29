@@ -1,0 +1,45 @@
+{
+  "firecloud": {
+    "baseUrl": "https:\/\/api.firecloud.org",
+    "billingAccountId": "014D91-FCB792-33D2C0",
+    "billingProjectPrefix": "aou-rw-staging-",
+    "clusterMaxAgeDays": 7,
+    "clusterIdleMaxAgeDays": 3,
+    "debugEndpoints": false,
+    "enforceRegistered": true,
+    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-staging-scripts/setup_notebook_cluster.sh",
+    "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
+    "registeredDomainName": "all-of-us-registered-staging",
+    "billingRetryCount": 2
+  },
+  "auth": {
+    "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
+  },
+  "cdr": {
+    "defaultCdrVersion": "Test Registered CDR",
+    "debugQueries": true
+  },
+  "googleCloudStorageService": {
+    "credentialsBucketName": "all-of-us-rw-staging-credentials",
+    "emailImagesBucketName": "all-of-us-workbench-test-email-images",
+    "demosBucketName": "all-of-us-rw-staging-demos"
+  },
+  "googleDirectoryService": {
+    "gSuiteDomain": "staging.fake-research-aou.org"
+  },
+  "server": {
+    "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
+    "projectId": "all-of-us-rw-staging"
+  },
+  "admin": {
+    "loginUrl": "http:\/\/all-of-us-rw-staging.appspot.com/login",
+    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
+  },
+  "jira": {
+    "projectKey": "RW"
+  },
+  "mandrill": {
+    "fromEmail": "donotreply@fake-research-aou.org",
+    "sendRetries": 3
+  }
+}
