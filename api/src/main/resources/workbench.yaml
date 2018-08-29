@@ -441,7 +441,7 @@ paths:
       parameters:
         - in: path
           name: term
-          description: String to find in user's name or email address
+          description: String to find in user's name or email address. Search is a case-insensitive substring match.
           required: true
           type: string
         - in: query
