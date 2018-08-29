@@ -80,8 +80,8 @@
 <div class="container count-preview">
   <div class="row">
     <div class="col-lg-2 ">
-      <button type="button" [ngClass]="{'greyed-button': preview.get('requesting')}"
-        class="btn calculate-btn btn-primary"
+      <button type="button" [ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"
+        class="btn "
         [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
         [disabled] = "!formChanges">
