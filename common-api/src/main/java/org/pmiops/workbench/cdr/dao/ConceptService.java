@@ -92,11 +92,10 @@ public class ConceptService {
 
                     Expression<Double> matchExp = null;
                     Expression<Double> matchSynonymExp = null;
-                    Join<Concept, ConceptSynonym> csJoin = null;
 
-                    if (Long.class != criteriaQuery.getResultType()) {
-                        csJoin = (Join)root.fetch("synonyms",JoinType.LEFT);
-                    }
+                    Subquery<ConceptSynonym> subquery = criteriaQuery.subquery(ConceptSynonym.class);
+                    Root<ConceptSynonym> subqueryRoot = subquery.from(ConceptSynonym.class);
+
 
                     List<Predicate> conceptCodeIDName = new ArrayList<>();
 
@@ -114,19 +113,24 @@ public class ConceptService {
                         }
                         matchExp = criteriaBuilder.function("match", Double.class,
                                 root.get("conceptName"), criteriaBuilder.literal(keyword));
-                        if (csJoin != null) {
-                            matchSynonymExp = criteriaBuilder.function("match", Double.class,
-                                    csJoin.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
-                        }
 
+                        subquery.select(subqueryRoot);
+
+                        matchSynonymExp = criteriaBuilder.function("match", Double.class,
+                                subqueryRoot.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
+
+
+                        Predicate synonymNamePredicate = criteriaBuilder.greaterThan(matchSynonymExp, 0.0);
+                        subquery.select(subqueryRoot.get("conceptId")).where(synonymNamePredicate);
                     }
+
 
 
                     if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
 
                         if(keyword != null) {
                             conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            conceptCodeIDName.add(root.get("conceptId").in(subquery));
                             predicates.add(
                                     criteriaBuilder.or(
                                             conceptCodeIDName.toArray(new Predicate[0])
@@ -142,7 +146,7 @@ public class ConceptService {
 
                         if(keyword != null) {
                             conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            conceptCodeIDName.add(root.get("conceptId").in(subquery));
                             predicates.add(
                                     criteriaBuilder.or(
                                             conceptCodeIDName.toArray(new Predicate[0])
@@ -163,7 +167,7 @@ public class ConceptService {
                             List<Predicate> conceptNameFilter = new ArrayList<>();
                             List<Predicate> matchFilter = new ArrayList<>();
                             matchFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                            matchFilter.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            matchFilter.add(root.get("conceptId").in(subquery));
                             conceptNameFilter.add(criteriaBuilder.or(matchFilter.toArray(new Predicate[0])));
                             conceptNameFilter.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
 
@@ -180,7 +184,7 @@ public class ConceptService {
                         if (keyword != null) {
 
                             conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            conceptCodeIDName.add(root.get("conceptId").in(subquery));
                             predicates.add(
                                     criteriaBuilder.or(
                                             conceptCodeIDName.toArray(new Predicate[0])
