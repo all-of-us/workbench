@@ -780,7 +780,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fileDetail.setLastModifiedTime(now.getTime());
     userRecentResourceService.updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
     return fileDetail;
-  }
+ }
 
   private void notebookDeleteOperation(String workspace, String workspaceName, String notebookName) {
     NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, "");
