@@ -24,11 +24,11 @@ import {
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
-  BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
   LOAD_CHILDREN_LIST,
+  SELECT_CHILDREN_LIST,
   LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
@@ -161,6 +161,16 @@ export const rootReducer: Reducer<CohortSearchState> =
                 : paramList.push(child.parameterId));
         });
         return state;
+
+      case SELECT_CHILDREN_LIST:
+        const parentId = action.parentId.toString();
+        return state
+          .updateIn(
+          ['wizard', 'item', 'selectedGroups'],
+          List(),
+          groupIdList => groupIdList.includes(parentId)
+            ? groupIdList
+            : groupIdList.push(parentId));
 
       case LOAD_ATTRIBUTE_LIST:
         const node = action.node.set('attributes', action.attributes);

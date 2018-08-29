@@ -19,6 +19,7 @@ import {
   CohortSearchState,
   isParameterActive,
   isSelectedParent,
+  selectedGroups,
   subtreeSelected
 } from '../redux';
 import {stripHtml} from '../utils';
@@ -42,12 +43,14 @@ function needsAttributes(node: any) {
   styleUrls: ['./node-info.component.css']
 })
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
+  @select(selectedGroups) groups$: Observable<any>;
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() node;
   readonly domainType = DomainType;
   readonly criteriaTypes = CRITERIA_TYPES;
   private isSelected: boolean;
   private isSelectedParent: boolean;
+  private isSelectedChild: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
@@ -75,6 +78,14 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(val => {
         this.isSelectedParent = val;
       });
+
+    this.subscription.add(this.groups$
+      .filter(groupIds => !!groupIds)
+      .subscribe(groupIds => {
+        console.log(groupIds.toJS());
+        this.isSelectedChild = groupIds.filter(groupId =>
+          this.node.get('path').split('.').indexOf(groupId) !== -1);
+      }));
 
     this.subscription.add(this.selected$
       .filter(selectedIds => !!selectedIds)
@@ -131,6 +142,13 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.get('code', '');
   }
 
+  get selectAllChildren() {
+    return (this.node.get('type') === DomainType.DRUG
+      || this.node.get('type') === CRITERIA_TYPES.ICD9
+      || this.node.get('type') === CRITERIA_TYPES.ICD10)
+      && this.node.get('group');
+  }
+
   /*
    * On selection, we examine the selected criterion and see if it needs some
    * attributes. If it does, we set the criterion in "focus".  The explorer
@@ -156,8 +174,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        * to have a complete sense are given a unique ID based on the attribute
        */
 
-      if (this.node.get('type') === DomainType.DRUG && this.node.get('group')) {
-        this.actions.fetchAllChildren(DomainType[DomainType.DRUG], this.node.get('id'));
+      if (this.selectAllChildren) {
+        this.actions.fetchAllChildren(this.node);
       } else {
         let attributes = [];
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {

@@ -60,6 +60,7 @@ export class CohortSearchActions {
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
+  @dispatch() selectChildren = ActionFuncs.selectChildren;
   @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
@@ -248,8 +249,17 @@ export class CohortSearchActions {
     this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
-  fetchAllChildren(kind: string, parentId: number): void {
-    this.requestAllChildren(this.cdrVersionId, kind, parentId);
+  fetchAllChildren(node: any): void {
+    const kind = node.get('type');
+    const id = node.get('id');
+    if (kind === DomainType[DomainType.DRUG]) {
+      this.requestAllChildren(this.cdrVersionId, kind, id);
+    } else {
+      const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`
+      const param = node.set('parameterId', paramId);
+      this.addParameter(param);
+      this.selectChildren(kind, id);
+    }
   }
 
   fetchAttributes(node: any): void {

@@ -15,6 +15,7 @@ import {
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
   LOAD_CHILDREN_LIST,
+  SELECT_CHILDREN_LIST,
   LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
@@ -144,6 +145,11 @@ export const loadAndSelectChildren =
   (parentId: number, children: any
   ): ActionTypes[typeof LOAD_CHILDREN_LIST] =>
   ({type: LOAD_CHILDREN_LIST, parentId, children});
+
+export const selectChildren =
+  (kind: string, parentId: number
+  ): ActionTypes[typeof SELECT_CHILDREN_LIST] =>
+  ({type: SELECT_CHILDREN_LIST, kind, parentId});
 
 export const loadAttributes =
   (node: any, attributes: any
