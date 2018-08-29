@@ -33,6 +33,8 @@ public class UserControllerTest {
 
   private UserController userController;
 
+  private Long incrementedUserId = 1L;
+
   @Before
   public void setUp() {
     this.userController = new UserController(userDao);
@@ -137,8 +139,6 @@ public class UserControllerTest {
     saveUser("penny@lis.org", "Penny", "Robinson");
     saveUser("will@lis.org", "Will", "Robinson");
   }
-
-  private Long incrementedUserId = 1L;
 
   @SuppressWarnings("SameParameterValue")
   private void saveUser(String email, String givenName, String familyName) {
