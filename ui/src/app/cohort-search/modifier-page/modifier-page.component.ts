@@ -132,6 +132,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           });
         }
       }));
+
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
     // This reseeds the form with existing data if we're editing an existing group
