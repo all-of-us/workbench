@@ -202,4 +202,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.actions.addParameter(param);
     }
   }
+
+  showCount() {
+    return this.node.get('selectable') && this.node.get('count') !== null;
+  }
 }
