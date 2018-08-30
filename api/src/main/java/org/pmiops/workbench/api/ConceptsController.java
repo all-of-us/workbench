@@ -1,10 +1,17 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMultimap;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
@@ -62,10 +69,15 @@ public class ConceptsController implements ConceptsApiDelegate {
             .vocabularyId(concept.getVocabularyId());
 
   @Autowired
-  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService) {
+  ConceptSynonymDao conceptSynonymDao;
+
+  @Autowired
+  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,ConceptSynonymDao conceptSynonymDao) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
+    this.conceptSynonymDao = conceptSynonymDao;
   }
+
 
   @Override
   public ResponseEntity<ConceptListResponse> searchConcepts(String workspaceNamespace,
@@ -101,6 +113,14 @@ public class ConceptsController implements ConceptsApiDelegate {
 
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount);
+
+
+    List<Long> conceptIds =concepts.getContent().stream().map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList());
+    Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
+
+    for(org.pmiops.workbench.cdr.model.Concept concept: concepts.getContent()) {
+      concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
+    }
 
 
     // TODO: move Swagger codegen to common-api, pass request with modified values into service

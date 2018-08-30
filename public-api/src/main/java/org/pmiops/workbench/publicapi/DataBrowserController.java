@@ -1,5 +1,7 @@
 package org.pmiops.workbench.publicapi;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.pmiops.workbench.cdr.dao.*;
 import org.pmiops.workbench.cdr.model.*;
 import org.pmiops.workbench.model.ConceptListResponse;
@@ -44,17 +46,20 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private DbDomainDao dbDomainDao;
     @Autowired
     private AchillesResultDistDao achillesResultDistDao;
+    @Autowired
+    private ConceptSynonymDao conceptSynonymDao;
 
     private ConceptService conceptService;
 
 
-    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao) {
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao, ConceptSynonymDao conceptSynonymDao) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
         this.dbDomainDao = dbDomainDao;
         this.achillesResultDao = achillesResultDao;
         this.achillesAnalysisDao = achillesAnalysisDao;
         this.achillesResultDistDao = achillesResultDistDao;
+        this.conceptSynonymDao = conceptSynonymDao;
     }
 
 
@@ -124,6 +129,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .conceptSynonyms(conceptSynonymNames.get(concept.getConceptId()));
                 }
             };
+
 
     /**
      * Converter function from backend representation (used with Hibernate) to
@@ -370,20 +376,23 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             matchedConcepts = concepts.getContent();
         }
 
+        List<Long> conceptIds =matchedConcepts.stream().map(Concept::getConceptId).collect(Collectors.toList());
+        Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
+
         for(Concept con : matchedConcepts){
             String conceptCode = con.getConceptCode();
             String conceptId = String.valueOf(con.getConceptId());
 
             ArrayList<String> conceptSynonymNames = new ArrayList<>();
 
-            if(con.getSynonyms() != null){
-                response.setMatchType(MatchType.NAME);
-                for(ConceptSynonym conceptSynonym:con.getSynonyms()){
-                    if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
-                        conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
-                    }
+            con.setSynonyms(synonymMap.get(con.getConceptId()).stream().collect(Collectors.toList()));
+
+            for(ConceptSynonym conceptSynonym:con.getSynonyms()){
+                if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
+                    conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
                 }
             }
+
 
             this.conceptSynonymNames.put(con.getConceptId(),conceptSynonymNames);
 
@@ -546,8 +555,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
                             }
                         }
-                        if(uniqueAgeDeciles.size() < 8){
-                            Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] { "1", "2", "3", "4", "5", "6", "7", "8"}));
+                        if(uniqueAgeDeciles.size() < 7){
+                            Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] {"2", "3", "4", "5", "6", "7", "8"}));
                             completeAgeDeciles.removeAll(uniqueAgeDeciles);
                             for(String missingAgeDecile: completeAgeDeciles){
                                 AchillesResult missingResult = new AchillesResult();

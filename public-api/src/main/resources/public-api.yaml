@@ -353,6 +353,26 @@ definitions:
             $ref: "#/definitions/Concept"
           description: standard concepts associated with the matched concept
 
+  ConceptSynonym:
+    type: object
+    required:
+      - conceptId
+      - conceptSynonymName
+      - languageConceptId
+
+    properties:
+      conceptId:
+        description: concept id
+        type: integer
+        format: int64
+      conceptSynonymName:
+        description: concept synonym name
+        type: string
+      languageConceptId:
+        description: language concept id
+        type: integer
+        format: int64
+
   QuestionConcept:
     type: object
     required:
