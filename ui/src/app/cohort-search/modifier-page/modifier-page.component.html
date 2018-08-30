@@ -37,7 +37,7 @@
                   type="button"
                   clrDropdownItem>
                   {{ opt.name}}
-                  <span *ngIf="mod.name === 'encounters'" class="badge badge-info">
+                  <span *ngIf="showCount(mod.name, opt.name)" class="badge badge-info">
                     {{ visitCounts[opt.value] | number }}
                   </span>
                 </button>
