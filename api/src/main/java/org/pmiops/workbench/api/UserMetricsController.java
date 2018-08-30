@@ -11,6 +11,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResource;
+import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,11 +96,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
 
   @Override
-  public ResponseEntity<RecentResource> updateNotebookEntry(String workspaceNamespace, String workspaceId, String notebook) {
+  public ResponseEntity<RecentResource> updateRecentResource(String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
-    UserRecentResource addedEntry = userRecentResourceService.updateNotebookEntry(wId, userProvider.get().getUserId(), notebook, now);
-    return ResponseEntity.ok(TO_CLIENT.apply(addedEntry));
+    UserRecentResource recentResource = userRecentResourceService.updateNotebookEntry(wId, userProvider.get().getUserId(), recentResourceRequest.getNotebookName(), now);
+    return ResponseEntity.ok(TO_CLIENT.apply(recentResource));
   }
 
   @Override
