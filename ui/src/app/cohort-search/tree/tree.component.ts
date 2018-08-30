@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {DomainType} from 'generated';
-import {CRITERIA_TYPES} from '../constant';
+import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
 
 /*
@@ -23,8 +22,8 @@ export class TreeComponent extends NodeComponent implements OnInit {
   }
 
   showSearch() {
-    return this.node.get('type') === DomainType.VISIT
-      || this.node.get('type') === DomainType.DRUG
-      || this.node.get('type') === CRITERIA_TYPES.MEAS;
+    return this.node.get('type') === TreeType[TreeType.VISIT]
+      || this.node.get('type') === TreeType[TreeType.DRUG]
+      || this.node.get('type') === TreeType[TreeType.MEAS];
   }
 }

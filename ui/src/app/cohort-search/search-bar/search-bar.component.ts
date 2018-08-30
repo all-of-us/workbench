@@ -1,9 +1,9 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DomainType} from 'generated';
+import {TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
+import {CRITERIA_SUBTYPES} from '../constant';
 import {
   autocompleteError,
   autocompleteOptions,
@@ -72,7 +72,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
             }
           });
 
-          this.noResults = (this._type === DomainType.DRUG || this._type === CRITERIA_TYPES.MEAS)
+          this.noResults = (this._type === TreeType[TreeType.DRUG]
+              || this._type === TreeType[TreeType.MEAS])
             && !this.optionSelected
             && !this.options.length;
         }
@@ -115,7 +116,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   inputChange(newVal: string) {
     switch (this._type) {
-      case DomainType.VISIT:
+      case TreeType[TreeType.VISIT]:
         if (newVal.length > 2) {
           this.actions.setCriteriaSearchTerms([newVal]);
         } else {

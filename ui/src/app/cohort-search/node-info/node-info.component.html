@@ -4,7 +4,7 @@
       *ngIf="selectable"
       type="button"
       class="btn btn-sm btn-link selection-button"
-      [class.pm]="node.get('type') === criteriaTypes.PM"
+      [class.pm]="isPM()"
       [disabled]="isSelected || isSelectedParent"
       (click)="select($event)">
     <clr-icon *ngIf="isSelected" shape="check-circle" size="20" class="selection-icon"></clr-icon>

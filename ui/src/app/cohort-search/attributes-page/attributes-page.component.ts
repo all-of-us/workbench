@@ -12,9 +12,9 @@ import {
   nodeAttributes,
 } from '../redux';
 
-import {Operator} from 'generated';
+import {Operator, TreeType} from 'generated';
 
-import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PM_UNITS} from '../constant';
+import {CRITERIA_SUBTYPES, PM_UNITS} from '../constant';
 import {stripHtml} from '../utils';
 
 @Component({
@@ -46,8 +46,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     {value: 'BETWEEN', name: 'Between'},
   ];
 
-  readonly criteriaTypes = CRITERIA_TYPES;
-
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -55,7 +53,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
     this.subscription.add(this.node$.subscribe(node => {
       this.node = node;
-      if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+      if (this.isMeasurement()) {
         this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
             case 'NUM':
@@ -119,7 +117,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       attr.operands.filter(operand => !!operand)
         .forEach(operand => {
         if (operand < attr.MIN
-          || (this.node.get('type') === CRITERIA_TYPES.PM ? false : operand > attr.MAX)) {
+          || (this.isPM() ? false : operand > attr.MAX)) {
           this.rangeAlert = true;
         }
       });
@@ -127,7 +125,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   isValid(form: NgForm) {
-    if (this.node.get('type') === CRITERIA_TYPES.PM || !form.valid) {
+    if (this.isPM() || !form.valid) {
       return form.valid;
     }
     let valid = false;
@@ -234,7 +232,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           return attr;
         });
       }
-      name += (this.node.get('type') === CRITERIA_TYPES.PM && attrs[0].name !== 'ANY'
+      name += (this.isPM() && attrs[0].name !== 'ANY'
         ? this.units[this.node.get('subtype')]
         : '') + ')';
     }
@@ -273,11 +271,11 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   isMeasurement() {
-    return this.node.get('type') === CRITERIA_TYPES.MEAS;
+    return this.node.get('type') === TreeType[TreeType.MEAS];
   }
 
   isPM() {
-    return this.node.get('type') === CRITERIA_TYPES.PM;
+    return this.node.get('type') === TreeType[TreeType.PM];
   }
 
   showAdd() {

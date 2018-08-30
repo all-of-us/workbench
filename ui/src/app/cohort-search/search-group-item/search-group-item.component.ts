@@ -1,9 +1,7 @@
 import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DomainType} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_TYPES} from '../constant';
 
 import {
   CohortSearchActions,
@@ -19,7 +17,7 @@ import {
   typeToTitle,
 } from '../utils';
 
-import {SearchRequest} from 'generated';
+import {SearchRequest, TreeType} from 'generated';
 
 @Component({
   selector: 'app-search-group-item',
@@ -73,17 +71,17 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
     const _type = this.item.get('type', '');
     const formatter = (param) => {
       let funcs = [typeDisplay, attributeDisplay];
-      if (_type === CRITERIA_TYPES.DEMO) {
+      if (_type === TreeType[TreeType.DEMO]) {
         funcs = [typeDisplay, nameDisplay, attributeDisplay];
-      } else if (_type === CRITERIA_TYPES.PM
-        || _type === DomainType.VISIT
-        || _type === DomainType.DRUG
-        || _type === CRITERIA_TYPES.MEAS) {
+      } else if (_type === TreeType[TreeType.PM]
+        || _type === TreeType[TreeType.VISIT]
+        || _type === TreeType[TreeType.VISIT]
+        || _type === TreeType[TreeType.MEAS]) {
         funcs = [nameDisplay];
       }
       return funcs.map(f => f(param)).join(' ').trim();
     };
-    const sep = _type === CRITERIA_TYPES.DEMO ? '; ' : ', ';
+    const sep = _type === TreeType[TreeType.DEMO] ? '; ' : ', ';
     return this.rawCodes.map(formatter).join(sep);
   }
 

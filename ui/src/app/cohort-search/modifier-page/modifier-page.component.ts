@@ -1,11 +1,10 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
-import { DomainType, ModifierType } from 'generated';
+import {ModifierType, TreeType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_TYPES} from '../constant';
 import {
   activeCriteriaType,
   activeModifierList,
@@ -108,7 +107,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
     this.subscription.add(this.ctype$.subscribe(ctype => {
       this.ctype = ctype;
-      if ([CRITERIA_TYPES.PM, DomainType.VISIT].indexOf(ctype) === -1) {
+      if ([TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(ctype) === -1) {
         this.modifiers.push({
           name: 'encounters',
           label: 'During Visit Type',
@@ -119,7 +118,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
       }
     }));
-    this.subscription.add(this.ngRedux.select(criteriaChildren(DomainType[DomainType.VISIT], 0))
+    this.subscription.add(this.ngRedux.select(criteriaChildren(TreeType[TreeType.VISIT], 0))
       .filter(visiTypes => visiTypes.size > 0)
       .subscribe(visitTypes => {
         if (this.modifiers[3]) {
