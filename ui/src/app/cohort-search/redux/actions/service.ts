@@ -4,7 +4,7 @@ import {DomainType} from 'generated';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {CRITERIA_TYPES} from '../../constant';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -17,6 +17,7 @@ import {
   getSearchRequest,
   groupList,
   includeGroups,
+  isAttributeLoading,
   isAutocompleteLoading,
   isCriteriaLoading,
   isRequesting,
@@ -58,6 +59,9 @@ export class CohortSearchActions {
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
+  @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
+  @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
+  @dispatch() setScrollId = ActionFuncs.setScrollId;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
@@ -80,7 +84,8 @@ export class CohortSearchActions {
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
-  @dispatch() showAttributesPage = ActionFuncs.showAttributesPage;
+  @dispatch() requestAttributes = ActionFuncs.requestAttributes;
+  @dispatch() loadAttributes = ActionFuncs.loadAttributes;
   @dispatch() hideAttributesPage = ActionFuncs.hideAttributesPage;
 
   @dispatch() openWizard = ActionFuncs.openWizard;
@@ -231,17 +236,28 @@ export class CohortSearchActions {
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
   }
 
-  fetchAutocompleteOptions(terms: string): void {
-    this.requestAutocompleteOptions(this.cdrVersionId, terms);
+  fetchAutocompleteOptions(kind: string, terms: string): void {
+    this.requestAutocompleteOptions(this.cdrVersionId, kind, terms);
   }
 
   fetchIngredientsForBrand(conceptId: number): void {
     const isLoading = isAutocompleteLoading()(this.state);
-    const isLoaded = this.state.getIn(['criteria', 'search', 'autocomplete']);
-    if (isLoaded || isLoading) {
+    if (isLoading) {
       return;
     }
     this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
+  }
+
+  fetchAllChildren(kind: string, parentId: number): void {
+    this.requestAllChildren(this.cdrVersionId, kind, parentId);
+  }
+
+  fetchAttributes(node: any): void {
+    const isLoading = isAttributeLoading()(this.state);
+    if (isLoading) {
+      return;
+    }
+    this.requestAttributes(this.cdrVersionId, node);
   }
 
   requestPreview(): void {
@@ -274,7 +290,7 @@ export class CohortSearchActions {
         .toJS();
     const groupItem = <SearchGroupItem>{
       id: itemId,
-      type: 'PM',
+      type: searchParam[0].type,
       searchParameters: searchParam,
       modifiers: [],
     };
@@ -429,23 +445,18 @@ export class CohortSearchActions {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
       name: immParam.get('name', ''),
-      value: immParam.get('code'),
+      value: CRITERIA_SUBTYPES.DEC === immParam.get('subtype')
+          ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
-      attributes: []
+      attributes: immParam.get('attributes')
     };
-
-    if (immParam.get('hasAttributes') || param.type === CRITERIA_TYPES.DEMO) {
-      param.attributes = typeof immParam.get('attributes') !== 'undefined'
-        ? immParam.get('attributes') : [];
-    } else if (immParam.get('predefinedAttributes')) {
-      param.attributes = immParam.get('predefinedAttributes') ;
-    }
 
     if (param.type === CRITERIA_TYPES.DEMO
       || param.type === DomainType[DomainType.VISIT]
       || param.type === CRITERIA_TYPES.PM
+      || param.type === CRITERIA_TYPES.MEAS
       || param.type === DomainType[DomainType.DRUG]) {
         param.conceptId = immParam.get('conceptId');
     } else if (param.type === CRITERIA_TYPES.ICD9

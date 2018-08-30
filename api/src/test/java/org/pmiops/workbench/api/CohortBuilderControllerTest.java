@@ -7,11 +7,13 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
+import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
 import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.model.DomainType;
@@ -25,7 +27,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -49,13 +54,19 @@ public class CohortBuilderControllerTest {
   private Criteria demoCriteria;
   private Criteria labMeasurement;
   private Criteria drugATCCriteria;
+  private Criteria drugATCCriteriaChild;
   private Criteria drugBrandCriteria;
+  private CriteriaAttribute criteriaAttributeMin;
+  private CriteriaAttribute criteriaAttributeMax;
 
   @Autowired
   private CohortBuilderController controller;
 
   @Autowired
   private CriteriaDao criteriaDao;
+
+  @Autowired
+  private CriteriaAttributeDao criteriaAttributeDao;
 
   @Autowired
   private ConceptDao conceptDao;
@@ -95,6 +106,9 @@ public class CohortBuilderControllerTest {
     drugBrandCriteria = criteriaDao.save(
       createCriteria(TYPE_DRUG, SUBTYPE_BRAND, 0L, "LP12345", "brandName", DomainType.DRUG.name(), "1235", true)
     );
+    drugATCCriteriaChild = criteriaDao.save(
+      createCriteria(TYPE_DRUG, SUBTYPE_ATC, 0L, "LP12345", "differentName", DomainType.DRUG.name(), "12345", false)
+    );
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
       new ConceptRelationship().conceptRelationshipId(
@@ -103,6 +117,12 @@ public class CohortBuilderControllerTest {
           .conceptId2(12345)
           .conceptId1(1247)
       )
+    );
+    criteriaAttributeMin = criteriaAttributeDao.save(
+      new CriteriaAttribute().conceptId(1L).conceptName("MIN").estCount("10").type("NUM").valueAsConceptId(0L)
+    );
+    criteriaAttributeMax = criteriaAttributeDao.save(
+      new CriteriaAttribute().conceptId(1L).conceptName("MAX").estCount("100").type("NUM").valueAsConceptId(0L)
     );
   }
 
@@ -120,6 +140,30 @@ public class CohortBuilderControllerTest {
       createResponseCriteria(icd9CriteriaChild),
       controller
         .getCriteriaByTypeAndParentId(1L, TYPE_ICD9, icd9CriteriaParent.getId())
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void getCriteriaByTypeAndSubtypeAndParentId() throws Exception {
+    assertEquals(
+      createResponseCriteria(drugATCCriteria),
+      controller
+        .getCriteriaByTypeAndSubtypeAndParentId(1L, TYPE_DRUG, SUBTYPE_ATC, 0L)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void getCriteriaChildrenByTypeAndParentId() throws Exception {
+    assertEquals(
+      createResponseCriteria(drugATCCriteriaChild),
+      controller
+        .getCriteriaChildrenByTypeAndParentId(1L, TYPE_DRUG, 2L)
         .getBody()
         .getItems()
         .get(0)
@@ -195,6 +239,16 @@ public class CohortBuilderControllerTest {
     );
   }
 
+  @Test
+  public void getCriteriaAttributeByConceptId() throws Exception {
+    List<org.pmiops.workbench.model.CriteriaAttribute> attrs = controller
+      .getCriteriaAttributeByConceptId(1L, criteriaAttributeMin.getConceptId())
+      .getBody()
+      .getItems();
+    assertTrue(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMin)));
+    assertTrue(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMax)));
+  }
+
   private Criteria createCriteria(String type, String subtype, long parentId, String code, String name, String domain, String conceptId, boolean group) {
     return new Criteria()
       .parentId(parentId)
@@ -206,7 +260,8 @@ public class CohortBuilderControllerTest {
       .selectable(true)
       .count("16")
       .domainId(domain)
-      .conceptId(conceptId);
+      .conceptId(conceptId)
+      .path("1.2.3.4");
   }
 
   private org.pmiops.workbench.model.Criteria createResponseCriteria(Criteria criteria) {
@@ -223,6 +278,16 @@ public class CohortBuilderControllerTest {
       .selectable(criteria.getSelectable())
       .subtype(criteria.getSubtype())
       .type(criteria.getType())
-      .predefinedAttributes(null);
+      .path(criteria.getPath());
+  }
+
+  private org.pmiops.workbench.model.CriteriaAttribute createResponseCriteriaAttribute(CriteriaAttribute criteriaAttribute) {
+    return new org.pmiops.workbench.model.CriteriaAttribute()
+      .id(criteriaAttribute.getId())
+      .conceptId(criteriaAttribute.getConceptId())
+      .valueAsConceptId(criteriaAttribute.getValueAsConceptId())
+      .conceptName(criteriaAttribute.getConceptName())
+      .type(criteriaAttribute.getType())
+      .estCount(criteriaAttribute.getEstCount());
   }
 }

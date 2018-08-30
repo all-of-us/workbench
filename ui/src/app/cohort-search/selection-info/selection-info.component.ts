@@ -20,7 +20,8 @@ export class SelectionInfoComponent {
 
   remove(): void {
     const paramId = this.parameter.get('parameterId');
-    this.actions.removeParameter(paramId);
+    const path = this.parameter.get('path');
+    this.actions.removeParameter(paramId, path);
   }
 
   get _type()     { return typeDisplay(this.parameter); }

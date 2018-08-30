@@ -57,6 +57,13 @@ parameters:
     type: integer
     format: int64
     required: true
+  conceptSetId:
+    in: path
+    name: conceptSetId
+    type: integer
+    format: int64
+    required: true
+    description: Concept set ID
 
 paths:
 
@@ -795,6 +802,76 @@ paths:
           schema:
             $ref: "#/definitions/CloneWorkspaceResponse"
 
+  # Notebooks ############################################################################
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: Renames specified notebook
+      operationId: "renameNotebook"
+      parameters:
+        - in: body
+          name: NotebookRename
+          description: new name for notebook
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              newName:
+                type: string
+      responses:
+        200:
+          description: Successful rename
+          schema:
+            $ref: "#/definitions/FileDetail"
+
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/clone:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: Clones specified notebook
+      operationId: "cloneNotebook"
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful clone
+          schema:
+            $ref: "#/definitions/FileDetail"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    delete:
+      tags:
+        - workspaces
+      description: Deletes specified notebook
+      operationId: "deleteNotebook"
+      parameters:
+        - in: path
+          name: notebookName
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful delete
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
   # Cohorts ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
@@ -871,6 +948,117 @@ paths:
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
+
+  /v1/workspaces/user-recent-resources:
+    get:
+      tags:
+        - userMetrics
+      description: Returns the resources accessed by user order by access time desc
+      operationId: getUserRecentResources
+      responses:
+        200:
+          description: A list of resources order by last access time desc order
+          schema:
+            $ref: "#/definitions/RecentResourceResponse"
+# Concept sets ##############################################################################
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    get:
+      tags:
+        - conceptSets
+      description: Returns all concept sets in a workspace
+      operationId: "getConceptSetsInWorkspace"
+      responses:
+        200:
+          description: A list of concept sets.
+          schema:
+            $ref: "#/definitions/ConceptSetListResponse"
+    post:
+      tags:
+        - conceptSets
+      description: Creates a concept set in a workspace.
+      operationId: "createConceptSet"
+      parameters:
+        - in: body
+          name: conceptSet
+          description: concept set definition
+          schema:
+            $ref: "#/definitions/ConceptSet"
+      responses:
+        200:
+          description: The concept set that was created.
+          schema:
+            $ref: "#/definitions/ConceptSet"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/conceptSetId'
+    get:
+      tags:
+        - conceptSets
+      description: Returns the concept set definition with the specified ID
+      operationId: "getConceptSet"
+      responses:
+        200:
+          description: A concept set definition
+          schema:
+            $ref: "#/definitions/ConceptSet"
+    patch:
+      tags:
+        - conceptSets
+      description: >
+        Modifies the name or description of the concept set with the specified ID;
+        fields that are omitted will not be modified
+      operationId: "updateConceptSet"
+      parameters:
+        - in: body
+          name: conceptSet
+          description: concept set definition
+          schema:
+            $ref: "#/definitions/ConceptSet"
+      responses:
+        200:
+          description: The updated concept set.
+          schema:
+            $ref: "#/definitions/ConceptSet"
+    delete:
+      tags:
+        - conceptSets
+      description: Deletes the concept set with the specified ID
+      operationId: "deleteConceptSet"
+      responses:
+        202:
+          description: ACCEPTED
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concepts:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/conceptSetId'
+    post:
+      tags:
+        - conceptSets
+      description: >
+        Adds or removes concepts from the concept set.
+      operationId: "updateConceptSetConcepts"
+      parameters:
+        - in: body
+          name: request
+          description: update concept set request
+          schema:
+            $ref: "#/definitions/UpdateConceptSetRequest"
+      responses:
+        200:
+          description: The updated concept set.
+          schema:
+            $ref: "#/definitions/ConceptSet"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -1053,6 +1241,10 @@ definitions:
       - role
     properties:
       email:
+        type: string
+      givenName:
+        type: string
+      familyName:
         type: string
       role:
         $ref: "#/definitions/WorkspaceAccessLevel"
@@ -1295,6 +1487,85 @@ definitions:
         format: int64
         description: Milliseconds since the UNIX epoch.
 
+  ConceptSetListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+           $ref: "#/definitions/ConceptSet"
+
+  ConceptSet:
+    type: object
+    required:
+      - name
+      - type
+    properties:
+      id:
+        type: integer
+        format: int64
+      etag:
+        type: string
+        description: >
+          Entity tag for optimistic concurrency control. To be set during a
+          read-modify-write to ensure that the client has not attempted to
+          modify a changed resource.
+      name:
+        type: string
+      domain:
+        description: >
+          Domain corresponding to an OMOP table that can contain rows for the concepts in this
+          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
+          here; it makes sense to specify concepts in these domains in cohort criteria, but
+          there isn't much value in having concept sets defined for them.
+        $ref: "#/definitions/Domain"
+      description:
+        type: string
+      creator:
+        type: string
+      creationTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
+      lastModifiedTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
+      concepts:
+        description: "Concepts in the concept set, in conceptName order."
+        type: array
+        items:
+          $ref: "#/definitions/Concept"
+
+  UpdateConceptSetRequest:
+    type: object
+    required:
+      - etag
+    properties:
+      etag:
+        type: string
+        description: >
+          Etag of the concept set being modified.
+          Validates that the concept set has not been modified since this
+          etag was retrieved.
+      addedIds:
+        type: array
+        description: >
+          The IDs of concepts to be added to the concept set.
+        items:
+          type: integer
+          format: int64
+      removedIds:
+        type: array
+        description: >
+          The IDs of concepts to be removed from the concept set.
+        items:
+          type: integer
+          format: int64
+
+
   CreateAccountRequest:
     type: object
     properties:
@@ -1359,7 +1630,6 @@ definitions:
     type: object
     required:
       - username
-      - enabledInFireCloud
       - dataAccessLevel
     properties:
       userId:
@@ -1378,9 +1648,6 @@ definitions:
       firstSignInTime:
         type: integer
         format: int64
-      enabledInFireCloud:
-        description: true if the user is enabled in FireCloud, false if they are not
-        type: boolean
       freeTierBillingProjectName:
         description: name of the AllOfUs free tier billing project created for this user
         type: string
@@ -1669,3 +1936,23 @@ definitions:
         format: int32
         description: >
           Number of clusters deleted during the check.
+
+  RecentResourceResponse:
+    type: array
+    items:
+      $ref: "#/definitions/RecentResource"
+
+  RecentResource:
+    type: object
+    properties:
+      workspaceId:
+        type: integer
+        format: int64
+      permission:
+        type: string
+      cohort:
+        $ref: "#/definitions/Cohort"
+      notebook:
+        $ref: '#/definitions/FileDetail'
+      modifiedTime:
+        type: string

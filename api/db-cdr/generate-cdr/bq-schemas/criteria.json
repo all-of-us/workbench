@@ -57,11 +57,11 @@
       {
         "mode": "NULLABLE",
         "name": "has_attribute",
-        "type": "BOOLEAN"
+        "type": "INTEGER"
       },
       {
         "mode": "NULLABLE",
-        "name": "predefined_attributes",
+        "name": "path",
         "type": "STRING"
       }
 ]

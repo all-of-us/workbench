@@ -5,9 +5,11 @@ import {
   CloneWorkspaceResponse,
   EmptyResponse,
   FileDetail,
+  NotebookRename,
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
   UpdateWorkspaceRequest,
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceListResponse,
@@ -28,12 +30,40 @@ export class WorkspacesServiceStub {
   // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
   workspacesForReview: Workspace[];
+  sharingProfilesList: UserRole[] = [
+    {
+      email: 'sampleuser1@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User1',
+      role: WorkspaceAccessLevel.OWNER
+    },
+    {
+      email: 'sampleuser2@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User2',
+      role: WorkspaceAccessLevel.WRITER
+    },
+    {
+      email: 'sampleuser3@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User3',
+      role: WorkspaceAccessLevel.READER
+    },
+    {
+      email: 'sampleuser4@fake-research-aou.org',
+      givenName: 'Sample',
+      familyName: 'User4',
+      role: WorkspaceAccessLevel.WRITER
+    }
+  ];
+  notebookList: FileDetail[];
 
   constructor() {
 
     this.workspaces = [WorkspacesServiceStub.stubWorkspace()];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.workspacesForReview = WorkspacesServiceStub.stubWorkspacesForReview();
+    this.notebookList = WorkspacesServiceStub.stubNotebookList();
   }
 
   static stubWorkspace(): Workspace {
@@ -59,14 +89,20 @@ export class WorkspacesServiceStub {
       userRoles: [
         {
           email: 'sampleuser1@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.OWNER
         },
         {
           email: 'sampleuser2@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.WRITER
         },
         {
           email: 'sampleuser3@fake-research-aou.org',
+          givenName: 'Sample',
+          familyName: 'User1',
           role: WorkspaceAccessLevel.READER
         },
       ]
@@ -77,6 +113,16 @@ export class WorkspacesServiceStub {
     const stubWorkspace = this.stubWorkspace();
     stubWorkspace.researchPurpose.reviewRequested = true;
     return [stubWorkspace];
+  }
+
+  static stubNotebookList(): FileDetail[] {
+    return [
+      {
+        'name': 'mockFile.ipynb',
+        'path': 'gs://bucket/notebooks/mockFile.ipynb',
+        'lastModifiedTime': 100
+      }
+    ];
   }
 
   private clone(w: Workspace): Workspace {
@@ -229,9 +275,14 @@ export class WorkspacesServiceStub {
           observer.error(new Error(msg));
           return;
         }
+        let responseItems: UserRole[] = [];
+        responseItems = request.items.map(
+          userRole => this.sharingProfilesList.find(
+            current => userRole.email === current.email));
+
         observer.next({
           workspaceEtag: request.workspaceEtag,
-          items: request.items
+          items: responseItems
         });
         observer.complete();
       }, 0);
@@ -242,17 +293,50 @@ export class WorkspacesServiceStub {
       workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(() => {
-        const fileDetailsList =
-            [
-              {
-                'name': 'FileDetails',
-                'path': 'gs://bucket/notebooks/mockFile',
-                'lastModifiedTime': 100
-              }
-            ];
-        observer.next(fileDetailsList);
+        observer.next(this.notebookList);
         observer.complete();
       }, 0);
+    });
+  }
+
+  renameNotebook(workspaceNamespace: string, workspaceId: string,
+      rename: NotebookRename): Observable<FileDetail> {
+    return new Observable<FileDetail>(observer => {
+      setTimeout(() => {
+        const responseItems: FileDetail = {
+          'name': rename.newName,
+          'path': 'gs://bucket/notebooks/' + rename.newName,
+          'lastModifiedTime': 100
+        };
+        observer.next(responseItems);
+        observer.complete();
+      });
+    });
+  }
+
+  cloneNotebook(workspaceNamespace: string, workspaceId: string,
+      notebookName: String): Observable<any> {
+    return new Observable<any>(observer => {
+      setTimeout(() => {
+        const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
+        this.notebookList.push({
+          'name': cloneName,
+          'path': 'gs://bucket/notebooks/' + cloneName,
+          'lastModifiedTime': 100
+        });
+        observer.complete();
+      });
+    });
+  }
+
+  deleteNotebook(workspaceNamespace: string, workspaceId: string,
+      notebookName: String): Observable<any> {
+    return new Observable<any>(observer => {
+      setTimeout(() => {
+        this.notebookList.pop();
+      });
+      observer.next();
+      observer.complete();
     });
   }
 

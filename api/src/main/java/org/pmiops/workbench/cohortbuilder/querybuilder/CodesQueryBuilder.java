@@ -51,10 +51,12 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     "and b.vocabulary_id = ${cmOrProc}\n";
 
   private static final String CHILD_CODE_IN_CLAUSE_TEMPLATE =
-    "and b.concept_code in unnest(${conceptCodes})\n";
+    "and b.concept_code in unnest(${conceptCodes})\n" +
+      "${encounterSql}";
 
   private static final String GROUP_CODE_LIKE_TEMPLATE =
-    "and b.concept_code like ${conceptCodes}\n";
+    "and b.concept_code like ${conceptCodes}\n" +
+      "${encounterSql}";
 
   private static final String UNION_TEMPLATE = " union all\n";
 

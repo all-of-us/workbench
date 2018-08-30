@@ -27,7 +27,7 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
-import {CohortEditComponent} from './views/cohort-edit/component';
+import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
@@ -39,6 +39,7 @@ import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
+import {RenameModalComponent} from './views/rename-modal/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
@@ -120,7 +121,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
-    CohortEditComponent,
+    CohortEditModalComponent,
     CohortListComponent,
     ConfirmDeleteModalComponent,
     ErrorHandlerComponent,
@@ -132,6 +133,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
+    RenameModalComponent,
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,

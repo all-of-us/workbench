@@ -1,4 +1,4 @@
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {
   AfterViewInit,
   Component,
@@ -10,9 +10,18 @@ import {
   ViewChild
 } from '@angular/core';
 import { DomainType } from 'generated';
+import {Map} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_TYPES} from '../constant';
-import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
+import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
+import {
+  CohortSearchActions,
+  CohortSearchState,
+  isParameterActive,
+  isSelectedParent,
+  subtreeSelected
+} from '../redux';
+import {stripHtml} from '../utils';
 
 /*
  * Stub function - some criteria types will have "attributes" that help define
@@ -23,7 +32,7 @@ import {CohortSearchActions, CohortSearchState, isParameterActive} from '../redu
  */
 function needsAttributes(node: any) {
   // will change soon to check for attributes property instead of id
-  return node.get('hasAttributes', '') === true;
+  return node.get('hasAttributes') === true;
 }
 
 
@@ -33,13 +42,16 @@ function needsAttributes(node: any) {
   styleUrls: ['./node-info.component.css']
 })
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
+  @select(subtreeSelected) selected$: Observable<any>;
   @Input() node;
   readonly domainType = DomainType;
   readonly criteriaTypes = CRITERIA_TYPES;
   private isSelected: boolean;
+  private isSelectedParent: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
+  matched = false;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -56,6 +68,17 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(val => {
         this.isSelected = val;
       });
+
+    this.subscription = this.ngRedux
+      .select(isSelectedParent(this.node.get('id')))
+      .map(val => noAttr && val)
+      .subscribe(val => {
+        this.isSelectedParent = val;
+      });
+
+    this.subscription.add(this.selected$
+      .filter(selectedIds => !!selectedIds)
+      .subscribe(selectedIds => this.matched = selectedIds.includes(this.node.get('id'))));
   }
 
   ngOnDestroy() {
@@ -82,7 +105,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get paramId() {
-    return `param${this.node.get('id')}`;
+    return `param${this.node.get('conceptId') ? this.node.get('conceptId') : this.node.get('id')}`;
   }
 
   get selectable() {
@@ -94,6 +117,10 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       || this.node.get('type', '') === CRITERIA_TYPES.PM;
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
     return (noCode || nameIsCode) ? '' : this.node.get('name', '');
+  }
+
+  get popperName() {
+    return stripHtml(this.displayName);
   }
 
   get displayCode() {
@@ -120,7 +147,21 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     event.stopPropagation();
     if (needsAttributes(this.node)) {
-      this.actions.showAttributesPage(this.node);
+      if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+        this.actions.fetchAttributes(this.node);
+      } else {
+        const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
+          : [{
+            name: '',
+            operator: null,
+            operands: [null],
+            conceptId: this.node.get('conceptId', null),
+            MIN: 0,
+            MAX: 10000
+          }];
+        this.actions.loadAttributes(this.node, attributes);
+      }
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
@@ -130,24 +171,35 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        */
 
       if (this.node.get('type') === DomainType.DRUG && this.node.get('group')) {
-        this.node.get('children').forEach(child => {
-          this.selectChildren(child);
-        });
+        this.actions.fetchAllChildren(DomainType[DomainType.DRUG], this.node.get('id'));
       } else {
-        const param = this.node.set('parameterId', this.paramId);
+        let attributes = [];
+        if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+          Object.keys(PREDEFINED_ATTRIBUTES).forEach(name => {
+            if (this.node.get('name').indexOf(name) === 0) {
+              attributes = PREDEFINED_ATTRIBUTES[name];
+            }
+          });
+        }
+        const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
         this.actions.addParameter(param);
       }
     }
   }
 
-  selectChildren(node) {
+  selectChildren(node: Map<string, any>) {
     if (node.get('group')) {
       node.get('children').forEach(child => {
         this.selectChildren(child);
       });
     } else {
-      const param = node.set('parameterId', `param${node.get('id')}`);
+      const param = node.set('parameterId', `param${(node.get('conceptId')
+        ? node.get('conceptId') : node.get('id'))}`);
       this.actions.addParameter(param);
     }
+  }
+
+  showCount() {
+    return this.node.get('selectable') && this.node.get('count') !== null;
   }
 }

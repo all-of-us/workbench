@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
@@ -65,8 +65,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
     BASE_SQL_TEMPLATE + VALUE_AS_NUMBER;
 
-  private static final String VALUE_SOURCE_VALUE_SQL_TEMPLATE =
-    BASE_SQL_TEMPLATE + "and value_source_value = ${value}\n";
+  private static final String VALUE_AS_CONCEPT_ID_SQL_TEMPLATE =
+    BASE_SQL_TEMPLATE + "and value_as_concept_id = ${value}\n";
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
@@ -78,16 +78,16 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
         validateAttributes(parameter);
         for (Attribute attribute : parameter.getAttributes()) {
-          boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
           String namedParameterConceptId = CONCEPT_ID + getUniqueNamedParameterPostfix();
           String namedParameter1 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
           String namedParameter2 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
-          if (attribute.getOperator().equals(Operator.ANY)) {
+          if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             tempQueryParts.add(tempSql
               .replace("${conceptId}", "@" + namedParameterConceptId));
             queryParams.put(namedParameterConceptId, QueryParameterValue.int64(attribute.getConceptId()));
           } else {
+            boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE + VALUE_AS_NUMBER : VALUE_AS_NUMBER_SQL_TEMPLATE;
             tempQueryParts.add(tempSql
               .replace("${conceptId}", "@" + namedParameterConceptId)
@@ -110,10 +110,10 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
         validateSearchParameter(parameter);
         String namedParameterConceptId = CONCEPT_ID + getUniqueNamedParameterPostfix();
         String namedParameter = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
-        queryParts.add(VALUE_SOURCE_VALUE_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
+        queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
           .replace("${value}","@" + namedParameter));
         queryParams.put(namedParameterConceptId, QueryParameterValue.int64(parameter.getConceptId()));
-        queryParams.put(namedParameter, QueryParameterValue.string(parameter.getValue()));
+        queryParams.put(namedParameter, QueryParameterValue.int64(new Long(parameter.getValue())));
       }
     }
     String finalSql = String.join(UNION_ALL, queryParts);
@@ -134,29 +134,25 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateAttributes(SearchParameter parameter) {
+    List<Attribute> attrs = parameter.getAttributes();
+    Predicate<Attribute> systolic = nameIsSystolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
+    Predicate<Attribute> diastolic = nameIsDiastolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
     if (parameter.getSubtype().equals(BLOOD_PRESSURE)) {
-      List<Attribute> systolicAttrs =
-        parameter.getAttributes().stream()
-          .filter(nameIsSystolic()
-            .and(operatorWithCorrectOperands())
-            .and(conceptIdNotNull())::test)
-          .collect(Collectors.toList());
-      List<Attribute> diastolicAttrs =
-        parameter.getAttributes().stream()
-          .filter(nameIsDiastolic()
-            .and(operatorWithCorrectOperands())
-            .and(conceptIdNotNull())::test)
-          .collect(Collectors.toList());
-      if (systolicAttrs.size() != 1 || diastolicAttrs.size() != 1) {
-        throw new BadRequestException("Please provide valid search attributes(name, operator, operands and conceptId) for Systolic and Diastolic.");
+      boolean systolicAttrs =
+        attrs.stream().filter(systolic::test).collect(Collectors.toList()).size() != 1;
+      boolean diastolicAttrs =
+        attrs.stream().filter(diastolic::test).collect(Collectors.toList()).size() != 1;
+      boolean anyAttrs =
+        attrs.stream().filter(nameIsAny()::test).collect(Collectors.toList()).size() != 2;
+      if ((systolicAttrs || diastolicAttrs) && anyAttrs) {
+        throw new BadRequestException("Please provide valid search attributes" +
+          "(name, operator, operands and conceptId) for Systolic and Diastolic.");
       }
     } else if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
-      List<Attribute> attrs =
-        parameter.getAttributes().stream()
-          .filter(operatorWithCorrectOperands()
-            .and(conceptIdNotNull())::test)
-          .collect(Collectors.toList());
-      if (attrs.size() != 1) {
+      Predicate<Attribute> allTypes = operatorWithCorrectOperands().and(conceptIdNotNull());
+      boolean allAttrs =
+        parameter.getAttributes().stream().filter(allTypes::test).collect(Collectors.toList()).size() != 1;
+      if (allAttrs) {
         throw new BadRequestException("Please provide valid search attributes(operator, operands) for "
           + exceptionText.get(parameter.getSubtype()) + ".");
       }
@@ -167,7 +163,11 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     if (parameter.getConceptId() == null || parameter.getValue() == null) {
       throw new BadRequestException("Please provide valid conceptId and value for "
         + exceptionText.get(parameter.getSubtype()) + ".");
+    } else if (!NumberUtils.isNumber(parameter.getValue())) {
+      throw new BadRequestException("Please provide valid value for "
+        + exceptionText.get(parameter.getSubtype()) + ".");
     }
+
   }
 
   private static Predicate<Attribute> nameIsSystolic() {
@@ -182,20 +182,12 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     return attribute -> attribute.getConceptId() != null;
   }
 
+  private static Predicate<Attribute> nameIsAny() { return attribute -> isNameAny(attribute); }
+
   private static Predicate<Attribute> operatorWithCorrectOperands() {
-    return attribute ->
-      (attribute.getOperator() != null
-        && attribute.getOperator().equals(Operator.ANY)
-        && attribute.getOperands().size() == 0)
-          || (attribute.getOperator() != null
-        && attribute.getOperator().equals(Operator.BETWEEN)
-        && attribute.getOperands().size() == 2
-        && StringUtils.isNumeric(attribute.getOperands().get(0)))
-        && StringUtils.isNumeric(attribute.getOperands().get(1))
-          || (attribute.getOperator() != null
-        && !attribute.getOperator().equals(Operator.BETWEEN)
-        && !attribute.getOperator().equals(Operator.ANY)
-        && attribute.getOperands().size() == 1
-        && StringUtils.isNumeric(attribute.getOperands().get(0)));
+    return attribute -> isNameAny(attribute)
+      || isOperatorBetween(attribute)
+      || isOperatorAnyEquals(attribute)
+      || isOperatorIn(attribute);
   }
 }

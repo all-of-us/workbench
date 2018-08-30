@@ -78,6 +78,11 @@ export const isParameterActive = paramId => (state): boolean =>
     .getIn(['wizard', 'item', 'searchParameters'], List())
     .includes(paramId);
 
+export const isSelectedParent = id => (state): boolean =>
+  state
+    .getIn(['wizard', 'item', 'selectedParents'], List())
+    .includes(id.toString());
+
 export const activeItem = (state) =>
   state.getIn(['wizard', 'item'], Map());
 
@@ -90,8 +95,12 @@ export const previewStatus = (state) =>
 export const attributesPreviewStatus = (state) =>
   state.getIn(['wizard', 'calculate'], Map());
 
-export const attributesPage = (state) =>
-  state.getIn(['wizard', 'item', 'attributes'], Map());
+export const nodeAttributes = (state): any =>
+    state.getIn(['wizard', 'item', 'attributes', 'node'], Map());
+
+export const isAttributeLoading =
+  () => (state): boolean =>
+    state.getIn(['wizard', 'item', 'attributes', 'loading'], false);
 
 
 /**
@@ -110,6 +119,10 @@ export const demoCriteriaChildren =
 export const criteriaSearchTerms =
   () => (state): Array<string> =>
   state.getIn(['criteria', 'search', 'terms'], null);
+
+export const criteriaSubtree =
+  (kind: string) => (state): List<any> =>
+  state.getIn(['criteria', 'subtree', kind], List());
 
 export const isCriteriaLoading =
   (kind: string, parentId: number) =>
@@ -140,6 +153,9 @@ export const criteriaError =
 export const criteriaLoadErrors =
   (state): any =>
   state.getIn(['criteria', 'errors'], Map());
+
+export const subtreeSelected = (state) =>
+  state.getIn(['criteria', 'subtree', 'selected'], null);
 
 /**
  * Other

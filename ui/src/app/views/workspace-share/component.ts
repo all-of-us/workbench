@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
@@ -22,16 +22,11 @@ import {
   templateUrl: './component.html',
 })
 export class WorkspaceShareComponent implements OnInit {
-  workspace: Workspace = {
-    name: '',
-    userRoles: []
-  };
-  loadingWorkspace = true;
-  loadWorkspaceFinished = false;
+  @Input('workspace') workspace: Workspace;
   toShare = '';
   selectedPermission = 'Select Permission';
   roleNotSelected = false;
-  private accessLevel: WorkspaceAccessLevel;
+  @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
   selectedAccessLevel: WorkspaceAccessLevel;
   notFound = false;
   userEmail: string;
@@ -57,14 +52,7 @@ export class WorkspaceShareComponent implements OnInit {
   ngOnInit(): void {
     this.profileStorageService.profile$.subscribe((profile) => {
       this.usersLoading = false;
-      if (this.loadWorkspaceFinished === true) {
-        this.loadingWorkspace = false;
-      }
       this.userEmail = profile.username;
-    });
-
-    this.loadWorkspace().subscribe((workspace) => {
-      this.loadWorkspaceFinished = true;
     });
   }
 
@@ -99,8 +87,9 @@ export class WorkspaceShareComponent implements OnInit {
       if (this.checkUnique(email, role)) {
         this.usersLoading = true;
         // A user can only have one role on a workspace so we replace them in the list
-        const updateList = Array.from(this.workspace.userRoles)
-          .filter(r => r.email !== email);
+        const updateList = this.workspace.userRoles
+          .filter(r => r.email !== email)
+          .map((userRole) => ({email: userRole.email, role: userRole.role}));
         updateList.push({
           email: email,
           role: role
@@ -134,7 +123,8 @@ export class WorkspaceShareComponent implements OnInit {
   removeCollaborator(user: UserRole): void {
     if (!this.usersLoading) {
       this.usersLoading = true;
-      const updateList = Array.from(this.workspace.userRoles);
+      const updateList = this.workspace.userRoles
+        .map((userRole) => ({email: userRole.email, role: userRole.role}));
       const position = updateList.findIndex((userRole) => {
         if (user.email === userRole.email) {
           return true;
@@ -162,10 +152,10 @@ export class WorkspaceShareComponent implements OnInit {
     }
   }
 
-  loadWorkspace(): Observable<WorkspaceResponse> {
+  reloadWorkspace(): Observable<WorkspaceResponse> {
     const obs: Observable<WorkspaceResponse> = this.workspacesService.getWorkspace(
-      this.route.snapshot.params['ns'],
-      this.route.snapshot.params['wsid']);
+      this.workspace.namespace,
+      this.workspace.id);
     obs.subscribe(
       (workspaceResponse) => {
         this.accessLevel = workspaceResponse.accessLevel;
@@ -181,7 +171,7 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   reloadConflictingWorkspace(): void {
-    this.loadWorkspace().subscribe(() => this.resetWorkspaceEditor());
+    this.reloadWorkspace().subscribe(() => this.resetWorkspaceEditor());
   }
 
   resetWorkspaceEditor(): void {

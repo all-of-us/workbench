@@ -1,4 +1,4 @@
-"id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","predefined_attributes"
+"id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","path"
 23828,0,"ICD10","ICD10CM","ICD10CM","DIAGNOSIS CODES",1,0,"","","",0,""
 23829,23828,"ICD10","ICD10CM","A00-B99","Certain infectious and parasitic diseases (A00-B99)",1,0,"","","",0,""
 23830,23828,"ICD10","ICD10CM","C00-D49","Neoplasms (C00-D49)",1,0,"","","",0,""

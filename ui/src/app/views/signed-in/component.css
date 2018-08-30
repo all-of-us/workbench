@@ -113,6 +113,23 @@ button.btn:focus {
   outline: none;
 }
 
+a.btn.btn-primary.nav-link {
+  line-height: 1rem;
+}
+
+.btn.btn-secondary.btn-bug-report {
+  color: #979797;
+  border: 1px solid #979797;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
+  height: 2rem;
+  width: 6rem;
+  align-self: center;
+  margin-top: 6rem;
+  margin-left: calc(50% - 3rem);
+  margin-right: calc(50% - 3rem);
+}
+
 .background-image {
   background-image: url('/assets/images/hex-background@2x.png');
   background-repeat: no-repeat;

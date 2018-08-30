@@ -9,12 +9,14 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -23,6 +25,8 @@ import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -45,6 +49,7 @@ import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.fail;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({TestJpaConfig.class})
@@ -110,14 +115,16 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
     BigQueryService.class,
-    ReviewTabQueryBuilder.class,
+    ReviewQueryBuilder.class,
     CohortService.class,
+    ConceptSetService.class,
     ParticipantCounter.class,
     DomainLookupService.class,
     CohortQueryBuilder.class
   })
   @MockBean({
-    FireCloudService.class
+    FireCloudService.class,
+    UserRecentResourceService.class
   })
   static class Configuration {
     @Bean
@@ -291,7 +298,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .numMentions("1")
       .ageAtEvent(28)
       .standardVocabulary("SNOMED")
-      .standardName("SNOMED")
+      .standardName("name1")
       .standardCode("002")
       .sourceCode("004")
       .sourceVocabulary("ICD9CM")
@@ -305,7 +312,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .numMentions("1")
       .ageAtEvent(28)
       .standardVocabulary("SNOMED")
-      .standardName("SNOMED")
+      .standardName("name2")
       .standardCode("002")
       .sourceCode("004")
       .sourceVocabulary("ICD9CM")
@@ -1099,6 +1106,117 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         expectedAllEvents1,
         expectedAllEvents8,
         expectedAllEvents7), 8);
+  }
+
+  @Test
+  public void getParticipantChartData() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    ParticipantChartDataListResponse response =
+    controller
+      .getParticipantChartData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        DomainType.CONDITION.name(),
+        null)
+      .getBody();
+
+    ParticipantChartData expectedData1 = new ParticipantChartData().ageAtEvent(28).rank(1).standardName("name1").standardVocabulary("SNOMED").startDate("2008-07-22");
+    ParticipantChartData expectedData2 = new ParticipantChartData().ageAtEvent(28).rank(1).standardName("name2").standardVocabulary("SNOMED").startDate("2008-08-01");
+    assertThat(response.getItems().size()).isEqualTo(2);
+    assertThat(expectedData1).isIn(response.getItems());
+    assertThat(expectedData2).isIn(response.getItems());
+  }
+
+  @Test
+  public void getParticipantChartDataBadCohortId() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    try {
+      controller
+        .getParticipantChartData(
+          NAMESPACE,
+          NAME,
+          99L,
+          cdrVersion.getCdrVersionId(),
+          PARTICIPANT_ID,
+          DomainType.CONDITION.name(),
+          null);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException nfe) {
+      //Success
+      assertThat(nfe.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: 99");
+    }
+  }
+
+  @Test
+  public void getParticipantChartDataBadCdrVersionId() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    try {
+      controller
+        .getParticipantChartData(
+          NAMESPACE,
+          NAME,
+          cohort.getCohortId(),
+          99L,
+          PARTICIPANT_ID,
+          DomainType.CONDITION.name(),
+          null);
+      fail("Should have thrown a NotFoundException!");
+    } catch (NotFoundException nfe) {
+      //Success
+      assertThat(nfe.getMessage())
+        .isEqualTo("Not Found: Cohort Review does not exist for cohortId: "
+          + cohort.getCohortId() + ", cdrVersionId: 99");
+    }
+  }
+
+  @Test
+  public void getParticipantChartDataBadLimit() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    try {
+      controller
+        .getParticipantChartData(
+          NAMESPACE,
+          NAME,
+          cohort.getCohortId(),
+          99L,
+          PARTICIPANT_ID,
+          DomainType.CONDITION.name(),
+          -1);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertThat(bre.getMessage())
+        .isEqualTo("Please provide a chart limit between 1 and 20.");
+    }
+  }
+
+  @Test
+  public void getParticipantChartDataBadLimitOverHundred() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    try {
+      controller
+        .getParticipantChartData(
+          NAMESPACE,
+          NAME,
+          cohort.getCohortId(),
+          99L,
+          PARTICIPANT_ID,
+          DomainType.CONDITION.name(),
+          101);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertThat(bre.getMessage())
+        .isEqualTo("Please provide a chart limit between 1 and 20.");
+    }
   }
 
   private void assertResponse(ParticipantDataListResponse response, PageRequest expectedPageRequest, List<ParticipantData> expectedData, int totalCount) {

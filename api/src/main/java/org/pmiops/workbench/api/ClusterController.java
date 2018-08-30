@@ -1,6 +1,8 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +12,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -80,6 +83,8 @@ public class ClusterController implements ClusterApiDelegate {
   private final FireCloudService fireCloudService;
   private final String apiHostName;
   private UserService userService;
+  private UserRecentResourceService userRecentResourceService;
+  private Clock clock;
 
   @Autowired
   ClusterController(NotebooksService notebooksService,
@@ -87,13 +92,17 @@ public class ClusterController implements ClusterApiDelegate {
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       @Qualifier("apiHostName") String apiHostName,
-      UserService userService) {
+      UserService userService,
+      UserRecentResourceService userRecentResourceService,
+      Clock clock) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
     this.apiHostName = apiHostName;
     this.userService = userService;
+    this.userRecentResourceService = userRecentResourceService;
+    this.clock = clock;
   }
 
   @VisibleForTesting
@@ -173,6 +182,16 @@ public class ClusterController implements ClusterApiDelegate {
     // include the namespace in the directory name to avoid possible conflicts
     // in workspace IDs.
     String gcsNotebooksDir = "gs://" + fcWorkspace.getBucketName() + "/notebooks";
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    long workspaceId = workspaceService
+        .getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
+        .getWorkspaceId();
+
+    body.getNotebookNames().forEach(
+        notebook ->
+            userRecentResourceService.updateNotebookEntry(workspaceId, userProvider.get().getUserId(),
+                gcsNotebooksDir + "/" + notebook, now)
+    );
     String workspacePath = body.getWorkspaceId();
     if (!projectName.equals(body.getWorkspaceNamespace())) {
       workspacePath = body.getWorkspaceNamespace() + ":" + body.getWorkspaceId();

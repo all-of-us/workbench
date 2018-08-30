@@ -2,10 +2,14 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
+import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
@@ -46,6 +50,28 @@ public final class StorageEnums {
 
   public static Short authorityToStorage(Authority authority) {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
+  }
+
+  // RACE, GENDER, and ETHNICITY are explicitly not mapped here as they are not valid domains
+  // for concept sets.
+  private static final BiMap<Domain, Short> CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN =
+      ImmutableBiMap.<Domain, Short>builder()
+      .put(Domain.CONDITION, (short) 0)
+      .put(Domain.DEATH, (short) 1)
+      .put(Domain.DEVICE, (short) 2)
+      .put(Domain.DRUG, (short) 3)
+      .put(Domain.MEASUREMENT, (short) 4)
+      .put(Domain.OBSERVATION, (short) 5)
+      .put(Domain.PROCEDURE, (short) 6)
+      .put(Domain.VISIT, (short) 7)
+      .build();
+
+  public static Domain conceptSetDomainFromStorage(Short domain) {
+    return CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN.inverse().get(domain);
+  }
+
+  public static Short conceptSetDomainToStorage(Domain domain) {
+    return CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN.get(domain);
   }
 
   private static final BiMap<BillingProjectStatus, Short> CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS =
@@ -163,6 +189,53 @@ public final class StorageEnums {
 
   public static Short workspaceAccessLevelToStorage(WorkspaceAccessLevel level) {
     return CLIENT_TO_STORAGE_WORKSPACE_ACCESS.get(level);
+  }
+
+  private static final BiMap<ReviewStatus, Short> CLIENT_TO_STORAGE_REVIEW_STATUS =
+      ImmutableBiMap.<ReviewStatus, Short>builder()
+      .put(ReviewStatus.NONE, (short) 0)
+      .put(ReviewStatus.CREATED, (short) 1)
+      .build();
+
+  public static ReviewStatus reviewStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_REVIEW_STATUS.inverse().get(s);
+  }
+
+  public static Short reviewStatusToStorage(ReviewStatus s) {
+    return CLIENT_TO_STORAGE_REVIEW_STATUS.get(s);
+  }
+
+  private static final BiMap<CohortStatus, Short> CLIENT_TO_STORAGE_COHORT_STATUS =
+      ImmutableBiMap.<CohortStatus, Short>builder()
+      .put(CohortStatus.EXCLUDED, (short) 0)
+      .put(CohortStatus.INCLUDED, (short) 1)
+      .put(CohortStatus.NEEDS_FURTHER_REVIEW, (short) 2)
+      .put(CohortStatus.NOT_REVIEWED, (short) 3)
+      .build();
+
+  public static CohortStatus cohortStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_COHORT_STATUS.inverse().get(s);
+  }
+
+  public static Short cohortStatusToStorage(CohortStatus s) {
+    return CLIENT_TO_STORAGE_COHORT_STATUS.get(s);
+  }
+
+  private static final BiMap<AnnotationType, Short> CLIENT_TO_STORAGE_ANNOTATION_TYPE =
+      ImmutableBiMap.<AnnotationType, Short>builder()
+      .put(AnnotationType.STRING, (short) 0)
+      .put(AnnotationType.ENUM, (short) 1)
+      .put(AnnotationType.DATE, (short) 2)
+      .put(AnnotationType.BOOLEAN, (short) 3)
+      .put(AnnotationType.INTEGER, (short) 4)
+      .build();
+
+  public static AnnotationType annotationTypeFromStorage(Short t) {
+    return CLIENT_TO_STORAGE_ANNOTATION_TYPE.inverse().get(t);
+  }
+
+  public static Short annotationTypeToStorage(AnnotationType t) {
+    return CLIENT_TO_STORAGE_ANNOTATION_TYPE.get(t);
   }
 
   /** Utility class. */

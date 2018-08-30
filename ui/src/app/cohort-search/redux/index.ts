@@ -33,6 +33,8 @@ export class ConfigureStore {
           epics.fetchDrugCriteria,
           epics.fetchAutocompleteOptions,
           epics.fetchIngredientsForBrand,
+          epics.fetchAllChildren,
+          epics.fetchAttributes,
           epics.fetchCount,
           epics.fetchChartData,
           epics.previewCount,

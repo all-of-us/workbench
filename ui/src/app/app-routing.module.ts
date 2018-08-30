@@ -6,7 +6,7 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {CohortEditComponent} from './views/cohort-edit/component';
+import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
@@ -135,17 +135,6 @@ const routes: Routes = [
                   loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
                   data: {
                     title: 'Cohort',
-                    breadcrumb: 'Param: Cohort Name'
-                  },
-                  resolve: {
-                    cohort: CohortResolver,
-                  }
-                },
-                {
-                  path: ':cid/edit',
-                  component: CohortEditComponent,
-                  data: {
-                    title: 'Edit Cohort',
                     breadcrumb: 'Param: Cohort Name'
                   },
                   resolve: {

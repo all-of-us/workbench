@@ -156,6 +156,35 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortStatus"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/charts/{domain}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/participantId'
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will return a ParticipantCohortStatus
+      operationId: "getParticipantChartData"
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: specifies which domain the chart data should belong to.
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: the limit search results to
+      responses:
+        200:
+          description: The Participant Chart data
+          schema:
+            $ref: "#/definitions/ParticipantChartDataListResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -240,35 +269,6 @@ paths:
           description: A collection of ParticipantConditions.
           schema:
             $ref: "#/definitions/ParticipantDataListResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/detail/{dataId}/{domain}:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortReview
-      description: Returns detailed domain data for the specified params for a participant.
-      operationId: "getDetailParticipantData"
-      parameters:
-        - in: path
-          name: dataId
-          type: integer
-          format: int64
-          required: true
-          description: specifies which domain the details belong to.
-        - in: path
-          name: domain
-          type: string
-          required: true
-          description: specifies which domain the details belong to.
-      responses:
-        200:
-          description: A detail for the specified participant and domain
-          schema:
-            $ref: "#/definitions/ParticipantData"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
@@ -575,6 +575,16 @@ definitions:
       status:
         $ref: "#/definitions/CohortStatus"
 
+  ParticipantChartDataListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ParticipantChartData"
+
   CohortSummaryListResponse:
     type: object
     required:
@@ -718,6 +728,31 @@ definitions:
         type: integer
         format: int64
         description: the count for this criteria type in the cohort
+
+  ParticipantChartData:
+    type: object
+    required:
+      - standardName
+      - standardVocabulary
+      - startDate
+      - ageAtEvent
+      - rank
+    properties:
+      standardName:
+        type: string
+        description: the standard name
+      standardVocabulary:
+        type: string
+        description: the standard vocabulary
+      startDate:
+        type: string
+        description: the date of the event
+      ageAtEvent:
+        type: integer
+        description: The age at event for the participant
+      rank:
+        type: integer
+        description: the rank of the data
 
   ParticipantData:
     discriminator: domainType

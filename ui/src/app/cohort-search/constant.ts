@@ -1,7 +1,8 @@
-import { DomainType } from 'generated';
+import { DomainType, Operator } from 'generated';
 
 export const CRITERIA_TYPES = {
   'PM': 'PM',
+  'MEAS': 'MEAS',
   'ICD9': 'ICD9',
   'ICD10': 'ICD10',
   'CPT': 'CPT',
@@ -30,8 +31,8 @@ export const DOMAIN_TYPES = [
     { name: 'Demographics', type: CRITERIA_TYPES.DEMO },
     { name: 'Conditions',    type: DomainType.CONDITION, disabled: true },
     { name: 'Procedures',    type: DomainType.PROCEDURE, disabled: true },
-    { name: 'Drugs',    type: DomainType.DRUG, fullTree: true },
-    { name: 'Measurements',    type: DomainType.MEASUREMENT, disabled: true },
+    { name: 'Drugs',    type: DomainType.DRUG },
+    { name: 'Measurements',    type: CRITERIA_TYPES.MEAS },
     { name: 'Visits',    type: DomainType.VISIT, fullTree: true },
     { name: 'ICD9 Codes',   type: CRITERIA_TYPES.ICD9 },
     { name: 'ICD10 Codes',  type: CRITERIA_TYPES.ICD10 },
@@ -53,3 +54,79 @@ export const PM_UNITS = {
     'HR-DETAIL': 'beats/min'
 };
 
+export const PREDEFINED_ATTRIBUTES = {
+  'Hypotensive': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: ['90'],
+      operator: Operator.LESSTHANOREQUALTO
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: ['60'],
+      operator: Operator.LESSTHANOREQUALTO
+    }
+  ],
+  'Normal': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: ['120'],
+      operator: Operator.LESSTHANOREQUALTO
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: ['80'],
+      operator: Operator.LESSTHANOREQUALTO
+    }
+  ],
+  'Pre-Hypertensive': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: ['121', '139'],
+      operator: Operator.BETWEEN
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: ['81', '89'],
+      operator: Operator.BETWEEN
+    }
+  ],
+  'Hypertensive': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: ['140'],
+      operator: Operator.GREATERTHANOREQUALTO
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: ['90'],
+      operator: Operator.GREATERTHANOREQUALTO
+    }
+  ],
+  'BP_DETAIL': [
+    {
+      conceptId: 903118,
+      name: 'Systolic',
+      operands: [null],
+      operator: null,
+      MIN: 0,
+      MAX: 1000
+    },
+    {
+      conceptId: 903115,
+      name: 'Diastolic',
+      operands: [null],
+      operator: null,
+      MIN: 0,
+      MAX: 1000
+    }
+  ],
+};

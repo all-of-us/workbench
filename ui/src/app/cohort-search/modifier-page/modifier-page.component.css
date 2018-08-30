@@ -32,8 +32,6 @@
 .modifier-event-header {
     color: #262262;
     font-weight: 500;
-    padding-bottom: 0.1rem;
-    padding-top: 1.4rem;
 }
 .modifier-event-indicator {
     border-radius:0.15rem;
@@ -55,7 +53,7 @@
 
 .count-preview  .disable-link {
     pointer-events: none;
-    opavity: 0.3;
+    opacity: 0.3;
 }
 .count-preview  .add-button {
     border-color:transparent;
@@ -77,8 +75,6 @@
     color: #262262;
     font-size: 14px;
     font-weight: 500;
-    /*line-height: 17px;*/
-
 }
 
 .modifier-calender {
@@ -86,6 +82,7 @@
     border : 1px solid #C3C3C3;
     height: 1.4rem;
     text-align: center;
+    width: 6rem;
 }
 .modifier-calender .datepicker-trigger .datepicker-trigger-icon {
    height: 30px;
@@ -107,7 +104,34 @@
 
 .modifier-container .and-text {
     padding-left: 1rem;
-    padding-right: 1.5rem;
+    padding-right: 1rem;
     padding-top: 0.2rem;
 }
 
+.date-container {
+    width: 8rem !important;
+}
+
+.label-flex {
+    display: flex;
+    padding-top: 1.4rem;
+    padding-bottom: 0.1rem;
+}
+
+.label-flex .label-info {
+    color: #0077b7;
+    margin-left: 0.4rem;
+    width: 1rem;
+    height: 0.7rem;
+
+}
+
+.greyed-button {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.3;
+    background-color: #c3c3c3;
+    border-radius: 0.125rem;
+    border: transparent;
+    color: white;
+}

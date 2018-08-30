@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,13 @@ public class CohortService {
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Transactional
-  public Cohort saveAndCloneReviews(Cohort from, Cohort to) {
+  public Cohort cloneCohortAndReviews(Cohort from, Workspace targetWorkspace) {
+    Cohort to = new Cohort(from);
+    to.setWorkspaceId(targetWorkspace.getWorkspaceId());
+    to.setCreator(targetWorkspace.getCreator());
+    to.setLastModifiedTime(targetWorkspace.getLastModifiedTime());
+    to.setCreationTime(targetWorkspace.getCreationTime());
+    to.setVersion(1);
     Cohort saved = cohortDao.save(to);
     cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationDefinitionByCohort(
             from.getCohortId(), to.getCohortId());
@@ -34,7 +41,7 @@ public class CohortService {
       cr.setMatchedParticipantCount(fromReview.getMatchedParticipantCount());
       cr.setReviewSize(fromReview.getReviewSize());
       cr.setReviewedCount(fromReview.getReviewedCount());
-      cr.setReviewStatus(fromReview.getReviewStatus());
+      cr.setReviewStatusEnum(fromReview.getReviewStatusEnum());
       cr = cohortReviewDao.save(cr);
       participantCohortStatusDao.bulkCopyByCohortReview(
         fromReview.getCohortReviewId(), cr.getCohortReviewId());

@@ -19,15 +19,21 @@ import {
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
+  LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
-  BEGIN_DRUG_AUTOCOMPLETE_REQUEST,
+  BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
+  BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
+  LOAD_CHILDREN_LIST,
+  LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
+  ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
@@ -101,13 +107,19 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['criteria', 'tree', action.kind, action.subtype], action.results)
           .deleteIn(['criteria', 'requests', action.kind, action.subtype]);
 
+      case LOAD_CRITERIA_SUBTREE:
+        return state
+          .setIn(['criteria', 'subtree', action.kind], fromJS(action.path))
+          .setIn(['criteria', 'subtree', 'selected'], action.ids)
+          .deleteIn(['criteria', 'requests', action.kind]);
+
       case CANCEL_CRITERIA_REQUEST:
         return state.deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
       case SET_CRITERIA_SEARCH:
         return state.setIn(['criteria', 'search', 'terms'], action.searchTerms);
 
-      case BEGIN_DRUG_AUTOCOMPLETE_REQUEST:
+      case BEGIN_AUTOCOMPLETE_REQUEST:
         return state
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
@@ -131,10 +143,42 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['criteria', 'search', 'ingredients'], action.ingredients)
           .deleteIn(['criteria', 'search', 'autocomplete']);
 
+      case LOAD_CHILDREN_LIST:
+        action.children.forEach(child => {
+          child.parameterId = `param${(child.conceptId ? child.conceptId : child.id)}`;
+          const path = child.path.split('.');
+          const parents = path.slice(path.indexOf(action.parentId.toString()));
+          state = state
+            .setIn(['wizard', 'selections', child.parameterId], fromJS(child))
+            .updateIn(['wizard', 'item', 'selectedParents'],
+              List(),
+              parentIdList => parentIdList.merge(fromJS(parents)))
+            .updateIn(
+              ['wizard', 'item', 'searchParameters'],
+              List(),
+              paramList => paramList.includes(child.parameterId)
+                ? paramList
+                : paramList.push(child.parameterId));
+        });
+        return state;
+
+      case LOAD_ATTRIBUTE_LIST:
+        const node = action.node.set('attributes', action.attributes);
+        return state
+          .setIn(['wizard', 'item', 'attributes', 'node'], node)
+          .deleteIn(['wizard', 'item', 'attributes', 'loading']);
+
       case AUTOCOMPLETE_REQUEST_ERROR:
         return state
           .deleteIn(['criteria', 'search', 'autocomplete'])
           .setIn(['criteria', 'search', 'errors'], fromJS({error: action.error}));
+
+      case ATTRIBUTE_REQUEST_ERROR:
+        return state
+          .deleteIn(['wizard', 'item', 'attributes', 'loading'])
+          .setIn(
+            ['wizard', 'item', 'attributes', 'errors'], fromJS({error: action.error})
+          );
 
       case CRITERIA_REQUEST_ERROR:
         return state
@@ -143,6 +187,9 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['criteria', 'errors', List([action.kind, action.parentId])],
             fromJS({error: action.error})
           );
+
+      case SET_SCROLL_ID:
+        return state.setIn(['criteria', 'tree', 'scroll'], action.nodeId);
 
       case BEGIN_PREVIEW_REQUEST:
         return state
@@ -251,6 +298,11 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['wizard', 'item', 'searchParameters'],
             List(),
             paramList => paramList.filterNot(id => id === action.parameterId)
+          )
+          .updateIn(
+            ['wizard', 'item', 'selectedParents'],
+            List(),
+            parentIdList => parentIdList.filterNot(id => action.path.split('.').includes(id))
           );
 
       case ADD_MODIFIER:
@@ -279,11 +331,12 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case SHOW_ATTRIBUTES_PAGE:
         return state
-          .setIn(['wizard', 'item', 'attributes'], action.node)
-          .deleteIn(['wizard', 'calculate', 'count']);
+          .setIn(['wizard', 'item', 'attributes', 'loading'], true);
 
       case HIDE_ATTRIBUTES_PAGE:
-        return state.setIn(['wizard', 'item', 'attributes'], Map());
+        return state
+          .setIn(['wizard', 'item', 'attributes', 'node'], Map())
+          .deleteIn(['wizard', 'calculate', 'count']);
 
         case REMOVE_ITEM: {
         state = state
@@ -372,9 +425,8 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['entities', 'items', itemId], item)
           .updateIn(['entities', 'parameters'], Map(), mergeParams)
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'search', 'terms'])
-          .deleteIn(['criteria', 'search', 'options'])
-          .deleteIn(['criteria', 'search', 'ingredients']);
+          .deleteIn(['criteria', 'subtree'])
+          .deleteIn(['criteria', 'search']);
       }
 
       case WIZARD_CANCEL: {
@@ -391,9 +443,8 @@ export const rootReducer: Reducer<CohortSearchState> =
         }
         return state
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'search', 'terms'])
-          .deleteIn(['criteria', 'search', 'options'])
-          .deleteIn(['criteria', 'search', 'ingredients']);
+          .deleteIn(['criteria', 'subtree'])
+          .deleteIn(['criteria', 'search']);
       }
 
       case SET_WIZARD_CONTEXT:

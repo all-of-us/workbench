@@ -2,18 +2,24 @@
   position: absolute;
   top: 1px;
   right: 0px;
-  border: 1px solid rgb(86, 86, 86);
+  /*border: 1px solid rgb(86, 86, 86);*/
   border-radius: 2px;
   height: 100%;
   z-index: 1;
-  background-color: rgb(250, 250, 250);
+  background-color: #E2E2EA;
   display: flex;
   margin-right: -0.6rem;
+
 }
 
 .sidebar-handle {
-  min-width: 24px;
-  background-color: rgb(230, 230, 230);
+  /*min-width: 24px;*/
+  background-color: #728FA3;
+  padding:0.6rem;
+  position: absolute;
+  margin-left: -2rem;
+  border-radius: 0.2rem;
+  top: 3rem;
 }
 
 .detail-page {
@@ -31,9 +37,26 @@
   transition: 0.5s;
   overflow-x: hidden;
   flex: 1;
+  padding-top:0.35rem;
 }
 
 .sidebar-content.sidebar-open {
+  /*margin-left: 0.25rem;*/
+  width: 413px;
+  border-left: 1rem solid #728FA3;
+  padding-left: 0.5rem;
+}
+
+.sidebar-handle.sidebar-open {
   margin-left: 0.25rem;
-  width: 300px;
+  width: 359px;
+}
+/*.detail-sidebar::before {*/
+  /*content: "\00BB";*/
+  /*background-color: yellow;*/
+  /*color: red;*/
+  /*font-weight: bold;*/
+/*}*/
+.angle-icon {
+  color: white;
 }

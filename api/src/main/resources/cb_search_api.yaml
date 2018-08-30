@@ -65,6 +65,63 @@ paths:
           schema:
             $ref: "#/definitions/CriteriaListResponse"
 
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/children/{parentId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns builder criteria tree with the specified criteria type and parentId
+      operationId: "getCriteriaChildrenByTypeAndParentId"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: parentId
+          type: integer
+          format: int64
+          required: true
+          description: fetch children of parentId
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{subtype}/{parentId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: Returns builder criteria tree with the specified criteria type and parentId
+      operationId: "getCriteriaByTypeAndSubtypeAndParentId"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: subtype
+          type: string
+          required: true
+          description: the specific subtype of criteria to get
+        - in: path
+          name: parentId
+          type: integer
+          format: int64
+          required: true
+          description: fetch children of parentId
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            $ref: "#/definitions/CriteriaListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -104,27 +161,6 @@ paths:
           type: string
           required: true
           description: the value to search for
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            $ref: "#/definitions/CriteriaListResponse"
-
-  /v1/cohortbuilder/{cdrVersionId}/criteria/subtree/{id}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: Returns subtree for the specified id.
-      operationId: "getCriteriaById"
-      parameters:
-        - in: path
-          name: id
-          type: integer
-          format: int64
-          required: true
-          description: the id of the subtree to find
       responses:
         200:
           description: A collection of criteria
@@ -326,7 +362,6 @@ definitions:
       - group
       - selectable
       - hasAttribute
-      - predefinedAttributes
     properties:
       id:
         description: id of the criteria
@@ -377,10 +412,9 @@ definitions:
       hasAttributes:
         description: specifies if extra attributes are needed
         type: boolean
-      predefinedAttributes:
-        type: array
-        items:
-          $ref: "#/definitions/Attribute"
+      path:
+        description: full path from parent to this node with ids
+        type: string
 
   CriteriaAttributeListResponse:
     type: object
@@ -572,7 +606,6 @@ definitions:
   Attribute:
     type: object
     required:
-      - operator
       - operands
     properties:
       name:
@@ -623,7 +656,7 @@ definitions:
   ModifierType:
     type: string
     description: possible types of modifiers
-    enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE]
+    enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE, ENCOUNTERS]
 
   ChartInfoListResponse:
     type: object

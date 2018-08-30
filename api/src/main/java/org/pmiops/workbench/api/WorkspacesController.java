@@ -22,6 +22,7 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -41,6 +42,7 @@ import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -65,9 +67,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
   // If we later decide to tune this value, consider moving to the WorkbenchConfig.
   private static final int MAX_NOTEBOOK_SIZE_MB = 100;
-  private static final Pattern NOTEBOOK_PATTERN = Pattern.compile("(.+(\\.(?i)(ipynb))$)");
   // "directory" for notebooks, within the workspace cloud storage bucket.
   private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks";
+  private static final Pattern NOTEBOOK_PATTERN =
+      Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
@@ -78,6 +81,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final UserService userService;
+  private final UserRecentResourceService userRecentResourceService;
 
   @Autowired
   WorkspacesController(
@@ -89,7 +93,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
-      UserService userService) {
+      UserService userService,
+      UserRecentResourceService userRecentResourceService) {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
@@ -99,8 +104,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.cloudStorageService = cloudStorageService;
     this.clock = clock;
     this.userService = userService;
+    this.userRecentResourceService = userRecentResourceService;
   }
 
+  @VisibleForTesting
+  public void setUserProvider(Provider<User> userProvider) {
+    this.userProvider = userProvider;
+  }
   // This does not populate the list of underserved research groups.
   private static final Workspace constructListWorkspaceFromDb(org.pmiops.workbench.db.model.Workspace workspace,
       ResearchPurpose researchPurpose) {
@@ -234,15 +244,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
           UserRole result = new UserRole();
           result.setEmail(workspaceUserRole.getUser().getEmail());
+          result.setGivenName(workspaceUserRole.getUser().getGivenName());
+          result.setFamilyName(workspaceUserRole.getUser().getFamilyName());
           result.setRole(workspaceUserRole.getRoleEnum());
           return result;
         }
       };
-
-  @VisibleForTesting
-  void setUserProvider(Provider<User> userProvider) {
-    this.userProvider = userProvider;
-  }
 
   private static String generateRandomChars(String candidateChars, int length) {
     StringBuilder sb = new StringBuilder();
@@ -655,7 +662,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.addWorkspaceUserRole(permissions);
 
-    dbWorkspace = workspaceService.saveAndCloneCohorts(fromWorkspace, dbWorkspace);
+    dbWorkspace = workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
     CloneWorkspaceResponse resp = new CloneWorkspaceResponse();
     resp.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, toFcWorkspace));
     return ResponseEntity.ok(resp);
@@ -698,6 +705,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         .stream()
         .map(r -> new UserRole()
             .email(r.getUser().getEmail())
+            .givenName(r.getUser().getGivenName())
+            .familyName(r.getUser().getFamilyName())
             .role(r.getRoleEnum()))
         // Reverse sorting arranges the role list in a logical order - owners first, then by email.
         .sorted(Comparator.comparing(UserRole::getRole).thenComparing(UserRole::getEmail).reversed())
@@ -735,6 +744,73 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(workspaces.stream().map(TO_CLIENT_WORKSPACE).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<FileDetail> renameNotebook(String workspace, String workspaceName, NotebookRename rename) {
+    String newName = rename.getNewName();
+    if (!newName.matches("^.+\\.ipynb")) {
+      newName = newName + ".ipynb";
+    }
+    FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, rename.getName(), newName);
+    notebookDeleteOperation(workspace, workspaceName, rename.getName());
+    return ResponseEntity.ok(fileDetail);
+  }
+
+  @Override
+  public ResponseEntity<FileDetail> cloneNotebook(String workspace, String workspaceName, String notebookName) {
+    String newName = notebookName.replaceAll("\\.ipynb", " ") + "Clone.ipynb";
+    FileDetail fileDetail = notebookCloneOperation(workspace, workspaceName, notebookName, newName);
+    return ResponseEntity.ok(fileDetail);
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> deleteNotebook(String workspace, String workspaceName, String notebookName) {
+    notebookDeleteOperation(workspace, workspaceName, notebookName);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private FileDetail notebookCloneOperation(String workspace, String workspaceName, String notebookName, String newName) {
+    NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, newName);
+    FileDetail fileDetail = new FileDetail();
+    cloudStorageService.copyBlob(opDto.blobId, opDto.newBlobId);
+    fileDetail.setName(newName);
+    fileDetail.setPath(opDto.fullPath);
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    fileDetail.setLastModifiedTime(now.getTime());
+    userRecentResourceService.updateNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath, now);
+    return fileDetail;
+ }
+
+  private void notebookDeleteOperation(String workspace, String workspaceName, String notebookName) {
+    NotebookOpSetup opDto = new NotebookOpSetup(workspace, workspaceName, notebookName, "");
+    cloudStorageService.deleteBlob(opDto.blobId);
+    userRecentResourceService.deleteNotebookEntry(opDto.workspaceId, opDto.userId, opDto.fullPath);
+  }
+
+  private class NotebookOpSetup {
+    private BlobId blobId;
+    private BlobId newBlobId;
+    private String fullPath;
+    private long userId;
+    private long workspaceId;
+
+    public NotebookOpSetup(String workspace, String workspaceName, String notebookName, String newName) {
+      String bucket = fireCloudService.getWorkspace(workspace, workspaceName)
+        .getWorkspace()
+        .getBucketName();
+      String origBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;
+      String newBlobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + newName;
+      String pathStart = "gs://" + bucket + "/";
+      String origPath = pathStart + origBlobPath;
+      String newPath = pathStart + newBlobPath;
+      String fullPath = (newName.isEmpty()) ? origPath : newPath;
+      this.blobId = BlobId.of(bucket, origBlobPath);
+      this.newBlobId = BlobId.of(bucket, newBlobPath);
+      this.fullPath = fullPath;
+      this.userId = userProvider.get().getUserId();
+      this.workspaceId = workspaceService.getRequired(workspace, workspaceName).getWorkspaceId();
+    }
   }
 
   /**

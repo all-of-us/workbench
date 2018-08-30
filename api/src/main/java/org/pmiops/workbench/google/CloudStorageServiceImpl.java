@@ -117,4 +117,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   public JSONObject getJiraCredentials() {
     return new JSONObject(readToString(getCredentialsBucketName(), "jira-login.json"));
   }
+
+  @Override
+  public void deleteBlob(BlobId blobId) {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    storage.delete(blobId);
+  }
 }

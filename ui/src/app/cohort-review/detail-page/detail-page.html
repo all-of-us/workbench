@@ -7,12 +7,17 @@
   <app-detail-tabs>
   </app-detail-tabs>
 </div>
-
+<!--<div class="sidebar-handle" (click)="toggleSidebar()">-->
+  <!--<clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>-->
+<!--</div>-->
 <div class="detail-sidebar">
-  <!-- Sidebar left column (always visible) -->
   <div class="sidebar-handle" (click)="toggleSidebar()">
-    <clr-icon shape="angle-double" [dir]="angleDir" size="24"></clr-icon>
+    <clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>
   </div>
+  <!-- Sidebar left column (always visible) -->
+  <!--<div class="sidebar-handle" (click)="toggleSidebar()">-->
+    <!--<clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>-->
+  <!--</div>-->
   <!-- Sidebar content -->
   <div class="sidebar-content" [class.sidebar-open]="sidebarOpen">
     <app-sidebar-content [participant]="participant">

@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -22,7 +23,10 @@ import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
@@ -94,6 +98,9 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   private CohortReviewDao cohortReviewDao;
 
   @Autowired
+  private ConceptDao conceptDao;
+
+  @Autowired
   private ParticipantCohortStatusDao participantCohortStatusDao;
 
   private ParticipantCohortStatus makeStatus(long cohortReviewId, long participantId, CohortStatus status) {
@@ -101,7 +108,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     key.setCohortReviewId(cohortReviewId);
     key.setParticipantId(participantId);
     ParticipantCohortStatus result = new ParticipantCohortStatus();
-    result.setStatus(status);
+    result.setStatusEnum(status);
     result.setParticipantKey(key);
     return result;
   }
@@ -135,7 +142,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
+    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     Cohort cohort = new Cohort();
@@ -187,10 +194,24 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     return request;
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testMaterializeCohortBadSpec() {
+    cohortMaterializationService.materializeCohort(null,
+        "badSpec", null, makeRequest(1000));
+  }
+
+  @Test
+  public void testMaterializeCohortOneMaleSpec() {
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        new Gson().toJson(SearchRequests.males()), null, makeRequest(1000));
+    assertPersonIds(response, 1L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
   @Test
   public void testMaterializeCohortOneMale() {
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(1000));
+        SearchRequests.males(), null, 0, makeRequest(1000));
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -198,7 +219,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   @Test
   public void testMaterializeCohortICD9Group() {
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-            SearchRequests.icd9Codes(), makeRequest(1000));
+            SearchRequests.icd9Codes(), null, 0, makeRequest(1000));
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -206,7 +227,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   @Test
   public void testMaterializeCohortWithReviewNullStatusFilter() {
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), makeRequest(2));
+        SearchRequests.allGenders(), null, 0, makeRequest(2));
     // With a null status filter, everyone but excluded participants are returned.
     assertPersonIds(response, 1L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
@@ -218,7 +239,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     request.setStatusFilter(ImmutableList
             .of(CohortStatus.NOT_REVIEWED, CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     // With a not excluded status filter, ID 2 is not returned.
     assertPersonIds(response, 1L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
@@ -229,7 +250,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortRequest request = makeRequest(2);
     request.setStatusFilter(ImmutableList.of(CohortStatus.EXCLUDED));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -239,7 +260,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortRequest request = makeRequest(2);
     request.setStatusFilter(ImmutableList.of(CohortStatus.INCLUDED));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -249,7 +270,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortRequest request = makeRequest(2);
     request.setStatusFilter(ImmutableList.of(CohortStatus.EXCLUDED, CohortStatus.INCLUDED));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -259,7 +280,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortRequest request = makeRequest(2);
     request.setStatusFilter(ImmutableList.of(CohortStatus.NOT_REVIEWED));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -269,7 +290,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortRequest request = makeRequest(2);
     request.setStatusFilter(ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.NOT_REVIEWED));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 1L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -279,7 +300,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortRequest request = makeRequest(2);
     request.setStatusFilter(ImmutableList.of(CohortStatus.NEEDS_FURTHER_REVIEW, CohortStatus.NOT_REVIEWED));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -289,7 +310,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortRequest request = makeRequest(2);
     request.setStatusFilter(ImmutableList.of(CohortStatus.EXCLUDED, CohortStatus.NOT_REVIEWED));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 2L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -300,12 +321,12 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     request.setStatusFilter(ImmutableList.of(CohortStatus.EXCLUDED, CohortStatus.NOT_REVIEWED,
         CohortStatus.INCLUDED, CohortStatus.NEEDS_FURTHER_REVIEW));
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNotNull();
     request.setPageToken(response.getNextPageToken());
     MaterializeCohortResponse response2 = cohortMaterializationService.materializeCohort(cohortReview,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response2, 102246L);
     assertThat(response2.getNextPageToken()).isNull();
   }
@@ -314,19 +335,19 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   public void testMaterializeCohortPaging() {
     MaterializeCohortRequest request = makeRequest(2);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNotNull();
     request.setPageToken(response.getNextPageToken());
     MaterializeCohortResponse response2 = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), request);
+        SearchRequests.allGenders(), null, 0, request);
     assertPersonIds(response2, 102246L);
     assertThat(response2.getNextPageToken()).isNull();
 
     try {
       // Pagination token doesn't match, this should fail.
       cohortMaterializationService.materializeCohort(null, SearchRequests.males(),
-          request);
+          null, 1, request);
       fail("Exception expected");
     } catch (BadRequestException e) {
       // expected
@@ -336,9 +357,9 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     PaginationToken invalidToken = new PaginationToken(-1L, token.getParameterHash());
     request.setPageToken(invalidToken.toBase64());
     try {
-      // Pagination token doesn't match, this should fail.
+      // Invalid offset, this should fail.
       cohortMaterializationService.materializeCohort(null, SearchRequests.males(),
-          request);
+          null, 0, request);
       fail("Exception expected");
     } catch (BadRequestException e) {
       // expected
@@ -353,7 +374,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -370,7 +391,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -389,7 +410,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 2L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -407,7 +428,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -425,7 +446,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 2L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -443,7 +464,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -461,7 +482,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -479,7 +500,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -497,7 +518,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -514,7 +535,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -531,7 +552,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -549,7 +570,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -567,7 +588,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -585,7 +606,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -603,7 +624,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -621,7 +642,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -635,7 +656,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L,
         "gender_concept_id", 8507L);
     ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L,
@@ -655,7 +676,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L,
         "gender_concept_id", 8507L);
     ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L,
@@ -679,7 +700,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -697,7 +718,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -715,7 +736,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -732,7 +753,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -752,7 +773,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -772,7 +793,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -800,7 +821,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -812,7 +833,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
        .put("person_id", 1L)
        .put("gender_source_value", "1")
@@ -843,7 +864,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
         .put("observation_id", 5L)
         .put("person_id", 1L)
@@ -874,7 +895,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.females(), makeRequest(fieldSet, 1000));
+        SearchRequests.females(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -891,7 +912,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -908,7 +929,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -926,7 +947,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -944,7 +965,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -962,7 +983,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -980,7 +1001,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -997,7 +1018,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -1014,7 +1035,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -1032,7 +1053,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -1050,7 +1071,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -1068,7 +1089,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -1086,7 +1107,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.males(), makeRequest(fieldSet, 1000));
+        SearchRequests.males(), null, 0, makeRequest(fieldSet, 1000));
     assertResults(response, ImmutableMap.of("observation_id", 5L));
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -1110,7 +1131,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
         .put("person_id", 1L)
         .put("gender_concept.concept_name", "MALE")
@@ -1151,7 +1172,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
         .put("person_id", 1L)
         .put("gender_concept.concept_name", "MALE")
@@ -1192,7 +1213,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
         .put("person_id", 1L)
         .put("gender_concept.concept_name", "MALE")
@@ -1231,7 +1252,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
         .put("person_id", 1L)
         .put("gender_concept.concept_name", "MALE")
@@ -1270,7 +1291,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.<String, Object>builder()
         .put("person_id", 1L)
         .put("gender_concept.concept_name", "MALE")
@@ -1303,7 +1324,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 102246L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -1317,7 +1338,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     FieldSet fieldSet = new FieldSet();
     fieldSet.setTableQuery(tableQuery);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
-        SearchRequests.allGenders(), makeRequest(fieldSet, 1000));
+        SearchRequests.allGenders(), null, 0, makeRequest(fieldSet, 1000));
     assertPersonIds(response, 102246L, 1L, 2L);
     assertThat(response.getNextPageToken()).isNull();
   }
@@ -1328,7 +1349,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     fieldSet.setAnnotationQuery(new AnnotationQuery());
     MaterializeCohortResponse response =
         cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(),
-            makeRequest(fieldSet, 1000));
+            null, 0, makeRequest(fieldSet, 1000));
     ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
     assertResults(response, p1Map);
     assertThat(response.getNextPageToken()).isNull();
@@ -1341,16 +1362,150 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     MaterializeCohortRequest request = makeRequest(fieldSet, 1);
     request.setStatusFilter(ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED));
     MaterializeCohortResponse response =
-        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), request);
+        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), null, 0, request);
     ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
     assertResults(response, p1Map);
     assertThat(response.getNextPageToken()).isNotNull();
 
     request.setPageToken(response.getNextPageToken());
     MaterializeCohortResponse response2 =
-        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), request);
+        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), null, 0, request);
     ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
     assertResults(response2, p2Map);
+    assertThat(response2.getNextPageToken()).isNull();
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testMaterializeCohortConceptSetNoConcepts() {
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("person_id", "condition_concept_id", "condition_source_concept_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(123456L), 0, makeRequest(fieldSet, 1000));
+  }
+
+  @Test
+  public void testMaterializeCohortConceptSetNoMatchingConcepts() {
+    Concept concept = new Concept();
+    concept.setConceptId(2L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("person_id", "condition_concept_id", "condition_source_concept_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(2L), 0, makeRequest(fieldSet, 1000));
+    assertResults(response);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortConceptSetOneStandardConcept() {
+    Concept concept = new Concept();
+    concept.setConceptId(192819L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(192819L), 0, makeRequest(fieldSet, 1000));
+    assertConditionOccurrenceIds(response, 12751439L, 12751440L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortConceptSetOneStandardConceptMismatch() {
+    Concept concept = new Concept();
+    concept.setConceptId(44829697L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(44829697L), 0, makeRequest(fieldSet, 1000));
+    assertResults(response);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortConceptSetOneSourceConcept() {
+    Concept concept = new Concept();
+    concept.setConceptId(44829697L);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(44829697L), 0, makeRequest(fieldSet, 1000));
+    assertConditionOccurrenceIds(response, 12751439L, 12751440L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortConceptSetOneSourceConceptMismatch() {
+    Concept concept = new Concept();
+    concept.setConceptId(192819L);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(192819L), 0, makeRequest(fieldSet, 1000));
+    assertResults(response);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
+  public void testMaterializeCohortConceptSetLotsOfConceptsPaging() {
+    Concept concept = new Concept();
+    concept.setConceptId(1L);
+    conceptDao.save(concept);
+    concept = new Concept();
+    concept.setConceptId(6L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    concept = new Concept();
+    concept.setConceptId(7L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    concept = new Concept();
+    concept.setConceptId(192819L);
+    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
+    conceptDao.save(concept);
+    concept = new Concept();
+    concept.setConceptId(44829697L);
+    conceptDao.save(concept);
+    TableQuery tableQuery = new TableQuery();
+    tableQuery.setTableName("condition_occurrence");
+    tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
+    tableQuery.setOrderBy(ImmutableList.of("condition_occurrence_id"));
+    FieldSet fieldSet = new FieldSet();
+    fieldSet.setTableQuery(tableQuery);
+    MaterializeCohortRequest request = makeRequest(fieldSet, 4);
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(1L, 6L, 7L, 192819L, 44829697L, 12345L),
+        0, request);
+    assertConditionOccurrenceIds(response, 1L, 6L, 7L, 12751439L);
+    assertThat(response.getNextPageToken()).isNotNull();
+    request.setPageToken(response.getNextPageToken());
+    MaterializeCohortResponse response2 = cohortMaterializationService.materializeCohort(null,
+        SearchRequests.allGenders(), ImmutableSet.of(1L, 6L, 7L, 192819L, 44829697L, 12345L),
+        0, request);
+    assertConditionOccurrenceIds(response2, 12751440L);
     assertThat(response2.getNextPageToken()).isNull();
   }
 
@@ -1397,6 +1552,15 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     List<Object> expectedResults = new ArrayList<>();
     for (long personId : personIds) {
       expectedResults.add(ImmutableMap.of(CohortMaterializationService.PERSON_ID, personId));
+    }
+    assertThat(response.getResults()).isEqualTo(expectedResults);
+  }
+
+  private void assertConditionOccurrenceIds(MaterializeCohortResponse response,
+      long... conditionOccurrenceIds) {
+    List<Object> expectedResults = new ArrayList<>();
+    for (long conditionOccurrenceId : conditionOccurrenceIds) {
+      expectedResults.add(ImmutableMap.of("condition_occurrence_id", conditionOccurrenceId));
     }
     assertThat(response.getResults()).isEqualTo(expectedResults);
   }

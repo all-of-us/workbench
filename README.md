@@ -236,7 +236,8 @@ database with a 10 minute expiration.
 
 Loading of local tables/data for both schemas (workbench/cdr) happens in a manual goal(creates tables in both schemas and insert any app data needed for local development):
 
-```./project.rb run-local-all-migrations
+```
+./project.rb run-local-all-migrations
 ```
 
 Local tables loaded with data are:
