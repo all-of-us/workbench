@@ -102,17 +102,16 @@ public class ConceptSetsControllerTest {
           .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_4 = new Concept()
-          .conceptId(7890L)
-          .standardConcept(false)
-          .conceptName("conceptD test concept")
-          .standardConcept(true)
-          .conceptCode("conceptE")
-          .conceptClassId("classId5")
-          .vocabularyId("V5")
-          .domainId("Condition/Procedure")
-          .countValue(7890L)
-          .prevalence(0.9F)
-          .conceptSynonyms(new ArrayList<String>());
+      .conceptId(7890L)
+      .standardConcept(false)
+      .conceptName("conceptD test concept")
+      .standardConcept(true)
+      .conceptCode("conceptE")
+      .conceptClassId("classId5")
+      .vocabularyId("V5")
+      .domainId("Condition/Procedure")
+      .countValue(7890L)
+      .prevalence(0.9F);
 
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
