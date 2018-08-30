@@ -108,7 +108,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
 
   selectChange(index: number, option: any) {
     this.selctedCode = option.code;
-    console.log(this.selctedCode);
     this.attrs.NUM[index].operator = option.value;
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
@@ -172,9 +171,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   get paramId() {
-    console.log(this.node.get('conceptId'));
-      console.log(this.node.get('name'));
-      console.log(this.selctedCode);
     return `param${this.node.get('conceptId') ? (this.node.get('conceptId') + (this.selctedCode)) : (this.node.get('id') + (this.selctedCode))}`;
   }
 
