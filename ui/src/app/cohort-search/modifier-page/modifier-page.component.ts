@@ -275,6 +275,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   ngOnDestroy() {
       this.subscription.unsubscribe();
-    }
+  }
 
 }
