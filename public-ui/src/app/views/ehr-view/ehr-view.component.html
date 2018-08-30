@@ -29,6 +29,7 @@
 <div class="row white-card-box top-stat one-row" *ngIf="items.length > 0">
 
     <div class="col-md-4 col-sm-6 col-xs-12">
+
       <div class="row">
         <h5 class="col-xs-12 box-title">
           {{dbDomain.domainDisplay}}
@@ -36,9 +37,9 @@
       </div>
 
       <div class="row">
-      <div class="col-md-4 col-sm-6 col-xs-6 card-stat" >
-        {{items.length}}
-      </div>
+        <div class="col-md-4 col-sm-6 col-xs-6 card-stat" >
+          {{items.length}}
+        </div>
         <div *ngIf="searchText.value.length > 0" class="col-md-8 col-sm-6 col-xs-6 flex-xs-middle card-text">
           matching medical concepts.
         </div>
@@ -47,17 +48,11 @@
         </div>
       </div>
 
-      <!-- <div class="row">
-        <div class="col-xs-12 card-text bottom">
-          Total participants: {{totalParticipants | number}}
-        </div>
-      </div>
-      -->
-
     </div>
 
     <div class="col-md-8 col-sm-6 col-xs-12 chart-wrapper flex-xs-middle">
-      <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by particpant count'" [pointWidth]="15" [backgroundColor]="'#D9E4EA'"> </app-chart>
+      <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 by participant count'"
+                 [pointWidth]="15" [backgroundColor]="'#D9E4EA'"> </app-chart>
     </div>
 
 </div>
@@ -80,10 +75,10 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-2 grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
-          <div class="col-md-4 grid-header flex-xs-middle"> Synonyms </div>
-          <div class="col-md-2 grid-header flex-xs-middle"> Particpants of <b> {{totalParticipants | number}}</b> </div>
-          <div class="col-md-3 grid-header flex-xs-middle info-text">
+          <div class="col-md grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
+          <div class="col-md grid-header flex-xs-middle"> Synonyms </div>
+          <div class="col-md-2 grid-header flex-xs-middle"> Participants of <b> {{totalParticipants | number}}</b> </div>
+          <div class="col-md-2 grid-header flex-xs-middle info-text">
             Vocabulary Code
             <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon>
           </div>
@@ -93,13 +88,13 @@
         <div class="row expandable-grid-row"
              *ngFor="let r of items.concat(standardConcepts), let i = index"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-2 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}
+          <div class="col-md flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
-          <div class="col-md-4 flex-xs-middle" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"> </div>
+          <div class="col-md flex-xs-middle" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"> </div>
           <div class="col-md-2 flex-items-xs-right">
             {{r.countValue | number }}
           </div>
-          <div class="col-md-3 flex-xs-middle">
+          <div class="col-md-2 flex-xs-middle">
             {{r.vocabularyId}} {{r.conceptCode}}
           </div>
           <div class="col-md-1 flex-xs-middle">
