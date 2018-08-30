@@ -75,7 +75,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
         funcs = [typeDisplay, nameDisplay, attributeDisplay];
       } else if (_type === TreeType[TreeType.PM]
         || _type === TreeType[TreeType.VISIT]
-        || _type === TreeType[TreeType.VISIT]
+        || _type === TreeType[TreeType.DRUG]
         || _type === TreeType[TreeType.MEAS]) {
         funcs = [nameDisplay];
       }
