@@ -86,6 +86,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           this.attrs.NUM.forEach((attr, i) => {
             attr.operator = 'ANY';
             this.dropdowns.selected[i] = 'ANY';
+            this.dropdowns.oldVals[i] = 'ANY';
             if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
               this.dropdowns.labels[i] = attr.name;
             }
@@ -113,8 +114,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = 'ANY';
         this.dropdowns.selected[other] = 'Any';
       } else if (this.dropdowns.oldVals[index] === 'ANY') {
-        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = '';
-        this.dropdowns.selected[other] = '';
+        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = option.value;
+        this.dropdowns.selected[other] = option.name;
       }
       this.dropdowns.oldVals[index] = option.value;
     }
