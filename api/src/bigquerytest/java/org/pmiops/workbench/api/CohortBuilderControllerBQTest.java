@@ -753,6 +753,32 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsDrugNoSearchParameter() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), new ArrayList<>(), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Please provide a valid search parameter.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsDrugNoConceptIdOnSearchParameter() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false);
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Please provide a search parameter with a valid conceptId.", bre.getMessage());
+    }
+  }
+
+  @Test
   public void countSubjectsDrugChild() throws Exception {
     Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
