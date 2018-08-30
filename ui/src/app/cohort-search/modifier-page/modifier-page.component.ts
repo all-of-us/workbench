@@ -131,6 +131,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
       }
     }));
+
     this.subscription.add(this.ngRedux.select(criteriaChildren(DomainType[DomainType.VISIT], 0))
       .filter(visiTypes => visiTypes.size > 0)
       .subscribe(visitTypes => {
