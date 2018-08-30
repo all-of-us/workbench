@@ -183,7 +183,6 @@ public class UserMetricsControllerTest {
   @Test
   public void testUpdateRecentResource() {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-
     UserRecentResource mockUserRecentResource = new UserRecentResource();
     mockUserRecentResource.setCohort(null);
     mockUserRecentResource.setWorkspaceId(WORKSPACE_2_ID);
@@ -192,18 +191,20 @@ public class UserMetricsControllerTest {
     mockUserRecentResource.setLastAccessDate(now);
     when(userRecentResourceService.updateNotebookEntry(WORKSPACE_2_ID, USER_ID, "gs://newBucket/notebooks/notebook.ipynb", now))
         .thenReturn(mockUserRecentResource);
+
     RecentResourceRequest request = new RecentResourceRequest();
     request.setNotebookName("gs://newBucket/notebooks/notebook.ipynb");
+
     RecentResource addedEntry = userMetricsController
         .updateRecentResource(WORKSPACE_NAMESPACE, FIRECLOUD_WORKSPACE_ID, request)
         .getBody();
+
     assertNotNull(addedEntry);
     assertEquals((long) addedEntry.getWorkspaceId(), WORKSPACE_2_ID);
     assertNull(addedEntry.getCohort());
     assertNotNull(addedEntry.getNotebook());
     assertEquals(addedEntry.getNotebook().getName(), "notebook.ipynb");
     assertEquals(addedEntry.getNotebook().getPath(), "gs://newBucket/notebooks/");
-
   }
 }
 
