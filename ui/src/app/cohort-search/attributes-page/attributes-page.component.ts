@@ -39,11 +39,12 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   subscription: Subscription;
   rangeAlert = false;
   loading: boolean;
+    selctedCode:any;
   options = [
-    {value: 'EQUAL', name: 'Equals'},
-    {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to'},
-    {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to'},
-    {value: 'BETWEEN', name: 'Between'},
+    {value: 'EQUAL', name: 'Equals', code: '01'},
+    {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to', code: '02'},
+    {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to', code: '03'},
+    {value: 'BETWEEN', name: 'Between', code: '04'},
   ];
 
   readonly criteriaTypes = CRITERIA_TYPES;
@@ -80,7 +81,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           }
         });
       } else {
-        this.options.unshift({value: 'ANY', name: 'Any'});
+        this.options.unshift({value: 'ANY', name: 'Any', code: 'Any'});
         this.attrs.NUM = this.node.get('attributes');
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
           this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
@@ -98,6 +99,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   selectChange(index: number, option: any) {
+    this.selctedCode = option.code;
+    console.log(this.selctedCode);
     this.attrs.NUM[index].operator = option.value;
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
@@ -158,7 +161,10 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   get paramId() {
-    return `param${this.node.get('conceptId') ? this.node.get('conceptId') : this.node.get('id')}`;
+    console.log(this.node.get('conceptId'));
+      console.log(this.node.get('name'));
+      console.log(this.selctedCode);
+    return `param${this.node.get('conceptId') ? (this.node.get('conceptId') + (this.selctedCode)) : (this.node.get('id') + (this.selctedCode))}`;
   }
 
   get displayName() {
