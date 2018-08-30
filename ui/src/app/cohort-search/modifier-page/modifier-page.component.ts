@@ -201,6 +201,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           .filter(mod => !!mod)
           .filter(mod => !this.existing.includes(mod))
           .forEach(mod => this.actions.addModifier(mod));
+        // clear preview/counts
+        this.preview = Map();
       })
     );
   }
