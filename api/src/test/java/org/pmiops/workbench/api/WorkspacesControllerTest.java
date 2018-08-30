@@ -47,6 +47,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
@@ -176,14 +177,15 @@ public class WorkspacesControllerTest {
     ReviewTabQueryBuilder.class
   })
   @MockBean({
-    FireCloudService.class,
-    CohortMaterializationService.class,
-    CloudStorageService.class,
-    BigQueryService.class,
-    DomainLookupService.class,
-    ParticipantCounter.class,
-    UserService.class,
-    UserRecentResourceService.class
+          FireCloudService.class,
+          CohortMaterializationService.class,
+          CloudStorageService.class,
+          BigQueryService.class,
+          DomainLookupService.class,
+          ParticipantCounter.class,
+          UserService.class,
+          UserRecentResourceService.class,
+          ConceptService.class
   })
   static class Configuration {
     @Bean
