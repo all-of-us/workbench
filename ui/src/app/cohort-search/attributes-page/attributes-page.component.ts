@@ -90,6 +90,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
               this.dropdowns.labels[i] = attr.name;
             }
           });
+          this.preview = this.preview.set('count', this.node.get('count'));
         }
       }
     }));
@@ -117,6 +118,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       }
       this.dropdowns.oldVals[index] = option.value;
     }
+    this.preview = option.value === 'ANY'
+      ? this.preview.set('count', this.node.get('count')) : Map();
   }
 
   inputChange() {
@@ -130,6 +133,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         }
       });
     });
+    this.preview = Map();
   }
 
   isValid(form: NgForm) {
@@ -286,7 +290,20 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     return this.node.get('type') === CRITERIA_TYPES.PM;
   }
 
+  showCalc() {
+    let notAny = true;
+    if (this.isPM()) {
+      notAny = this.attrs.NUM[0].operator !== 'ANY';
+    }
+    return !this.attrs.EXISTS && notAny;
+  }
+
   showAdd() {
-    return this.preview.get('count') && !this.preview.get('requesting');
+    let any = false;
+    if (this.isPM()) {
+      any = this.attrs.NUM[0].operator === 'ANY';
+    }
+    return (this.preview.get('count') && !this.preview.get('requesting'))
+      || (this.isPM() && this.attrs.NUM[0].operator === 'ANY');
   }
 }
