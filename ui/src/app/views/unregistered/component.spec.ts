@@ -136,6 +136,8 @@ describe('UnregisteredComponent', () => {
     loadProfileWithRegistrationSettings({
       dataAccessLevel: DataAccessLevel.Unregistered
     });
+    tick();
+    fixture.detectChanges();
 
     expect(de.nativeElement.textContent).toContain('Awaiting identity verification');
   }));
@@ -163,6 +165,7 @@ describe('UnregisteredComponent', () => {
     // Tick the retry delays.
     tick(1000);
     tick(1000);
+    fixture.detectChanges();
 
     expect(de.nativeElement.textContent).toContain('Awaiting identity verification');
     expectAllRegistrationSubmitted(profileStub.profile);
