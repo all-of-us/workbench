@@ -95,27 +95,27 @@
     <div *ngIf="isValid(attrForm) || attrs.EXISTS" class="count-preview ">
       <div class="row">
         <div *ngIf="showCalc()" class="col-lg-3">
-          <button type="button"
-            class="btn calculate-btn"
+          <button type="button" [ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"
+            class="btn"
             [disabled]="rangeAlert"
+            [clrLoading]="preview.get('requesting')"
             (click)="requestPreview(attrForm)">
             Calculate
           </button>
         </div>
-        <div class="spin-top-padding">
-          <span *ngIf="preview.get('requesting')" class="spinner spinner-inline"> Loading...   </span>
-        </div>
-        <div class="col-lg-5 text-padding" *ngIf="preview.get('count') >= 0">
-          <div class="result-text">
-            Results
-          </div>
-           <div>
+        <ng-container *ngIf="!preview.get('requesting')">
+          <div class="col-lg-5 text-padding" *ngIf="preview.get('count') >= 0">
+            <div class="result-text">
+              Results
+            </div>
+            <div>
               Number Participants:
-             <span class="text-bold" *ngIf="!preview.get('requesting')">
+              <span class="text-bold" *ngIf="!preview.get('requesting')">
              {{ preview.get('count', 0)  | number }}
              </span>
+            </div>
           </div>
-        </div>
+        </ng-container>
         <div class="col-lg-3 button-padding" *ngIf="showAdd()">
           <button class="btn add-button " type="submit" [disabled]="rangeAlert"> ADD THIS RESULT</button>
         </div>

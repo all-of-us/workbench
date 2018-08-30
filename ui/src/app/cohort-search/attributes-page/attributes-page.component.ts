@@ -303,7 +303,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     if (this.isPM()) {
       any = this.attrs.NUM[0].operator === 'ANY';
     }
-    return (this.preview.get('count') && !this.preview.get('requesting'))
-      || (this.isPM() && this.attrs.NUM[0].operator === 'ANY');
+    return (this.preview.get('count') && !this.preview.get('requesting')) || any;
   }
 }
