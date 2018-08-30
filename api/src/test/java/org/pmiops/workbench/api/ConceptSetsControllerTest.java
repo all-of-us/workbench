@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -180,8 +181,8 @@ public class ConceptSetsControllerTest {
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class,
-      UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptService.class})
-  @MockBean({FireCloudService.class, CloudStorageService.class, ConceptService.class, ConceptSetService.class})
+      UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptService.class, ConceptSetService.class})
+  @MockBean({FireCloudService.class, CloudStorageService.class, ConceptService.class, ConceptSetService.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {

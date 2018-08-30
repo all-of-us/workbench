@@ -12,7 +12,12 @@
 .card-footer {
   color: rgb(38, 34, 98);
   background-color: rgb(226, 226, 233);
-  font-size: 0.66rem;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card-footer >span{
+  font-size: 14px;
   font-weight: 600;
 }
 

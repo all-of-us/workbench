@@ -482,6 +482,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsDemoDecNoValue() throws Exception {
+    Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
+    SearchParameter demo = createSearchParameter(demoGender, "");
+    SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Dec must provide a value of: Deceased");
+    }
+  }
+
+  @Test
   public void countSubjectsDemoAge() throws Exception {
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
@@ -491,7 +505,57 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter demo = createSearchParameter(demoAge, null);
     demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+  }
+
+  @Test
+  public void countSubjectsDemoAgeAndDeceased() throws Exception {
+    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime now = new DateTime();
+    Period period = new Period(birthDate, now);
+    Integer age = period.getYears();
+    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoDec = createDemoCriteria("DEMO", "DEC", null);
+    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
+    SearchParameter demoDecParameter = createSearchParameter(demoDec, null);
+    demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
+    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter, demoDecParameter), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Cannot select age and deceased in the same context.");
+    }
+  }
+
+  @Test
+  public void countSubjectsDemoAgeNoAttribute() throws Exception {
+    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
+    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Age must provide an operator and operands.");
+    }
+  }
+
+  @Test
+  public void countSubjectsDemoAgeNoAttributeOperands() throws Exception {
+    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
+    demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL)));
+    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Age must provide an operator and operands.");
+    }
   }
 
   @Test
@@ -502,7 +566,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       new Attribute().operator(Operator.BETWEEN).operands(Arrays.asList("15","99"))
     ));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 2);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
@@ -698,6 +762,32 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     .operands(Arrays.asList("1"));
     SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDrugNoSearchParameter() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), new ArrayList<>(), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Please provide a valid search parameter.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsDrugNoConceptIdOnSearchParameter() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false);
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Please provide a search parameter with a valid conceptId.", bre.getMessage());
+    }
   }
 
   @Test
@@ -946,7 +1036,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-    SearchParameter heartRateIrr = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "irregularity-detected");
+    SearchParameter heartRateIrr = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "4262985");
     SearchGroupItem heartRateIrrSearchGroupItem = new SearchGroupItem().type(TYPE_PM).searchParameters(Arrays.asList(heartRateIrr)).modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
@@ -956,7 +1046,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsHeartRateNoIrr() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "no-irregularity-detected");
+    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "4297303");
     SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1019,15 +1109,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectPregnant() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_PREG, "Pregnancy", "903120", "pregnant");
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
-
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectNotPregnant() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_PREG, "Pregnancy", "903120", "not-pregnant");
+    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_PREG, "Pregnancy", "903120", "45877994");
     SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1035,18 +1117,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectWheelChairUser() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", "wheelchair-user");
+    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", "4023190");
     SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectNotWheelChairUser() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", "not-wheelchair-user");
+  public void countSubjectWheelChairUserBadValue() throws Exception {
+    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", null);
     SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals(bre.getMessage(), "Please provide valid conceptId and value for Wheel Chair User.");
+    }
   }
 
   @Test

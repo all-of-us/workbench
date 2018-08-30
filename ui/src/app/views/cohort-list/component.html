@@ -29,8 +29,8 @@
               <clr-icon shape="copy"></clr-icon>
               Clone
             </button>
-            <button class="action-item"
-                    routerLink="{{cohort.id}}/edit"
+            <button class="action-item edit-button"
+                    (click)="beginEdit(cohort)"
                     [class.disabled]="actionsDisabled"
                     [disabled]="actionsDisabled">
               <clr-icon shape="pencil"></clr-icon>
@@ -66,5 +66,5 @@
     </div>
   </div>
 </div>
-
 <app-confirm-delete-modal [resourceType]="'cohort'" [resource]="cohortInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
+<app-cohort-edit-modal [cohort]="cohortInFocus" (updateFinished)="updateFinished()"></app-cohort-edit-modal>

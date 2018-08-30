@@ -33,10 +33,8 @@ public class CohortQueryBuilder {
       PERSON_ID_BLACKLIST_PARAM + ")\n";
 
   private static final String EXCLUDE_SQL_TEMPLATE =
-      "not exists\n" +
-          "(select 'x' from\n" +
-          "(${excludeSql})\n" +
-          "x where x.person_id = ${mainTable}.person_id)\n";
+      "${mainTable}.person_id not in\n" +
+          "(${excludeSql})\n";
 
   private final DomainLookupService domainLookupService;
 

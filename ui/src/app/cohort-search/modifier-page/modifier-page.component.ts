@@ -35,7 +35,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   selectedDate: any;
   subscription: Subscription;
   dropdownOption = {
-    selected: ['', '', '', '']
+    selected: ['Any', 'Any', 'Any', 'Any']
   };
   visitCounts: any;
 
@@ -45,6 +45,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     inputType: 'number',
     modType: ModifierType.AGEATEVENT,
     operators: [{
+      name: 'Any',
+      value: undefined,
+    }, {
       name: 'Greater Than or Equal To',
       value: 'GREATER_THAN_OR_EQUAL_TO',
     }, {
@@ -56,10 +59,13 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }]
   }, {
     name: 'eventDate',
-    label: 'Event Date',
+    label: 'Shifted Event Date',
     inputType: 'date',
     modType: ModifierType.EVENTDATE,
     operators: [{
+      name: 'Any',
+      value: undefined,
+    }, {
       name: 'Is On or Before',
       value: 'LESS_THAN_OR_EQUAL_TO',
     }, {
@@ -75,6 +81,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     inputType: 'number',
     modType: ModifierType.NUMOFOCCURRENCES,
     operators: [{
+        name: 'Any',
+        value: undefined,
+    }, {
       name: 'N or More',
       value: 'GREATER_THAN_OR_EQUAL_TO',
     }]
@@ -114,11 +123,15 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           label: 'During Visit Type',
           inputType: null,
           modType: ModifierType.ENCOUNTERS,
-          operators: []
+          operators: [{
+              name: 'Any',
+              value: undefined,
+          }]
         });
         this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
       }
     }));
+
     this.subscription.add(this.ngRedux.select(criteriaChildren(DomainType[DomainType.VISIT], 0))
       .filter(visiTypes => visiTypes.size > 0)
       .subscribe(visitTypes => {
@@ -132,6 +145,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           });
         }
       }));
+
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
     // This reseeds the form with existing data if we're editing an existing group
@@ -140,15 +154,35 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         const meta = this.modifiers.find(_mod => mod.get('name') === _mod.modType);
         if (meta) {
           if (meta.modType === ModifierType.ENCOUNTERS) {
+            const selected = meta.operators.find(
+              operator => operator.value.toString() === mod.getIn(['operands', 0])
+            );
+            this.dropdownOption.selected[3] = selected.name;
             this.form.get(meta.name).patchValue({
               operator: mod.getIn(['operands', 0]),
             }, {emitEvent: false});
           } else {
-            this.form.get(meta.name).patchValue({
-              operator: mod.get('operator'),
-              valueA: mod.getIn(['operands', 0]),
-              valueB: mod.getIn(['operands', 1]),
-            }, {emitEvent: false});
+            const selected = meta.operators.find(
+              operator => operator.value === mod.get('operator')
+            );
+            const index = this.modifiers.indexOf(meta);
+            this.dropdownOption.selected[index] = selected.name;
+            this.ngAfterContentChecked();
+            if (meta.modType === ModifierType.EVENTDATE) {
+              this.myDate = mod.getIn(['operands', 0]);
+              this.selectedDate = mod.getIn(['operands', 1]);
+              this.form.get(meta.name).patchValue({
+                operator: mod.get('operator'),
+                valueA: mod.getIn(['operands', 0]),
+                valueB: mod.getIn(['operands', 1]),
+              }, {emitEvent: false});
+            } else {
+              this.form.get(meta.name).patchValue({
+                operator: mod.get('operator'),
+                valueA: mod.getIn(['operands', 0]),
+                valueB: mod.getIn(['operands', 1]),
+              }, {emitEvent: false});
+            }
           }
         }
       });
@@ -180,24 +214,32 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           .filter(mod => !!mod)
           .filter(mod => !this.existing.includes(mod))
           .forEach(mod => this.actions.addModifier(mod));
+
+        // update the calculate button
+         this.formChanges = !newMods.every(element => element === undefined);
+        // clear preview/counts
+        this.preview = Map();
       })
     );
   }
-    ngAfterContentChecked() {
-        this.cdref.detectChanges();
-    }
-    selectChange(opt, index, e, mod) {
-      this.dropdownOption.selected[index] = opt.name;
-      if (e.target.value || this.form.controls.valueA) {
-        this.formChanges = true;
-      }
-      const modForm = <FormArray>this.form.controls[mod.name];
-      const valueForm = <FormArray>modForm;
-      valueForm.get('operator').patchValue(opt.value);
-    }
+
+  ngAfterContentChecked() {
+      this.cdref.detectChanges();
+  }
+
+  showCount(modName: string, optName: string) {
+    return modName === 'encounters' && optName !== 'Any';
+  }
+
+  selectChange(opt, index, e, mod) {
+    this.dropdownOption.selected[index] = opt.name;
+    const modForm = <FormArray>this.form.controls[mod.name];
+    const valueForm = <FormArray>modForm;
+    valueForm.get('operator').patchValue(opt.value);
+  }
 
   currentMods(vals) {
-      this.ngAfterContentChecked();
+    this.ngAfterContentChecked();
     return this.modifiers.map(({name, inputType, modType}) => {
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {

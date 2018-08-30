@@ -50,7 +50,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
-import org.pmiops.workbench.cohortreview.ReviewTabQueryBuilder;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
@@ -59,6 +59,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -161,6 +162,8 @@ public class WorkspacesControllerTest {
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   private WorkspacesController workspacesController;
+  @Mock
+  WorkspaceService workspaceService;
 
   @TestConfiguration
   @Import({
@@ -172,9 +175,9 @@ public class WorkspacesControllerTest {
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
+    ReviewQueryBuilder.class,
     ConceptSetService.class,
-    ConceptSetsController.class,
-    ReviewTabQueryBuilder.class
+    ConceptSetsController.class
   })
   @MockBean({
           FireCloudService.class,
@@ -1394,12 +1397,18 @@ public class WorkspacesControllerTest {
     String nb1 = "notebooks/nb1.ipynb";
     String newName = "nb2.ipynb";
     String newPath = "notebooks/nb2.ipynb";
+    String fullPath = "gs://workspace-bucket/" + newPath;
+    String origFullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
@@ -1411,12 +1420,18 @@ public class WorkspacesControllerTest {
     String nb1 = "notebooks/nb1.ipynb";
     String newName = "nb2";
     String newPath = "notebooks/nb2.ipynb";
+    String fullPath = "gs://workspace-bucket/" + newPath;
+    String origFullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
@@ -1427,8 +1442,12 @@ public class WorkspacesControllerTest {
       LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     String nb1 = "notebooks/nb1.ipynb";
     String newPath = "notebooks/nb1 Clone.ipynb";
+    String fullPath = "gs://workspace-bucket/" + newPath;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     workspacesController.cloneNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
   }
 
   @Test
@@ -1438,7 +1457,11 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
       LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     String nb1 = "notebooks/nb1.ipynb";
+    String fullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     workspacesController.deleteNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 }

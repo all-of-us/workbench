@@ -242,4 +242,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(workspace.getCdrVersion());
     return workspace;
   }
+
+  @Override
+  public Workspace findByWorkspaceId(long workspaceId) {
+    return getDao().findOne(workspaceId);
+  }
 }
