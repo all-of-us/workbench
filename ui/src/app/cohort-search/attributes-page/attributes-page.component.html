@@ -91,7 +91,7 @@
     </ng-container>
     <div *ngIf="isValid(attrForm) || attrs.EXISTS" class="count-preview ">
       <div class="row">
-        <div *ngIf="!attrs.EXISTS" class="col-lg-3">
+        <div *ngIf="showCalc()" class="col-lg-3">
           <button type="button" [ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"
             class="btn"
             [disabled]="rangeAlert"
