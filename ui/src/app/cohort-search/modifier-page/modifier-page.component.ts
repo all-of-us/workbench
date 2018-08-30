@@ -225,6 +225,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       this.cdref.detectChanges();
   }
 
+  showCount(modName: string, optName: string) {
+    return modName === 'encounters' && optName !== 'Any';
+  }
+
   selectChange(opt, index, e, mod) {
     this.dropdownOption.selected[index] = opt.name;
     const modForm = <FormArray>this.form.controls[mod.name];
