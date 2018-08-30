@@ -5,7 +5,6 @@ import {By} from '@angular/platform-browser';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {CRITERIA_TYPES} from '../constant';
 
 import {
   CohortSearchActions,
@@ -18,13 +17,13 @@ import {
 import {SearchGroupItemComponent} from '../search-group-item/search-group-item.component';
 import {SearchGroupComponent} from './search-group.component';
 
-import {CohortBuilderService} from 'generated';
+import {CohortBuilderService, TreeType} from 'generated';
 
 const itemA = fromJS({
   id: 'itemA',
   count: null,
   isRequesting: false,
-  type: CRITERIA_TYPES.ICD9,
+  type: TreeType[TreeType.ICD9],
   searchParameters: [],
   modifiers: [],
 });
@@ -33,7 +32,7 @@ const itemB = fromJS({
   id: 'itemB',
   count: null,
   isRequesting: false,
-  type: CRITERIA_TYPES.ICD9,
+  type: TreeType[TreeType.ICD9],
   searchParameters: [],
   modifiers: [],
 });
@@ -106,12 +105,12 @@ describe('SearchGroupComponent', () => {
 
   it('Should dispatch WIZARD_OPEN when a Criteria is selected', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
-    comp.launchWizard({type: CRITERIA_TYPES.ICD9});
+    comp.launchWizard({type: TreeType[TreeType.ICD9]});
     expect(spy).toHaveBeenCalledWith({
       type: OPEN_WIZARD,
       itemId: 'TestId',
       context: {
-        criteriaType: CRITERIA_TYPES.ICD9,
+        criteriaType: TreeType[TreeType.ICD9],
         role: 'includes',
         groupId: 'include0',
         itemId: 'TestId',

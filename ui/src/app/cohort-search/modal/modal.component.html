@@ -2,10 +2,10 @@
   <div class="crit-modal-content">
     <div class="container title-margin">
       <div class="row">
-        <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === criteriaTypes.DEMO}">
+        <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === treeType[treeType.DEMO]}">
           <div class="title-bar">
             <div class="btn-group btn-link">
-              <ng-container *ngIf="ctype !== criteriaTypes.DEMO">
+              <ng-container *ngIf="ctype !== treeType[treeType.DEMO]">
                 <button  *ngIf="attributesNode.size === 0"
                   type="button"
                   class="btn tab"
@@ -19,10 +19,10 @@
                   {{attributeTitle}}
                 </button>
 
-                <div *ngIf="ctype !== criteriaTypes.PM" class="vbar"></div>
+                <div *ngIf="ctype !== treeType[treeType.PM]" class="vbar"></div>
                 <button type="button"
                   class="btn tab"
-                  *ngIf="ctype !== criteriaTypes.PM"
+                  *ngIf="ctype !== treeType[treeType.PM]"
                   [class.active]="mode === 'modifiers'"
                   [disabled]="noSelection"
                   (click)="mode = 'modifiers'">
@@ -44,7 +44,7 @@
           </div>
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
-              <crit-demographics *ngSwitchCase="criteriaTypes.DEMO"
+              <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
                                  (cancel)="cancel()"
                                  (finish)="finish()">
               </crit-demographics>
@@ -69,7 +69,7 @@
           </div>
         </div>
 
-        <div class="col col-sm-4 padding-zero" *ngIf="ctype !== criteriaTypes.DEMO">
+        <div class="col col-sm-4 padding-zero" *ngIf="ctype !== treeType[treeType.DEMO]">
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>
@@ -82,7 +82,7 @@
                             [parameter]="parameter">
                     </crit-selection-info>
                   </div>
-                  <div *ngIf="ctype !== criteriaTypes.DEMO" class="footer">
+                  <div *ngIf="ctype !== treeType[treeType.DEMO]" class="footer">
                     <button type="button"
                             (click)="cancel()"
                             class="btn btn-link">
