@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -29,7 +30,7 @@ public class CodesQueryBuilderTest {
         final SearchParameter searchParam3 = new SearchParameter().group(false).domain("Procedure").value("003");
         final SearchParameter searchParam4 = new SearchParameter().group(true).domain("Procedure").value("0");
         SearchGroupItem item = new SearchGroupItem()
-                .type("ICD9")
+                .type(TreeType.ICD9.name())
                 .searchParameters(
                         Arrays.asList(
                                 searchParam1,
