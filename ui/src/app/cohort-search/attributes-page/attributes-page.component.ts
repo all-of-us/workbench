@@ -39,7 +39,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   subscription: Subscription;
   rangeAlert = false;
   loading: boolean;
-    selctedCode:any;
+  selectedCode: any;
   options = [
     {value: 'EQUAL', name: 'Equals', code: '01'},
     {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to', code: '02'},
@@ -107,7 +107,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   selectChange(index: number, option: any) {
-    this.selctedCode = option.code;
+    this.selectedCode = option.code;
     this.attrs.NUM[index].operator = option.value;
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
@@ -171,7 +171,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   get paramId() {
-    return `param${this.node.get('conceptId') ? (this.node.get('conceptId') + (this.selctedCode)) : (this.node.get('id') + (this.selctedCode))}`;
+    return `param${this.node.get('conceptId')
+        ? (this.node.get('conceptId') + (this.selectedCode))
+        : (this.node.get('id') + (this.selectedCode))}`;
   }
 
   get displayName() {
