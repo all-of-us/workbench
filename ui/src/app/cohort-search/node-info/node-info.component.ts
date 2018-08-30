@@ -181,7 +181,12 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           });
         }
-        const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
+          const param = this.node.set('parameterId', `param${(this.node.get('conceptId')
+              ? (this.node.get('conceptId') && this.node.get('code')) : this.node.get('id'))}`);
+       // const param = this.node.set('parameterId', this.paramId).set('attributes', attributes) + this.node.get('code');
+          console.log('--------------');
+          console.log(this.node.get('conceptId'));
+          console.log(this.node.get('code'));
         this.actions.addParameter(param);
       }
     }
@@ -195,6 +200,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       const param = node.set('parameterId', `param${(node.get('conceptId')
         ? node.get('conceptId') : node.get('id'))}`);
+        console.log('-------------->>>>>>>');
+      console.log(param);
       this.actions.addParameter(param);
     }
   }
