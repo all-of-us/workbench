@@ -976,10 +976,7 @@ paths:
           description: request object for updating recent resource
           required: true
           schema:
-            type: object
-            properties:
-              notebookName:
-                type: string
+            $ref: "#/definitions/RecentResourceRequest"
       responses:
         200:
           description: Successfully added/updated
@@ -997,9 +994,11 @@ paths:
       operationId: deleteRecentResource
       parameters:
         - in: body
-          name: notebook
+          name: RecentResourceRequest
+          description: request object for updating recent resource
+          required: true
           schema:
-            type: string
+            $ref: "#/definitions/RecentResourceRequest"
       responses:
         200:
           description: Successfully deleted
@@ -2003,3 +2002,10 @@ definitions:
         $ref: '#/definitions/FileDetail'
       modifiedTime:
         type: string
+
+  RecentResourceRequest:
+      type: object
+      properties:
+        notebookName:
+          type: string
+

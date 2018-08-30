@@ -104,9 +104,9 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> deleteRecentResource(String workspaceNamespace, String workspaceId, String notebook) {
+  public ResponseEntity<EmptyResponse> deleteRecentResource(String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
-    userRecentResourceService.deleteNotebookEntry(wId, userProvider.get().getUserId(), notebook);
+    userRecentResourceService.deleteNotebookEntry(wId, userProvider.get().getUserId(), recentResourceRequest.getNotebookName());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
