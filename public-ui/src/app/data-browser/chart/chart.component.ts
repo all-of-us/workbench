@@ -3,7 +3,7 @@ import * as highcharts from 'highcharts';
 
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
-import {DbConstantsService} from '../../utils/db-constants.service';
+import {DbConfigService} from '../../utils/db-config.service';
 
 @Component({
   selector: 'app-chart',
@@ -22,7 +22,7 @@ export class ChartComponent implements OnChanges {
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any = null;
 
-  constructor(private dbc: DbConstantsService) {
+  constructor(private dbc: DbConfigService) {
     highcharts.setOptions({
       lang: {thousandsSep: ','},
     });

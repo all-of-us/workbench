@@ -40,17 +40,17 @@
 
               <app-chart *ngIf="gender.stratum2 === dbc.MALE_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueMaleAnalysis"
-                         [chartTitle]="maleGenderChartTitle" [chartType]="selectedConcept.chartType"
+                         [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()" [chartType]="selectedConcept.chartType"
                          [analysis]="selectedConcept.analyses.measurementValueMaleAnalysis"></app-chart>
 
               <app-chart *ngIf="gender.stratum2 === dbc.FEMALE_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueFemaleAnalysis"
-                         [chartTitle]="femaleGenderChartTitle" [chartType]="selectedConcept.chartType"
+                         [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()" [chartType]="selectedConcept.chartType"
                          [analysis]="selectedConcept.analyses.measurementValueFemaleAnalysis"></app-chart>
 
               <app-chart *ngIf="gender.stratum2 === dbc.OTHER_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueOtherGenderAnalysis"
-                         [chartTitle]="otherGenderChartTitle" [chartType]="selectedConcept.chartType"
+                         [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()" [chartType]="selectedConcept.chartType"
                          [analysis]="selectedConcept.analyses.measurementValueOtherGenderAnalysis"></app-chart>
 
         </div>

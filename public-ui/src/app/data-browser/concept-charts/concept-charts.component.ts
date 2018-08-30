@@ -6,7 +6,7 @@ import {Analysis} from '../../../publicGenerated/model/analysis';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
-import {DbConstantsService} from '../../utils/db-constants.service';
+import {DbConfigService} from '../../utils/db-config.service';
 
 @Component({
   selector: 'app-concept-charts',
@@ -33,7 +33,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   sourceConcepts: Concept[] = null;
   analyses: ConceptAnalysis;
 
-  constructor(private api: DataBrowserService, public dbc: DbConstantsService) { }
+  constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
 
   loading() {
     return this.loadingStack.length > 0;

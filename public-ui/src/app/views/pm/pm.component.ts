@@ -3,7 +3,9 @@ import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {Analysis} from '../../../publicGenerated/model/analysis';
-import {DbConstantsService} from '../../utils/db-constants.service';
+import {ConceptGroup} from '../../utils/conceptGroup';
+import {ConceptWithAnalysis} from '../../utils/conceptWithAnalysis';
+import {DbConfigService} from '../../utils/db-config.service';
 
 @Component({
   selector: 'app-physical-measurements',
@@ -29,53 +31,22 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   femaleGenderChartTitle = '';
   otherGenderChartTitle = '';
 
-  conceptGroups = [
-    { group: 'blood-pressure', groupName: 'Mean Blood Pressure', concepts: [
-      {conceptId: '903118', conceptName: 'Systolic ', analyses: null, chartType: this.chartType,
-        maleCount: 0, femaleCount: 0, otherCount: 0},
-      {conceptId: '903115', conceptName: 'Diastolic', analyses: null, chartType: this.chartType,
-        maleCount: 0, femaleCount: 0, otherCount: 0},
-    ]},
-    { group: 'height', groupName: 'Height', concepts: [
-      {conceptId: '903133', conceptName: 'Height', analyses: null, chartType: this.chartType,
-        maleCount: 0, femaleCount: 0, otherCount: 0}
-    ]},
-    { group: 'weight', groupName: 'Weight', concepts: [
-      {conceptId: '903121', conceptName: 'Weight', analyses: null, chartType: this.chartType,
-        maleCount: 0, femaleCount: 0, otherCount: 0},
-    ]},
-    { group: 'mean-waist', groupName: 'Mean waist circumference', concepts: [
-      { conceptId: '903135', conceptName: 'Mean waist circumference', analyses: null,
-        chartType: this.chartType, maleCount: 0, femaleCount: 0, otherCount: 0},
-    ]},
-    { group: 'mean-hip', groupName: 'Mean hip circumference', concepts: [
-      {conceptId: '903136', conceptName: 'Mean hip circumference', analyses: null,
-        chartType: this.chartType, maleCount: 0, femaleCount: 0, otherCount: 0},
-    ]},
-    { group: 'mean-heart-rate', groupName: 'Mean heart rate', concepts: [
-      {conceptId: '903126', conceptName: 'Mean heart rate', analyses: null,
-        chartType: this.chartType, maleCount: 0, femaleCount: 0, otherCount: 0},
-    ]},
-    { group: 'wheel-chair', groupName: 'Wheel chair use', concepts: [
-      {conceptId: '903111', conceptName: 'Wheel chair use', analyses: null, chartType: 'column',
-        maleCount: 0, femaleCount: 0, otherCount: 0},
-    ]},
-    { group: 'pregnancy', groupName: 'Pregnancy', concepts: [
-      {conceptId: '903120', conceptName: 'Pregnancy', analyses: null, chartType: 'column',
-       maleCount: 0, femaleCount: 0, otherCount: 0},
-    ]}
-  ];
-
+  // Get the physical measurement groups array we display here
+  conceptGroups: ConceptGroup[];
   // Initialize to first group and concept, adjust order in groups array above
-  selectedGroup = this.conceptGroups[0];
-  selectedConcept = this.selectedGroup.concepts[0];
+  selectedGroup: ConceptGroup;
+  selectedConcept: ConceptWithAnalysis;
 
   // we save the total gender counts
   femaleCount = 0;
   maleCount = 0;
   otherCount = 0;
 
-  constructor(private api: DataBrowserService, public dbc: DbConstantsService) { }
+  constructor(private api: DataBrowserService, public dbc: DbConfigService) {
+    this.conceptGroups = this.dbc.getPmGroups();
+    this.selectedGroup = this.conceptGroups[0];
+    this.selectedConcept = this.selectedGroup.concepts[0];
+  }
 
   loading() {
     return this.loadingStack.length > 0;
@@ -204,11 +175,12 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   // Put the gender analysis in the order we want to show them
   // Sum up the other genders and make a result for that
   // Put the gender counts on selected concept for easy use in templates
-  organizeGenders(concept: any) {
+  organizeGenders(concept: ConceptWithAnalysis) {
     const analysis: Analysis = concept.analyses.genderAnalysis;
     let male = null;
     let female = null;
     const others = [];
+    let otherCount = 0;
 
     // No need to do anything if only one gender
     if (analysis.results.length <= 1) {
@@ -218,28 +190,24 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     for (const g of analysis.results) {
       if (g.stratum2 === this.dbc.MALE_GENDER_ID) {
         male = g;
-        concept.maleCount = g.countValue;
-        this.maleGenderChartTitle = g.analysisStratumName + ' - ' + g.countValue.toLocaleString();
       } else if (g.stratum2 === this.dbc.FEMALE_GENDER_ID) {
         female = g;
-        this.femaleGenderChartTitle = g.analysisStratumName + ' - ' + g.countValue.toLocaleString();
-        concept.femaleCount = g.countValue;
       } else {
-        concept.otherCount += g.countValue;
+        otherCount += g.countValue;
       }
     }
 
     // Order genders how we want to display  Male, Female , Others
     if (male) { results.push(male); }
     if (female) { results.push(female); }
-    if (concept.otherCount > 0) {
+    if (otherCount > 0) {
       // Make Other results,
       const otherResult: AchillesResult =  {
         analysisId: male.analysisId,
         stratum1: male.stratum1,
         stratum2: this.dbc.OTHER_GENDER_ID,
         analysisStratumName: 'Other',
-        countValue: concept.otherCount
+        countValue: otherCount
       };
       results.push(otherResult);
       this.otherGenderChartTitle = otherResult.analysisStratumName + ' - ' +
