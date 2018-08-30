@@ -83,8 +83,16 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       } else {
         this.options.unshift({value: 'ANY', name: 'Any', code: 'Any'});
         this.attrs.NUM = this.node.get('attributes');
-        if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
-          this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
+        if (this.attrs.NUM) {
+          this.attrs.NUM.forEach((attr, i) => {
+            attr.operator = 'ANY';
+            this.dropdowns.selected[i] = 'ANY';
+            this.dropdowns.oldVals[i] = 'ANY';
+            if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+              this.dropdowns.labels[i] = attr.name;
+            }
+          });
+          this.preview = this.preview.set('count', this.node.get('count'));
         }
       }
     }));
@@ -108,11 +116,13 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = 'ANY';
         this.dropdowns.selected[other] = 'Any';
       } else if (this.dropdowns.oldVals[index] === 'ANY') {
-        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = '';
-        this.dropdowns.selected[other] = '';
+        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = option.value;
+        this.dropdowns.selected[other] = option.name;
       }
       this.dropdowns.oldVals[index] = option.value;
     }
+    this.preview = option.value === 'ANY'
+      ? this.preview.set('count', this.node.get('count')) : Map();
   }
 
   inputChange() {
@@ -126,6 +136,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         }
       });
     });
+    this.preview = Map();
   }
 
   isValid(form: NgForm) {
@@ -282,7 +293,19 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     return this.node.get('type') === CRITERIA_TYPES.PM;
   }
 
+  showCalc() {
+    let notAny = true;
+    if (this.isPM()) {
+      notAny = this.attrs.NUM[0].operator !== 'ANY';
+    }
+    return !this.attrs.EXISTS && notAny;
+  }
+
   showAdd() {
-    return this.preview.get('count') && !this.preview.get('requesting');
+    let any = false;
+    if (this.isPM()) {
+      any = this.attrs.NUM[0].operator === 'ANY';
+    }
+    return (this.preview.get('count') && !this.preview.get('requesting')) || any;
   }
 }
