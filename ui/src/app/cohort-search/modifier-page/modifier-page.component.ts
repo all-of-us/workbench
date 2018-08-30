@@ -217,6 +217,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
         // update the calculate button
          this.formChanges = !newMods.every(element => element === undefined);
+        // clear preview/counts
+        this.preview = Map();
       })
     );
   }
@@ -275,5 +277,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   ngOnDestroy() {
       this.subscription.unsubscribe();
-  }
+    }
+
 }
