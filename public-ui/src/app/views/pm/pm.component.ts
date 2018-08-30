@@ -86,32 +86,49 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     // Get demographic totals
     this.loadingStack.push(true);
     this.subscriptions.push(this.api.getGenderAnalysis()
-      .subscribe(result => {
-        this.genderAnalysis = result;
-        for (const g of this.genderAnalysis.results) {
-          if (g.stratum1 === this.dbc.FEMALE_GENDER_ID) {
-            this.femaleCount = g.countValue;
-          } else if (g.stratum1 === this.dbc.MALE_GENDER_ID) {
-            this.maleCount = g.countValue;
-          } else {
-            this.otherCount += g.countValue;
+      .subscribe({
+        next: result => {
+          this.genderAnalysis = result;
+          for (const g of this.genderAnalysis.results) {
+            if (g.stratum1 === this.dbc.FEMALE_GENDER_ID) {
+              this.femaleCount = g.countValue;
+            } else if (g.stratum1 === this.dbc.MALE_GENDER_ID) {
+              this.maleCount = g.countValue;
+            } else {
+              this.otherCount += g.countValue;
+            }
           }
-        }
-        this.loadingStack.pop();
-      }));
+          this.loadingStack.pop();
+        },
+        error: err =>  {
+          this.loadingStack.pop();
+          console.log('Error: ', err);
+        }}));
 
     this.loadingStack.push(true);
     this.subscriptions.push(this.api.getRaceAnalysis()
-      .subscribe(result => {
-        this.raceAnalysis = result;
-        this.loadingStack.pop();
+      .subscribe({
+          next: result => {
+            this.raceAnalysis = result;
+            this.loadingStack.pop();
+          },
+          error: err =>  {
+            this.loadingStack.pop();
+            console.log('Error: ', err);
+          }
       }));
 
     this.loadingStack.push(true);
     this.subscriptions.push(this.api.getEthnicityAnalysis()
-      .subscribe(result => {
-        this.ethnicityAnalysis = result;
-        this.loadingStack.pop();
+      .subscribe({
+        next: result => {
+          this.ethnicityAnalysis = result;
+          this.loadingStack.pop();
+        },
+        error: err =>  {
+          this.loadingStack.pop();
+          console.log('Error: ', err);
+        }
       }));
   }
 
@@ -129,14 +146,20 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
       this.loadingStack.push(true);
       this.subscriptions.push(this.api.getConceptAnalysisResults(
         [this.selectedConcept.conceptId])
-        .subscribe(result => {
-          this.selectedConcept.analyses = result.items[0];
-          // Organize, massage the data for ui graphing
-          // for example, pregnant has only 1 result for pregnant,
-          // we add a not pregnant to make display better
-          this.arrangeConceptAnalyses(this.selectedConcept);
-          this.loadingStack.pop();
-      }));
+        .subscribe({
+          next: result => {
+            this.selectedConcept.analyses = result.items[0];
+            // Organize, massage the data for ui graphing
+            // for example, pregnant has only 1 result for pregnant,
+            // we add a not pregnant to make display better
+            this.arrangeConceptAnalyses(this.selectedConcept);
+            this.loadingStack.pop();
+          },
+          error: err => {
+            this.loadingStack.pop();
+            console.log('Error: ', err);
+          }
+        }));
     } else {
       // Don't get the analyses
     }

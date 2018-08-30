@@ -101,7 +101,10 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         this.filterResults();
         this.loading = false;
       },
-      error: err => console.error('Observer got an error: ' + err),
+      error: err => {
+        console.error('Observer got an error: ' + err);
+        this.loading = false;
+      },
       complete: () => { this.resultsComplete = true; }
     }));
 
@@ -111,6 +114,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         .debounceTime(400)
         .distinctUntilChanged()
         .subscribe((query) => { this.filterResults(); } ));
+
     // Set to loading as long as they are typing
     this.subscriptions.push(this.searchText.valueChanges.subscribe(
       (query) => this.loading = true ));
@@ -129,6 +133,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
     return percent * 100;
   }
+
   public searchQuestion(q: QuestionConcept) {
     // Todo , match all words maybe instead of any. Or allow some operators such as 'OR' 'AND'
     const text = this.searchText.value;

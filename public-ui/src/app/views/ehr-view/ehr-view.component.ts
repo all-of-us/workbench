@@ -97,7 +97,12 @@ export class EhrViewComponent implements OnInit, OnDestroy {
         .debounceTime(200)
         .distinctUntilChanged()
         .switchMap((query) => this.searchDomain(query))
-        .subscribe(results => this.searchCallback(results)));
+        .subscribe({
+          next: results => this.searchCallback(results),
+          error: err => {
+            console.log('Error searching: ', err);
+            this.loading = false;
+          }}));
 
       // Set to loading as long as they are typing
       this.subscriptions.push(this.searchText.valueChanges.subscribe(

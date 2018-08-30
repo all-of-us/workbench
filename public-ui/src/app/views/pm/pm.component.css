@@ -1,5 +1,10 @@
-.measurement.white-card-box {
+.white-card-box {
     min-height: 400px;
+}
+.loading.white-card-box .row{
+    text-align: center;
+    /* Todo align loading spinner better after design */
+    padding-top: 10%;
 }
 .chart-wrapper {
     width: 336px;
@@ -11,6 +16,6 @@ button.active.btn-link {
 }
 
 .row.page-align {
-    margin-left: 0px;
-    margin-right: 0px;
+    margin-left: 0;
+    margin-right: 0;
 }

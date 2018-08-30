@@ -572,9 +572,6 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/AchillesResultDist"
-      unitName:
-        description: measurement unit
-        type: string
 
   AnalysisListResponse:
     type: object

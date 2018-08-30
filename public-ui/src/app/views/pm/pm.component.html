@@ -13,6 +13,15 @@
                 class="btn btn-primary"> {{item.groupName}} </button>
       </div>
     </div>
+    <div *ngIf="loading()" class="loading white-card-box ">
+      <div class="row flex-items-xs-middle">
+        <div class="col-xs-12">
+          <span  class="spinner spinner-lg hidden-sm-down">Loading ...</span>
+          <span  class="spinner spinner-md hidden-md-up hidden-xs-down"></span>
+          <span  class="spinner spinner-sm hidden-sm-up"></span>
+        </div>
+      </div>
+    </div>
 
     <div *ngIf="!loading()" class="measurement white-card-box ">
       <div class="row box-title">
@@ -55,15 +64,6 @@
 
       </div>
     </div>
-
-    <!-- Don't want to deploy this link
-    <div class="row page-align">
-      <p>
-        <a target="_blank" href="https://projects.invisionapp.com/d/main/default/#/console/13577480/306624424/preview" >
-        Link to Mock Up
-        </a>
-      </p>
-    </div> -->
 
   </div>
   <div class="col-xs-12 col-sm-12 col-md-3">

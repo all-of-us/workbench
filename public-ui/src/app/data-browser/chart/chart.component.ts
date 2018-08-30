@@ -77,7 +77,8 @@ export class ChartComponent implements OnChanges {
           minPointLength: 3,
           events: {
             click: function (event) {
-              console.log('plot options clicked ', event.point);
+              // Todo handle click and log events in analytics
+              // console.log('plot options clicked ', event.point);
             }
           }
         },
@@ -167,7 +168,8 @@ export class ChartComponent implements OnChanges {
   }
 
   seriesClick(event) {
-    console.log('Global series clicked ', this.analysis, 'Clicked analysis', event.point);
+    // Todo handle click and log events in analytics
+    // console.log('Global series clicked ', this.analysis, 'Clicked analysis', event.point);
   }
 
   public makeCountChartOptions() {
@@ -199,7 +201,8 @@ export class ChartComponent implements OnChanges {
 
     const seriesClick = function (event) {
       const thisCtrl = event.point.options.thisCtrl;
-      console.log('Count plot Clicked point :', event.point);
+      // Todo handle click and log events in analytics
+      // console.log('Count plot Clicked point :', event.point);
       thisCtrl.resultClicked.emit(event.point.result);
     };
     // Override tooltip and colors and such
@@ -421,12 +424,14 @@ export class ChartComponent implements OnChanges {
     // Todo we will use this later in drill downs and such
     const seriesClick = function(event) {
       const thisCtrl = event.point.options.thisCtrl;
+      // Todo handle click events
       // console.log('Histogram plot Clicked point :',  event.point);
-      thisCtrl.resultClicked.emit(event.point.result);
+      // thisCtrl.resultClicked.emit(event.point.result);
     };
 
     // Unit for measurements is in stratum5
-    const unit: string = this.analysis.unitName ? this.analysis.unitName : '';
+    const unit: string = '' ; // Api update coming for this
+    // this.analysis.unitName ? this.analysis.unitName : '';
     const series: any = {
       name: this.analysis.analysisName,
       colorByPoint: true,
