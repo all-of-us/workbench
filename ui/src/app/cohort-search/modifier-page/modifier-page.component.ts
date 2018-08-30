@@ -132,6 +132,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           });
         }
       }));
+
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
     // This reseeds the form with existing data if we're editing an existing group
@@ -140,15 +141,35 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         const meta = this.modifiers.find(_mod => mod.get('name') === _mod.modType);
         if (meta) {
           if (meta.modType === ModifierType.ENCOUNTERS) {
+            const selected = meta.operators.find(
+              operator => operator.value.toString() === mod.getIn(['operands', 0])
+            );
+            this.dropdownOption.selected[3] = selected.name;
             this.form.get(meta.name).patchValue({
               operator: mod.getIn(['operands', 0]),
             }, {emitEvent: false});
           } else {
-            this.form.get(meta.name).patchValue({
-              operator: mod.get('operator'),
-              valueA: mod.getIn(['operands', 0]),
-              valueB: mod.getIn(['operands', 1]),
-            }, {emitEvent: false});
+            const selected = meta.operators.find(
+              operator => operator.value === mod.get('operator')
+            );
+            const index = this.modifiers.indexOf(meta);
+            this.dropdownOption.selected[index] = selected.name;
+            this.ngAfterContentChecked();
+            if (meta.modType === ModifierType.EVENTDATE) {
+              this.myDate = mod.getIn(['operands', 0]);
+              this.selectedDate = mod.getIn(['operands', 1]);
+              this.form.get(meta.name).patchValue({
+                operator: mod.get('operator'),
+                valueA: mod.getIn(['operands', 0]),
+                valueB: mod.getIn(['operands', 1]),
+              }, {emitEvent: false});
+            } else {
+              this.form.get(meta.name).patchValue({
+                operator: mod.get('operator'),
+                valueA: mod.getIn(['operands', 0]),
+                valueB: mod.getIn(['operands', 1]),
+              }, {emitEvent: false});
+            }
           }
         }
       });
