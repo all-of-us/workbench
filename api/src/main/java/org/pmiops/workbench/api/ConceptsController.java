@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
@@ -63,8 +61,7 @@ public class ConceptsController implements ConceptsApiDelegate {
             .countValue(concept.getCountValue())
             .domainId(concept.getDomainId())
             .prevalence(concept.getPrevalence())
-            .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(
-                concept.getStandardConcept()))
+            .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
             .vocabularyId(concept.getVocabularyId())
             .conceptSynonyms(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
 
@@ -112,7 +109,6 @@ public class ConceptsController implements ConceptsApiDelegate {
 
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount);
-
 
     // TODO: move Swagger codegen to common-api, pass request with modified values into service
     ConceptListResponse response = new ConceptListResponse();
