@@ -8,6 +8,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,12 +27,10 @@ import java.util.stream.Collectors;
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   private static final ImmutableMap<String, String> TYPE_PROC =
-    ImmutableMap.of("ICD9", "ICD9Proc", "CPT", "CPT4");
+    ImmutableMap.of(TreeType.ICD9.name(), "ICD9Proc", TreeType.CPT.name(), "CPT4");
 
   private static final ImmutableMap<String, String> TYPE_CM =
-    ImmutableMap.of("ICD9", "ICD9CM", "CPT", "CPT4");
-
-  public static final String ICD_10 = "ICD10";
+    ImmutableMap.of(TreeType.ICD9.name(), "ICD9CM", TreeType.CPT.name(), "CPT4");
 
   public enum GroupType {
     GROUP, NOT_GROUP
@@ -139,7 +138,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     final String namedParameter = domain + uniqueName;
 
     queryParams.put(namedParameter, codes);
-    if (type.equals(ICD_10)) {
+    if (type.equals(TreeType.ICD10.name())) {
       queryParams.put(cmOrProcUniqueParam, QueryParameterValue.string(subtype));
       inClauseSql = ICD10_VOCABULARY_ID_IN_CLAUSE_TEMPLATE;
       paramNames = new ImmutableMap.Builder<String, String>()

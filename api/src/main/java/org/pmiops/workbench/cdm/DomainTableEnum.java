@@ -50,7 +50,7 @@ public enum DomainTableEnum {
 
     public static String getTableName(String domainId) {
         for (DomainTableEnum item: values()) {
-            if (item.domainId.equals(domainId)) {
+            if (item.domainId.equalsIgnoreCase(domainId)) {
                 return item.tableName;
             }
         }
@@ -59,7 +59,7 @@ public enum DomainTableEnum {
 
     public static String getSourceConceptId(String domainId) {
         for (DomainTableEnum item: values()) {
-            if (item.domainId.equals(domainId)) {
+            if (item.domainId.equalsIgnoreCase(domainId)) {
                 return item.sourceConceptId;
             }
         }
@@ -68,7 +68,7 @@ public enum DomainTableEnum {
 
     public static String getEntryDate(String domainId) {
         for (DomainTableEnum item: values()) {
-            if (item.domainId.equals(domainId)) {
+            if (item.domainId.equalsIgnoreCase(domainId)) {
                 return item.entryDate;
             }
         }
