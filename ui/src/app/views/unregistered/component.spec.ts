@@ -115,7 +115,7 @@ describe('UnregisteredComponent', () => {
     const profile = {
       ...ProfileStubVariables.PROFILE_STUB,
       dataAccessLevel: p.dataAccessLevel,
-      idVerificationStatus: p.idVerificationStatus,
+      idVerificationStatus: p.idVerificationStatus || IdVerificationStatus.UNVERIFIED,
       requestedIdVerification: !!p.requestedIdVerification,
       termsOfServiceCompletionTime: p.termsOfServiceCompletionTime,
       ethicsTrainingCompletionTime: p.ethicsTrainingCompletionTime,
