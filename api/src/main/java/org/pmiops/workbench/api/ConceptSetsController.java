@@ -47,6 +47,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final ConceptSetDao conceptSetDao;
   private final ConceptDao conceptDao;
   private final ConceptService conceptService;
+  private final ConceptSynonymDao conceptSynonymDao;
   private final Clock clock;
 
   private Provider<User> userProvider;
