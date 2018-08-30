@@ -16,8 +16,8 @@ import {
 activeCriteriaTreeType,
 activeCriteriaType,
 activeParameterList,
-attributesPage,
 CohortSearchActions,
+nodeAttributes,
 wizardOpen
 } from '../redux';
 import {SafeHtmlPipe} from '../safe-html.pipe';
@@ -31,7 +31,7 @@ class MockActions {
   @dispatch() activeCriteriaType = activeCriteriaType;
   @dispatch() activeCriteriaTreeType = activeCriteriaTreeType;
   @dispatch() activeParameterList = activeParameterList;
-  @dispatch() attributesPage = attributesPage;
+  @dispatch() attributesPage = nodeAttributes;
   @dispatch() wizardOpen = wizardOpen;
 }
 
