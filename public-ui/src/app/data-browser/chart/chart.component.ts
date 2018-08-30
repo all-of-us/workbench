@@ -430,7 +430,7 @@ export class ChartComponent implements OnChanges {
     };
 
     // Unit for measurements is in stratum5
-    const unit: string = '' ; // Api update coming for this
+    const unit = '' ; // Api update coming for this
     // this.analysis.unitName ? this.analysis.unitName : '';
     const series: any = {
       name: this.analysis.analysisName,
