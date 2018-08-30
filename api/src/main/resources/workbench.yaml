@@ -961,7 +961,7 @@ paths:
           schema:
             $ref: "#/definitions/RecentResourceResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/recent-resource/{notebook}/update-notebook:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resource/updateEntry:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
@@ -971,17 +971,17 @@ paths:
       description: Add/update Notebook entry to recent resource
       operationId: updateNotebookEntry
       parameters:
-        - in: path
+        - in: body
           name: notebook
-          required: true
-          type: string
+          schema:
+            type: string
       responses:
         200:
           description: Successfully added
           schema:
             $ref: "#/definitions/RecentResource"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/recent-resource/deleteEntry:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resource/deleteEntry:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'

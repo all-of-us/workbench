@@ -97,15 +97,15 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<RecentResource> updateNotebookEntry(String workspaceNamespace, String workspaceId, String notebook) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    UserRecentResource addedEntry = userRecentResourceService.updateNotebookEntry
-        (getWorkspaceId(workspaceNamespace, workspaceId), userProvider.get().getUserId(), notebook, now);
+    long wId = getWorkspaceId(workspaceNamespace, workspaceId);
+    UserRecentResource addedEntry = userRecentResourceService.updateNotebookEntry(wId, userProvider.get().getUserId(), notebook, now);
     return ResponseEntity.ok(TO_CLIENT.apply(addedEntry));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteRecentResource(String workspaceNamespace, String workspaceId, String notebook) {
-    userRecentResourceService.deleteNotebookEntry(
-        getWorkspaceId(workspaceNamespace, workspaceId), userProvider.get().getUserId(), notebook);
+    long wId = getWorkspaceId(workspaceNamespace, workspaceId);
+    userRecentResourceService.deleteNotebookEntry(wId, userProvider.get().getUserId(), notebook);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
