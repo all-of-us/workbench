@@ -3,7 +3,9 @@ package org.pmiops.workbench.api;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.collect.*;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -15,8 +17,8 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
@@ -44,6 +46,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final WorkspaceService workspaceService;
   private final ConceptSetDao conceptSetDao;
   private final ConceptDao conceptDao;
+  private final ConceptService conceptService;
   private final ConceptSynonymDao conceptSynonymDao;
   private final Clock clock;
 
@@ -93,10 +96,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @Autowired
   ConceptSetsController(WorkspaceService workspaceService, ConceptSetDao conceptSetDao,
-      ConceptDao conceptDao, ConceptSynonymDao conceptSynonymDao, Provider<User> userProvider, Clock clock) {
+      ConceptDao conceptDao, ConceptSynonymDao conceptSynonymDao, ConceptService conceptService, Provider<User> userProvider, Clock clock) {
     this.workspaceService = workspaceService;
     this.conceptSetDao = conceptSetDao;
     this.conceptDao = conceptDao;
+    this.conceptService = conceptService;
     this.conceptSynonymDao = conceptSynonymDao;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -135,13 +139,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     ConceptSet result = TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
-      List<org.pmiops.workbench.cdr.model.Concept> conceptList = Lists.newArrayList(concepts);
-      List<Long> conceptIds = conceptList.stream().map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList());
-      Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
-      for(org.pmiops.workbench.cdr.model.Concept concept: conceptList) {
-        concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
-      }
-
+      List<org.pmiops.workbench.cdr.model.Concept> conceptList = conceptService.fetchConceptSynonyms(Lists.newArrayList(concepts));
       result.setConcepts(conceptList.stream()
               .map(ConceptsController.TO_CLIENT_CONCEPT)
               .sorted(CONCEPT_NAME_ORDERING)
@@ -234,12 +232,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (request.getAddedIds() != null) {
       final Domain domainEnum = dbConceptSet.getDomainEnum();
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(request.getAddedIds());
-      List<org.pmiops.workbench.cdr.model.Concept> conceptList = Lists.newArrayList(concepts);
-      List<Long> conceptIds = conceptList.stream().map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList());
-      Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
-      for(org.pmiops.workbench.cdr.model.Concept concept: concepts) {
-        concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
-      }
+      List<org.pmiops.workbench.cdr.model.Concept> conceptList = conceptService.fetchConceptSynonyms(Lists.newArrayList(concepts));
       List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
           ImmutableList.copyOf(concepts).stream().filter(concept -> {
           Collection<Domain> domain = ConceptsController.DOMAIN_MAP.inverse().get(concept.getDomainId());

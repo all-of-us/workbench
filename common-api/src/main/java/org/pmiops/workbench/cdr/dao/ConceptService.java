@@ -223,13 +223,17 @@ public class ConceptService {
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);
         Slice<Concept> conceptSlice = conceptDao.findAll(conceptSpecification, pageable);
-        List<Concept> concepts = conceptSlice.getContent();
+        fetchConceptSynonyms(conceptSlice.getContent());
+        return conceptSlice;
+    }
+
+    public List<Concept> fetchConceptSynonyms(List<Concept> concepts) {
         List<Long> conceptIds = concepts.stream().map(Concept::getConceptId).collect(Collectors.toList());
         Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
         for(Concept concept: concepts) {
             concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
         }
-        return conceptSlice;
+        return concepts;
     }
 
 }
