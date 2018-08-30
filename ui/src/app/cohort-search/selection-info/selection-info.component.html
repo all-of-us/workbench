@@ -14,11 +14,11 @@
            [popperTrigger]="'hover'"
            [popperPlacement]="'bottom'">
       <strong *ngIf="parameter.get('type') !== criteriaTypes.PM && parameter.get('type') !== domainType.DRUG">{{ _type }}</strong>
-      <span class="text-size text-muted">hello{{ name }}</span>
+      <span class="text-size text-muted">{{ name }}</span>
       <span class="text-muted">{{ attribute }}</span>
     </small>
   </span>
   <popper-content #codesPopper>
-  <p class="tooltip-text" [style.margin]="'0'">hi{{name}}</p>
+  <p class="tooltip-text" [style.margin]="'0'">{{name}}</p>
   </popper-content>
 </div>

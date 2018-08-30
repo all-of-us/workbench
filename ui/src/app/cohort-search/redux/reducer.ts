@@ -145,7 +145,7 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case LOAD_CHILDREN_LIST:
         action.children.forEach(child => {
-          child.parameterId = `param${(child.conceptId ? child.conceptId : child.id)}`;
+          child.parameterId = `param${(child.conceptId ? (child.conceptId + child.code) : child.id)}`;
           const path = child.path.split('.');
           const parents = path.slice(path.indexOf(action.parentId.toString()));
           state = state
