@@ -195,8 +195,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       const param = node.set('parameterId', `param${(node.get('conceptId')
         ? node.get('conceptId') : node.get('id'))}`);
-        console.log('-------------->>>>>>>');
-      console.log(param);
       this.actions.addParameter(param);
     }
   }
