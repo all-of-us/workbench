@@ -43,11 +43,6 @@ export class ChartComponent implements OnChanges {
     if (this.chartTitle) {
       options.title.text = this.chartTitle;
     }
-    // Override chart type if we have it
-    // todo  -- check we don't need this. too hacky
-    /*if (this.chartType) {
-      options.chart.type = this.chartType;
-    }*/
 
     return {
       chart: options.chart,
