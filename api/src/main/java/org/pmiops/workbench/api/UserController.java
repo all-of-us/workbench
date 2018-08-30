@@ -4,10 +4,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
 
 @RestController
 public class UserController implements UserApiDelegate {
@@ -31,10 +36,12 @@ public class UserController implements UserApiDelegate {
   };
 
   private final UserDao userDao;
+  private final WorkbenchConfig workbenchConfig;
 
   @Autowired
-  public UserController(UserDao userDao) {
+  public UserController(UserDao userDao, Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.userDao = userDao;
+    this.workbenchConfig = workbenchConfigProvider.get();
   }
 
   @Override
@@ -52,6 +59,8 @@ public class UserController implements UserApiDelegate {
     List<UserResponse> responses = userDao
         .findUsersBySearchString(term, pageable)
         .stream()
+        .filter(u -> !workbenchConfig.firecloud.enforceRegistered ||
+            u.getDataAccessLevelEnum().equals(DataAccessLevel.REGISTERED))
         .map(TO_USER_RESPONSE)
         .collect(Collectors.toList());
     return ResponseEntity.ok(responses);
