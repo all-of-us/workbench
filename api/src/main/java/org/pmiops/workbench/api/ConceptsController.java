@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMultimap;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -66,7 +65,8 @@ public class ConceptsController implements ConceptsApiDelegate {
             .prevalence(concept.getPrevalence())
             .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(
                 concept.getStandardConcept()))
-            .vocabularyId(concept.getVocabularyId());
+            .vocabularyId(concept.getVocabularyId())
+            .conceptSynonyms(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
 
   @Autowired
   ConceptSynonymDao conceptSynonymDao;
@@ -110,17 +110,8 @@ public class ConceptsController implements ConceptsApiDelegate {
       throw new BadRequestException("Query must be non-whitespace");
     }
 
-
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount);
-
-
-    List<Long> conceptIds =concepts.getContent().stream().map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList());
-    Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
-
-    for(org.pmiops.workbench.cdr.model.Concept concept: concepts.getContent()) {
-      concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
-    }
 
 
     // TODO: move Swagger codegen to common-api, pass request with modified values into service

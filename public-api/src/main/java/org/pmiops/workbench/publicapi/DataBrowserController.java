@@ -51,7 +51,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     private ConceptService conceptService;
 
-
     public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao, ConceptSynonymDao conceptSynonymDao) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
@@ -371,21 +370,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         concepts = conceptService.searchConcepts(searchConceptsRequest.getQuery(), convertedConceptFilter,
                 searchConceptsRequest.getVocabularyIds(), domainIds, maxResults, minCount);
         ConceptListResponse response = new ConceptListResponse();
-        List<Concept> matchedConcepts = new ArrayList<>();
-        if(concepts != null){
-            matchedConcepts = concepts.getContent();
-        }
 
-        List<Long> conceptIds =matchedConcepts.stream().map(Concept::getConceptId).collect(Collectors.toList());
-        Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
 
-        for(Concept con : matchedConcepts){
+        for(Concept con : concepts.getContent()){
             String conceptCode = con.getConceptCode();
             String conceptId = String.valueOf(con.getConceptId());
 
             ArrayList<String> conceptSynonymNames = new ArrayList<>();
-
-            con.setSynonyms(synonymMap.get(con.getConceptId()).stream().collect(Collectors.toList()));
 
             for(ConceptSynonym conceptSynonym:con.getSynonyms()){
                 if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
@@ -409,7 +400,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             response.setMatchType(MatchType.NAME);
         }
 
-        response.setItems(matchedConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+        response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 

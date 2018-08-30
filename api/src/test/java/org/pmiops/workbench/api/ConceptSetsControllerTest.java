@@ -50,6 +50,7 @@ import javax.inject.Provider;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
@@ -65,49 +66,53 @@ import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 public class ConceptSetsControllerTest {
 
   private static final Concept CLIENT_CONCEPT_1 = new Concept()
-      .conceptId(123L)
-      .conceptName("a concept")
-      .standardConcept(true)
-      .conceptCode("conceptA")
-      .conceptClassId("classId")
-      .vocabularyId("V1")
-      .domainId("Condition")
-      .countValue(123L)
-      .prevalence(0.2F);
+          .conceptId(123L)
+          .conceptName("a concept")
+          .standardConcept(true)
+          .conceptCode("conceptA")
+          .conceptClassId("classId")
+          .vocabularyId("V1")
+          .domainId("Condition")
+          .countValue(123L)
+          .prevalence(0.2F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_2 = new Concept()
-      .conceptId(456L)
-      .standardConcept(false)
-      .conceptName("b concept")
-      .conceptCode("conceptB")
-      .conceptClassId("classId2")
-      .vocabularyId("V2")
-      .domainId("Measurement")
-      .countValue(456L)
-      .prevalence(0.3F);
+          .conceptId(456L)
+          .standardConcept(false)
+          .conceptName("b concept")
+          .conceptCode("conceptB")
+          .conceptClassId("classId2")
+          .vocabularyId("V2")
+          .domainId("Measurement")
+          .countValue(456L)
+          .prevalence(0.3F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_3 = new Concept()
-      .conceptId(789L)
-      .standardConcept(false)
-      .conceptName("multi word concept")
-      .conceptCode("conceptC")
-      .conceptClassId("classId3")
-      .vocabularyId("V3")
-      .domainId("Condition/Device")
-      .countValue(789L)
-      .prevalence(0.4F);
+          .conceptId(789L)
+          .standardConcept(false)
+          .conceptName("multi word concept")
+          .conceptCode("conceptC")
+          .conceptClassId("classId3")
+          .vocabularyId("V3")
+          .domainId("Condition/Device")
+          .countValue(789L)
+          .prevalence(0.4F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_4 = new Concept()
-      .conceptId(7890L)
-      .standardConcept(false)
-      .conceptName("conceptD test concept")
-      .standardConcept(true)
-      .conceptCode("conceptE")
-      .conceptClassId("classId5")
-      .vocabularyId("V5")
-      .domainId("Condition/Procedure")
-      .countValue(7890L)
-      .prevalence(0.9F);
+          .conceptId(7890L)
+          .standardConcept(false)
+          .conceptName("conceptD test concept")
+          .standardConcept(true)
+          .conceptCode("conceptE")
+          .conceptClassId("classId5")
+          .vocabularyId("V5")
+          .domainId("Condition/Procedure")
+          .countValue(7890L)
+          .prevalence(0.9F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);

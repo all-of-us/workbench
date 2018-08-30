@@ -1,7 +1,10 @@
 package org.pmiops.workbench.cdr.dao;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,6 +15,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ConceptService {
@@ -26,12 +30,16 @@ public class ConceptService {
     @PersistenceContext(unitName = "cdr")
     private EntityManager entityManager;
 
+    @Autowired
+    private ConceptSynonymDao conceptSynonymDao;
+
     public ConceptService() {
     }
 
     // Used for tests
-    public ConceptService(EntityManager entityManager) {
+    public ConceptService(EntityManager entityManager, ConceptSynonymDao conceptSynonymDao) {
         this.entityManager = entityManager;
+        this.conceptSynonymDao = conceptSynonymDao;
     }
 
     public static String modifyMultipleMatchKeyword(String query){
@@ -214,7 +222,14 @@ public class ConceptService {
                 new Sort(Direction.DESC, "countValue"));
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);
-        return conceptDao.findAll(conceptSpecification, pageable);
+        Slice<Concept> conceptSlice = conceptDao.findAll(conceptSpecification, pageable);
+        List<Concept> concepts = conceptSlice.getContent();
+        List<Long> conceptIds = concepts.stream().map(Concept::getConceptId).collect(Collectors.toList());
+        Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
+        for(Concept concept: concepts) {
+            concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
+        }
+        return conceptSlice;
     }
 
 }

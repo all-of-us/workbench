@@ -401,6 +401,27 @@ definitions:
         items:
           type: "string"
 
+  ConceptSynonym:
+    type: object
+    description: concept synonym
+    required:
+      - conceptId
+      - conceptSynonymName
+      - languageConceptId
+
+    properties:
+      conceptId:
+        description: concept id
+        type: integer
+        format: int64
+      conceptSynonymName:
+        description: concept synonym name
+        type: string
+      languageConceptId:
+        description: language concept id
+        type: integer
+        format: int64
+
   SearchConceptsRequest:
     type: object
     required:

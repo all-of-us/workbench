@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.annotations.BatchSize;
 
 import java.util.Objects;
 import java.util.ArrayList;
