@@ -1,6 +1,7 @@
 .selection-button {
   color: rgb(114, 114, 114);
   border-color: rgb(195, 195, 195);
+  font-weight: 100 !important
 }
 
 .selection-button:hover {
