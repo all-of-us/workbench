@@ -128,26 +128,28 @@ public class WorkspacesControllerTest {
   private static final String BUCKET_NAME = "workspace-bucket";
 
   private static final Concept CLIENT_CONCEPT_1 = new Concept()
-      .conceptId(123L)
-      .conceptName("a concept")
-      .standardConcept(true)
-      .conceptCode("conceptA")
-      .conceptClassId("classId")
-      .vocabularyId("V1")
-      .domainId("Condition")
-      .countValue(123L)
-      .prevalence(0.2F);
+          .conceptId(123L)
+          .conceptName("a concept")
+          .standardConcept(true)
+          .conceptCode("conceptA")
+          .conceptClassId("classId")
+          .vocabularyId("V1")
+          .domainId("Condition")
+          .countValue(123L)
+          .prevalence(0.2F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_2 = new Concept()
-      .conceptId(456L)
-      .standardConcept(false)
-      .conceptName("b concept")
-      .conceptCode("conceptB")
-      .conceptClassId("classId2")
-      .vocabularyId("V2")
-      .domainId("Condition/Device")
-      .countValue(456L)
-      .prevalence(0.3F);
+          .conceptId(456L)
+          .standardConcept(false)
+          .conceptName("b concept")
+          .conceptCode("conceptB")
+          .conceptClassId("classId2")
+          .vocabularyId("V2")
+          .domainId("Condition/Device")
+          .countValue(456L)
+          .prevalence(0.3F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);

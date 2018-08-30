@@ -72,7 +72,8 @@ public class DataBrowserControllerTest {
                             .domainId(concept.getDomainId())
                             .count(concept.getCountValue())
                             .sourceCountValue(concept.getSourceCountValue())
-                            .prevalence(concept.getPrevalence());
+                            .prevalence(concept.getPrevalence())
+                            .synonyms(new ArrayList<>());
                 }
             };
 
@@ -103,7 +104,8 @@ public class DataBrowserControllerTest {
             .domainId("Condition")
             .count(123L)
             .sourceCountValue(20L)
-            .prevalence(0.2F);
+            .prevalence(0.2F)
+            .synonyms(new ArrayList<ConceptSynonym>());
 
     private static final Concept CLIENT_CONCEPT_2 = new Concept()
             .conceptId(456L)
@@ -114,7 +116,8 @@ public class DataBrowserControllerTest {
             .domainId("Measurement")
             .count(456L)
             .sourceCountValue(25L)
-            .prevalence(0.3F);
+            .prevalence(0.3F)
+            .synonyms(new ArrayList<ConceptSynonym>());
 
     private static final Concept CLIENT_CONCEPT_3 = new Concept()
             .conceptId(789L)
@@ -126,7 +129,8 @@ public class DataBrowserControllerTest {
             .domainId("Condition")
             .count(789L)
             .sourceCountValue(0L)
-            .prevalence(0.4F);
+            .prevalence(0.4F)
+            .synonyms(new ArrayList<ConceptSynonym>());
 
     private static final Concept CLIENT_CONCEPT_4 = new Concept()
             .conceptId(1234L)
@@ -138,7 +142,8 @@ public class DataBrowserControllerTest {
             .domainId("Observation")
             .count(1250L)
             .sourceCountValue(99L)
-            .prevalence(0.5F);
+            .prevalence(0.5F)
+            .synonyms(new ArrayList<ConceptSynonym>());
 
     private static final Concept CLIENT_CONCEPT_5 = new Concept()
             .conceptId(7890L)
@@ -150,7 +155,8 @@ public class DataBrowserControllerTest {
             .domainId("Condition")
             .count(7890L)
             .sourceCountValue(78L)
-            .prevalence(0.9F);
+            .prevalence(0.9F)
+            .synonyms(new ArrayList<ConceptSynonym>());
 
     private static final Concept CLIENT_CONCEPT_6 = new Concept()
             .conceptId(7891L)
@@ -162,7 +168,8 @@ public class DataBrowserControllerTest {
             .domainId("Condition")
             .count(0L)
             .sourceCountValue(20L)
-            .prevalence(0.1F);
+            .prevalence(0.1F)
+            .synonyms(new ArrayList<ConceptSynonym>());
 
     private static final Concept CLIENT_CONCEPT_7 = new Concept()
             .conceptId(7892L)
@@ -174,7 +181,8 @@ public class DataBrowserControllerTest {
             .domainId("Condition")
             .count(0L)
             .sourceCountValue(0L)
-            .prevalence(0.0F);
+            .prevalence(0.0F)
+            .synonyms(new ArrayList<ConceptSynonym>());
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_1 = new ConceptSynonym()
             .conceptId(7892L)
@@ -681,6 +689,7 @@ public class DataBrowserControllerTest {
         result.setCountValue(concept.getCountValue());
         result.setSourceCountValue(concept.getSourceCountValue());
         result.setPrevalence(concept.getPrevalence());
+        result.setSynonyms(concept.getSynonyms());
         return result;
     }
 
