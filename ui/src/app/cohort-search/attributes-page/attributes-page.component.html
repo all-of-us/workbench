@@ -56,9 +56,6 @@
                 (ngModelChange)="inputChange()"
                 required>
               <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
-              <span *ngIf="isMeasurement()">
-                Range: {{attr.MIN}} - {{attr.MAX}}
-              </span>
             </div>
             <div *ngIf="isBetween(i, attrForm)" class="form-group and-text">
               <div>and</div>
@@ -73,10 +70,10 @@
                 (ngModelChange)="inputChange()"
                 required>
               <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
-              <span *ngIf="isMeasurement()">
-                Range: {{attr.MIN}} - {{attr.MAX}}
-              </span>
             </div>
+              <span class="range-padding" *ngIf="isMeasurement() && showInput(i, attrForm)">
+              Range: {{attr.MIN}} - {{attr.MAX}}
+              </span>
           </div>
       </div>
       <ng-container *ngIf="attrs.CAT.length">
