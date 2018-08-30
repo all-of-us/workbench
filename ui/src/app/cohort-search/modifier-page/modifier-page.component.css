@@ -125,3 +125,13 @@
     height: 0.7rem;
 
 }
+
+.greyed-button {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.3;
+    background-color: #c3c3c3;
+    border-radius: 0.125rem;
+    border: transparent;
+    color: white;
+}
