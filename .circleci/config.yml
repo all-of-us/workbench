@@ -23,9 +23,9 @@ jobs:
       - run:
           command: git submodule update --init --recursive
       - run:
-        #Circle is bad about setting up your remotes for you, you must use origin/
+          #Circle is bad about setting up your remotes for you, you must use origin/
           command: |
-            if [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ] && [ ${CIRCLE_BRANCH} != "master" ]; then
+            if [ ${CIRCLE_BRANCH} != "master" ] && [ ${CIRCLE_BRANCH} != "" ] && [ $(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ]; then
               echo No relevant changes on non-master branch, skipping
               circleci step halt
             fi
