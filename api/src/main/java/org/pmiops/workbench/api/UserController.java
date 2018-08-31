@@ -52,7 +52,7 @@ public class UserController implements UserApiDelegate {
     PaginationToken paginationToken;
     try {
       paginationToken = getPaginationTokenFromPageToken(pageToken);
-    } catch (BadRequestException e) {
+    } catch (IllegalArgumentException | BadRequestException e) {
       return ResponseEntity.badRequest().body(response);
     }
 

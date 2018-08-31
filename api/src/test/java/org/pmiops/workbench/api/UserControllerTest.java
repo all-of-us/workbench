@@ -114,9 +114,11 @@ public class UserControllerTest {
     assertThat(response.getUsers()).hasSize(0);
   }
 
-  @Test(expected=IllegalArgumentException.class)
+  @Test
   public void testInvalidPageTokenCharacters() {
-    userController.user("Robinson", "Inv@l!dT0k3n#", null, null);
+    ResponseEntity<UserResponse> response = userController.user("Robinson", "Inv@l!dT0k3n#", null, null);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(response.getBody().getUsers()).hasSize(0);
   }
 
   @Test
