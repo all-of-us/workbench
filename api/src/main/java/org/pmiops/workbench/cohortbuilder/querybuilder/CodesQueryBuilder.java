@@ -203,12 +203,12 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   }
 
-  private class MultiKey {
+  public class MultiKey {
     private String group;
     private String type;
     private String domain;
 
-    MultiKey(SearchParameter searchParameter) {
+    public MultiKey(SearchParameter searchParameter) {
       this.group = searchParameter.getGroup() ? GROUP : NOT_GROUP;
       this.type = searchParameter.getType();
       this.domain = searchParameter.getDomain();
