@@ -37,7 +37,12 @@ jobs:
       - run:
           name: Unit tests
           working_directory: ~/workbench/api
-          command: ./project.rb test
+          command: |
+            if (( ../ci/has_branch_changes "${CIRCLE_BRANCH}" "/api/" "/common-api/" )); then
+              ./project.rb test
+            else
+              echo "skipped, no changes"
+            fi
       - save_cache:
           paths:
             - ~/.gradle
