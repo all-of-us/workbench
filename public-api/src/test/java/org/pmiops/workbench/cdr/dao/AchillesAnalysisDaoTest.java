@@ -95,7 +95,7 @@ public class AchillesAnalysisDaoTest {
         analysisIds.add(3101L);
         analysisIds.add(3102L);
         List<String> conceptIds = new ArrayList<>();
-        conceptIds.add("10");
+        conceptIds.add("104567");
         List<AchillesAnalysis> aa = dao.findConceptAnalysisResults(conceptIds,analysisIds);
         Assert.assertNotEquals(aa.get(0),null);
         Assert.assertNotEquals(aa.get(1),null);
