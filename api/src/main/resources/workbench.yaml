@@ -2035,7 +2035,7 @@ definitions:
     type: object
     properties:
       users:
-        description: researchallofus email address
+        description: A list of users matching the provided search query.
         type: array
         items:
           $ref: "#/definitions/User"

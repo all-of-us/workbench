@@ -1,9 +1,11 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
-
+import javax.inject.Provider;
 import com.google.common.collect.Lists;
 import org.junit.After;
 import org.junit.Before;
@@ -28,10 +30,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.inject.Provider;
-
-import static com.google.common.truth.Truth.assertThat;
-
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -41,25 +39,18 @@ public class UserControllerTest {
 
   @Autowired
   private UserDao userDao;
-
   @Mock
   private AdminActionHistoryDao adminActionHistoryDao;
-
   @Mock
   private Provider<WorkbenchConfig> configProvider;
-
   @Mock
   private Provider<User> userProvider;
-
   @Mock
   private FireCloudService fireCloudService;
-
   @Mock
   private Clock clock;
-
   private UserController userController;
   private UserService userService;
-
   private Long incrementedUserId = 1L;
 
   @Before
