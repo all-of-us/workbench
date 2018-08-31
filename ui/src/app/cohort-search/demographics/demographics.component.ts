@@ -58,6 +58,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
   /* Storage for the demographics options (fetched via the API) */
   ageNode;
+  ageNodes: Array<any>;
+  ageCount: number;
   deceasedNode;
 
   genderNodes = List();
@@ -151,6 +153,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       /* Age and Deceased are single nodes we use as templates */
       case CRITERIA_SUBTYPES.AGE:
         this.ageNode = nodes.get(0);
+        this.ageNodes = nodes.toJS();
+        this.calculateAgeCount();
         break;
       case CRITERIA_SUBTYPES.DEC:
         this.deceasedNode = nodes.get(0);
@@ -251,7 +255,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       min.setValue(range[0]);
       max.setValue(range[1]);
     }
-
     const selectedAge = this.selection$
       .map(selectedNodes => selectedNodes
         .find(node => node.get('subtype') === CRITERIA_SUBTYPES.AGE)
@@ -261,6 +264,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       .debounceTime(250)
       .distinctUntilChanged()
       .map(([lo, hi]) => {
+        this.calculateAgeCount();
         const attr = fromJS(<Attribute>{
           name: 'Age',
           operator: Operator.BETWEEN,
@@ -301,5 +305,16 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         ? this.actions.addParameter(this.deceasedNode)
         : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
     }));
+  }
+
+  calculateAgeCount() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    let count = 0;
+    for (let i = min.value; i <= max.value; i++) {
+      const ageNode = this.ageNodes.find(node => node.name === i.toString());
+      count += ageNode.count;
+    }
+    this.ageCount = count;
   }
 }
