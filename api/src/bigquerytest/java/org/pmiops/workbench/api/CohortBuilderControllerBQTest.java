@@ -630,6 +630,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsICD9ConditionOccurrenceChildICD10ConditionOccurrenceChild() throws Exception {
+    SearchParameter icd9P = createSearchParameter(icd9ConditionParent, "001");
+    SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9P, icd10), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
   public void countSubjectsICD10ConditionOccurrenceParent() throws Exception {
     SearchParameter icd10 = createSearchParameter(icd10ConditionParent, "A");
     SearchRequest searchRequest = createSearchRequests(icd10ConditionParent.getType(), Arrays.asList(icd10), new ArrayList<>());
@@ -754,7 +762,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugNoSearchParameter() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
     SearchRequest searchRequest = createSearchRequests(drug.getType(), new ArrayList<>(), new ArrayList<>());
     try {
@@ -767,7 +775,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugNoConceptIdOnSearchParameter() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false);
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false);
     SearchParameter drug = createSearchParameter(drugCriteria, null);
     SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
     try {

@@ -17,7 +17,7 @@
   {
     "condition_occurrence_id":6,
     "condition_source_concept_id":"6",
-    "person_id":1,
+    "person_id":2,
     "condition_concept_id":6,
     "condition_start_date":"2009-12-03",
     "condition_start_datetime":"2009-12-03 05:00:00 UTC",
