@@ -114,24 +114,22 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   inputChange(newVal: string) {
-    switch (this._type) {
-      case DomainType.VISIT:
-        if (newVal.length > 2) {
-          this.actions.setCriteriaSearchTerms([newVal]);
-        } else {
-          this.actions.setCriteriaSearchTerms([]);
-        }
-        break;
-      default:
-        this.optionSelected = false;
-        this.multiIngredient = false;
-        this.noResults = false;
-        if (newVal.length >= 4) {
-          this.actions.fetchAutocompleteOptions(this._type, newVal);
-        } else {
-          this.actions.setCriteriaSearchTerms([]);
-          this.options = [];
-        }
+    if (this._type === DomainType.VISIT || this._type === CRITERIA_TYPES.PM) {
+      if (newVal.length > 2) {
+        this.actions.setCriteriaSearchTerms([newVal]);
+      } else {
+        this.actions.setCriteriaSearchTerms([]);
+      }
+    } else {
+      this.optionSelected = false;
+      this.multiIngredient = false;
+      this.noResults = false;
+      if (newVal.length >= 4) {
+        this.actions.fetchAutocompleteOptions(this._type, newVal);
+      } else {
+        this.actions.setCriteriaSearchTerms([]);
+        this.options = [];
+      }
     }
   }
 
