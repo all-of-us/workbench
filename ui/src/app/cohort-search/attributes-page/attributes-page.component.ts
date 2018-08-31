@@ -106,7 +106,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   radioChange() {
-    this.selectedCode ='Any';
+    this.selectedCode = 'Any';
     this.preview = this.preview.set('count', this.node.get('count'));
   }
 
@@ -115,22 +115,22 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
       const other = index === 0 ? 1 : 0;
-      if(other === 0){
-          if(this.diaOption === undefined) {
+      if (other === 0) {
+          if (this.diaOption === undefined) {
               this.diaOption = option.code;
               this.sysOption = option.code;
           } else {
               this.sysOption = option.code;
           }
-      } else if(other === 1){
-          if(this.sysOption === undefined) {
+      } else if (other === 1) {
+          if (this.sysOption === undefined) {
               this.sysOption = option.code;
               this.diaOption = option.code;
           } else {
               this.diaOption = option.code;
           }
       }
-      if(this.sysOption && this.diaOption){
+      if (this.sysOption && this.diaOption) {
             this.selectedCode = (this.sysOption + this.diaOption);
         }
       if (option.value === 'ANY') {
@@ -141,7 +141,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         this.dropdowns.selected[other] = option.name;
       }
       this.dropdowns.oldVals[index] = option.value;
-    } else{
+    } else {
         this.selectedCode = option.code;
     }
     this.preview = option.value === 'ANY'
