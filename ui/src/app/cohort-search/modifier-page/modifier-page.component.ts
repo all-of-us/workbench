@@ -224,14 +224,16 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     ngAfterContentChecked() {
         this.cdref.detectChanges();
     }
+
+    showCount(modName: string, optName: string) {
+        return modName === 'encounters' && optName !== 'Any';
+    }
+
     selectChange(opt, index, e, mod) {
-      this.dropdownOption.selected[index] = opt.name;
-      if (e.target.value || this.form.controls.valueA) {
-        this.formChanges = true;
-      }
-      const modForm = <FormArray>this.form.controls[mod.name];
-      const valueForm = <FormArray>modForm;
-      valueForm.get('operator').patchValue(opt.value);
+        this.dropdownOption.selected[index] = opt.name;
+        const modForm = <FormArray>this.form.controls[mod.name];
+        const valueForm = <FormArray>modForm;
+        valueForm.get('operator').patchValue(opt.value);
     }
 
   currentMods(vals) {
