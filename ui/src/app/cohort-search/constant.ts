@@ -24,7 +24,7 @@ export const CRITERIA_SUBTYPES = {
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys',    type: CRITERIA_TYPES.SURVEY, children: [], disabled: true },
-  { name: 'Physical Measurements',    type: CRITERIA_TYPES.PM },
+  { name: 'Physical Measurements',    type: CRITERIA_TYPES.PM, fullTree: true },
 ];
 
 export const DOMAIN_TYPES = [
