@@ -3,8 +3,13 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Table;
 import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
@@ -12,10 +17,14 @@ import org.pmiops.workbench.model.TreeType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -26,15 +35,14 @@ import java.util.stream.Collectors;
 @Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 
+  private static final String GROUP = "group";
+  private static final String NOT_GROUP = "notGroup";
+
   private static final ImmutableMap<String, String> TYPE_PROC =
     ImmutableMap.of(TreeType.ICD9.name(), "ICD9Proc", TreeType.CPT.name(), "CPT4");
 
   private static final ImmutableMap<String, String> TYPE_CM =
     ImmutableMap.of(TreeType.ICD9.name(), "ICD9CM", TreeType.CPT.name(), "CPT4");
-
-  public enum GroupType {
-    GROUP, NOT_GROUP
-  }
 
   //If the querybuilder will use modifiers then this sql statement has to have
   //the distinct and ${modifierColumns}
@@ -61,26 +69,30 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters params) {
-    Map<GroupType, ListMultimap<String, SearchParameter>> paramMap = getMappedParameters(params.getParameters());
+    ListMultimap<MultiKey, SearchParameter> paramMap = getMappedParameters(params.getParameters());
     List<String> queryParts = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
-    for (GroupType group : paramMap.keySet()) {
-      ListMultimap<String, SearchParameter> domainMap = paramMap.get(group);
-
-      for (String domain : domainMap.keySet()) {
-        final List<SearchParameter> searchParameterList = domainMap.get(domain);
+    for (MultiKey key : paramMap.keySet()) {
+        final List<SearchParameter> searchParameterList = paramMap.get(key);
         final SearchParameter parameter = searchParameterList.get(0);
-        final String type = parameter.getType();
-        final String subtype = parameter.getSubtype();
         List<String> codes =
           searchParameterList.stream().map(SearchParameter::getValue).collect(Collectors.toList());
-        if (group.equals(GroupType.NOT_GROUP)) {
-          buildNotGroupQuery(type, subtype, queryParts, queryParams, domain, codes);
+        if (key.getKey().contains(NOT_GROUP)) {
+          buildNotGroupQuery(parameter.getType(),
+            parameter.getSubtype(),
+            queryParts,
+            queryParams,
+            parameter.getDomain(),
+            codes);
         } else {
-          buildGroupQuery(type, subtype, queryParts, queryParams, domain, codes);
+          buildGroupQuery(parameter.getType(),
+            parameter.getSubtype(),
+            queryParts,
+            queryParams,
+            parameter.getDomain(),
+            codes);
         }
-      }
     }
 
     String codesSql = String.join(UNION_TEMPLATE, queryParts);
@@ -171,23 +183,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     return FactoryKey.CODES;
   }
 
-  protected Map<GroupType, ListMultimap<String, SearchParameter>> getMappedParameters(List<SearchParameter> searchParameters) {
-    Map<GroupType, ListMultimap<String, SearchParameter>> fullMap = new LinkedHashMap<>();
-    ListMultimap<String, SearchParameter> groupParameters = ArrayListMultimap.create();
-    ListMultimap<String, SearchParameter> notGroupParameters = ArrayListMultimap.create();
-    for (SearchParameter parameter : searchParameters) {
-      if (parameter.getGroup()) {
-        groupParameters.put(parameter.getDomain(), parameter);
-      } else {
-        notGroupParameters.put(parameter.getDomain(), parameter);
-      }
-    }
-    if (!groupParameters.isEmpty()) {
-      fullMap.put(GroupType.GROUP, groupParameters);
-    }
-    if (!notGroupParameters.isEmpty()) {
-      fullMap.put(GroupType.NOT_GROUP, notGroupParameters);
-    }
+  protected ListMultimap<MultiKey, SearchParameter> getMappedParameters(List<SearchParameter> searchParameters) {
+    ListMultimap<MultiKey, SearchParameter> fullMap = ArrayListMultimap.create();
+    searchParameters
+      .forEach(param -> {
+          fullMap.put(new MultiKey(param), param);
+        }
+      );
     return fullMap;
   }
 
@@ -199,5 +201,36 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     }
     return returnSql;
 
+  }
+
+  private class MultiKey {
+    private String group;
+    private String type;
+    private String domain;
+
+    MultiKey(SearchParameter searchParameter) {
+      this.group = searchParameter.getGroup() ? GROUP : NOT_GROUP;
+      this.type = searchParameter.getType();
+      this.domain = searchParameter.getDomain();
+    }
+
+    public String getKey() {
+      return this.group + this.type + this.domain;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      MultiKey multiKey = (MultiKey) o;
+      return Objects.equals(group, multiKey.group) &&
+        Objects.equals(type, multiKey.type) &&
+        Objects.equals(domain, multiKey.domain);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(group, type, domain);
+    }
   }
 }
