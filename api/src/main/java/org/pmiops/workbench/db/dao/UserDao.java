@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.pmiops.workbench.db.model.User;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -41,7 +41,7 @@ public interface UserDao extends CrudRepository<User, Long> {
   /**
    * Find users matching the user's name or email
    */
-  @Query("SELECT user FROM User user WHERE lower(user.email) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%'))")
-  List<User> findUsersBySearchString(@Param("term") String term, Pageable pageable);
+  @Query("SELECT user FROM User user WHERE user.dataAccessLevel in :dals AND ( lower(user.email) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%')) )")
+  List<User> findUsersByDataAccessLevelsAndSearchString(@Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
 
 }

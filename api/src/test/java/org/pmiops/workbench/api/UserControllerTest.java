@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
 
@@ -10,9 +11,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.test.Providers;
@@ -31,17 +35,30 @@ import static com.google.common.truth.Truth.assertThat;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 public class UserControllerTest {
 
   @Autowired
   private UserDao userDao;
 
   @Mock
+  private AdminActionHistoryDao adminActionHistoryDao;
+
+  @Mock
   private Provider<WorkbenchConfig> configProvider;
 
+  @Mock
+  private Provider<User> userProvider;
+
+  @Mock
+  private FireCloudService fireCloudService;
+
+  @Mock
+  private Clock clock;
+
   private UserController userController;
+  private UserService userService;
 
   private Long incrementedUserId = 1L;
 
@@ -51,7 +68,8 @@ public class UserControllerTest {
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.enforceRegistered = false;
     configProvider = Providers.of(config);
-    this.userController = new UserController(userDao, configProvider);
+    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
+    this.userController = new UserController(userService);
     saveFamily();
   }
 
@@ -63,95 +81,99 @@ public class UserControllerTest {
   @Test
   public void testEnforceRegistered() {
     configProvider.get().firecloud.enforceRegistered = true;
-    this.userController = new UserController(userDao, configProvider);
+    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
+    this.userController = new UserController(userService);
     User john = userDao.findUserByEmail("john@lis.org");
 
-    List<UserResponse> users = userController.user("Robinson", null, null, null).getBody();
+    UserResponse response = userController.user("Robinson", null, null, null).getBody();
     // Test data contains a single registered user, John Robinson.
-    assertThat(users).hasSize(1);
-    assertThat(users.get(0).getEmail()).isSameAs(john.getEmail());
+    assertThat(response.getUsers()).hasSize(1);
+    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getEmail());
   }
 
   @Test
   public void testUserSearch() {
     User john = userDao.findUserByEmail("john@lis.org");
 
-    List<UserResponse> users = userController.user("John", null, null, null).getBody();
-    assertThat(users).hasSize(1);
-    assertThat(users.get(0).getEmail()).isSameAs(john.getEmail());
+    UserResponse response = userController.user("John", null, null, null).getBody();
+    assertThat(response.getUsers()).hasSize(1);
+    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getEmail());
   }
 
   @Test
   public void testUserPartialStringSearch() {
     List<User> allUsers = Lists.newArrayList(userDao.findAll());
 
-    List<UserResponse> users = userController.user("obin", null, null, null).getBody();
-    assertThat(users).hasSize(allUsers.size());
+    UserResponse response = userController.user("obin", null, null, null).getBody();
+    assertThat(response.getUsers()).hasSize(allUsers.size());
   }
 
   @Test
   public void testUserEmptyResponse() {
-    List<UserResponse> emptyString = userController.user("", null, null, null).getBody();
-    assertThat(emptyString).hasSize(0);
+    UserResponse response = userController.user("", null, null, null).getBody();
+    assertThat(response.getUsers()).hasSize(0);
   }
 
   @Test
   public void testUserNoUsersResponse() {
-    List<UserResponse> noSmiths = userController.user("Smith", null, null, null).getBody();
-    assertThat(noSmiths).hasSize(0);
+    UserResponse response = userController.user("Smith", null, null, null).getBody();
+    assertThat(response.getUsers()).hasSize(0);
   }
 
   @Test
   public void testUserPageSize() {
     int size = 1;
-    List<UserResponse> robinsons_0 = userController.user("Robinson", 0, size, null).getBody();
-    List<UserResponse> robinsons_1 = userController.user("Robinson", 1, size, null).getBody();
-    List<UserResponse> robinsons_2 = userController.user("Robinson", 2, size, null).getBody();
-    List<UserResponse> robinsons_3 = userController.user("Robinson", 3, size, null).getBody();
-    List<UserResponse> robinsons_4 = userController.user("Robinson", 4, size, null).getBody();
+    UserResponse robinsons_0 = userController.user("Robinson", "0", size, null).getBody();
+    UserResponse robinsons_1 = userController.user("Robinson", "1", size, null).getBody();
+    UserResponse robinsons_2 = userController.user("Robinson", "2", size, null).getBody();
+    UserResponse robinsons_3 = userController.user("Robinson", "3", size, null).getBody();
+    UserResponse robinsons_4 = userController.user("Robinson", "4", size, null).getBody();
 
-    assertThat(robinsons_0).hasSize(size);
-    assertThat(robinsons_1).hasSize(size);
-    assertThat(robinsons_2).hasSize(size);
-    assertThat(robinsons_3).hasSize(size);
-    assertThat(robinsons_4).hasSize(size);
+    assertThat(robinsons_0.getUsers()).hasSize(size);
+    assertThat(robinsons_0.getNextPageToken()).isEqualTo("1");
+    assertThat(robinsons_1.getUsers()).hasSize(size);
+    assertThat(robinsons_1.getNextPageToken()).isEqualTo("2");
+    assertThat(robinsons_2.getUsers()).hasSize(size);
+    assertThat(robinsons_2.getNextPageToken()).isEqualTo("3");
+    assertThat(robinsons_3.getUsers()).hasSize(size);
+    assertThat(robinsons_3.getNextPageToken()).isEqualTo("4");
+    assertThat(robinsons_4.getUsers()).hasSize(size);
+    assertThat(robinsons_4.getNextPageToken()).isEqualTo("");
   }
 
   @Test
   public void testUserPagedResponses() {
-    List<UserResponse> robinsons_0_1 = userController.user("Robinson", 0, 2, null).getBody();
-    List<UserResponse> robinsons_2_3 = userController.user("Robinson", 1, 2, null).getBody();
-    List<UserResponse> robinsons_4 = userController.user("Robinson", 3, 1, null).getBody();
+    UserResponse robinsons_0_1 = userController.user("Robinson", "0", 2, null).getBody();
+    UserResponse robinsons_2_3 = userController.user("Robinson", "1", 2, null).getBody();
+    UserResponse robinsons_4 = userController.user("Robinson", "3", 1, null).getBody();
 
     // Assert the expected size for each page
-    assertThat(robinsons_0_1).hasSize(2);
-    assertThat(robinsons_2_3).hasSize(2);
-    assertThat(robinsons_4).hasSize(1);
+    assertThat(robinsons_0_1.getUsers()).hasSize(2);
+    assertThat(robinsons_2_3.getUsers()).hasSize(2);
+    assertThat(robinsons_4.getUsers()).hasSize(1);
 
     // Assert uniqueness across pages
-    assertThat(robinsons_0_1).containsNoneOf(robinsons_2_3, robinsons_4);
-    assertThat(robinsons_2_3).containsNoneOf(robinsons_0_1, robinsons_4);
-    assertThat(robinsons_4).containsNoneOf(robinsons_0_1, robinsons_2_3);
-
+    assertThat(robinsons_0_1.getUsers()).containsNoneOf(robinsons_2_3, robinsons_4);
+    assertThat(robinsons_2_3.getUsers()).containsNoneOf(robinsons_0_1, robinsons_4);
+    assertThat(robinsons_4.getUsers()).containsNoneOf(robinsons_0_1, robinsons_2_3);
   }
 
   @Test
   public void testUserSort() {
-    List<UserResponse> robinsonsAsc = userController.user("Robinson", null, null, "asc").getBody();
-    List<UserResponse> robinsonsDesc = userController.user("Robinson", null, null, "desc").getBody();
+    UserResponse robinsonsAsc = userController.user("Robinson", null, null, "asc").getBody();
+    UserResponse robinsonsDesc = userController.user("Robinson", null, null, "desc").getBody();
 
     // Assert we have the same elements in both responses
-    assertThat(robinsonsAsc).containsAllIn(robinsonsDesc);
+    assertThat(robinsonsAsc.getUsers()).containsAllIn(robinsonsDesc.getUsers());
 
     // Now reverse one and assert both in the same order
-    List<UserResponse> descendingReversed = Lists.reverse(robinsonsDesc);
-    assertThat(robinsonsAsc).containsAllIn(descendingReversed).inOrder();
+    List<org.pmiops.workbench.model.User> descendingReversed = Lists.reverse(robinsonsDesc.getUsers());
+    assertThat(robinsonsAsc.getUsers()).containsAllIn(descendingReversed).inOrder();
 
     // Test that JPA sorting is really what we expected it to be by re-sorting one into a new list
-    List<UserResponse> newAscending = Lists.newArrayList(robinsonsAsc);
-    newAscending.sort(Comparator.comparing(UserResponse::getEmail));
-    assertThat(robinsonsAsc).containsAllIn(newAscending).inOrder();
-
+    List<org.pmiops.workbench.model.User> newAscending = Lists.newArrayList(robinsonsAsc.getUsers());
+    newAscending.sort(Comparator.comparing(org.pmiops.workbench.model.User::getEmail));
+    assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
   }
 
   /*

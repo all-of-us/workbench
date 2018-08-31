@@ -435,9 +435,7 @@ paths:
         200:
           description: The user information matching supplied search terms
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/UserResponse"
+            $ref: "#/definitions/UserResponse"
       parameters:
         - in: path
           name: term
@@ -445,18 +443,20 @@ paths:
           required: true
           type: string
         - in: query
-          name: page
-          description: Results you want to retrieve (0..N), default is the first page, 0
+          name: pageToken
+          description: >
+            Pagination token retrieved from a previous call to user; used for retrieving additional pages of results.
+          type: string
+          required: false
+        - in: query
+          name: pageSize
+          description: >
+            Maximum number of results to return in a response. Defaults to 10.
           type: integer
           required: false
         - in: query
-          name: size
-          description: Number of records per page, default is 10
-          type: integer
-          required: false
-        - in: query
-          name: sort
-          description: Sorting direction, either 'asc' or 'desc', default is 'asc' on the user's email
+          name: sortOrder
+          description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the user's email.
           type: string
           required: false
 
@@ -1972,7 +1972,7 @@ definitions:
         description: >
           Number of clusters deleted during the check.
 
-  UserResponse:
+  User:
     type: object
     properties:
       email:
@@ -1983,6 +1983,20 @@ definitions:
         type: string
       familyName:
         description: the user's family  name (e.g. Jones)
+        type: string
+
+  UserResponse:
+    type: object
+    properties:
+      users:
+        description: researchallofus email address
+        type: array
+        items:
+          $ref: "#/definitions/User"
+      nextPageToken:
+        description: >
+          Pagination token that can be used in a subsequent calls to retrieve more results.
+          If not set, there are no more results to retrieve.
         type: string
 
   RecentResourceResponse:

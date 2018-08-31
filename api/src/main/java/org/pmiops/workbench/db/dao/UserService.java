@@ -2,11 +2,16 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
+
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -15,6 +20,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
@@ -242,4 +248,23 @@ public class UserService {
   public boolean getContactEmailTaken(String contactEmail) {
     return (!userDao.findUserByContactEmail(contactEmail).isEmpty());
   }
+
+  /**
+   * Find users matching the user's name or email
+   */
+  public List<User> findUsersBySearchString(String term, Sort sort) {
+    List<Short> dataAccessLevels;
+    if (configProvider.get().firecloud.enforceRegistered) {
+      dataAccessLevels = Collections
+          .singletonList(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+    } else {
+      dataAccessLevels = EnumSet
+          .allOf(DataAccessLevel.class)
+          .stream()
+          .map(StorageEnums::dataAccessLevelToStorage)
+          .collect(Collectors.toList());
+    }
+    return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
+  }
+
 }
