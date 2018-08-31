@@ -372,18 +372,18 @@ Common.register_command({
 
 def test_api_changes(branch_name)
   common = Common.new
-  common_commit = common.capture_stdout(%W{git merge-base master blrubenstein/test-circle}).split("\n")[0]
+  common_commit = common.capture_stdout(%W{git merge-base master #{branch_name}}).split("\n")[0]
   api_lines = common.capture_stdout(%W{git diff --name-only #{common_commit}}).split("\n")
-  return api_lines.any? { |s| s.include?('api') }
+  api_lines.any? { |s| s.include?('api') }
 end
 
 def run_all_tests(cmd_name, args)
-  common = Common.new
   circle_branch = ENV["CIRCLE_BRANCH"]
   if circle_branch.nil? || circle_branch.empty? || circle_branch == "master"
     run_tests = true
   else
     run_tests = test_api_changes(circle_branch)
+    Common.new.run_inline %W{echo #{run_tests}}
   end
 
   if run_tests
