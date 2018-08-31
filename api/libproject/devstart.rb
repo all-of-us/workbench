@@ -371,7 +371,7 @@ Common.register_command({
 })
 
 def test_api_changes(branch_name)
-  common_commit = %W{git merge-base master #{branch_name}}
+  common_commit = Common.new.run_inline %W{git merge-base master #{branch_name}}
   api_lines = Common.new.run_inline %W{git diff --name-only #{common_commit}) | grep api | wc -l}
   if api_lines == 0
     return false
