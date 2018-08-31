@@ -370,10 +370,30 @@ Common.register_command({
   :fn => ->(*args) { run_public_api_tests("test-public-api", args) }
 })
 
+def test_api_changes(branch_name)
+  common = Common.new
+  common_commit = common.capture_stdout(%W{git merge-base master #{branch_name}}).split("\n")[0]
+  api_lines = common.capture_stdout(%W{git diff --name-only #{common_commit}}).split("\n")
+  api_changes = api_lines.any? { |s| s.include?('api') }
+  common.run_inline %W{echo #{api_changes}}
+  return api_changes
+end
 
 def run_all_tests(cmd_name, args)
-  run_api_tests(cmd_name, args)
-  run_public_api_tests(cmd_name, args)
+  circle_branch = ENV["CIRCLE_BRANCH"]
+  Common.new.run_inline %W{echo #{circle_branch}}
+
+  if circle_branch.nil? || circle_branch.empty? || circle_branch == "master"
+    run_tests = true
+  else
+    run_tests = test_api_changes(circle_branch)
+    Common.new.run_inline %W{echo #{run_tests}}
+  end
+
+  if run_tests
+    run_api_tests(cmd_name, args)
+    run_public_api_tests(cmd_name, args)
+  end
 end
 
 Common.register_command({
