@@ -38,7 +38,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   ctype: string;
   fullTree: boolean;
   subscription: Subscription;
-  attributesNode: any;
+  attributesNode: Map<any, any> = Map();
 
   open = false;
   noSelection = true;
