@@ -93,6 +93,10 @@
     width: 12rem;
 }
 
+.dropdown-menu.encounters {
+    width: auto;
+}
+
 .modifier-container {
     display: flex;
     padding-top: 0.5rem;

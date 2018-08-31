@@ -28,7 +28,7 @@
                 <span>{{dropdownOption.selected[i]}}</span>
                 <clr-icon shape="caret down"></clr-icon>
               </button>
-              <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
+              <clr-dropdown-menu [class.encounters]="mod.name === 'encounters'"  clrPosition="bottom-left" *clrIfOpen>
                 <button
                   *ngFor="let opt of mod.operators"
                   [value]="opt.value"
