@@ -165,7 +165,6 @@ public class ConceptSetsControllerTest {
   @Autowired
   FireCloudService fireCloudService;
 
-  private WorkspacesController workspacesController;
 
   @Autowired
   ConceptSynonymDao conceptSynonymDao;
@@ -198,7 +197,7 @@ public class ConceptSetsControllerTest {
 
     ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao, conceptSynonymDao, conceptService, userProvider, CLOCK);
-    workspacesController = new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);
+    WorkspacesController workspacesController = new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);
 
     User user = new User();
     user.setEmail(USER_EMAIL);
