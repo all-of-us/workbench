@@ -381,6 +381,7 @@ end
 def run_all_tests(cmd_name, args)
   circle_branch = ENV["CIRCLE_BRANCH"]
   Common.new.run_inline %W{echo #{circle_branch}}
+  Common.new.run_inline %W{git version}
   if circle_branch.nil? || circle_branch.empty? || circle_branch == "master"
     run_tests = true
   else
