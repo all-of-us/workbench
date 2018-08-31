@@ -264,6 +264,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       .debounceTime(250)
       .distinctUntilChanged()
       .map(([lo, hi]) => {
+        const slider = document.getElementsByClassName('noUi-connect');
+        const count = document.getElementById('age-count');
+        // TODO set width & position here for count
         this.calculateAgeCount();
         const attr = fromJS(<Attribute>{
           name: 'Age',
