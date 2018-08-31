@@ -3,7 +3,7 @@ import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
-import {fromJS} from 'immutable';
+import {fromJS, Map} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {AttributesPageComponent} from '../attributes-page/attributes-page.component';
@@ -27,7 +27,6 @@ import {TreeComponent} from '../tree/tree.component';
 import {ModalComponent} from './modal.component';
 
 class MockActions {
-  @dispatch() addAttributeForPreview = activeParameterList;
   @dispatch() activeCriteriaType = activeCriteriaType;
   @dispatch() activeCriteriaTreeType = activeCriteriaTreeType;
   @dispatch() activeParameterList = activeParameterList;
@@ -78,6 +77,7 @@ describe('ModalComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ModalComponent);
     component = fixture.componentInstance;
+    component.attributesNode = Map();
     fixture.detectChanges();
   });
 
