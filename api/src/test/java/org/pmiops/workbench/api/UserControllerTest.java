@@ -22,11 +22,14 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.test.Providers;
+import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -111,32 +114,51 @@ public class UserControllerTest {
     assertThat(response.getUsers()).hasSize(0);
   }
 
+  @Test(expected=IllegalArgumentException.class)
+  public void testInvalidPageTokenCharacters() {
+    userController.user("Robinson", "Inv@l!dT0k3n#", null, null);
+  }
+
+  @Test
+  public void testInvalidPageToken() {
+    ResponseEntity<UserResponse> response = userController.user("Robinson", "eyJvZmZzZXQBhcmFtZF9", null, null);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(response.getBody().getUsers()).hasSize(0);
+  }
+
+  @Test
+  public void testNegativePageOffset() {
+    ResponseEntity<UserResponse> response = userController.user("Robinson", PaginationToken.of(-1).toBase64(), null, null);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThat(response.getBody().getUsers()).hasSize(0);
+  }
+
   @Test
   public void testUserPageSize() {
     int size = 1;
-    UserResponse robinsons_0 = userController.user("Robinson", "0", size, null).getBody();
-    UserResponse robinsons_1 = userController.user("Robinson", "1", size, null).getBody();
-    UserResponse robinsons_2 = userController.user("Robinson", "2", size, null).getBody();
-    UserResponse robinsons_3 = userController.user("Robinson", "3", size, null).getBody();
-    UserResponse robinsons_4 = userController.user("Robinson", "4", size, null).getBody();
+    UserResponse robinsons_0 = userController.user("Robinson", PaginationToken.of(0).toBase64(), size, null).getBody();
+    UserResponse robinsons_1 = userController.user("Robinson", PaginationToken.of(1).toBase64(), size, null).getBody();
+    UserResponse robinsons_2 = userController.user("Robinson", PaginationToken.of(2).toBase64(), size, null).getBody();
+    UserResponse robinsons_3 = userController.user("Robinson", PaginationToken.of(3).toBase64(), size, null).getBody();
+    UserResponse robinsons_4 = userController.user("Robinson", PaginationToken.of(4).toBase64(), size, null).getBody();
 
     assertThat(robinsons_0.getUsers()).hasSize(size);
-    assertThat(robinsons_0.getNextPageToken()).isEqualTo("1");
+    assertThat(robinsons_0.getNextPageToken()).isEqualTo(PaginationToken.of(1).toBase64());
     assertThat(robinsons_1.getUsers()).hasSize(size);
-    assertThat(robinsons_1.getNextPageToken()).isEqualTo("2");
+    assertThat(robinsons_1.getNextPageToken()).isEqualTo(PaginationToken.of(2).toBase64());
     assertThat(robinsons_2.getUsers()).hasSize(size);
-    assertThat(robinsons_2.getNextPageToken()).isEqualTo("3");
+    assertThat(robinsons_2.getNextPageToken()).isEqualTo(PaginationToken.of(3).toBase64());
     assertThat(robinsons_3.getUsers()).hasSize(size);
-    assertThat(robinsons_3.getNextPageToken()).isEqualTo("4");
+    assertThat(robinsons_3.getNextPageToken()).isEqualTo(PaginationToken.of(4).toBase64());
     assertThat(robinsons_4.getUsers()).hasSize(size);
     assertThat(robinsons_4.getNextPageToken()).isEqualTo("");
   }
 
   @Test
   public void testUserPagedResponses() {
-    UserResponse robinsons_0_1 = userController.user("Robinson", "0", 2, null).getBody();
-    UserResponse robinsons_2_3 = userController.user("Robinson", "1", 2, null).getBody();
-    UserResponse robinsons_4 = userController.user("Robinson", "3", 1, null).getBody();
+    UserResponse robinsons_0_1 = userController.user("Robinson", PaginationToken.of(0).toBase64(), 2, null).getBody();
+    UserResponse robinsons_2_3 = userController.user("Robinson", PaginationToken.of(1).toBase64(), 2, null).getBody();
+    UserResponse robinsons_4 = userController.user("Robinson", PaginationToken.of(3).toBase64(), 1, null).getBody();
 
     // Assert the expected size for each page
     assertThat(robinsons_0_1.getUsers()).hasSize(2);

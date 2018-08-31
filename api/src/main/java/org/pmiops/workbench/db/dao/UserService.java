@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -255,12 +256,11 @@ public class UserService {
   public List<User> findUsersBySearchString(String term, Sort sort) {
     List<Short> dataAccessLevels;
     if (configProvider.get().firecloud.enforceRegistered) {
-      dataAccessLevels = Collections
-          .singletonList(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      dataAccessLevels = Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
+          .map(StorageEnums::dataAccessLevelToStorage)
+          .collect(Collectors.toList());
     } else {
-      dataAccessLevels = EnumSet
-          .allOf(DataAccessLevel.class)
-          .stream()
+      dataAccessLevels = Stream.of(DataAccessLevel.values())
           .map(StorageEnums::dataAccessLevelToStorage)
           .collect(Collectors.toList());
     }
