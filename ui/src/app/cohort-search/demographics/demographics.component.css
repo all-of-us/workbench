@@ -59,7 +59,17 @@ h3 {
   margin: 0 0.5rem;
 }
 
+.slider > .count-wrapper {
+  text-align: center;
+  height: 1.25rem;
+}
+
+.ng2-nouislider {
+  margin-top: 0;
+}
+
 .number-display {
+  margin-top: 0.25rem;
   padding: 0 0.5rem;
   border: 1px solid black;
   border-radius: 3px;
