@@ -181,7 +181,7 @@ export class NodeComponent implements OnInit, OnDestroy {
     }
     // Load options for Encounters modifier
     if ([CRITERIA_TYPES.PM, DomainType.VISIT].indexOf(_type) === -1) {
-      this.actions.fetchCriteria(DomainType[DomainType.VISIT], 0);
+      this.actions.fetchAllCriteria(DomainType[DomainType.VISIT], 0);
     }
   }
 
