@@ -29,13 +29,13 @@ jobs:
               echo "*"
               git merge-base master ${CIRCLE_BRANCH}
               echo "*"
-              git diff --name-only $(git merge-base master ${CIRCLE_BRANCH})
+              git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH}
               echo "*"
-              git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/
+              git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH} | grep api/
               echo "*"
-              git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/ | wc -l
+              git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH} | grep api/ | wc -l
               echo "*"
-              echo $(git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/ | wc -l)
+              echo $(git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH} | grep api/ | wc -l)
               echo "*"
               echo No relevant changes on non-master branch, skipping
               circleci step halt
