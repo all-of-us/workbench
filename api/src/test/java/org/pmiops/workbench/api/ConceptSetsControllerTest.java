@@ -175,13 +175,16 @@ public class ConceptSetsControllerTest {
 
   private ConceptSetsController conceptSetsController;
 
+  @Autowired
+  UserRecentResourceService userRecentResourceService;
+
   @Mock
   Provider<User> userProvider;
 
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class,
-      UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptService.class, ConceptSetService.class})
+      UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
   @MockBean({FireCloudService.class, CloudStorageService.class, ConceptService.class, ConceptSetService.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
@@ -195,7 +198,7 @@ public class ConceptSetsControllerTest {
 
     ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao, conceptSynonymDao, conceptService, userProvider, CLOCK);
-    workspacesController = new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, userService);
+    workspacesController = new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);
 
     User user = new User();
     user.setEmail(USER_EMAIL);
