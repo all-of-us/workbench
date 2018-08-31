@@ -46,7 +46,7 @@
         class="number-display"
         (blur)="checkMin()">
       <div class="slider">
-        <div class="count-wrapper">
+        <div id="age-count" class="count-wrapper">
           <span *ngIf="ageCount" class="badge badge-info">
             {{ ageCount | number }}
           </span>
