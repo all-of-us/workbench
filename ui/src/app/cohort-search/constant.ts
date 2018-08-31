@@ -1,15 +1,4 @@
-import { DomainType, Operator } from 'generated';
-
-export const CRITERIA_TYPES = {
-  'PM': 'PM',
-  'MEAS': 'MEAS',
-  'ICD9': 'ICD9',
-  'ICD10': 'ICD10',
-  'CPT': 'CPT',
-  'DEMO': 'DEMO',
-  'PHECODE': 'PHECODE',
-  'SURVEY': 'SURVEY'
-};
+import { Operator, TreeType } from 'generated';
 
 export const CRITERIA_SUBTYPES = {
   'ATC': 'ATC',
@@ -23,24 +12,21 @@ export const CRITERIA_SUBTYPES = {
 };
 
 export const PROGRAM_TYPES = [
-  { name: 'Surveys',    type: CRITERIA_TYPES.SURVEY, children: [], disabled: true },
-  { name: 'Physical Measurements',    type: CRITERIA_TYPES.PM, fullTree: true },
+  { name: 'Surveys',    type: TreeType.SURVEY, children: [], disabled: true },
+  { name: 'Physical Measurements',    type: TreeType.PM, fullTree: true },
 ];
 
 export const DOMAIN_TYPES = [
-    { name: 'Demographics', type: CRITERIA_TYPES.DEMO },
-    { name: 'Conditions',    type: DomainType.CONDITION, disabled: true },
-    { name: 'Procedures',    type: DomainType.PROCEDURE, disabled: true },
-    { name: 'Drugs',    type: DomainType.DRUG },
-    { name: 'Measurements',    type: CRITERIA_TYPES.MEAS },
-    { name: 'Visits',    type: DomainType.VISIT, fullTree: true },
-    { name: 'ICD9 Codes',   type: CRITERIA_TYPES.ICD9 },
-    { name: 'ICD10 Codes',  type: CRITERIA_TYPES.ICD10 },
+    { name: 'Demographics', type: TreeType.DEMO },
+    { name: 'Conditions',    type: TreeType.CONDITION, disabled: true },
+    { name: 'Procedures',    type: TreeType.PROCEDURE, disabled: true },
+    { name: 'Drugs',    type: TreeType.DRUG },
+    { name: 'Measurements',    type: TreeType.MEAS },
+    { name: 'Visits',    type: TreeType.VISIT, fullTree: true },
+    { name: 'ICD9 Codes',   type: TreeType.ICD9 },
+    { name: 'ICD10 Codes',  type: TreeType.ICD10 },
     // { name: 'PheCodes',     type: 'phecode' },
-    { name: 'CPT Codes',    type: CRITERIA_TYPES.CPT },
-    // { name: 'Medications',  type: 'meds' },
-    // { name: 'Labs',         type: 'labs' },
-    // { name: 'Vitals',       type: 'vitals' },
+    { name: 'CPT Codes',    type: TreeType.CPT },
     // { name: 'Temporal',     type: 'temporal' }
 ];
 

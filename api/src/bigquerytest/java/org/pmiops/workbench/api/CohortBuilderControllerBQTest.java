@@ -46,13 +46,6 @@ import static org.junit.Assert.fail;
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
-  private static final String TYPE_ICD9 = "ICD9";
-  private static final String TYPE_ICD10 = "ICD10";
-  private static final String TYPE_CPT = "CPT";
-  private static final String TYPE_PM = "PM";
-  private static final String TYPE_VISIT = "VISIT";
-  private static final String TYPE_DRUG = "DRUG";
-  private static final String TYPE_MEAS = "MEAS";
   private static final String SUBTYPE_NONE = null;
   private static final String SUBTYPE_CPT4 = "CPT4";
   private static final String SUBTYPE_ICD10CM = "ICD10CM";
@@ -68,11 +61,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private static final String SUBTYPE_PREG = "PREG";
   private static final String SUBTYPE_WHEEL = "WHEEL";
   private static final String SUBTYPE_LAB = "LAB";
-  private static final String DOMAIN_CONDITION = "Condition";
-  private static final String DOMAIN_PROCEDURE = "Procedure";
-  private static final String DOMAIN_MEASUREMENT = "Measurement";
-  private static final String DOMAIN_OBSERVATION = "Observation";
-  private static final String DOMAIN_DRUG = "Drug";
   private static final String NUMERICAL = MeasurementQueryBuilder.NUMERICAL;
   private static final String CATEGORICAL = MeasurementQueryBuilder.CATEGORICAL;
   private static final String BOTH = MeasurementQueryBuilder.BOTH;
@@ -143,22 +131,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     cdrVersionDao.save(cdrVersion);
 
-    icd9ConditionParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE, "001"));
-    icd9ConditionChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9ConditionParent.getId(), "001", DOMAIN_CONDITION));
-    icd9ProcedureParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE, "002"));
-    icd9ProcedureChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9ProcedureParent.getId(), "002", DOMAIN_PROCEDURE));
-    icd9MeasurementParent = criteriaDao.save(createCriteriaParent(TYPE_ICD9, SUBTYPE_NONE, "003"));
-    icd9MeasurementChild = criteriaDao.save(createCriteriaChild(TYPE_ICD9, SUBTYPE_NONE, icd9MeasurementParent.getId(), "003", DOMAIN_MEASUREMENT));
-    icd10ConditionParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10CM, "A"));
-    icd10ConditionChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10CM, icd10ConditionParent.getId(), "A09", DOMAIN_CONDITION));
-    icd10ProcedureParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10PCS, "16"));
-    icd10ProcedureChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10PCS, icd10ProcedureParent.getId(), "16070", DOMAIN_PROCEDURE));
-    icd10MeasurementParent = criteriaDao.save(createCriteriaParent(TYPE_ICD10, SUBTYPE_ICD10CM, "R92"));
-    icd10MeasurementChild = criteriaDao.save(createCriteriaChild(TYPE_ICD10, SUBTYPE_ICD10CM, icd10MeasurementParent.getId(), "R92.2", DOMAIN_MEASUREMENT));
-    cptProcedure = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001T", DOMAIN_PROCEDURE));
-    cptObservation = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001Z", DOMAIN_OBSERVATION));
-    cptMeasurement = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "0001Q", DOMAIN_MEASUREMENT));
-    cptDrug = criteriaDao.save(createCriteriaChild(TYPE_CPT, SUBTYPE_CPT4, 1L, "90703", DOMAIN_DRUG));
+    icd9ConditionParent = criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), SUBTYPE_NONE, "001"));
+    icd9ConditionChild = criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), SUBTYPE_NONE, icd9ConditionParent.getId(), "001", DomainType.CONDITION.name()));
+    icd9ProcedureParent = criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), SUBTYPE_NONE, "002"));
+    icd9ProcedureChild = criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), SUBTYPE_NONE, icd9ProcedureParent.getId(), "002", DomainType.PROCEDURE.name()));
+    icd9MeasurementParent = criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), SUBTYPE_NONE, "003"));
+    icd9MeasurementChild = criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), SUBTYPE_NONE, icd9MeasurementParent.getId(), "003", DomainType.MEASUREMENT.name()));
+    icd10ConditionParent = criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), SUBTYPE_ICD10CM, "A"));
+    icd10ConditionChild = criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), SUBTYPE_ICD10CM, icd10ConditionParent.getId(), "A09", DomainType.CONDITION.name()));
+    icd10ProcedureParent = criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), SUBTYPE_ICD10PCS, "16"));
+    icd10ProcedureChild = criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), SUBTYPE_ICD10PCS, icd10ProcedureParent.getId(), "16070", DomainType.PROCEDURE.name()));
+    icd10MeasurementParent = criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), SUBTYPE_ICD10CM, "R92"));
+    icd10MeasurementChild = criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), SUBTYPE_ICD10CM, icd10MeasurementParent.getId(), "R92.2", DomainType.MEASUREMENT.name()));
+    cptProcedure = criteriaDao.save(createCriteriaChild(TreeType.CPT.name(), SUBTYPE_CPT4, 1L, "0001T", DomainType.PROCEDURE.name()));
+    cptObservation = criteriaDao.save(createCriteriaChild(TreeType.CPT.name(), SUBTYPE_CPT4, 1L, "0001Z", DomainType.OBSERVATION.name()));
+    cptMeasurement = criteriaDao.save(createCriteriaChild(TreeType.CPT.name(), SUBTYPE_CPT4, 1L, "0001Q", DomainType.MEASUREMENT.name()));
+    cptDrug = criteriaDao.save(createCriteriaChild(TreeType.CPT.name(), SUBTYPE_CPT4, 1L, "90703", DomainType.DRUG.name()));
   }
 
   @Test
@@ -642,6 +630,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsICD9ConditionOccurrenceChildICD10ConditionOccurrenceChild() throws Exception {
+    SearchParameter icd9P = createSearchParameter(icd9ConditionParent, "001");
+    SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9P, icd10), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
   public void countSubjectsICD10ConditionOccurrenceParent() throws Exception {
     SearchParameter icd10 = createSearchParameter(icd10ConditionParent, "A");
     SearchRequest searchRequest = createSearchRequests(icd10ConditionParent.getType(), Arrays.asList(icd10), new ArrayList<>());
@@ -714,7 +710,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsVisitChild() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("10");
+    Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(false).conceptId("10");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
     SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -722,7 +718,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsVisitParent() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(true).conceptId("1");
+    Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(true).conceptId("1");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
     SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
@@ -730,8 +726,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsVisitChildOrParent() throws Exception {
-    Criteria visitChildCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("1");
-    Criteria visitParentCriteria = new Criteria().type(TYPE_VISIT).group(true).conceptId("1");
+    Criteria visitChildCriteria = new Criteria().type(TreeType.VISIT.name()).group(false).conceptId("1");
+    Criteria visitParentCriteria = new Criteria().type(TreeType.VISIT.name()).group(true).conceptId("1");
     SearchParameter visitChild = createSearchParameter(visitChildCriteria, null);
     SearchParameter visitParent = createSearchParameter(visitParentCriteria, null);
     SearchRequest searchRequest = createSearchRequests(visitChild.getType(), Arrays.asList(visitChild, visitParent), new ArrayList<>());
@@ -740,7 +736,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsVisitChildNullConceptId() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false);
+    Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(false);
     SearchParameter visit = createSearchParameter(visitCriteria, null);
     SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
     try {
@@ -754,7 +750,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsVisitChildModifiers() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TYPE_VISIT).group(false).conceptId("10");
+    Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(false).conceptId("10");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
     Modifier modifier = new Modifier()
     .name(ModifierType.NUM_OF_OCCURRENCES)
@@ -766,7 +762,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugNoSearchParameter() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
     SearchRequest searchRequest = createSearchRequests(drug.getType(), new ArrayList<>(), new ArrayList<>());
     try {
@@ -779,7 +775,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugNoConceptIdOnSearchParameter() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false);
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false);
     SearchParameter drug = createSearchParameter(drugCriteria, null);
     SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
     try {
@@ -792,7 +788,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugChild() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
     SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -800,7 +796,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugChildEncounter() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
     Modifier modifier = new Modifier()
       .name(ModifierType.ENCOUNTERS)
@@ -812,7 +808,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugChildModifiers() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TYPE_DRUG).group(false).conceptId("11");
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
     Modifier modifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
@@ -824,7 +820,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabTextAnyEncounter() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
     Modifier modifier = new Modifier()
@@ -837,7 +833,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabTextAnyEncounterNoInOperator() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
     Modifier modifier = new Modifier()
@@ -856,7 +852,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabTextAnyEncounterConceptIdNotANumber() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
     Modifier modifier = new Modifier()
@@ -875,7 +871,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabTextAny() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
@@ -884,7 +880,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabNumericalAny() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
@@ -893,7 +889,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabNumericalBetween() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(NUMERICAL).operator(Operator.BETWEEN).operands(Arrays.asList("0", "1"))));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
@@ -902,7 +898,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabCategoricalAny() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
@@ -911,7 +907,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabCategoricalIn() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("1"))));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
@@ -920,7 +916,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabBothAny() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
@@ -929,7 +925,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabBothNumericalAndCategorical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     Attribute numerical = new Attribute().name(BOTH).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
     Attribute categorical = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("1"));
@@ -940,7 +936,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabBothNumericalAndCategoricalSpecificName() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     Attribute numerical = new Attribute().name(NUMERICAL).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
     Attribute categorical = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("1"));
@@ -951,7 +947,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabBothCategorical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     Attribute categorical = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("1"));
     lab.attributes(Arrays.asList(categorical));
@@ -961,7 +957,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabBothNumerical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     Attribute numerical = new Attribute().name(BOTH).operator(Operator.EQUAL).operands(Arrays.asList("1.0"));
     lab.attributes(Arrays.asList(numerical));
@@ -971,7 +967,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabNumericalAnyAgeAtEvent() throws Exception {
-    Criteria labCriteria = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
     Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.GREATER_THAN_OR_EQUAL_TO).operands(Arrays.asList("25"));
@@ -981,9 +977,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsLabMoreThanOneSearchParameter() throws Exception {
-    Criteria labCriteria1 = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("3");
-    Criteria labCriteria2 = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("9");
-    Criteria labCriteria3 = new Criteria().type(TYPE_MEAS).subtype(SUBTYPE_LAB).group(false).conceptId("9");
+    Criteria labCriteria1 = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("3");
+    Criteria labCriteria2 = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("9");
+    Criteria labCriteria3 = new Criteria().type(TreeType.MEAS.name()).subtype(SUBTYPE_LAB).group(false).conceptId("9");
     SearchParameter lab1 = createSearchParameter(labCriteria1, null);
     SearchParameter lab2 = createSearchParameter(labCriteria2, null);
     SearchParameter lab3 = createSearchParameter(labCriteria3, null);
@@ -1003,8 +999,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L),
       new Attribute().name("Diastolic").operator(Operator.BETWEEN).operands(Arrays.asList("60","80")).conceptId(903115L)
     );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_BP, "BP Name", attributes);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_BP, "BP Name", attributes);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -1014,8 +1010,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       new Attribute().name(PMQueryBuilder.ANY).operands(new ArrayList<>()).conceptId(903118L),
       new Attribute().name(PMQueryBuilder.ANY).operands(new ArrayList<>()).conceptId(903115L)
     );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_BP, "BP Name", attributes);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_BP, "BP Name", attributes);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -1025,19 +1021,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L),
       new Attribute().name("Diastolic").operator(Operator.BETWEEN).operands(Arrays.asList("60","80")).conceptId(903115L)
     );
-    SearchParameter bpSearchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_BP, "BP Name", bpAttributes);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(bpSearchParameter), new ArrayList<>());
+    SearchParameter bpSearchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_BP, "BP Name", bpAttributes);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(bpSearchParameter), new ArrayList<>());
 
     List<Attribute> hrAttributes = Arrays.asList(
       new Attribute().name("Heart Rate").operator(Operator.EQUAL).operands(Arrays.asList("71")).conceptId(903126L)
     );
-    SearchParameter hrSearchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_HR_DETAIL, "Heart Rate Detail", hrAttributes);
-    SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(TYPE_PM).searchParameters(Arrays.asList(hrSearchParameter)).modifiers(new ArrayList<>());
+    SearchParameter hrSearchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_HR_DETAIL, "Heart Rate Detail", hrAttributes);
+    SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(TreeType.PM.name()).searchParameters(Arrays.asList(hrSearchParameter)).modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-    SearchParameter heartRateIrr = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "4262985");
-    SearchGroupItem heartRateIrrSearchGroupItem = new SearchGroupItem().type(TYPE_PM).searchParameters(Arrays.asList(heartRateIrr)).modifiers(new ArrayList<>());
+    SearchParameter heartRateIrr = createPMSearchCriteria(TreeType.PM.name(), SUBTYPE_HR, "Heart Rate Irr", "1586218", "4262985");
+    SearchGroupItem heartRateIrrSearchGroupItem = new SearchGroupItem().type(TreeType.PM.name()).searchParameters(Arrays.asList(heartRateIrr)).modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
 
@@ -1046,8 +1042,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsHeartRateNoIrr() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_HR, "Heart Rate Irr", "1586218", "4297303");
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), SUBTYPE_HR, "Heart Rate Irr", "1586218", "4297303");
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1057,8 +1053,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     List<Attribute> attributes = Arrays.asList(
       new Attribute().name("Height").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("168")).conceptId(903133L)
     );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_HEIGHT, "Height", attributes);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_HEIGHT, "Height", attributes);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1068,8 +1064,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     List<Attribute> attributes = Arrays.asList(
       new Attribute().name("Weight").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("201")).conceptId(903121L)
     );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_WEIGHT, "Weight", attributes);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_WEIGHT, "Weight", attributes);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1079,8 +1075,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     List<Attribute> attributes = Arrays.asList(
       new Attribute().name("BMI").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("263")).conceptId(903124L)
     );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_BMI, "BMI", attributes);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_BMI, "BMI", attributes);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1090,8 +1086,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     List<Attribute> attributes = Arrays.asList(
       new Attribute().name("Waist").operator(Operator.EQUAL).operands(Arrays.asList("31")).conceptId(903135L)
     );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_WC, "Waist", attributes);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_WC, "Waist", attributes);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1101,32 +1097,32 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     List<Attribute> attributes = Arrays.asList(
       new Attribute().name("Hip").operator(Operator.EQUAL).operands(Arrays.asList("33")).conceptId(903136L)
     );
-    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TYPE_PM, SUBTYPE_HC, "Hip", attributes);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), SUBTYPE_HC, "Hip", attributes);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectPregnant() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_PREG, "Pregnancy", "903120", "45877994");
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), SUBTYPE_PREG, "Pregnancy", "903120", "45877994");
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectWheelChairUser() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", "4023190");
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), SUBTYPE_WHEEL, "Wheel Chair User", "903111", "4023190");
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectWheelChairUserBadValue() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TYPE_PM, SUBTYPE_WHEEL, "Wheel Chair User", "903111", null);
-    SearchRequest searchRequest = createSearchRequests(TYPE_PM, Arrays.asList(searchParameter), new ArrayList<>());
+    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), SUBTYPE_WHEEL, "Wheel Chair User", "903111", null);
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
@@ -1140,118 +1136,118 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsBadOperand() throws Exception {
     Attribute attribute = new Attribute().name("Heart Rate Detail").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903126L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
 
     attribute = new Attribute().name("BMI").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903124L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_BMI, "BMI", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_BMI, "BMI", "Measurement");
 
     attribute = new Attribute().name("Height").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903133L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HEIGHT, "Height", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HEIGHT, "Height", "Measurement");
 
     attribute = new Attribute().name("Weight").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903121L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_WEIGHT, "Weight", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_WEIGHT, "Weight", "Measurement");
 
     attribute = new Attribute().name("Waist").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903135L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_WC, "Waist Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_WC, "Waist Circumference", "Measurement");
 
     attribute = new Attribute().name("Hip").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HC, "Hip Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HC, "Hip Circumference", "Measurement");
 
     attribute = new Attribute().name(NUMERICAL).operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
 
     attribute = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
 
     attribute = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
 
     attribute = new Attribute().name(BOTH).operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
   }
 
   @Test
   public void countSubjectsNoOperator() throws Exception {
     Attribute attribute = new Attribute().name("Heart Rate Detail").operands(Arrays.asList("10")).conceptId(903126L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
 
     attribute = new Attribute().name("BMI").operands(Arrays.asList("10")).conceptId(903124L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_BMI, "BMI", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_BMI, "BMI", "Measurement");
 
     attribute = new Attribute().name("Height").operands(Arrays.asList("10")).conceptId(903133L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HEIGHT, "Height", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HEIGHT, "Height", "Measurement");
 
     attribute = new Attribute().name("Weight").operands(Arrays.asList("10")).conceptId(903121L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_WEIGHT, "Weight", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_WEIGHT, "Weight", "Measurement");
 
     attribute = new Attribute().name("Waist").operands(Arrays.asList("10")).conceptId(903135L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_WC, "Waist Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_WC, "Waist Circumference", "Measurement");
 
     attribute = new Attribute().name("Hip").operands(Arrays.asList("10")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HC, "Hip Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HC, "Hip Circumference", "Measurement");
 
     attribute = new Attribute().name(NUMERICAL).operands(Arrays.asList("10")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
 
     attribute = new Attribute().name(CATEGORICAL).operands(Arrays.asList("10")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
 
     attribute = new Attribute().name(BOTH).operands(Arrays.asList("10")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
   }
 
   @Test
   public void countSubjectsNoConceptId() throws Exception {
     Attribute attribute = new Attribute().name("Heart Rate Detail").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
 
     attribute = new Attribute().name("BMI").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_BMI, "BMI", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_BMI, "BMI", "Measurement");
 
     attribute = new Attribute().name("Height").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HEIGHT, "Height", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HEIGHT, "Height", "Measurement");
 
     attribute = new Attribute().name("Weight").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_WEIGHT, "Weight", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_WEIGHT, "Weight", "Measurement");
 
     attribute = new Attribute().name("Waist").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_WC, "Waist Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_WC, "Waist Circumference", "Measurement");
 
     attribute = new Attribute().name("Hip").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HC, "Hip Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HC, "Hip Circumference", "Measurement");
 
     attribute = new Attribute().name(MeasurementQueryBuilder.ANY);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
 
     attribute = new Attribute().name(MeasurementQueryBuilder.ANY);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
 
     attribute = new Attribute().name(MeasurementQueryBuilder.ANY);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
 
     attribute = new Attribute().name(MeasurementQueryBuilder.ANY);
-    assertBadRequestExceptionAttributes(attribute, TYPE_MEAS, SUBTYPE_LAB, "Measurements", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), SUBTYPE_LAB, "Measurements", "Measurement");
   }
 
   @Test
   public void countSubjectsEmptyAttribute() throws Exception {
     Attribute attribute = new Attribute();
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_BMI, "BMI", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HEIGHT, "Height", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_WEIGHT, "Weight", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_WC, "Waist Circumference", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TYPE_PM, SUBTYPE_HC, "Hip Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_BMI, "BMI", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HEIGHT, "Height", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_WEIGHT, "Weight", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_WC, "Waist Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), SUBTYPE_HC, "Hip Circumference", "Measurement");
   }
 
   @Test
   public void countSubjectsNoAttribute() throws Exception {
-    assertBadRequestExceptionAttributes(null, TYPE_PM, SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
-    assertBadRequestExceptionAttributes(null, TYPE_PM, SUBTYPE_BMI, "BMI", "Measurement");
-    assertBadRequestExceptionAttributes(null, TYPE_PM, SUBTYPE_HEIGHT, "Height", "Measurement");
-    assertBadRequestExceptionAttributes(null, TYPE_PM, SUBTYPE_WEIGHT, "Weight", "Measurement");
-    assertBadRequestExceptionAttributes(null, TYPE_PM, SUBTYPE_WC, "Waist Circumference", "Measurement");
-    assertBadRequestExceptionAttributes(null, TYPE_PM, SUBTYPE_HC, "Hip Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), SUBTYPE_HR_DETAIL, "Heart Rate", "Measurement");
+    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), SUBTYPE_BMI, "BMI", "Measurement");
+    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), SUBTYPE_HEIGHT, "Height", "Measurement");
+    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), SUBTYPE_WEIGHT, "Weight", "Measurement");
+    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), SUBTYPE_WC, "Waist Circumference", "Measurement");
+    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), SUBTYPE_HC, "Hip Circumference", "Measurement");
   }
 
   @Test
@@ -1418,7 +1414,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     if (diastolicAttr != null) {
       attributes.add(diastolicAttr);
     }
-    Criteria hypotensive = new Criteria().type(TYPE_PM).subtype(SUBTYPE_BP)
+    Criteria hypotensive = new Criteria().type(TreeType.PM.name()).subtype(SUBTYPE_BP)
       .name("Hypotensive (Systolic <= 90 / Diastolic <= 60)").group(false).selectable(true)
       .count("16").domainId("Measurement");
     SearchParameter hypotensiveSP = createSearchParameter(hypotensive, null);
@@ -1450,7 +1446,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestExeption!");
     } catch (BadRequestException e) {
       //success
-      boolean isMeasurementConceptIdNull = attribute != null && attribute.getConceptId() == null && TYPE_MEAS.equals(type);
+      boolean isMeasurementConceptIdNull = attribute != null && attribute.getConceptId() == null && TreeType.MEAS.name().equals(type);
       String message = isMeasurementConceptIdNull ? "Please provide valid concept id for %s."
         : "Please provide valid search attributes(operator, operands) for %s.";
       assertThat(e.getMessage()).isEqualTo(String.format(message, exceptionType));
@@ -1458,7 +1454,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertBadRequestExceptionNoAttributes(String subtype, String exceptionType, String conceptId, String value) {
-    Criteria criteria = new Criteria().type(TYPE_PM).subtype(subtype)
+    Criteria criteria = new Criteria().type(TreeType.PM.name()).subtype(subtype)
       .name("Name").group(false).selectable(true)
       .count("16").domainId("Measurement").conceptId(conceptId);
     SearchParameter searchParameter = createSearchParameter(criteria, value);

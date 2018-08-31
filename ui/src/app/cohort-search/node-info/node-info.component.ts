@@ -9,11 +9,11 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { DomainType } from 'generated';
+import {TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES, CRITERIA_TYPES, PREDEFINED_ATTRIBUTES} from '../constant';
+import {CRITERIA_SUBTYPES, PREDEFINED_ATTRIBUTES} from '../constant';
 import {
   CohortSearchActions,
   CohortSearchState,
@@ -44,8 +44,6 @@ function needsAttributes(node: any) {
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() node;
-  readonly domainType = DomainType;
-  readonly criteriaTypes = CRITERIA_TYPES;
   private isSelected: boolean;
   private isSelectedParent: boolean;
   private subscription: Subscription;
@@ -114,8 +112,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const noCode = (this.node.get('type', '') === DomainType.DRUG && this.node.get('group'))
-      || this.node.get('type', '') === CRITERIA_TYPES.PM;
+    const noCode = (this.isDrug() && this.node.get('group'))
+      || this.isPM();
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
     return (noCode || nameIsCode) ? '' : this.node.get('name', '');
   }
@@ -125,8 +123,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayCode() {
-    if ((this.node.get('type', '') === DomainType.DRUG && this.node.get('group'))
-      || this.node.get('type', '') === CRITERIA_TYPES.PM) {
+    if ((this.isDrug() && this.node.get('group'))
+      || this.isPM()) {
       return this.node.get('name', '');
     }
     return this.node.get('code', '');
@@ -148,7 +146,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      */
     event.stopPropagation();
     if (needsAttributes(this.node)) {
-      if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+      if (this.isMeas()) {
         this.actions.fetchAttributes(this.node);
       } else {
         const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
@@ -171,8 +169,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        * to have a complete sense are given a unique ID based on the attribute
        */
 
-      if (this.node.get('type') === DomainType.DRUG && this.node.get('group')) {
-        this.actions.fetchAllChildren(DomainType[DomainType.DRUG], this.node.get('id'));
+      if (this.isDrug() && this.node.get('group')) {
+        this.actions.fetchAllChildren(TreeType[TreeType.DRUG], this.node.get('id'));
       } else {
         let attributes = [];
         if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
@@ -202,5 +200,17 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
 
   showCount() {
     return this.node.get('selectable') && this.node.get('count') !== null;
+  }
+
+  isPM() {
+    return this.node.get('type') === TreeType[TreeType.PM];
+  }
+
+  isDrug() {
+    return this.node.get('type') === TreeType[TreeType.DRUG];
+  }
+
+  isMeas() {
+    return this.node.get('type') === TreeType[TreeType.MEAS];
   }
 }

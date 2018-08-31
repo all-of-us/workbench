@@ -1,6 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {DomainType} from 'generated';
-import {CRITERIA_TYPES} from '../constant';
+import {TreeType} from 'generated';
 import {CohortSearchActions} from '../redux';
 import {attributeDisplay, nameDisplay, typeDisplay} from '../utils';
 
@@ -13,8 +12,7 @@ export class SelectionInfoComponent {
   @Input() parameter;
   @Input() index;
 
-  readonly domainType = DomainType;
-  readonly criteriaTypes = CRITERIA_TYPES;
+  readonly treeType = TreeType;
 
   constructor(private actions: CohortSearchActions) {}
 

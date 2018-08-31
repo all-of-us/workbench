@@ -1,6 +1,5 @@
-import {DomainType} from 'generated';
+import {TreeType} from 'generated';
 import {List} from 'immutable';
-import {CRITERIA_TYPES} from './constant';
 
 
 export function typeDisplay(parameter): string {
@@ -54,19 +53,19 @@ export function attributeDisplay(parameter): string {
 
 export function typeToTitle(_type: string): string {
   switch (_type) {
-    case CRITERIA_TYPES.DEMO:
+    case TreeType[TreeType.DEMO]:
       _type = 'Demographics';
       break;
-    case CRITERIA_TYPES.MEAS:
+    case TreeType[TreeType.MEAS]:
       _type = 'Measurements';
       break;
-    case CRITERIA_TYPES.PM:
+    case TreeType[TreeType.PM]:
       _type = 'Physical Measurements';
       break;
-    case DomainType[DomainType.VISIT]:
+    case TreeType[TreeType.VISIT]:
       _type = 'Visit';
       break;
-    case DomainType[DomainType.DRUG]:
+    case TreeType[TreeType.DRUG]:
       _type = 'Drug';
       break;
   }
