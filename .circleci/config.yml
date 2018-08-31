@@ -22,6 +22,13 @@ jobs:
       - checkout
       - run:
           command: git submodule update --init --recursive
+      - run:
+        command: |
+          # The following bash will not actually work
+          if (( ! ../ci/has_branch_changes "${CIRCLE_BRANCH}" "/api/" "/common-api/" )); then
+            echo No relevant changes on non-master branch, skipping
+            circleci step halt
+          fi
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
@@ -37,12 +44,7 @@ jobs:
       - run:
           name: Unit tests
           working_directory: ~/workbench/api
-          command: |
-            if (( ../ci/has_branch_changes "${CIRCLE_BRANCH}" "/api/" "/common-api/" )); then
-              ./project.rb test
-            else
-              echo "skipped, no changes"
-            fi
+          command: ./project.rb test
       - save_cache:
           paths:
             - ~/.gradle
