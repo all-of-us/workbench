@@ -29,8 +29,10 @@ jobs:
               echo "*"
               git merge-base master ${CIRCLE_BRANCH}
               echo "*"
+              echo git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH}
               git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH}
               echo "*"
+              echo git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH} | grep api/
               git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH} | grep api/
               echo "*"
               git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) ${CIRCLE_BRANCH} | grep api/ | wc -l
