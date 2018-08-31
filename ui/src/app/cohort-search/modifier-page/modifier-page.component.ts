@@ -138,7 +138,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         if (this.modifiers[3]) {
           this.visitCounts = {};
           visitTypes.toJS().forEach(option => {
-            if (option.parentId === 0) {
+            if (option.parentId === 0 && option.count > 0) {
               this.modifiers[3].operators.push({name: option.name, value: option.conceptId});
               this.visitCounts[option.conceptId] = option.count;
             }
