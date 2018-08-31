@@ -425,6 +425,41 @@ paths:
       summary: remove a user from an auth domain if you have manage groups permission
       operationId: removeUserFromAuthDomain
 
+  /v1/user/{term}:
+    get:
+      tags:
+        - user
+      description: Returns user information matching search terms
+      operationId: user
+      responses:
+        200:
+          description: The user information matching supplied search terms
+          schema:
+            $ref: "#/definitions/UserResponse"
+      parameters:
+        - in: path
+          name: term
+          description: String to find in user's name or email address. Search is a case-insensitive substring match.
+          required: true
+          type: string
+        - in: query
+          name: pageToken
+          description: >
+            Pagination token retrieved from a previous call to user; used for retrieving additional pages of results.
+          type: string
+          required: false
+        - in: query
+          name: pageSize
+          description: >
+            Maximum number of results to return in a response. Defaults to 10.
+          type: integer
+          required: false
+        - in: query
+          name: sortOrder
+          description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the user's email.
+          type: string
+          required: false
+
   # Notebook clusters ####################################################################
 
   /v1/clusters:
@@ -1982,6 +2017,33 @@ definitions:
         format: int32
         description: >
           Number of clusters deleted during the check.
+
+  User:
+    type: object
+    properties:
+      email:
+        description: researchallofus email address
+        type: string
+      givenName:
+        description: the user's given name (e.g. Alice)
+        type: string
+      familyName:
+        description: the user's family  name (e.g. Jones)
+        type: string
+
+  UserResponse:
+    type: object
+    properties:
+      users:
+        description: A list of users matching the provided search query.
+        type: array
+        items:
+          $ref: "#/definitions/User"
+      nextPageToken:
+        description: >
+          Pagination token that can be used in a subsequent calls to retrieve more results.
+          If not set, there are no more results to retrieve.
+        type: string
 
   RecentResourceResponse:
     type: array
