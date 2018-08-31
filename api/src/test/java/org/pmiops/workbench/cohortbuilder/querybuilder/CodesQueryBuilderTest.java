@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Table;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -13,7 +12,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
