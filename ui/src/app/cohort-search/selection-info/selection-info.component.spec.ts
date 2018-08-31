@@ -3,6 +3,7 @@ import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
+import {NgxPopperModule} from 'ngx-popper';
 import {CohortSearchActions} from '../redux';
 import {SelectionInfoComponent} from './selection-info.component';
 
@@ -19,7 +20,7 @@ describe('SelectionInfoComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [SelectionInfoComponent],
-      imports: [ClarityModule],
+      imports: [ClarityModule, NgxPopperModule],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
         CohortSearchActions,

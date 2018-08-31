@@ -6,7 +6,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {CohortBuilderService} from 'generated';
-import {fromJS, List, Set} from 'immutable';
+import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
@@ -21,12 +21,9 @@ import {NodeInfoComponent} from '../node-info/node-info.component';
 import {NodeComponent} from '../node/node.component';
 import {OverviewComponent} from '../overview/overview.component';
 import {
-  activeParameterList,
   cancelWizard,
   CohortSearchActions,
   finishWizard,
-  initialState,
-  nodeAttributes,
   resetStore
 } from '../redux';
 import {SafeHtmlPipe} from '../safe-html.pipe';
@@ -38,11 +35,8 @@ import {SearchGroupComponent} from '../search-group/search-group.component';
 import {SelectionInfoComponent} from '../selection-info/selection-info.component';
 import {TreeComponent} from '../tree/tree.component';
 import {CohortSearchComponent} from './cohort-search.component';
-import {CohortSearchState, SR_ID} from '../redux/store';
 
 class MockActions {
-  @dispatch() activeParameterList = activeParameterList;
-  @dispatch() attributesPage = nodeAttributes;
   @dispatch() cancelWizard = cancelWizard;
   @dispatch() finishWizard = finishWizard;
   @dispatch() resetStore = resetStore;
@@ -51,42 +45,11 @@ class MockActions {
   runAllRequests() {}
 }
 
-const attributesNode = {
-  conceptId: 903133,
-  path: '',
-  parentId: 0,
-  name: 'Height Detail',
-  code: '',
-  count: 408041,
-  hasAttributes: true,
-  selectable: true,
-  attributes: [
-    {
-      name: '',
-      operator: 'ANY',
-      operands: [null],
-      conceptId: 903133,
-      MIN: 0,
-      MAX: 10000
-    }
-  ],
-  subtype: 'HEIGHT',
-  type: 'PM',
-  id: 316227,
-  domainId: 'Measurement',
-  children: [],
-  group: false
-}
-
-const dummyState = initialState
-  .setIn(['wizard', 'item', 'attributes', 'node'], fromJS(attributesNode));
-
 describe('CohortSearchComponent', () => {
   let activatedRoute: ActivatedRoute;
   let component: CohortSearchComponent;
   let fixture: ComponentFixture<CohortSearchComponent>;
   let mockReduxInst;
-  let actions: CohortSearchActions;
 
   beforeEach(async(() => {
     mockReduxInst = MockNgRedux.getInstance();
@@ -141,12 +104,6 @@ describe('CohortSearchComponent', () => {
   }));
 
   beforeEach(() => {
-    MockNgRedux.reset();
-    mockReduxInst = MockNgRedux.getInstance();
-    mockReduxInst.getState = () => dummyState;
-    actions = new CohortSearchActions(
-      mockReduxInst as NgRedux<CohortSearchState>,
-    );
     fixture = TestBed.createComponent(CohortSearchComponent);
     component = fixture.componentInstance;
     activatedRoute = new ActivatedRoute();

@@ -5,6 +5,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 
 import {fromJS} from 'immutable';
+import {NgxPopperModule} from 'ngx-popper';
 import {activeModifierList, CohortSearchActions, previewStatus} from '../redux';
 import {ModifierPageComponent} from './modifier-page.component';
 
@@ -30,6 +31,7 @@ describe('ModifierPageComponent', () => {
       ],
       imports: [
         ClarityModule,
+        NgxPopperModule,
         ReactiveFormsModule,
       ],
       providers: [
