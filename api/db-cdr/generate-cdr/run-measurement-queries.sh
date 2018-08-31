@@ -35,6 +35,7 @@ if [ -z "${WORKBENCH_PROJECT}" ]
 then
   echo "Usage: $USAGE"
   exit 1
+
 fi
 
 if [ -z "${WORKBENCH_DATASET}" ]
@@ -46,80 +47,78 @@ fi
 # TODO Next Populate achilles_results
 echo "Running measurement queries..."
 
-# 3000 Measurements that have numeric values - Number of persons with at least one measurement occurrence by measurement_concept_id, bin size of the measurement value for 10 bins, maximum and minimum from measurement value
+# 3000 Measurements that have numeric values - Number of persons with at least one measurement occurrence by measurement_concept_id, bin size of the measurement value for 10 bins, maximum and minimum from measurement value. Added value for measurement rows
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, count_value, source_count_value)
-with single_unit_measurement_concepts as
-(select measurement_concept_id,count(distinct unit_source_value) as cnt
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_concept_id != 0 group by measurement_concept_id having cnt=1
-),
-single_unit_measurement_source_concepts as
-(select measurement_source_concept_id,count(distinct unit_source_value) as cnt
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_source_concept_id != 0 and measurement_concept_id != measurement_source_concept_id group by measurement_source_concept_id having cnt=1
-)
-select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
-cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
-'Measurement binned' as stratum_3,
-(case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
-(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else 'unknown' end)end)
-as stratum_4,
-COUNT(distinct co1.person_id) as count_value,
-(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+with distinct_concepts as
+(select distinct measurement_concept_id as m_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_concept_id != 0),
+distinct_source_concepts as
+(select distinct measurement_source_concept_id as m_s_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_source_concept_id != 0 and measurement_concept_id != measurement_source_concept_id),
+single_unit_concepts as
+(select measurement_concept_id as m_concept_id,count(distinct unit_concept_id) as cnt
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where (measurement_concept_id != 0 and unit_concept_id != 0) group by measurement_concept_id having cnt=1),
+single_unit_source_concepts as
+(select measurement_source_concept_id as m_s_concept_id,count(distinct unit_concept_id) as cnt
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where (measurement_source_concept_id != 0 and measurement_concept_id != measurement_source_concept_id and unit_concept_id != 0)
+group by measurement_source_concept_id having cnt=1),
+single_unit_concept_name as
+(select sc.m_concept_id as cid,c.concept_name as cname
+from single_unit_concepts sc join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m on m.measurement_concept_id=sc.m_concept_id join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+on c.concept_id=m.unit_concept_id where m.unit_concept_id != 0 group by sc.m_concept_id,c.concept_name),
+single_unit_source_concept_name as
+(select sc.m_s_concept_id as cid,c.concept_name as cname
+from single_unit_source_concepts sc join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m on m.measurement_source_concept_id=sc.m_s_concept_id join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+on c.concept_id=m.unit_concept_id where m.unit_concept_id != 0 group by sc.m_s_concept_id,c.concept_name),
+single_unit_value_concepts as
+(select measurement_concept_id as m_concept_id,count(distinct unit_source_value) as cnt
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where (measurement_concept_id != 0 and unit_source_value is not null) group by measurement_concept_id having cnt=1),
+single_unit_value_source_concepts as
+(select measurement_source_concept_id as m_s_concept_id,count(distinct unit_source_value) as cnt
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where (measurement_source_concept_id != 0 and measurement_concept_id != measurement_source_concept_id) group by measurement_source_concept_id having cnt=1),
+single_unitvalue_concept_name as
+(select sc.m_concept_id as cid,m.unit_source_value as cname
+from single_unit_value_concepts sc join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m on m.measurement_concept_id=sc.m_concept_id group by sc.m_concept_id,m.unit_source_value),
+single_unitvalue_source_concept_name as
+(select sc.m_s_concept_id as cid,m.unit_source_value as cname
+from single_unit_value_source_concepts sc join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m on m.measurement_source_concept_id=sc.m_s_concept_id group by sc.m_s_concept_id,m.unit_source_value),
+measurement_units as
+(select m_concept_id as concept,
+(case when m_concept_id in (select distinct m_concept_id from single_unit_concepts) then (select distinct cname from single_unit_concept_name where cid=m_concept_id)
+      when m_concept_id in (select distinct m_concept_id from single_unit_value_concepts) then (select distinct cname from single_unitvalue_concept_name where cid=m_concept_id)
+      else 'unknown' end)
+as unit
+from distinct_concepts dc join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m on dc.m_concept_id=m.measurement_concept_id
+group by m_concept_id,unit
+union all
+select m_s_concept_id as concept,
+(case when m_s_concept_id in (select distinct m_s_concept_id from single_unit_source_concepts) then (select distinct cname from single_unit_source_concept_name where cid=m_s_concept_id)
+      when m_s_concept_id in (select distinct m_s_concept_id from single_unit_value_source_concepts) then (select distinct cname from single_unitvalue_source_concept_name where cid=m_s_concept_id)
+      else 'unknown' end)
+as unit
+from distinct_source_concepts dsc join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m on dsc.m_s_concept_id=m.measurement_source_concept_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on c.concept_id=m.unit_concept_id
+group by m_s_concept_id,unit),
+value_measurements as
+(select distinct measurement_concept_id as concept from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where value_as_number is not null
+union all
+select distinct measurement_source_concept_id as concept from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where value_as_number is not null)
+select 0,3000 as analysis_id,CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
+(case when co1.measurement_concept_id in (select distinct concept from value_measurements) then cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) as string)
+      else '0' end) as stratum_2,
+'Measurement' as stratum_3,unit as stratum_4
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1 join measurement_units on co1.measurement_concept_id=concept
 where co1.measurement_concept_id > 0
-and co1.value_as_number is not null
-group by  co1.measurement_concept_id,stratum_4
+group by  co1.measurement_concept_id,unit
 union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
-cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) AS STRING) as stratum_2,
-'Measurement binned' as stratum_3,
-(case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
-(case when co1.measurement_source_concept_id in (select measurement_source_concept_id from single_unit_measurement_source_concepts) then co1.unit_source_value else 'unknown' end)end)
-as stratum_4,
-COUNT(distinct co1.person_id) as count_value,
-COUNT(distinct co1.person_id) as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
+(case when co1.measurement_source_concept_id in (select distinct concept from value_measurements) then cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) as string)
+      else '0' end) as stratum_2,
+'Measurement' as stratum_3,unit as stratum_4
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1 join measurement_units on co1.measurement_source_concept_id=concept
 where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
-and co1.value_as_number is not null
-group by  co1.measurement_source_concept_id,stratum_4"
+group by  co1.measurement_source_concept_id,unit"
 
-
-# 3000 Measurements that have string values - Number of persons with at least one measurement occurrence by measurement_concept_id
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_3, stratum_4, count_value, source_count_value)
-with single_unit_measurement_concepts as
-(select measurement_concept_id,count(distinct unit_source_value) as cnt
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_concept_id != 0 group by measurement_concept_id having cnt=1
-),
-single_unit_measurement_source_concepts as
-(select measurement_source_concept_id,count(distinct unit_source_value) as cnt
-from  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_source_concept_id != 0 and measurement_concept_id != measurement_source_concept_id group by measurement_source_concept_id having cnt=1
-)
-select 0, 3000 as analysis_id, CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
-'Measurement un-binned' as stratum_3,
-(case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
-(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_concepts) then co1.unit_source_value else 'unknown' end)end)
-as stratum_4,
-COUNT(distinct co1.person_id) as count_value,
-(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
-where co1.measurement_concept_id > 0
-and co1.value_as_number is null and co1.value_source_value is not null
-group by  co1.measurement_concept_id,stratum_4
-union all
-select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
-'Measurement un-binned' as stratum_3,
-(case when co1.unit_concept_id != 0 then (select concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where concept_id=co1.unit_concept_id) else
-(case when co1.measurement_concept_id in (select measurement_concept_id from single_unit_measurement_source_concepts) then co1.unit_source_value else 'unknown' end)end)
-as stratum_4,
-COUNT(distinct co1.person_id) as count_value,
-COUNT(distinct co1.person_id) as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1
-where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
-and co1.value_as_number is null and co1.value_source_value is not null
-group by  co1.measurement_source_concept_id,stratum_4"
 
 
 # 1815 Measurement response distribution

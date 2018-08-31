@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cdr.dao;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ConceptService {
@@ -30,12 +30,16 @@ public class ConceptService {
     @PersistenceContext(unitName = "cdr")
     private EntityManager entityManager;
 
+    @Autowired
+    private ConceptSynonymDao conceptSynonymDao;
+
     public ConceptService() {
     }
 
     // Used for tests
-    public ConceptService(EntityManager entityManager) {
+    public ConceptService(EntityManager entityManager, ConceptSynonymDao conceptSynonymDao) {
         this.entityManager = entityManager;
+        this.conceptSynonymDao = conceptSynonymDao;
     }
 
     public static String modifyMultipleMatchKeyword(String query){
@@ -94,7 +98,9 @@ public class ConceptService {
                     Expression<Double> matchExp = null;
                     Expression<Double> matchSynonymExp = null;
 
-                    Join<Concept, ConceptSynonym> csJoin = (Join)root.fetch("synonyms",JoinType.LEFT);
+                    Subquery<ConceptSynonym> subquery = criteriaQuery.subquery(ConceptSynonym.class);
+                    Root<ConceptSynonym> subqueryRoot = subquery.from(ConceptSynonym.class);
+
 
                     List<Predicate> conceptCodeIDName = new ArrayList<>();
 
@@ -112,16 +118,24 @@ public class ConceptService {
                         }
                         matchExp = criteriaBuilder.function("match", Double.class,
                                 root.get("conceptName"), criteriaBuilder.literal(keyword));
+
+                        subquery.select(subqueryRoot);
+
                         matchSynonymExp = criteriaBuilder.function("match", Double.class,
-                                csJoin.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
+                                subqueryRoot.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
+
+
+                        Predicate synonymNamePredicate = criteriaBuilder.greaterThan(matchSynonymExp, 0.0);
+                        subquery.select(subqueryRoot.get("conceptId")).where(synonymNamePredicate);
                     }
+
 
 
                     if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
 
                         if(keyword != null) {
                             conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            conceptCodeIDName.add(root.get("conceptId").in(subquery));
                             predicates.add(
                                     criteriaBuilder.or(
                                             conceptCodeIDName.toArray(new Predicate[0])
@@ -137,7 +151,7 @@ public class ConceptService {
 
                         if(keyword != null) {
                             conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            conceptCodeIDName.add(root.get("conceptId").in(subquery));
                             predicates.add(
                                     criteriaBuilder.or(
                                             conceptCodeIDName.toArray(new Predicate[0])
@@ -154,24 +168,28 @@ public class ConceptService {
 
                     }else if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
 
-                        List<Predicate> conceptNameFilter = new ArrayList<>();
-                        List<Predicate> matchFilter = new ArrayList<>();
-                        matchFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                        matchFilter.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
-                        conceptNameFilter.add(criteriaBuilder.or(matchFilter.toArray(new Predicate[0])));
-                        conceptNameFilter.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
+                        if(keyword != null){
+                            List<Predicate> conceptNameFilter = new ArrayList<>();
+                            List<Predicate> matchFilter = new ArrayList<>();
+                            matchFilter.add(criteriaBuilder.greaterThan(matchExp, 0.0));
+                            matchFilter.add(root.get("conceptId").in(subquery));
+                            conceptNameFilter.add(criteriaBuilder.or(matchFilter.toArray(new Predicate[0])));
+                            conceptNameFilter.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
 
-                        predicates.add(
-                                criteriaBuilder.or(
-                                        criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])),
-                                        criteriaBuilder.and(conceptNameFilter.toArray(new Predicate[0]))
-                                ));
+                            predicates.add(
+                                    criteriaBuilder.or(
+                                            criteriaBuilder.or(conceptCodeIDName.toArray(new Predicate[0])),
+                                            criteriaBuilder.and(conceptNameFilter.toArray(new Predicate[0]))
+                                    ));
+                        }
+
+
                     } else {
 
                         if (keyword != null) {
 
                             conceptCodeIDName.add(criteriaBuilder.greaterThan(matchExp, 0.0));
-                            conceptCodeIDName.add(criteriaBuilder.greaterThan(matchSynonymExp, 0.0));
+                            conceptCodeIDName.add(root.get("conceptId").in(subquery));
                             predicates.add(
                                     criteriaBuilder.or(
                                             conceptCodeIDName.toArray(new Predicate[0])
@@ -199,11 +217,23 @@ public class ConceptService {
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
         // Return up to limit results, sorted in descending count value order.
+
         Pageable pageable = new PageRequest(0, limit,
                 new Sort(Direction.DESC, "countValue"));
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);
-        return conceptDao.findAll(conceptSpecification, pageable);
+        Slice<Concept> conceptSlice = conceptDao.findAll(conceptSpecification, pageable);
+        fetchConceptSynonyms(conceptSlice.getContent());
+        return conceptSlice;
+    }
+
+    public List<Concept> fetchConceptSynonyms(List<Concept> concepts) {
+        List<Long> conceptIds = concepts.stream().map(Concept::getConceptId).collect(Collectors.toList());
+        Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
+        for(Concept concept: concepts) {
+            concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
+        }
+        return concepts;
     }
 
 }

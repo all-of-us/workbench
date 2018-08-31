@@ -25,6 +25,7 @@ export class TreeComponent extends NodeComponent implements OnInit {
   showSearch() {
     return this.node.get('type') === DomainType.VISIT
       || this.node.get('type') === DomainType.DRUG
-      || this.node.get('type') === CRITERIA_TYPES.MEAS;
+      || this.node.get('type') === CRITERIA_TYPES.MEAS
+      || this.node.get('type') === CRITERIA_TYPES.PM;
   }
 }

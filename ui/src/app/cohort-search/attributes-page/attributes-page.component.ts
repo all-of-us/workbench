@@ -39,11 +39,14 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   subscription: Subscription;
   rangeAlert = false;
   loading: boolean;
+  selectedCode: any;
+  sysOption: any;
+  diaOption: any;
   options = [
-    {value: 'EQUAL', name: 'Equals'},
-    {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to'},
-    {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to'},
-    {value: 'BETWEEN', name: 'Between'},
+    {value: 'EQUAL', name: 'Equals', code: '01'},
+    {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to', code: '02'},
+    {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to', code: '03'},
+    {value: 'BETWEEN', name: 'Between', code: '04'},
   ];
 
   readonly criteriaTypes = CRITERIA_TYPES;
@@ -80,10 +83,19 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           }
         });
       } else {
-        this.options.unshift({value: 'ANY', name: 'Any'});
+        this.options.unshift({value: 'ANY', name: 'Any', code: 'Any'});
         this.attrs.NUM = this.node.get('attributes');
-        if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
-          this.attrs.NUM.forEach((attr, i) => this.dropdowns.labels[i] = attr.name);
+        if (this.attrs.NUM) {
+          this.selectedCode = 'Any';
+          this.attrs.NUM.forEach((attr, i) => {
+            attr.operator = 'ANY';
+            this.dropdowns.selected[i] = 'ANY';
+            this.dropdowns.oldVals[i] = 'ANY';
+            if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+              this.dropdowns.labels[i] = attr.name;
+            }
+          });
+          this.preview = this.preview.set('count', this.node.get('count'));
         }
       }
     }));
@@ -94,6 +106,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   radioChange() {
+    this.selectedCode = 'Any';
     this.preview = this.preview.set('count', this.node.get('count'));
   }
 
@@ -102,15 +115,37 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
       const other = index === 0 ? 1 : 0;
+      if (other === 0) {
+          if (this.diaOption === undefined) {
+              this.diaOption = option.code;
+              this.sysOption = option.code;
+          } else {
+              this.sysOption = option.code;
+          }
+      } else if (other === 1) {
+          if (this.sysOption === undefined) {
+              this.sysOption = option.code;
+              this.diaOption = option.code;
+          } else {
+              this.diaOption = option.code;
+          }
+      }
+      if (this.sysOption && this.diaOption) {
+            this.selectedCode = (this.sysOption + this.diaOption);
+        }
       if (option.value === 'ANY') {
         this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = 'ANY';
         this.dropdowns.selected[other] = 'Any';
       } else if (this.dropdowns.oldVals[index] === 'ANY') {
-        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = '';
-        this.dropdowns.selected[other] = '';
+        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = option.value;
+        this.dropdowns.selected[other] = option.name;
       }
       this.dropdowns.oldVals[index] = option.value;
+    } else {
+        this.selectedCode = option.code;
     }
+    this.preview = option.value === 'ANY'
+      ? this.preview.set('count', this.node.get('count')) : Map();
   }
 
   inputChange() {
@@ -124,6 +159,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         }
       });
     });
+    this.preview = Map();
   }
 
   isValid(form: NgForm) {
@@ -158,7 +194,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   get paramId() {
-    return `param${this.node.get('conceptId') ? this.node.get('conceptId') : this.node.get('id')}`;
+    return `param${this.node.get('conceptId')
+        ? (this.node.get('conceptId') + (this.selectedCode))
+        : (this.node.get('id') + (this.selectedCode))}`;
   }
 
   get displayName() {
@@ -280,7 +318,19 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     return this.node.get('type') === CRITERIA_TYPES.PM;
   }
 
+  showCalc() {
+    let notAny = true;
+    if (this.isPM()) {
+      notAny = this.attrs.NUM[0].operator !== 'ANY';
+    }
+    return !this.attrs.EXISTS && notAny;
+  }
+
   showAdd() {
-    return this.preview.get('count') && !this.preview.get('requesting');
+    let any = false;
+    if (this.isPM()) {
+      any = this.attrs.NUM[0].operator === 'ANY';
+    }
+    return (this.preview.get('count') && !this.preview.get('requesting')) || any;
   }
 }
