@@ -23,11 +23,11 @@ jobs:
       - run:
           command: git submodule update --init --recursive
       - run:
-        command: |
-          if [git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/ | wc -l] && ${CIRCLE_BRANCH != "master"}; then
-            echo No relevant changes on non-master branch, skipping
-            circleci step halt
-          fi
+          command: |
+            if [git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/ | wc -l] && ${CIRCLE_BRANCH != "master"}; then
+              echo No relevant changes on non-master branch, skipping
+              circleci step halt
+            fi
       - restore_cache:
           keys:
           - api-cache-{{ checksum "~/workbench/api/build.gradle" }}
