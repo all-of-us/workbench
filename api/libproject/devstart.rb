@@ -374,7 +374,9 @@ def test_api_changes(branch_name)
   common = Common.new
   common_commit = common.capture_stdout(%W{git merge-base master #{branch_name}}).split("\n")[0]
   api_lines = common.capture_stdout(%W{git diff --name-only #{common_commit}}).split("\n")
-  api_lines.any? { |s| s.include?('api') }
+  api_changes = api_lines.any? { |s| s.include?('api') }
+  common.run_inline %W{echo #{api_changes}}
+  return api_changes
 end
 
 def run_all_tests(cmd_name, args)
