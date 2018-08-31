@@ -50,6 +50,7 @@ describe('AttributesPageComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AttributesPageComponent);
     component = fixture.componentInstance;
+    component.attrs = {EXISTS: false, NUM: [{operator: 'ANY', operands: []}], CAT: []};
     component.node = fromJS({
       code: '',
       conceptId: 903133,

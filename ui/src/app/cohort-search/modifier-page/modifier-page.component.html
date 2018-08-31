@@ -25,13 +25,10 @@
           <div class="dropdown-width ">
             <clr-dropdown >
               <button type="button" class="btn btn-outline" clrDropdownTrigger>
-                <span *ngIf = "dropdownOption.selected[i] !== ''; else elseBlock">{{dropdownOption.selected[i]}}</span>
-                <ng-template #elseBlock>
-                  <span>Select Operator</span>
-                </ng-template>
+                <span>{{dropdownOption.selected[i]}}</span>
                 <clr-icon shape="caret down"></clr-icon>
               </button>
-              <clr-dropdown-menu  clrPosition="bottom-left" *clrIfOpen>
+              <clr-dropdown-menu [class.encounters]="mod.name === 'encounters'"  clrPosition="bottom-left" *clrIfOpen>
                 <button
                   *ngFor="let opt of mod.operators"
                   [value]="opt.value"
@@ -40,37 +37,39 @@
                   type="button"
                   clrDropdownItem>
                   {{ opt.name}}
-                  <span *ngIf="mod.name === 'encounters'" class="badge badge-info">
+                  <span *ngIf="showCount(mod.name, opt.name)" class="badge badge-info">
                     {{ visitCounts[opt.value] | number }}
                   </span>
                 </button>
               </clr-dropdown-menu>
             </clr-dropdown>
           </div>
-          <ng-container *ngIf="mod.inputType">
-            <div>
-              <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
-            </div>
-            <div *ngIf="mod.inputType === 'date'" >
-              <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
-                     (ngModelChange)="myDate = $event" formControlName="valueA" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
-            </div>
-            <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
-              <div class="and-text">
-                <div>and</div>
-              </div>
+          <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
+            <ng-container *ngIf="mod.inputType">
               <div>
-                <input *ngIf="mod.inputType !== 'date'"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
+                <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
-            </ng-container>
-            <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
-              <div class="and-text" >
-                <div>and</div>
+              <div *ngIf="mod.inputType === 'date'" >
+                <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
+                       (ngModelChange)="myDate = $event" formControlName="valueA" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
               </div>
-              <div>
-                <input *ngIf = "mod.inputType === 'date'" [ngModel]="selectedDate | date:'yyyy-MM-dd'"
-                       (ngModelChange)="selectedDate = $event"  class="modifier-calender" formControlName="valueB" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
-              </div>
+              <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
+                <div class="and-text">
+                  <div>and</div>
+                </div>
+                <div>
+                  <input *ngIf="mod.inputType !== 'date'"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
+                </div>
+              </ng-container>
+              <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
+                <div class="and-text" >
+                  <div>and</div>
+                </div>
+                <div>
+                  <input *ngIf = "mod.inputType === 'date'" [ngModel]="selectedDate | date:'yyyy-MM-dd'"
+                         (ngModelChange)="selectedDate = $event"  class="modifier-calender" formControlName="valueB" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
+                </div>
+              </ng-container>
             </ng-container>
           </ng-container>
         </div>

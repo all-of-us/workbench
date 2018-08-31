@@ -20,7 +20,7 @@ import {
 })
 export class UnregisteredComponent implements OnInit, OnDestroy {
   IdVerificationStatus = IdVerificationStatus;
-  idvStatus: IdVerificationStatus;
+  idvStatus: IdVerificationStatus = null;
   private profileSub: Subscription;
 
   constructor(

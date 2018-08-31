@@ -103,7 +103,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get paramId() {
-    return `param${this.node.get('conceptId') ? this.node.get('conceptId') : this.node.get('id')}`;
+    return `param${this.node.get('conceptId') ?
+        (this.node.get('conceptId') + this.node.get('code')) : this.node.get('id')}`;
   }
 
   get selectable() {

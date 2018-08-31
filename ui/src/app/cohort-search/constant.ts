@@ -1,16 +1,5 @@
 import { Operator, TreeType } from 'generated';
 
-export const CRITERIA_TYPES = {
-  'PM': 'PM',
-  'MEAS': 'MEAS',
-  'ICD9': 'ICD9',
-  'ICD10': 'ICD10',
-  'CPT': 'CPT',
-  'DEMO': 'DEMO',
-  'PHECODE': 'PHECODE',
-  'SURVEY': 'SURVEY'
-};
-
 export const CRITERIA_SUBTYPES = {
   'ATC': 'ATC',
   'BRAND': 'BRAND',
@@ -24,7 +13,7 @@ export const CRITERIA_SUBTYPES = {
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys',    type: TreeType.SURVEY, children: [], disabled: true },
-  { name: 'Physical Measurements',    type: TreeType.PM },
+  { name: 'Physical Measurements',    type: TreeType.PM, fullTree: true },
 ];
 
 export const DOMAIN_TYPES = [

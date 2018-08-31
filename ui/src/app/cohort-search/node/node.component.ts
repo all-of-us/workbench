@@ -181,7 +181,7 @@ export class NodeComponent implements OnInit, OnDestroy {
     }
     // Load options for Encounters modifier
     if ([TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(_type) === -1) {
-      this.actions.fetchCriteria(TreeType[TreeType.VISIT], 0);
+      this.actions.fetchAllCriteria(TreeType[TreeType.VISIT], 0);
     }
   }
 

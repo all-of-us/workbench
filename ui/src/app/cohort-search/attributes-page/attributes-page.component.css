@@ -165,3 +165,6 @@ input[type=radio] {
     border: transparent;
     color: white;
 }
+.range-padding {
+    padding-top: 0.2rem;
+}
