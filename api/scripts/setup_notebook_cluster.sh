@@ -8,6 +8,11 @@
 jupyter kernelspec uninstall -f pyspark2
 jupyter kernelspec uninstall -f pyspark3
 
+# reticulate is our preferred access method for the AoU client library - default
+# to python3 as our pyclient has better support for python3. Rprofile is executed
+# each time the R kernel starts.
+echo "Sys.setenv(RETICULATE_PYTHON = '$(which python3)')" >> ~/.Rprofile
+
 for v in "2.7" "3.4"; do
-  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-13.zip#egg=aou_workbench_client&subdirectory=py'
+  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-14.zip#egg=aou_workbench_client&subdirectory=py'
 done
