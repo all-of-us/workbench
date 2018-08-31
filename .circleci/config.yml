@@ -26,11 +26,17 @@ jobs:
           command: |
             if [ $(git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/ | wc -l | xargs) == 0 ] && [ ${CIRCLE_BRANCH} != "master" ]; then
               echo ${CIRCLE_BRANCH}
+              echo "*"
               git merge-base master ${CIRCLE_BRANCH}
+              echo "*"
               git diff --name-only $(git merge-base master ${CIRCLE_BRANCH})
+              echo "*"
               git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/
+              echo "*"
               git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/ | wc -l
+              echo "*"
               echo $(git diff --name-only $(git merge-base master ${CIRCLE_BRANCH}) | grep api/ | wc -l)
+              echo "*"
               echo No relevant changes on non-master branch, skipping
               circleci step halt
             fi
