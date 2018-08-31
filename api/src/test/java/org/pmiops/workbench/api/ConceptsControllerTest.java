@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 import javax.persistence.EntityManager;
@@ -14,6 +15,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -46,32 +49,34 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
+@Import({LiquibaseAutoConfiguration.class})
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ConceptsControllerTest {
 
   private static final Concept CLIENT_CONCEPT_1 = new Concept()
-      .conceptId(123L)
-      .conceptName("a concept")
-      .standardConcept(true)
-      .conceptCode("conceptA")
-      .conceptClassId("classId")
-      .vocabularyId("V1")
-      .domainId("Condition")
-      .countValue(123L)
-      .prevalence(0.2F);
+          .conceptId(123L)
+          .conceptName("a concept")
+          .standardConcept(true)
+          .conceptCode("conceptA")
+          .conceptClassId("classId")
+          .vocabularyId("V1")
+          .domainId("Condition")
+          .countValue(123L)
+          .prevalence(0.2F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_2 = new Concept()
-      .conceptId(456L)
-      .conceptName("b concept")
-      .conceptCode("conceptB")
-      .conceptClassId("classId2")
-      .vocabularyId("V2")
-      .domainId("Measurement")
-      .countValue(456L)
-      .prevalence(0.3F);
+          .conceptId(456L)
+          .conceptName("b concept")
+          .conceptCode("conceptB")
+          .conceptClassId("classId2")
+          .vocabularyId("V2")
+          .domainId("Measurement")
+          .countValue(456L)
+          .prevalence(0.3F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_3 = new Concept()
           .conceptId(789L)
@@ -81,7 +86,8 @@ public class ConceptsControllerTest {
           .vocabularyId("V3")
           .domainId("Condition")
           .countValue(789L)
-          .prevalence(0.4F);
+          .prevalence(0.4F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_4 = new Concept()
           .conceptId(1234L)
@@ -92,7 +98,8 @@ public class ConceptsControllerTest {
           .vocabularyId("V4")
           .domainId("Observation")
           .countValue(1250L)
-          .prevalence(0.5F);
+          .prevalence(0.5F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_5 = new Concept()
           .conceptId(7890L)
@@ -103,7 +110,8 @@ public class ConceptsControllerTest {
           .vocabularyId("V5")
           .domainId("Condition")
           .countValue(7890L)
-          .prevalence(0.9F);
+          .prevalence(0.9F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_6 = new Concept()
           .conceptId(7891L)
@@ -114,7 +122,8 @@ public class ConceptsControllerTest {
           .vocabularyId("V6")
           .domainId("Condition")
           .countValue(7891L)
-          .prevalence(0.1F);
+          .prevalence(0.1F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
@@ -147,6 +156,8 @@ public class ConceptsControllerTest {
   @Autowired
   private ConceptDao conceptDao;
   @Autowired
+  private ConceptSynonymDao conceptSynonymDao;
+  @Autowired
   private WorkspaceService workspaceService;
   @Autowired
   private WorkspaceDao workspaceDao;
@@ -165,8 +176,8 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(entityManager);
-    conceptsController = new ConceptsController(conceptService, workspaceService);
+    ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
+    conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -439,6 +450,7 @@ public class ConceptsControllerTest {
     result.setDomainId(concept.getDomainId());
     result.setCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
+    result.setSynonyms(new ArrayList<ConceptSynonym>());
     return result;
   }
 

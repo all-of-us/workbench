@@ -44,7 +44,7 @@
               </clr-dropdown-menu>
             </clr-dropdown>
           </div>
-          <div *ngIf="dropdownOption.selected[i] !== 'Any'">
+          <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
               <div>
                 <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
@@ -71,7 +71,7 @@
                 </div>
               </ng-container>
             </ng-container>
-          </div>
+          </ng-container>
         </div>
     </div>
   </section>
