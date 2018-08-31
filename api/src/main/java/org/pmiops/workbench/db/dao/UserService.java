@@ -2,8 +2,6 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
