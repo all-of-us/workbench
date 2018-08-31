@@ -1,10 +1,14 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMultimap;
+
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
@@ -57,15 +61,20 @@ public class ConceptsController implements ConceptsApiDelegate {
             .countValue(concept.getCountValue())
             .domainId(concept.getDomainId())
             .prevalence(concept.getPrevalence())
-            .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(
-                concept.getStandardConcept()))
-            .vocabularyId(concept.getVocabularyId());
+            .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
+            .vocabularyId(concept.getVocabularyId())
+            .conceptSynonyms(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
 
   @Autowired
-  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService) {
+  ConceptSynonymDao conceptSynonymDao;
+
+  @Autowired
+  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,ConceptSynonymDao conceptSynonymDao) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
+    this.conceptSynonymDao = conceptSynonymDao;
   }
+
 
   @Override
   public ResponseEntity<ConceptListResponse> searchConcepts(String workspaceNamespace,
@@ -98,10 +107,8 @@ public class ConceptsController implements ConceptsApiDelegate {
       throw new BadRequestException("Query must be non-whitespace");
     }
 
-
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount);
-
 
     // TODO: move Swagger codegen to common-api, pass request with modified values into service
     ConceptListResponse response = new ConceptListResponse();
