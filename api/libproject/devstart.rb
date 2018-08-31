@@ -370,10 +370,27 @@ Common.register_command({
   :fn => ->(*args) { run_public_api_tests("test-public-api", args) }
 })
 
+def test_api_changes(branch_name)
+  api_lines = Common.new.run_inline %W{git diff --name-only $(git merge-base master #{branch_name}) | grep api | wc -l}
+  if api_lines == 0
+    return false
+  end
+  return true
+end
 
 def run_all_tests(cmd_name, args)
-  run_api_tests(cmd_name, args)
-  run_public_api_tests(cmd_name, args)
+  circle_branch = ENV["CIRCLE_BRANCH"]
+  Common.new.run_inline %W{echo #{circle_branch}}
+  if circle_branch.nil? || circle_branch.empty? || circle_branch == "master"
+    run_tests = true
+  else
+    run_tests = test_api_changes(circle_branch)
+  end
+
+  if run_tests
+    run_api_tests(cmd_name, args)
+    run_public_api_tests(cmd_name, args)
+  end
 end
 
 Common.register_command({
