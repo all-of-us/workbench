@@ -613,7 +613,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     List<AchillesResult> results = Lists.newArrayList(conceptResults.get(conceptId));
                     for(AchillesResult ar: results){
                         String analysisStratumName=ar.getAnalysisStratumName();
-                        String stratum2 = ar.getStratum2();
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
                         }
