@@ -145,7 +145,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       const ids = [option.id];
       let path = option.path.split('.');
       if (this.multiples[option.name]) {
-          this.multiples[option.name].forEach(multiple => {
+        this.multiples[option.name].forEach(multiple => {
           ids.push(multiple.id);
           path = path.concat(multiple.path.split('.'));
         });
