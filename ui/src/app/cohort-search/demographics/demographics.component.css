@@ -59,10 +59,16 @@ h3 {
   margin: 0 0.5rem;
 }
 
-.slider > .count-wrapper {
+.slider > #count-wrapper {
   text-align: center;
   height: 1.25rem;
+  position: relative;
 }
+
+/*#age-count {*/
+  /*position: absolute;*/
+  /*left: 50%;*/
+/*}*/
 
 .ng2-nouislider {
   margin-top: 0;
