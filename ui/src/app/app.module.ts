@@ -40,7 +40,7 @@ import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
-import {RecentWorkComponent} from "./views/recent-work/component";
+import {RecentWorkComponent} from './views/recent-work/component';
 import {RenameModalComponent} from './views/rename-modal/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
