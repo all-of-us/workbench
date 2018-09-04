@@ -31,10 +31,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   loading = false;
   noResults = false;
   optionSelected = false;
-  multiIngredient = false;
   error = false;
   subscription: Subscription;
   numMatches: number;
+  ingredientsName: any;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -88,14 +88,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         let path = [];
         this.ingredients.forEach(item => {
           ingredientList.push(item.name);
-          ids.push(item.id);
+            this.ingredientsName = ingredientList;
+            ids.push(item.id);
           path = path.concat(item.path.split('.'));
         });
         if (ingredientList.length) {
           this.actions.setCriteriaSearchTerms(ingredientList);
           this.actions.loadCriteriaSubtree(this._type, ids, path);
         }
-        this.multiIngredient = ingredientList.length > 1;
       });
 
     const subtreeSelectSub = this.selected$
@@ -123,7 +123,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       }
     } else {
       this.optionSelected = false;
-      this.multiIngredient = false;
+      this.ingredientsName = '';
+      this.numMatches = 0;
       this.noResults = false;
       if (newVal.length >= 4) {
         this.actions.fetchAutocompleteOptions(this._type, newVal);
