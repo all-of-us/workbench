@@ -68,6 +68,7 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
+import {CardComponent} from './views/card/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -123,6 +124,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
+    CardComponent,
     CohortEditModalComponent,
     CohortListComponent,
     ConfirmDeleteModalComponent,
