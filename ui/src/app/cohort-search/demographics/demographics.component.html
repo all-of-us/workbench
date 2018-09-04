@@ -46,8 +46,8 @@
         class="number-display"
         (blur)="checkMin()">
       <div class="slider">
-        <div id="age-count" class="count-wrapper">
-          <span *ngIf="ageCount" class="badge badge-info">
+        <div id="count-wrapper">
+          <span id="age-count" class="badge badge-info">
             {{ ageCount | number }}
           </span>
         </div>
@@ -55,6 +55,7 @@
           [min]="minAge" [max]="maxAge" [step]="1"
           [behaviour]="'drag'"
           [connect]="true"
+          (slide)="centerAgeCount()"
           [formControl]="demoForm.controls.ageRange">
         </nouislider>
       </div>

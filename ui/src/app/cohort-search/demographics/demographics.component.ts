@@ -264,10 +264,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       .debounceTime(250)
       .distinctUntilChanged()
       .map(([lo, hi]) => {
-        const slider = document.getElementsByClassName('noUi-connect');
-        const count = document.getElementById('age-count');
-        // TODO set width & position here for count
-        this.calculateAgeCount();
         const attr = fromJS(<Attribute>{
           name: 'Age',
           operator: Operator.BETWEEN,
@@ -319,5 +315,23 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       count += ageNode.count;
     }
     this.ageCount = count;
+  }
+
+  centerAgeCount() {
+    this.calculateAgeCount();
+    const slider = <HTMLElement> document.getElementsByClassName('noUi-connect')[0];
+    const wrapper = document.getElementById('count-wrapper');
+    const count = document.getElementById('age-count');
+    wrapper.setAttribute(
+      'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
+    );
+    // set style properties also for cross-browser compatibility
+    wrapper.style.width = slider.offsetWidth.toString();
+    wrapper.style.left = slider.offsetLeft.toString();
+    if (slider.offsetWidth < count.offsetWidth) {
+      const margin = (slider.offsetWidth - count.offsetWidth) / 2;
+      count.setAttribute('style', 'margin-left: ' + margin + 'px;');
+      count.style.marginLeft = margin.toString();
+    }
   }
 }
