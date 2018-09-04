@@ -1,10 +1,10 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {Criteria, DomainType} from 'generated';
-import {fromJS, List, Map} from 'immutable';
+import {TreeType} from 'generated';
+import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
+import {CRITERIA_SUBTYPES} from '../constant';
 
 import {
   activeCriteriaTreeType,
@@ -18,9 +18,7 @@ import {
   subtreeSelected,
 } from '../redux';
 
-import {loadSubtreeItems} from '../redux/actions/creators';
-
-import {highlightMatches} from '../utils';
+import {highlightMatches, stripHtml} from '../utils';
 
 @Component({
   selector: 'crit-node',
@@ -118,9 +116,11 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(() =>  this.expanded = true);
 
       const subtreeSelectSub = this.selected$
-        .filter(selectedId => selectedId === parentId)
-        .subscribe(() => {
-          const displayName = highlightMatches(this.searchTerms, this.node.get('name'));
+        .filter(selectedIds => !!selectedIds && parentId !== 0)
+        .subscribe(selectedIds => {
+          const displayName = selectedIds.includes(parentId)
+            ? highlightMatches(this.searchTerms, this.node.get('name'))
+            : stripHtml(this.node.get('name'));
           this.node = this.node.set('name', displayName);
         });
 
@@ -172,7 +172,7 @@ export class NodeComponent implements OnInit, OnDestroy {
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops
      */
-    if (_type === DomainType.DRUG) {
+    if (_type === TreeType[TreeType.DRUG]) {
       this.actions.fetchDrugCriteria(_type, parentId, CRITERIA_SUBTYPES.ATC);
     } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
@@ -180,8 +180,8 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchCriteria(_type, parentId);
     }
     // Load options for Encounters modifier
-    if ([CRITERIA_TYPES.PM, DomainType.VISIT].indexOf(_type) === -1) {
-      this.actions.fetchCriteria(DomainType[DomainType.VISIT], 0);
+    if ([TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(_type) === -1) {
+      this.actions.fetchAllCriteria(TreeType[TreeType.VISIT], 0);
     }
   }
 

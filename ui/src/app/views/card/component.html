@@ -1,19 +1,29 @@
-<div class="card" style="margin-left:30px;">
+<div class="card">
   <div>
     <clr-dropdown>
       <button type="button" clrDropdownTrigger>
         <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
       </button>
       <clr-dropdown-menu *clrIfOpen>
-        <div *ngFor="let action of actionList">
+        <div *ngFor="let action of actions">
           <button>
-            <clr-icon shape=action.type.class></clr-icon>
+            <clr-icon shape=action.class></clr-icon>
           </button>
 
         </div>
       </clr-dropdown-menu>
     </clr-dropdown>
-     {{header}}
+     {{card.notebook?.name}} {{card.cohort?.name}}
+  </div>
+  <div>
+    {{card.cohort?.description}}
+  </div>
+  <div class="footer">
+      <div class="last-modified">Last Updated <br/>{{card.modifiedTime | date}}</div>
+      <div class="item-type type">
+        <div *ngIf="card.cohort">CH</div>
+        <div *ngIf="card.notebook">NB</div>
+      </div>
   </div>
 
 </div>

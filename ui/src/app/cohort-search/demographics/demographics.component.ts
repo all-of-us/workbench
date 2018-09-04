@@ -1,15 +1,15 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS, List} from 'immutable';
-import {forkJoin} from 'rxjs/observable/forkJoin';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
+import {CRITERIA_SUBTYPES} from '../constant';
 
-import {activeParameterList, CohortSearchActions, CohortSearchState, demoCriteriaChildren, loadDemoCriteriaRequestResults} from '../redux';
+import {activeParameterList, CohortSearchActions, CohortSearchState, demoCriteriaChildren} from '../redux';
 
 import {Attribute, CohortBuilderService, Operator} from 'generated';
+import {TreeType} from '../../../generated';
 
 const minAge = 18;
 const maxAge = 120;
@@ -121,24 +121,24 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       CRITERIA_SUBTYPES.RACE,
       CRITERIA_SUBTYPES.ETH
     ].map(code => {
-      this.subscription.add(this.ngRedux.select(demoCriteriaChildren(CRITERIA_TYPES.DEMO, code))
+      this.subscription.add(this.ngRedux.select(demoCriteriaChildren(TreeType[TreeType.DEMO], code))
         .subscribe(options => {
           if (options.size) {
             this.loadOptions(options, code);
           } else {
-            this.api.getCriteriaByTypeAndSubtype(cdrid, CRITERIA_TYPES.DEMO, code)
+            this.api.getCriteriaByTypeAndSubtype(cdrid, TreeType[TreeType.DEMO], code)
               .subscribe(response => {
                 const items = response.items
                   .filter(item => item.parentId !== 0 || code === CRITERIA_SUBTYPES.DEC);
                 items.sort(sortByCountThenName);
                 const nodes = fromJS(items).map(node => {
                   if (node.get('subtype') !== CRITERIA_SUBTYPES.AGE) {
-                    const paramId = `param${node.get('id', node.get('code'))}`;
+                    const paramId = `param${node.get('conceptId', node.get('code'))}`;
                     node = node.set('parameterId', paramId);
                   }
                   return node;
                 });
-                this.actions.loadDemoCriteriaRequestResults(CRITERIA_TYPES.DEMO, code, nodes);
+                this.actions.loadDemoCriteriaRequestResults(TreeType[TreeType.DEMO], code, nodes);
               });
           }
         })

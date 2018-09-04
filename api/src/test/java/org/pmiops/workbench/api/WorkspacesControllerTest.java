@@ -47,6 +47,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
@@ -58,6 +59,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -128,26 +130,28 @@ public class WorkspacesControllerTest {
   private static final String BUCKET_NAME = "workspace-bucket";
 
   private static final Concept CLIENT_CONCEPT_1 = new Concept()
-      .conceptId(123L)
-      .conceptName("a concept")
-      .standardConcept(true)
-      .conceptCode("conceptA")
-      .conceptClassId("classId")
-      .vocabularyId("V1")
-      .domainId("Condition")
-      .countValue(123L)
-      .prevalence(0.2F);
+          .conceptId(123L)
+          .conceptName("a concept")
+          .standardConcept(true)
+          .conceptCode("conceptA")
+          .conceptClassId("classId")
+          .vocabularyId("V1")
+          .domainId("Condition")
+          .countValue(123L)
+          .prevalence(0.2F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_2 = new Concept()
-      .conceptId(456L)
-      .standardConcept(false)
-      .conceptName("b concept")
-      .conceptCode("conceptB")
-      .conceptClassId("classId2")
-      .vocabularyId("V2")
-      .domainId("Condition/Device")
-      .countValue(456L)
-      .prevalence(0.3F);
+          .conceptId(456L)
+          .standardConcept(false)
+          .conceptName("b concept")
+          .conceptCode("conceptB")
+          .conceptClassId("classId2")
+          .vocabularyId("V2")
+          .domainId("Condition/Device")
+          .countValue(456L)
+          .prevalence(0.3F)
+          .conceptSynonyms(new ArrayList<String>());
 
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
@@ -158,6 +162,8 @@ public class WorkspacesControllerTest {
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired
   private WorkspacesController workspacesController;
+  @Mock
+  WorkspaceService workspaceService;
 
   @TestConfiguration
   @Import({
@@ -174,14 +180,15 @@ public class WorkspacesControllerTest {
     ConceptSetsController.class
   })
   @MockBean({
-    FireCloudService.class,
-    CohortMaterializationService.class,
-    CloudStorageService.class,
-    BigQueryService.class,
-    DomainLookupService.class,
-    ParticipantCounter.class,
-    UserService.class,
-    UserRecentResourceService.class
+          FireCloudService.class,
+          CohortMaterializationService.class,
+          CloudStorageService.class,
+          BigQueryService.class,
+          DomainLookupService.class,
+          ParticipantCounter.class,
+          UserService.class,
+          UserRecentResourceService.class,
+          ConceptService.class
   })
   static class Configuration {
     @Bean
@@ -1390,12 +1397,18 @@ public class WorkspacesControllerTest {
     String nb1 = "notebooks/nb1.ipynb";
     String newName = "nb2.ipynb";
     String newPath = "notebooks/nb2.ipynb";
+    String fullPath = "gs://workspace-bucket/" + newPath;
+    String origFullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
@@ -1407,12 +1420,18 @@ public class WorkspacesControllerTest {
     String nb1 = "notebooks/nb1.ipynb";
     String newName = "nb2";
     String newPath = "notebooks/nb2.ipynb";
+    String fullPath = "gs://workspace-bucket/" + newPath;
+    String origFullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     NotebookRename rename = new NotebookRename();
     rename.setName("nb1.ipynb");
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
@@ -1423,8 +1442,12 @@ public class WorkspacesControllerTest {
       LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     String nb1 = "notebooks/nb1.ipynb";
     String newPath = "notebooks/nb1 Clone.ipynb";
+    String fullPath = "gs://workspace-bucket/" + newPath;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     workspacesController.cloneNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
   }
 
   @Test
@@ -1434,7 +1457,11 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
       LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     String nb1 = "notebooks/nb1.ipynb";
+    String fullPath = "gs://workspace-bucket/" + nb1;
+    long workspaceIdInDb = 1;
+    long userIdInDb = 1;
     workspacesController.deleteNotebook(workspace.getNamespace(), workspace.getId(), "nb1.ipynb");
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
+    verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 }

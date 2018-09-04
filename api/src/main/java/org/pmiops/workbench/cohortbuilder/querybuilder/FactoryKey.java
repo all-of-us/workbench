@@ -1,5 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
+import org.pmiops.workbench.model.TreeType;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,14 +42,15 @@ public enum FactoryKey {
      */
     private static Map<String, Object> initializeMapping() {
         Map<String, Object> tMap = new HashMap<String, Object>();
-        tMap.put("ICD9", FactoryKey.CODES);
-        tMap.put("ICD10", FactoryKey.CODES);
-        tMap.put("CPT", FactoryKey.CODES);
-        tMap.put("DEMO", FactoryKey.DEMO);
-        tMap.put("VISIT", FactoryKey.VISIT);
-        tMap.put("PM", FactoryKey.PM);
-        tMap.put("DRUG", FactoryKey.DRUG);
-        tMap.put("MEAS", FactoryKey.MEAS);
+        tMap.put(TreeType.ICD9.name(), FactoryKey.CODES);
+        tMap.put(TreeType.ICD10.name(), FactoryKey.CODES);
+        tMap.put(TreeType.CPT.name(), FactoryKey.CODES);
+        tMap.put(TreeType.CONDITION.name(), FactoryKey.CODES);
+        tMap.put(TreeType.DEMO.name(), FactoryKey.DEMO);
+        tMap.put(TreeType.VISIT.name(), FactoryKey.VISIT);
+        tMap.put(TreeType.PM.name(), FactoryKey.PM);
+        tMap.put(TreeType.DRUG.name(), FactoryKey.DRUG);
+        tMap.put(TreeType.MEAS.name(), FactoryKey.MEAS);
         return tMap;
     }
 }

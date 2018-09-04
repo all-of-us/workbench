@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
@@ -64,8 +65,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
     BASE_SQL_TEMPLATE + VALUE_AS_NUMBER;
 
-  private static final String VALUE_SOURCE_VALUE_SQL_TEMPLATE =
-    BASE_SQL_TEMPLATE + "and value_source_value = ${value}\n";
+  private static final String VALUE_AS_CONCEPT_ID_SQL_TEMPLATE =
+    BASE_SQL_TEMPLATE + "and value_as_concept_id = ${value}\n";
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
@@ -109,10 +110,10 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
         validateSearchParameter(parameter);
         String namedParameterConceptId = CONCEPT_ID + getUniqueNamedParameterPostfix();
         String namedParameter = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
-        queryParts.add(VALUE_SOURCE_VALUE_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
+        queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
           .replace("${value}","@" + namedParameter));
         queryParams.put(namedParameterConceptId, QueryParameterValue.int64(parameter.getConceptId()));
-        queryParams.put(namedParameter, QueryParameterValue.string(parameter.getValue()));
+        queryParams.put(namedParameter, QueryParameterValue.int64(new Long(parameter.getValue())));
       }
     }
     String finalSql = String.join(UNION_ALL, queryParts);
@@ -162,7 +163,11 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     if (parameter.getConceptId() == null || parameter.getValue() == null) {
       throw new BadRequestException("Please provide valid conceptId and value for "
         + exceptionText.get(parameter.getSubtype()) + ".");
+    } else if (!NumberUtils.isNumber(parameter.getValue())) {
+      throw new BadRequestException("Please provide valid value for "
+        + exceptionText.get(parameter.getSubtype()) + ".");
     }
+
   }
 
   private static Predicate<Attribute> nameIsSystolic() {

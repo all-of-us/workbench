@@ -21,6 +21,7 @@ import {
 export class HomepageComponent implements OnInit, OnDestroy {
   profile: Profile;
   view: any[] = [180, 180];
+  hello = 'this is dummy header';
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';

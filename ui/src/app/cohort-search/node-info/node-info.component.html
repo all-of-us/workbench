@@ -1,19 +1,22 @@
 <div class="item">
   <!-- SELECT BTN -->
   <button
-      *ngIf="selectable"
-      type="button"
-      class="btn btn-sm btn-link selection-button"
-      [class.pm]="node.get('type') === criteriaTypes.PM"
-      [disabled]="isSelected"
-      (click)="select($event)">
-    <clr-icon *ngIf="isSelected" shape="check-circle" size="20" class="selection-icon"></clr-icon>
+          *ngIf="selectable"
+          type="button"
+          class="btn btn-sm btn-link selection-button"
+          [class.pm]="isPM()"
+          [disabled]="isSelected && !node.get('hasAttributes')"
+          (click)="select($event)">
+    <clr-icon *ngIf="isSelected && !node.get('hasAttributes')" shape="check-circle" size="20" class="selection-icon"></clr-icon>
     <clr-icon *ngIf="!isSelected && !node.get('hasAttributes')" shape="plus-circle" size="20" class="selection-icon"></clr-icon>
-    <clr-icon *ngIf="!isSelected && node.get('hasAttributes')" shape="slider" dir="right" size="20" class="selection-icon-blue is-solid"></clr-icon>
+    <clr-icon *ngIf="node.get('hasAttributes')" shape="slider" dir="right" size="20" class="selection-icon-blue is-solid"></clr-icon>
   </button>
 
   <!-- CODE -->
-  <div class="code font-weight-bold" [innerHTML]="displayCode | safeHtml"></div>
+  <div class="code font-weight-bold"
+    [innerHTML]="displayCode | safeHtml">
+    {{ displayCode }}
+  </div>
 
   <!-- NAME -->
   <div #name
@@ -25,11 +28,11 @@
     [innerHTML]="displayName | safeHtml"></div>
 
   <!-- COUNT -->
-  <div *ngIf="node.get('selectable')" class="count">
+  <div *ngIf="showCount()" class="count">
     <span class="text-muted">&#124;</span>
     <span class="badge badge-info">
       <span *ngIf="node.get('group')">~</span>
-      {{ node.get('count', 0) | number }}
+      {{ node.get('count') | number }}
     </span>
   </div>
 </div>

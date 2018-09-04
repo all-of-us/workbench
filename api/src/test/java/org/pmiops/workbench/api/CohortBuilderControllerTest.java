@@ -17,6 +17,7 @@ import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -39,10 +40,6 @@ import static org.junit.Assert.assertTrue;
 @Transactional
 public class CohortBuilderControllerTest {
 
-  private static final String TYPE_ICD9 = "ICD9";
-  private static final String TYPE_DEMO = "DEMO";
-  private static final String TYPE_MEASUREMENT = "MEAS";
-  private static final String TYPE_DRUG = "DRUG";
   private static final String SUBTYPE_NONE = null;
   private static final String SUBTYPE_AGE = "AGE";
   private static final String SUBTYPE_LAB = "LAB";
@@ -54,6 +51,7 @@ public class CohortBuilderControllerTest {
   private Criteria demoCriteria;
   private Criteria labMeasurement;
   private Criteria drugATCCriteria;
+  private Criteria drugATCCriteriaChild;
   private Criteria drugBrandCriteria;
   private CriteriaAttribute criteriaAttributeMin;
   private CriteriaAttribute criteriaAttributeMax;
@@ -88,22 +86,25 @@ public class CohortBuilderControllerTest {
   @Before
   public void setUp() {
     icd9CriteriaParent = criteriaDao.save(
-      createCriteria(TYPE_ICD9, SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true)
+      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true)
     );
     icd9CriteriaChild = criteriaDao.save(
-      createCriteria(TYPE_ICD9, SUBTYPE_NONE, icd9CriteriaParent.getId(), "001.1", "name", DomainType.CONDITION.name(), null, false)
+      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, icd9CriteriaParent.getId(), "001.1", "name", DomainType.CONDITION.name(), null, false)
     );
     demoCriteria = criteriaDao.save(
-      createCriteria(TYPE_DEMO, SUBTYPE_AGE, 0L, null, "age", null, null, true)
+      createCriteria(TreeType.DEMO.name(), SUBTYPE_AGE, 0L, null, "age", null, null, true)
     );
     labMeasurement = criteriaDao.save(
-      createCriteria(TYPE_MEASUREMENT, SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, true)
+      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, true)
     );
     drugATCCriteria = criteriaDao.save(
-      createCriteria(TYPE_DRUG, SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true)
     );
     drugBrandCriteria = criteriaDao.save(
-      createCriteria(TYPE_DRUG, SUBTYPE_BRAND, 0L, "LP12345", "brandName", DomainType.DRUG.name(), "1235", true)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_BRAND, 0L, "LP12345", "brandName", DomainType.DRUG.name(), "1235", true)
+    );
+    drugATCCriteriaChild = criteriaDao.save(
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "differentName", DomainType.DRUG.name(), "12345", false)
     );
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
@@ -127,7 +128,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(icd9CriteriaParent),
       controller
-        .getCriteriaByTypeAndParentId(1L, TYPE_ICD9, 0L)
+        .getCriteriaByTypeAndParentId(1L, TreeType.ICD9.name(), 0L)
         .getBody()
         .getItems()
         .get(0)
@@ -135,7 +136,31 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(icd9CriteriaChild),
       controller
-        .getCriteriaByTypeAndParentId(1L, TYPE_ICD9, icd9CriteriaParent.getId())
+        .getCriteriaByTypeAndParentId(1L, TreeType.ICD9.name(), icd9CriteriaParent.getId())
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void getCriteriaByTypeAndSubtypeAndParentId() throws Exception {
+    assertEquals(
+      createResponseCriteria(drugATCCriteria),
+      controller
+        .getCriteriaByTypeAndSubtypeAndParentId(1L, TreeType.DRUG.name(), SUBTYPE_ATC, 0L)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void getCriteriaChildrenByTypeAndParentId() throws Exception {
+    assertEquals(
+      createResponseCriteria(drugATCCriteriaChild),
+      controller
+        .getCriteriaChildrenByTypeAndParentId(1L, TreeType.DRUG.name(), 2L)
         .getBody()
         .getItems()
         .get(0)
@@ -147,7 +172,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(demoCriteria),
       controller
-        .getCriteriaByTypeAndSubtype(1L, TYPE_DEMO, SUBTYPE_AGE)
+        .getCriteriaByTypeAndSubtype(1L, TreeType.DEMO.name(), SUBTYPE_AGE)
         .getBody()
         .getItems()
         .get(0)
@@ -159,7 +184,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(labMeasurement),
       controller
-        .getCriteriaByTypeForCodeOrName(1L, "MEAS", "LP12")
+        .getCriteriaByTypeForCodeOrName(1L, TreeType.MEAS.name(), "LP12")
         .getBody()
         .getItems()
         .get(0)
@@ -232,7 +257,8 @@ public class CohortBuilderControllerTest {
       .selectable(true)
       .count("16")
       .domainId(domain)
-      .conceptId(conceptId);
+      .conceptId(conceptId)
+      .path("1.2.3.4");
   }
 
   private org.pmiops.workbench.model.Criteria createResponseCriteria(Criteria criteria) {
@@ -248,7 +274,8 @@ public class CohortBuilderControllerTest {
       .parentId(criteria.getParentId())
       .selectable(criteria.getSelectable())
       .subtype(criteria.getSubtype())
-      .type(criteria.getType());
+      .type(criteria.getType())
+      .path(criteria.getPath());
   }
 
   private org.pmiops.workbench.model.CriteriaAttribute createResponseCriteriaAttribute(CriteriaAttribute criteriaAttribute) {

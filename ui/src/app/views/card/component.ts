@@ -1,7 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {CohortsService} from '../../../generated';
-import {WorkspaceData} from '../../resolvers/workspace';
+import {FileDetail, RecentResource} from '../../../generated';
 
 @Component ({
   selector : 'app-card',
@@ -13,16 +11,30 @@ import {WorkspaceData} from '../../resolvers/workspace';
 export class CardComponent {
   actionList = [];
   type: string;
-  @Input('header')
-  header: string;
+  @Input('card')
+  card: RecentResource;
+  actions = [];
 
   constructor(
   ) {
    this.actionList = [{
-     notebook: {
+     type: 'notebook',
+     class: 'pencil',
+     link: 'renameThis(notebook)'},
+     {
+       type: 'cohort',
        class: 'copy',
-       link: 'query'}
-   }];
-   this.type = 'notebook';
+       link: 'renameThis(notebook)'},
+     {
+       type: 'cohort',
+       class: 'pencil',
+       link: 'renameThis(notebook)'}
+   ];
+   this.type = this.card && this.card.notebook == null ? 'cohort' : 'notebook';
+   this.actions = this.actionList.filter(action =>  action.type === this.type);
+  }
+
+  renameThis(notebook: FileDetail): void {
+    console.log('in rename');
   }
 }

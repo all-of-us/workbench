@@ -1,10 +1,9 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
-import {DomainType} from 'generated';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../../constant';
+import {CRITERIA_SUBTYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -30,6 +29,7 @@ import {
   SearchGroupItem,
   SearchParameter,
   SearchRequest,
+  TreeType
 } from 'generated';
 
 
@@ -59,8 +59,8 @@ export class CohortSearchActions {
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
-  @dispatch() requestCriteriaSubtree = ActionFuncs.requestCriteriaSubtree;
-  @dispatch() loadSubtreeItems = ActionFuncs.loadSubtreeItems;
+  @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
+  @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
@@ -248,13 +248,8 @@ export class CohortSearchActions {
     this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
-  fetchCriteriaSubtree(kind: string, id: number): void {
-    const isLoading = isAutocompleteLoading()(this.state);
-    const isLoaded = this.state.getIn(['criteria', 'subtree', kind, id]);
-    if (isLoaded || isLoading) {
-      return;
-    }
-    this.requestCriteriaSubtree(this.cdrVersionId, kind, id);
+  fetchAllChildren(kind: string, parentId: number): void {
+    this.requestAllChildren(this.cdrVersionId, kind, parentId);
   }
 
   fetchAttributes(node: any): void {
@@ -458,16 +453,15 @@ export class CohortSearchActions {
       attributes: immParam.get('attributes')
     };
 
-    if (param.type === CRITERIA_TYPES.DEMO
-      || param.type === DomainType[DomainType.VISIT]
-      || param.type === CRITERIA_TYPES.PM
-      || param.type === CRITERIA_TYPES.MEAS
-      || param.type === DomainType[DomainType.DRUG]) {
+    if (param.type === TreeType[TreeType.DEMO]
+      || param.type === TreeType[TreeType.VISIT]
+      || param.type === TreeType[TreeType.PM]
+      || param.type === TreeType[TreeType.MEAS]
+      || param.type === TreeType[TreeType.DRUG]) {
         param.conceptId = immParam.get('conceptId');
-    } else if (param.type === CRITERIA_TYPES.ICD9
-      || param.type === CRITERIA_TYPES.ICD10
-      || param.type === CRITERIA_TYPES.CPT
-      || param.type === CRITERIA_TYPES.PHECODE) {
+    } else if (param.type === TreeType[TreeType.ICD9]
+      || param.type === TreeType[TreeType.ICD10]
+      || param.type === TreeType[TreeType.CPT]) {
         param.domain = immParam.get('domainId');
     }
 
