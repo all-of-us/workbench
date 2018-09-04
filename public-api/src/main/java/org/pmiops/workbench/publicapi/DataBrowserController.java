@@ -18,6 +18,7 @@ import org.pmiops.workbench.model.MatchType;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Slice;
+import javax.persistence.EntityManager;
 
 import com.google.common.collect.ImmutableMultimap;
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private DbDomainDao dbDomainDao;
     @Autowired
     private AchillesResultDistDao achillesResultDistDao;
+    @Autowired
+    private EntityManager entityManager;
 
     private ConceptService conceptService;
 
@@ -494,42 +497,46 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         analysisIds.add(MEASUREMENT_AGE_ANALYSIS_ID);
         analysisIds.add(MEASUREMENT_DIST_ANALYSIS_ID);
 
-        List<AchillesAnalysis> achillesAnalyses = achillesAnalysisDao.findConceptAnalysisResults(conceptIds, analysisIds);
-        HashMap<String,ConceptAnalysis> conceptAnalysisHashMap = new HashMap<>();
-        HashMap<String,String> conceptUnits = new HashMap<>();
-        for(AchillesAnalysis analysis: achillesAnalyses) {
+        for(String conceptId: conceptIds){
+            ConceptAnalysis conceptAnalysis=new ConceptAnalysis();
 
-            Multimap<String,AchillesResult> conceptResults = Multimaps.index(analysis.getResults(),AchillesResult::getStratum1);
+            boolean isMeasurement = false;
 
-            if(analysis.getAnalysisId() == GENDER_ANALYSIS_ID){
-                for(String conceptId: conceptIds){
-                    List<AchillesResult> results = Lists.newArrayList(conceptResults.get(conceptId));
-                    for(AchillesResult ar: results){
-                        String analysisStratumName = ar.getAnalysisStratumName();
+            List<AchillesAnalysis> analysisList = achillesAnalysisDao.findConceptAnalysisResults(conceptId,analysisIds);
+
+            HashMap<Long, AchillesAnalysis> analysisHashMap = new HashMap<>();
+            for(AchillesAnalysis aa: analysisList){
+                this.entityManager.detach(aa);
+                analysisHashMap.put(aa.getAnalysisId(), aa);
+            }
+
+            AchillesAnalysis analysis = analysisHashMap.get(COUNT_ANALYSIS_ID);
+            String unitName = null;
+            if(analysis != null){
+                for(AchillesResult results: analysis.getResults()){
+                    unitName = results.getStratum4();
+                }
+            }
+
+            conceptAnalysis.setConceptId(conceptId);
+            Iterator it = analysisHashMap.entrySet().iterator();
+            while(it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                Long analysisId = (Long)pair.getKey();
+                AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
+                conceptAnalysis.setUnitName(unitName);
+                if(analysisId == GENDER_ANALYSIS_ID){
+                    for(AchillesResult ar: aa.getResults()){
+                        String analysisStratumName =ar.getAnalysisStratumName();
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
                         }
                     }
-                    AchillesAnalysis achillesAnalysis = new AchillesAnalysis(analysis);
-                    achillesAnalysis.setResults(results);
-                    if(conceptAnalysisHashMap.containsKey(conceptId))
-                    {
-                        ConceptAnalysis conceptAnalysis = conceptAnalysisHashMap.get(conceptId);
-                        conceptAnalysis.setGenderAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                    }else{
-                        ConceptAnalysis conceptAnalysis = new ConceptAnalysis();
-                        conceptAnalysis.setGenderAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                        conceptAnalysis.setConceptId(conceptId);
-                        conceptAnalysisHashMap.put(conceptId, conceptAnalysis);
-                    }
-                }
-
-            }else if(analysis.getAnalysisId() == AGE_ANALYSIS_ID){
-                for(String conceptId: conceptIds){
-                    List<AchillesResult> results = Lists.newArrayList(conceptResults.get(conceptId));
+                    conceptAnalysis.setGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
+                }else if(analysisId == AGE_ANALYSIS_ID){
                     Set<String> uniqueAgeDeciles = new TreeSet<String>();
-                    for(AchillesResult ar: results){
-                        String analysisStratumName = ar.getAnalysisStratumName();
+                    for(AchillesResult ar: aa.getResults()){
+                        String analysisStratumName=ar.getAnalysisStratumName();
                         uniqueAgeDeciles.add(ar.getStratum2());
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
@@ -546,148 +553,63 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             missingResult.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(missingAgeDecile));
                             missingResult.setCountValue(0L);
                             missingResult.setSourceCountValue(0L);
-                            analysis.getResults().add(missingResult);
+                            aa.getResults().add(missingResult);
                         }
                     }
-                    AchillesAnalysis achillesAnalysis = new AchillesAnalysis(analysis);
-                    achillesAnalysis.setResults(results);
-                    if(conceptAnalysisHashMap.containsKey(conceptId))
-                    {
-                        ConceptAnalysis conceptAnalysis = conceptAnalysisHashMap.get(conceptId);
-                        conceptAnalysis.setAgeAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                    }else{
-                        ConceptAnalysis conceptAnalysis = new ConceptAnalysis();
-                        conceptAnalysis.setAgeAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                        conceptAnalysis.setConceptId(conceptId);
-                        conceptAnalysisHashMap.put(conceptId, conceptAnalysis);
-                    }
-                }
-            }else if(analysis.getAnalysisId() == RACE_ANALYSIS_ID){
-                for(String conceptId: conceptIds){
-                    List<AchillesResult> results = Lists.newArrayList(conceptResults.get(conceptId));
-                    for(AchillesResult ar: results){
+                    conceptAnalysis.setAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
+                }else if(analysisId == RACE_ANALYSIS_ID){
+                    for(AchillesResult ar: aa.getResults()){
                         String analysisStratumName=ar.getAnalysisStratumName();
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.raceStratumNameMap.get(ar.getStratum2()));
                         }
                     }
-                    AchillesAnalysis achillesAnalysis = new AchillesAnalysis(analysis);
-                    achillesAnalysis.setResults(results);
-                    if(conceptAnalysisHashMap.containsKey(conceptId))
-                    {
-                        ConceptAnalysis conceptAnalysis = conceptAnalysisHashMap.get(conceptId);
-                        conceptAnalysis.setRaceAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                    }else{
-                        ConceptAnalysis conceptAnalysis = new ConceptAnalysis();
-                        conceptAnalysis.setRaceAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                        conceptAnalysis.setConceptId(conceptId);
-                        conceptAnalysisHashMap.put(conceptId, conceptAnalysis);
-                    }
-                }
-            }else if(analysis.getAnalysisId() == ETHNICITY_ANALYSIS_ID){
-                for(String conceptId: conceptIds){
-                    List<AchillesResult> results = Lists.newArrayList(conceptResults.get(conceptId));
-                    for(AchillesResult ar: results){
+                    conceptAnalysis.setRaceAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
+                }else if(analysisId == ETHNICITY_ANALYSIS_ID){
+                    for(AchillesResult ar: aa.getResults()){
                         String analysisStratumName=ar.getAnalysisStratumName();
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.ethnicityStratumNameMap.get(ar.getStratum2()));
                         }
                     }
-                    AchillesAnalysis achillesAnalysis = new AchillesAnalysis(analysis);
-                    achillesAnalysis.setResults(results);
-                    if(conceptAnalysisHashMap.containsKey(conceptId))
-                    {
-                        ConceptAnalysis conceptAnalysis = conceptAnalysisHashMap.get(conceptId);
-                        conceptAnalysis.setEthnicityAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                    }else{
-                        ConceptAnalysis conceptAnalysis = new ConceptAnalysis();
-                        conceptAnalysis.setEthnicityAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                        conceptAnalysis.setConceptId(conceptId);
-                        conceptAnalysisHashMap.put(conceptId, conceptAnalysis);
-                    }
-                }
+                    conceptAnalysis.setEthnicityAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
+                }else if(analysisId == MEASUREMENT_GENDER_ANALYSIS_ID){
 
-            }else if(analysis.getAnalysisId() == MEASUREMENT_GENDER_ANALYSIS_ID){
+                    isMeasurement = true;
 
-                for(String conceptId: conceptIds){
-                    List<AchillesResult> results = Lists.newArrayList(conceptResults.get(conceptId));
-                    for(AchillesResult ar: results){
+
+                    for(AchillesResult ar: aa.getResults()){
                         String analysisStratumName=ar.getAnalysisStratumName();
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
                         }
                     }
-                    AchillesAnalysis achillesAnalysis = new AchillesAnalysis(analysis);
-                    achillesAnalysis.setResults(results);
-                    if(conceptAnalysisHashMap.containsKey(conceptId))
-                    {
-                        ConceptAnalysis conceptAnalysis = conceptAnalysisHashMap.get(conceptId);
-                        conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                    }else{
-                        ConceptAnalysis conceptAnalysis = new ConceptAnalysis();
-                        conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                        conceptAnalysis.setConceptId(conceptId);
-                        conceptAnalysisHashMap.put(conceptId, conceptAnalysis);
-                    }
-                }
 
-            }else if(analysis.getAnalysisId() == MEASUREMENT_AGE_ANALYSIS_ID){
 
-                for(String conceptId: conceptIds){
-                    List<AchillesResult> results = Lists.newArrayList(conceptResults.get(conceptId));
-                    for(AchillesResult ar: results){
+                    conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
+
+                }else if(analysisId == MEASUREMENT_AGE_ANALYSIS_ID){
+                    isMeasurement = true;
+
+                    for(AchillesResult ar: aa.getResults()){
                         String analysisStratumName=ar.getAnalysisStratumName();
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
                         }
                     }
-                    AchillesAnalysis achillesAnalysis = new AchillesAnalysis(analysis);
-                    achillesAnalysis.setResults(results);
-                    if(conceptAnalysisHashMap.containsKey(conceptId))
-                    {
-                        ConceptAnalysis conceptAnalysis = conceptAnalysisHashMap.get(conceptId);
-                        conceptAnalysis.setMeasurementValueAgeAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                    }else{
-                        ConceptAnalysis conceptAnalysis = new ConceptAnalysis();
-                        conceptAnalysis.setMeasurementValueAgeAnalysis(TO_CLIENT_ANALYSIS.apply(achillesAnalysis));
-                        conceptAnalysis.setConceptId(conceptId);
-                        conceptAnalysisHashMap.put(conceptId, conceptAnalysis);
-                    }
+                    conceptAnalysis.setMeasurementValueAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }
-
-            }else if(analysis.getAnalysisId() == COUNT_ANALYSIS_ID) {
-
-                for(String conceptId: conceptIds){
-                    String unitName = null;
-                    List<AchillesResult> results = Lists.newArrayList(conceptResults.get(conceptId));
-                    for(AchillesResult ar: results){
-                        String analysisStratumName=ar.getAnalysisStratumName();
-                        unitName = ar.getStratum4();
-                        if (analysisStratumName == null || analysisStratumName.equals("")) {
-                            ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
-                        }
-                    }
-                    conceptUnits.put(conceptId, unitName);
-                }
-
             }
 
-        }
-        Iterator it = conceptAnalysisHashMap.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry pair = (Map.Entry)it.next();
-            String conceptId = (String)pair.getKey();
-            ConceptAnalysis conceptAnalysis = (ConceptAnalysis)pair.getValue();
-            if(conceptAnalysis.getMeasurementValueGenderAnalysis() != null || conceptAnalysis.getMeasurementValueAgeAnalysis() != null) {
+            if(isMeasurement){
                 AchillesAnalysis measurementDistAnalysis = achillesAnalysisDao.findAnalysisById(MEASUREMENT_DIST_ANALYSIS_ID);
                 List<AchillesResultDist> achillesResultDistList = achillesResultDistDao.fetchConceptDistResults(MEASUREMENT_DIST_ANALYSIS_ID,conceptId);
                 measurementDistAnalysis.setDistResults(achillesResultDistList);
                 conceptAnalysis.setMeasurementDistributionAnalysis(TO_CLIENT_ANALYSIS.apply(measurementDistAnalysis));
             }
-            conceptAnalysis.setUnitName(conceptUnits.get(conceptId));
-
+            conceptAnalysisList.add(conceptAnalysis);
         }
-        conceptAnalysisList.addAll(conceptAnalysisHashMap.values());
+
         resp.setItems(conceptAnalysisList.stream().map(TO_CLIENT_CONCEPTANALYSIS).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
     }
