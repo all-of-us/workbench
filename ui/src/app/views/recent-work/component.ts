@@ -6,24 +6,37 @@ import {
 } from 'generated';
 
 @Component({
-  // styleUrls: ['./component.css'],
+  selector: 'app-recent-work',
+  styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
 
-export class RecentWorkComponent implements OnInit, OnDestroy {
-  resourceList: RecentResource[];
-
+export class RecentWorkComponent implements OnInit {
+  resourceList: String[];
+  fullList: RecentResource[];
   constructor(
     private userMetricsService: UserMetricsService
   ){}
 
   ngOnInit(): void {
     this.userMetricsService.getUserRecentResources().subscribe((resources) => {
-      this.resourceList = resources;
+      this.fullList = resources;
+      // this should actually be first 3 elements of full List
+      this.resourceList = ["testing1", "testing2", "testing3"];
     });
   }
 
-  ngOnDestroy() {
-
+  moveDownList(): void {
+      this.fullList.push(this.fullList.shift());
+      console.log(this.fullList);
+      //again should actually be first 3 elements of fullList
+      this.resourceList = ["testing2", "testing3", "testing1"];
   }
+
+  moveUpList(): void {
+      this.fullList.unshift(this.fullList.pop());
+      console.log(this.fullList);
+      this.resourceList = ["testing1", "testing2", "testing3"];
+  }
+
 }
