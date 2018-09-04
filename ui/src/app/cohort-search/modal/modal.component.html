@@ -5,7 +5,7 @@
         <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === treeType[treeType.DEMO]}">
           <div class="title-bar">
             <div class="btn-group btn-link">
-              <ng-container *ngIf="(ctype !== treeType[treeType.DEMO]) ">
+              <ng-container *ngIf="(ctype !== treeType[treeType.DEMO]) && !conditionTitle">
                 <button  *ngIf="attributesNode.size === 0"
                   type="button"
                   class="btn tab"
@@ -18,12 +18,7 @@
                   class="btn tab-node">
                   {{attributeTitle}}
                 </button>
-                  <!--<button  *ngIf="(ctype === treeType[treeType.ICD9]) || (ctype === treeType[treeType.ICD10]) || (ctype === treeType[treeType.CONDITION])"-->
-                           <!--type="button" class="btn tab"-->
-                           <!--[class.active]="mode === 'tree'"-->
-                           <!--(click)="mode = 'tree'">-->
-                      <!--Conditions-->
-                  <!--</button>-->
+
                 <div *ngIf="ctype !== treeType[treeType.PM]" class="vbar"></div>
                 <button type="button"
                   class="btn tab"
@@ -34,6 +29,12 @@
                   Modifiers
                 </button>
               </ng-container>
+              <button  *ngIf="conditionTitle"
+                       type="button" class="btn tab"
+                       [class.active]="mode === 'tree'"
+                       (click)="mode = 'tree'">
+                Conditions
+              </button>
             </div>
             <div class="explore-link" *ngIf="ctype === domainType[domainType.DRUG]">
               <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank">

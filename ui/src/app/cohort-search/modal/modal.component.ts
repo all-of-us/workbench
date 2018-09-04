@@ -159,7 +159,11 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
 
   }
-
+  get conditionTitle() {
+      return this.ctype === this.treeType[this.treeType.ICD9]
+          || this.ctype === this.treeType[this.treeType.ICD10]
+          || this.ctype === this.treeType[this.treeType.CONDITION];
+  }
   get attributeTitle() {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
