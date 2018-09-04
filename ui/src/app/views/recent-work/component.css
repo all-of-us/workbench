@@ -13,3 +13,28 @@
     margin-left: .45rem;
     margin-top: 1rem;
 }
+
+.scroll-indicator {
+    border-radius: 50%;
+    height: 2rem;
+    width: 2rem;
+    background-color: #2691D0;
+    position: relative;
+}
+
+.scroll-arrow {
+    height: 1.3rem;
+    width: 1.3rem;
+    color: #FFFFFF;
+    position: relative;
+    top: .375rem;
+    left: .3rem
+}
+
+.title {
+    left: 2.7rem;
+    margin-top: -1.7rem;
+    color: #FFFFFF;
+    width: 100%;
+    position: relative
+}
