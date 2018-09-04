@@ -12,7 +12,7 @@ import {
 })
 
 export class RecentWorkComponent implements OnInit {
-  resourceList: String[];
+  resourceList: RecentResource[];
   fullList: RecentResource[];
   constructor(
     private userMetricsService: UserMetricsService
@@ -22,7 +22,7 @@ export class RecentWorkComponent implements OnInit {
     this.userMetricsService.getUserRecentResources().subscribe((resources) => {
       this.fullList = resources;
       // this should actually be first 3 elements of full List
-      this.resourceList = ["testing1", "testing2", "testing3"];
+      this.resourceList = this.fullList.slice(0,3);
     });
   }
 

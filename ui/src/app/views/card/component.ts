@@ -1,14 +1,16 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {FileDetail, RecentResource} from '../../../generated';
 
 @Component ({
   selector : 'app-card',
-  styleUrls: [
-    '../../styles/template.css'],
+  styleUrls: ['../../styles/buttons.css',
+    '../../styles/cards.css',
+    '../../styles/template.css',
+    './component.css'],
   templateUrl: './component.html'
 })
 
-export class CardComponent {
+export class CardComponent implements OnInit {
   actionList = [];
   type: string;
   @Input('card')
@@ -20,7 +22,16 @@ export class CardComponent {
    this.actionList = [{
      type: 'notebook',
      class: 'pencil',
-     link: 'renameThis(notebook)'},
+     link: this.renameThis(this.card),
+   text: 'Rename'}, {
+     type: 'notebook',
+     class: 'copy',
+     link: this.renameThis(this.card),
+     text: 'Clone'}, {
+     type: 'notebook',
+     class: 'trash',
+     link: this.renameThis(this.card),
+     text: 'Delete'},
      {
        type: 'cohort',
        class: 'copy',
@@ -31,10 +42,12 @@ export class CardComponent {
        link: 'renameThis(notebook)'}
    ];
    this.type = this.card && this.card.notebook == null ? 'cohort' : 'notebook';
-   this.actions = this.actionList.filter(action =>  action.type === this.type);
   }
 
-  renameThis(notebook: FileDetail): void {
+  renameThis(notebook: RecentResource): void {
     console.log('in rename');
+  }
+  ngOnInit() {
+    this.actions = this.actionList.filter(elem =>  elem.type === this.type);
   }
 }

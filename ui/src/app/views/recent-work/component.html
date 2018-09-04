@@ -7,16 +7,12 @@
     </div>
     <div class="card-area">
         <div class="card" *ngFor="let resource of resourceList">
-           Testing
+            <app-card [card]="resource"></app-card>
+
         </div>
     </div>
     <div style="border-radius: 50%; height: 2rem; width: 2rem; background-color: #2691D0; position: relative; float: right; top: 3.4rem; left:-.8rem" (click)="moveUpList()">
         <clr-icon shape="angle" dir="right" style="height: 1.3rem; width: 1.3rem; color: #FFFFFF; position: relative; top: .375rem; left: .3rem"></clr-icon>
     </div>
 
-</div>
-<div class="row">
-<div class="col" *ngFor="let card of resourceList">
-    <app-card [card]="card"></app-card>
-</div>
 </div>
