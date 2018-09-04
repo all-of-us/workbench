@@ -1,29 +1,19 @@
-<div class="recent-work" style="width: 29rem; display: inline-block">
+<div class="recent-work" style="display: inline-block">
     <div style="border-radius: 50%; height: 2rem; width: 2rem; background-color: #2691D0; position: relative; top: 4.5rem" (click)="moveDownList()">
         <clr-icon shape="angle" dir="left" style="height: 1.3rem; width: 1.3rem; color: #FFFFFF; position: relative; top: .375rem; left: .3rem"></clr-icon>
     </div>
-    <div style="margin-left: 2.7rem; margin-top: -1.7rem; color: #FFFFFF">
+    <div style="left: 2.7rem; margin-top: -1.7rem; color: #FFFFFF; width: 100%; position: relative">
         Your Recent Work
     </div>
     <div class="card-area">
+        <div style="display: flex">
         <div class="card" *ngFor="let resource of resourceList">
             <app-card [card]="resource"></app-card>
 
         </div>
-    </div>
-    <div style="border-radius: 50%; height: 2rem; width: 2rem; background-color: #2691D0; position: relative; float: right; top: 3.4rem; left:-.8rem" (click)="moveUpList()">
-        <clr-icon shape="angle" dir="right" style="height: 1.3rem; width: 1.3rem; color: #FFFFFF; position: relative; top: .375rem; left: .3rem"></clr-icon>
-    </div>
-    <div style="margin-left: 2.7rem; margin-top: -1.7rem; color: #FFFFFF">
-        Your Recent Work
-    </div>
-    <div class="card-area">
-        <div class="card" *ngFor="let resource of resourceList">
-           Testing
         </div>
     </div>
-    <div style="border-radius: 50%; height: 2rem; width: 2rem; background-color: #2691D0; position: relative; float: right; top: 3.4rem; left:-.8rem" (click)="moveUpList()">
+    <div style="border-radius: 50%; height: 2rem; width: 2rem; background-color: #2691D0; position: relative; float: right; top: 3.2rem; left:.7rem" (click)="moveUpList()">
         <clr-icon shape="angle" dir="right" style="height: 1.3rem; width: 1.3rem; color: #FFFFFF; position: relative; top: .375rem; left: .3rem"></clr-icon>
     </div>
-
 </div>

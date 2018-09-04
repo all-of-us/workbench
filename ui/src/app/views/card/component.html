@@ -9,8 +9,8 @@
           <div *ngFor="let action of actions">
             <button
                 class="action-item"
-                (click)=action.link>
-              <clr-icon shape=action.class></clr-icon>
+                (click)="this[action.link](this.card)">
+              <clr-icon [attr.shape]="action.class"></clr-icon>
               {{action.text}}
             </button>
           </div>
