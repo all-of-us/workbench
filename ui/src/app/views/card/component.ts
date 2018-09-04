@@ -5,12 +5,14 @@ import {WorkspaceData} from '../../resolvers/workspace';
 
 @Component ({
   selector : 'app-card',
-  styleUrls: [
-    '../../styles/template.css'],
+  styleUrls: ['../../styles/buttons.css',
+    '../../styles/cards.css',
+    '../../styles/template.css',
+    './component.css'],
   templateUrl: './component.html'
 })
 
-export class CardComponent {
+export class CardComponent implements OnInit {
   actionList = [];
   type: string;
   @Input('header')
@@ -24,5 +26,8 @@ export class CardComponent {
        link: 'query'}
    }];
    this.type = 'notebook';
+  }
+  ngOnInit() {
+    this.actions = this.actionList.filter(elem =>  elem.type === this.type);
   }
 }

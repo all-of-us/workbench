@@ -7,7 +7,8 @@
     </div>
     <div class="card-area">
         <div class="card" *ngFor="let resource of resourceList">
-           Testing
+            <app-card [card]="resource"></app-card>
+
         </div>
     </div>
     <div style="border-radius: 50%; height: 2rem; width: 2rem; background-color: #2691D0; position: relative; float: right; top: 3.4rem; left:-.8rem" (click)="moveUpList()">
