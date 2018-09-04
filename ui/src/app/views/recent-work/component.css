@@ -1,0 +1,14 @@
+.card-area {
+    margin-left: 2.3rem;
+    margin-top: -1rem;
+    display: inline-block;
+}
+
+.card {
+    height: 9.2rem;
+    border-radius: .3125rem;
+    box-shadow: 0 0 0 0;
+    width: 7.3rem;
+    display: inline-block;
+    margin-left: .45rem;
+}
