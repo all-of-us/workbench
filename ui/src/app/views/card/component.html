@@ -9,8 +9,8 @@
           <div *ngFor="let action of actions">
             <button
                 class="action-item"
-                (click)="this[action.link](this.card)">
-              <clr-icon [attr.shape]="action.class"></clr-icon>
+                (click) =this[action.link](this.card)>
+              <clr-icon [attr.shape]=action.class></clr-icon>
               {{action.text}}
             </button>
           </div>
@@ -33,4 +33,11 @@
     </div>
   </div>
 </div>
+
+<app-rename-modal [resourceType]="'notebook'" [resource]="this.card.notebook" (receiveRename)="receiveRename($event)"></app-rename-modal>
+<app-confirm-delete-modal [resourceType]="'notebook'" [resource]="this.card.notebook" (receiveDelete)="receiveNotebookDelete($event)"></app-confirm-delete-modal>
+
+<app-confirm-delete-modal [resourceType]="'cohort'" [resource]="this.card.cohort" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
+<app-cohort-edit-modal [cohort]="this.card.cohort" (updateFinished)="updateFinished()"></app-cohort-edit-modal>
+
 
