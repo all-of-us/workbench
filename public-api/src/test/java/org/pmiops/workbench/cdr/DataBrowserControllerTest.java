@@ -646,7 +646,7 @@ public class DataBrowserControllerTest {
         queryConceptIds.add("137990");
         ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(queryConceptIds);
         List<ConceptAnalysis> conceptAnalysisList = response.getBody().getItems();
-        assertThat(conceptAnalysisList.size()).isEqualTo(0);
+        assertThat(conceptAnalysisList.get(0).getAgeAnalysis()).isEqualTo(null);
     }
 
     @Test
@@ -667,7 +667,7 @@ public class DataBrowserControllerTest {
         conceptsIds.add("1585855");
         ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(conceptsIds);
         List<ConceptAnalysis> conceptAnalysisList = response.getBody().getItems();
-        assertThat(conceptAnalysisList.size()).isEqualTo(0);
+        assertThat(conceptAnalysisList.get(0).getAgeAnalysis()).isEqualTo(null);
     }
 
 
