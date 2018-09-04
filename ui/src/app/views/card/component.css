@@ -2,6 +2,15 @@
   justify-content: space-between;
 }
 
+.card.item-card {
+  width: 7.2rem;
+  margin-right: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0.75rem;
+}
+
 .card.item-card .name {
   cursor: pointer;
   word-wrap: break-word;
