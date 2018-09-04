@@ -154,7 +154,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         if (meta) {
           if (meta.modType === ModifierType.ENCOUNTERS) {
             const selected = meta.operators.find(
-              operator => operator.value.toString() === mod.getIn(['operands', 0])
+              operator => operator.value && operator.value.toString() === mod.getIn(['operands', 0])
             );
             this.dropdownOption.selected[3] = selected.name;
             this.form.get(meta.name).patchValue({
