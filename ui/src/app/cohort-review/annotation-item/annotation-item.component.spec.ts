@@ -4,9 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
 import {CohortAnnotationDefinition, CohortReviewService, ParticipantCohortAnnotation} from 'generated';
-import {Observable} from 'rxjs/Observable';
 import {AnnotationItemComponent} from './annotation-item.component';
-import {C} from '@angular/core/src/render3';
 
 interface Annotation {
   definition: CohortAnnotationDefinition;
