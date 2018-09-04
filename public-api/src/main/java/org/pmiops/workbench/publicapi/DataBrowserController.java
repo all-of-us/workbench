@@ -49,13 +49,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     private ConceptService conceptService;
 
-    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao) {
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao, EntityManager entityManager) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
         this.dbDomainDao = dbDomainDao;
         this.achillesResultDao = achillesResultDao;
         this.achillesAnalysisDao = achillesAnalysisDao;
         this.achillesResultDistDao = achillesResultDistDao;
+        this.entityManager = entityManager;
     }
 
 
