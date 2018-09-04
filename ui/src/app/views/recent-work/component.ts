@@ -30,7 +30,7 @@ export class RecentWorkComponent implements OnInit {
   moveDownList(): void {
       this.fullList.push(this.fullList.shift());
       console.log(this.fullList);
-      //again should actually be first 3 elements of fullList
+      // again should actually be first 3 elements of fullList
     this.resourceList = this.fullList.slice(++this.index, this.index + 2);
   }
 
