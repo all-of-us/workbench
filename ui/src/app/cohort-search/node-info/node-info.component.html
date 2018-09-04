@@ -1,15 +1,15 @@
 <div class="item">
   <!-- SELECT BTN -->
   <button
-      *ngIf="selectable"
-      type="button"
-      class="btn btn-sm btn-link selection-button"
-      [class.pm]="node.get('type') === criteriaTypes.PM"
-      [disabled]="isSelected || isSelectedParent"
-      (click)="select($event)">
-    <clr-icon *ngIf="isSelected" shape="check-circle" size="20" class="selection-icon"></clr-icon>
+          *ngIf="selectable"
+          type="button"
+          class="btn btn-sm btn-link selection-button"
+          [class.pm]="isPM()"
+          [disabled]="isSelected && !node.get('hasAttributes')"
+          (click)="select($event)">
+    <clr-icon *ngIf="isSelected && !node.get('hasAttributes')" shape="check-circle" size="20" class="selection-icon"></clr-icon>
     <clr-icon *ngIf="!isSelected && !node.get('hasAttributes')" shape="plus-circle" size="20" class="selection-icon"></clr-icon>
-    <clr-icon *ngIf="!isSelected && node.get('hasAttributes')" shape="slider" dir="right" size="20" class="selection-icon-blue is-solid"></clr-icon>
+    <clr-icon *ngIf="node.get('hasAttributes')" shape="slider" dir="right" size="20" class="selection-icon-blue is-solid"></clr-icon>
   </button>
 
   <!-- CODE -->

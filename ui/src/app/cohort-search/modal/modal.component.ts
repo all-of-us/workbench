@@ -1,10 +1,10 @@
 import {select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DomainType} from 'generated';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {DomainType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_TYPES, DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {
   activeCriteriaTreeType,
   activeCriteriaType,
@@ -34,11 +34,12 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(subtreeSelected) scrollTo$: Observable<any>;
 
   readonly domainType = DomainType;
-  readonly criteriaTypes = CRITERIA_TYPES;
+  readonly treeType = TreeType;
   ctype: string;
   fullTree: boolean;
   subscription: Subscription;
-  attributesNode: any;
+  attributesNode: Map<any, any> = Map();
+
   open = false;
   noSelection = true;
   title = '';
@@ -159,12 +160,8 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   }
 
-    showTitle() {
-        return this.title === 'Drugs' || this.title == 'Visits' || this.title == 'CPT Codes' || this.title == 'Demographics';
-    }
-
   get attributeTitle() {
-    return this.ctype === CRITERIA_TYPES.PM
+    return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
       : typeToTitle(this.ctype) + ' Detail';
   }

@@ -4,6 +4,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TreeType;
 
 public class SearchRequests {
 
@@ -12,8 +13,8 @@ public class SearchRequests {
   private static final long WEIRD_CONCEPT_ID = 2;
   private static final String DEMO_DOMAIN = "DEMO";
   private static final String GENDER_SUBTYPE = "GEN";
-  private static final String DEMO_TYPE = "DEMO";
-  public static final String ICD9_TYPE = "ICD9";
+  private static final String DEMO_TYPE = TreeType.DEMO.name();
+  public static final String ICD9_TYPE = TreeType.ICD9.name();
   public static final String ICD9_GROUP_CODE = "001";
 
   private SearchRequests() {

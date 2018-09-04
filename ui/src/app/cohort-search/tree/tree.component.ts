@@ -1,7 +1,7 @@
 import {Component, EventEmitter, OnChanges, OnInit, Output} from '@angular/core';
-import {DomainType} from 'generated';
-import {CRITERIA_TYPES} from '../constant';
+import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
+// import {CRITERIA_TYPES} from '../constant';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -27,17 +27,18 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
     setTimeout(() => super.loadChildren(true));
   }
 
-  showSearch() {
-    return this.node.get('type') === DomainType.VISIT
-      || this.node.get('type') === DomainType.DRUG
-      || this.node.get('type') === DomainType.CONDITION
-      || this.node.get('type') === CRITERIA_TYPES.ICD9
-      || this.node.get('type') === CRITERIA_TYPES.ICD10
-      || this.node.get('type') === CRITERIA_TYPES.MEAS;
-  }
+    showSearch() {
+        return this.node.get('type') === TreeType[TreeType.VISIT]
+            || this.node.get('type') === TreeType[TreeType.DRUG]
+            || this.node.get('type') === TreeType[TreeType.MEAS]
+            || this.node.get('type') === TreeType[TreeType.CONDITION]
+            || this.node.get('type') === TreeType[TreeType.ICD9]
+            || this.node.get('type') === TreeType[TreeType.ICD10]
+            || this.node.get('type') === TreeType[TreeType.PM];
+    }
 
   showDropDown() {
-    return this.node.get('type') === DomainType.CONDITION || this.node.get('type') === CRITERIA_TYPES.ICD9 || this.node.get('type') === CRITERIA_TYPES.ICD10;
+    return this.node.get('type') === TreeType[TreeType.CONDITION] || this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10];
   }
 
   optionChange(flag) {
