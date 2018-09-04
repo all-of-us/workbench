@@ -19,25 +19,25 @@ export class RecentWorkComponent implements OnInit {
   ) {}
   index: Number;
   ngOnInit(): void {
-    this.index = 0 ;
     this.userMetricsService.getUserRecentResources().subscribe((resources) => {
       this.fullList = resources;
       // this should actually be first 3 elements of full List
-      this.resourceList = this.fullList.slice(this.index, 3);
+      this.resourceList = this.fullList.slice(0, 3);
     });
   }
 
   moveDownList(): void {
-      this.fullList.push(this.fullList.shift());
+      this.fullList.unshift(this.fullList.pop());
       console.log(this.fullList);
       // again should actually be first 3 elements of fullList
-    this.resourceList = this.fullList.slice(++this.index, this.index + 2);
+    // this.resourceList = this.fullList.slice(++this.index, this.index + 2);
+    this.resourceList = this.fullList.slice(0, 3);
   }
 
   moveUpList(): void {
-      this.fullList.unshift(this.fullList.pop());
+      this.fullList.push(this.fullList.shift());
       console.log(this.fullList);
-    this.resourceList = this.fullList.slice(--this.index, 3);
+      this.resourceList = this.fullList.slice(0, 3);
   }
 
 }

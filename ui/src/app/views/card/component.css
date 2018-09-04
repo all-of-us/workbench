@@ -38,12 +38,6 @@
   background-color: #E0EAF1;
 }
 
-.card-area {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-}
-
 .notebooks-header {
   color: #2F2E7E;
   font-size: 20px;
