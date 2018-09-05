@@ -24,19 +24,6 @@ import {
 } from '../redux';
 import {stripHtml} from '../utils';
 
-/*
- * Stub function - some criteria types will have "attributes" that help define
- * them.  Demographics AGE was in this category until we removed demographics
- * to its own modal form.  This function and the overall attribute flow has
- * been left intact in order to provide a "hook-in" location for implementing
- * other types of attribute.
- */
-function needsAttributes(node: any) {
-  // will change soon to check for attributes property instead of id
-  return node.get('hasAttributes') === true;
-}
-
-
 @Component({
   selector: 'crit-node-info',
   templateUrl: './node-info.component.html',
@@ -80,9 +67,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscription.add(this.groups$
       .filter(groupIds => !!groupIds)
       .subscribe(groupIds => {
-        console.log(groupIds.toJS());
-        this.isSelectedChild = groupIds.filter(groupId =>
-          this.node.get('path').split('.').indexOf(groupId) !== -1);
+        this.isSelectedChild = groupIds.some(id => this.node.get('path').split('.').includes(id));
       }));
 
     this.subscription.add(this.selected$
@@ -123,8 +108,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const noCode = (this.isDrug() && this.node.get('group'))
-      || this.isPM();
+    const noCode = (this.isDrug && this.node.get('group'))
+      || this.isPM;
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
     return (noCode || nameIsCode) ? '' : this.node.get('name', '');
   }
@@ -134,17 +119,17 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayCode() {
-    if ((this.isDrug() && this.node.get('group'))
-      || this.isPM()) {
+    if ((this.isDrug && this.node.get('group'))
+      || this.isPM) {
       return this.node.get('name', '');
     }
     return this.node.get('code', '');
   }
 
   get selectAllChildren() {
-    return (this.node.get('type') === DomainType.DRUG
-      || this.node.get('type') === CRITERIA_TYPES.ICD9
-      || this.node.get('type') === CRITERIA_TYPES.ICD10)
+    return (this.isDrug
+      || this.node.get('type') === TreeType.ICD9
+      || this.node.get('type') === TreeType.ICD10)
       && this.node.get('group');
   }
 
@@ -163,7 +148,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      * fire a request for children (if there are any)
      */
     event.stopPropagation();
-    if (needsAttributes(this.node)) {
+    if (this.hasAttributes) {
       this.getAttributes();
     } else {
       /*
@@ -191,7 +176,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getAttributes() {
-    if (this.node.get('type') === CRITERIA_TYPES.MEAS) {
+    if (this.isMeas) {
       this.actions.fetchAttributes(this.node);
     } else {
       const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
@@ -228,15 +213,23 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       && this.node.get('code') !== null ));
   }
 
-  isPM() {
+  get isPM() {
     return this.node.get('type') === TreeType[TreeType.PM];
   }
 
-  isDrug() {
+  get isDrug() {
     return this.node.get('type') === TreeType[TreeType.DRUG];
   }
 
-  isMeas() {
+  get isMeas() {
     return this.node.get('type') === TreeType[TreeType.MEAS];
+  }
+
+  get hasAttributes() {
+    return this.node.get('hasAttributes') === true;
+  }
+
+  get isDisabled() {
+    return this.isSelected || this.isSelectedChild || this.isSelectedParent;
   }
 }

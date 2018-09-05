@@ -314,6 +314,11 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['wizard', 'item', 'selectedParents'],
             List(),
             parentIdList => parentIdList.filterNot(id => action.path.split('.').includes(id))
+          )
+          .updateIn(
+            ['wizard', 'item', 'selectedGroups'],
+            List(),
+            groupIdList => groupIdList.filter(id => id !== action.id.toString())
           );
 
       case ADD_MODIFIER:

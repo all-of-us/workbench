@@ -252,7 +252,7 @@ export class CohortSearchActions {
   fetchAllChildren(node: any): void {
     const kind = node.get('type');
     const id = node.get('id');
-    if (kind === DomainType[DomainType.DRUG]) {
+    if (kind === TreeType[TreeType.DRUG]) {
       this.requestAllChildren(this.cdrVersionId, kind, id);
     } else {
       const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`;
