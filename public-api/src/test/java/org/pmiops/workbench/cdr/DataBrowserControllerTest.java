@@ -662,6 +662,17 @@ public class DataBrowserControllerTest {
     }
 
     @Test
+    public void testGetSurveyDemographicAnalysesMultipleMatch() throws Exception{
+        List<String> conceptsIds = new ArrayList<>();
+        conceptsIds.add("1586134");
+        conceptsIds.add("1585855");
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(conceptsIds);
+        List<ConceptAnalysis> conceptAnalysis = response.getBody().getItems();
+        assertThat(conceptAnalysis.get(0).getGenderAnalysis().getResults().size()).isEqualTo(2);
+        assertThat(conceptAnalysis.get(1).getGenderAnalysis()).isEqualTo(null);
+    }
+
+    @Test
     public void testGetSurveyDemographicAnalysesNoMatch() throws Exception{
         List<String> conceptsIds = new ArrayList<>();
         conceptsIds.add("1585855");
