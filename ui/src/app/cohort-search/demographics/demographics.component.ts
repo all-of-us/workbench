@@ -58,6 +58,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
   /* Storage for the demographics options (fetched via the API) */
   ageNode;
+  ageNodes: Array<any>;
+  ageCount: number;
   deceasedNode;
 
   genderNodes = List();
@@ -151,6 +153,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       /* Age and Deceased are single nodes we use as templates */
       case CRITERIA_SUBTYPES.AGE:
         this.ageNode = nodes.get(0);
+        this.ageNodes = nodes.toJS();
+        this.calculateAgeCount();
         break;
       case CRITERIA_SUBTYPES.DEC:
         this.deceasedNode = nodes.get(0);
@@ -251,7 +255,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       min.setValue(range[0]);
       max.setValue(range[1]);
     }
-
     const selectedAge = this.selection$
       .map(selectedNodes => selectedNodes
         .find(node => node.get('subtype') === CRITERIA_SUBTYPES.AGE)
@@ -301,5 +304,34 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         ? this.actions.addParameter(this.deceasedNode)
         : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
     }));
+  }
+
+  calculateAgeCount() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    let count = 0;
+    for (let i = min.value; i <= max.value; i++) {
+      const ageNode = this.ageNodes.find(node => node.name === i.toString());
+      count += ageNode.count;
+    }
+    this.ageCount = count;
+  }
+
+  centerAgeCount() {
+    this.calculateAgeCount();
+    const slider = <HTMLElement> document.getElementsByClassName('noUi-connect')[0];
+    const wrapper = document.getElementById('count-wrapper');
+    const count = document.getElementById('age-count');
+    wrapper.setAttribute(
+      'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
+    );
+    // set style properties also for cross-browser compatibility
+    wrapper.style.width = slider.offsetWidth.toString();
+    wrapper.style.left = slider.offsetLeft.toString();
+    if (slider.offsetWidth < count.offsetWidth) {
+      const margin = (slider.offsetWidth - count.offsetWidth) / 2;
+      count.setAttribute('style', 'margin-left: ' + margin + 'px;');
+      count.style.marginLeft = margin.toString();
+    }
   }
 }
