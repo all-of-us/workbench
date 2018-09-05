@@ -3,6 +3,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {AnnotationType, CohortAnnotationDefinition, CohortAnnotationDefinitionService} from 'generated';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 
 import {ReviewStateService} from '../review-state.service';
@@ -10,7 +11,6 @@ import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotat
 import {SetAnnotationItemComponent} from '../set-annotation-item/set-annotation-item.component';
 import {SetAnnotationListComponent} from '../set-annotation-list/set-annotation-list.component';
 import {SetAnnotationModalComponent} from './set-annotation-modal.component';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 describe('SetAnnotationModalComponent', () => {
   let component: SetAnnotationModalComponent;
