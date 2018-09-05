@@ -231,7 +231,6 @@ export class CohortSearchActions {
   }
 
   fetchDrugCriteria(kind: string, parentId: number, subtype: string): void {
-      console.log("3-------->>>");
     const isLoading = isCriteriaLoading(kind, parentId)(this.state);
     const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
     if (isLoaded || isLoading) {
@@ -274,7 +273,6 @@ export class CohortSearchActions {
   }
 
   requestPreview(): void {
-      console.log("4-------->>>");
     const params = activeParameterList(this.state)
       .valueSeq()
       .map(this.mapParameter)
@@ -295,7 +293,6 @@ export class CohortSearchActions {
   }
 
   requestAttributePreview(): void {
-      console.log("5-------->>>");
     const role = activeRole(this.state);
     const itemId = activeItem(this.state).get('id');
     const searchParam = this.state
