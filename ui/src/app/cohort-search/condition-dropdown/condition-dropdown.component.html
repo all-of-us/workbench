@@ -2,7 +2,7 @@
     <button type="button" class="btn btn-outline btn-outline-primary" clrDropdownTrigger>
         <span *ngIf = "dropDownSelected !== ''; else elseBlock">{{dropDownSelected}}</span>
         <ng-template #elseBlock>
-            <span>Select Vocabulary</span>
+            <span>ICD9 Codes</span>
         </ng-template>
         <clr-icon shape="caret down"></clr-icon>
     </button>

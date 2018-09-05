@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit, OnChanges} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {DomainType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -25,7 +25,7 @@ import {stripHtml, typeToTitle} from '../utils';
     '../../styles/buttons.css',
   ]
 })
-export class ModalComponent implements OnInit, OnDestroy, OnChanges {
+export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
@@ -48,10 +48,6 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
   scrollTime: number;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
-
-  ngOnChanges(){
-
-  }
 
   ngOnInit() {
     this.subscription = this.open$
@@ -143,18 +139,18 @@ export class ModalComponent implements OnInit, OnDestroy, OnChanges {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-      return Map({
-          type: this.ctype,
-          fullTree: this.fullTree,
-          id: 0,    // root parent ID is always 0
-      });
+    return Map({
+      type: this.ctype,
+      fullTree: this.fullTree,
+      id: 0,    // root parent ID is always 0
+    });
   }
 
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
     if((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')){
         return title
-            ? `Add Selected CONDITION Criteria to Cohort`
+            ? `Add Selected CONDITIONS Criteria to Cohort`
             : 'No Selection';
     } else {
         return title
