@@ -7,12 +7,12 @@
     </div>
     <div class="card-area">
         <div style="display: flex">
-            <div class="card" *ngFor="let resource of resourceList">
+            <div *ngFor="let resource of resourceList">
                 <app-card [card]="resource"></app-card>
             </div>
         </div>
     </div>
-    <div class="scroll-indicator" style="float: right; top: 3.2rem; left:.7rem" (click)="moveUpList()">
+    <div class="scroll-indicator" style="float: right; top: 3.2rem; left:-.7rem" (click)="moveUpList()">
         <clr-icon shape="angle" dir="right" class="scroll-arrow"></clr-icon>
     </div>
 </div>

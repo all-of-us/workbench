@@ -1,4 +1,4 @@
-<div class="item-card {{type}}-card">
+<div class="card item-card {{type}}-card">
   <div>
     <div class="header-area">
       <clr-dropdown>
@@ -24,12 +24,12 @@
     <div>
       {{card.cohort?.description}}
     </div>
-    <div class="footer">
-      <div class="last-modified">Last Updated <br/>{{card.modifiedTime | date}}</div>
-      <div class="item-type {{type}}">
-        <div *ngIf="card.cohort">CH</div>
-        <div *ngIf="card.notebook">NB</div>
-      </div>
+  </div>
+  <div class="footer">
+    <div class="last-modified">Last Updated <br/>{{card.modifiedTime | date}}</div>
+    <div class="item-type {{type}}">
+      <div *ngIf="card.cohort">CH</div>
+      <div *ngIf="card.notebook">NB</div>
     </div>
   </div>
 </div>
