@@ -22,7 +22,7 @@
         <div *ngFor="let opt of filteredOptions" class="option" (click)="select(opt)">
           {{ opt.get('name', '') | titlecase }}
           <span *ngIf="opt.get('count')" class="badge badge-info">
-            {{ opt.get('count') }}
+            {{ opt.get('count') | number }}
           </span>
         </div>
       </div>
@@ -38,7 +38,7 @@
         <clr-icon shape="window-close"></clr-icon>
         {{ opt.get('name', '') | titlecase }}
         <span *ngIf="opt.get('count')" class="badge">
-          {{ opt.get('count') }}
+          {{ opt.get('count') | number }}
         </span>
       </div>
     </div>
