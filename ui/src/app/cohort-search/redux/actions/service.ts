@@ -211,7 +211,6 @@ export class CohortSearchActions {
   }
 
   fetchCriteria(kind: string, parentId: number): void {
-    console.log("1-------->>>");
     const isLoading = isCriteriaLoading(kind, parentId)(this.state);
     const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
     if (isLoaded || isLoading) {
@@ -221,7 +220,6 @@ export class CohortSearchActions {
   }
 
   fetchAllCriteria(kind: string, parentId: number): void {
-      console.log("2-------->>>");
     const isLoading = isCriteriaLoading(kind, parentId)(this.state);
     const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
     if (isLoaded || isLoading) {
@@ -317,9 +315,6 @@ export class CohortSearchActions {
   }
 
   requestItemCount(role: keyof SearchRequest, itemId: string): void {
-      console.log("6-------->>>");
-      console.log(role);
-      console.log(itemId);
     const item = getItem(itemId)(this.state);
     if (item.get('isRequesting', false)) {
       this.cancelCountRequest('items', itemId);
@@ -335,7 +330,6 @@ export class CohortSearchActions {
   }
 
   requestGroupCount(role: keyof SearchRequest, groupId: string): void {
-      console.log("7-------->>>");
     const group = getGroup(groupId)(this.state);
     if (group.get('isRequesting', false)) {
       this.cancelCountRequest('groups', groupId);
@@ -352,7 +346,6 @@ export class CohortSearchActions {
    * @param outdatedGroup: string
    */
   requestTotalCount(outdatedGroupId?: string): void {
-      console.log("8-------->>>");
     const searchRequest = getSearchRequest(SR_ID)(this.state);
     if (searchRequest.get('isRequesting', false)) {
       this.cancelChartsRequest('searchRequests', SR_ID);
@@ -396,7 +389,6 @@ export class CohortSearchActions {
    * requests
    */
   runAllRequests() {
-      console.log("9-------->>>");
     const doRequests = (kind) => {
       const groups = groupList(kind)(this.state);
       groups.forEach(group => {

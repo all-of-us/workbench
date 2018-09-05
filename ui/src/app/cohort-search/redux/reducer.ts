@@ -386,10 +386,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['entities', 'groups', action.groupId]);
 
       case OPEN_WIZARD:
-        console.log(action.itemId);
-          console.log(action.context.criteriaType);
-          console.log(action.context.fullTree);
-          console.log(action.context);
         return state.mergeIn(['wizard'], fromJS({
           open: true,
           item: {
@@ -468,7 +464,6 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case SET_WIZARD_CONTEXT:
-        console.log(action.context);
         return state.mergeDeepIn(['wizard'], action.context);
 
       case LOAD_ENTITIES:

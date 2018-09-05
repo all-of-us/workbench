@@ -17,9 +17,11 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
      _type: string;
      name: string;
 
-  ngOnChanges() {
-    super.ngOnInit();
-  }
+    ngOnChanges() {
+        if(this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10]){
+            super.ngOnInit();
+        }
+    }
 
   ngOnInit() {
     super.ngOnInit();
@@ -27,13 +29,15 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
     this._type = this.node.get('type', '');
   }
 
-  showSearch() {
-    return this.node.get('type') === TreeType[TreeType.VISIT]
-      || this.node.get('type') === TreeType[TreeType.DRUG]
-      || this.node.get('type') === TreeType[TreeType.MEAS]
-      || this.node.get('type') === TreeType[TreeType.CONDITION]
-      || this.node.get('type') === TreeType[TreeType.PM];
-  }
+    showSearch() {
+        return this.node.get('type') === TreeType[TreeType.VISIT]
+            || this.node.get('type') === TreeType[TreeType.DRUG]
+            || this.node.get('type') === TreeType[TreeType.MEAS]
+            || this.node.get('type') === TreeType[TreeType.PM]
+            || this.node.get('type') === TreeType[TreeType.CONDITION]
+            || this.node.get('type') === TreeType[TreeType.ICD9]
+            || this.node.get('type') === TreeType[TreeType.ICD10];
+    }
 
   optionChange(flag) {
     if (flag) {
