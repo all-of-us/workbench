@@ -1,78 +1,78 @@
 "id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","path"
-316234,0,"VISIT","","","Emergency Room Visit",1,1,501263,"Visit",9203,0,""
-316235,0,"VISIT","","","Emergency Room and Inpatient Visit",0,1,0,"Visit",262,0,""
-316236,0,"VISIT","","","Inpatient Visit",1,1,432068,"Visit",9201,0,""
-316237,0,"VISIT","","","Intensive Care",1,1,0,"Visit",32037,0,""
-316238,0,"VISIT","","","Long Term Care Visit",1,1,0,"Visit",42898160,0,""
-316239,0,"VISIT","","","Outpatient Visit",1,1,1763346,"Visit",9202,0,""
-316240,0,"VISIT","","","Pharmacy visit",1,1,0,"Visit",581458,0,""
-316241,0,"VISIT","","","Rehabilitation Visit",1,1,0,"Visit",581479,0,""
-316242,316239,"VISIT","","","Ambulance Visit",1,1,0,"Visit",581478,0,""
-316243,316239,"VISIT","","","Home Visit",1,1,0,"Visit",581476,0,""
-316244,316239,"VISIT","","","Laboratory Visit",1,1,0,"Visit",32036,0,""
-316245,316239,"VISIT","","","Office Visit",1,1,0,"Visit",581477,0,""
-316246,316243,"VISIT","","","Adult Living Care Facility",0,1,0,"Visit",8882,0,""
-316247,316242,"VISIT","","","Ambulance - Air or Water",0,1,0,"Visit",8850,0,""
-316248,316242,"VISIT","","","Ambulance - Land",0,1,0,"Visit",8668,0,""
-316249,316239,"VISIT","","","Ambulatory Surgical Center",0,1,0,"Visit",8883,0,""
-316250,316243,"VISIT","","","Assisted Living Facility",0,1,0,"Visit",8615,0,""
-316251,316239,"VISIT","","","Birthing Center",0,1,0,"Visit",8650,0,""
-316252,316239,"VISIT","","","Community Mental Health Center",0,1,0,"Visit",8964,0,""
-316253,316241,"VISIT","","","Comprehensive Inpatient Rehabilitation Facility",0,1,0,"Visit",8920,0,""
-316254,316236,"VISIT","","","Comprehensive Inpatient Rehabilitation Facility",0,1,0,"Visit",8920,0,""
-316255,316241,"VISIT","","","Comprehensive Outpatient Rehabilitation Facility",0,1,0,"Visit",8947,0,""
-316256,316239,"VISIT","","","Comprehensive Outpatient Rehabilitation Facility",0,1,0,"Visit",8947,0,""
-316257,316243,"VISIT","","","Custodial Care Facility",0,1,0,"Visit",8827,0,""
-316258,316234,"VISIT","","","Emergency Room - Hospital",0,1,0,"Visit",8870,0,""
-316259,316237,"VISIT","","","Emergency Room Critical Care Facility",0,1,0,"Visit",581381,0,""
-316260,316234,"VISIT","","","Emergency Room Critical Care Facility",0,1,0,"Visit",581381,0,""
-316261,316239,"VISIT","","","End-Stage Renal Disease Treatment Facility",0,1,0,"Visit",8949,0,""
-316262,316245,"VISIT","","","Federally Qualified Health Center",0,1,0,"Visit",8966,0,""
-316263,316243,"VISIT","","","Group Home",0,1,0,"Visit",8851,0,""
-316264,316243,"VISIT","","","Home",0,1,0,"Visit",8536,0,""
-316265,316243,"VISIT","","","Homeless Shelter",0,1,0,"Visit",8672,0,""
-316266,316239,"VISIT","","","Hospice",0,1,0,"Visit",8546,0,""
-316267,316245,"VISIT","","","Independent Clinic",0,1,0,"Visit",8716,0,""
-316268,316244,"VISIT","","","Independent Laboratory",0,1,0,"Visit",8809,0,""
-316269,316239,"VISIT","","","Indian Health Service Free-standing Facility",0,1,0,"Visit",8968,0,""
-316270,316239,"VISIT","","","Indian Health Service Provider-based Facility",0,1,0,"Visit",8969,0,""
-316271,316237,"VISIT","","","Inpatient Cardiac Care Facility",0,1,0,"Visit",581383,0,""
-316272,316236,"VISIT","","","Inpatient Cardiac Care Facility",0,1,0,"Visit",581383,0,""
-316273,316237,"VISIT","","","Inpatient Critical Care Facility",0,1,0,"Visit",581379,0,""
-316274,316236,"VISIT","","","Inpatient Critical Care Facility",0,1,0,"Visit",581379,0,""
-316275,316236,"VISIT","","","Inpatient Hospital",0,1,0,"Visit",8717,0,""
-316276,316237,"VISIT","","","Inpatient Intensive Care Facility",0,1,0,"Visit",581382,0,""
-316277,316236,"VISIT","","","Inpatient Intensive Care Facility",0,1,0,"Visit",581382,0,""
-316278,316238,"VISIT","","","Inpatient Long-term Care",0,1,0,"Visit",8970,0,""
-316279,316236,"VISIT","","","Inpatient Long-term Care",0,1,0,"Visit",8970,0,""
-316280,316236,"VISIT","","","Inpatient Nursery",0,1,0,"Visit",581384,0,""
-316281,316236,"VISIT","","","Inpatient Psychiatric Facility",0,1,0,"Visit",8971,0,""
-316282,316239,"VISIT","","","Intermediate Care Facility/Mentally Retarded",0,1,0,"Visit",8951,0,""
-316283,316245,"VISIT","","","Mass Immunization Center",0,1,0,"Visit",8858,0,""
-316284,316239,"VISIT","","","Military Treatment Facility",0,1,0,"Visit",8905,0,""
-316285,316239,"VISIT","","","Mobile Unit",0,1,0,"Visit",8584,0,""
-316286,316239,"VISIT","","","Non-residential Substance Abuse Treatment Facility",0,1,0,"Visit",8974,0,""
-316287,316243,"VISIT","","","Nursing Facility",0,1,0,"Visit",8676,0,""
-316288,316239,"VISIT","","","Observation Room",0,1,0,"Visit",581385,0,""
-316289,316239,"VISIT","","","Off Campus-Outpatient Hospital",0,1,0,"Visit",5084,0,""
-316290,316245,"VISIT","","","Office",0,1,0,"Visit",8940,0,""
-316291,316236,"VISIT","","","Other Inpatient Care",0,1,0,"Visit",8892,0,""
-316292,316237,"VISIT","","","Outpatient Critical Care Facility",0,1,0,"Visit",581380,0,""
-316293,316239,"VISIT","","","Outpatient Critical Care Facility",0,1,0,"Visit",581380,0,""
-316294,316239,"VISIT","","","Outpatient Hospital",0,1,0,"Visit",8756,0,""
-316295,316239,"VISIT","","","Outpatient NEC",0,1,0,"Visit",8677,0,""
-316296,316240,"VISIT","","","Pharmacy",0,1,0,"Visit",8562,0,""
-316297,316243,"VISIT","","","Place of Employment-Worksite",0,1,"","Visit",581475,0,""
-316298,316239,"VISIT","","","Prison/Correctional Facility",0,1,0,"Visit",38003619,0,""
-316299,316239,"VISIT","","","Psychiatric Facility-Partial Hospitalization",0,1,0,"Visit",8913,0,""
-316300,316239,"VISIT","","","Psychiatric Residential Treatment Center",0,1,0,"Visit",8976,0,""
-316301,316245,"VISIT","","","Public Health Clinic",0,1,0,"Visit",8977,0,""
-316302,316243,"VISIT","","","Residential Substance Abuse Treatment Facility",0,1,0,"Visit",8957,0,""
-316303,316245,"VISIT","","","Rural Health Clinic",0,1,0,"Visit",8761,0,""
-316304,316243,"VISIT","","","School",0,1,0,"Visit",8537,0,""
-316305,316236,"VISIT","","","Skilled Nursing Facility",0,1,0,"Visit",8863,0,""
-316306,316243,"VISIT","","","Temporary Lodging",0,1,0,"Visit",8602,0,""
-316307,316239,"VISIT","","","Tribal 638 Free-standing Facility",0,1,0,"Visit",8941,0,""
-316308,316239,"VISIT","","","Tribal 638 Provider-based Facility",0,1,0,"Visit",8960,0,""
-316309,316245,"VISIT","","","Urgent Care Facility",0,1,0,"Visit",8782,0,""
-316310,316245,"VISIT","","","Walk-in Retail Health Clinic",0,1,0,"Visit",38003620,0,""
+325033,0,"VISIT","","","Emergency Room Visit",1,1,501263,"Visit",9203,0,""
+325034,0,"VISIT","","","Emergency Room and Inpatient Visit",0,1,0,"Visit",262,0,""
+325035,0,"VISIT","","","Inpatient Visit",1,1,432068,"Visit",9201,0,""
+325036,0,"VISIT","","","Intensive Care",1,1,0,"Visit",32037,0,""
+325037,0,"VISIT","","","Long Term Care Visit",1,1,0,"Visit",42898160,0,""
+325038,0,"VISIT","","","Outpatient Visit",1,1,1763346,"Visit",9202,0,""
+325039,0,"VISIT","","","Pharmacy visit",1,1,0,"Visit",581458,0,""
+325040,0,"VISIT","","","Rehabilitation Visit",1,1,0,"Visit",581479,0,""
+325041,325038,"VISIT","","","Ambulance Visit",1,1,0,"Visit",581478,0,325038
+325042,325038,"VISIT","","","Home Visit",1,1,0,"Visit",581476,0,325038
+325043,325038,"VISIT","","","Laboratory Visit",1,1,0,"Visit",32036,0,325038
+325044,325038,"VISIT","","","Office Visit",1,1,0,"Visit",581477,0,325038
+325045,325042,"VISIT","","","Adult Living Care Facility",0,1,0,"Visit",8882,0,325038.325042
+325046,325041,"VISIT","","","Ambulance - Air or Water",0,1,0,"Visit",8850,0,325038.325041
+325047,325041,"VISIT","","","Ambulance - Land",0,1,0,"Visit",8668,0,325038.325041
+325048,325038,"VISIT","","","Ambulatory Surgical Center",0,1,0,"Visit",8883,0,325038
+325049,325042,"VISIT","","","Assisted Living Facility",0,1,0,"Visit",8615,0,325038.325042
+325050,325038,"VISIT","","","Birthing Center",0,1,0,"Visit",8650,0,325038
+325051,325038,"VISIT","","","Community Mental Health Center",0,1,0,"Visit",8964,0,325038
+325052,325040,"VISIT","","","Comprehensive Inpatient Rehabilitation Facility",0,1,0,"Visit",8920,0,325040
+325053,325035,"VISIT","","","Comprehensive Inpatient Rehabilitation Facility",0,1,0,"Visit",8920,0,325035
+325054,325040,"VISIT","","","Comprehensive Outpatient Rehabilitation Facility",0,1,0,"Visit",8947,0,325040
+325055,325038,"VISIT","","","Comprehensive Outpatient Rehabilitation Facility",0,1,0,"Visit",8947,0,325038
+325056,325042,"VISIT","","","Custodial Care Facility",0,1,0,"Visit",8827,0,325038.325042
+325057,325033,"VISIT","","","Emergency Room - Hospital",0,1,0,"Visit",8870,0,325033
+325058,325036,"VISIT","","","Emergency Room Critical Care Facility",0,1,0,"Visit",581381,0,325036
+325059,325033,"VISIT","","","Emergency Room Critical Care Facility",0,1,0,"Visit",581381,0,325033
+325060,325038,"VISIT","","","End-Stage Renal Disease Treatment Facility",0,1,0,"Visit",8949,0,325038
+325061,325044,"VISIT","","","Federally Qualified Health Center",0,1,0,"Visit",8966,0,325038.325044
+325062,325042,"VISIT","","","Group Home",0,1,0,"Visit",8851,0,325038.325042
+325063,325042,"VISIT","","","Home",0,1,0,"Visit",8536,0,325038.325042
+325064,325042,"VISIT","","","Homeless Shelter",0,1,0,"Visit",8672,0,325038.325042
+325065,325038,"VISIT","","","Hospice",0,1,0,"Visit",8546,0,325038
+325066,325044,"VISIT","","","Independent Clinic",0,1,0,"Visit",8716,0,325038.325044
+325067,325043,"VISIT","","","Independent Laboratory",0,1,0,"Visit",8809,0,325038.325043
+325068,325038,"VISIT","","","Indian Health Service Free-standing Facility",0,1,0,"Visit",8968,0,325038
+325069,325038,"VISIT","","","Indian Health Service Provider-based Facility",0,1,0,"Visit",8969,0,325038
+325070,325036,"VISIT","","","Inpatient Cardiac Care Facility",0,1,0,"Visit",581383,0,325036
+325071,325035,"VISIT","","","Inpatient Cardiac Care Facility",0,1,0,"Visit",581383,0,325035
+325072,325036,"VISIT","","","Inpatient Critical Care Facility",0,1,0,"Visit",581379,0,325036
+325073,325035,"VISIT","","","Inpatient Critical Care Facility",0,1,0,"Visit",581379,0,325035
+325074,325035,"VISIT","","","Inpatient Hospital",0,1,0,"Visit",8717,0,325035
+325075,325036,"VISIT","","","Inpatient Intensive Care Facility",0,1,0,"Visit",581382,0,325036
+325076,325035,"VISIT","","","Inpatient Intensive Care Facility",0,1,0,"Visit",581382,0,325035
+325077,325037,"VISIT","","","Inpatient Long-term Care",0,1,0,"Visit",8970,0,325037
+325078,325035,"VISIT","","","Inpatient Long-term Care",0,1,0,"Visit",8970,0,325035
+325079,325035,"VISIT","","","Inpatient Nursery",0,1,0,"Visit",581384,0,325035
+325080,325035,"VISIT","","","Inpatient Psychiatric Facility",0,1,0,"Visit",8971,0,325035
+325081,325038,"VISIT","","","Intermediate Care Facility/Mentally Retarded",0,1,0,"Visit",8951,0,325038
+325082,325044,"VISIT","","","Mass Immunization Center",0,1,0,"Visit",8858,0,325038.325044
+325083,325038,"VISIT","","","Military Treatment Facility",0,1,0,"Visit",8905,0,325038
+325084,325038,"VISIT","","","Mobile Unit",0,1,0,"Visit",8584,0,325038
+325085,325038,"VISIT","","","Non-residential Substance Abuse Treatment Facility",0,1,0,"Visit",8974,0,325038
+325086,325042,"VISIT","","","Nursing Facility",0,1,0,"Visit",8676,0,325038.325042
+325087,325038,"VISIT","","","Observation Room",0,1,0,"Visit",581385,0,325038
+325088,325038,"VISIT","","","Off Campus-Outpatient Hospital",0,1,0,"Visit",5084,0,325038
+325089,325044,"VISIT","","","Office",0,1,0,"Visit",8940,0,325038.325044
+325090,325035,"VISIT","","","Other Inpatient Care",0,1,0,"Visit",8892,0,325035
+325091,325036,"VISIT","","","Outpatient Critical Care Facility",0,1,0,"Visit",581380,0,325036
+325092,325038,"VISIT","","","Outpatient Critical Care Facility",0,1,0,"Visit",581380,0,325038
+325093,325038,"VISIT","","","Outpatient Hospital",0,1,0,"Visit",8756,0,325038
+325094,325038,"VISIT","","","Outpatient NEC",0,1,0,"Visit",8677,0,325038
+325095,325039,"VISIT","","","Pharmacy",0,1,0,"Visit",8562,0,325039
+325096,325042,"VISIT","","","Place of Employment-Worksite",0,1,"","Visit",581475,0,325038.325042
+325097,325038,"VISIT","","","Prison/Correctional Facility",0,1,0,"Visit",38003619,0,325038
+325098,325038,"VISIT","","","Psychiatric Facility-Partial Hospitalization",0,1,0,"Visit",8913,0,325038
+325099,325038,"VISIT","","","Psychiatric Residential Treatment Center",0,1,0,"Visit",8976,0,325038
+325100,325044,"VISIT","","","Public Health Clinic",0,1,0,"Visit",8977,0,325038.325044
+325101,325042,"VISIT","","","Residential Substance Abuse Treatment Facility",0,1,0,"Visit",8957,0,325038.325042
+325102,325044,"VISIT","","","Rural Health Clinic",0,1,0,"Visit",8761,0,325038.325044
+325103,325042,"VISIT","","","School",0,1,0,"Visit",8537,0,325038.325042
+325104,325035,"VISIT","","","Skilled Nursing Facility",0,1,0,"Visit",8863,0,325035
+325105,325042,"VISIT","","","Temporary Lodging",0,1,0,"Visit",8602,0,325038.325042
+325106,325038,"VISIT","","","Tribal 638 Free-standing Facility",0,1,0,"Visit",8941,0,325038
+325107,325038,"VISIT","","","Tribal 638 Provider-based Facility",0,1,0,"Visit",8960,0,325038
+325108,325044,"VISIT","","","Urgent Care Facility",0,1,0,"Visit",8782,0,325038.325044
+325109,325044,"VISIT","","","Walk-in Retail Health Clinic",0,1,0,"Visit",38003620,0,325038.325044
