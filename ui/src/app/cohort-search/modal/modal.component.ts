@@ -139,18 +139,28 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-    return Map({
-      type: this.ctype,
-      fullTree: this.fullTree,
-      id: 0,    // root parent ID is always 0
-    });
+    if(this.ctype === this.treeType[this.treeType.CONDITION]){
+        return Map({
+            type: this.treeType[this.treeType.ICD9],
+            fullTree: this.fullTree,
+            id: 0,    // root parent ID is always 0
+        });
+
+    }else {
+        return Map({
+            type: this.ctype,
+            fullTree: this.fullTree,
+            id: 0,    // root parent ID is always 0
+        });
+    }
+
   }
 
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
     if((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')){
         return title
-            ? `Add Selected CONDITION Criteria to Cohort`
+            ? `Add Selected CONDITIONS Criteria to Cohort`
             : 'No Selection';
     } else {
         return title
@@ -159,11 +169,13 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
 
   }
+
   get conditionTitle() {
       return this.ctype === this.treeType[this.treeType.ICD9]
           || this.ctype === this.treeType[this.treeType.ICD10]
           || this.ctype === this.treeType[this.treeType.CONDITION];
   }
+
   get attributeTitle() {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
