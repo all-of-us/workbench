@@ -14,11 +14,9 @@
       <em>No results based on your search</em>
     </button>
   </div>
-  <div *ngIf="multiIngredient">
-    <b>Note:</b> This drug is multi-ingredient
-  </div>
-  <div *ngIf="numMatches > 1">
-    <b>Note:</b> There are {{numMatches}} matches for your search
+  <div *ngIf="ingredientsName">Ingredients in this brand: {{ingredientsName}} </div>
+  <div *ngIf="numMatches > 1 && !ingredientsName">
+    {{searchTerm}} exists {{numMatches}} times in the tree below
   </div>
   <div *ngIf="options.length" class="dropdown-menu">
     <button

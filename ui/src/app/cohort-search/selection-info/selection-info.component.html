@@ -13,7 +13,7 @@
            [popper]="codesPopper"
            [popperTrigger]="'hover'"
            [popperPlacement]="'bottom'">
-      <strong *ngIf="parameter.get('type') !== criteriaTypes.PM && parameter.get('type') !== domainType.DRUG">{{ _type }}</strong>
+      <strong *ngIf="parameter.get('type') !== treeType.PM && parameter.get('type') !== treeType.DRUG">{{ _type }}</strong>
       <span class="text-size text-muted">{{ name }}</span>
       <span class="text-muted">{{ attribute }}</span>
     </small>

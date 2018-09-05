@@ -1,9 +1,9 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DomainType} from 'generated';
+import {TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES, CRITERIA_TYPES} from '../constant';
+import {CRITERIA_SUBTYPES} from '../constant';
 import {
   autocompleteError,
   autocompleteOptions,
@@ -31,10 +31,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   loading = false;
   noResults = false;
   optionSelected = false;
-  multiIngredient = false;
   error = false;
   subscription: Subscription;
   numMatches: number;
+  ingredientsName: any;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -72,7 +72,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
             }
           });
 
-          this.noResults = (this._type === DomainType.DRUG || this._type === CRITERIA_TYPES.MEAS)
+          this.noResults = (this._type === TreeType[TreeType.DRUG]
+              || this._type === TreeType[TreeType.MEAS])
             && !this.optionSelected
             && !this.options.length;
         }
@@ -87,14 +88,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         let path = [];
         this.ingredients.forEach(item => {
           ingredientList.push(item.name);
-          ids.push(item.id);
+            this.ingredientsName = ingredientList;
+            ids.push(item.id);
           path = path.concat(item.path.split('.'));
         });
         if (ingredientList.length) {
           this.actions.setCriteriaSearchTerms(ingredientList);
           this.actions.loadCriteriaSubtree(this._type, ids, path);
         }
-        this.multiIngredient = ingredientList.length > 1;
       });
 
     const subtreeSelectSub = this.selected$
@@ -114,24 +115,23 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   inputChange(newVal: string) {
-    switch (this._type) {
-      case DomainType.VISIT:
-        if (newVal.length > 2) {
-          this.actions.setCriteriaSearchTerms([newVal]);
-        } else {
-          this.actions.setCriteriaSearchTerms([]);
-        }
-        break;
-      default:
-        this.optionSelected = false;
-        this.multiIngredient = false;
-        this.noResults = false;
-        if (newVal.length >= 4) {
-          this.actions.fetchAutocompleteOptions(this._type, newVal);
-        } else {
-          this.actions.setCriteriaSearchTerms([]);
-          this.options = [];
-        }
+    if (this._type === TreeType[TreeType.VISIT] || this._type === TreeType[TreeType.PM]) {
+      if (newVal.length > 2) {
+        this.actions.setCriteriaSearchTerms([newVal]);
+      } else {
+        this.actions.setCriteriaSearchTerms([]);
+      }
+    } else {
+      this.optionSelected = false;
+      this.ingredientsName = '';
+      this.numMatches = 0;
+      this.noResults = false;
+      if (newVal.length >= 4) {
+        this.actions.fetchAutocompleteOptions(this._type, newVal);
+      } else {
+        this.actions.setCriteriaSearchTerms([]);
+        this.options = [];
+      }
     }
   }
 

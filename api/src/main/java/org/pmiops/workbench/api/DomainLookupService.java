@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +27,10 @@ public class DomainLookupService {
      * @param searchGroups
      */
     public void findCodesForEmptyDomains(List<SearchGroup> searchGroups) {
+        String regex = TreeType.ICD9.name() + "|" + TreeType.ICD10.name() + "|" + TreeType.CONDITION.name();
         searchGroups.stream()
                 .flatMap(searchGroup -> searchGroup.getItems().stream())
-                .filter(item -> item.getType().matches("ICD9|ICD10"))
+                .filter(item -> item.getType().matches(regex))
                 .forEach(item -> {
                     List<SearchParameter> paramsWithDomains = new ArrayList<>();
                         for (SearchParameter parameter : item.getSearchParameters()) {
