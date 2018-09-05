@@ -127,12 +127,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .limit(distinctWorkspacelimit)
         .collect(Collectors.toList());
 
-    Map<Long, String> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
+    Map<Long, WorkspaceResponse> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
       Workspace workspace = workspaceService.findByWorkspaceId((long) id);
       WorkspaceResponse workspaceResponse = fireCloudService
           .getWorkspace(workspace.getWorkspaceNamespace(),
               workspace.getFirecloudName());
-      return workspaceResponse.getAccessLevel();
+      return workspaceResponse;
     }));
 
     userRecentResourceList.stream()
@@ -141,7 +141,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         })
         .forEach(userRecentResource -> {
           RecentResource resource = TO_CLIENT.apply(userRecentResource);
-          resource.setPermission(workspaceAccessMap.get(userRecentResource.getWorkspaceId()));
+          WorkspaceResponse workspaceDetails = workspaceAccessMap.get(userRecentResource.getWorkspaceId());
+          resource.setPermission(workspaceDetails.getAccessLevel());
+          resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
+          resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
           recentResponse.add(resource);
         });
     return ResponseEntity.ok(recentResponse);

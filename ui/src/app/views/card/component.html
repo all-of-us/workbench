@@ -34,10 +34,15 @@
   </div>
 </div>
 
-<app-rename-modal [resourceType]="'notebook'" [resource]="this.card.notebook" (receiveRename)="receiveRename($event)"></app-rename-modal>
-<app-confirm-delete-modal [resourceType]="'notebook'" [resource]="this.card.notebook" (receiveDelete)="receiveNotebookDelete($event)"></app-confirm-delete-modal>
+<app-confirm-delete-modal [resourceType]=type
+                          [resource]=resource
+                          (receiveDelete)=this[callbackFun]($event)></app-confirm-delete-modal>
 
-<app-confirm-delete-modal [resourceType]="'cohort'" [resource]="this.card.cohort" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
+
+<app-rename-modal [resourceType]="'notebook'"
+                  [resource]="this.card.notebook"
+                  (receiveRename)="receiveNotebookRename($event)"></app-rename-modal>
+
 <app-cohort-edit-modal [cohort]="this.card.cohort" (updateFinished)="updateFinished()"></app-cohort-edit-modal>
 
 

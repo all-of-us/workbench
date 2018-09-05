@@ -18,7 +18,12 @@ export class RecentWorkComponent implements OnInit {
     private userMetricsService: UserMetricsService
   ) {}
   index: Number;
+
   ngOnInit(): void {
+    this.updateList();
+  }
+
+  updateList(): void {
     this.userMetricsService.getUserRecentResources().subscribe((resources) => {
       this.fullList = resources;
       // this should actually be first 3 elements of full List
