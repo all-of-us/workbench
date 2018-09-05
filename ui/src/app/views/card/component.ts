@@ -17,11 +17,14 @@ export class CardComponent implements OnInit {
   type: string;
   @Input('header')
   header: string;
+  @ViewChild(CohortEditModalComponent)
+  editModal: CohortEditModalComponent;
 
   constructor(
       private cohortsService: CohortsService,
       private workspacesService: WorkspacesService,
-      private route: ActivatedRoute,
+      private recentWork: RecentWorkComponent,
+      private route: Router
   ) {
    this.actionList = [{
      notebook: {
@@ -37,40 +40,63 @@ export class CardComponent implements OnInit {
     this.type = this.card && this.card.notebook == null ? 'cohort' : 'notebook';
     this.actions = this.actionList.filter(elem =>  elem.type === this.type);
 
+
+  cloneNotebook(resource: RecentResource): void {
+    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, resource.notebook.name)
+        .subscribe(() => {
+          this.recentWork.updateList();
+        });
   }
 
-  confirmDelete(notebook: FileDetail): void {
-    this.notebookInFocus = notebook;
+  deleteNotebook(resource: RecentResource): void {
+    this.resource = resource.notebook;
+    this.callbackFun = 'receiveNotebookDelete';
+    this.notebookInFocus = resource.notebook;
     this.deleteModal.open();
   }
 
   receiveNotebookDelete($event: FileDetail): void {
     this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
         .subscribe(() => {
-         // this.notebooksLoading = true;
-         // this.loadNotebookList();
+          this.recentWork.updateList();
           this.deleteModal.close();
         });
   }
 
-  cloneThis(notebook: string): void {
-    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, notebook)
-        .subscribe(() => {
-         // this.loadNotebookList();
-        });
+  editCohort(resource: RecentResource): void {
+    this.cohortInFocus = resource.cohort;
+
+    // This ensures the cohort binding is picked up before the open resolves.
+    setTimeout(_ => this.editModal.open(), 0);
   }
 
-  receiveDelete($event): void {
-    this.deleteCohort($event);
+  cloneCohort(resource: RecentResource): void {
+    const url =
+        '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?criteria=';
+    this.route.navigateByUrl(url
+        + resource.cohort.criteria);
   }
 
-  public deleteCohort(cohort: Cohort): void {
-    /*this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
-      this.cohortList.splice(
-          this.cohortList.indexOf(cohort), 1);
+  reviewCohort(resource: RecentResource): void {
+    const url =
+        '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
+    this.route.navigateByUrl(url);
+  }
+
+  deleteCohort(resource: RecentResource): void {
+    this.resource = resource.cohort;
+this.callbackFun = 'receiveCohortDelete';
+    this.cohortInFocus = resource.cohort;
+    this.deleteModal.open();
+  }
+
+  receiveCohortDelete($event: Cohort): void {
+    this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id).subscribe(() => {
+      this.recentWork.updateList();
       this.deleteModal.close();
-    });*/
+    });
   }
+
 
   updateFinished(): void {
     // this.editModal.close();
