@@ -256,9 +256,9 @@ export const addParameter =
   ({type: ADD_PARAMETER, parameter});
 
 export const removeParameter =
-  (parameterId: string, path?: string
+  (parameterId: string, path?: string, id?: number
   ): ActionTypes[typeof REMOVE_PARAMETER] =>
-  ({type: REMOVE_PARAMETER, parameterId, path});
+  ({type: REMOVE_PARAMETER, parameterId, path, id});
 
 export const addModifier =
   (modifier: any
