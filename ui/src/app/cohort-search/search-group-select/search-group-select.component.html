@@ -10,6 +10,7 @@
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
         <h4 class="dropdown-header">Program Data</h4>
+
         <button
           *ngFor="let criteria of programTypes"
           id="criteria.type"
@@ -20,14 +21,16 @@
           clrDropdownItem>{{criteria.name}}</button>
         <div class="dropdown-divider"></div>
         <h4 class="dropdown-header">Domains</h4>
-        <button
-          *ngFor="let criteria of domainTypes"
-          id="criteria.type"
-          class="dropdown-item"
-          type="button"
-          [disabled]="criteria.disabled"
-          (click)="launchWizard(criteria)"
-          clrDropdownItem>{{criteria.name}}</button>
+        <ng-container *ngFor="let criteria of domainTypes">
+          <button *ngIf="criteria.name !=='ICD9 Codes' && criteria.name !=='ICD10 Codes' "
+                  id="criteria.type"
+                  class="dropdown-item"
+                  type="button"
+                  [disabled]="criteria.disabled"
+                  (click)="launchWizard(criteria)"
+                  clrDropdownItem>{{criteria.name}}</button>
+        </ng-container>
+
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
