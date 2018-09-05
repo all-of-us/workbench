@@ -66,6 +66,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
     if (!this.fullTree || this.node.get('id') === 0) {
+ //     console.log(this.node.get('type'));
       const _type = this.node.get('type');
       const parentId = this.node.get('id');
       const errorSub = this.ngRedux
@@ -168,6 +169,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   loadChildren(event) {
     if (!event) { return ; }
     const _type = this.node.get('type');
+    console.log(_type)
     const parentId = this.node.get('id');
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops
