@@ -1,10 +1,12 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {
   Cohort, CohortsService, FileDetail, NotebookRename,
   RecentResource, WorkspacesService
 } from '../../../generated';
+import {CohortEditModalComponent} from '../cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from '../confirm-delete-modal/component';
+import {RecentWorkComponent} from '../recent-work/component';
 import {RenameModalComponent} from '../rename-modal/component';
 
 @Component ({
@@ -26,7 +28,10 @@ export class CardComponent implements OnInit {
   notebookRenameError = false;
   wsNamespace: string;
   wsId: string;
-
+  cohortInFocus: Cohort;
+  resource: any;
+  callbackFun: any;
+  router: Router;
 
   @ViewChild(RenameModalComponent)
   renameModal: RenameModalComponent;
@@ -34,54 +39,69 @@ export class CardComponent implements OnInit {
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
 
+  @ViewChild(CohortEditModalComponent)
+  editModal: CohortEditModalComponent;
+
   constructor(
       private cohortsService: CohortsService,
       private workspacesService: WorkspacesService,
-      private route: ActivatedRoute,
+      private recentWork: RecentWorkComponent,
+      private route: Router
   ) {
     this.actionList = [
       {
         type: 'notebook',
         class: 'pencil',
-        link: 'renameThis',
+        link: 'renameNotebook',
         text: 'Rename'
       }, {
         type: 'notebook',
         class: 'copy',
-        link: 'cloneThis',
+        link: 'cloneNotebook',
         text: 'Clone'
       }, {
         type: 'notebook',
         class: 'trash',
         text: 'Delete',
-        link: 'confirmDelete'
+        link: 'deleteNotebook'
       }, {
         type: 'cohort',
         class: 'copy',
-        text: 'Clone'
+        text: 'Clone',
+        link: 'cloneCohort'
       }, {
         type: 'cohort',
         class: 'pencil',
-        text: 'Edit'
+        text: 'Edit',
+        link: 'editCohort'
       },  {
         type: 'cohort',
         class: 'grid-view',
-        text: 'Review'
+        text: 'Review',
+        link: 'reviewCohort'
       }, {
         type: 'cohort',
         class: 'trash',
         text: 'Delete',
+        link: 'deleteCohort'
       }
     ];
   }
 
-  renameThis(recentResource: RecentResource): void {
-    console.log('in rename');
-    this.notebookInFocus = this.card.notebook;
-    this.renameModal.open();
+  ngOnInit() {
+    this.wsNamespace = this.card.workspaceNamespace;
+    this.wsId = this.card.workspaceFirecloudName;
+    this.type = this.card && this.card.notebook == null ? 'cohort' : 'notebook';
+    this.actions = this.actionList.filter(elem =>  elem.type === this.type);
 
   }
-  receiveRename(rename: NotebookRename): void {
+
+  renameNotebook(recentResource: RecentResource): void {
+    this.notebookInFocus = this.card.notebook;
+    this.renameModal.open();
+  }
+
+  receiveNotebookRename(rename: NotebookRename): void {
     let newName = rename.newName;
     if (!(new RegExp('^.+\.ipynb$').test(newName))) {
       newName = rename.newName + '.ipynb';
@@ -92,47 +112,70 @@ export class CardComponent implements OnInit {
       this.notebookRenameError = true;
       return;
     }
+    this.workspacesService
+        .renameNotebook(this.wsNamespace, this.wsId, rename)
+        .subscribe((newNb) => {
+          this.recentWork.updateList();
+          this.renameModal.close();
+    });
   }
-  ngOnInit() {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
-    this.type = this.card && this.card.notebook == null ? 'cohort' : 'notebook';
-    this.actions = this.actionList.filter(elem =>  elem.type === this.type);
 
+  cloneNotebook(resource: RecentResource): void {
+    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, resource.notebook.name)
+        .subscribe(() => {
+          this.recentWork.updateList();
+        });
   }
 
-  confirmDelete(notebook: FileDetail): void {
-    this.notebookInFocus = notebook;
+  deleteNotebook(resource: RecentResource): void {
+    this.resource = resource.notebook;
+    this.callbackFun = 'receiveNotebookDelete';
+    this.notebookInFocus = resource.notebook;
     this.deleteModal.open();
   }
 
   receiveNotebookDelete($event: FileDetail): void {
     this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
         .subscribe(() => {
-         // this.notebooksLoading = true;
-         // this.loadNotebookList();
+          this.recentWork.updateList();
           this.deleteModal.close();
         });
   }
 
-  cloneThis(notebook: string): void {
-    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, notebook)
-        .subscribe(() => {
-         // this.loadNotebookList();
-        });
+  editCohort(resource: RecentResource): void {
+    this.cohortInFocus = resource.cohort;
+
+    // This ensures the cohort binding is picked up before the open resolves.
+    setTimeout(_ => this.editModal.open(), 0);
   }
 
-  receiveDelete($event): void {
-    this.deleteCohort($event);
+  cloneCohort(resource: RecentResource): void {
+    const url =
+        '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?criteria=';
+    this.route.navigateByUrl(url
+        + resource.cohort.criteria);
   }
 
-  public deleteCohort(cohort: Cohort): void {
-    /*this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
-      this.cohortList.splice(
-          this.cohortList.indexOf(cohort), 1);
+  reviewCohort(resource: RecentResource): void {
+    const url =
+        '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
+    this.route.navigateByUrl(url);
+  }
+
+  deleteCohort(resource: RecentResource): void {
+    this.resource = resource.cohort;
+this.callbackFun = 'receiveCohortDelete';
+    this.cohortInFocus = resource.cohort;
+    this.deleteModal.open();
+  }
+
+  receiveCohortDelete($event: Cohort): void {
+    this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id).subscribe(() => {
+      this.recentWork.updateList();
       this.deleteModal.close();
-    });*/
+    });
   }
+
 
   updateFinished(): void {
     // this.editModal.close();
