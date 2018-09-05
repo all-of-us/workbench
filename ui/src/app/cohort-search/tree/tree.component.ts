@@ -25,6 +25,7 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   ngOnInit() {
     super.ngOnInit();
     setTimeout(() => super.loadChildren(true));
+      this._type = this.node.get('type', '');
   }
 
     showSearch() {

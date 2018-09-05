@@ -40,22 +40,11 @@ export class SearchGroupComponent {
   }
 
   launchWizard(criteria: any) {
-    // if(criteria.name === 'Conditions'){
-    //     criteria.name = 'ICD9 Codes'
-    //     const criteriaType = 'ICD9';
-    //     const itemId = this.actions.generateId('items');
-    //     const fullTree = criteria.fullTree || false;
-    //     const {role, groupId} = this;
-    //     const context = {criteriaType, role, groupId, itemId, fullTree};
-    //     this.actions.openWizard(itemId, context);
-    // } else{
-        const itemId = this.actions.generateId('items');
-        const criteriaType = criteria.type;
-        const fullTree = criteria.fullTree || false;
-        const {role, groupId} = this;
-        const context = {criteriaType, role, groupId, itemId, fullTree};
-        this.actions.openWizard(itemId, context);
-    // }
-
+    const itemId = this.actions.generateId('items');
+    const criteriaType = criteria.type;
+    const fullTree = criteria.fullTree || false;
+    const {role, groupId} = this;
+    const context = {criteriaType, role, groupId, itemId, fullTree};
+    this.actions.openWizard(itemId, context);
   }
 }
