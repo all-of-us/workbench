@@ -9,44 +9,46 @@ import {NodeComponent} from '../node/node.component';
  * children until "expanded" - expansion is basically its default state.
  */
 @Component({
-  selector: 'crit-tree',
-  templateUrl: './tree.component.html',
-  styleUrls: ['./tree.component.css']
+    selector: 'crit-tree',
+    templateUrl: './tree.component.html',
+    styleUrls: ['./tree.component.css']
 })
 export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
-     _type: string;
-     testOptionChange= false;
-     name: string;
+    _type: string;
+    testOptionChange= false;
+    name: string;
 
-  ngOnChanges() {
-    super.ngOnInit();
-  }
+    ngOnChanges() {
+        if(this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10]){
+            super.ngOnInit();
+        }
+    }
 
-  ngOnInit() {
-    super.ngOnInit();
-    setTimeout(() => super.loadChildren(true));
-      this._type = this.node.get('type', '');
-  }
+    ngOnInit() {
+        super.ngOnInit();
+        setTimeout(() => super.loadChildren(true));
+        this._type = this.node.get('type', '');
+    }
 
     showSearch() {
         return this.node.get('type') === TreeType[TreeType.VISIT]
             || this.node.get('type') === TreeType[TreeType.DRUG]
             || this.node.get('type') === TreeType[TreeType.MEAS]
+            || this.node.get('type') === TreeType[TreeType.PM]
             || this.node.get('type') === TreeType[TreeType.CONDITION]
             || this.node.get('type') === TreeType[TreeType.ICD9]
-            || this.node.get('type') === TreeType[TreeType.ICD10]
-            || this.node.get('type') === TreeType[TreeType.PM];
+            || this.node.get('type') === TreeType[TreeType.ICD10];
     }
 
-  showDropDown() {
-    return this.node.get('type') === TreeType[TreeType.CONDITION] || this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10];
-  }
+    showDropDown() {
+        return this.node.get('type') === TreeType[TreeType.CONDITION] || this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10];
+    }
 
-  optionChange(flag) {
-    if (flag) {
-        this.name = flag;
-        this.testOptionChange = true;
-        setTimeout(() => super.loadChildren(true));
+    optionChange(flag) {
+        if (flag) {
+            this.name = flag;
+            this.testOptionChange = true;
+            setTimeout(() => super.loadChildren(true));
         }
     }
 

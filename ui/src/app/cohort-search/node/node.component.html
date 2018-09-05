@@ -1,5 +1,5 @@
 <clr-tree-node >
-  <div class="clr-treenode-link container" (click)="toggleExpanded()">
+  <div [id]="nodeId" class="clr-treenode-link container" (click)="toggleExpanded()">
     <crit-node-info [node]="node"></crit-node-info>
   </div>
 

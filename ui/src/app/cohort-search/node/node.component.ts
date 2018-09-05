@@ -27,7 +27,6 @@ import {highlightMatches, stripHtml} from '../utils';
 })
 export class NodeComponent implements OnInit, OnDestroy {
   @Input() node;
-  @Input() testChange = false;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
 
   /*
