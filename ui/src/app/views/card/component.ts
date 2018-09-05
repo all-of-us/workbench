@@ -79,7 +79,8 @@ export class CardComponent implements OnInit {
 
   reviewCohort(resource: RecentResource): void {
     const url =
-        '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
+        '/workspaces/' + this.wsNamespace
+        + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
     this.route.navigateByUrl(url);
   }
 
