@@ -11,7 +11,10 @@
                  [popper]="codesPopper"
                  [popperTrigger]="'hover'"
                  [popperPlacement]="'top'">
-            <clr-icon  class="label-info is-solid" shape="info-standard"></clr-icon>
+              <div class="label-info">
+                  <clr-icon  class=" is-solid" shape="info-standard"></clr-icon>
+              </div>
+
           </small>
           <popper-content #codesPopper>
             <p class="tooltip-text" [style.margin]="'0'">

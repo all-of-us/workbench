@@ -32,6 +32,7 @@
 .modifier-event-header {
     color: #262262;
     font-weight: 500;
+    margin-right: 0.4rem;
 }
 .modifier-event-indicator {
     border-radius:0.15rem;
@@ -124,9 +125,9 @@
 
 .label-flex .label-info {
     color: #0077b7;
-    margin-left: 0.4rem;
-    width: 1rem;
-    height: 0.7rem;
+   /*padding-left: 0.4rem;*/
+    /*width: 1rem;*/
+    /*height: 0.7rem;*/
 
 }
 
