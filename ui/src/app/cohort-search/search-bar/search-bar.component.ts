@@ -25,6 +25,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() _type;
   searchTerm = '';
+  typedTerm: string;
   options = [];
   multiples: any;
   loading = false;
@@ -34,6 +35,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   numMatches: number;
   ingredientList: Array<string>;
+  highlightedOption: number;
 
   @ViewChild('searchBar') searchBar;
   @HostListener('document:mouseup', ['$event.target'])
@@ -68,6 +70,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           const optionNames = [];
           if (options !== null) {
             options.forEach(option => {
+              this.highlightedOption = null;
               if (optionNames.indexOf(option.name) === -1) {
                 optionNames.push(option.name);
                 option.displayName = highlightMatches([this.searchTerm], option.name);
@@ -124,6 +127,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   inputChange(newVal: string) {
+    this.typedTerm = newVal;
     if (this._type === TreeType[TreeType.VISIT] || this._type === TreeType[TreeType.PM]) {
       if (newVal.length > 2) {
         this.actions.setCriteriaSearchTerms([newVal]);
@@ -166,5 +170,29 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   hideDropdown() {
     this.options = [];
+  }
+
+  moveUp() {
+    if (this.highlightedOption === 0) {
+      this.highlightedOption = null;
+      this.searchTerm = this.typedTerm;
+    } else if (this.highlightedOption > 0) {
+      this.highlightedOption--;
+      this.searchTerm = this.options[this.highlightedOption].name;
+    }
+  }
+
+  moveDown() {
+    if (this.highlightedOption === null) {
+      this.highlightedOption = 0;
+      this.searchTerm = this.options[this.highlightedOption].name;
+    } else if ((this.highlightedOption + 1) < this.options.length) {
+      this.highlightedOption++;
+      this.searchTerm = this.options[this.highlightedOption].name;
+    }
+  }
+
+  enterSelect() {
+    this.selectOption(this.options[this.highlightedOption]);
   }
 }
