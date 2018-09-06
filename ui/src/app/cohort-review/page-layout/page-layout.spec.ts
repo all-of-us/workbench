@@ -3,10 +3,8 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
-import {AnnotationType, Cohort, CohortAnnotationDefinition, CohortAnnotationDefinitionService, CohortReview} from 'generated';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {Observable} from 'rxjs/Observable';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
+import {CohortAnnotationDefinitionService, CohortReview} from 'generated';
+import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
 import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
@@ -33,23 +31,7 @@ describe('PageLayout', () => {
       ],
       imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule],
       providers: [
-        {
-          provide: ReviewStateService, useValue: {
-            annotationDefinitions: new ReplaySubject<CohortAnnotationDefinition[]>(1),
-            annotationManagerOpen: new BehaviorSubject<boolean>(false),
-            editAnnotationManagerOpen: new BehaviorSubject<boolean>(false),
-            cohort: new ReplaySubject<Cohort>(1),
-            review: new ReplaySubject<CohortReview>(1),
-            annotationDefinitions$: Observable.of([
-              <CohortAnnotationDefinition> {
-                cohortAnnotationDefinitionId: 1,
-                cohortId: 2,
-                columnName: 'test',
-                annotationType: AnnotationType.BOOLEAN
-              }
-            ]),
-          }
-        },
+        {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: ActivatedRoute, useValue: {snapshot: {data: {review: <CohortReview> {}}}}},
         {provide: CohortAnnotationDefinitionService, useValue: {}},
         {provide: Router, useValue: routerSpy},

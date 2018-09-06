@@ -9,7 +9,7 @@ import {
   CohortReviewService,
 } from 'generated';
 import {Observable} from 'rxjs/Observable';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
+import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
 import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {ReviewNavComponent} from '../review-nav/review-nav.component';
@@ -42,13 +42,7 @@ describe('TablePage', () => {
       imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule],
       providers: [
         {
-          provide: ReviewStateService, useValue: {
-            review: new ReplaySubject<CohortReview>(1),
-            review$: Observable.of({
-              participantCohortStatuses: []
-            }),
-          }
-        },
+          provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {
           provide: ActivatedRoute, useValue: {
             snapshot: {

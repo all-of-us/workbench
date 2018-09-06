@@ -5,6 +5,8 @@ import {ClarityModule} from '@clr/angular';
 import {AnnotationType, CohortAnnotationDefinition, CohortReviewService} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
+
 import {AnnotationItemComponent} from '../annotation-item/annotation-item.component';
 import {AnnotationListComponent} from '../annotation-list/annotation-list.component';
 import {DetailAllEventsComponent} from '../detail-all-events/detail-all-events.component';
@@ -44,19 +46,7 @@ describe('DetailPage', () => {
             })
         }},
         {provide: CohortReviewService, useValue: {}},
-        {provide: ReviewStateService, useValue: {
-          review$: Observable.of({
-            participantCohortStatuses: []
-          }),
-          annotationDefinitions$: Observable.of([
-            <CohortAnnotationDefinition> {
-              cohortAnnotationDefinitionId: 1,
-              cohortId: 2,
-              columnName: 'test',
-              annotationType: AnnotationType.BOOLEAN
-            }
-          ]),
-        }},
+        {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: Router, useValue: routerSpy},
       ],
     })

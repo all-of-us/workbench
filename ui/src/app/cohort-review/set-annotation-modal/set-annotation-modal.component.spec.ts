@@ -2,9 +2,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {AnnotationType, CohortAnnotationDefinition, CohortAnnotationDefinitionService} from 'generated';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {Observable} from 'rxjs/Observable';
+import {CohortAnnotationDefinitionService} from 'generated';
+import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
 import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
@@ -30,18 +29,7 @@ describe('SetAnnotationModalComponent', () => {
       providers: [
         {provide: ActivatedRoute, useValue: {}},
         {provide: CohortAnnotationDefinitionService, useValue: {}},
-        {provide: ReviewStateService, useValue: {
-          annotationManagerOpen: new BehaviorSubject<boolean>(false),
-          editAnnotationManagerOpen: new BehaviorSubject<boolean>(false),
-          annotationDefinitions$: Observable.of([
-            <CohortAnnotationDefinition> {
-              cohortAnnotationDefinitionId: 1,
-              cohortId: 2,
-              columnName: 'test',
-              annotationType: AnnotationType.BOOLEAN
-            }
-          ]),
-        }},
+        {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
       ],
     })
       .compileComponents();
