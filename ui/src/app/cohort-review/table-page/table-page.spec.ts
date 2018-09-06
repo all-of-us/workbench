@@ -3,12 +3,8 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
-import {
-  CohortAnnotationDefinitionService,
-  CohortReview,
-  CohortReviewService,
-} from 'generated';
-import {Observable} from 'rxjs/Observable';
+import {CohortAnnotationDefinitionService, CohortReviewService} from 'generated';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
 import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
@@ -58,11 +54,7 @@ describe('TablePage', () => {
           }
         },
         {provide: CohortAnnotationDefinitionService, useValue: {}},
-        {provide: CohortReviewService, useValue: {
-          getParticipantCohortStatuses: (): Observable<CohortReview> => {
-            return Observable.of(<CohortReview> {});
-          }
-        }},
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
       ],
     })
       .compileComponents();

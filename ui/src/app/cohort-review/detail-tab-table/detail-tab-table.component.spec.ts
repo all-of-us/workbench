@@ -4,6 +4,7 @@ import {ClarityModule} from '@clr/angular';
 import {CohortReviewService, ParticipantDataListResponse} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 
 import {DetailTabTableComponent} from './detail-tab-table.component';
 
@@ -19,11 +20,7 @@ describe('DetailTabTableComponent', () => {
       imports: [ClarityModule, NgxPopperModule],
       providers: [
         {
-          provide: CohortReviewService, useValue: {
-            getParticipantData: (): Observable<ParticipantDataListResponse> => {
-              return Observable.of(<ParticipantDataListResponse> {items: []});
-            }
-          }},
+          provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {
           provide: ActivatedRoute, useValue: {
             data: Observable.of({
