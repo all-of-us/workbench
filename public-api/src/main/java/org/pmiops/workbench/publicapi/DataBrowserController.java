@@ -538,21 +538,20 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         uniqueAgeDeciles.add(ar.getStratum2());
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
-
                         }
-                        if(uniqueAgeDeciles.size() < 8){
-                            Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] { "1", "2", "3", "4", "5", "6", "7", "8"}));
-                            completeAgeDeciles.removeAll(uniqueAgeDeciles);
-                            for(String missingAgeDecile: completeAgeDeciles){
-                                AchillesResult missingResult = new AchillesResult();
-                                missingResult.setAnalysisId(AGE_ANALYSIS_ID);
-                                missingResult.setStratum1(conceptId);
-                                missingResult.setStratum2(missingAgeDecile);
-                                missingResult.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(missingAgeDecile));
-                                missingResult.setCountValue(0L);
-                                missingResult.setSourceCountValue(0L);
-                                aa.getResults().add(missingResult);
-                            }
+                    }
+                    if(uniqueAgeDeciles.size() < 7){
+                        Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] {"2", "3", "4", "5", "6", "7", "8"}));
+                        completeAgeDeciles.removeAll(uniqueAgeDeciles);
+                        for(String missingAgeDecile: completeAgeDeciles){
+                            AchillesResult missingResult = new AchillesResult();
+                            missingResult.setAnalysisId(AGE_ANALYSIS_ID);
+                            missingResult.setStratum1(conceptId);
+                            missingResult.setStratum2(missingAgeDecile);
+                            missingResult.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(missingAgeDecile));
+                            missingResult.setCountValue(0L);
+                            missingResult.setSourceCountValue(0L);
+                            aa.getResults().add(missingResult);
                         }
                     }
                     conceptAnalysis.setAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
@@ -582,19 +581,19 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
                         }
+                    }
+
 
                     conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
 
-                    }else if(analysisId == MEASUREMENT_AGE_ANALYSIS_ID){
-                        isMeasurement = true;
+                }else if(analysisId == MEASUREMENT_AGE_ANALYSIS_ID){
+                    isMeasurement = true;
 
-                        for(AchillesResult ar: aa.getResults()){
-                            String analysisStratumName=ar.getAnalysisStratumName();
-                            if (analysisStratumName == null || analysisStratumName.equals("")) {
-                                ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
-                            }
+                    for(AchillesResult ar: aa.getResults()){
+                        String analysisStratumName=ar.getAnalysisStratumName();
+                        if (analysisStratumName == null || analysisStratumName.equals("")) {
+                            ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
                         }
-                        conceptAnalysis.setMeasurementValueAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                     }
                     conceptAnalysis.setMeasurementValueAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }
