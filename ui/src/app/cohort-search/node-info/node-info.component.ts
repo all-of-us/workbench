@@ -9,11 +9,11 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {TreeType} from 'generated';
+import {TreeSubType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES, PREDEFINED_ATTRIBUTES} from '../constant';
+import {PREDEFINED_ATTRIBUTES} from '../constant';
 import {
   CohortSearchActions,
   CohortSearchState,
@@ -149,7 +149,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.isMeas()) {
         this.actions.fetchAttributes(this.node);
       } else {
-        const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+        const attributes = this.node.get('subtype') === TreeSubType[TreeSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{
             name: '',
@@ -173,7 +173,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.actions.fetchAllChildren(TreeType[TreeType.DRUG], this.node.get('id'));
       } else {
         let attributes = [];
-        if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+        if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
           Object.keys(PREDEFINED_ATTRIBUTES).forEach(name => {
             if (this.node.get('name').indexOf(name) === 0) {
               attributes = PREDEFINED_ATTRIBUTES[name];

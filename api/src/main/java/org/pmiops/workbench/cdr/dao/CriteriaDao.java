@@ -67,25 +67,18 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2", nativeQuery = true)
   List<Criteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
 
-  @Query(value = "select distinct c.domain_id as domainId from criteria c " +
-    "where c.parent_id in (" +
-    "select id from criteria " +
-    "where type = :type " +
-    "and code like :code% " +
-    "and is_selectable = 1 " +
-    "and is_group = 1) " +
-    "and c.is_group = 0 and c.is_selectable = 1", nativeQuery = true)
-  List<String> findCriteriaByTypeAndCode(@Param("type") String type, @Param("code") String code);
-
-  @Query(value = "select distinct c.domain_id as domainId from criteria c " +
-    "where c.parent_id in (" +
-    "select id from criteria " +
+  @Query(value = "select distinct domain_id as domainId " +
+    "from criteria " +
+    "where path like ( " +
+    "select concat( path, '.', id, '%') as path " +
+    "from criteria " +
     "where type = :type " +
     "and subtype = :subtype " +
-    "and code like :code% " +
-    "and is_selectable = 1 " +
-    "and is_group = 1) " +
-    "and c.is_group = 0 and c.is_selectable = 1", nativeQuery = true)
+    "and code = :code " +
+    "and is_group = 1 " +
+    "and is_selectable = 1) " +
+    "and is_group = 0 " +
+    "and is_selectable = 1", nativeQuery = true)
   List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
 
   @Query(value = "select * from criteria c " +

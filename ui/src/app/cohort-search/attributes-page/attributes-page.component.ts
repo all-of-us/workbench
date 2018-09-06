@@ -12,9 +12,9 @@ import {
   nodeAttributes,
 } from '../redux';
 
-import {Operator, TreeType} from 'generated';
+import {Operator, TreeSubType, TreeType} from 'generated';
 
-import {CRITERIA_SUBTYPES, PM_UNITS} from '../constant';
+import {PM_UNITS} from '../constant';
 import {stripHtml} from '../utils';
 
 @Component({
@@ -89,7 +89,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
             attr.operator = 'ANY';
             this.dropdowns.selected[i] = 'ANY';
             this.dropdowns.oldVals[i] = 'ANY';
-            if (this.node.get('subtype') === CRITERIA_SUBTYPES.BP) {
+            if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
               this.dropdowns.labels[i] = attr.name;
             }
           });
@@ -223,7 +223,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         if (i > 0) {
           name += ' / ';
         }
-        name += (this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+        name += (this.node.get('subtype') === TreeSubType[TreeSubType.BP]
           && values['operator' + i] !== 'ANY')
           ? attr.name + ' ' : '';
         switch (values['operator' + i]) {

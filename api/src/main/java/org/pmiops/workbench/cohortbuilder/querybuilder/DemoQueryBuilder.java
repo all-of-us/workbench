@@ -7,6 +7,7 @@ import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -55,29 +56,16 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
   private static final String AND_TEMPLATE = "and\n";
 
-  public enum DemoType {
-    GEN, AGE, DEC, RACE, ETH;
-
-    public static DemoType fromValue(String subtype) {
-      for (DemoType demoType : DemoType.values()) {
-        if (demoType.name().equals(subtype)) {
-          return demoType;
-        }
-      }
-      return null;
-    }
-  }
-
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
-    ListMultimap<DemoType, Object> paramMap = getMappedParameters(parameters.getParameters());
+    ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(parameters.getParameters());
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     List<String> queryParts = new ArrayList<>();
-    if (paramMap.keySet().contains(DemoType.AGE) && paramMap.keySet().contains(DemoType.DEC)) {
+    if (paramMap.keySet().contains(TreeSubType.AGE) && paramMap.keySet().contains(TreeSubType.DEC)) {
       throw new BadRequestException("Cannot select age and deceased in the same context.");
     }
 
-    for (DemoType key : paramMap.keySet()) {
+    for (TreeSubType key : paramMap.keySet()) {
       String namedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
 
       switch (key) {
@@ -138,15 +126,15 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     return FactoryKey.DEMO;
   }
 
-  protected ListMultimap<DemoType, Object> getMappedParameters(List<SearchParameter> searchParameters) {
-    ListMultimap<DemoType, Object> mappedParameters = ArrayListMultimap.create();
+  protected ListMultimap<TreeSubType, Object> getMappedParameters(List<SearchParameter> searchParameters) {
+    ListMultimap<TreeSubType, Object> mappedParameters = ArrayListMultimap.create();
     for (SearchParameter parameter : searchParameters)
-      if (parameter.getSubtype().equals(DemoType.AGE.name())) {
-        mappedParameters.put(DemoType.AGE, parameter.getAttributes().isEmpty() ? null : parameter.getAttributes().get(0));
-      } else if (parameter.getSubtype().equals(DemoType.DEC.name())) {
-        mappedParameters.put(DemoType.DEC, parameter.getValue());
+      if (parameter.getSubtype().equals(TreeSubType.AGE.name())) {
+        mappedParameters.put(TreeSubType.AGE, parameter.getAttributes().isEmpty() ? null : parameter.getAttributes().get(0));
+      } else if (parameter.getSubtype().equals(TreeSubType.DEC.name())) {
+        mappedParameters.put(TreeSubType.DEC, parameter.getValue());
       } else {
-        mappedParameters.put(DemoType.fromValue(parameter.getSubtype()), parameter.getConceptId());
+        mappedParameters.put(TreeSubType.fromValue(parameter.getSubtype()), parameter.getConceptId());
       }
 
     return mappedParameters;

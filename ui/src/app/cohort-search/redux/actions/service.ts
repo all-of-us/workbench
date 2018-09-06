@@ -3,7 +3,6 @@ import {Injectable} from '@angular/core';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {CRITERIA_SUBTYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -25,11 +24,12 @@ import {
 import * as ActionFuncs from './creators';
 
 import {
-  SearchGroup,
-  SearchGroupItem,
-  SearchParameter,
-  SearchRequest,
-  TreeType
+    SearchGroup,
+    SearchGroupItem,
+    SearchParameter,
+    SearchRequest,
+    TreeSubType,
+    TreeType
 } from 'generated';
 
 
@@ -445,7 +445,7 @@ export class CohortSearchActions {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
       name: immParam.get('name', ''),
-      value: CRITERIA_SUBTYPES.DEC === immParam.get('subtype')
+      value: TreeSubType[TreeSubType.DEC] === immParam.get('subtype')
           ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),

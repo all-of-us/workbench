@@ -5,6 +5,8 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.rpc.BadRequest;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
@@ -14,6 +16,7 @@ import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -101,64 +106,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.cdrVersionService = cdrVersionService;
   }
 
-  /**
-   * This method list any of the criteria trees.
-   */
-  @Override
-  public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndParentId(Long cdrVersionId, String type, Long parentId) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(type, parentId);
-
-    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
-    return ResponseEntity.ok(criteriaResponse);
-  }
-
-  @Override
-  public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndSubtype(Long cdrVersionId, String type, String subtype) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeOrderByIdAsc(type, subtype);
-
-    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
-    return ResponseEntity.ok(criteriaResponse);
-  }
-
-  @Override
-  public ResponseEntity<CriteriaListResponse> getCriteriaByTypeAndSubtypeAndParentId(Long cdrVersionId,
-                                                                                     String type,
-                                                                                     String subtype,
-                                                                                     Long parentId) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc(type, subtype, parentId);
-
-    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
-    return ResponseEntity.ok(criteriaResponse);
-  }
-
   @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaByTypeForCodeOrName(Long cdrVersionId,
                                                                              String type,
                                                                              String value) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, value);
-
-    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
-    return ResponseEntity.ok(criteriaResponse);
-  }
-
-  @Override
-  public ResponseEntity<CriteriaListResponse> getCriteriaChildrenByTypeAndParentId(Long cdrVersionId,
-                                                                                   String type,
-                                                                                   Long parentId) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaChildrenByTypeAndParentId(type, parentId);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -236,9 +189,40 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getCriteriaByType(Long cdrVersionId, String type) {
+  public ResponseEntity<CriteriaListResponse> getCriteriaBy(Long cdrVersionId,
+                                                            String type,
+                                                            String subtype,
+                                                            Long parentId,
+                                                            Boolean allChildren) {
+    Optional.ofNullable(type)
+      .orElseThrow(() -> new BadRequestException(String.format("Criteria type: %s is not valid.", type )));
+    Arrays
+      .stream(TreeType.values())
+      .filter(treeType -> treeType.name().equalsIgnoreCase(type))
+      .findFirst()
+      .orElseThrow(() -> new BadRequestException(String.format("Criteria type: %s is not valid.", type )));
+    Optional.ofNullable(subtype)
+      .ifPresent(st -> Arrays
+      .stream(TreeSubType.values())
+      .filter(treeSubType -> treeSubType.name().equalsIgnoreCase(st))
+      .findFirst()
+      .orElseThrow(() -> new BadRequestException(String.format("Criteria subtype: %s is not valid.", st ))));
+
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaByType(type);
+    List<Criteria> criteriaList;
+    if (parentId != null) {
+      if (subtype != null) {
+        criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc(type, subtype, parentId);
+      } else if (allChildren != null) {
+        criteriaList = criteriaDao.findCriteriaChildrenByTypeAndParentId(type, parentId);
+      } else {
+        criteriaList = criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(type, parentId);
+      }
+    } else if (subtype != null) {
+      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeOrderByIdAsc(type, subtype);
+    } else {
+      criteriaList = criteriaDao.findCriteriaByType(type);
+    }
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
