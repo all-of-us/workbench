@@ -39,7 +39,7 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
-  /v1/cohortbuilder/{cdrVersionId}/criteria:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
@@ -50,7 +50,7 @@ paths:
         type, subtype, parentId and/or allChildren
       operationId: "getCriteriaBy"
       parameters:
-        - in: query
+        - in: path
           name: type
           type: string
           required: true
@@ -84,13 +84,18 @@ paths:
       tags:
         - cohortBuilder
       description: Returns matches on criteria table by code or name
-      operationId: "getCriteriaByTypeForCodeOrName"
+      operationId: "getCriteriaAutoComplete"
       parameters:
         - in: path
           name: type
           type: string
           required: true
           description: the specific type of criteria to get
+        - in: query
+          name: subtype
+          type: string
+          required: false
+          description: the subtype of the criteria were search for
         - in: query
           name: value
           type: string

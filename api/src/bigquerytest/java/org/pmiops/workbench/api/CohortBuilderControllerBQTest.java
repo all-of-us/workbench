@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,7 +81,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       "concept_relationship",
       "death",
       "visit_occurrence",
-      "concept_ancestor");
+      "concept_ancestor",
+      "criteria");
   }
 
   @Override
@@ -104,7 +104,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -113,9 +113,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildrenAgeAtEvent() throws Exception {
     Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
     Modifier modifier = new Modifier()
@@ -130,9 +130,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildrenEncounter() throws Exception {
     Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
     Modifier modifier = new Modifier()
@@ -147,7 +147,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventInvalidLong() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     String operand = "zz";
     Modifier modifier = new Modifier()
@@ -169,7 +169,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventTooManyOperands() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     String operand1 = "1";
     String operand2 = "2";
@@ -193,7 +193,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetween() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     DateTime birthDate = new DateTime(1980, 2, 17, 0, 0, 0, 0);
     DateTime eventDate = new DateTime(2008, 7, 22, 0, 0, 0, 0);
 
@@ -216,7 +216,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetweenTooManyOperands() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     String operand1 = "24";
     String operand2 = "26";
@@ -241,7 +241,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetweenNotEnoughOperands() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     String operand1 = "24";
     Modifier modifier = new Modifier()
@@ -264,7 +264,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildNumOfOccurrencesMoreThanOne() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     Modifier modifier1 = new Modifier()
       .name(ModifierType.NUM_OF_OCCURRENCES)
@@ -288,7 +288,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildNumOfOccurrencesInvalidLong() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     String operand = "c";
     Modifier modifier1 = new Modifier()
@@ -309,7 +309,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     Modifier modifier1 = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
@@ -327,9 +327,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrencesAndEventDate() throws Exception {
     Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     SearchParameter icd9Proc = createSearchParameter(icd9ProcedureChild, "001.1");
     Modifier modifier1 = new Modifier()
@@ -352,7 +352,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildEventDate() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     Modifier modifier = new Modifier()
       .name(ModifierType.EVENT_DATE)
@@ -366,7 +366,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildEventDateInvalidDate() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     Modifier modifier = new Modifier()
       .name(ModifierType.EVENT_DATE)
@@ -387,7 +387,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildOccurrences() throws Exception {
     Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     Modifier modifier2 = new Modifier()
       .name(ModifierType.NUM_OF_OCCURRENCES)
@@ -403,7 +403,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9ConditionParent =
       criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "001"));
     Criteria icd9ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name()));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name(), "1"));
     SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
     SearchRequest searchRequest = createSearchRequests(icd9ConditionParent.getType(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -414,7 +414,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9ProcedureOccurrenceChild() throws Exception {
     Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
     SearchParameter icd9 = createSearchParameter(icd9ProcedureChild, "002.1");
     SearchRequest searchRequest = createSearchRequests(icd9ProcedureChild.getType(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -425,7 +425,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9ProcedureParent =
       criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.PROC.name(), "002"));
     Criteria icd9ProcedureChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), icd9ProcedureParent.getId(), "002", DomainType.PROCEDURE.name()));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), icd9ProcedureParent.getId(), "002", DomainType.PROCEDURE.name(), "2"));
     SearchParameter icd9 = createSearchParameter(icd9ProcedureParent, "002");
     SearchRequest searchRequest = createSearchRequests(icd9ProcedureParent.getType(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -436,7 +436,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9MeasurementChild() throws Exception {
     Criteria icd9MeasurementChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name(), "3");
     SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
     SearchRequest searchRequest = createSearchRequests(icd9MeasurementChild.getType(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -447,7 +447,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9MeasurementParent =
       criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "003"));
     Criteria icd9MeasurementChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9MeasurementParent.getId(), "003", DomainType.MEASUREMENT.name()));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9MeasurementParent.getId(), "003", DomainType.MEASUREMENT.name(), "3"));
     SearchParameter icd9 = createSearchParameter(icd9MeasurementParent, "003");
     SearchRequest searchRequest = createSearchRequests(icd9MeasurementParent.getType(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -587,7 +587,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9AndDemo() throws Exception {
     Criteria icd9MeasurementChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name());
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name(), "3");
     Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
@@ -629,7 +629,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD10ConditionOccurrenceChildEncounter() throws Exception {
     Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
     SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
     Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("1"));
     SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10), Arrays.asList(modifier));
@@ -639,7 +639,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD10ConditionOccurrenceChild() throws Exception {
     Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
     SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
     SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -650,9 +650,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9ConditionParent =
       criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "001"));
     Criteria icd9ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name()));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name(), "1"));
     Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name());
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
     SearchParameter icd9P = createSearchParameter(icd9ConditionParent, "001");
     SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
     SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9P, icd10), new ArrayList<>());
@@ -666,7 +666,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd10ConditionParent =
       criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), "A"));
     Criteria icd10ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), icd10ConditionParent.getId(), "A09", DomainType.CONDITION.name()));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), icd10ConditionParent.getId(), "A09", DomainType.CONDITION.name(), "6"));
     SearchParameter icd10 = createSearchParameter(icd10ConditionParent, "A");
     SearchRequest searchRequest = createSearchRequests(icd10ConditionParent.getType(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -677,7 +677,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD10ProcedureOccurrenceChild() throws Exception {
     Criteria icd10ProcedureChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), 0, "16070", DomainType.PROCEDURE.name());
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), 0, "16070", DomainType.PROCEDURE.name(), "8");
     SearchParameter icd10 = createSearchParameter(icd10ProcedureChild, "16070");
     SearchRequest searchRequest = createSearchRequests(icd10ProcedureChild.getType(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -688,7 +688,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd10ProcedureParent =
       criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), "16"));
     Criteria icd10ProcedureChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), icd10ProcedureParent.getId(), "16070", DomainType.PROCEDURE.name()));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), icd10ProcedureParent.getId(), "16070", DomainType.PROCEDURE.name(), "8"));
     SearchParameter icd10 = createSearchParameter(icd10ProcedureParent, "16");
     SearchRequest searchRequest = createSearchRequests(icd10ProcedureParent.getType(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -699,7 +699,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD10MeasurementChild() throws Exception {
     Criteria icd10MeasurementChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "R92.2", DomainType.MEASUREMENT.name());
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "R92.2", DomainType.MEASUREMENT.name(), "9");
     SearchParameter icd10 = createSearchParameter(icd10MeasurementChild, "R92.2");
     SearchRequest searchRequest = createSearchRequests(icd10MeasurementChild.getType(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -710,7 +710,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd10MeasurementParent =
       criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), "R92"));
     Criteria icd10MeasurementChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), icd10MeasurementParent.getId(), "R92.2", DomainType.MEASUREMENT.name()));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), icd10MeasurementParent.getId(), "R92.2", DomainType.MEASUREMENT.name(), "9"));
     SearchParameter icd10 = createSearchParameter(icd10MeasurementParent, "R92");
     SearchRequest searchRequest = createSearchRequests(icd10MeasurementParent.getType(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -721,7 +721,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsCPTProcedureOccurrence() throws Exception {
     Criteria cptProcedure =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001T", DomainType.PROCEDURE.name());
+      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001T", DomainType.PROCEDURE.name(), "4");
     SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
     SearchRequest searchRequest = createSearchRequests(cptProcedure.getType(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -730,7 +730,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsCPTProcedureOccurrenceEncounter() throws Exception {
     Criteria cptProcedure =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001T", DomainType.PROCEDURE.name());
+      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001T", DomainType.PROCEDURE.name(), "4");
     SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
     Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("1"));
     SearchRequest searchRequest = createSearchRequests(cptProcedure.getType(), Arrays.asList(cpt), Arrays.asList(modifier));
@@ -740,7 +740,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsCPTObservation() throws Exception {
     Criteria cptObservation =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Z", DomainType.OBSERVATION.name());
+      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Z", DomainType.OBSERVATION.name(), "5");
     SearchParameter cpt = createSearchParameter(cptObservation, "0001Z");
     SearchRequest searchRequest = createSearchRequests(cptObservation.getType(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -749,7 +749,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsCPTMeasurement() throws Exception {
     Criteria cptMeasurement =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Q", DomainType.MEASUREMENT.name());
+      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Q", DomainType.MEASUREMENT.name(), "10");
     SearchParameter cpt = createSearchParameter(cptMeasurement, "0001Q");
     SearchRequest searchRequest = createSearchRequests(cptMeasurement.getType(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -758,7 +758,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsCPTDrugExposure() throws Exception {
     Criteria cptDrug =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "90703", DomainType.DRUG.name());
+      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "90703", DomainType.DRUG.name(), "11");
     SearchParameter cpt = createSearchParameter(cptDrug, "90703");
     SearchRequest searchRequest = createSearchRequests(cptDrug.getType(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1531,10 +1531,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .count("28").path("1.2");
   }
 
-  private Criteria createCriteriaChild(String type, String subtype, long parentId, String code, String domain) {
+  private Criteria createCriteriaChild(String type, String subtype, long parentId, String code, String domain, String conceptId) {
     return new Criteria().parentId(parentId).type(type).subtype(subtype)
       .code(code).name("Cholera").group(false).selectable(true)
-      .count("16").domainId(domain).conceptId("44829696").path("1.2." + parentId);
+      .count("16").domainId(domain).conceptId(conceptId).path("1.2." + parentId);
   }
 
   private Criteria createDemoCriteria(String type, String subtype, String conceptId) {
