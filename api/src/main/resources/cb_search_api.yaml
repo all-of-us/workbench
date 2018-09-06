@@ -39,103 +39,38 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{parentId}:
+  /v1/cohortbuilder/{cdrVersionId}/criteria:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
-      description: Returns builder criteria tree with the specified criteria type and parentId
-      operationId: "getCriteriaByTypeAndParentId"
+      description: >
+        Returns a collection of criteria by optional query parameters of the following:
+        type, subtype, parentId and/or allChildren
+      operationId: "getCriteriaBy"
       parameters:
-        - in: path
+        - in: query
           name: type
           type: string
           required: true
           description: the specific type of criteria to get
-        - in: path
-          name: parentId
-          type: integer
-          format: int64
-          required: true
-          description: fetch children of parentId
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            $ref: "#/definitions/CriteriaListResponse"
-
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/children/{parentId}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: Returns builder criteria tree with the specified criteria type and parentId
-      operationId: "getCriteriaChildrenByTypeAndParentId"
-      parameters:
-        - in: path
-          name: type
-          type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: path
-          name: parentId
-          type: integer
-          format: int64
-          required: true
-          description: fetch children of parentId
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            $ref: "#/definitions/CriteriaListResponse"
-
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{subtype}/{parentId}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: Returns builder criteria tree with the specified criteria type and parentId
-      operationId: "getCriteriaByTypeAndSubtypeAndParentId"
-      parameters:
-        - in: path
-          name: type
-          type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: path
+        - in: query
           name: subtype
           type: string
-          required: true
+          required: false
           description: the specific subtype of criteria to get
-        - in: path
+        - in: query
           name: parentId
           type: integer
           format: int64
-          required: true
-          description: fetch children of parentId
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            $ref: "#/definitions/CriteriaListResponse"
-
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: Returns builder criteria tree in its entirety with the specified criteria type
-      operationId: "getCriteriaByType"
-      parameters:
-        - in: path
-          name: type
-          type: string
-          required: true
-          description: the specific type of criteria to get
+          required: false
+          description: fetch direct children of parentId
+        - in: query
+          name: allChildren
+          type: boolean
+          required: false
+          description: fetch all children of parentId
       responses:
         200:
           description: A collection of criteria
@@ -161,31 +96,6 @@ paths:
           type: string
           required: true
           description: the value to search for
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            $ref: "#/definitions/CriteriaListResponse"
-
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/subtype/{subtype}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: Returns builder criteria tree with the specified criteria type and subtype
-      operationId: "getCriteriaByTypeAndSubtype"
-      parameters:
-        - in: path
-          name: type
-          type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: path
-          name: subtype
-          type: string
-          required: true
-          description: the specific subtype of criteria to get
       responses:
         200:
           description: A collection of criteria
@@ -662,6 +572,11 @@ definitions:
     type: string
     description: possible types of trees
     enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, SURVEY]
+
+  TreeSubType:
+      type: string
+      description: possible subtypes of trees
+      enum: [CM, PROC, ICD10CM, ICD10PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR, HR-DETAIL, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC, BRAND, CLIN, LAB]
 
   ChartInfoListResponse:
     type: object
