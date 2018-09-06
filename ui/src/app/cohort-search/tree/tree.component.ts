@@ -13,15 +13,15 @@ import {NodeComponent} from '../node/node.component';
     templateUrl: './tree.component.html',
     styleUrls: ['./tree.component.css']
 })
-export class TreeComponent extends NodeComponent implements OnInit {
+export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
     _type: string;
     name: string;
 
-    // ngOnChanges() {
-    //     if(this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10]){
-    //          super.ngOnInit();
-    //     }
-    // }
+    ngOnChanges() {
+        if(this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10]){
+             super.ngOnInit();
+        }
+    }
 
     ngOnInit() {
         super.ngOnInit();
@@ -40,7 +40,9 @@ export class TreeComponent extends NodeComponent implements OnInit {
     }
 
     showDropDown() {
-        return this.node.get('type') === TreeType[TreeType.CONDITION] || this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10];
+        return this.node.get('type') === TreeType[TreeType.CONDITION]
+            || this.node.get('type') === TreeType[TreeType.ICD9]
+            || this.node.get('type') === TreeType[TreeType.ICD10];
     }
 
     optionChange(flag) {

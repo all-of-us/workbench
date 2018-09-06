@@ -138,23 +138,32 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   /* Used to bootstrap the criteria tree */
-  get rootNode() {
-    if(this.ctype === this.treeType[this.treeType.CONDITION]){
-        return Map({
-            type: this.treeType[this.treeType.ICD9],
-            fullTree: this.fullTree,
-            id: 0,    // root parent ID is always 0
-        });
+  // get rootNode() {
+  //   if(this.ctype === this.treeType[this.treeType.CONDITION]){
+  //       //this.ctype= this.treeType[this.treeType.ICD9];
+  //       return Map({
+  //           type: this.treeType[this.treeType.ICD9],
+  //           fullTree: this.fullTree,
+  //           id: 0,    // root parent ID is always 0
+  //       });
+  //
+  //   } else {
+  //       return Map({
+  //           type: this.ctype,
+  //           fullTree: this.fullTree,
+  //           id: 0,    // root parent ID is always 0
+  //       });
+  //   }
+  //
+  // }
 
-    }else {
-        return Map({
-            type: this.ctype,
-            fullTree: this.fullTree,
-            id: 0,    // root parent ID is always 0
-        });
+    get rootNode() {
+            return Map({
+                type: this.ctype,
+                fullTree: this.fullTree,
+                id: 0,    // root parent ID is always 0
+            });
     }
-
-  }
 
   get selectionTitle() {
     const title = typeToTitle(this.ctype);

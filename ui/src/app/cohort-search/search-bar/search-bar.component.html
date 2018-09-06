@@ -15,7 +15,7 @@
     </button>
   </div>
   <div *ngIf="ingredientsName">Ingredients in this brand: {{ingredientsName}} </div>
-  <div *ngIf="numMatches > 1">
+  <div *ngIf="numMatches > 1 && !ingredientsName">
     {{searchTerm}} exists {{numMatches}} times in the tree below
   </div>
   <div *ngIf="options.length" class="dropdown-menu">

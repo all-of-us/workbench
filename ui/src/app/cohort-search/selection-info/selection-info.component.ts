@@ -11,7 +11,6 @@ import {attributeDisplay, nameDisplay, typeDisplay} from '../utils';
 export class SelectionInfoComponent {
   @Input() parameter;
   @Input() index;
-
   readonly treeType = TreeType;
 
   constructor(private actions: CohortSearchActions) {}

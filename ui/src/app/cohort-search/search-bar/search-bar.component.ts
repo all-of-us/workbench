@@ -88,7 +88,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         let path = [];
         this.ingredients.forEach(item => {
           ingredientList.push(item.name);
-          console.log(ingredientList);
             this.ingredientsName = ingredientList;
             ids.push(item.id);
           path = path.concat(item.path.split('.'));
@@ -128,7 +127,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.numMatches = 0;
       this.noResults = false;
       if (newVal.length >= 4) {
-        console.log(this._type)
         this.actions.fetchAutocompleteOptions(this._type, newVal);
       } else {
         this.actions.setCriteriaSearchTerms([]);
