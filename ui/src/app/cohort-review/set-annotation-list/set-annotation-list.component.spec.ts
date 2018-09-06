@@ -4,6 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {AnnotationType, CohortAnnotationDefinition, CohortAnnotationDefinitionService} from 'generated';
 import {Observable} from 'rxjs/Observable';
+import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
 import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationItemComponent} from '../set-annotation-item/set-annotation-item.component';
@@ -22,16 +23,7 @@ describe('SetAnnotationListComponent', () => {
       providers: [
         {provide: ActivatedRoute, useValue: {}},
         {provide: CohortAnnotationDefinitionService, useValue: {}},
-        {provide: ReviewStateService, useValue: {
-          annotationDefinitions$: Observable.of([
-            <CohortAnnotationDefinition> {
-              cohortAnnotationDefinitionId: 1,
-              cohortId: 2,
-              columnName: 'test',
-              annotationType: AnnotationType.BOOLEAN
-            }
-          ]),
-        }},
+        {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
       ],
     })
       .compileComponents();
