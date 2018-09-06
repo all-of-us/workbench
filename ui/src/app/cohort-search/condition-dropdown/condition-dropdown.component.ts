@@ -41,6 +41,7 @@ export class ConditionDropdownComponent implements  OnChanges {
         const criteriaType = criteria.type;
         const context = {criteriaType, itemId};
         this.actions.setWizardContext(context);
+      //  this.actions.resetStore();
     }
 
 }
