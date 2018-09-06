@@ -40,7 +40,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   onClick(targetElement) {
     const clickedInside = this.searchBar.nativeElement.contains(targetElement);
     if (!clickedInside) {
-      this.hideDropdown()
+      this.hideDropdown();
     }
   }
 
