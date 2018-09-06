@@ -2,8 +2,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {ChartInfoListResponse, CohortBuilderService} from 'generated';
-import {Observable} from 'rxjs/Observable';
+import {CohortBuilderService} from 'generated';
+import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
@@ -22,11 +22,7 @@ describe('OverviewPage', () => {
       declarations: [ ComboChartComponent, OverviewPage, ReviewNavComponent ],
       imports: [ClarityModule, NgxChartsModule],
       providers: [
-        {provide: CohortBuilderService, useValue: {
-          getChartInfo:  (): Observable<ChartInfoListResponse> => {
-            return Observable.of(<ChartInfoListResponse> {items: []});
-          }
-        }},
+        {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: ActivatedRoute, useValue: {
           parent: {snapshot: {data: {workspace: {cdrVersionId: 1}}}}
