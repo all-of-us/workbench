@@ -137,7 +137,7 @@ export class CohortSearchEpics {
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         } else {
-          return this.service.getCriteriaByTypeForCodeOrName(cdrVersionId, kind, searchTerms)
+          return this.service.getCriteriaAutoComplete(cdrVersionId, kind, null, searchTerms)
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         }
