@@ -1,24 +1,55 @@
 package org.pmiops.workbench.cdr;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Ordering;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CdrVersionService {
 
+  private static final Ordering<CdrVersion> ORDER_BY_DESCENDING_CREATION_TIME_AND_ACCESS_LEVEL =
+    Ordering.compound(ImmutableList.of(
+        Ordering.natural().reverse().onResultOf(CdrVersion::getCreationTime),
+        Ordering.natural().reverse().onResultOf(CdrVersion::getDataAccessLevel)));
+
+  private static final ImmutableSet<Short> REGISTERED_ONLY =
+      ImmutableSet.of(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+
+  private static final ImmutableSet<Short> REGISTERED_AND_PROTECTED =
+      ImmutableSet.of(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED),
+          StorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
+
+  private static final ImmutableMap<DataAccessLevel, ImmutableSet<Short>>
+    DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES =
+      ImmutableMap.<DataAccessLevel, ImmutableSet<Short>>builder()
+          .put(DataAccessLevel.REGISTERED, REGISTERED_ONLY)
+          .put(DataAccessLevel.PROTECTED, REGISTERED_AND_PROTECTED)
+          .build();
+
   private Provider<WorkbenchConfig> configProvider;
   private FireCloudService fireCloudService;
+  private CdrVersionDao cdrVersionDao;
 
   @Autowired
   public CdrVersionService(Provider<WorkbenchConfig> configProvider,
-      FireCloudService fireCloudService) {
+      FireCloudService fireCloudService, CdrVersionDao cdrVersionDao) {
     this.configProvider = configProvider;
     this.fireCloudService = fireCloudService;
+    this.cdrVersionDao = cdrVersionDao;
   }
 
   /**
@@ -38,5 +69,26 @@ public class CdrVersionService {
       }
     }
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(version);
+  }
+
+  /**
+   * Retrieve all the CDR versions visible to users with the specified data access level.
+   * When {@link DataAccessLevel#PROTECTED} is provided, CDR versions for both
+   * {@link DataAccessLevel#REGISTERED} and {@link DataAccessLevel#PROTECTED} are returned.
+   * Note: this relies on {@link User#dataAccessLevel} accurately reflecting that the user is in
+   * the authorization domain that has access to the CDR version BigQuery data sets
+   * with the matching {@link DataAccessLevel} values.
+   * @param dataAccessLevel the data access level of the user
+   * @return a list of {@link CdrVersion} in descending timestamp, data access level order.
+   */
+  public List<CdrVersion> findAuthorizedCdrVersions(DataAccessLevel dataAccessLevel) {
+    ImmutableSet<Short> visibleValues = DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES.get(dataAccessLevel);
+    if (visibleValues == null) {
+      return ImmutableList.of();
+    }
+    return cdrVersionDao.findByDataAccessLevelIn(visibleValues)
+        .stream()
+        .sorted(ORDER_BY_DESCENDING_CREATION_TIME_AND_ACCESS_LEVEL)
+        .collect(Collectors.toList());
   }
 }
