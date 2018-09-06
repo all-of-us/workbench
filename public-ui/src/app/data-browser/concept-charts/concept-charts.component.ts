@@ -20,6 +20,8 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   @Input() showGender = true;
   @Input() showAge = true;
   @Input() showMeasurementGenderBins = false;
+  @Input() showRace = false;
+  @Input() showEthnicity = false;
 
   private subscriptions: ISubscription[] = [];
   loadingStack: any = [];

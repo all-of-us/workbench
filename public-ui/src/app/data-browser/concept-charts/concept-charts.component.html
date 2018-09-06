@@ -43,5 +43,17 @@
     </app-chart>
   </div>
 
+  <!-- show race totals  if we want -->
+  <div class="col-md-4 col-xs-12 chart"  *ngIf="showRace && analyses.raceAnalysis ">
+    <app-chart [analysis]="analyses.raceAnalysis" [pointWidth]="20"
+               [backgroundColor]="backgroundColor" [chartTitle]="'Race'">
+    </app-chart>
+  </div>
+  <!-- show ethnicity totals  if we want -->
+  <div class="col-md-4 col-xs-12 chart"  *ngIf="showEthnicity && analyses.ethnicityAnalysis ">
+    <app-chart [analysis]="analyses.ethnicityAnalysis" [pointWidth]="20"
+               [backgroundColor]="backgroundColor" [chartTitle]="'Ethnicity'">
+    </app-chart>
+  </div>
 
 </div>

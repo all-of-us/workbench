@@ -26,11 +26,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   raceAnalysis: Analysis = null;
   ethnicityAnalysis: Analysis = null;
 
-  // Chart titles for our gender histograms.
-  maleGenderChartTitle =  '';
-  femaleGenderChartTitle = '';
-  otherGenderChartTitle = '';
-
   // Get the physical measurement groups array we display here
   conceptGroups: ConceptGroup[];
   // Initialize to first group and concept, adjust order in groups array above
@@ -43,9 +38,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   otherCount = 0;
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) {
-    this.conceptGroups = this.dbc.getPmGroups();
-    this.selectedGroup = this.conceptGroups[0];
-    this.selectedConcept = this.selectedGroup.concepts[0];
+
   }
 
   loading() {
@@ -53,29 +46,15 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.showMeasurement(this.selectedGroup, this.selectedConcept);
-    // Get demographic totals
     this.loadingStack.push(true);
-    this.subscriptions.push(this.api.getGenderAnalysis()
-      .subscribe({
-        next: result => {
-          this.genderAnalysis = result;
-          for (const g of this.genderAnalysis.results) {
-            if (g.stratum1 === this.dbc.FEMALE_GENDER_ID) {
-              this.femaleCount = g.countValue;
-            } else if (g.stratum1 === this.dbc.MALE_GENDER_ID) {
-              this.maleCount = g.countValue;
-            } else {
-              this.otherCount += g.countValue;
-            }
-          }
-          this.loadingStack.pop();
-        },
-        error: err =>  {
-          this.loadingStack.pop();
-          console.log('Error: ', err);
-        }}));
+    this.dbc.getPmGroups().subscribe(results => {
+      this.conceptGroups = results;
+      this.selectedGroup = this.conceptGroups[0];
+      this.selectedConcept = this.selectedGroup.concepts[0];
+      this.loadingStack.pop();
+    });
 
+    // Get demographic totals
     this.loadingStack.push(true);
     this.subscriptions.push(this.api.getRaceAnalysis()
       .subscribe({
@@ -112,108 +91,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   showMeasurement(group: any, concept: any) {
     this.selectedGroup = group;
     this.selectedConcept = concept;
-
-    if (!this.selectedConcept.analyses) {
-      this.loadingStack.push(true);
-      this.subscriptions.push(this.api.getConceptAnalysisResults(
-        [this.selectedConcept.conceptId])
-        .subscribe({
-          next: result => {
-            this.selectedConcept.analyses = result.items[0];
-            // Organize, massage the data for ui graphing
-            // for example, pregnant has only 1 result for pregnant,
-            // we add a not pregnant to make display better
-            this.arrangeConceptAnalyses(this.selectedConcept);
-            this.loadingStack.pop();
-          },
-          error: err => {
-            this.loadingStack.pop();
-            console.log('Error: ', err);
-          }
-        }));
-    } else {
-      // Don't get the analyses
-    }
   }
 
-  arrangeConceptAnalyses(concept: any) {
-
-    if (concept.conceptId === this.dbc.PREGNANCY_CONCEPT_ID) {
-      // Delete any male results so we don't look dumb with dumb data
-      concept.analyses.measurementValueMaleAnalysis = null;
-      concept.analyses.measurementValueOtherGenderAnalysis = null;
-      concept.analyses.genderAnalysis.results =
-        concept.analyses.genderAnalysis.results.filter(result =>
-        result.stratum2 === this.dbc.FEMALE_GENDER_ID );
-
-      // Add not pregnant result to the female value results
-      // because this concept is just a one value Yes
-      const pregnantResult  = concept.analyses.measurementValueFemaleAnalysis.results[0];
-
-      const notPregnantResult: AchillesResult = {
-        analysisId: pregnantResult.analysisId,
-        stratum1: pregnantResult.stratum1,
-        stratum2: pregnantResult.stratum2,
-        stratum3: pregnantResult.stratum3,
-        stratum4: 'Not Pregnant',
-        stratum5: pregnantResult.stratum5,
-        countValue: this.femaleCount - pregnantResult.countValue
-      };
-
-      // Add Not pregnant to results,
-      concept.analyses.measurementValueFemaleAnalysis.results.push(notPregnantResult);
-
-    }
-    if (concept.conceptId === this.dbc.WHEEL_CHAIR_CONCEPT_ID) {
-      // Todo What to do about this boolean concept , wait for design
-    }
-
-    if (concept.analyses.genderAnalysis) {
-      this.organizeGenders(concept);
-    }
-  }
-  // Put the gender analysis in the order we want to show them
-  // Sum up the other genders and make a result for that
-  // Put the gender counts on selected concept for easy use in templates
-  organizeGenders(concept: ConceptWithAnalysis) {
-    const analysis: Analysis = concept.analyses.genderAnalysis;
-    let male = null;
-    let female = null;
-    const others = [];
-    let otherCount = 0;
-
-    // No need to do anything if only one gender
-    if (analysis.results.length <= 1) {
-      return;
-    }
-    const results = [];
-    for (const g of analysis.results) {
-      if (g.stratum2 === this.dbc.MALE_GENDER_ID) {
-        male = g;
-      } else if (g.stratum2 === this.dbc.FEMALE_GENDER_ID) {
-        female = g;
-      } else {
-        otherCount += g.countValue;
-      }
-    }
-
-    // Order genders how we want to display  Male, Female , Others
-    if (male) { results.push(male); }
-    if (female) { results.push(female); }
-    if (otherCount > 0) {
-      // Make Other results,
-      const otherResult: AchillesResult =  {
-        analysisId: male.analysisId,
-        stratum1: male.stratum1,
-        stratum2: this.dbc.OTHER_GENDER_ID,
-        analysisStratumName: 'Other',
-        countValue: otherCount
-      };
-      results.push(otherResult);
-      this.otherGenderChartTitle = otherResult.analysisStratumName + ' - ' +
-        otherResult.countValue.toLocaleString();
-    }
-    analysis.results = results;
-  }
 
 }

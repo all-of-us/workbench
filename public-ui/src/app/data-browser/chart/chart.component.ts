@@ -19,6 +19,7 @@ export class ChartComponent implements OnChanges {
   @Input() chartTitle: string;
   @Input() chartType: string;
   @Input() sources = false;
+  @Input() genderId: string; // Hack until measurement design of graphs gender overlay
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any = null;
 
@@ -147,10 +148,20 @@ export class ChartComponent implements OnChanges {
       this.analysis.analysisId === this.dbc.SURVEY_COUNT_ANALYSIS_ID) {
       return this.makeCountChartOptions();
     }
+
     if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID ||
       this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
       return this.makeGenderChartOptions();
     }
+
+    /* Todo make charts for ethniticy and race
+     * maybe cleanup / generalize pie chart
+    if (
+      this.analysis.analysisId === this.dbc.ETHNICITY_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID) {
+      return this.makePieChartOptions();
+    }*/
+
     if (this.analysis.analysisId === this.dbc.AGE_ANALYSIS_ID ||
       this.analysis.analysisId === this.dbc.SURVEY_AGE_ANALYSIS_ID) {
       return this.makeAgeChartOptions();
@@ -158,8 +169,7 @@ export class ChartComponent implements OnChanges {
     if (this.analysis.analysisId === this.dbc.MEASUREMENT_VALUE_ANALYSIS_ID) {
       return this.makeMeasurementChartOptions();
     }
-
-    console.log('Error: Could not make chart options for this analysis:', this.analysis);
+    console.log('Error: Can not make chart options for this analysis. :', this.analysis);
   }
 
   seriesClick(event) {
@@ -273,7 +283,9 @@ export class ChartComponent implements OnChanges {
   public makeGenderChartOptions() {
     let results = [];
     let seriesName = '';
-    if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID) {
+    if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.ETHNICITY_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
     } else {
@@ -288,8 +300,14 @@ export class ChartComponent implements OnChanges {
     let cats = [];
     for (const a  of results) {
       // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
-      const color = a.analysisId === this.dbc.GENDER_ANALYSIS_ID ?
-        this.dbc.GENDER_COLORS[a.stratum2] : this.dbc.GENDER_COLORS[a.stratum5];
+      let color = null;
+      if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID) {
+        color = this.dbc.GENDER_COLORS[a.stratum2];
+      }
+      if (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
+        color = this.dbc.GENDER_COLORS[a.stratum5];
+      }
+
       data.push({
         name: a.analysisStratumName
         , y: a.countValue, color: color, sliced: true
@@ -388,8 +406,13 @@ export class ChartComponent implements OnChanges {
   public makeMeasurementChartOptions() {
     let data = [];
     const cats = [];
-
-    for (const a  of this.analysis.results) {
+    // Todo overlay genders on one graph , use hack for separate gender graphs now
+    // Hack to filter gender
+    let results = this.analysis.results.concat([]);
+    if (this.genderId) {
+      results = results.filter(r => r.stratum2 === this.genderId);
+    }
+    for (const a  of results) {
       data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});
     }
     data = data.sort((a, b) => {
@@ -425,8 +448,7 @@ export class ChartComponent implements OnChanges {
     };
 
     // Unit for measurements is in stratum5
-    const unit = '' ; // Api update coming for this
-    // this.analysis.unitName ? this.analysis.unitName : '';
+    const unit = this.analysis.unitName ? this.analysis.unitName : '';
     const series: any = {
       name: this.analysis.analysisName,
       colorByPoint: true,
