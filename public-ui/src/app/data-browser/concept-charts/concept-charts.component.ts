@@ -34,6 +34,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   otherGenderChartTitle = '';
   sourceConcepts: Concept[] = null;
   analyses: ConceptAnalysis;
+  genderResults: AchillesResult[] = []
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
 
@@ -50,6 +51,10 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
         this.results = results.items;
         this.analyses = results.items[0];
         this.organizeGenders(this.analyses.genderAnalysis);
+        // Set this var to make template simpler. We can just loop through the results and show bins
+        if (this.showMeasurementGenderBins) {
+          this.genderResults = this.analyses.genderAnalysis.results;
+        }
         this.loadingStack.pop();
       }));
 

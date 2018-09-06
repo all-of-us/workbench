@@ -6,25 +6,33 @@
 
 <div *ngIf="!loading()" class="row concept-charts chart">
   <!-- show measurements binned by gender if we want -->
-  <div class="col-md-4 col-xs-12 chart" *ngIf="showMeasurementGenderBins && analyses.measurementValueMaleAnalysis">
-    <app-chart [chartType]="'histogram'" [chartTitle]="maleGenderChartTitle"
-               [analysis]="analyses.measurementValueMaleAnalysis" [backgroundColor]="backgroundColor">
-    </app-chart>
+  <!-- Loop through the genders we have measurement results for  for showing the graph
+   This looping variable is set if showMeasurements is passed in to the component-->
+  <div class="col-md-4 col-xs-12 chart" *ngFor="let gender of genderResults">
+
+    <app-chart *ngIf="gender.stratum2 === dbc.FEMALE_GENDER_ID"
+               [genderId]="dbc.FEMALE_GENDER_ID"
+               [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
+               [chartType]="'histogram'"
+               [analysis]="analyses.measurementValueGenderAnalysis"
+               [backgroundColor]="backgroundColor"></app-chart>
+
+    <app-chart *ngIf="gender.stratum2 === dbc.MALE_GENDER_ID"
+               [genderId]="dbc.MALE_GENDER_ID"
+               [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
+               [chartType]="'histogram'"
+               [analysis]="analyses.measurementValueGenderAnalysis"
+               [backgroundColor]="backgroundColor"></app-chart>
+
+    <app-chart *ngIf="gender.stratum2 === dbc.OTHER_GENDER_ID"
+               [genderId]="dbc.OTHER_GENDER_ID_GENDER_ID"
+               [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
+               [chartType]="'histogram'"
+               [analysis]="analyses.measurementValueGenderAnalysis"
+               [backgroundColor]="backgroundColor"></app-chart>
+
   </div>
 
-  <div class="col-md-4 col-xs-12 chart" *ngIf="showMeasurementGenderBins &&
-    analyses.measurementValueFemaleAnalysis && analyses.measurementValueFemaleAnalysis.results.length">
-    <app-chart [chartType]="'histogram'" [chartTitle]="femaleGenderChartTitle" [chartType]="histogram"
-               [analysis]="analyses.measurementValueFemaleAnalysis" [backgroundColor]="backgroundColor">
-    </app-chart>
-  </div>
-
-  <div class="col-md-4 col-xs-12 chart" *ngIf="showMeasurementGenderBins &&
-    analyses.measurementValueOtherGenderAnalysis && analyses.measurementValueOtherGenderAnalysis.results.length">
-    <app-chart [chartType]="'histogram'" [chartTitle]="otherGenderChartTitle" [chartType]="histogram"
-               [analysis]="analyses.measurementValueOtherGenderAnalysis" [backgroundColor]="backgroundColor">
-    </app-chart>
-  </div>
 
   <!-- show gender totals  if we want -->
   <div class="col-md-4 col-xs-12 chart" *ngIf="showGender && analyses.genderAnalysis"  >
