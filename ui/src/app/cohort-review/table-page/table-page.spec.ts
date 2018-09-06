@@ -20,6 +20,18 @@ import {TablePage} from './table-page';
 describe('TablePage', () => {
   let component: TablePage;
   let fixture: ComponentFixture<TablePage>;
+  const activatedRouteStub = {
+    snapshot: {
+      data: {
+        concepts: {
+          raceList: [],
+          genderList: [],
+          ethnicityList: [],
+        }
+      },
+      pathFromRoot: [{data: {workspace: {cdrVersionId: 1}}}]
+    }
+  };
   let route;
 
   beforeEach(async(() => {
@@ -40,19 +52,7 @@ describe('TablePage', () => {
         {
           provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {
-          provide: ActivatedRoute, useValue: {
-            snapshot: {
-              data: {
-                concepts: {
-                  raceList: [],
-                  genderList: [],
-                  ethnicityList: [],
-                }
-              },
-              pathFromRoot: [{data: {workspace: {cdrVersionId: 1}}}]
-            }
-          }
-        },
+          provide: ActivatedRoute, useValue: activatedRouteStub},
         {provide: CohortAnnotationDefinitionService, useValue: {}},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
       ],
