@@ -34,7 +34,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   otherGenderChartTitle = '';
   sourceConcepts: Concept[] = null;
   analyses: ConceptAnalysis;
-  genderResults: AchillesResult[] = []
+  genderResults: AchillesResult[] = [];
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
 
