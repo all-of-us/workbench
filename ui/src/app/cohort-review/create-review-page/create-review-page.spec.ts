@@ -10,6 +10,16 @@ import {CreateReviewPage} from './create-review-page';
 describe('CreateReviewPage', () => {
   let component: CreateReviewPage;
   let fixture: ComponentFixture<CreateReviewPage>;
+  const activatedRouteStub = {
+    parent: {
+      snapshot: {
+        data: {
+          review: {},
+          cohort: {}
+        }
+      }
+    }
+  };
   let route;
 
   beforeEach(async(() => {
@@ -19,7 +29,7 @@ describe('CreateReviewPage', () => {
       imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule.withRoutes([])],
       providers: [
         {provide: CohortReviewService, useValue: {}},
-        {provide: ActivatedRoute, useValue: {parent: {snapshot: {data: {review: {}, cohort: {}}}}}},
+        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();
