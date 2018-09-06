@@ -572,9 +572,6 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/AchillesResultDist"
-      unitName:
-        description: measurement unit
-        type: string
 
   AnalysisListResponse:
     type: object
@@ -657,18 +654,6 @@ definitions:
         description: measurement value gender analysis
         type: object
         $ref: "#/definitions/Analysis"
-      measurementValueMaleAnalysis:
-        description: male analysis for measurement values
-        type: object
-        $ref: "#/definitions/Analysis"
-      measurementValueFemaleAnalysis:
-        description: female analysis for measurement values
-        type: object
-        $ref: "#/definitions/Analysis"
-      measurementValueOtherGenderAnalysis:
-        description: other  analysis for measurement values
-        type: object
-        $ref: "#/definitions/Analysis"
       measurementValueAgeAnalysis:
         description: age analysis for measurement values
         type: object
@@ -677,6 +662,9 @@ definitions:
         description: measurement distribution analysis
         type: object
         $ref: "#/definitions/Analysis"
+      unitName:
+        description: measurement unit
+        type: string
 
   ConceptAnalysisListResponse:
     type: object
