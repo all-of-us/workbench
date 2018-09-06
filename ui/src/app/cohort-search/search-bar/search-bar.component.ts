@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -34,6 +34,15 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   numMatches: number;
   ingredientList: Array<string>;
+
+  @ViewChild('searchBar') searchBar;
+  @HostListener('document:mouseup', ['$event.target'])
+  onClick(targetElement) {
+    const clickedInside = this.searchBar.nativeElement.contains(targetElement);
+    if (!clickedInside) {
+      this.hideDropdown()
+    }
+  }
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -153,5 +162,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.actions.loadCriteriaSubtree(this._type, ids, path);
     }
     this.actions.clearAutocompleteOptions();
+  }
+
+  hideDropdown() {
+    this.options = [];
   }
 }
