@@ -26,7 +26,6 @@ public class AchillesAnalysis {
     private String dataType;
     private List<AchillesResult> results = new ArrayList<>();
     private List<AchillesResultDist> distResults = new ArrayList<>();
-    private String unit;
 
     public AchillesAnalysis() {}
 
@@ -182,18 +181,6 @@ public class AchillesAnalysis {
     }
     public void addDistResult(AchillesResultDist achillesResultDist) {
         this.distResults.add(achillesResultDist);
-    }
-
-    @Transient
-    public String getUnit() {
-        return unit;
-    }
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-    public AchillesAnalysis unit(String unit) {
-        this.unit = unit;
-        return this;
     }
 
     @Override
