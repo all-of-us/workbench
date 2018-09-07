@@ -36,7 +36,7 @@
         or if this is a temporary workspace, please check this box (any entries already made will not be saved):
       </div>
       <div class="section-text">
-        <input type="checkbox" [(ngModel)]="fillDetailsLater" (click)="clearDescription()">
+        <input type="checkbox" [(ngModel)]="fillDetailsLater" (click)="clearAllFields()">
         I will provide this information later
       </div>
     </div>
@@ -53,8 +53,8 @@
           participants.
         </div>
         <textarea class="input description" name="workspace-description"
-                  [(ngModel)]="workspace.description" [disabled]="!hasPermission"
-                  [class.validation-error]="descriptionNotEntered">
+            [(ngModel)]="workspace.description" [disabled]="!hasPermission"
+            [class.validation-error]="descriptionNotEntered">
         </textarea>
       </div>
       <div class="section data-use-categories-section">
@@ -79,9 +79,9 @@
                 </div>
                 <div style="display: flex">
                   <input type="text" class="input" name="disease-specification"
-                         [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
-                         placeholder="Name of Disease"
-                         style="width: calc(50% - 2rem); margin-right: 2rem; margin-to`p: 0.5rem">
+                      [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
+                      placeholder="Name of Disease"
+                      style="width: calc(50% - 2rem); margin-right: 2rem; margin-to`p: 0.5rem">
                 </div>
               </div>
             </div>
@@ -107,10 +107,10 @@
             <div class="checkbox-group">
               <div style="display: flex">
                 <clr-checkbox
-                    name="aggregate-analysis"
-                    id="aggregate-analysis"
-                    [(ngModel)]="workspace.researchPurpose.aggregateAnalysis"
-                    [clrDisabled]="mode == Mode.Edit">
+                        name="aggregate-analysis"
+                        id="aggregate-analysis"
+                        [(ngModel)]="workspace.researchPurpose.aggregateAnalysis"
+                        [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-aggregate-analysis"><h3 class="data-use-label">
@@ -143,10 +143,10 @@
             <div class="checkbox-group">
               <div style="display: flex">
                 <clr-checkbox
-                    name="ancestry"
-                    id="ancestry"
-                    [(ngModel)]="workspace.researchPurpose.ancestry"
-                    [clrDisabled]="mode == Mode.Edit">
+                        name="ancestry"
+                        id="ancestry"
+                        [(ngModel)]="workspace.researchPurpose.ancestry"
+                        [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-ancestry"><h3 class="data-use-label">
@@ -162,10 +162,10 @@
             <div class="checkbox-group">
               <div style="display: flex">
                 <clr-checkbox
-                    name="population"
-                    id="population"
-                    [(ngModel)]="workspace.researchPurpose.population"
-                    [clrDisabled]="mode == Mode.Edit">
+                        name="population"
+                        id="population"
+                        [(ngModel)]="workspace.researchPurpose.population"
+                        [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-population"><h3 class="data-use-label">
@@ -179,10 +179,10 @@
             <div class="checkbox-group">
               <div style="display: flex">
                 <clr-checkbox
-                    name="commercial-purpose"
-                    id="commercial-purpose"
-                    [(ngModel)]="workspace.researchPurpose.commercialPurpose"
-                    [clrDisabled]="mode == Mode.Edit">
+                        name="commercial-purpose"
+                        id="commercial-purpose"
+                        [(ngModel)]="workspace.researchPurpose.commercialPurpose"
+                        [clrDisabled]="mode == Mode.Edit">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-commercial-purpose"><h3 class="data-use-label">

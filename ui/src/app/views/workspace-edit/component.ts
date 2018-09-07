@@ -417,7 +417,19 @@ export class WorkspaceEditComponent implements OnInit {
     const stigmatizationPage = window.open(stigmatizationURL, '_blank');
   }
 
-  clearDescription() {
-    this.workspace.description = '';
+  clearAllFields() {
+    this.workspace.description = '',
+    this.workspace.researchPurpose =  {
+        diseaseFocusedResearch: false,
+        methodsDevelopment: false,
+        controlSet: false,
+        aggregateAnalysis: false,
+        ancestry: false,
+        commercialPurpose: false,
+        population: false,
+        reviewRequested: false,
+        containsUnderservedPopulation: false,
+        underservedPopulationDetails: []
+      };
   }
 }
