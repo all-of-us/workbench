@@ -165,7 +165,6 @@ def run_local_migrations()
   common = Common.new
   Dir.chdir('db') do
     common.run_inline %W{./run-migrations.sh main}
-    common.run_inline %W{./run-migrations.sh data local}
   end
   Dir.chdir('db-cdr') do
     common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
@@ -173,6 +172,7 @@ def run_local_migrations()
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
+  common.run_inline %W{gradle :tools:updateCdrVersions "-PappArgs=['/w/api/config/cdr_versions_nonprod.json',false]"}
 end
 
 Common.register_command({
