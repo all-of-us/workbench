@@ -1,0 +1,23 @@
+# Swagger definitions for API objects common to both api and public-api.
+
+swagger: '2.0'
+info:
+  version: "0.1.0"
+  title: "AllOfUs Common API"
+  description: "API objects common to both api and public-api"
+  termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
+  contact:
+    name: "developer_help@pmi-ops.org"
+  license:
+    name: "MIT"
+host: "api.pmi-ops.org"
+schemes:
+  - "https"
+produces:
+  - "application/json"
+
+definitions:
+  DataAccessLevel:
+    type: string
+    description: levels of access to data in the curated data repository
+    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
