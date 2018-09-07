@@ -8,7 +8,8 @@ export const CRITERIA_SUBTYPES = {
   'ETH': 'ETH',
   'AGE': 'AGE',
   'DEC': 'DEC',
-  'BP': 'BP'
+  'BP': 'BP',
+  'LAB': 'LAB'
 };
 
 export const PROGRAM_TYPES = [
