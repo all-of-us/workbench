@@ -199,11 +199,11 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   showCount() {
-    return (this.node.get('selectable')
+    return this.node.get('count') !== null
+      && (this.node.get('selectable')
       || (this.node.get('subtype') === CRITERIA_SUBTYPES.LAB
       && this.node.get('group')
-      && this.node.get('code') !== null ))
-      && this.node.get('count') !== null;
+      && this.node.get('code') !== null ));
   }
 
   isPM() {
