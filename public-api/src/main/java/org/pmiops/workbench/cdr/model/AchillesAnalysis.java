@@ -24,9 +24,9 @@ public class AchillesAnalysis {
     private String stratum5Name;
     private String chartType;
     private String dataType;
+    private String unitName;
     private List<AchillesResult> results = new ArrayList<>();
     private List<AchillesResultDist> distResults = new ArrayList<>();
-    private String unit;
 
     public AchillesAnalysis() {}
 
@@ -154,6 +154,18 @@ public class AchillesAnalysis {
         return this;
     }
 
+    @Transient
+    public String getUnitName() {
+        return unitName;
+    }
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
+    }
+    public AchillesAnalysis unitName(String unitName) {
+        this.unitName = unitName;
+        return this;
+    }
+
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "analysis")
     public List<AchillesResult> getResults() {
         return results;
@@ -182,18 +194,6 @@ public class AchillesAnalysis {
     }
     public void addDistResult(AchillesResultDist achillesResultDist) {
         this.distResults.add(achillesResultDist);
-    }
-
-    @Transient
-    public String getUnit() {
-        return unit;
-    }
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-    public AchillesAnalysis unit(String unit) {
-        this.unit = unit;
-        return this;
     }
 
     @Override

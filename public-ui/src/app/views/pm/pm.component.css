@@ -1,0 +1,21 @@
+.white-card-box {
+    min-height: 400px;
+}
+.loading.white-card-box .row{
+    text-align: center;
+    /* Todo align loading spinner better after design */
+    padding-top: 10%;
+}
+.chart-wrapper {
+    width: 336px;
+}
+
+/* Style the active sub buttons */
+button.active.btn-link {
+    font-weight: bolder;
+}
+
+.row.page-align {
+    margin-left: 0;
+    margin-right: 0;
+}

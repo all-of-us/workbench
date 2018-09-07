@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -24,16 +24,26 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() _type;
   searchTerm = '';
+  typedTerm: string;
   options = [];
   multiples: any;
-  ingredients: any;
   loading = false;
   noResults = false;
   optionSelected = false;
   error = false;
   subscription: Subscription;
   numMatches: number;
-  ingredientsName: any;
+  ingredientList = [];
+  highlightedOption: number;
+
+  @ViewChild('searchBar') searchBar;
+  @HostListener('document:mouseup', ['$event.target'])
+  onClick(targetElement) {
+    const clickedInside = this.searchBar.nativeElement.contains(targetElement);
+    if (!clickedInside) {
+      this.hideDropdown();
+    }
+  }
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -57,20 +67,22 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           this.options = [];
           this.multiples = {};
           const optionNames = [];
-          options.forEach(option => {
-            if (optionNames.indexOf(option.name) === -1) {
-              optionNames.push(option.name);
-              option.displayName = highlightMatches([this.searchTerm], option.name);
-              this.options.push(option);
-            } else {
-              if (this.multiples[option.name]) {
-                this.multiples[option.name].push({id: option.id, path: option.path});
+          if (options !== null) {
+            options.forEach(option => {
+              this.highlightedOption = null;
+              if (optionNames.indexOf(option.name) === -1) {
+                optionNames.push(option.name);
+                option.displayName = highlightMatches([this.searchTerm], option.name);
+                this.options.push(option);
               } else {
-                this.multiples[option.name] = [{id: option.id, path: option.path}];
+                if (this.multiples[option.name]) {
+                  this.multiples[option.name].push({id: option.id, path: option.path});
+                } else {
+                  this.multiples[option.name] = [{id: option.id, path: option.path}];
+                }
               }
-            }
-          });
-
+            });
+          }
           this.noResults = (this._type === TreeType[TreeType.DRUG]
               || this._type === TreeType[TreeType.MEAS])
             && !this.optionSelected
@@ -81,18 +93,18 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const ingredientSub = this.ngRedux
       .select(ingredientsForBrand())
       .subscribe(ingredients => {
-        this.ingredients = ingredients;
-        const ingredientList = [];
+        this.ingredientList = [];
         const ids = [];
         let path = [];
-        this.ingredients.forEach(item => {
-          ingredientList.push(item.name);
-            this.ingredientsName = ingredientList;
-            ids.push(item.id);
+        ingredients.forEach(item => {
+          if (!this.ingredientList.includes(item.name)) {
+            this.ingredientList.push(item.name);
+          }
+          ids.push(item.id);
           path = path.concat(item.path.split('.'));
         });
-        if (ingredientList.length) {
-          this.actions.setCriteriaSearchTerms(ingredientList);
+        if (this.ingredientList.length) {
+          this.actions.setCriteriaSearchTerms(this.ingredientList);
           this.actions.loadCriteriaSubtree(this._type, ids, path);
         }
       });
@@ -114,6 +126,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   inputChange(newVal: string) {
+    this.typedTerm = newVal;
     if (this._type === TreeType[TreeType.VISIT] || this._type === TreeType[TreeType.PM]) {
       if (newVal.length > 2) {
         this.actions.setCriteriaSearchTerms([newVal]);
@@ -122,7 +135,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       }
     } else {
       this.optionSelected = false;
-      this.ingredientsName = '';
+      this.ingredientList = [];
       this.numMatches = 0;
       this.noResults = false;
       if (newVal.length >= 4) {
@@ -152,5 +165,33 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.actions.loadCriteriaSubtree(this._type, ids, path);
     }
     this.actions.clearAutocompleteOptions();
+  }
+
+  hideDropdown() {
+    this.options = [];
+  }
+
+  moveUp() {
+    if (this.highlightedOption === 0) {
+      this.highlightedOption = null;
+      this.searchTerm = this.typedTerm;
+    } else if (this.highlightedOption > 0) {
+      this.highlightedOption--;
+      this.searchTerm = this.options[this.highlightedOption].name;
+    }
+  }
+
+  moveDown() {
+    if (this.highlightedOption === null) {
+      this.highlightedOption = 0;
+      this.searchTerm = this.options[this.highlightedOption].name;
+    } else if ((this.highlightedOption + 1) < this.options.length) {
+      this.highlightedOption++;
+      this.searchTerm = this.options[this.highlightedOption].name;
+    }
+  }
+
+  enterSelect() {
+    this.selectOption(this.options[this.highlightedOption]);
   }
 }

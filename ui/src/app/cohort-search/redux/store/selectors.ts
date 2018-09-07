@@ -131,7 +131,7 @@ export const isCriteriaLoading =
 
 export const autocompleteOptions =
   () => (state): Array<any> =>
-  state.getIn(['criteria', 'search', 'options'], []);
+  state.getIn(['criteria', 'search', 'options'], null);
 
 export const ingredientsForBrand =
   () => (state): Array<any> =>
