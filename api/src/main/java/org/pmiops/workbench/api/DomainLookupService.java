@@ -47,7 +47,8 @@ public class DomainLookupService {
                   .value(parameter.getValue())
                   .type(parameter.getType())
                   .subtype(parameter.getSubtype())
-                  .group(parameter.getGroup()));
+                  .group(parameter.getGroup())
+                  .conceptId(parameter.getConceptId()));
               }
             } else {
               paramsWithDomains.add(parameter);

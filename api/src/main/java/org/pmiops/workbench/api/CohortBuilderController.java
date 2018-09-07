@@ -109,8 +109,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaAutoComplete(Long cdrVersionId,
                                                                       String type,
-                                                                      String subtype,
-                                                                      String value) {
+                                                                      String value,
+                                                                      String subtype) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     final List<Criteria> criteriaList = subtype == null ?
       criteriaDao.findCriteriaByTypeForCodeOrName(type, value) :
