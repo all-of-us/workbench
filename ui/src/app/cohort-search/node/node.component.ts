@@ -112,8 +112,7 @@ export class NodeComponent implements OnInit, OnDestroy {
 
       const subtreeSub = this.ngRedux
         .select(criteriaSubtree(_type))
-        .filter(nodeIds => nodeIds.includes(parentId.toString()))
-        .subscribe(() =>  this.expanded = true);
+        .subscribe(nodeIds => this.expanded = nodeIds.includes(parentId.toString()));
 
       const subtreeSelectSub = this.selected$
         .filter(selectedIds => !!selectedIds && parentId !== 0)
