@@ -172,7 +172,7 @@ def run_local_migrations()
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
-  common.run_inline %W{gradle :tools:updateCdrVersions "-PappArgs=['/w/api/config/cdr_versions_nonprod.json',false]"}
+  common.run_inline %W{gradle :tools:updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_nonprod.json',false]}
 end
 
 Common.register_command({
