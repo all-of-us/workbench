@@ -998,14 +998,14 @@ def update_cdr_version_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
-       "--file JSON_FILE",
+       "--file [JSON_FILE]",
        ->(opts, v) { opts.file = v},
-       "Path to a file containing the CDR version data to use.")
+       "Path to a file containing the CDR version data to use (relative to api directory).")
   op.add_option(
       "--dry_run",
       ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
-  op.add_validator ->(opts) { raise ArgumentError unless opts.email and opts.authority}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.file}
   return op
 end
 
@@ -1021,7 +1021,7 @@ def update_cdr_versions(cmd_name, *args)
       common = Common.new
       common.run_inline %W{
         gradle --info updateCdrVersions
-       -PappArgs=['#{op.opts.file}',#{op.opts.dry_run}]}
+       -PappArgs=['/w/api/#{op.opts.file}',#{op.opts.dry_run}]}
     end
   end
 end
@@ -1042,7 +1042,7 @@ def update_cdr_versions_local(cmd_name, *args)
     common = Common.new
     common.run_inline %W{
         gradle --info updateCdrVersions
-       -PappArgs=['#{op.opts.file}',#{op.opts.dry_run}]}
+       -PappArgs=['/w/api/#{op.opts.file}',#{op.opts.dry_run}]}
   end
 end
 
