@@ -188,6 +188,7 @@ export class WorkspaceEditComponent implements OnInit {
 
   researchPurposeItems = ResearchPurposeItems;
   fillDetailsLater = false;
+  hideDetailsLaterOption = false;
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
@@ -244,6 +245,8 @@ export class WorkspaceEditComponent implements OnInit {
       this.accessLevel = wsData.accessLevel;
       if (!this.workspace.description && this.workspace.description === '') {
         this.fillDetailsLater = true;
+      } else {
+        this.hideDetailsLaterOption = true;
       }
     } else if (this.mode === WorkspaceEditMode.Clone) {
       this.workspace.name = 'Clone of ' + wsData.name;
