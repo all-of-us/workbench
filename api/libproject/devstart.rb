@@ -128,7 +128,7 @@ def dev_up()
   common.run_inline %W{docker-compose run db-public-migration}
 
   common.status "Updating CDR versions..."
-  common.run_inline %W{docker-compose run update-cdr-versions}
+  common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
 
   common.status "Updating workbench configuration..."
   common.run_inline %W{
@@ -172,7 +172,7 @@ def run_local_migrations()
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
-  common.run_inline %W{gradle :tools:updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_nonprod.json',false]}
+  common.run_inline %W{gradle :tools:updateCdrVersions "-PappArgs=['../config/cdr_versions_local.json',false]""}
 end
 
 Common.register_command({
@@ -1005,7 +1005,6 @@ def update_cdr_version_options(cmd_name, args)
       "--dry_run",
       ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
-  op.add_validator ->(opts) { raise ArgumentError unless opts.file}
   return op
 end
 
@@ -1016,6 +1015,10 @@ def update_cdr_versions(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
+  if op.opts.file.nil?
+    # TODO: make this conditional on project once we have a prod CDR
+    op.opts.file = 'config/cdr_versions_nonprod.json'
+  end
   with_cloud_proxy_and_db(gcc) do
     Dir.chdir("tools") do
       common = Common.new
@@ -1033,17 +1036,15 @@ Common.register_command({
 })
 
 def update_cdr_versions_local(cmd_name, *args)
-  ensure_docker cmd_name, args
-
+  setup_local_environment
   op = update_cdr_version_options(cmd_name, args)
   op.parse.validate
-
-  Dir.chdir("tools") do
-    common = Common.new
-    common.run_inline %W{
-        gradle --info updateCdrVersions
-       -PappArgs=['/w/api/#{op.opts.file}',#{op.opts.dry_run}]}
+  if op.opts.file.nil?
+    op.opts.file = 'config/cdr_versions_local.json'
   end
+  app_args = ["-PappArgs=['/w/api/" + op.opts.file + "',false]"]
+  common = Common.new
+  common.run_inline %W{docker-compose run update-cdr-versions} + app_args
 end
 
 Common.register_command({

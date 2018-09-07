@@ -277,7 +277,7 @@ services:
       volumes:
         - ..:/w:cached
         - gradle-cache:/.gradle
-      entrypoint: wait-for db:3306 -- ./gradlew :tools:updateCdrVersions "-PappArgs=['/w/api/config/cdr_versions_nonprod.json',false]"
+      entrypoint: wait-for db:3306 -- ./gradlew :tools:updateCdrVersions
       env_file:
         - db/vars.env
 volumes:
