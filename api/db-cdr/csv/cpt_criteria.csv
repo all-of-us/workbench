@@ -506,7 +506,7 @@
 310528,310289,"CPT","","Level 3: 1125F-1126F","Pain severity quantified",1,0,"","","",0,309995.310289
 310529,310289,"CPT","","1127F","New episode for condition (NMA-No Measure Associated)",0,1,0,"Observation",42741581,0,309995.310289
 310530,310289,"CPT","","1128F","Subsequent episode for condition (NMA-No Measure Associated)",0,1,0,"Observation",42741582,0,309995.310289
-310531,310289,"CPT","","1130F","Back pain and function assessed, including all of the following: Pain assessment and functional status and patient history, including notation of presence or absence of \"red flags\" (warning signs) and assessment of prior treatment and response, and employment status (BkP)",0,1,0,"Observation",2101955,0,309995.310289
+310531,310289,"CPT","","1130F","Back pain and function assessed, including all of the following: Pain assessment and functional status and patient history, including notation of presence or absence of red flags (warning signs) and assessment of prior treatment and response, and employment status (BkP)",0,1,0,"Observation",2101955,0,309995.310289
 310532,310289,"CPT","","1134F","Episode of back pain lasting 6 weeks or less (BkP)",0,1,0,"Observation",2101960,0,309995.310289
 310533,310289,"CPT","","1135F","Episode of back pain lasting longer than 6 weeks (BkP)",0,1,0,"Observation",2101961,0,309995.310289
 310534,310289,"CPT","","1136F","Episode of back pain lasting 12 weeks or less (BkP)",0,1,0,"Observation",2101962,0,309995.310289
@@ -699,13 +699,13 @@
 310721,310291,"CPT","","3328F","Performance status documented and reviewed within 2 weeks prior to surgery (Lung/Esop Cx)",0,1,0,"Observation",40756995,0,309995.310291
 310722,310291,"CPT","","3330F","Imaging study ordered (BkP)",0,1,0,"Observation",2107097,0,309995.310291
 310723,310291,"CPT","","3331F","Imaging study not ordered (BkP)",0,1,0,"Observation",2107100,0,309995.310291
-310724,310291,"CPT","","3340F","Mammogram assessment category of \"incomplete: need additional imaging evaluation\" documented (RAD)",0,1,0,"Observation",2107133,0,309995.310291
-310725,310291,"CPT","","3341F","Mammogram assessment category of \"negative,\" documented (RAD)",0,1,0,"Observation",2107152,0,309995.310291
-310726,310291,"CPT","","3342F","Mammogram assessment category of \"benign,\" documented (RAD)",0,1,0,"Observation",2107158,0,309995.310291
-310727,310291,"CPT","","3343F","Mammogram assessment category of \"probably benign,\" documented (RAD)",0,1,0,"Observation",2107160,0,309995.310291
-310728,310291,"CPT","","3344F","Mammogram assessment category of \"suspicious,\" documented (RAD)",0,1,0,"Observation",2107161,0,309995.310291
-310729,310291,"CPT","","3345F","Mammogram assessment category of \"highly suggestive of malignancy,\" documented (RAD)",0,1,0,"Observation",2107172,0,309995.310291
-310730,310291,"CPT","","3350F","Mammogram assessment category of \"known biopsy proven malignancy,\" documented (RAD)",0,1,0,"Observation",2107215,0,309995.310291
+310724,310291,"CPT","","3340F","Mammogram assessment category of incomplete: need additional imaging evaluation documented (RAD)",0,1,0,"Observation",2107133,0,309995.310291
+310725,310291,"CPT","","3341F","Mammogram assessment category of negative, documented (RAD)",0,1,0,"Observation",2107152,0,309995.310291
+310726,310291,"CPT","","3342F","Mammogram assessment category of benign, documented (RAD)",0,1,0,"Observation",2107158,0,309995.310291
+310727,310291,"CPT","","3343F","Mammogram assessment category of probably benign, documented (RAD)",0,1,0,"Observation",2107160,0,309995.310291
+310728,310291,"CPT","","3344F","Mammogram assessment category of suspicious, documented (RAD)",0,1,0,"Observation",2107161,0,309995.310291
+310729,310291,"CPT","","3345F","Mammogram assessment category of highly suggestive of malignancy, documented (RAD)",0,1,0,"Observation",2107172,0,309995.310291
+310730,310291,"CPT","","3350F","Mammogram assessment category of known biopsy proven malignancy, documented (RAD)",0,1,0,"Observation",2107215,0,309995.310291
 310731,310291,"CPT","","3351F","Negative screen for depressive symptoms as categorized by using a standardized depression screening/assessment tool (MDD)",0,1,0,"Observation",2107225,0,309995.310291
 310732,310291,"CPT","","3352F","No significant depressive symptoms as categorized by using a standardized depression assessment tool (MDD)",0,1,0,"Observation",2107229,0,309995.310291
 310733,310291,"CPT","","3353F","Mild to moderate depressive symptoms as categorized by using a standardized depression screening/assessment tool (MDD)",0,1,0,"Observation",2107245,0,309995.310291
@@ -5305,7 +5305,7 @@
 315480,312734,"CPT","","Level 4: 99441-99443","Telephone evaluation and management service by a physician or other qualified health care professional who may report evaluation and management services provided to an established patient, parent, or guardian not originating from a related E/M service provided within the previous 7 days nor leading to an E/M service or procedure within the next 24 hours or soonest available appointment",1,0,"","","",0,"311100.311218.312734"
 315481,312735,"CPT","",99444,"Online evaluation and management service provided by a physician or other qualified health care professional who may report evaluation and management services provided to an established patient or guardian, not originating from a related E/M service provided within the previous 7 days, using the Internet or similar electronic communications network",0,1,0,"Procedure",2514551,0,"311100.311218.312735"
 315482,312736,"CPT","","Level 4: 99446-99449","Interprofessional telephone/Internet assessment and management service provided by a consultative physician including a verbal and written report to the patient's treating/requesting physician or other qualified health care professional",1,0,"","","",0,"311100.311218.312736"
-315483,312737,"CPT","",99450,"Basic life and/or disability examination that includes: Measurement of height, weight, and blood pressure; Completion of a medical history following a life insurance pro forma; Collection of blood sample and/or urinalysis complying with \"chain of custody\" protocols; and Completion of necessary documentation/certificates.",0,1,3,"Procedure",2514552,0,"311100.311219.312737"
+315483,312737,"CPT","",99450,"Basic life and/or disability examination that includes: Measurement of height, weight, and blood pressure; Completion of a medical history following a life insurance pro forma; Collection of blood sample and/or urinalysis complying with chain of custody protocols; and Completion of necessary documentation/certificates.",0,1,3,"Procedure",2514552,0,"311100.311219.312737"
 315484,312738,"CPT","",99455,"Work-related or medical disability examination",0,1,1256,"Procedure",2514553,0,"311100.311219.312738"
 315485,312738,"CPT","",99456,"Work-related or medical disability examination",0,1,242,"Procedure",2514554,0,"311100.311219.312738"
 315486,312745,"CPT","","Level 4: 99466-99467","Critical care face-to-face services, during an interfacility transport of critically ill or critically injured pediatric patient, 24 months of age or younger",1,0,"","","",0,"311100.311222.312745"
@@ -10100,7 +10100,7 @@
 320383,315702,"CPT","",20501,"Injection of sinus tract; diagnostic (sinogram)",0,1,283,"Procedure",2102880,0,"311096.311122.311442.313039.315702"
 320384,315703,"CPT","",20520,"Removal of foreign body in muscle or tendon sheath; simple",0,1,142,"Procedure",2102892,0,"311096.311122.311442.313039.315703"
 320385,315703,"CPT","",20525,"Removal of foreign body in muscle or tendon sheath; deep or complicated",0,1,119,"Procedure",2102893,0,"311096.311122.311442.313039.315703"
-320386,315706,"CPT","",20550,"Injection(s); single tendon sheath, or ligament, aponeurosis (eg, plantar \"fascia\")",0,1,7341,"Procedure",2102895,0,"311096.311122.311442.313039.315706"
+320386,315706,"CPT","",20550,"Injection(s); single tendon sheath, or ligament, aponeurosis (eg, plantar fascia)",0,1,7341,"Procedure",2102895,0,"311096.311122.311442.313039.315706"
 320387,315706,"CPT","",20551,"Injection(s); single tendon origin/insertion",0,1,2976,"Procedure",2102896,0,"311096.311122.311442.313039.315706"
 320388,315707,"CPT","",20552,"Injection(s); single or multiple trigger point(s), 1 or 2 muscle(s)",0,1,2152,"Procedure",2102897,0,"311096.311122.311442.313039.315707"
 320389,315707,"CPT","",20553,"Injection(s); single or multiple trigger point(s), 3 or more muscles",0,1,1564,"Procedure",2102898,0,"311096.311122.311442.313039.315707"
