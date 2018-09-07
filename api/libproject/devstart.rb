@@ -998,10 +998,6 @@ def update_cdr_version_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
-       "--file [JSON_FILE]",
-       ->(opts, v) { opts.file = v},
-       "Path to a file containing the CDR version data to use (relative to api directory).")
-  op.add_option(
       "--dry_run",
       ->(opts, _) { opts.dry_run = "true"},
       "Make no changes.")
@@ -1015,16 +1011,15 @@ def update_cdr_versions(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  if op.opts.file.nil?
-    # TODO: make this conditional on project once we have a prod CDR
-    op.opts.file = 'config/cdr_versions_nonprod.json'
-  end
+  # TODO: make this conditional on project once we have a prod CDR
+  versions_file = 'config/cdr_versions_nonprod.json'
+
   with_cloud_proxy_and_db(gcc) do
     Dir.chdir("tools") do
       common = Common.new
       common.run_inline %W{
         gradle --info updateCdrVersions
-       -PappArgs=['/w/api/#{op.opts.file}',#{op.opts.dry_run}]}
+       -PappArgs=['/w/api/#{versions_file}',#{op.opts.dry_run}]}
     end
   end
 end
@@ -1039,10 +1034,8 @@ def update_cdr_versions_local(cmd_name, *args)
   setup_local_environment
   op = update_cdr_version_options(cmd_name, args)
   op.parse.validate
-  if op.opts.file.nil?
-    op.opts.file = 'config/cdr_versions_local.json'
-  end
-  app_args = ["-PappArgs=['/w/api/" + op.opts.file + "',false]"]
+  versions_file = 'config/cdr_versions_local.json'
+  app_args = ["-PappArgs=['/w/api/" + versions_file + "',false]"]
   common = Common.new
   common.run_inline %W{docker-compose run update-cdr-versions} + app_args
 end
