@@ -187,7 +187,7 @@ export class WorkspaceEditComponent implements OnInit {
   };
 
   researchPurposeItems = ResearchPurposeItems;
-
+  fillDetailsLater = false;
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
@@ -242,6 +242,9 @@ export class WorkspaceEditComponent implements OnInit {
     if (this.mode === WorkspaceEditMode.Edit) {
       this.workspace = wsData;
       this.accessLevel = wsData.accessLevel;
+      if (!this.workspace.description && this.workspace.description === '') {
+        this.fillDetailsLater = true;
+      }
     } else if (this.mode === WorkspaceEditMode.Clone) {
       this.workspace.name = 'Clone of ' + wsData.name;
       this.workspace.description = wsData.description;
@@ -291,7 +294,7 @@ export class WorkspaceEditComponent implements OnInit {
       return false;
     }
     this.descriptionNotEntered = isBlank(this.workspace.description);
-    if (this.descriptionNotEntered) {
+    if (this.descriptionNotEntered && !this.fillDetailsLater) {
       return false;
     }
     return true;
@@ -398,18 +401,23 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   get isValidWorkspace() {
-    return !isBlank(this.workspace.name) && !isBlank(this.workspace.description);
+    return !isBlank(this.workspace.name) &&
+        (!(isBlank(this.workspace.description) && !this.fillDetailsLater));
   }
 
   get allowSave() {
     if (this.savingWorkspace) {
       return false;
     }
-    return this.isValidWorkspace;
+    return this.isValidWorkspace || this.fillDetailsLater;
   }
 
   openStigmatizationLink() {
     const stigmatizationURL = `/definitions/stigmatization`;
     const stigmatizationPage = window.open(stigmatizationURL, '_blank');
+  }
+
+  clearDescription() {
+    this.workspace.description = '';
   }
 }
