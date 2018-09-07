@@ -12,24 +12,22 @@ import {DetailAllEventsComponent} from './detail-all-events.component';
 describe('DetailAllEventsComponent', () => {
   let component: DetailAllEventsComponent;
   let fixture: ComponentFixture<DetailAllEventsComponent>;
+  const activatedRouteStub = {
+    data: Observable.of({
+      workspace: {cdrVersionId: '1'},
+      cohort: {},
+      participant: {}
+    })
+  };
 
-  beforeEach(async(() => {
+    beforeEach(async(() => {
 
     TestBed.configureTestingModule({
       declarations: [ DetailAllEventsComponent, DetailTabTableComponent ],
       imports: [ClarityModule, NgxPopperModule],
       providers: [
-        {
-          provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
-        {
-          provide: ActivatedRoute, useValue: {
-            data: Observable.of({
-              workspace: {cdrVersionId: '1'},
-              cohort: {},
-              participant: {}
-            })
-          }
-        },
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
+        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();

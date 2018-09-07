@@ -17,6 +17,13 @@ describe('PageLayout', () => {
   let component: PageLayout;
   let fixture: ComponentFixture<PageLayout>;
   const routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
+  const activatedRouteStub = {
+    snapshot: {
+      data: {
+        review: <CohortReview> {}
+      }
+    }
+  };
   let route;
 
   beforeEach(async(() => {
@@ -32,7 +39,7 @@ describe('PageLayout', () => {
       imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule],
       providers: [
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
-        {provide: ActivatedRoute, useValue: {snapshot: {data: {review: <CohortReview> {}}}}},
+        {provide: ActivatedRoute, useValue: activatedRouteStub},
         {provide: CohortAnnotationDefinitionService, useValue: {}},
         {provide: Router, useValue: routerSpy},
       ],

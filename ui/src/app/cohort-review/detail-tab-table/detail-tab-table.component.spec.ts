@@ -11,6 +11,13 @@ import {DetailTabTableComponent} from './detail-tab-table.component';
 describe('DetailTabTableComponent', () => {
   let component: DetailTabTableComponent;
   let fixture: ComponentFixture<DetailTabTableComponent>;
+  const activatedRouteStub = {
+    data: Observable.of({
+      workspace: {cdrVersionId: '1'},
+      cohort: {},
+      participant: {}
+    })
+  };
   let route;
 
   beforeEach(async(() => {
@@ -19,17 +26,8 @@ describe('DetailTabTableComponent', () => {
       declarations: [ DetailTabTableComponent ],
       imports: [ClarityModule, NgxPopperModule],
       providers: [
-        {
-          provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
-        {
-          provide: ActivatedRoute, useValue: {
-            data: Observable.of({
-              workspace: {cdrVersionId: '1'},
-              cohort: {},
-              participant: {}
-            })
-          }
-        },
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
+        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();

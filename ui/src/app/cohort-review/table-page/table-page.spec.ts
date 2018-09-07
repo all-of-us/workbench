@@ -49,10 +49,8 @@ describe('TablePage', () => {
       ],
       imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule],
       providers: [
-        {
-          provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
-        {
-          provide: ActivatedRoute, useValue: activatedRouteStub},
+        {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
+        {provide: ActivatedRoute, useValue: activatedRouteStub},
         {provide: CohortAnnotationDefinitionService, useValue: {}},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
       ],

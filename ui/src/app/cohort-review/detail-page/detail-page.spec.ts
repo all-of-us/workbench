@@ -22,6 +22,12 @@ describe('DetailPage', () => {
   let component: DetailPage;
   let fixture: ComponentFixture<DetailPage>;
   const routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
+  const activatedRouteStub = {
+    data: Observable.of({
+      participant: {},
+      annotations: [],
+    })
+  };
   let route;
 
   beforeEach(async(() => {
@@ -40,11 +46,7 @@ describe('DetailPage', () => {
       ],
       imports: [ClarityModule, NgxPopperModule, ReactiveFormsModule],
       providers: [
-        {provide: ActivatedRoute, useValue: {data: Observable.of({
-              participant: {},
-              annotations: [],
-            })
-        }},
+        {provide: ActivatedRoute, useValue: activatedRouteStub},
         {provide: CohortReviewService, useValue: {}},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: Router, useValue: routerSpy},

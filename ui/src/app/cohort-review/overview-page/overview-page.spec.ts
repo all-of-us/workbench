@@ -14,6 +14,17 @@ import {OverviewPage} from './overview-page';
 describe('OverviewPage', () => {
   let component: OverviewPage;
   let fixture: ComponentFixture<OverviewPage>;
+  const activatedRouteStub = {
+    parent: {
+      snapshot: {
+        data: {
+          workspace: {
+            cdrVersionId: 1
+          }
+        }
+      }
+    }
+  };
   let route;
 
   beforeEach(async(() => {
@@ -24,9 +35,7 @@ describe('OverviewPage', () => {
       providers: [
         {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
-        {provide: ActivatedRoute, useValue: {
-          parent: {snapshot: {data: {workspace: {cdrVersionId: 1}}}}
-        }},
+        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();
