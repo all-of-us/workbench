@@ -27,19 +27,23 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
 ENVIRONMENTS = {
   TEST_PROJECT => {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_test.json"
+    :config_json => "config_test.json",
+    :cdr_versions_json => "cdr_versions_test.json"
   },
   "all-of-us-rw-staging" => {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_staging.json"
+    :config_json => "config_staging.json",
+    :cdr_versions_json => "cdr_versions_staging.json"
   },
   "all-of-us-rw-stable" => {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_stable.json"
+    :config_json => "config_stable.json",
+    :cdr_versions_json => "cdr_versions_stable.json"
   },
   "all-of-us-rw-prod" => {
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
-    :config_json => "config_prod.json"
+    :config_json => "config_prod.json",
+    :cdr_versions_json => "cdr_versions_prod.json"
   }
 }
 
@@ -48,6 +52,13 @@ def get_config(project)
     raise ArgumentError.new("project #{project} lacks a valid env configuration")
   end
   return ENVIRONMENTS[project][:config_json]
+end
+
+def get_cdr_versions_file(project)
+  unless ENVIRONMENTS.fetch(project, {}).has_key?(:cdr_versions_json)
+    raise ArgumentError.new("project #{project} lacks a valid env configuration")
+  end
+  return ENVIRONMENTS[project][:cdr_versions_json]
 end
 
 def get_cdr_sql_project(project)
@@ -1004,6 +1015,16 @@ def update_cdr_version_options(cmd_name, args)
   return op
 end
 
+def update_cdr_versions_for_project(project, dry_run)
+  versions_file = get_cdr_versions_file(project)
+  Dir.chdir("tools") do
+    common = Common.new
+    common.run_inline %W{
+      gradle --info updateCdrVersions
+     -PappArgs=['/w/api/config/#{versions_file}',#{dry_run}]}
+  end
+end
+
 def update_cdr_versions(cmd_name, *args)
   ensure_docker cmd_name, args
   op = update_cdr_version_options(cmd_name, args)
@@ -1011,16 +1032,8 @@ def update_cdr_versions(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  # TODO: make this conditional on project once we have a prod CDR
-  versions_file = 'config/cdr_versions_nonprod.json'
-
   with_cloud_proxy_and_db(gcc) do
-    Dir.chdir("tools") do
-      common = Common.new
-      common.run_inline %W{
-        gradle --info updateCdrVersions
-       -PappArgs=['/w/api/#{versions_file}',#{op.opts.dry_run}]}
-    end
+    update_cdr_versions_for_project(gcc.project, op.opts.dry_run)
   end
 end
 
@@ -1321,6 +1334,7 @@ def deploy(cmd_name, args)
   with_cloud_proxy_and_db(gcc, op.opts.account, op.opts.key_file) do |ctx|
     migrate_database
     load_config(ctx.project)
+    update_cdr_versions_for_project(ctx.project, false)
 
     common.status "Pushing GCS artifacts..."
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
