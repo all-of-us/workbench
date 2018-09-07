@@ -41,14 +41,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class CdrVersionsControllerTest {
 
   @Autowired
-  CdrVersionDao cdrVersionDao;
+  private CdrVersionDao cdrVersionDao;
 
   @Autowired
-  CdrVersionsController cdrVersionsController;
+  private CdrVersionsController cdrVersionsController;
 
-  CdrVersion defaultCdrVersion;
-  CdrVersion protectedCdrVersion;
-  User user;
+  private CdrVersion defaultCdrVersion;
+  private CdrVersion protectedCdrVersion;
+  private User user;
 
   @TestConfiguration
   @Import({
@@ -60,14 +60,14 @@ public class CdrVersionsControllerTest {
   })
   static class Configuration {
     @Bean
-    User user() {
+    public User user() {
       // Allows for wiring of the initial Provider<User>; actual mocking of the
       // user is achieved via setUserProvider().
       return null;
     }
 
     @Bean
-    WorkbenchConfig workbenchConfig() {
+    public WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.cdr = new CdrConfig();
       workbenchConfig.cdr.defaultCdrVersion = "Test Registered CDR";
