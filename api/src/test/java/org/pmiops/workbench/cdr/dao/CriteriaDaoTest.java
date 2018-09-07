@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
+import apple.laf.JRSUIUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +31,6 @@ import static org.junit.Assert.assertEquals;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class CriteriaDaoTest {
-
-  private static final String SUBTYPE_NONE = null;
 
   @Autowired
   private CriteriaDao criteriaDao;
@@ -64,17 +63,17 @@ public class CriteriaDaoTest {
 
   @Before
   public void setUp() {
-    icd9Criteria1 = createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, "002", "blah chol", 0, false, true, null);
-    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, "001", "chol blah", 0, false, true, null);
+    icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
+    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, false, true, null);
     parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
     demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
     demoCriteria1a = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "B", "African American", parentDemo.getId(), false, true, null);
     demoCriteria2 = createCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), "Age", "demo age", 0, false, true, null);
-    icd10Criteria1 = createCriteria(TreeType.ICD10.name(), SUBTYPE_NONE, "002", "icd10 test 1", 0, false, true, null);
-    icd10Criteria2 = createCriteria(TreeType.ICD10.name(), SUBTYPE_NONE, "001", "icd10 test 2", 0, false, true, null);
-    cptCriteria1 = createCriteria(TreeType.CPT.name(), SUBTYPE_NONE, "0039T", "zzzcptzzz", 0, false, true, null);
-    cptCriteria2 = createCriteria(TreeType.CPT.name(), SUBTYPE_NONE, "0001T", "zzzCPTxxx", 0, false, true, null);
-    parentIcd9 = createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, "003", "name", 0, true, true, null);
+    icd10Criteria1 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), "002", "icd10 test 1", 0, false, true, null);
+    icd10Criteria2 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), "001", "icd10 test 2", 0, false, true, null);
+    cptCriteria1 = createCriteria(TreeType.CPT.name(), TreeSubType.CPT4.name(), "0039T", "zzzcptzzz", 0, false, true, null);
+    cptCriteria2 = createCriteria(TreeType.CPT.name(), TreeSubType.CPT4.name(), "0001T", "zzzCPTxxx", 0, false, true, null);
+    parentIcd9 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "003", "name", 0, true, true, null);
     parentIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), "003", "name", 0, true, true, "1.2");
     pmCriteria = createCriteria(TreeType.PM.name(), TreeSubType.BP.name(), "1", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true, "1.2.3.4");
     drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
@@ -94,7 +93,7 @@ public class CriteriaDaoTest {
     criteriaDao.save(cptCriteria2);
     criteriaDao.save(parentIcd9);
     criteriaDao.save(parentIcd10);
-    childIcd9 = createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, "003.1", "name", parentIcd9.getId(), false, true, null);
+    childIcd9 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "003.1", "name", parentIcd9.getId(), false, true, null);
     criteriaDao.save(childIcd9);
     childIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), "003.1", "name", parentIcd10.getId(), false, true, "1.2." + parentIcd10.getId());
     criteriaDao.save(childIcd10);
@@ -193,6 +192,20 @@ public class CriteriaDaoTest {
     labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "Mysearch");
     assertEquals(1, labs.size());
     assertEquals(labCriteria, labs.get(0));
+  }
+
+  @Test
+  public void findCriteriaByTypeAndSubtypeForCodeOrName() throws Exception {
+    //match on code
+    List<Criteria> conditions =
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001");
+    assertEquals(1, conditions.size());
+    assertEquals(icd9Criteria2, conditions.get(0));
+
+    //match on name
+    conditions = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(), "ol b");
+    assertEquals(1, conditions.size());
+    assertEquals(icd9Criteria2, conditions.get(0));
   }
 
   @Test

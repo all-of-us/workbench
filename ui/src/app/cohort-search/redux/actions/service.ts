@@ -457,11 +457,17 @@ export class CohortSearchActions {
       || param.type === TreeType[TreeType.VISIT]
       || param.type === TreeType[TreeType.PM]
       || param.type === TreeType[TreeType.MEAS]
-      || param.type === TreeType[TreeType.DRUG]) {
-        param.conceptId = immParam.get('conceptId');
-    } else if (param.type === TreeType[TreeType.ICD9]
+      || param.type === TreeType[TreeType.DRUG]
+      || param.type === TreeType[TreeType.ICD9]
       || param.type === TreeType[TreeType.ICD10]
-      || param.type === TreeType[TreeType.CPT]) {
+      || param.type === TreeType[TreeType.CPT]
+      || param.type === TreeType[TreeType.CONDITION]) {
+        param.conceptId = immParam.get('conceptId');
+    }
+    if (param.type === TreeType[TreeType.ICD9]
+      || param.type === TreeType[TreeType.ICD10]
+      || param.type === TreeType[TreeType.CPT]
+      || param.type === TreeType[TreeType.CONDITION]) {
         param.domain = immParam.get('domainId');
     }
 
