@@ -1015,13 +1015,12 @@ def update_cdr_version_options(cmd_name, args)
   return op
 end
 
-def update_cdr_versions_for_project(project, dry_run)
-  versions_file = get_cdr_versions_file(project)
+def update_cdr_versions_for_project(versions_file, dry_run)
   Dir.chdir("tools") do
     common = Common.new
     common.run_inline %W{
       gradle --info updateCdrVersions
-     -PappArgs=['/w/api/config/#{versions_file}',#{dry_run}]}
+     -PappArgs=['#{versions_file}',#{dry_run}]}
   end
 end
 
@@ -1033,7 +1032,8 @@ def update_cdr_versions(cmd_name, *args)
   gcc.validate
 
   with_cloud_proxy_and_db(gcc) do
-    update_cdr_versions_for_project(gcc.project, op.opts.dry_run)
+    versions_file = get_cdr_versions_file(gcc.project)
+    update_cdr_versions_for_project("/w/api/config/#{versions_file}", op.opts.dry_run)
   end
 end
 
@@ -1334,7 +1334,8 @@ def deploy(cmd_name, args)
   with_cloud_proxy_and_db(gcc, op.opts.account, op.opts.key_file) do |ctx|
     migrate_database
     load_config(ctx.project)
-    update_cdr_versions_for_project(ctx.project, false)
+    versions_file = get_cdr_versions_file(ctx.project)
+    update_cdr_versions_for_project("../config/#{versions_file}", false)
 
     common.status "Pushing GCS artifacts..."
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
