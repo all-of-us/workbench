@@ -106,7 +106,10 @@ select distinct measurement_source_concept_id as concept from \`${BQ_PROJECT}.${
 select 0,3000 as analysis_id,CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
 (case when co1.measurement_concept_id in (select distinct concept from value_measurements) then cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) as string)
       else '0' end) as stratum_2,
-'Measurement' as stratum_3,unit as stratum_4
+'Measurement' as stratum_3,unit as stratum_4,
+COUNT(distinct co1.PERSON_ID) as count_value,
+(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2
+	where co2.measurement_source_concept_id=co1.measurement_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1 join measurement_units on co1.measurement_concept_id=concept
 where co1.measurement_concept_id > 0
 group by  co1.measurement_concept_id,unit
@@ -114,7 +117,8 @@ union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
 (case when co1.measurement_source_concept_id in (select distinct concept from value_measurements) then cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) as string)
       else '0' end) as stratum_2,
-'Measurement' as stratum_3,unit as stratum_4
+'Measurement' as stratum_3,unit as stratum_4,
+COUNT(distinct co1.PERSON_ID) as count_value,COUNT(distinct co1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1 join measurement_units on co1.measurement_source_concept_id=concept
 where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id != co1.measurement_source_concept_id
 group by  co1.measurement_source_concept_id,unit"

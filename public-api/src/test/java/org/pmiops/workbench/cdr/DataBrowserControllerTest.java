@@ -457,7 +457,7 @@ public class DataBrowserControllerTest {
     public void setUp() {
         saveData();
         ConceptService conceptService = new ConceptService(entityManager, conceptSynonymDao);
-        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao);
+        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao, entityManager);
     }
 
 
@@ -646,8 +646,7 @@ public class DataBrowserControllerTest {
         queryConceptIds.add("137990");
         ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(queryConceptIds);
         List<ConceptAnalysis> conceptAnalysisList = response.getBody().getItems();
-        Analysis ageAnalysis = conceptAnalysisList.get(0).getMeasurementValueAgeAnalysis();
-        assertThat(ageAnalysis).isEqualTo(null);
+        assertThat(conceptAnalysisList.get(0).getAgeAnalysis()).isEqualTo(null);
     }
 
     @Test
@@ -663,15 +662,23 @@ public class DataBrowserControllerTest {
     }
 
     @Test
+    public void testGetSurveyDemographicAnalysesMultipleMatch() throws Exception{
+        List<String> conceptsIds = new ArrayList<>();
+        conceptsIds.add("1586134");
+        conceptsIds.add("1585855");
+        ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(conceptsIds);
+        List<ConceptAnalysis> conceptAnalysis = response.getBody().getItems();
+        assertThat(conceptAnalysis.get(0).getGenderAnalysis().getResults().size()).isEqualTo(2);
+        assertThat(conceptAnalysis.get(1).getGenderAnalysis()).isEqualTo(null);
+    }
+
+    @Test
     public void testGetSurveyDemographicAnalysesNoMatch() throws Exception{
         List<String> conceptsIds = new ArrayList<>();
         conceptsIds.add("1585855");
         ResponseEntity<ConceptAnalysisListResponse> response = dataBrowserController.getConceptAnalysisResults(conceptsIds);
-        List<ConceptAnalysis> conceptAnalysis = response.getBody().getItems();
-        Analysis ageAnalysis = conceptAnalysis.get(0).getAgeAnalysis();
-        Analysis genderAnalysis = conceptAnalysis.get(0).getGenderAnalysis();
-        assertThat(ageAnalysis).isEqualTo(null);
-        assertThat(genderAnalysis).isEqualTo(null);
+        List<ConceptAnalysis> conceptAnalysisList = response.getBody().getItems();
+        assertThat(conceptAnalysisList.get(0).getAgeAnalysis()).isEqualTo(null);
     }
 
 
