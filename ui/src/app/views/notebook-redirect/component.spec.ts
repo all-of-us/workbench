@@ -106,6 +106,9 @@ describe('NotebookRedirectComponent', () => {
               'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
               'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
             },
+            data: {
+              creating: true
+            }
           }
         }},
       ]}).compileComponents();
@@ -202,6 +205,7 @@ describe('NotebookRedirectComponent', () => {
     updateAndTick(fixture);
 
     fixture.componentInstance.notebookName = 'foo.ipynb';
+    fixture.componentInstance.creating = false;
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     blockingClusterStub.block();
     tick(10000);

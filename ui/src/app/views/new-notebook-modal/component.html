@@ -1,0 +1,27 @@
+<clr-modal [(clrModalOpen)]="creatingNotebook" [clrModalSize]="'md'">
+  <div class="modal-title">
+    <!--The ngIf is to avoid null pointers before the modal is opened.-->
+    <div *ngIf="creatingNotebook" class="modal-title-text">New Notebook</div>
+  </div>
+  <div class="modal-body">
+    <div class="form-section">
+      <label class="modal-label">New Name</label>
+      <input id="new-name" type="text" class="input"
+             [(ngModel)]="newName">
+      <label class="modal-label">Python or R?</label>
+      <div class="select">
+        <select [(ngModel)]="kernelType">
+          <option [ngValue]="Kernels.Python3">{{Kernels[Kernels.Python3]}}</option>
+          <option [ngValue]="Kernels.R">{{Kernels[Kernels.R]}}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="creatingNotebook=false">Cancel</button>
+    <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
+            (click)="submitNewNotebook()" [clrLoading]="loading" [disabled]="loading">
+      Create Notebook
+    </button>
+  </div>
+</clr-modal>

@@ -30,6 +30,25 @@ enum Progress {
   Redirecting
 }
 
+export enum Kernels {
+  R,
+  Python3,
+}
+
+const rNotebookFileContent = '{ "cells": [ { "cell_type": "code", "execution_count": null, \
+    "metadata": {}, "outputs": [], "source": [] } ], "metadata": { "kernelspec": { \
+    "display_name": "R", "language": "R", "name": "ir" }, "language_info": { \
+    "codemirror_mode": "r", "file_extension": ".r", "mimetype": "text/x-r-source", \
+    "name": "R", "pygments_lexer": \
+    "r", "version": "3.4.4" }  }, "nbformat": 4, "nbformat_minor": 2 }';
+
+const pyNotebookFileContent = '{"cells": [{"cell_type": "code","execution_count": null, \
+    "metadata": {},"outputs": [],"source": []}],"metadata": {"kernelspec": {"display_name": \
+     "Python 3","language": "python","name": "python3"},"language_info": {"codemirror_mode": \
+     {"name": "ipython","version": 3},"file_extension": ".py","mimetype": "text/x-python", \
+    "name": "python","nbconvert_exporter": "python","pygments_lexer": "ipython3","version": \
+     "3.4.2"}},"nbformat": 4,"nbformat_minor": 2}';
+
 @Component({
   styleUrls: ['../../styles/buttons.css',
               '../../styles/cards.css',
@@ -39,10 +58,16 @@ enum Progress {
   templateUrl: './component.html',
 })
 export class NotebookRedirectComponent implements OnInit, OnDestroy {
+
+
+  fileContent: string;
+
   Progress = Progress;
 
   progress = Progress.Unknown;
   notebookName: string;
+
+  creating: boolean;
 
   private wsId: string;
   private wsNamespace: string;
@@ -62,6 +87,15 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.notebookName = this.route.snapshot.params['nbName'];
+    this.creating = this.route.snapshot.data.creating;
+
+    if (this.creating) {
+      if (this.route.snapshot.params['kernelType'] === Kernels.R.toString()) {
+        this.fileContent = rNotebookFileContent;
+      } else {
+        this.fileContent = pyNotebookFileContent;
+      }
+    }
 
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
@@ -96,7 +130,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       .flatMap(c => {
         let localizeObs: Observable<string>;
         // This will contain the Jupyter-local path to the localized notebook.
-        if (this.notebookName) {
+        if (!this.creating) {
           this.progress = Progress.Copying;
           localizeObs = this.localizeNotebooks([this.notebookName])
             .map(localDir => `${localDir}/${this.notebookName}`);
@@ -148,10 +182,12 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       // API handles notebook name collisions and matches the behavior of
       // clicking "new notebook" in the Jupyter UI.
       const workspaceDir = localDir.replace(/^workspaces\//, '');
-      return this.jupyterService.postContents(
+      return this.jupyterService.putContents(
         this.cluster.clusterNamespace, this.cluster.clusterName,
-        workspaceDir, {
-          'type': 'notebook'
+        workspaceDir, this.notebookName + '.ipynb', {
+          'type': 'file',
+          'format': 'text',
+          'content': this.fileContent
         }).map(resp => `${localDir}/${resp.name}`);
     });
   }

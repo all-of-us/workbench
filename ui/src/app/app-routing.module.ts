@@ -170,16 +170,18 @@ const routes: Routes = [
         // The notebook redirect pages are interstitial pages, so we want to
         // give them special chrome treatment - we therefore put them outside
         // the normal /workspaces hierarchy.
-        path: 'workspaces/:ns/:wsid/notebooks/create',
+        path: 'workspaces/:ns/:wsid/notebooks/create/:nbName/:kernelType',
         component: NotebookRedirectComponent,
         data: {
-          title: 'Creating a new Notebook'
+          title: 'Creating a new Notebook',
+          creating: true
         }
       }, {
         path: 'workspaces/:ns/:wsid/notebooks/:nbName',
         component: NotebookRedirectComponent,
         data: {
-          title: 'Opening a Notebook'
+          title: 'Opening a Notebook',
+          creating: false
         }
       }
     ]
