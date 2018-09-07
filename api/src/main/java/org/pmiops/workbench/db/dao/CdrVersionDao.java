@@ -9,5 +9,5 @@ public interface CdrVersionDao extends CrudRepository<CdrVersion, Long> {
 
   CdrVersion findByName(String name);
 
-  List<CdrVersion> findByDataAccessLevelIn(Set<Short> dataAccessLevel);
+  List<CdrVersion> findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(Set<Short> dataAccessLevel);
 }

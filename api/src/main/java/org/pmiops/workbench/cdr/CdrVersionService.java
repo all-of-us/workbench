@@ -3,9 +3,7 @@ package org.pmiops.workbench.cdr;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Ordering;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -20,11 +18,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CdrVersionService {
-
-  private static final Ordering<CdrVersion> ORDER_BY_DESCENDING_CREATION_TIME_AND_ACCESS_LEVEL =
-    Ordering.compound(ImmutableList.of(
-        Ordering.natural().reverse().onResultOf(CdrVersion::getCreationTime),
-        Ordering.natural().reverse().onResultOf(CdrVersion::getDataAccessLevel)));
 
   private static final ImmutableSet<Short> REGISTERED_ONLY =
       ImmutableSet.of(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
@@ -86,9 +79,6 @@ public class CdrVersionService {
     if (visibleValues == null) {
       return ImmutableList.of();
     }
-    return cdrVersionDao.findByDataAccessLevelIn(visibleValues)
-        .stream()
-        .sorted(ORDER_BY_DESCENDING_CREATION_TIME_AND_ACCESS_LEVEL)
-        .collect(Collectors.toList());
+    return cdrVersionDao.findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(visibleValues);
   }
 }
