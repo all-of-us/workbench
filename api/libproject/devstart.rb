@@ -126,7 +126,9 @@ def dev_up()
   common.run_inline %W{docker-compose run db-migration}
   common.run_inline %W{docker-compose run db-cdr-migration}
   common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-data-migration}
+
+  common.status "Updating CDR versions..."
+  common.run_inline %W{docker-compose run update-cdr-versions}
 
   common.status "Updating workbench configuration..."
   common.run_inline %W{
@@ -581,7 +583,6 @@ def run_local_all_migrations()
   common.run_inline %W{docker-compose run db-public-migration}
   common.run_inline %W{docker-compose run db-cdr-data-migration}
   common.run_inline %W{docker-compose run db-public-data-migration}
-  common.run_inline %W{docker-compose run db-data-migration}
 end
 
 Common.register_command({
@@ -991,6 +992,64 @@ Common.register_command({
   :invocation => "list-clusters",
   :description => "List all clusters in this environment",
   :fn => ->(*args) { list_clusters("list-clusters", *args) }
+})
+
+def update_cdr_version_options(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
+  op.add_option(
+       "--file JSON_FILE",
+       ->(opts, v) { opts.file = v},
+       "Path to a file containing the CDR version data to use.")
+  op.add_option(
+      "--dry_run",
+      ->(opts, _) { opts.dry_run = "true"},
+      "Make no changes.")
+  op.add_validator ->(opts) { raise ArgumentError unless opts.email and opts.authority}
+  return op
+end
+
+def update_cdr_versions(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = update_cdr_version_options(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  with_cloud_proxy_and_db(gcc) do
+    Dir.chdir("tools") do
+      common = Common.new
+      common.run_inline %W{
+        gradle --info updateCdrVersions
+       -PappArgs=['#{op.opts.file}',#{op.opts.dry_run}]}
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "update-cdr-versions",
+  :description => "Update CDR versions in a cloud environment",
+  :fn => ->(*args) { update_cdr_versions("update-cdr-versions", *args)}
+})
+
+def update_cdr_versions_local(cmd_name, *args)
+  ensure_docker cmd_name, args
+
+  op = update_cdr_version_options(cmd_name, args)
+  op.parse.validate
+
+  Dir.chdir("tools") do
+    common = Common.new
+    common.run_inline %W{
+        gradle --info updateCdrVersions
+       -PappArgs=['#{op.opts.file}',#{op.opts.dry_run}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "update-cdr-versions-local",
+  :description => "Update CDR versions in the local environment",
+  :fn => ->(*args) { update_cdr_versions_local("update-cdr-versions-local", *args)}
 })
 
 def get_test_service_account()
