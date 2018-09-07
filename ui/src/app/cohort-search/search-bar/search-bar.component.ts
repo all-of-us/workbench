@@ -34,7 +34,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   error = false;
   subscription: Subscription;
   numMatches: number;
-  ingredientList: Array<string>;
+  ingredientList = [];
   highlightedOption: number;
 
   @ViewChild('searchBar') searchBar;
