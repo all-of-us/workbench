@@ -30,12 +30,6 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   private static final String GROUP = "group";
   private static final String NOT_GROUP = "notGroup";
 
-  private static final ImmutableMap<String, String> TYPE_PROC =
-    ImmutableMap.of(TreeType.ICD9.name(), "ICD9Proc", TreeType.CPT.name(), "CPT4");
-
-  private static final ImmutableMap<String, String> TYPE_CM =
-    ImmutableMap.of(TreeType.ICD9.name(), "ICD9CM", TreeType.CPT.name(), "CPT4");
-
   //If the querybuilder will use modifiers then this sql statement has to have
   //the distinct and ${modifierColumns}
   private static final String CODES_SQL_TEMPLATE =
