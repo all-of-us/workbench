@@ -21,7 +21,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
   //If the querybuilder will use modifiers then this sql statement has to have
   //the distinct and visit_start_date as entry_date
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
-    "select distinct person_id, visit_start_date as entry_date \n" +
+    "select distinct person_id, visit_start_date as entry_date, visit_source_concept_id\n" +
       "from `${projectId}.${dataSetId}.visit_occurrence` a\n";
 
   private static final String VISIT_CHILD_CLAUSE_TEMPLATE =
