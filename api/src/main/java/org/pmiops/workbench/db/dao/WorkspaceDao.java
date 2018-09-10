@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
 import java.util.List;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +30,5 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   List<Workspace> findByCreatorOrderByNameAsc(User creator);
   List<Workspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   List<Workspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
+  Workspace findFirstByCdrVersion(CdrVersion cdrVersion);
 }

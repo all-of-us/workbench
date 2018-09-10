@@ -190,6 +190,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .stratum5Name(cdr.getStratum5Name())
                             .chartType(cdr.getChartType())
                             .dataType(cdr.getDataType())
+                            .unitName(cdr.getUnitName())
                             .results(results)
                             .distResults(distResults);
 
@@ -234,8 +235,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .ethnicityAnalysis(ca.getEthnicityAnalysis())
                             .measurementValueGenderAnalysis(ca.getMeasurementValueGenderAnalysis())
                             .measurementValueAgeAnalysis(ca.getMeasurementValueAgeAnalysis())
-                            .measurementDistributionAnalysis(ca.getMeasurementDistributionAnalysis())
-                            .unitName(ca.getUnitName());
+                            .measurementDistributionAnalysis(ca.getMeasurementDistributionAnalysis());
                 }
             };
 
@@ -522,7 +522,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 Map.Entry pair = (Map.Entry)it.next();
                 Long analysisId = (Long)pair.getKey();
                 AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
-                conceptAnalysis.setUnitName(unitName);
+                aa.setUnitName(unitName);
                 if(analysisId == GENDER_ANALYSIS_ID){
                     for(AchillesResult ar: aa.getResults()){
                         String analysisStratumName =ar.getAnalysisStratumName();
