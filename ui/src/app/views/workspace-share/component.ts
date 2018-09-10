@@ -2,14 +2,14 @@ import {Location} from '@angular/common';
 import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
+import {Subject} from 'rxjs/Subject';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 
-import { Subject } from "rxjs/Subject";
 import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/map';
-import "rxjs/add/operator/distinctUntilChanged";
 
 import {
   ShareWorkspaceResponse,
@@ -262,7 +262,7 @@ export class WorkspaceShareComponent implements OnInit {
     });
   }
 
-  selectUser(user: User) :void {
+  selectUser(user: User): void {
     this.selectedUser = user;
     this.toShare = user.email;
     this.searchTerm = user.email;
@@ -272,37 +272,8 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   // TODO: This should be some kind of profile call to get the url for an email address
-  userProfileImage(user: User) :string {
-
-    // See the People API: https://developers.google.com/apis-explorer/?hl=en_US#p/people/v1/people.people.get?resourceName=people
-    // Example call, once you know the user's google account id
-    // The user's google account id is the same as the 'id' of the gsuite directory `User` object.
-    // In theory, we can cross reference that ID with a call to the people API and get the right data.
-    // GET https://people.googleapis.com/v1/people/104693332234229953403?personFields=photos&key={YOUR_API_KEY}
-    /*
-      {
-       "resourceName": "people/104693332234229953403",
-       "etag": "%EgQBAzcuGgwBAgMEBQYHCAkKCww=",
-       "photos": [
-        {
-         "metadata": {
-          "primary": true,
-          "source": {
-           "type": "PROFILE",
-           "id": "104693332234229953403"
-          }
-         },
-         "url": "https://lh4.googleusercontent.com/-Zn9jefunuT4/AAAAAAAAAAI/AAAAAAAAAAA/APUIFaMNFNJ8QvsBrbAOAFoLnT2LurjfoQ/s100/photo.jpg",
-         "default": true
-        }
-       ]
-      }
-     */
-    // return this.signInService.getProfileImageForAccount(user.email);
-    // return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().Paa;
-    // https://www.googleapis.com/plus/v1/people/104693332234229953403?fields=image&key=602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com
-    // http://picasaweb.google.com/data/entry/api/user/grushton@fake-research-aou.org?alt=json
-    return "https://lh4.googleusercontent.com/-Zn9jefunuT4/AAAAAAAAAAI/AAAAAAAAAAA/APUIFaMNFNJ8QvsBrbAOAFoLnT2LurjfoQ/s96-c/photo.jpg";
+  userProfileImage(user: User): string {
+    return '';
   }
 
 }
