@@ -1,13 +1,20 @@
 <div *ngIf="loading" class="spinner root-spinner">
   Loading...
 </div>
+<app-search-bar *ngIf="showSearch() && !loading" [_type]="_type"></app-search-bar>
+<div *ngIf="numMatches > 1">
+  <b>Note:</b> There are {{numMatches}} matches for your search
+</div>
 <!-- TODO: This error handling is a stub until we can get a designer to look at it -->
 <div *ngIf="error" class="error">
   <clr-icon shape="error-standard"></clr-icon>
   <em>Failed to Load Criteria</em>
 </div>
-<app-search-bar *ngIf="showSearch() && !loading" [_type]="_type"></app-search-bar>
-<div *ngIf="numMatches > 1">
-  <b>Note:</b> There are {{numMatches}} matches for your search
-</div>
+<clr-alert *ngIf="!children || !children.size" [clrAlertType]="'alert-warning'" [clrAlertClosable]="false">
+  <div clr-alert-item class="alert-item">
+    <span class="alert-text">
+      No results found
+    </span>
+  </div>
+</clr-alert>
 <crit-node *ngFor="let item of children" [node]="item"></crit-node>
