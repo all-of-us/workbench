@@ -1,17 +1,54 @@
-input.share, .sharing-buttons {
-  width: 10rem;
-  color: #565656;
-  border: 1px #565656 solid;
-  border-radius: 0.2rem;
-  font-size: 0.35rem;
-  height: 1.1rem;
-  text-transform: uppercase;
+.search-box {
+  height: 40px;
+  width: 100%;
+  padding: 7px 14px;
+  border-radius: 5px;
+  background-color: #DFF0FA;
 }
 
-.sharing-buttons, .add-button {
-  width: auto;
-  font-size: 0.5rem;
+clr-icon {
+  height: 18px;
+  width: 18px;
 }
+
+.no-border{
+  border: none!important;
+  background: none!important;
+}
+
+.dropdown {
+  width: 100%;
+  margin-top: 0;
+}
+
+.dropdown-menu {
+  display: block;
+  max-height: 15rem;
+  min-height: 30px;
+  overflow-y: auto;
+  visibility: visible;
+}
+
+.dropdown-item {
+  padding-top: .5rem;
+  height: 60px;
+  /*line-height: 0;*/
+}
+
+/*input.share, .sharing-buttons {*/
+  /*width: 10rem;*/
+  /*color: #565656;*/
+  /*border: 1px #565656 solid;*/
+  /*border-radius: 0.2rem;*/
+  /*font-size: 0.35rem;*/
+  /*height: 1.1rem;*/
+  /*text-transform: uppercase;*/
+/*}*/
+
+/*.sharing-buttons, .add-button {*/
+  /*width: auto;*/
+  /*font-size: 0.5rem;*/
+/*}*/
 
 .permissions-button {
   margin-top: 0.5rem;
@@ -22,23 +59,23 @@ input.share, .sharing-buttons {
   line-height: 0.5em;
 }
 
-.add-by-text-area, .removing-area {
-  display: inline-block;
-  padding-top: 1rem;
-  width: 18rem;
-}
+/*.add-by-text-area, .removing-area {*/
+  /*display: inline-block;*/
+  /*padding-top: 1rem;*/
+  /*width: 18rem;*/
+/*}*/
 
-.removing-area {
-  width: 22rem;
-}
+/*.removing-area {*/
+  /*width: 22rem;*/
+/*}*/
 
-.removing-area .user-name, .user-email, .user-role {
+.user-name, .user-email, .user-role {
   font-weight: 300;
   line-height: 0.8rem;
   color: rgb(38, 34, 98);
 }
 
-.removing-area .user-name, .user-email {
+.user-name, .user-email {
   margin-top: 0;
   padding-top: 0;
   font-size: 0.5rem;
@@ -51,23 +88,22 @@ input.share, .sharing-buttons {
 }
 
 .user {
-  margin-bottom: 0.5rem;
-  overflow: hidden;
-  clear: both;
+  /*margin-bottom: 0.5rem;*/
+  /*overflow: hidden;*/
+  /*clear: both;*/
+}
+
+.collaborator {
+  margin-top: 1rem;
 }
 
 .collaborator-icon {
-  width: 22px;
-  margin-top: -3px;
+  margin: 1rem 0 0 1rem;
+  color: #888;
 }
 
 .collaborator, .collaborator-icon {
   display: block;
-}
-
-.collaborator-icon {
-  float: left;
-  padding-right: 0.25rem;
 }
 
 clr-dropdown {
@@ -94,15 +130,15 @@ clr-dropdown > button {
   padding: 0.4rem;
 }
 
-.sharing-area {
-  display: flex;
-  justify-content: flex-start;
-}
+/*.sharing-area {*/
+  /*display: flex;*/
+  /*justify-content: flex-start;*/
+/*}*/
 
-.adding-area {
-  flex: 0 0 auto;
-  border-right: 1px solid #979797;
-}
+/*.adding-area {*/
+  /*flex: 0 0 auto;*/
+  /*border-right: 1px solid #979797;*/
+/*}*/
 
 .collaborator-label {
   font-size: 0.65rem;
@@ -111,9 +147,9 @@ clr-dropdown > button {
   color: rgb(38, 34, 98);
 }
 
-.removing-area {
-  padding-left: 1rem;
-}
+/*.removing-area {*/
+  /*padding-left: 1rem;*/
+/*}*/
 
 .spinner-padded {
   padding-top: 1rem;
