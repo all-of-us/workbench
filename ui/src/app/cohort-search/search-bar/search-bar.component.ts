@@ -1,9 +1,8 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {TreeType} from 'generated';
+import {TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES} from '../constant';
 import {
   autocompleteError,
   autocompleteOptions,
@@ -151,7 +150,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   selectOption(option: any) {
     this.optionSelected = true;
     this.searchTerm = option.name;
-    if (option.subtype === CRITERIA_SUBTYPES.BRAND) {
+    if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
       this.actions.fetchIngredientsForBrand(option.conceptId);
     } else {
       this.actions.setCriteriaSearchTerms([option.name]);

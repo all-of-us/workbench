@@ -16,6 +16,7 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -128,7 +130,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(icd9CriteriaParent),
       controller
-        .getCriteriaByTypeAndParentId(1L, TreeType.ICD9.name(), 0L)
+        .getCriteriaBy(1L, TreeType.ICD9.name(), null,  0L, null)
         .getBody()
         .getItems()
         .get(0)
@@ -136,7 +138,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(icd9CriteriaChild),
       controller
-        .getCriteriaByTypeAndParentId(1L, TreeType.ICD9.name(), icd9CriteriaParent.getId())
+        .getCriteriaBy(1L, TreeType.ICD9.name(), null, icd9CriteriaParent.getId(), null)
         .getBody()
         .getItems()
         .get(0)
@@ -144,11 +146,41 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void getCriteriaByExceptions() throws Exception {
+    try {
+      controller
+        .getCriteriaBy(1L, null, null,  null, null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertEquals("Criteria type: null is not valid.", bre.getMessage());
+    }
+
+    try {
+      controller
+        .getCriteriaBy(1L, "blah", null,  null, null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertEquals("Criteria type: blah is not valid.", bre.getMessage());
+    }
+
+    try {
+      controller
+        .getCriteriaBy(1L, TreeType.ICD9.name(), "blah",  null, null);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //success
+      assertEquals("Criteria subtype: blah is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
   public void getCriteriaByTypeAndSubtypeAndParentId() throws Exception {
     assertEquals(
       createResponseCriteria(drugATCCriteria),
       controller
-        .getCriteriaByTypeAndSubtypeAndParentId(1L, TreeType.DRUG.name(), SUBTYPE_ATC, 0L)
+        .getCriteriaBy(1L, TreeType.DRUG.name(), SUBTYPE_ATC, 0L, null)
         .getBody()
         .getItems()
         .get(0)
@@ -160,7 +192,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(drugATCCriteriaChild),
       controller
-        .getCriteriaChildrenByTypeAndParentId(1L, TreeType.DRUG.name(), 2L)
+        .getCriteriaBy(1L, TreeType.DRUG.name(), null, 2L, true)
         .getBody()
         .getItems()
         .get(0)
@@ -172,7 +204,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(demoCriteria),
       controller
-        .getCriteriaByTypeAndSubtype(1L, TreeType.DEMO.name(), SUBTYPE_AGE)
+        .getCriteriaBy(1L, TreeType.DEMO.name(), SUBTYPE_AGE, null, null)
         .getBody()
         .getItems()
         .get(0)
@@ -184,7 +216,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(labMeasurement),
       controller
-        .getCriteriaByTypeForCodeOrName(1L, TreeType.MEAS.name(), "LP12", null)
+        .getCriteriaAutoComplete(1L, TreeType.MEAS.name(),"LP12", null, null)
         .getBody()
         .getItems()
         .get(0)
@@ -229,7 +261,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(drugATCCriteria),
       controller
-        .getCriteriaByType(1L, drugATCCriteria.getType())
+        .getCriteriaBy(1L, drugATCCriteria.getType(), null, null, null)
         .getBody()
         .getItems()
         .get(0)
