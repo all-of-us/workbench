@@ -33,12 +33,12 @@
         To fulfill program requirements, All of Us requests the following information
         for each workspace.
         <div *ngIf="!hideDetailsLaterOption">
-        If you are not ready to complete this questionnaire,
-        or if this is a temporary workspace, please check this box (any entries already made will not be saved):
+          If you are not ready to complete this questionnaire,
+          or if this is a temporary workspace, please check this box (any entries already made will not be saved):
         </div>
       </div>
       <div class="section-text" *ngIf="!hideDetailsLaterOption">
-        <input type="checkbox" [(ngModel)]="fillDetailsLater" (click)="clearDescription()">
+        <input type="checkbox" [(ngModel)]="fillDetailsLater" (click)="clearAllFields()">
         I will provide this information later
       </div>
     </div>

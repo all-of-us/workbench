@@ -243,7 +243,7 @@ export class WorkspaceEditComponent implements OnInit {
     if (this.mode === WorkspaceEditMode.Edit) {
       this.workspace = wsData;
       this.accessLevel = wsData.accessLevel;
-      if (!this.workspace.description && this.workspace.description === '') {
+      if (isBlank(this.workspace.description)) {
         this.fillDetailsLater = true;
       } else {
         this.hideDetailsLaterOption = true;
@@ -423,16 +423,16 @@ export class WorkspaceEditComponent implements OnInit {
   clearAllFields() {
     this.workspace.description = '',
     this.workspace.researchPurpose =  {
-        diseaseFocusedResearch: false,
-        methodsDevelopment: false,
-        controlSet: false,
-        aggregateAnalysis: false,
-        ancestry: false,
-        commercialPurpose: false,
-        population: false,
-        reviewRequested: false,
-        containsUnderservedPopulation: false,
-        underservedPopulationDetails: []
-      };
+      diseaseFocusedResearch: false,
+      methodsDevelopment: false,
+      controlSet: false,
+      aggregateAnalysis: false,
+      ancestry: false,
+      commercialPurpose: false,
+      population: false,
+      reviewRequested: false,
+      containsUnderservedPopulation: false,
+      underservedPopulationDetails: []
+    };
   }
 }
