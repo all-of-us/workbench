@@ -86,6 +86,7 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   toShareChangedEvent($event: string) {
+    this.autocompleteLoading = true;
     this.toShareChanged.next($event);
   }
 
@@ -271,7 +272,8 @@ export class WorkspaceShareComponent implements OnInit {
     this.userService.user(this.searchTerm).subscribe((response) => {
       this.autocompleteLoading = false;
       this.userResponse = response;
-      this.autocompleteUsers = response.users;
+      // We want to limit to the first four results
+      this.autocompleteUsers = response.users.splice(0, 4);
       if (this.autocompleteUsers.length === 0) {
         this.autocompleteNoResults = true;
       }
