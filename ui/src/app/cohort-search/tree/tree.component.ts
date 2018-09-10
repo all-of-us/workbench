@@ -18,7 +18,8 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
     name: string;
 
     ngOnChanges() {
-        if(this.node.get('type') === TreeType[TreeType.ICD9] || this.node.get('type') === TreeType[TreeType.ICD10]){
+        if (this.node.get('type') === TreeType[TreeType.ICD9]
+          || this.node.get('type') === TreeType[TreeType.ICD10]) {
              super.ngOnInit();
         }
     }

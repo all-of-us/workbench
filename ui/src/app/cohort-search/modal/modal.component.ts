@@ -45,7 +45,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
-  scrollTime: number;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
 
@@ -139,8 +138,8 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-    if(this.ctype === this.treeType[this.treeType.CONDITION]){
-        //this.ctype= this.treeType[this.treeType.ICD9];
+    if (this.ctype === this.treeType[this.treeType.CONDITION]) {
+        // this.ctype= this.treeType[this.treeType.ICD9];
         return Map({
             type: this.treeType[this.treeType.ICD9],
             fullTree: this.fullTree,
@@ -168,7 +167,7 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
-    if((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')){
+    if ((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')) {
         return title
             ? `Add Selected CONDITIONS Criteria to Cohort`
             : 'No Selection';

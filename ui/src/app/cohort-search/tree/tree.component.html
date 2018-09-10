@@ -10,7 +10,7 @@
 <div class="dropdown-search-container">
   <div [ngClass]="{'condition-dropdown' : showDropDown()}">
     <ng-container *ngIf = "showDropDown() && !loading">
-    <app-crit-dropdown (onOptionChange)="optionChange($event)" [selectedType] = "name"></app-crit-dropdown>
+    <crit-code-dropdown (onOptionChange)="optionChange($event)" [selectedType] = "name"></crit-code-dropdown>
     </ng-container>
   </div>
   <div [ngClass]="showDropDown()? 'search-container' :'search-width'" >

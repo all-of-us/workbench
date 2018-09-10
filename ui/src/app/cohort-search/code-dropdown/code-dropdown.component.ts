@@ -8,11 +8,11 @@ import {
 
 
 @Component({
-    selector: 'app-crit-dropdown',
-    templateUrl: './condition-dropdown.component.html',
-    styleUrls: ['./condition-dropdown.component.css']
+    selector: 'crit-code-dropdown',
+    templateUrl: './code-dropdown.component.html',
+    styleUrls: ['./code-dropdown.component.css']
 })
-export class ConditionDropdownComponent implements  OnChanges {
+export class CodeDropdownComponent implements  OnChanges {
      @Input() selectedType;
     dropDownSelected = '';
     @Output() onOptionChange = new EventEmitter<string>();
@@ -22,8 +22,8 @@ export class ConditionDropdownComponent implements  OnChanges {
         private actions: CohortSearchActions
     ) {}
 
-    ngOnChanges(){
-        if(this.selectedType){
+    ngOnChanges() {
+        if (this.selectedType) {
             this.dropDownSelected = this.selectedType;
         } else {
             this.dropDownSelected = '';

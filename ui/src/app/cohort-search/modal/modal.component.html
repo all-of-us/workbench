@@ -5,7 +5,7 @@
         <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === treeType[treeType.DEMO]}">
           <div class="title-bar">
             <div class="btn-group btn-link">
-              <ng-container *ngIf="(ctype !== treeType[treeType.DEMO]) && !conditionTitle">
+              <ng-container *ngIf="(ctype !== treeType[treeType.DEMO])">
                 <button  *ngIf="attributesNode.size === 0"
                   type="button"
                   class="btn tab"
@@ -29,12 +29,12 @@
                   Modifiers
                 </button>
               </ng-container>
-              <button  *ngIf="conditionTitle"
-                       type="button" class="btn tab"
-                       [class.active]="mode === 'tree'"
-                       (click)="mode = 'tree'">
-                Conditions
-              </button>
+              <!--<button *ngIf="conditionTitle"-->
+                       <!--type="button" class="btn tab"-->
+                       <!--[class.active]="mode === 'tree'"-->
+                       <!--(click)="mode = 'tree'">-->
+                <!--Conditions-->
+              <!--</button>-->
             </div>
             <div class="explore-link" *ngIf="ctype === domainType[domainType.DRUG]">
               <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank">
@@ -80,7 +80,7 @@
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>
                 <div class="panel-right-container">
-                  <h5 class="selection-title">hi {{ selectionTitle }}</h5>
+                  <h5 class="selection-title">{{ selectionTitle }}</h5>
                   <div class="panel-right selected">
                     <crit-selection-info
                             *ngFor="let parameter of (selection$ | async); let i = index"
