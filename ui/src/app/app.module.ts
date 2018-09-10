@@ -27,6 +27,7 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
+import {CardComponent} from './views/card/component';
 import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
@@ -58,16 +59,15 @@ import {CohortCommonModule} from './cohort-common/module';
 import {IconsModule} from './icons/icons.module';
 
 import {
-  ApiModule,
-  ConfigService,
-  Configuration,
+ApiModule,
+ConfigService,
+Configuration,
 } from 'generated';
 
 import {
-  ApiModule as LeoApiModule,
-  Configuration as LeoConfiguration,
+ApiModule as LeoApiModule,
+Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import {CardComponent} from './views/card/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
