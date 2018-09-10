@@ -74,7 +74,7 @@
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>
                 <div class="panel-right-container">
-                  <h5 class="selection-title">hi {{ selectionTitle }}</h5>
+                  <h5 class="selection-title">{{ selectionTitle }}</h5>
                   <div class="panel-right selected">
                     <crit-selection-info
                             *ngFor="let parameter of (selection$ | async); let i = index"

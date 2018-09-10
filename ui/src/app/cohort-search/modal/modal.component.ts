@@ -45,7 +45,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
-  scrollTime: number;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
 
@@ -148,7 +147,7 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
-    if((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')){
+    if ((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')) {
         return title
             ? `Add Selected CONDITIONS Criteria to Cohort`
             : 'No Selection';
