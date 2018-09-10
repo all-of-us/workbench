@@ -182,15 +182,23 @@ public class CriteriaDaoTest {
   @Test
   public void findCriteriaByTypeForCodeOrName() throws Exception {
     //match on code
-    List<Criteria> labs =
-      criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123");
+    List<Criteria> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", null);
     assertEquals(1, labs.size());
     assertEquals(labCriteria, labs.get(0));
 
     //match on name
-    labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "Mysearch");
+    labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "Mysearch", null);
     assertEquals(1, labs.size());
     assertEquals(labCriteria, labs.get(0));
+
+    List<Criteria> cpts = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.CPT.name(), "zzz", 1L);
+    assertEquals(1, cpts.size());
+    assertEquals(cptCriteria2, cpts.get(0));
+
+    cpts = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.CPT.name(), "zzz", null);
+    assertEquals(2, cpts.size());
+    assertEquals(cptCriteria2, cpts.get(0));
+    assertEquals(cptCriteria1, cpts.get(1));
   }
 
   @Test
@@ -219,15 +227,24 @@ public class CriteriaDaoTest {
 
   @Test
   public void findDrugBrandOrIngredientByName() throws Exception {
-    List<Criteria> drugList = criteriaDao.findDrugBrandOrIngredientByName("ETAM");
+    List<Criteria> drugList = criteriaDao.findDrugBrandOrIngredientByName("ETAM", null);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
 
-    drugList = criteriaDao.findDrugBrandOrIngredientByName("ACE");
+    drugList = criteriaDao.findDrugBrandOrIngredientByName("ACE", null);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
 
-    drugList = criteriaDao.findDrugBrandOrIngredientByName("BL");
+    drugList = criteriaDao.findDrugBrandOrIngredientByName("A", 1L);
+    assertEquals(1, drugList.size());
+    assertEquals(drugCriteriaIngredient, drugList.get(0));
+
+    drugList = criteriaDao.findDrugBrandOrIngredientByName("A", 3L);
+    assertEquals(2, drugList.size());
+    assertEquals(drugCriteriaIngredient, drugList.get(0));
+    assertEquals(drugCriteriaBrand, drugList.get(1));
+
+    drugList = criteriaDao.findDrugBrandOrIngredientByName("BL", null);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaBrand, drugList.get(0));
   }

@@ -228,7 +228,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(drugATCCriteria),
       controller
-        .getDrugBrandOrIngredientByName(1L, "drugN")
+        .getDrugBrandOrIngredientByName(1L, "drugN", null)
         .getBody()
         .getItems()
         .get(0)
@@ -237,7 +237,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(drugBrandCriteria),
       controller
-        .getDrugBrandOrIngredientByName(1L, "brandN")
+        .getDrugBrandOrIngredientByName(1L, "brandN", null)
         .getBody()
         .getItems()
         .get(0)

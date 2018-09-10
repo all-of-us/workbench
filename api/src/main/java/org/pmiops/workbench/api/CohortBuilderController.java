@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
+  private final static Long DEFAULT_LIMIT = 100L;
+
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
   private CriteriaDao criteriaDao;
@@ -117,9 +119,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId, String drugName) {
+  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId,
+                                                                             String drugName,
+                                                                             Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName);
+    Long resultLimit = Optional.of(limit).orElse(DEFAULT_LIMIT);
+    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
