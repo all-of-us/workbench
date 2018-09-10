@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cdr.dao;
 
-import apple.laf.JRSUIUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
