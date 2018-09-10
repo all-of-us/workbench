@@ -9,6 +9,7 @@ import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
 
 import {WINDOW_REF} from 'app/utils';
+import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
 import {environment} from 'environments/environment';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
@@ -105,6 +106,10 @@ describe('NotebookRedirectComponent', () => {
             params: {
               'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
               'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
+            },
+            queryParamMap: {
+              'notebook-name': 'blah',
+              'kernel-type': Kernels.R
             },
             data: {
               creating: true
