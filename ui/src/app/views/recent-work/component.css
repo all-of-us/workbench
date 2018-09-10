@@ -2,6 +2,7 @@
     margin-left: 2.3rem;
     margin-top: -1rem;
     display: inline-block;
+    width: 17rem;
 }
 
 .card {
@@ -12,23 +13,14 @@
     display: inline-block;
     margin-left: .45rem;
     margin-top: 1rem;
+    position: relative;
 }
 
 .scroll-indicator {
-    border-radius: 50%;
     height: 2rem;
     width: 2rem;
-    background-color: #2691D0;
-    position: relative;
-}
-
-.scroll-arrow {
-    height: 1.3rem;
-    width: 1.3rem;
-    color: #FFFFFF;
-    position: relative;
-    top: .375rem;
-    left: .3rem
+    position: absolute;
+    top: 3rem;
 }
 
 .title {
@@ -37,4 +29,9 @@
     color: #FFFFFF;
     width: 100%;
     position: relative
+}
+
+.recent-work {
+    top: 2.1rem;
+    position: relative;
 }

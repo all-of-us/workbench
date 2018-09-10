@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 import {
   RecentResource,
@@ -13,7 +13,8 @@ import {
 
 export class RecentWorkComponent implements OnInit {
   resourceList: RecentResource[];
-  fullList: RecentResource[];
+  fullList: RecentResource[] = [];
+  startIndex = 0;
   constructor(
     private userMetricsService: UserMetricsService
   ) {}
@@ -26,18 +27,30 @@ export class RecentWorkComponent implements OnInit {
   updateList(): void {
     this.userMetricsService.getUserRecentResources().subscribe((resources) => {
       this.fullList = resources;
-      this.resourceList = this.fullList.slice(0, 3);
+      this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + 3);
     });
   }
 
   moveDownList(): void {
-    this.fullList.unshift(this.fullList.pop());
-    this.resourceList = this.fullList.slice(0, 3);
+    this.startIndex = this.startIndex - 1;
+    this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + 3);
   }
 
   moveUpList(): void {
-      this.fullList.push(this.fullList.shift());
-      this.resourceList = this.fullList.slice(0, 3);
+    this.startIndex = this.startIndex + 1;
+    this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + 3);
+  }
+
+  rightScrollVisible(): boolean {
+    return (this.fullList.length > 3) && (this.fullList.length > this.startIndex + 3);
+  }
+
+  leftScrollVisible(): boolean {
+    return (this.fullList.length > 3) && (this.startIndex > 0);
+  }
+
+  elementVisible(): boolean {
+    return this.fullList.length > 0;
   }
 
 }
