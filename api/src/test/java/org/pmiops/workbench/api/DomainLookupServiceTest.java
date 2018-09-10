@@ -50,7 +50,7 @@ public class DomainLookupServiceTest {
         List<String> lookups = new ArrayList<>();
         lookups.add("Procedure");
 
-        when(criteriaDao.findCriteriaByTypeAndCode(searchParameter2.getType(), searchParameter2.getValue()))
+        when(criteriaDao.findCriteriaByTypeAndSubtypeAndCode(searchParameter2.getType(), searchParameter2.getSubtype(), searchParameter2.getValue()))
                 .thenReturn(lookups);
 
         domainLookupService.findCodesForEmptyDomains(request.getIncludes());
@@ -62,7 +62,7 @@ public class DomainLookupServiceTest {
         assertEquals("Procedure", searchGroupItem1.getSearchParameters().get(1).getDomain());
 
         verify(criteriaDao, times(1))
-                .findCriteriaByTypeAndCode(searchParameter2.getType(), searchParameter2.getValue());
+                .findCriteriaByTypeAndSubtypeAndCode(searchParameter2.getType(), searchParameter2.getSubtype(), searchParameter2.getValue());
         verifyNoMoreInteractions(criteriaDao);
     }
 

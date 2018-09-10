@@ -8,6 +8,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
@@ -22,29 +23,25 @@ import java.util.stream.Collectors;
 @Service
 public class PMQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String BLOOD_PRESSURE = "BP";
-  private static final String HEART_RATE_DETAIL = "HR-DETAIL";
-  private static final String HEIGHT = "HEIGHT";
-  private static final String WEIGHT = "WEIGHT";
-  private static final String BMI = "BMI";
-  private static final String WC = "WC";
-  private static final String HC = "HC";
-  private static final String HR = "HR";
-  private static final String PREG = "PREG";
-  private static final String WHEEL = "WHEEL";
   private static final String CONCEPT_ID = "conceptId";
   private static final List<String> PM_TYPES_WITH_ATTR =
-    Arrays.asList(BLOOD_PRESSURE, HEART_RATE_DETAIL, HEIGHT, WEIGHT, BMI, WC, HC);
+    Arrays.asList(TreeSubType.BP.name(),
+      TreeSubType.HR_DETAIL.name(),
+      TreeSubType.HEIGHT.name(),
+      TreeSubType.WEIGHT.name(),
+      TreeSubType.BMI.name(),
+      TreeSubType.WC.name(),
+      TreeSubType.HC.name());
   ImmutableMap<String, String> exceptionText = ImmutableMap.<String, String>builder()
-    .put(HEART_RATE_DETAIL, "Heart Rate")
-    .put(HEIGHT, "Height")
-    .put(WEIGHT, "Weight")
-    .put(BMI, "BMI")
-    .put(WC, "Waist Circumference")
-    .put(HC, "Hip Circumference")
-    .put(HR, "Heart Rate")
-    .put(PREG, "Pregnancy")
-    .put(WHEEL, "Wheel Chair User")
+    .put(TreeSubType.HR_DETAIL.name(), "Heart Rate")
+    .put(TreeSubType.HEIGHT.name(), "Height")
+    .put(TreeSubType.WEIGHT.name(), "Weight")
+    .put(TreeSubType.BMI.name(), "BMI")
+    .put(TreeSubType.WC.name(), "Waist Circumference")
+    .put(TreeSubType.HC.name(), "Hip Circumference")
+    .put(TreeSubType.HR.name(), "Heart Rate")
+    .put(TreeSubType.PREG.name(), "Pregnancy")
+    .put(TreeSubType.WHEEL.name(), "Wheel Chair User")
     .build();
 
   private static final String UNION_ALL = " union all\n";
@@ -74,7 +71,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     for (SearchParameter parameter : parameters.getParameters()) {
       List<String> tempQueryParts = new ArrayList<String>();
-      boolean isBP = parameter.getSubtype().equals(BLOOD_PRESSURE);
+      boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
         validateAttributes(parameter);
         for (Attribute attribute : parameter.getAttributes()) {
@@ -137,7 +134,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     List<Attribute> attrs = parameter.getAttributes();
     Predicate<Attribute> systolic = nameIsSystolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
     Predicate<Attribute> diastolic = nameIsDiastolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
-    if (parameter.getSubtype().equals(BLOOD_PRESSURE)) {
+    if (parameter.getSubtype().equals(TreeSubType.BP.name())) {
       boolean systolicAttrs =
         attrs.stream().filter(systolic::test).collect(Collectors.toList()).size() != 1;
       boolean diastolicAttrs =

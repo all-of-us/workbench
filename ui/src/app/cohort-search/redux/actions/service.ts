@@ -3,7 +3,6 @@ import {Injectable} from '@angular/core';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {CRITERIA_SUBTYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -25,11 +24,12 @@ import {
 import * as ActionFuncs from './creators';
 
 import {
-  SearchGroup,
-  SearchGroupItem,
-  SearchParameter,
-  SearchRequest,
-  TreeType
+    SearchGroup,
+    SearchGroupItem,
+    SearchParameter,
+    SearchRequest,
+    TreeSubType,
+    TreeType
 } from 'generated';
 
 
@@ -445,7 +445,7 @@ export class CohortSearchActions {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
       name: immParam.get('name', ''),
-      value: CRITERIA_SUBTYPES.DEC === immParam.get('subtype')
+      value: TreeSubType[TreeSubType.DEC] === immParam.get('subtype')
           ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
@@ -457,11 +457,17 @@ export class CohortSearchActions {
       || param.type === TreeType[TreeType.VISIT]
       || param.type === TreeType[TreeType.PM]
       || param.type === TreeType[TreeType.MEAS]
-      || param.type === TreeType[TreeType.DRUG]) {
-        param.conceptId = immParam.get('conceptId');
-    } else if (param.type === TreeType[TreeType.ICD9]
+      || param.type === TreeType[TreeType.DRUG]
+      || param.type === TreeType[TreeType.ICD9]
       || param.type === TreeType[TreeType.ICD10]
-      || param.type === TreeType[TreeType.CPT]) {
+      || param.type === TreeType[TreeType.CPT]
+      || param.type === TreeType[TreeType.CONDITION]) {
+        param.conceptId = immParam.get('conceptId');
+    }
+    if (param.type === TreeType[TreeType.ICD9]
+      || param.type === TreeType[TreeType.ICD10]
+      || param.type === TreeType[TreeType.CPT]
+      || param.type === TreeType[TreeType.CONDITION]) {
         param.domain = immParam.get('domainId');
     }
 
