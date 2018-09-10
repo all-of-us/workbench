@@ -27,19 +27,23 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
 ENVIRONMENTS = {
   TEST_PROJECT => {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_test.json"
+    :config_json => "config_test.json",
+    :cdr_versions_json => "cdr_versions_test.json"
   },
   "all-of-us-rw-staging" => {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_staging.json"
+    :config_json => "config_staging.json",
+    :cdr_versions_json => "cdr_versions_staging.json"
   },
   "all-of-us-rw-stable" => {
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
-    :config_json => "config_stable.json"
+    :config_json => "config_stable.json",
+    :cdr_versions_json => "cdr_versions_stable.json"
   },
   "all-of-us-rw-prod" => {
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
-    :config_json => "config_prod.json"
+    :config_json => "config_prod.json",
+    :cdr_versions_json => "cdr_versions_prod.json"
   }
 }
 
@@ -48,6 +52,13 @@ def get_config(project)
     raise ArgumentError.new("project #{project} lacks a valid env configuration")
   end
   return ENVIRONMENTS[project][:config_json]
+end
+
+def get_cdr_versions_file(project)
+  unless ENVIRONMENTS.fetch(project, {}).has_key?(:cdr_versions_json)
+    raise ArgumentError.new("project #{project} lacks a valid env configuration")
+  end
+  return ENVIRONMENTS[project][:cdr_versions_json]
 end
 
 def get_cdr_sql_project(project)
@@ -126,7 +137,9 @@ def dev_up()
   common.run_inline %W{docker-compose run db-migration}
   common.run_inline %W{docker-compose run db-cdr-migration}
   common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-data-migration}
+
+  common.status "Updating CDR versions..."
+  common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
 
   common.status "Updating workbench configuration..."
   common.run_inline %W{
@@ -163,7 +176,6 @@ def run_local_migrations()
   common = Common.new
   Dir.chdir('db') do
     common.run_inline %W{./run-migrations.sh main}
-    common.run_inline %W{./run-migrations.sh data local}
   end
   Dir.chdir('db-cdr') do
     common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
@@ -171,6 +183,7 @@ def run_local_migrations()
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
+  common.run_inline %W{gradle :tools:updateCdrVersions -PappArgs=['../config/cdr_versions_local.json',false]}
 end
 
 Common.register_command({
@@ -581,7 +594,6 @@ def run_local_all_migrations()
   common.run_inline %W{docker-compose run db-public-migration}
   common.run_inline %W{docker-compose run db-cdr-data-migration}
   common.run_inline %W{docker-compose run db-public-data-migration}
-  common.run_inline %W{docker-compose run db-data-migration}
 end
 
 Common.register_command({
@@ -993,6 +1005,60 @@ Common.register_command({
   :fn => ->(*args) { list_clusters("list-clusters", *args) }
 })
 
+def update_cdr_version_options(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
+  op.add_option(
+      "--dry_run",
+      ->(opts, _) { opts.dry_run = "true"},
+      "Make no changes.")
+  return op
+end
+
+def update_cdr_versions_for_project(versions_file, dry_run)
+  Dir.chdir("tools") do
+    common = Common.new
+    common.run_inline %W{
+      gradle --info updateCdrVersions
+     -PappArgs=['#{versions_file}',#{dry_run}]}
+  end
+end
+
+def update_cdr_versions(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = update_cdr_version_options(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  with_cloud_proxy_and_db(gcc) do
+    versions_file = get_cdr_versions_file(gcc.project)
+    update_cdr_versions_for_project("/w/api/config/#{versions_file}", op.opts.dry_run)
+  end
+end
+
+Common.register_command({
+  :invocation => "update-cdr-versions",
+  :description => "Update CDR versions in a cloud environment",
+  :fn => ->(*args) { update_cdr_versions("update-cdr-versions", *args)}
+})
+
+def update_cdr_versions_local(cmd_name, *args)
+  setup_local_environment
+  op = update_cdr_version_options(cmd_name, args)
+  op.parse.validate
+  versions_file = 'config/cdr_versions_local.json'
+  app_args = ["-PappArgs=['/w/api/" + versions_file + "',false]"]
+  common = Common.new
+  common.run_inline %W{docker-compose run update-cdr-versions} + app_args
+end
+
+Common.register_command({
+  :invocation => "update-cdr-versions-local",
+  :description => "Update CDR versions in the local environment",
+  :fn => ->(*args) { update_cdr_versions_local("update-cdr-versions-local", *args)}
+})
+
 def get_test_service_account()
   ServiceAccountContext.new(TEST_PROJECT).run do
     print "Service account key is now in sa-key.json"
@@ -1268,6 +1334,8 @@ def deploy(cmd_name, args)
   with_cloud_proxy_and_db(gcc, op.opts.account, op.opts.key_file) do |ctx|
     migrate_database
     load_config(ctx.project)
+    versions_file = get_cdr_versions_file(ctx.project)
+    update_cdr_versions_for_project("../config/#{versions_file}", false)
 
     common.status "Pushing GCS artifacts..."
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
