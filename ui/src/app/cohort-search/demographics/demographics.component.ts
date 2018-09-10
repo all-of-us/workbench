@@ -4,12 +4,10 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES} from '../constant';
 
 import {activeParameterList, CohortSearchActions, CohortSearchState, demoCriteriaChildren} from '../redux';
 
-import {Attribute, CohortBuilderService, Operator} from 'generated';
-import {TreeType} from '../../../generated';
+import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
 
 const minAge = 18;
 const maxAge = 120;
@@ -93,9 +91,12 @@ export class DemographicsComponent implements OnInit, OnDestroy {
        * criteria already in the state (i.e. if we're editing a search group
        * item).  Finally we load the relevant criteria from the API.
        */
-      this.initialGenders = selections.filter(s => s.get('subtype') === CRITERIA_SUBTYPES.GEN);
-      this.initialRaces = selections.filter(s => s.get('subtype') === CRITERIA_SUBTYPES.RACE);
-      this.initialEthnicities = selections.filter(s => s.get('subtype') === CRITERIA_SUBTYPES.ETH);
+      this.initialGenders = selections
+          .filter(s => s.get('subtype') === TreeSubType[TreeSubType.GEN]);
+      this.initialRaces = selections
+          .filter(s => s.get('subtype') === TreeSubType[TreeSubType.RACE]);
+      this.initialEthnicities = selections
+          .filter(s => s.get('subtype') === TreeSubType[TreeSubType.ETH]);
       this.initDeceased(selections);
       this.initAgeRange(selections);
       this.loadNodesFromApi();
@@ -117,24 +118,24 @@ export class DemographicsComponent implements OnInit, OnDestroy {
      * sort them by count, then by name.
      */
     const calls = [
-      CRITERIA_SUBTYPES.AGE,
-      CRITERIA_SUBTYPES.DEC,
-      CRITERIA_SUBTYPES.GEN,
-      CRITERIA_SUBTYPES.RACE,
-      CRITERIA_SUBTYPES.ETH
+        TreeSubType[TreeSubType.AGE],
+        TreeSubType[TreeSubType.DEC],
+        TreeSubType[TreeSubType.GEN],
+        TreeSubType[TreeSubType.RACE],
+        TreeSubType[TreeSubType.ETH]
     ].map(code => {
       this.subscription.add(this.ngRedux.select(demoCriteriaChildren(TreeType[TreeType.DEMO], code))
         .subscribe(options => {
           if (options.size) {
             this.loadOptions(options, code);
           } else {
-            this.api.getCriteriaByTypeAndSubtype(cdrid, TreeType[TreeType.DEMO], code)
+            this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
               .subscribe(response => {
                 const items = response.items
-                  .filter(item => item.parentId !== 0 || code === CRITERIA_SUBTYPES.DEC);
+                  .filter(item => item.parentId !== 0 || code === TreeSubType[TreeSubType.DEC]);
                 items.sort(sortByCountThenName);
                 const nodes = fromJS(items).map(node => {
-                  if (node.get('subtype') !== CRITERIA_SUBTYPES.AGE) {
+                  if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
                     const paramId = `param${node.get('conceptId', node.get('code'))}`;
                     node = node.set('parameterId', paramId);
                   }
@@ -151,22 +152,22 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   loadOptions(nodes: any, subtype: string) {
     switch (subtype) {
       /* Age and Deceased are single nodes we use as templates */
-      case CRITERIA_SUBTYPES.AGE:
+      case TreeSubType[TreeSubType.AGE]:
         this.ageNode = nodes.get(0);
         this.ageNodes = nodes.toJS();
         this.calculateAgeCount();
         break;
-      case CRITERIA_SUBTYPES.DEC:
+      case TreeSubType[TreeSubType.DEC]:
         this.deceasedNode = nodes.get(0);
         break;
       /* Gender, Race, and Ethnicity are all used to generate option lists */
-      case CRITERIA_SUBTYPES.GEN:
+      case TreeSubType[TreeSubType.GEN]:
         this.genderNodes = nodes;
         break;
-      case CRITERIA_SUBTYPES.RACE:
+      case TreeSubType[TreeSubType.RACE]:
         this.raceNodes = nodes;
         break;
-      case CRITERIA_SUBTYPES.ETH:
+      case TreeSubType[TreeSubType.ETH]:
         this.ethnicityNodes = nodes;
         break;
     }
@@ -248,7 +249,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     const min = this.demoForm.get('ageMin');
     const max = this.demoForm.get('ageMax');
 
-    const existent = selections.find(s => s.get('subtype') === CRITERIA_SUBTYPES.AGE);
+    const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.AGE]);
     if (existent) {
       const range = existent.getIn(['attributes', '0', 'operands']).toArray();
       this.ageRange.setValue(range);
@@ -257,7 +258,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     }
     const selectedAge = this.selection$
       .map(selectedNodes => selectedNodes
-        .find(node => node.get('subtype') === CRITERIA_SUBTYPES.AGE)
+        .find(node => node.get('subtype') === TreeSubType[TreeSubType.AGE])
       );
 
     const ageDiff = this.ageRange.valueChanges
@@ -291,7 +292,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   initDeceased(selections) {
-    const existent = selections.find(s => s.get('subtype') === CRITERIA_SUBTYPES.DEC);
+    const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.DEC]);
     if (existent !== undefined) {
       this.deceased.setValue(true);
     }

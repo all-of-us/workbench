@@ -89,7 +89,7 @@ export class CohortSearchEpics {
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        return this.service.getCriteriaByTypeAndParentId(cdrVersionId, kind, parentId)
+        return this.service.getCriteriaBy(cdrVersionId, kind, null, parentId, null)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -103,7 +103,7 @@ export class CohortSearchEpics {
   fetchAllCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_ALL_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        return this.service.getCriteriaByType(cdrVersionId, kind)
+        return this.service.getCriteriaBy(cdrVersionId, kind, null, null, null)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -118,7 +118,7 @@ export class CohortSearchEpics {
     action$.ofType(BEGIN_DRUG_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId, subtype}: DrugCritRequestAction) => {
         return this.service
-          .getCriteriaByTypeAndSubtypeAndParentId(cdrVersionId, kind, subtype, parentId)
+          .getCriteriaBy(cdrVersionId, kind, subtype, parentId, null)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -137,7 +137,7 @@ export class CohortSearchEpics {
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         } else {
-          return this.service.getCriteriaByTypeForCodeOrName(cdrVersionId, kind, searchTerms)
+          return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms, null)
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         }
@@ -158,7 +158,7 @@ export class CohortSearchEpics {
   fetchAllChildren: CSEpic = (action$) => (
     action$.ofType(BEGIN_CHILDREN_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: ChildrenRequestAction) => {
-        return this.service.getCriteriaChildrenByTypeAndParentId(cdrVersionId, kind, parentId)
+        return this.service.getCriteriaBy(cdrVersionId, kind, null, parentId, true)
           .map(result => loadAndSelectChildren(parentId, result.items))
           .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
       }
