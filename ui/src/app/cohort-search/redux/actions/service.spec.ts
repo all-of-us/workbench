@@ -28,6 +28,7 @@ const zeroCrit = fromJS({
   type: TreeType[TreeType.ICD9],
   group: false,
   domainId: null,
+  conceptId: 12345
 }).set('attributes', []);
 
 const oneCrit = fromJS({
@@ -38,6 +39,7 @@ const oneCrit = fromJS({
   type: TreeType[TreeType.ICD9],
   group: true,
   domainId: null,
+  conceptId: 12345
 }).set('attributes', []);
 
 const DEMO_crit = fromJS({
@@ -90,7 +92,8 @@ const expectedSR = {
           subtype: '',
           group: false,
           domain: null,
-          attributes: []
+          attributes: [],
+          conceptId: 12345
         }, {
           parameterId: 'param1',
           name: 'CodeB',
@@ -99,7 +102,8 @@ const expectedSR = {
           subtype: '',
           group: true,
           domain: null,
-          attributes: []
+          attributes: [],
+          conceptId: 12345
         }],
       modifiers: [],
     }]
@@ -208,6 +212,7 @@ describe('CohortSearchActions', () => {
               subtype: '',
               group: false,
               domain: null,
+              conceptId: 12345,
               attributes: []
             }, {
               parameterId: 'param1',
@@ -217,6 +222,7 @@ describe('CohortSearchActions', () => {
               subtype: '',
               group: true,
               domain: null,
+              conceptId: 12345,
               attributes: []
           }],
           modifiers: [],
@@ -234,6 +240,7 @@ describe('CohortSearchActions', () => {
               subtype: '',
               group: false,
               domain: null,
+              conceptId: 12345,
               attributes: []
             }, {
               parameterId: 'param1',
@@ -243,6 +250,7 @@ describe('CohortSearchActions', () => {
               subtype: '',
               group: true,
               domain: null,
+              conceptId: 12345,
               attributes: []
           }],
           modifiers: [],
@@ -301,6 +309,7 @@ describe('CohortSearchActions', () => {
       subtype: '',
       group: false,
       domain: null,
+      conceptId: 12345,
       attributes: []
     });
     // Demographics
