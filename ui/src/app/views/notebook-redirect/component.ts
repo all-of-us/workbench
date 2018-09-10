@@ -7,6 +7,7 @@ import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
 import {WINDOW_REF} from 'app/utils';
+import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
 import {
@@ -30,24 +31,69 @@ enum Progress {
   Redirecting
 }
 
-export enum Kernels {
-  R,
-  Python3,
-}
 
-const rNotebookFileContent = '{ "cells": [ { "cell_type": "code", "execution_count": null, \
-    "metadata": {}, "outputs": [], "source": [] } ], "metadata": { "kernelspec": { \
-    "display_name": "R", "language": "R", "name": "ir" }, "language_info": { \
-    "codemirror_mode": "r", "file_extension": ".r", "mimetype": "text/x-r-source", \
-    "name": "R", "pygments_lexer": \
-    "r", "version": "3.4.4" }  }, "nbformat": 4, "nbformat_minor": 2 }';
 
-const pyNotebookFileContent = '{"cells": [{"cell_type": "code","execution_count": null, \
-    "metadata": {},"outputs": [],"source": []}],"metadata": {"kernelspec": {"display_name": \
-     "Python 3","language": "python","name": "python3"},"language_info": {"codemirror_mode": \
-     {"name": "ipython","version": 3},"file_extension": ".py","mimetype": "text/x-python", \
-    "name": "python","nbconvert_exporter": "python","pygments_lexer": "ipython3","version": \
-     "3.4.2"}},"nbformat": 4,"nbformat_minor": 2}';
+const rNotebookFileContent = {
+  'cells': [
+    {
+      'cell_type': 'code',
+      'execution_count': null,
+      'metadata': {},
+      'outputs': [],
+      'source': []
+    }
+  ],
+  'metadata': {
+    'kernelspec': {
+      'display_name': 'R',
+      'language': 'R',
+      'name': 'ir'
+    },
+    'language_info': {
+      'codemirror_mode': 'r',
+      'file_extension': '.r',
+      'mimetype': 'text/x-r-source',
+      'name': 'R',
+      'pygments_lexer': 'r',
+      'version': '3.4.4'
+    }
+  },
+  'nbformat': 4,
+  'nbformat_minor': 2
+};
+
+const pyNotebookFileContent = {
+  'cells': [
+    {
+      'cell_type': 'code',
+      'execution_count': null,
+      'metadata': {},
+      'outputs': [],
+      'source': []
+    }
+  ],
+  'metadata': {
+    'kernelspec': {
+      'display_name': 'Python 3',
+      'language': 'python',
+      'name': 'python3'
+    },
+    'language_info': {
+      'codemirror_mode': {
+        'name': 'ipython',
+        'version': 3
+      },
+      'file_extension': '.py',
+      'mimetype': 'text/x-python',
+      'name': 'python',
+      'nbconvert_exporter': 'python',
+      'pygments_lexer': 'ipython3',
+      'version': '3.4.2'
+    }
+  },
+  'nbformat': 4,
+  'nbformat_minor': 2
+};
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -86,15 +132,17 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
-    this.notebookName = this.route.snapshot.params['nbName'];
     this.creating = this.route.snapshot.data.creating;
 
     if (this.creating) {
-      if (this.route.snapshot.params['kernelType'] === Kernels.R.toString()) {
-        this.fileContent = rNotebookFileContent;
+      this.notebookName = this.route.snapshot.queryParamMap.get('notebook-name');
+      if (this.route.snapshot.queryParamMap.get('kernel-type') === Kernels.R.toString()) {
+        this.fileContent = JSON.stringify(rNotebookFileContent);
       } else {
-        this.fileContent = pyNotebookFileContent;
+        this.fileContent = JSON.stringify(pyNotebookFileContent);
       }
+    } else {
+      this.notebookName = this.route.snapshot.params['nbName'];
     }
 
     this.loadingSub = this.clusterService.listClusters()
@@ -180,7 +228,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     return this.localizeNotebooks([]).flatMap((localDir) => {
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
-      // clicking "new notebook" in the Jupyter UI.
+      // clicking 'new notebook' in the Jupyter UI.
       const workspaceDir = localDir.replace(/^workspaces\//, '');
       return this.jupyterService.putContents(
         this.cluster.clusterNamespace, this.cluster.clusterName,

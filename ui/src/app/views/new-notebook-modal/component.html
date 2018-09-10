@@ -1,7 +1,6 @@
 <clr-modal [(clrModalOpen)]="creatingNotebook" [clrModalSize]="'md'">
   <div class="modal-title">
-    <!--The ngIf is to avoid null pointers before the modal is opened.-->
-    <div *ngIf="creatingNotebook" class="modal-title-text">New Notebook</div>
+    <div class="modal-title-text">New Notebook</div>
   </div>
   <div class="modal-body">
     <div class="form-section">
@@ -19,9 +18,12 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="creatingNotebook=false">Cancel</button>
-    <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
-            (click)="submitNewNotebook()" [clrLoading]="loading" [disabled]="loading">
-      Create Notebook
-    </button>
+    <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
+      <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
+              (click)="submitNewNotebook()" [clrLoading]="loading" [disabled]="newNotebookDisabled">
+        Create Notebook
+      </button>
+      <span *ngIf="newNameEmpty" class="tooltip-content">A name is required</span>
+    </span>
   </div>
 </clr-modal>

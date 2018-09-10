@@ -1,7 +1,8 @@
 import {Component, Input, OnDestroy} from '@angular/core';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {Kernels} from 'app/views/notebook-redirect/component';
+import {isBlank} from 'app/utils/index';
+import {Kernels} from 'app/utils/notebook-kernels';
 
 import {environment} from 'environments/environment';
 
@@ -43,8 +44,10 @@ export class NewNotebookModalComponent implements OnDestroy {
   }
 
   submitNewNotebook(): void {
-    const nbUrl = `/workspaces/${this.workspace.namespace} \
-        ${this.workspace.id}/notebooks/create/${this.newName}/${this.kernelType}`;
+    const nbUrl = `/workspaces/` + encodeURIComponent(this.workspace.namespace) + '/' +
+        encodeURIComponent(this.workspace.id) + '/notebooks/create/?notebook-name=' +
+        encodeURIComponent(this.newName) + '&kernel-type=' +
+        encodeURIComponent(this.kernelType.toString());
 
     const notebook = window.open(nbUrl, '_blank');
 
@@ -74,5 +77,13 @@ export class NewNotebookModalComponent implements OnDestroy {
     };
     window.addEventListener('message', authHandler);
     this.notebookAuthListeners.push(authHandler);
+  }
+
+  get newNotebookDisabled(): boolean {
+    return this.loading || this.newNameEmpty;
+  }
+
+  get newNameEmpty(): boolean {
+    return isBlank(this.newName);
   }
 }

@@ -28,12 +28,6 @@ describe('NewNotebookModalComponent', () => {
         NewNotebookModalComponent
       ],
       providers: [
-        {
-          provide: ServerConfigService,
-          useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
-          })
-        },
         {provide: SignInService, useValue: new SignInServiceStub()}
       ]
     }).compileComponents().then(() => {
