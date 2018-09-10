@@ -161,6 +161,12 @@ paths:
           type: string
           required: true
           description: the value to search for
+        - in: query
+          name: limit
+          type: integer
+          format: int64
+          required: false
+          description: number of criteria matches to return
       responses:
         200:
           description: A collection of criteria
@@ -206,6 +212,12 @@ paths:
           type: string
           required: true
           description: name of ingredient or brand
+        - in: query
+          name: limit
+          type: integer
+          format: int64
+          required: false
+          description: number of criteria matches to return
       responses:
         200:
           description: A collection of criteria

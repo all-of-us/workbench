@@ -9,7 +9,8 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
-  List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type, @Param("parentId") Long parentId);
+  List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
+                                                           @Param("parentId") Long parentId);
 
   @Query(value = "select * " +
     "from criteria " +
@@ -41,14 +42,17 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
-    "limit 250", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeForCodeOrName(@Param("type") String type, @Param("value") String value);
+    "limit :limit", nativeQuery = true)
+  List<Criteria> findCriteriaByTypeForCodeOrName(@Param("type") String type,
+                                                 @Param("value") String value,
+                                                 @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "where c.type = :type " +
     "and c.subtype = :subtype " +
     "order by c.id asc", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeAndSubtypeOrderByIdAsc(@Param("type") String type, @Param("subtype") String subtype);
+  List<Criteria> findCriteriaByTypeAndSubtypeOrderByIdAsc(@Param("type") String type,
+                                                          @Param("subtype") String subtype);
 
   @Query(value = "select * from criteria c " +
     "where c.type = 'DRUG' " +
@@ -56,8 +60,9 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and c.is_selectable = 1 " +
     "and upper(c.name) like upper(concat('%',:name,'%')) " +
     "order by c.name asc " +
-    "limit 250", nativeQuery = true)
-  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name);
+    "limit :limit", nativeQuery = true)
+  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name,
+                                                 @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "inner join ( " +

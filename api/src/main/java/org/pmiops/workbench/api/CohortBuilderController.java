@@ -21,15 +21,19 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
+import javax.swing.text.html.Option;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
+
+  private final static Long DEFAULT_LIMIT = 100L;
 
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
@@ -143,9 +147,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaByTypeForCodeOrName(Long cdrVersionId,
                                                                              String type,
-                                                                             String value) {
+                                                                             String value,
+                                                                             Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, value);
+    Long resultLimit = Optional.of(limit).orElse(DEFAULT_LIMIT);
+    final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, value, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -167,9 +173,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId, String drugName) {
+  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId,
+                                                                             String drugName,
+                                                                             Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName);
+    Long resultLimit = Optional.of(limit).orElse(DEFAULT_LIMIT);
+    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
