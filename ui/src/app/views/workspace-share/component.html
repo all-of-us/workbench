@@ -1,7 +1,8 @@
 <clr-modal [(clrModalOpen)]="sharing">
   <div class="modal-title">
-    <h2 class="modal-title-text">Add a Collaborator
-      <clr-icon shape="info-standard" class="is-solid"></clr-icon>
+    <h2 class="modal-title-text">
+      Add a Collaborator
+      <clr-icon shape="info-standard is-solid"></clr-icon>
     </h2>
   </div>
   <div class="modal-body" id="sharing-modal-body">
@@ -18,31 +19,26 @@
                type="text"
                name="to-share"
                [(ngModel)]="searchTerm"
-               [ngModelOptions]="{debounce: 300}"
+               [ngModelOptions]="{debounce: 10000}"
                placeholder="Find Collaborators"
-               (ngModelChange)="userSearch()"
+               (ngModelChange)="toShareChangedEvent($event)"
                #usernameSharingInput [disabled]="!hasPermission"/>
         <span *ngIf="autocompleteLoading" class="spinner spinner-inline"></span>
       </div>
 
-      <div *ngIf="autocompleteNoResults" class="dropdown-menu">
+      <div *ngIf="showAutocompleteNoResults" class="dropdown-menu">
         <div class="dropdown-item disabled">
           <em>No results based on your search</em>
         </div>
       </div>
 
-      <div *ngIf="showSearchResults()" class="dropdown-menu">
+      <div *ngIf="showSearchResults" class="dropdown-menu">
         <div *ngFor="let autocompleteUser of autocompleteUsers"
              class="user dropdown-item"
              style="display: flex; align-items: center;"
              (click)="selectUser(autocompleteUser)">
 
           <!-- TODO: Lots of duplicated code here. Can the user row be templatized???? -->
-
-          <div style="margin-right: .5rem; margin-top: -1rem;">
-            <img style="border-radius: 15px; height: 30px; width: 30px" src="{{userProfileImage(autocompleteUser.email)}}">
-          </div>
-
           <div class="collaborator" style="margin-top: -1rem;">
             <h5 class="user-name">
               {{autocompleteUser.givenName}} {{autocompleteUser.familyName}}
@@ -52,17 +48,12 @@
           <div class="collaborator-icon" style="margin-top: -1rem;">
             <clr-icon shape="plus-circle"></clr-icon>
           </div>
-
         </div>
       </div>
 
       <div *ngIf="selectedUser">
 
         <div style="display: flex; align-items: center;">
-
-          <div style="margin-right: .5rem;">
-            <img style="border-radius: 15px; height: 30px; width: 30px" src="{{userProfileImage(selectedUser.email)}}">
-          </div>
 
           <div class="collaborator">
             <h5 class="user-name">
@@ -106,23 +97,22 @@
     </div>
 
     <!-- Current Collaborators -->
-    <div *ngFor="let collaboratorUser of workspace.userRoles" class="user" [ngClass]="{'owner' : (collaboratorUser.email === userEmail || !hasPermission)}">
-      <div style="display: flex; align-items: center;">
-        <div style="margin-right: .5rem;">
-          <img style="border-radius: 15px; height: 30px; width: 30px" src="{{userProfileImage(collaboratorUser.email)}}">
-        </div>
-        <div class="collaborator">
-          <h5 class="user-name">
-            {{collaboratorUser.givenName}} {{collaboratorUser.familyName}}
-          </h5>
-          <div class="user-email">{{collaboratorUser.email}}</div>
-          <div class="user-role">{{collaboratorUser.role}}</div>
-        </div>
-        <div class="collaborator-icon">
-          <clr-icon *ngIf="collaboratorUser.email !== userEmail && hasPermission"
-                    shape="minus-circle"
-                    class="remove-button"
-                    (click)="removeCollaborator(collaboratorUser)"></clr-icon>
+    <div class="user-area">
+      <div *ngFor="let collaboratorUser of workspace.userRoles" class="user" [ngClass]="{'owner' : (collaboratorUser.email === userEmail || !hasPermission)}">
+        <div style="display: flex; align-items: center;">
+          <div class="collaborator">
+            <h5 class="user-name">
+              {{collaboratorUser.givenName}} {{collaboratorUser.familyName}}
+            </h5>
+            <div class="user-email">{{collaboratorUser.email}}</div>
+            <div class="user-role">{{collaboratorUser.role}}</div>
+          </div>
+          <div class="collaborator-icon">
+            <clr-icon *ngIf="collaboratorUser.email !== userEmail && hasPermission"
+                      shape="minus-circle"
+                      class="remove-button"
+                      (click)="removeCollaborator(collaboratorUser)"></clr-icon>
+          </div>
         </div>
       </div>
     </div>
@@ -130,7 +120,7 @@
     <div style="border-top: 1px solid black; width: 100%; padding-top: .5rem;">
       <div style="float: right; clear: both;">
         <button type="button" class="btn btn-default" (click)="closeModal()">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="addCollaborator()" [disabled]="!hasPermission">Add</button>
+        <button type="button" class="btn btn-primary" (click)="addCollaborator()" [disabled]="!hasPermission || !selectedUser">Add</button>
       </div>
     </div>
   </div>

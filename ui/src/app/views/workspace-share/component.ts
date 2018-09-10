@@ -4,6 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 
+import {isBlank} from 'app/utils';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 
@@ -32,6 +33,7 @@ import {
 export class WorkspaceShareComponent implements OnInit {
   @Input('workspace') workspace: Workspace;
   toShare = '';
+  toShareChanged = new Subject<string>();
   selectedPermission = 'Select Permission';
   roleNotSelected = false;
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
@@ -62,13 +64,18 @@ export class WorkspaceShareComponent implements OnInit {
       private workspacesService: WorkspacesService,
       private serverConfigService: ServerConfigService
   ) {
-    // this.searchUpdated
-    //   .debounceTime(300) // wait 300ms after the last event before emitting last event
-    //   .distinctUntilChanged() // only emit if value is different from previous value
-    //   .subscribe(term => this.searchTerm = term);
     serverConfigService.getConfig().subscribe((config) => {
       this.gsuiteDomain = config.gsuiteDomain;
     });
+    this.toShareChanged
+      .debounceTime(300) // wait 300 millisec after the last event before emitting last event
+      .distinctUntilChanged() // only emit if value is different from previous value
+      .subscribe(model => {
+        this.toShare = model;
+
+        // Call your function which calls API or do anything you would like do after a lag of 1 sec
+        this.userSearch(this.toShare);
+      });
   }
 
   ngOnInit(): void {
@@ -76,6 +83,10 @@ export class WorkspaceShareComponent implements OnInit {
       this.usersLoading = false;
       this.userEmail = profile.username;
     });
+  }
+
+  toShareChangedEvent($event: string) {
+    this.toShareChanged.next($event);
   }
 
   setAccess(dropdownSelected: string): void {
@@ -88,6 +99,10 @@ export class WorkspaceShareComponent implements OnInit {
       this.selectedAccessLevel = WorkspaceAccessLevel.READER;
     }
     this.roleNotSelected = false;
+  }
+
+  clearDropdown(): void {
+    this.autocompleteUsers = [];
   }
 
   convertToEmail(username: string): string {
@@ -128,6 +143,9 @@ export class WorkspaceShareComponent implements OnInit {
             this.workspace.userRoles = resp.items;
             this.toShare = '';
             this.input.nativeElement.focus();
+            this.selectedUser = undefined;
+            this.toShare = '';
+            this.searchTerm = '';
           },
           (error) => {
             if (error.status === 400) {
@@ -206,6 +224,9 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   closeModal() {
+    this.selectedUser = undefined;
+    this.toShare = '';
+    this.searchTerm = '';
     this.sharing = false;
   }
 
@@ -225,23 +246,22 @@ export class WorkspaceShareComponent implements OnInit {
       .length === 0;
   }
 
-  showSearchResults() {
+  get showSearchResults(): boolean {
     return !this.autocompleteLoading &&
-      this.autocompleteUsers.length > 0;
+      this.autocompleteUsers.length > 0 &&
+      !isBlank(this.searchTerm);
   }
 
-  // onSearch(value: string): void {
-  //   console.log('Search String: ' + value);
-  //   this.searchUpdated.next(value);
-  // }
+  get showAutocompleteNoResults(): boolean {
+    return this.autocompleteNoResults &&
+        !isBlank(this.searchTerm);
+  }
 
   userSearch(value: string): void {
     this.autocompleteLoading = true;
     this.autocompleteNoResults = false;
     this.autocompleteUsers = [];
     this.selectedUser = null;
-
-    // this.searchTerm = this.searchUpdated.next(value);
 
     if (!this.searchTerm.trim()) {
       this.autocompleteLoading = false;
@@ -255,8 +275,6 @@ export class WorkspaceShareComponent implements OnInit {
       if (this.autocompleteUsers.length === 0) {
         this.autocompleteNoResults = true;
       }
-      // TODO: Remove before PR
-      console.log(this.autocompleteUsers);
     }, () => {
       this.autocompleteLoading = false;
     });
@@ -270,10 +288,4 @@ export class WorkspaceShareComponent implements OnInit {
     this.autocompleteNoResults = false;
     this.autocompleteUsers = [];
   }
-
-  // TODO: This should be some kind of profile call to get the url for an email address
-  userProfileImage(user: User): string {
-    return '';
-  }
-
 }
