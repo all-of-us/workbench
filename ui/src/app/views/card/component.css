@@ -1,8 +1,4 @@
-.card.notebook-card {
-  justify-content: space-between;
-}
-
-.card.cohort-card {
+.card {
   justify-content: space-between;
 }
 
