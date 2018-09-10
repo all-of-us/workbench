@@ -1,29 +1,27 @@
 <div class="card item-card {{type}}-card">
+  <div class="header-area">
+    <clr-dropdown>
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <div *ngFor="let action of actions">
+          <button
+                  class="action-item"
+                  (click) =this[action.link](this.card)>
+            <clr-icon [attr.shape]=action.class></clr-icon>
+            {{action.text}}
+          </button>
+        </div>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <div class="name">
+      {{card.notebook?.name}}
+      {{card.cohort?.name}}
+    </div>
+  </div>
   <div>
-    <div class="header-area">
-      <clr-dropdown>
-        <button type="button" clrDropdownTrigger>
-          <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
-        </button>
-        <clr-dropdown-menu *clrIfOpen>
-          <div *ngFor="let action of actions">
-            <button
-                class="action-item"
-                (click) =this[action.link](this.card)>
-              <clr-icon [attr.shape]=action.class></clr-icon>
-              {{action.text}}
-            </button>
-          </div>
-        </clr-dropdown-menu>
-      </clr-dropdown>
-      <div class="name">
-        {{card.notebook?.name}}
-        {{card.cohort?.name}}
-      </div>
-    </div>
-    <div>
-      {{card.cohort?.description}}
-    </div>
+    {{card.cohort?.description}}
   </div>
   <div class="footer">
     <div class="last-modified">Last Updated <br/>{{card.modifiedTime | date}}</div>

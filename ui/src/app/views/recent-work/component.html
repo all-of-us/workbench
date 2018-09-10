@@ -1,6 +1,6 @@
-<div class="recent-work" style="display: inline-block">
-    <div class="scroll-indicator" style="top: 4.5rem" (click)="moveDownList()">
-        <clr-icon shape="angle" dir="left" class="scroll-arrow"></clr-icon>
+<div *ngIf="elementVisible()" class="recent-work" style="display: inline-block">
+    <div *ngIf="leftScrollVisible()" class="scroll-indicator" (click)="moveDownList()">
+        <app-left-scroll-icon></app-left-scroll-icon>
     </div>
     <div class="title">
         Your Recent Work
@@ -12,7 +12,7 @@
             </div>
         </div>
     </div>
-    <div class="scroll-indicator" style="float: right; top: 3.2rem; left:-.7rem" (click)="moveUpList()">
-        <clr-icon shape="angle" dir="right" class="scroll-arrow"></clr-icon>
+    <div *ngIf="rightScrollVisible()" class="scroll-indicator" style="float: right; top: 3.2rem; right: -9rem" (click)="moveUpList()">
+        <app-right-scroll-icon></app-right-scroll-icon>
     </div>
 </div>

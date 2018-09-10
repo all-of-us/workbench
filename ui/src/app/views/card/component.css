@@ -2,6 +2,10 @@
   justify-content: space-between;
 }
 
+.card.cohort-card {
+  justify-content: space-between;
+}
+
 .card.item-card {
   width: 7.2rem;
   margin-right: 1rem;
@@ -9,6 +13,7 @@
   flex-direction: column;
   justify-content: flex-start;
   padding: 0.75rem;
+  box-shadow: 0 0 0 0;
 }
 
 .card.item-card .name {
@@ -62,4 +67,15 @@
 .header-area .name {
   cursor: pointer;
   word-break: break-all ;
+}
+
+.card .footer {
+  position: absolute;
+  bottom: .7rem;
+  right: .7rem;
+}
+
+.last-modified {
+  position: absolute;
+  left: -5rem;
 }
