@@ -569,19 +569,6 @@ paths:
           description: User Not Found
         500:
           description: Internal Server Error
-  # CDR versions #########################################################################
-
-  /v1/cdrVersions:
-    get:
-      tags:
-        - cdrVersions
-      description: Returns all curated data repository (CDR) versions that the user has access to
-      operationId: getCdrVersions
-      responses:
-        200:
-          description: A list of CDR versions.
-          schema:
-            $ref: "#/definitions/CdrVersionListResponse"
 
   # Workspaces ###########################################################################
 
@@ -1261,40 +1248,6 @@ definitions:
         type: integer
         format: int64
 
-  CdrVersionListResponse:
-    type: object
-    required:
-      - items
-      - defaultCdrVersionId
-    properties:
-      items:
-        type: "array"
-        items:
-          $ref: "#/definitions/CdrVersion"
-      defaultCdrVersionId:
-        type: "string"
-        description: ID of the CDR versions that should be used by the user by default
-
-  CdrVersion:
-    type: object
-    required:
-      - cdrVersionId
-      - name
-      - dataAccessLevel
-      - creationTime
-    properties:
-      cdrVersionId:
-        type: string
-      name:
-        type: string
-      dataAccessLevel:
-        $ref: "#/definitions/DataAccessLevel"
-      creationTime:
-        type: integer
-        format: int64
-        description: Milliseconds since the UNIX epoch.
-
-
   WorkspaceListResponse:
     type: object
     required:
@@ -1845,30 +1798,6 @@ definitions:
         type: string
       role:
         type: string
-
-  ErrorCode:
-    type: string
-    description: Short parsable error descriptions
-    enum: [
-      PARSE_ERROR,
-      USER_DISABLED
-    ]
-
-  ErrorResponse:
-    type: object
-    properties:
-      message:
-        description: General error message for the response.
-        type: string
-      statusCode:
-        type: integer
-        description: HTTP status code
-      errorClassName:
-        type: string
-      errorCode:
-        description: Short description of the type of error
-        $ref: "#/definitions/ErrorCode"
-      # TODO: add list of field-level error messages with field names.
 
   IdVerificationStatus:
     type: string

@@ -1,7 +1,8 @@
-package org.pmiops.workbench.cdr.model;
+package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import org.pmiops.workbench.model.DataAccessLevel;
 
 public class CommonStorageEnums {
 

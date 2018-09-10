@@ -123,6 +123,7 @@ sourceSets {
   }
 }
 
+compileJava.dependsOn ':common-api:generateCommonApi'
 compileJava.dependsOn ':generateApi'
 compileJava.dependsOn ':generateNotebooksClient'
 

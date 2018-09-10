@@ -96,6 +96,7 @@ dependencies {
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
   compile 'io.swagger:swagger-annotations:1.5.16'
+  compile 'com.google.code.gson:gson:2.8.5'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.10.19'
@@ -107,7 +108,7 @@ dependencies {
   // For Swagger generation. These should include dependencies found in the Swagger codegen
   // example here:
   // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
-  //generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
+  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
   generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
   generatedCompile 'com.squareup.okhttp:okhttp:2.6.0'
@@ -115,6 +116,7 @@ dependencies {
   generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:2.10'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
+
 }
 
 tasks.withType(Test) {
