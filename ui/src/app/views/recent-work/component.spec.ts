@@ -122,7 +122,7 @@ describe('RecentWorkComponent', () => {
     expect(de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText.trim()))
       .toEqual(['mockFile3.ipynb', 'mockFile2.ipynb', 'mockFile1.ipynb']);
     // right scroll should not be present and left present
-    expect(rightScroll).isNot;
+    expect(rightScroll).toBeNull();
     expect(leftScroll).toBeDefined();
     simulateClick(fixture, de.query(By.css('#left-scroll')));
     tick();
@@ -131,7 +131,7 @@ describe('RecentWorkComponent', () => {
     expect(de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText.trim()))
       .toEqual(['mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
     expect(rightScroll).toBeDefined();
-    expect(leftScroll).isNot;
+    expect(leftScroll).toBeNull();
   }));
 });
 
