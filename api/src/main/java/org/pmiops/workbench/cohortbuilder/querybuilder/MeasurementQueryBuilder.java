@@ -2,6 +2,8 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
@@ -13,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,50 +83,43 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateAttributes(SearchParameter parameter) {
-    List<Attribute> attrs = parameter.getAttributes();
-    Predicate<Attribute> any = nameIsAny();
-    Predicate<Attribute> numerical = nameIsNumerical().and(operatorWithCorrectOperands());
-    Predicate<Attribute> categorical = nameIsCategorical().and(inWithCorrectOperands()).or(nameIsAny());
-    Predicate<Attribute> both = nameIsBoth().and(operatorWithCorrectOperands());
-    boolean anyAttrs =
-      attrs.stream().filter(any::test).collect(Collectors.toList()).size() != 1;
-    boolean numericalAttrs =
-      attrs.stream().filter(numerical::test).collect(Collectors.toList()).size() != 1;
-    boolean categoricalAttrs =
-      attrs.stream().filter(categorical::test).collect(Collectors.toList()).size() != 1;
-    boolean bothAttrs =
-      attrs.stream().filter(both::test).collect(Collectors.toList()).size() == 0;
-    if (bothAttrs && anyAttrs && numericalAttrs && categoricalAttrs) {
-      throw new BadRequestException("Please provide valid search attributes" +
-        "(operator, operands) for Measurements.");
-    }
-  }
-
-  private static Predicate<Attribute> nameIsNumerical() {
-    return attribute -> NUMERICAL.equals(attribute.getName());
-  }
-
-  private static Predicate<Attribute> nameIsCategorical() {
-    return attribute -> CATEGORICAL.equals(attribute.getName());
-  }
-
-  private static Predicate<Attribute> nameIsAny() {
-    return attribute -> isNameAny(attribute);
-  }
-
-  private static Predicate<Attribute> nameIsBoth() {
-    return attribute -> BOTH.equals(attribute.getName());
-  }
-
-  private static Predicate<Attribute> inWithCorrectOperands() {
-    return attribute -> isOperatorIn(attribute);
-  }
-
-  private static Predicate<Attribute> operatorWithCorrectOperands() {
-    return attribute -> isNameAny(attribute)
-      || isOperatorBetween(attribute)
-      || isOperatorAnyEquals(attribute)
-      || isOperatorIn(attribute);
+    parameter
+      .getAttributes()
+      .stream()
+      .forEach(attribute -> {
+        if (!ANY.equalsIgnoreCase(attribute.getName())) {
+          if (StringUtils.isBlank(attribute.getName())) {
+            throw new BadRequestException("Please provide an attribute name.");
+          }
+          if (attribute.getOperator() == null) {
+            throw new BadRequestException("Please provide an attribute operator.");
+          }
+          if (CATEGORICAL.equalsIgnoreCase(attribute.getName())) {
+            if (!attribute.getOperator().equals(Operator.IN)) {
+              throw new BadRequestException("Please provide the in operator when searching categorical attributes.");
+            } else if (attribute.getOperands().isEmpty()) {
+              throw new BadRequestException("Please provide one or more operands when using the in operator.");
+            }
+          }
+          if (attribute.getOperator().equals(Operator.BETWEEN)) {
+            if (attribute.getOperands().size() != 2) {
+              throw new BadRequestException("Please provide two operands when using the between operator.");
+            }
+          } else {
+            List<String> operands =
+              attribute
+                .getOperands()
+                .stream()
+                .filter(
+                  o -> !NumberUtils.isNumber(o))
+                .collect(Collectors.toList());
+            if (!operands.isEmpty()) {
+              throw new BadRequestException(String.format("Please provide valid operands: %s.",
+                String.join(", ", operands)));
+            }
+          }
+        }
+      });
   }
 
   private void processNumericalSql(List<String> queryParts,
