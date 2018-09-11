@@ -42,12 +42,12 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
     }
 
     showDropDown() {
-        return this.item.get('type') === TreeType[TreeType.CONDITION];
+        return this.activeItem.get('type') === TreeType[TreeType.CONDITION];
     }
 
     optionChange(flag) {
         if (flag) {
-            this.name = flag;
+            this._type = flag;
             setTimeout(() => super.loadChildren(true));
         }
     }

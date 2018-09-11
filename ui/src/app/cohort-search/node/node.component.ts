@@ -55,10 +55,10 @@ export class NodeComponent implements OnInit, OnDestroy {
   loading = false;
   error = false;
   fullTree: boolean;
-  item: any;
+  activeItem: any;
   subscription: Subscription;
   @select(subtreeSelected) selected$: Observable<any>;
-  @select(activeItem) item$: Observable<any>;
+  @select(activeItem) activeItem$: Observable<any>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -126,7 +126,7 @@ export class NodeComponent implements OnInit, OnDestroy {
           this.node = this.node.set('name', displayName);
         });
 
-      const itemSub = this.item$.subscribe(item => this.item = item);
+      const itemSub = this.activeItem$.subscribe(item => this.activeItem = item);
 
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
