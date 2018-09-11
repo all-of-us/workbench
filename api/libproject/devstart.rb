@@ -1234,6 +1234,14 @@ def create_workbench_db()
   )
 end
 
+def grant_permissions()
+  run_with_redirects(
+    "cat db/grant_permissions.sql | envsubst | " \
+    "mysql -u \"root\" -p\"#{ENV["MYSQL_ROOT_PASSWORD"]}\" --host 127.0.0.1 --port 3307",
+    ENV["MYSQL_ROOT_PASSWORD"]
+  )
+end
+
 def migrate_database()
   common = Common.new
   common.status "Migrating main database..."
@@ -1487,8 +1495,13 @@ def setup_project_data(gcc, cdr_db_name, public_db_name)
 
     common.status "Running schema migrations..."
     migrate_database
+
+    # Grants permissions to the public user for specific tables
+    grant_permissions
+
     # This will insert a CDR version row pointing at the CDR and public DB.
     migrate_workbench_data
+
   end
 end
 
