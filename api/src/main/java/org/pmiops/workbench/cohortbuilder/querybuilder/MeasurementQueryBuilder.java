@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,42 +85,29 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateAttributes(SearchParameter parameter) {
+    Predicate<Attribute> isCategoricalAndNotIn = a -> CATEGORICAL.equals(a.getName()) && !a.getOperator().equals(Operator.IN);
+    Predicate<Attribute> isOperandsEmpty = a -> a.getOperands().isEmpty();
+    Predicate<Attribute> isNameBlank = a -> StringUtils.isBlank(a.getName());
+    Predicate<Attribute> isOperatorNull = a -> a.getOperator() == null;
+    Predicate<Attribute> isBetweenAndNotTwoOperands = a -> a.getOperator().equals(Operator.BETWEEN) && a.getOperands().size() != 2;
+    Predicate<Attribute> isOperandsInvalid =
+      a -> !a
+        .getOperands()
+        .stream()
+        .filter(
+          o -> !NumberUtils.isNumber(o))
+        .collect(Collectors.toList()).isEmpty();
     parameter
       .getAttributes()
       .stream()
+      .filter(attribute -> !isNameAny(attribute))
       .forEach(attribute -> {
-        if (!ANY.equalsIgnoreCase(attribute.getName())) {
-          if (StringUtils.isBlank(attribute.getName())) {
-            throw new BadRequestException("Please provide an attribute name.");
-          }
-          if (attribute.getOperator() == null) {
-            throw new BadRequestException("Please provide an attribute operator.");
-          }
-          if (CATEGORICAL.equalsIgnoreCase(attribute.getName())) {
-            if (!attribute.getOperator().equals(Operator.IN)) {
-              throw new BadRequestException("Please provide the in operator when searching categorical attributes.");
-            } else if (attribute.getOperands().isEmpty()) {
-              throw new BadRequestException("Please provide one or more operands when using the in operator.");
-            }
-          }
-          if (attribute.getOperator().equals(Operator.BETWEEN)) {
-            if (attribute.getOperands().size() != 2) {
-              throw new BadRequestException("Please provide two operands when using the between operator.");
-            }
-          } else {
-            List<String> operands =
-              attribute
-                .getOperands()
-                .stream()
-                .filter(
-                  o -> !NumberUtils.isNumber(o))
-                .collect(Collectors.toList());
-            if (!operands.isEmpty()) {
-              throw new BadRequestException(String.format("Please provide valid operands: %s.",
-                String.join(", ", operands)));
-            }
-          }
-        }
+        Validation.from(isNameBlank).test(attribute).throwException("Please provide an attribute name.");
+        Validation.from(isOperatorNull).test(attribute).throwException("Please provide an attribute operator");
+        Validation.from(isOperandsEmpty).test(attribute).throwException("Please provide one or more operands.");
+        Validation.from(isCategoricalAndNotIn).test(attribute).throwException("Please provide the in operator when searching categorical attributes.");
+        Validation.from(isBetweenAndNotTwoOperands).test(attribute).throwException("Please provide two operands when using the between operator.");
+        Validation.from(isOperandsInvalid).test(attribute).throwException("Please provide valid numeric operands.");
       });
   }
 
