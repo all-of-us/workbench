@@ -179,7 +179,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.isMeas) {
       this.actions.fetchAttributes(this.node);
     } else {
-      const attributes = this.node.get('subtype') === CRITERIA_SUBTYPES.BP
+      const attributes = this.node.get('subtype') === TreeSubType[TreeSubType.BP]
         ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
         : [{
           name: '',
@@ -205,7 +205,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  showCount() {
+  get showCount() {
     return this.node.get('count') !== null
       && (this.node.get('selectable')
       || (this.node.get('subtype') === TreeSubType[TreeSubType.LAB]
