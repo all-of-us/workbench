@@ -1,4 +1,5 @@
 import {Observable} from 'rxjs/Observable';
+
 import {RecentResourceResponse} from 'generated/model/recentResourceResponse';
 
 export class UserMetricsServiceStub {

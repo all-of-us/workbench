@@ -12,9 +12,7 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 
-import {
-  updateAndTick
-} from '../../../testing/test-helpers';
+import {updateAndTick} from 'testing/test-helpers';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
@@ -24,9 +22,10 @@ import {CardComponent} from 'app/views/card/component';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {HomepageComponent} from 'app/views/homepage/component';
-import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
+
+import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
 
 describe('HomepageComponent', () => {
