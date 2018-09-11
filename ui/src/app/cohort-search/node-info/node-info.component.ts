@@ -163,9 +163,10 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         let attributes = [];
         if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
-          Object.keys(PREDEFINED_ATTRIBUTES).forEach(name => {
-            if (this.node.get('name').indexOf(name) === 0) {
-              attributes = PREDEFINED_ATTRIBUTES[name];
+          const name = stripHtml(this.node.get('name'));
+          Object.keys(PREDEFINED_ATTRIBUTES).forEach(key => {
+            if (name.indexOf(key) === 0) {
+              attributes = PREDEFINED_ATTRIBUTES[key];
             }
           });
         }
