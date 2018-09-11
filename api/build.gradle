@@ -304,6 +304,7 @@ dependencies {
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
   generatedCompile project(":common-api")
 
+
 }
 
 swaggerSources {
