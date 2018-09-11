@@ -26,7 +26,7 @@ export class SearchGroupSelectComponent {
     const codes = criteria.codes || false;
     this.actions.initGroup(this.role, groupId);
     const role = this.role;
-    const context = {criteriaType, role, groupId, itemId, fullTree};
+    const context = {criteriaType, role, groupId, itemId, fullTree, codes};
     console.log(context);
     this.actions.openWizard(itemId, context);
   }

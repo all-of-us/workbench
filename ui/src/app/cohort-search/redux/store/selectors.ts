@@ -56,6 +56,9 @@ export const wizardOpen = (state): boolean =>
 export const activeCriteriaType = (state): string =>
   state.getIn(['wizard', 'criteriaType']);
 
+export const codeDropdownOptions = (state): List<any> =>
+  state.getIn(['wizard', 'codes'], List());
+
 export const activeCriteriaTreeType = (state): string =>
 state.getIn(['wizard', 'fullTree']);
 
