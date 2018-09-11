@@ -53,7 +53,10 @@ public-api/wrapper
 public-api/.swagger-codegen/*
 public-api/src/generated/
 public-api/src/main/webapp/WEB-INF/appengine-web.xml
-
+public-api/src/main/resources/merged.yaml
+public-api/gradle
+public-api/gradlew
+public-api/gradlew.bat
 **/.idea
 **/*.iml
 **/*.ipr

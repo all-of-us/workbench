@@ -74,9 +74,7 @@ public class CdrDbConfig {
           cdrVersionId = cdrVersion.getCdrVersionId();
         }
 
-        // TODO: Reconcile this with the public-api DB configs; this should
-        // share code and use the same approach, but attach to the public DBs.
-        String dbName = cdrVersion.getCdrDbName();
+        String dbName = dbUser.equals("public") ? cdrVersion.getPublicDbName() : cdrVersion.getCdrDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
         String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName + "?useSSL=false";
         DataSource dataSource =

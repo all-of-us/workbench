@@ -4,13 +4,18 @@ import io.swagger.codegen.DefaultGenerator
 def swaggerTemplateDir = 'src/main/resources'
 def swaggerSourceFile = 'src/main/resources/public-api.yaml'
 def swaggerTargetFolder = 'src/generated/java'
+def mergedPublicApiSourceFile = 'src/main/resources/merged.yaml'
+
+task generateMergedSwagger(type: Exec) {
+  commandLine "./build.rb", "merge-yaml"
+}
 
 task generateApi {
-  inputs.file("$projectDir/$swaggerSourceFile")
+  inputs.file("$projectDir/$mergedPublicApiSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$swaggerSourceFile")
+    config.setInputSpec("file:///$projectDir/$mergedPublicApiSourceFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('spring')
@@ -75,6 +80,7 @@ sourceSets {
   }
 }
 
+validateSwagger.dependsOn generateMergedSwagger
 generateApi.dependsOn validateSwagger
 ideaModule.dependsOn generateApi
 compileGeneratedJava.dependsOn generateApi
@@ -144,12 +150,13 @@ dependencies {
   generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:2.10'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
+  generatedCompile project(":common-api")
 
 }
 
 swaggerSources {
   workbench {
-    inputFile = file("$projectDir/$swaggerSourceFile")
+    inputFile = file("$projectDir/$mergedPublicApiSourceFile")
   }
 }
 

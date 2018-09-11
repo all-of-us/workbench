@@ -1,33 +1,49 @@
 package org.pmiops.workbench.publicapi;
 
-import org.pmiops.workbench.cdr.dao.*;
-import org.pmiops.workbench.cdr.model.*;
-import org.pmiops.workbench.model.ConceptListResponse;
-import org.pmiops.workbench.model.ConceptAnalysisListResponse;
-import org.pmiops.workbench.model.ConceptAnalysis;
-import org.pmiops.workbench.model.DbDomainListResponse;
-import org.pmiops.workbench.model.QuestionConceptListResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.StandardConceptFilter;
-import org.pmiops.workbench.model.MatchType;
-import org.pmiops.workbench.model.SearchConceptsRequest;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Slice;
-import javax.persistence.EntityManager;
-
 import com.google.common.collect.ImmutableMultimap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.DbDomainDao;
+import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
+import org.pmiops.workbench.cdr.model.AchillesAnalysis;
+import org.pmiops.workbench.cdr.model.AchillesResult;
+import org.pmiops.workbench.cdr.model.AchillesResultDist;
+import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
+import org.pmiops.workbench.cdr.model.DbDomain;
+import org.pmiops.workbench.cdr.model.QuestionConcept;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.model.ConceptAnalysis;
+import org.pmiops.workbench.model.ConceptAnalysisListResponse;
+import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.DbDomainListResponse;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.MatchType;
+import org.pmiops.workbench.model.QuestionConceptListResponse;
+import org.pmiops.workbench.model.SearchConceptsRequest;
+import org.pmiops.workbench.model.StandardConceptFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Slice;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DataBrowserController implements DataBrowserApiDelegate {
@@ -44,10 +60,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private DbDomainDao dbDomainDao;
     @Autowired
     private AchillesResultDistDao achillesResultDistDao;
-    @Autowired
+    @PersistenceContext(unitName = "cdr")
     private EntityManager entityManager;
 
+    @Autowired
+    @Qualifier("defaultCdr")
+    private Provider<CdrVersion> defaultCdrVersionProvider;
+
     private ConceptService conceptService;
+
+    public DataBrowserController() {}
 
     public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao, EntityManager entityManager) {
         this.conceptService = conceptService;
@@ -299,6 +321,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDomainFilters() {
+        // TODO: change all the APIs to accept CDR version ID as a parameter, use it here and below.
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         List<DbDomain> domains=dbDomainDao.findByDbType("domain_filter");
         DbDomainListResponse resp=new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
@@ -307,6 +331,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getSurveyList() {
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         List<DbDomain> domains=dbDomainDao.findByDbTypeAndConceptIdNot("survey",0L);
         DbDomainListResponse resp=new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
@@ -315,7 +340,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDomainSearchResults(String query){
-
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         String keyword = ConceptService.modifyMultipleMatchKeyword(query);
         List<DbDomain> domains = new ArrayList<>();
         domains = dbDomainDao.findDomainSearchResults(keyword,query);
@@ -326,7 +351,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<ConceptListResponse> searchConcepts(SearchConceptsRequest searchConceptsRequest){
-
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         Integer maxResults = searchConceptsRequest.getMaxResults();
         if(maxResults == null || maxResults == 0){
             maxResults = Integer.MAX_VALUE;
@@ -398,6 +423,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDomainTotals(){
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         List<DbDomain> domains = dbDomainDao.findDomainTotals();
         List<Concept> concepts = conceptDao.findDbDomainParticpantCounts();
         DbDomain.mapConceptCounts(concepts);
@@ -416,6 +442,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getGenderAnalysis(){
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         AchillesAnalysis genderAnalysis = achillesAnalysisDao.findAnalysisById(GENDER_ANALYSIS);
         for(AchillesResult ar: genderAnalysis.getResults()){
             String analysisStratumName =ar.getAnalysisStratumName();
@@ -428,6 +455,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getRaceAnalysis(){
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         AchillesAnalysis raceAnalysis = achillesAnalysisDao.findAnalysisById(RACE_ANALYSIS);
         for(AchillesResult ar: raceAnalysis.getResults()){
             String analysisStratumName =ar.getAnalysisStratumName();
@@ -440,6 +468,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getEthnicityAnalysis(){
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         AchillesAnalysis ethnicityAnalysis = achillesAnalysisDao.findAnalysisById(ETHNICITY_ANALYSIS);
         for(AchillesResult ar: ethnicityAnalysis.getResults()){
             String analysisStratumName =ar.getAnalysisStratumName();
@@ -452,6 +481,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<QuestionConceptListResponse> getSurveyResults(String surveyConceptId) {
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         /* Set up the age and gender names */
         // Too slow and concept names wrong so we hardcode list
         // List<Concept> genders = conceptDao.findByConceptClassId("Gender");
@@ -483,6 +513,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<ConceptAnalysisListResponse> getConceptAnalysisResults(List<String> conceptIds){
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         ConceptAnalysisListResponse resp=new ConceptAnalysisListResponse();
         List<ConceptAnalysis> conceptAnalysisList=new ArrayList<>();
         List<Long> analysisIds  = new ArrayList<>();
@@ -621,6 +652,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
      */
     @Override
     public ResponseEntity<ConceptListResponse> getSourceConcepts(Long conceptId,Integer minCount) {
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         Integer count=minCount;
         if(count == null){
             count = 0;
@@ -639,6 +671,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
      */
     @Override
     public ResponseEntity<ConceptListResponse> getParentConcepts(Long conceptId) {
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         List<Concept> conceptList = conceptDao.findConceptsMapsToParents(conceptId);
         ConceptListResponse resp = new ConceptListResponse();
         resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
@@ -647,12 +680,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.AchillesResult> getParticipantCount() {
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         AchillesResult result = achillesResultDao.findAchillesResultByAnalysisId(PARTICIPANT_COUNT_ANALYSIS_ID);
         return ResponseEntity.ok(TO_CLIENT_ACHILLES_RESULT.apply(result));
     }
 
     @Override
     public ResponseEntity<DbDomainListResponse> getDbDomains() {
+        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         List<DbDomain> resultList = dbDomainDao.findByConceptIdNotNull();
         DbDomainListResponse resp = new DbDomainListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
