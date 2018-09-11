@@ -8,7 +8,9 @@ import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {
   activeCriteriaTreeType,
   activeCriteriaType,
+  activeItem,
   activeParameterList,
+  codeDropdownOptions,
   CohortSearchActions,
   nodeAttributes,
   subtreeSelected,
@@ -29,16 +31,20 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
+  @select(activeItem) item$: Observable<any>;
   @select(activeParameterList) selection$: Observable<any>;
   @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
+  @select(codeDropdownOptions) codeOptions$: Observable<any>;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
   ctype: string;
+  item: any;
   fullTree: boolean;
   subscription: Subscription;
   attributesNode: Map<any, any> = Map();
+  codeOptions: any;
 
   open = false;
   noSelection = true;
@@ -60,22 +66,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.criteriaType$
       .filter(ctype => !!ctype)
       .subscribe(ctype => {
-        if (![TreeType[TreeType.CONDITION], TreeType[TreeType.PROCEDURE]].includes(this.ctype)) {
-          this.ctype = ctype;
-          this.title = 'Codes';
-          for (const crit of DOMAIN_TYPES) {
-            const regex = new RegExp(`.*${crit.type}.*`, 'i');
-            if (regex.test(this.ctype)) {
-              this.title = crit.name;
-            }
-          }
-          for (const crit of PROGRAM_TYPES) {
-            const regex = new RegExp(`.*${crit.type}.*`, 'i');
-            if (regex.test(this.ctype)) {
-              this.title = crit.name;
-            }
-          }
-        }
+        this.ctype = ctype;
       })
     );
 
@@ -105,6 +96,25 @@ export class ModalComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.subscription.add(this.item$.subscribe(item => {
+      const itemType = item.get('type');
+      this.title = 'Codes';
+      for (const crit of DOMAIN_TYPES) {
+        const regex = new RegExp(`.*${crit.type}.*`, 'i');
+        if (regex.test(itemType)) {
+          this.title = crit.name;
+        }
+      }
+      for (const crit of PROGRAM_TYPES) {
+        const regex = new RegExp(`.*${crit.type}.*`, 'i');
+        if (regex.test(itemType)) {
+          this.title = crit.name;
+        }
+      }
+    }));
+
+    this.subscription.add(this.codeOptions$.subscribe(options => this.codeOptions = options));
   }
   setScroll(nodeId: string) {
     let node: any;

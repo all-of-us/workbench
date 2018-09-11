@@ -2,6 +2,7 @@ import {Component, EventEmitter, OnChanges, OnInit, Output} from '@angular/core'
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
 // import {CRITERIA_TYPES} from '../constant';
+// import {activeItem} from '../redux/store';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -41,9 +42,7 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
     }
 
     showDropDown() {
-        return this.node.get('type') === TreeType[TreeType.CONDITION]
-            || this.node.get('type') === TreeType[TreeType.ICD9]
-            || this.node.get('type') === TreeType[TreeType.ICD10];
+        return this.item.get('type') === TreeType[TreeType.CONDITION];
     }
 
     optionChange(flag) {

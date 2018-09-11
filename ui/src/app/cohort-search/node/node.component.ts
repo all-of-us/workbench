@@ -7,6 +7,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {
   activeCriteriaTreeType,
+  activeItem,
   CohortSearchActions,
   CohortSearchState,
   criteriaChildren,
@@ -54,8 +55,10 @@ export class NodeComponent implements OnInit, OnDestroy {
   loading = false;
   error = false;
   fullTree: boolean;
+  item: any;
   subscription: Subscription;
   @select(subtreeSelected) selected$: Observable<any>;
+  @select(activeItem) item$: Observable<any>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -123,12 +126,15 @@ export class NodeComponent implements OnInit, OnDestroy {
           this.node = this.node.set('name', displayName);
         });
 
+      const itemSub = this.item$.subscribe(item => this.item = item);
+
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
       this.subscription.add(subtreeSub);
       this.subscription.add(subtreeSelectSub);
+      this.subscription.add(itemSub);
     }
     if (this.fullTree) {
       this.expanded = this.node.get('expanded', false);
