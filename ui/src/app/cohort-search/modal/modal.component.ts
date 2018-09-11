@@ -60,26 +60,26 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.criteriaType$
       .filter(ctype => !!ctype)
       .subscribe(ctype => {
-        this.ctype = ctype;
-        this.title = 'Codes';
-        for (const crit of DOMAIN_TYPES) {
-          const regex = new RegExp(`.*${crit.type}.*`, 'i');
-          if (regex.test(this.ctype)) {
-            this.title = crit.name;
+        if (![TreeType[TreeType.CONDITION], TreeType[TreeType.PROCEDURE]].includes(this.ctype)) {
+          this.ctype = ctype;
+          this.title = 'Codes';
+          for (const crit of DOMAIN_TYPES) {
+            const regex = new RegExp(`.*${crit.type}.*`, 'i');
+            if (regex.test(this.ctype)) {
+              this.title = crit.name;
+            }
           }
-        }
-        for (const crit of PROGRAM_TYPES) {
-          const regex = new RegExp(`.*${crit.type}.*`, 'i');
-          if (regex.test(this.ctype)) {
-            this.title = crit.name;
+          for (const crit of PROGRAM_TYPES) {
+            const regex = new RegExp(`.*${crit.type}.*`, 'i');
+            if (regex.test(this.ctype)) {
+              this.title = crit.name;
+            }
           }
         }
       })
     );
 
-    this.subscription.add(this.isFullTree$
-      .subscribe(fullTree => this.fullTree = fullTree)
-    );
+    this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
 
     this.subscription.add(this.selection$
       .map(sel => sel.size === 0)
@@ -138,31 +138,35 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-    return Map({
-      type: this.ctype,
-      fullTree: this.fullTree,
-      id: 0,    // root parent ID is always 0
-    });
+    if (this.ctype === this.treeType[this.treeType.CONDITION]) {
+      // this.ctype= this.treeType[this.treeType.ICD9];
+      return Map({
+        type: this.treeType[this.treeType.ICD9],
+        fullTree: this.fullTree,
+        id: 0,    // root parent ID is always 0
+      });
+    } else {
+      return Map({
+        type: this.ctype,
+        fullTree: this.fullTree,
+        id: 0,    // root parent ID is always 0
+      });
+    }
   }
 
   get selectionTitle() {
     const title = typeToTitle(this.ctype);
     if ((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')) {
-        return title
-            ? `Add Selected CONDITIONS Criteria to Cohort`
-            : 'No Selection';
+      return title
+        ? `Add Selected CONDITIONS Criteria to Cohort`
+        : 'No Selection';
     } else {
-        return title
-            ? `Add Selected ${title} Criteria to Cohort`
-            : 'No Selection';
+      return title
+        ? `Add Selected ${title} Criteria to Cohort`
+        : 'No Selection';
     }
+  }
 
-  }
-  get conditionTitle() {
-      return this.ctype === this.treeType[this.treeType.ICD9]
-          || this.ctype === this.treeType[this.treeType.ICD10]
-          || this.ctype === this.treeType[this.treeType.CONDITION];
-  }
   get attributeTitle() {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
