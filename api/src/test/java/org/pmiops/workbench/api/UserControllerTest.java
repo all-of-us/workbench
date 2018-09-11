@@ -2,11 +2,11 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.Lists;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
 import javax.inject.Provider;
-import com.google.common.collect.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +16,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -211,9 +211,9 @@ public class UserControllerTest {
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
     if (registered) {
-      user.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     } else {
-      user.setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
+      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
     }
     incrementedUserId++;
     userDao.save(user);

@@ -39,8 +39,8 @@ public class StorageEnumsTest {
       {
         DataAccessLevel.class.getSimpleName(),
         DataAccessLevel.values(),
-        (Function<Short, DataAccessLevel>) StorageEnums::dataAccessLevelFromStorage,
-        (Function<DataAccessLevel, Short>) StorageEnums::dataAccessLevelToStorage
+        (Function<Short, DataAccessLevel>) CommonStorageEnums::dataAccessLevelFromStorage,
+        (Function<DataAccessLevel, Short>) CommonStorageEnums::dataAccessLevelToStorage
       },
       {
         EmailVerificationStatus.class.getSimpleName(),
