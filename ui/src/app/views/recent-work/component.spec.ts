@@ -3,6 +3,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {By} from '@angular/platform-browser';
 import {ClarityModule} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
+
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -19,9 +20,10 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 import {CardComponent} from 'app/views/card/component';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
+
+import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
 
 describe('RecentWorkComponent', () => {
@@ -116,16 +118,18 @@ describe('RecentWorkComponent', () => {
     simulateClick(fixture, rightScroll);
     fixture.detectChanges();
     tick();
-    //should have scrolled right so should be FIRST 3 and NOT last
-    expect(de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText.trim())).toEqual(['mockFile3.ipynb', 'mockFile2.ipynb', 'mockFile1.ipynb']);
-    //right scroll should not be present and left present
+    // should have scrolled right so should be FIRST 3 and NOT last
+    expect(de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText.trim()))
+      .toEqual(['mockFile3.ipynb', 'mockFile2.ipynb', 'mockFile1.ipynb']);
+    // right scroll should not be present and left present
     expect(rightScroll).isNot;
     expect(leftScroll).toBeDefined();
     simulateClick(fixture, de.query(By.css('#left-scroll')));
     tick();
     fixture.detectChanges();
-    //all should be returned to orig state
-    expect(de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText)).toEqual(['mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
+    // all should be returned to orig state
+    expect(de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText.trim()))
+      .toEqual(['mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
     expect(rightScroll).toBeDefined();
     expect(leftScroll).isNot;
   }));
