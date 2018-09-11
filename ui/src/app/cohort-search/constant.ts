@@ -7,7 +7,11 @@ export const PROGRAM_TYPES = [
 
 export const DOMAIN_TYPES = [
     { name: 'Demographics', type: TreeType.DEMO },
-    { name: 'Conditions',    type: TreeType.CONDITION },
+    { name: 'Conditions',    type: TreeType.CONDITION , codes: [
+        { name: 'ICD9 Codes', type: TreeType.ICD9},
+        { name: 'ICD10 Codes', type: TreeType.ICD10}
+      ]
+    },
     { name: 'Procedures',    type: TreeType.PROCEDURE, disabled: true },
     { name: 'Drugs',    type: TreeType.DRUG },
     { name: 'Measurements',    type: TreeType.MEAS },

@@ -23,9 +23,11 @@ export class SearchGroupSelectComponent {
     const groupId = this.actions.generateId(this.role);
     const criteriaType = criteria.type;
     const fullTree = criteria.fullTree || false;
+    const codes = criteria.codes || false;
     this.actions.initGroup(this.role, groupId);
     const role = this.role;
     const context = {criteriaType, role, groupId, itemId, fullTree};
+    console.log(context);
     this.actions.openWizard(itemId, context);
   }
 }
