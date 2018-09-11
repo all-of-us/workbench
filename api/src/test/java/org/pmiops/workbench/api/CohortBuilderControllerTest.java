@@ -216,7 +216,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(labMeasurement),
       controller
-        .getCriteriaAutoComplete(1L, TreeType.MEAS.name(),"LP12", null)
+        .getCriteriaAutoComplete(1L, TreeType.MEAS.name(),"LP12", null, null)
         .getBody()
         .getItems()
         .get(0)

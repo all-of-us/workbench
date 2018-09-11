@@ -106,11 +106,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> getCriteriaAutoComplete(Long cdrVersionId,
                                                                       String type,
                                                                       String value,
-                                                                      String subtype) {
+                                                                      String subtype,
+                                                                      Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     final List<Criteria> criteriaList = subtype == null ?
-      criteriaDao.findCriteriaByTypeForCodeOrName(type, value) :
-      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value);
+      criteriaDao.findCriteriaByTypeForCodeOrName(type, value, resultLimit) :
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -123,7 +125,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                              String drugName,
                                                                              Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    Long resultLimit = Optional.of(limit).orElse(DEFAULT_LIMIT);
+    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();

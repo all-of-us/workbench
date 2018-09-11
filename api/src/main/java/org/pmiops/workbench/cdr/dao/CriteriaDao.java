@@ -62,10 +62,11 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
-    "limit 250", nativeQuery = true)
+    "limit :limit", nativeQuery = true)
   List<Criteria> findCriteriaByTypeAndSubtypeForCodeOrName(@Param("type") String type,
                                                            @Param("subtype") String subtype,
-                                                           @Param("value") String value);
+                                                           @Param("value") String value,
+                                                           @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "where c.type = :type " +

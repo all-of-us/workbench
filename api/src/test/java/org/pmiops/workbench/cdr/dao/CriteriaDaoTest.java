@@ -205,14 +205,28 @@ public class CriteriaDaoTest {
   public void findCriteriaByTypeAndSubtypeForCodeOrName() throws Exception {
     //match on code
     List<Criteria> conditions =
-      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001");
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", null);
     assertEquals(1, conditions.size());
     assertEquals(icd9Criteria2, conditions.get(0));
 
     //match on name
-    conditions = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(), "ol b");
+    conditions = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(), "ol b", null);
     assertEquals(1, conditions.size());
     assertEquals(icd9Criteria2, conditions.get(0));
+
+    conditions =
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"00", null);
+    assertEquals(4, conditions.size());
+    assertEquals(icd9Criteria1, conditions.get(0));
+    assertEquals(icd9Criteria2, conditions.get(1));
+    assertEquals(parentIcd9, conditions.get(2));
+    assertEquals(childIcd9, conditions.get(3));
+
+    conditions =
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"00", 2L);
+    assertEquals(2, conditions.size());
+    assertEquals(icd9Criteria1, conditions.get(0));
+    assertEquals(icd9Criteria2, conditions.get(1));
   }
 
   @Test
