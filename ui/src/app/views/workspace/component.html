@@ -27,7 +27,17 @@
       </div>
     </div>
     <div style="padding-top: 1rem;">
-      <h4 class="subheader">Research Purpose</h4>
+      <h4 class="subheader">Research Purpose
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
+          <button [disabled]="!writePermission"
+                  [class.disabled]="!writePermission"
+                  routerLink="/workspaces/{{workspace.namespace}}/{{workspace.id}}/edit"
+                  routerLinkActive="active" class="action-item">
+            <clr-icon shape="pencil" class="icon"></clr-icon>
+          </button>
+          <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
+        </span>
+      </h4>
       <div class="description-text">
         {{workspace.description}}
       </div>
