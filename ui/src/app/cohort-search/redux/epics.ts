@@ -89,7 +89,7 @@ export class CohortSearchEpics {
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        return this.service.getCriteriaBy(cdrVersionId, kind, null, parentId, null)
+        return this.service.getCriteriaBy(cdrVersionId, kind, null, parentId)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -103,7 +103,7 @@ export class CohortSearchEpics {
   fetchAllCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_ALL_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        return this.service.getCriteriaBy(cdrVersionId, kind, null, null, null)
+        return this.service.getCriteriaBy(cdrVersionId, kind)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -137,7 +137,7 @@ export class CohortSearchEpics {
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         } else {
-          return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms, null)
+          return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms)
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         }
