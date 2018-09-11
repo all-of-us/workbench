@@ -13,6 +13,7 @@ export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
 export const BEGIN_CHILDREN_REQUEST = 'BEGIN_CHILDREN_REQUEST';
 export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
 export const LOAD_CHILDREN_LIST = 'LOAD_CHILDREN_LIST';
+export const SELECT_CHILDREN_LIST = 'SELECT_CHILDREN_LIST';
 export const LOAD_ATTRIBUTE_LIST = 'LOAD_ATTRIBUTE_LIST';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
 export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
@@ -155,6 +156,11 @@ export interface ActionTypes {
     parentId: number;
     children: any;
   };
+  SELECT_CHILDREN_LIST: {
+    type: typeof SELECT_CHILDREN_LIST;
+    kind: string;
+    parentId: number;
+  };
   LOAD_ATTRIBUTE_LIST: {
     type: typeof LOAD_ATTRIBUTE_LIST;
     node: any;
@@ -262,6 +268,7 @@ export interface ActionTypes {
     type: typeof REMOVE_PARAMETER;
     parameterId: string;
     path: string;
+    id: number;
   };
   ADD_MODIFIER: {
     type: typeof ADD_MODIFIER;
@@ -344,6 +351,7 @@ export type RootAction =
   | ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof LOAD_INGREDIENT_LIST]
   | ActionTypes[typeof LOAD_CHILDREN_LIST]
+  | ActionTypes[typeof SELECT_CHILDREN_LIST]
   | ActionTypes[typeof LOAD_ATTRIBUTE_LIST]
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof ATTRIBUTE_REQUEST_ERROR]

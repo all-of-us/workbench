@@ -19,22 +19,10 @@ import {
   CohortSearchState,
   isParameterActive,
   isSelectedParent,
+  selectedGroups,
   subtreeSelected
 } from '../redux';
 import {stripHtml} from '../utils';
-
-/*
- * Stub function - some criteria types will have "attributes" that help define
- * them.  Demographics AGE was in this category until we removed demographics
- * to its own modal form.  This function and the overall attribute flow has
- * been left intact in order to provide a "hook-in" location for implementing
- * other types of attribute.
- */
-function needsAttributes(node: any) {
-  // will change soon to check for attributes property instead of id
-  return node.get('hasAttributes') === true;
-}
-
 
 @Component({
   selector: 'crit-node-info',
@@ -42,10 +30,12 @@ function needsAttributes(node: any) {
   styleUrls: ['./node-info.component.css']
 })
 export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
+  @select(selectedGroups) groups$: Observable<any>;
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() node;
   private isSelected: boolean;
   private isSelectedParent: boolean;
+  private isSelectedChild: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
@@ -73,6 +63,12 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(val => {
         this.isSelectedParent = val;
       });
+
+    this.subscription.add(this.groups$
+      .filter(groupIds => !!groupIds)
+      .subscribe(groupIds => {
+        this.isSelectedChild = groupIds.some(id => this.node.get('path').split('.').includes(id));
+      }));
 
     this.subscription.add(this.selected$
       .filter(selectedIds => !!selectedIds)
@@ -112,8 +108,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const noCode = (this.isDrug() && this.node.get('group'))
-      || this.isPM();
+    const noCode = (this.isDrug && this.node.get('group'))
+      || this.isPM;
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
     return (noCode || nameIsCode) ? '' : this.node.get('name', '');
   }
@@ -123,11 +119,18 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayCode() {
-    if ((this.isDrug() && this.node.get('group'))
-      || this.isPM()) {
+    if ((this.isDrug && this.node.get('group'))
+      || this.isPM) {
       return this.node.get('name', '');
     }
     return this.node.get('code', '');
+  }
+
+  get selectAllChildren() {
+    return (this.isDrug
+      || this.node.get('type') === TreeType.ICD9
+      || this.node.get('type') === TreeType.ICD10)
+      && this.node.get('group');
   }
 
   /*
@@ -145,22 +148,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
      * fire a request for children (if there are any)
      */
     event.stopPropagation();
-    if (needsAttributes(this.node)) {
-      if (this.isMeas()) {
-        this.actions.fetchAttributes(this.node);
-      } else {
-        const attributes = this.node.get('subtype') === TreeSubType[TreeSubType.BP]
-          ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-          : [{
-            name: '',
-            operator: null,
-            operands: [null],
-            conceptId: this.node.get('conceptId', null),
-            MIN: 0,
-            MAX: 10000
-          }];
-        this.actions.loadAttributes(this.node, attributes);
-      }
+    if (this.hasAttributes) {
+      this.getAttributes();
     } else {
       /*
        * Here we set the parameter ID to `param<criterion ID>` - this is
@@ -169,8 +158,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        * to have a complete sense are given a unique ID based on the attribute
        */
 
-      if (this.isDrug() && this.node.get('group')) {
-        this.actions.fetchAllChildren(TreeType[TreeType.DRUG], this.node.get('id'));
+      if (this.selectAllChildren) {
+        this.actions.fetchAllChildren(this.node);
       } else {
         let attributes = [];
         if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
@@ -186,6 +175,24 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  getAttributes() {
+    if (this.isMeas) {
+      this.actions.fetchAttributes(this.node);
+    } else {
+      const attributes = this.node.get('subtype') === TreeSubType[TreeSubType.BP]
+        ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
+        : [{
+          name: '',
+          operator: null,
+          operands: [null],
+          conceptId: this.node.get('conceptId', null),
+          MIN: 0,
+          MAX: 10000
+        }];
+      this.actions.loadAttributes(this.node, attributes);
+    }
+  }
+
   selectChildren(node: Map<string, any>) {
     if (node.get('group')) {
       node.get('children').forEach(child => {
@@ -198,7 +205,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  showCount() {
+  get showCount() {
     return this.node.get('count') !== null
       && (this.node.get('selectable')
       || (this.node.get('subtype') === TreeSubType[TreeSubType.LAB]
@@ -206,15 +213,23 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       && this.node.get('code') !== null ));
   }
 
-  isPM() {
+  get isPM() {
     return this.node.get('type') === TreeType[TreeType.PM];
   }
 
-  isDrug() {
+  get isDrug() {
     return this.node.get('type') === TreeType[TreeType.DRUG];
   }
 
-  isMeas() {
+  get isMeas() {
     return this.node.get('type') === TreeType[TreeType.MEAS];
+  }
+
+  get hasAttributes() {
+    return this.node.get('hasAttributes') === true;
+  }
+
+  get isDisabled() {
+    return this.isSelected || this.isSelectedChild || this.isSelectedParent;
   }
 }
