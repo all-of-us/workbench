@@ -2,7 +2,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {Response, ResponseOptions} from '@angular/http';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, convertToParamMap} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {AsyncSubject} from 'rxjs/AsyncSubject';
@@ -107,10 +107,10 @@ describe('NotebookRedirectComponent', () => {
               'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
               'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
             },
-            queryParamMap: {
+            queryParamMap: convertToParamMap({
               'notebook-name': 'blah',
               'kernel-type': Kernels.R
-            },
+            }),
             data: {
               creating: true
             }
