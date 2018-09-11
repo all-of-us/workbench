@@ -31,4 +31,9 @@ analysis_id,"analysis_name","stratum_1_name","stratum_2_name","stratum_3_name","
 3104,"Ethnicity","concept_id","ethnicity_concept_id","domain_id",NULL,NULL,"column","counts"
 3110,"Response Distribution","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","null","column","counts"
 3111,"Gender","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","gender_concept_id","column","counts"
-3112,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value_string","age_decile","column","counts"
+3112,"Age","survey_concept_id","question_concept_id","answer_concept_id","answer_value:q!
+
+
+
+
+_string","age_decile","column","counts"

@@ -917,4 +917,3 @@ on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'H
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0) and (dbd.db_type = 'survey' and dbd.concept_id <> 0)
 group by dbd.concept_id, stratum_2"
-
