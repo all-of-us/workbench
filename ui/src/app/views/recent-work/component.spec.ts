@@ -2,9 +2,10 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 
 import {By} from '@angular/platform-browser';
 import {ClarityModule} from '@clr/angular';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {RouterTestingModule} from '@angular/router/testing';
 import {Observable} from 'rxjs/Observable';
+import {RouterTestingModule} from '@angular/router/testing';
+
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {CohortsService} from 'generated/api/cohorts.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
@@ -62,7 +63,7 @@ describe('RecentWorkComponent', () => {
     expect(fixture).toBeTruthy();
   }));
 
-  //test that it displays 3 most recent resources from UserMetrics cache
+  // test that it displays 3 most recent resources from UserMetrics cache
   it('should display recent work', fakeAsync(() => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(4)));
     updateAndTick(fixture);
@@ -70,11 +71,11 @@ describe('RecentWorkComponent', () => {
     const cardsOnPage = de.queryAll(By.css('.card'));
     const cardNames = de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText);
     expect(cardsOnPage.length).toEqual(3);
-    //should match LAST 3, and NOT include the "oldest"
-    expect(cardNames).toEqual(["mockFile4.ipynb", "mockFile3.ipynb", "mockFile2.ipynb"]);
+    // should match LAST 3, and NOT include the "oldest"
+    expect(cardNames).toEqual(['mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
   }));
 
-  //it should not render the component at all if user has no cache
+  // it should not render the component at all if user has no cache
   it('should not render if no cache', fakeAsync(() => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of([]));
     updateAndTick(fixture);
@@ -82,7 +83,7 @@ describe('RecentWorkComponent', () => {
     expect(recentWork.length).toEqual(0);
   }));
 
-  //neither scroll indicator should show if cache < 4
+  // neither scroll indicator should show if cache < 4
   it('should not render either scroll indicator if cache fewer than 4', fakeAsync(() => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of([]));
     updateAndTick(fixture);
@@ -90,7 +91,7 @@ describe('RecentWorkComponent', () => {
     expect(scrolls.length).toEqual(0);
   }));
 
-  //right scroll should appear (but no left scroll) if cache > 3
+  // right scroll should appear (but no left scroll) if cache > 3
   it('should render scroll indicators correctly if cache greater than 3', fakeAsync(() => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(4)));
     updateAndTick(fixture);
@@ -101,7 +102,7 @@ describe('RecentWorkComponent', () => {
     expect(rightScroll.length).toEqual(1);
   }));
 
-  //test that component scrolls correctly
+  // test that component scrolls correctly
   //    moves down list on right scroll click
   //    right scroll disappears and left appears
   //    moves up list on left scroll click
@@ -135,9 +136,9 @@ function stubRecentResources(numberOfResources: number) {
   while (numberOfResources > 0) {
     const currentResource = {
       workspaceId: numberOfResources,
-      workspaceNamespace: "defaultNamespace" + numberOfResources,
-      workspaceFirecloudName: "defaultFirecloudName" + numberOfResources,
-      permission: "Owner",
+      workspaceNamespace: 'defaultNamespace' + numberOfResources,
+      workspaceFirecloudName: 'defaultFirecloudName' + numberOfResources,
+      permission: 'Owner',
       notebook: {
         'name': 'mockFile' + numberOfResources + '.ipynb',
         'path': 'gs://bucket/notebooks/mockFile.ipynb',
@@ -150,9 +151,3 @@ function stubRecentResources(numberOfResources: number) {
   }
   return currentCache;
 }
-
-//test that component scrolls correctly
-//    moves down list on right scroll click
-//    right scroll disappears and left appears
-//    moves up list on left scroll click
-//    left scroll disappears and right appears
