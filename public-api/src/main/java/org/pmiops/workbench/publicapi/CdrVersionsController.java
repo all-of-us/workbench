@@ -33,10 +33,6 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
         }
       };
 
-  private static final ImmutableSet<Short> REGISTERED_AND_PROTECTED =
-      ImmutableSet.of(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED),
-          CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
-
   private final CdrVersionDao cdrVersionDao;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -49,10 +45,11 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
 
   @Override
   public ResponseEntity<CdrVersionListResponse> getCdrVersions() {
-    // We return CDR versions for both registered and controlled CDR versions in the public API,
-    // since the metadata for them is public.
+    // We return CDR versions for just registered CDR versions; controlled CDR data is currently
+    // out of scope for the data browser.
     List<CdrVersion> cdrVersions = cdrVersionDao
-        .findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(REGISTERED_AND_PROTECTED);
+        .findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(
+            ImmutableSet.of(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED)));
     // TODO: consider different default CDR versions for different access levels
     String defaultCdrVersionName = workbenchConfigProvider.get().cdr.defaultCdrVersion;
     String defaultCdrVersionId = null;

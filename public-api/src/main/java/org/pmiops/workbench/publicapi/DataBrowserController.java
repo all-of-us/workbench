@@ -71,7 +71,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     public DataBrowserController() {}
 
-    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao, DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao, EntityManager entityManager) {
+    public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao,
+        DbDomainDao dbDomainDao, AchillesResultDao achillesResultDao,
+        AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao,
+        EntityManager entityManager, Provider<CdrVersion> defaultCdrVersionProvider) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
         this.dbDomainDao = dbDomainDao;
@@ -79,6 +82,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         this.achillesAnalysisDao = achillesAnalysisDao;
         this.achillesResultDistDao = achillesResultDistDao;
         this.entityManager = entityManager;
+        this.defaultCdrVersionProvider = defaultCdrVersionProvider;
     }
 
 

@@ -74,7 +74,7 @@ public class CdrDbConfig {
           cdrVersionId = cdrVersion.getCdrVersionId();
         }
 
-        String dbName = dbUser.equals("public") ? cdrVersion.getPublicDbName() : cdrVersion.getCdrDbName();
+        String dbName = "public".equals(dbUser) ? cdrVersion.getPublicDbName() : cdrVersion.getCdrDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
         String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName + "?useSSL=false";
         DataSource dataSource =
