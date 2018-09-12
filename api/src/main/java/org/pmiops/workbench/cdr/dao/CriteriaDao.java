@@ -9,7 +9,8 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
-  List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type, @Param("parentId") Long parentId);
+  List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
+                                                           @Param("parentId") Long parentId);
 
   @Query(value = "select * " +
     "from criteria " +
@@ -41,14 +42,38 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
-    "limit 250", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeForCodeOrName(@Param("type") String type, @Param("value") String value);
+    "limit :limit", nativeQuery = true)
+  List<Criteria> findCriteriaByTypeForCodeOrName(@Param("type") String type,
+                                                 @Param("value") String value,
+                                                 @Param("limit") Long limit);
+
+  @Query(value = "select * from criteria where id in ( " +
+    "select id from " +
+    "(select case " +
+    "when @curType = name " +
+    "then @curRow \\:= @curRow + 1 " +
+    "else @curRow \\:= 1 end as rank, " +
+    "id, " +
+    "code, " +
+    "@curType \\:= name as name, " +
+    "concept_id " +
+    "from (select * from criteria where type = upper(:type) and subtype = upper(:subtype) and " +
+    "(upper(code) like upper(concat('%',:value,'%')) or upper(name) like upper(concat('%',:value,'%'))) ) a, " +
+    "(select @curRow \\:= 0, @curType \\:= '') r " +
+    "order by name, id) as x " +
+    "where rank = 1) " +
+    "limit :limit", nativeQuery = true)
+  List<Criteria> findCriteriaByTypeAndSubtypeForCodeOrName(@Param("type") String type,
+                                                           @Param("subtype") String subtype,
+                                                           @Param("value") String value,
+                                                           @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "where c.type = :type " +
     "and c.subtype = :subtype " +
     "order by c.id asc", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeAndSubtypeOrderByIdAsc(@Param("type") String type, @Param("subtype") String subtype);
+  List<Criteria> findCriteriaByTypeAndSubtypeOrderByIdAsc(@Param("type") String type,
+                                                          @Param("subtype") String subtype);
 
   @Query(value = "select * from criteria c " +
     "where c.type = 'DRUG' " +
@@ -56,8 +81,9 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and c.is_selectable = 1 " +
     "and upper(c.name) like upper(concat('%',:name,'%')) " +
     "order by c.name asc " +
-    "limit 250", nativeQuery = true)
-  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name);
+    "limit :limit", nativeQuery = true)
+  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name,
+                                                 @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "inner join ( " +
@@ -67,25 +93,26 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2", nativeQuery = true)
   List<Criteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
 
-  @Query(value = "select distinct c.domain_id as domainId from criteria c " +
-    "where c.parent_id in (" +
-    "select id from criteria " +
-    "where type = :type " +
-    "and code like :code% " +
+  @Query(value = "select distinct domain_id as domainId " +
+    "from criteria " +
+    "where is_group = 0 " +
     "and is_selectable = 1 " +
-    "and is_group = 1) " +
-    "and c.is_group = 0 and c.is_selectable = 1", nativeQuery = true)
-  List<String> findCriteriaByTypeAndCode(@Param("type") String type, @Param("code") String code);
-
-  @Query(value = "select distinct c.domain_id as domainId from criteria c " +
-    "where c.parent_id in (" +
-    "select id from criteria " +
+    "and path = ( " +
+    "select concat( path, '.', id) as path " +
+    "from criteria " +
     "where type = :type " +
     "and subtype = :subtype " +
-    "and code like :code% " +
-    "and is_selectable = 1 " +
-    "and is_group = 1) " +
-    "and c.is_group = 0 and c.is_selectable = 1", nativeQuery = true)
+    "and code = :code " +
+    "and is_group = 1 " +
+    "and is_selectable = 1) " +
+    "or path like (" +
+    "select concat( path, '.', id, '.%') as path " +
+    "from criteria " +
+    "where type = :type " +
+    "and subtype = :subtype " +
+    "and code = :code " +
+    "and is_group = 1 " +
+    "and is_selectable = 1)", nativeQuery = true)
   List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
 
   @Query(value = "select * from criteria c " +

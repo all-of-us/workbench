@@ -83,6 +83,9 @@ export const isSelectedParent = id => (state): boolean =>
     .getIn(['wizard', 'item', 'selectedParents'], List())
     .includes(id.toString());
 
+export const selectedGroups = (state): List<any> =>
+  state.getIn(['wizard', 'item', 'selectedGroups'], List());
+
 export const activeItem = (state) =>
   state.getIn(['wizard', 'item'], Map());
 

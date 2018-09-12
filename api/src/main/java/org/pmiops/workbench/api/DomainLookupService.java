@@ -27,34 +27,34 @@ public class DomainLookupService {
      * @param searchGroups
      */
     public void findCodesForEmptyDomains(List<SearchGroup> searchGroups) {
-        String regex = TreeType.ICD9.name() + "|" + TreeType.ICD10.name() + "|" + TreeType.CONDITION.name();
-        searchGroups.stream()
-                .flatMap(searchGroup -> searchGroup.getItems().stream())
-                .filter(item -> item.getType().matches(regex))
-                .forEach(item -> {
-                    List<SearchParameter> paramsWithDomains = new ArrayList<>();
-                        for (SearchParameter parameter : item.getSearchParameters()) {
-                        if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
-                            List<String> domainLookups =
-                                    (parameter.getSubtype() == null)
-                                            ? criteriaDao.findCriteriaByTypeAndCode(parameter.getType(), parameter.getValue())
-                                            : criteriaDao.findCriteriaByTypeAndSubtypeAndCode(parameter.getType(),
-                                            parameter.getSubtype(), parameter.getValue());
+      String regex = TreeType.ICD9.name() + "|" + TreeType.ICD10.name() + "|" + TreeType.CONDITION.name();
+      searchGroups.stream()
+        .flatMap(searchGroup -> searchGroup.getItems().stream())
+        .filter(item -> item.getType().matches(regex))
+        .forEach(item -> {
+          List<SearchParameter> paramsWithDomains = new ArrayList<>();
+          for (SearchParameter parameter : item.getSearchParameters()) {
+            if (parameter.getDomain() == null || parameter.getDomain().isEmpty()) {
+              List<String> domainLookups =
+                criteriaDao.findCriteriaByTypeAndSubtypeAndCode(
+                  parameter.getType(),
+                  parameter.getSubtype(),
+                  parameter.getValue());
 
-                            for (String row : domainLookups) {
-                                paramsWithDomains.add(new SearchParameter()
-                                        .domain(row)
-                                        .value(parameter.getValue())
-                                        .type(parameter.getType())
-                                        .subtype(parameter.getSubtype())
-                                        .group(parameter.getGroup()));
-                            }
-                        }
-                        else {
-                            paramsWithDomains.add(parameter);
-                        }
-                    }
-                    item.setSearchParameters(paramsWithDomains);
-                });
+              for (String row : domainLookups) {
+                paramsWithDomains.add(new SearchParameter()
+                  .domain(row)
+                  .value(parameter.getValue())
+                  .type(parameter.getType())
+                  .subtype(parameter.getSubtype())
+                  .group(parameter.getGroup())
+                  .conceptId(parameter.getConceptId()));
+              }
+            } else {
+              paramsWithDomains.add(parameter);
+            }
+          }
+          item.setSearchParameters(paramsWithDomains);
+        });
     }
 }

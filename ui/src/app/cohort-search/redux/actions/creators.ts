@@ -15,6 +15,7 @@ import {
   CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
   LOAD_CHILDREN_LIST,
+  SELECT_CHILDREN_LIST,
   LOAD_ATTRIBUTE_LIST,
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
@@ -145,6 +146,11 @@ export const loadAndSelectChildren =
   ): ActionTypes[typeof LOAD_CHILDREN_LIST] =>
   ({type: LOAD_CHILDREN_LIST, parentId, children});
 
+export const selectChildren =
+  (kind: string, parentId: number
+  ): ActionTypes[typeof SELECT_CHILDREN_LIST] =>
+  ({type: SELECT_CHILDREN_LIST, kind, parentId});
+
 export const loadAttributes =
   (node: any, attributes: any
   ): ActionTypes[typeof LOAD_ATTRIBUTE_LIST] =>
@@ -250,9 +256,9 @@ export const addParameter =
   ({type: ADD_PARAMETER, parameter});
 
 export const removeParameter =
-  (parameterId: string, path?: string
+  (parameterId: string, path?: string, id?: number
   ): ActionTypes[typeof REMOVE_PARAMETER] =>
-  ({type: REMOVE_PARAMETER, parameterId, path});
+  ({type: REMOVE_PARAMETER, parameterId, path, id});
 
 export const addModifier =
   (modifier: any
