@@ -63,6 +63,10 @@ sourceSets {
     compileClasspath += generated.output
     runtimeClasspath += generated.output
   }
+  test {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
 }
 
 generateCommonApi.dependsOn validateSwagger
