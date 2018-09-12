@@ -14,7 +14,7 @@ export class NotebookActions {
     class: 'trash',
     text: 'Delete',
     link: 'deleteResource'
-  }]
+  }];
 }
 
 export class CohortActions {
@@ -38,7 +38,7 @@ export class CohortActions {
     class: 'trash',
     text: 'Delete',
     link: 'deleteResource'
-  }]
+  }];
 }
 
 export class ResourceActions {

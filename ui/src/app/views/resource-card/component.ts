@@ -8,13 +8,13 @@ import {
   RecentResource, WorkspacesService
 } from 'generated';
 
-import {environment} from 'environments/environment';
 import {SignInService} from 'app/services/sign-in.service';
+import {environment} from 'environments/environment';
 
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {Observable} from "rxjs/Observable";
+import {Observable} from 'rxjs/Observable';
 
 enum ResourceType {
   NOTEBOOK = 'notebook',
@@ -68,9 +68,9 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     this.wsId = this.resourceCard.workspaceFirecloudName;
     if (this.resourceCard) {
       if (this.resourceCard.notebook) {
-        this.resourceType = ResourceType.NOTEBOOK
+        this.resourceType = ResourceType.NOTEBOOK;
       } else if (this.resourceCard.cohort) {
-        this.resourceType = ResourceType.COHORT
+        this.resourceType = ResourceType.COHORT;
       } else {
         this.resourceType = ResourceType.INVALID;
         this.invalidResourceError = true;
@@ -106,7 +106,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, resource.notebook.name)
-          .subscribe(() => { return Observable.empty();});
+          .subscribe(() => Observable.empty());
         break;
       }
       case ResourceType.COHORT: {
@@ -138,12 +138,12 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
-          .subscribe(() => { return Observable.empty()});
+          .subscribe(() => Observable.empty());
         break;
       }
       case ResourceType.COHORT: {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
-          .subscribe(() => { return Observable.empty()});
+          .subscribe(() => Observable.empty());
       }
     }
     this.onUpdate.emit();
@@ -157,7 +157,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         break;
       }
       case ResourceType.NOTEBOOK: {
-        let nbUrl = '/workspaces/${this.wsNamespace}/${this.wsId}/notebooks/'
+        const nbUrl = '/workspaces/${this.wsNamespace}/${this.wsId}/notebooks/'
           + encodeURIComponent(this.resourceCard.notebook.name);
         const notebook = window.open(nbUrl, '_blank');
 
