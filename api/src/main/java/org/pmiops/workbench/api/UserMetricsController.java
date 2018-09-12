@@ -127,6 +127,9 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .limit(distinctWorkspacelimit)
         .collect(Collectors.toList());
 
+    // RW-1298
+    // This needs to be refactored to only use namespace and FC ID
+    // The purpose of this Map, is to check what is actually still present in FC 
     Map<Long, WorkspaceResponse> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
       Workspace workspace = workspaceService.findByWorkspaceId((long) id);
       WorkspaceResponse workspaceResponse = fireCloudService

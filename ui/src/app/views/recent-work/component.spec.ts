@@ -17,7 +17,7 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
-import {CardComponent} from 'app/views/card/component';
+import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
@@ -42,7 +42,7 @@ describe('RecentWorkComponent', () => {
         RecentWorkComponent,
         LeftScrollComponent,
         RightScrollComponent,
-        CardComponent,
+        ResourceCardComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         CohortEditModalComponent,
