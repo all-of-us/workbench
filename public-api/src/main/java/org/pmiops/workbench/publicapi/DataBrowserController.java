@@ -94,6 +94,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public static final long MEASUREMENT_GENDER_ANALYSIS_ID = 1900;
     public static final long MEASUREMENT_AGE_ANALYSIS_ID = 1901;
 
+    public static final long MALE = 8507;
+    public static final long FEMALE = 8532;
+
     public static final long GENDER_ANALYSIS = 2;
     public static final long RACE_ANALYSIS = 4;
     public static final long ETHNICITY_ANALYSIS = 5;
@@ -575,14 +578,104 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                     isMeasurement = true;
 
+                    Float male_bin_min = null;
+                    Float male_bin_max = null;
+
+                    Float female_bin_min = null;
+                    Float female_bin_max = null;
+
+                    if(!unitName.equals("unknown")){
+                        for(AchillesResult achillesResult: aa.getResults()){
+                            if(Long.valueOf(achillesResult.getStratum2()) == MALE){
+                                if((achillesResult.getStratum3() != null && !achillesResult.getStratum3().isEmpty()) && (achillesResult.getStratum5() != null && !achillesResult.getStratum5().isEmpty())){
+                                    male_bin_min = Float.valueOf(achillesResult.getStratum3());
+                                    male_bin_max = Float.valueOf(achillesResult.getStratum5());
+                                }
+                            }else if(Long.valueOf(achillesResult.getStratum2()) == FEMALE){
+                                if((achillesResult.getStratum3() != null && !achillesResult.getStratum3().isEmpty()) && (achillesResult.getStratum5() != null && !achillesResult.getStratum5().isEmpty())){
+                                    female_bin_min = Float.valueOf(achillesResult.getStratum3());
+                                    female_bin_max = Float.valueOf(achillesResult.getStratum5());
+                                }
+                            }
+                        }
+                        System.out.println(male_bin_max+"\t"+male_bin_min);
+                        System.out.println(female_bin_max+"\t"+female_bin_min);
+                    }
+
+
+                    TreeSet<Float> male_bin_ranges = new TreeSet<Float>();
+                    TreeSet<Float> female_bin_ranges = new TreeSet<Float>();
+
+                    if(male_bin_max != null && male_bin_min != null){
+                        float male_bin_width = (male_bin_max-male_bin_min)/10;
+                        male_bin_ranges.add(male_bin_min);
+                        male_bin_ranges.add(male_bin_min+male_bin_width);
+                        male_bin_ranges.add(male_bin_min+2*male_bin_width);
+                        male_bin_ranges.add(male_bin_min+3*male_bin_width);
+                        male_bin_ranges.add(male_bin_min+4*male_bin_width);
+                        male_bin_ranges.add(male_bin_min+5*male_bin_width);
+                        male_bin_ranges.add(male_bin_min+6*male_bin_width);
+                        male_bin_ranges.add(male_bin_min+7*male_bin_width);
+                        male_bin_ranges.add(male_bin_min+8*male_bin_width);
+                        male_bin_ranges.add(male_bin_min+9*male_bin_width);
+                        male_bin_ranges.add(male_bin_min+10*male_bin_width);
+                        male_bin_ranges.add(male_bin_max);
+                    }
+
+                    if(female_bin_max != null && female_bin_min != null){
+
+                        float female_bin_width = (female_bin_max-female_bin_min)/10;
+                        female_bin_ranges.add(female_bin_min);
+                        female_bin_ranges.add(female_bin_min+female_bin_width);
+                        female_bin_ranges.add(female_bin_min+2*female_bin_width);
+                        female_bin_ranges.add(female_bin_min+3*female_bin_width);
+                        female_bin_ranges.add(female_bin_min+4*female_bin_width);
+                        female_bin_ranges.add(female_bin_min+5*female_bin_width);
+                        female_bin_ranges.add(female_bin_min+6*female_bin_width);
+                        female_bin_ranges.add(female_bin_min+7*female_bin_width);
+                        female_bin_ranges.add(female_bin_min+8*female_bin_width);
+                        female_bin_ranges.add(female_bin_min+9*female_bin_width);
+                        female_bin_ranges.add(female_bin_min+10*female_bin_width);
+                        female_bin_ranges.add(female_bin_max);
+                    }
+
 
                     for(AchillesResult ar: aa.getResults()){
                         String analysisStratumName=ar.getAnalysisStratumName();
+                        if(Long.valueOf(ar.getStratum2()) == MALE && male_bin_ranges.contains(Float.parseFloat(ar.getStratum1()))){
+                            male_bin_ranges.remove(Float.parseFloat(ar.getStratum1()));
+                        }else if(Long.valueOf(ar.getStratum2()) == FEMALE && male_bin_ranges.contains(Float.parseFloat(ar.getStratum1()))){
+                            female_bin_ranges.remove(Float.parseFloat(ar.getStratum1()));
+                        }
                         if (analysisStratumName == null || analysisStratumName.equals("")) {
                             ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
                         }
                     }
 
+                    System.out.println(male_bin_ranges);
+                    System.out.println(female_bin_ranges);
+
+                    for(float maleRemaining: male_bin_ranges){
+                        AchillesResult achillesResult = new AchillesResult();
+                        achillesResult.setAnalysisId(MEASUREMENT_GENDER_ANALYSIS_ID);
+                        achillesResult.setStratum1(conceptId);
+                        achillesResult.setStratum2(String.valueOf(MALE));
+                        achillesResult.setStratum4(String.valueOf(maleRemaining));
+                        achillesResult.setCountValue(20L);
+                        achillesResult.setSourceCountValue(0L);
+                        aa.addResult(achillesResult);
+                    }
+
+                    for(float femaleRemaining: female_bin_ranges){
+                        AchillesResult ar = new AchillesResult();
+                        ar.setAnalysisId(MEASUREMENT_GENDER_ANALYSIS_ID);
+                        ar.setStratum1(conceptId);
+                        ar.setStratum2(String.valueOf(FEMALE));
+                        ar.setStratum4(String.valueOf(femaleRemaining));
+                        ar.setCountValue(20L);
+                        ar.setSourceCountValue(0L);
+                        aa.addResult(ar);
+                    }
 
                     conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
 
