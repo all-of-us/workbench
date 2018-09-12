@@ -1,9 +1,11 @@
 import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
+export const BEGIN_SUBTYPE_CRITERIA_REQUEST = 'BEGIN_SUBTYPE_CRITERIA_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
+export const LOAD_CRITERIA_SUBTYPE_RESULTS = 'LOAD_CRITERIA_SUBTYPE_RESULTS';
 export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
@@ -75,6 +77,13 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
   };
+  BEGIN_SUBTYPE_CRITERIA_REQUEST: {
+    type: typeof BEGIN_SUBTYPE_CRITERIA_REQUEST;
+    cdrVersionId: number;
+    kind: string;
+    subtype: string;
+    parentId: number;
+  };
   BEGIN_ALL_CRITERIA_REQUEST: {
     type: typeof BEGIN_ALL_CRITERIA_REQUEST;
     cdrVersionId: number;
@@ -91,6 +100,13 @@ export interface ActionTypes {
   LOAD_CRITERIA_RESULTS: {
     type: typeof LOAD_CRITERIA_RESULTS;
     kind: string;
+    parentId: number;
+    results: Criteria[];
+  };
+  LOAD_CRITERIA_SUBTYPE_RESULTS: {
+    type: typeof LOAD_CRITERIA_SUBTYPE_RESULTS;
+    kind: string;
+    subtype: string;
     parentId: number;
     results: Criteria[];
   };
@@ -338,9 +354,11 @@ export interface ActionTypes {
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
+  | ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
+  | ActionTypes[typeof LOAD_CRITERIA_SUBTYPE_RESULTS]
   | ActionTypes[typeof LOAD_CRITERIA_SUBTREE]
   | ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]

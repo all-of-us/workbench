@@ -42,10 +42,11 @@ export class SearchGroupComponent {
   launchWizard(criteria: any) {
     const itemId = this.actions.generateId('items');
     const criteriaType = criteria.codes ? criteria.codes[0].type : criteria.type;
+    const criteriaSubtype = criteria.codes ? criteria.codes[0].subtype : null;
     const fullTree = criteria.fullTree || false;
     const codes = criteria.codes || false;
     const {role, groupId} = this;
-    const context = {criteriaType, role, groupId, itemId, fullTree, codes};
+    const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
     this.actions.openWizard(itemId, criteria.type, context);
   }
 }

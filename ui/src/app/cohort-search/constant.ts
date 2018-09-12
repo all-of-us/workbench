@@ -12,7 +12,7 @@ export const DOMAIN_TYPES = [
         { name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.ICD10CM}
       ]
     },
-    { name: 'Procedures',    type: TreeType.PROCEDURE, disabled: true, codes: [
+    { name: 'Procedures',    type: TreeType.PROCEDURE, codes: [
         { name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.PROC },
         { name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.ICD10PCS}
       ] },

@@ -27,11 +27,13 @@ export class CodeDropdownComponent implements  OnInit {
     ) {}
 
     ngOnInit() {
-      this.subscription = this.options$.subscribe(options => {
-        this.options = options.toJS();
-        if (this.options.length) {
-          this.dropDownSelected = this.options.find(option => option.type === this._type).name;
-        }
+      this.subscription = this.options$
+        .filter(options => !!options)
+        .subscribe(options => {
+          this.options = options.toJS();
+          if (this.options.length) {
+            this.dropDownSelected = this.options.find(option => option.type === this._type).name;
+          }
       });
     }
 
@@ -44,7 +46,8 @@ export class CodeDropdownComponent implements  OnInit {
     getTree(option: any) {
         const itemId = this.actions.generateId('items');
         const criteriaType = option.type;
-        const context = {criteriaType, itemId};
+        const criteriaSubtype = option.subtype;
+        const context = {criteriaType, criteriaSubtype, itemId};
         this.actions.setWizardContext(context);
     }
 

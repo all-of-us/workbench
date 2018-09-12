@@ -56,6 +56,9 @@ export const wizardOpen = (state): boolean =>
 export const activeCriteriaType = (state): string =>
   state.getIn(['wizard', 'criteriaType']);
 
+export const activeCriteriaSubtype = (state): string =>
+  state.getIn(['wizard', 'criteriaSubtype']);
+
 export const codeDropdownOptions = (state): List<any> =>
   state.getIn(['wizard', 'codes'], List());
 
@@ -113,9 +116,14 @@ export const isAttributeLoading =
  * Criteria
  */
 export const criteriaChildren =
-  (kind: string, parentId: number) =>
-  (state): List<any> =>
-  state.getIn(['criteria', 'tree', kind, parentId], List());
+  (kind: string, subtype: string, parentId: number) =>
+  (state): List<any> => {
+    if (subtype) {
+      return state.getIn(['criteria', 'tree', kind, subtype, parentId], List());
+    } else {
+      return state.getIn(['criteria', 'tree', kind, parentId], List());
+    }
+  }
 
 export const demoCriteriaChildren =
   (kind: string, subtype: string) =>

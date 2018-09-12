@@ -131,7 +131,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       }
     }));
 
-    this.subscription.add(this.ngRedux.select(criteriaChildren(TreeType[TreeType.VISIT], 0))
+    this.subscription.add(this.ngRedux.select(criteriaChildren(TreeType[TreeType.VISIT], null, 0))
       .filter(visiTypes => visiTypes.size > 0)
       .subscribe(visitTypes => {
         if (this.modifiers[3]) {
