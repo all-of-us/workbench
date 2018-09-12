@@ -22,6 +22,7 @@ import {
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  CHANGE_CODE_OPTION,
   SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
@@ -120,9 +121,9 @@ export const setCriteriaSearchTerms =
   ({type: SET_CRITERIA_SEARCH, searchTerms});
 
 export const requestAutocompleteOptions =
-  (cdrVersionId: number, kind: string, searchTerms: string
+  (cdrVersionId: number, kind: string, subtype: string, searchTerms: string
   ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
-  ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, searchTerms});
+  ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, subtype, searchTerms});
 
 export const requestIngredientsForBrand =
   (cdrVersionId: number, conceptId: number
@@ -182,6 +183,10 @@ export const setScrollId =
   (nodeId: string
   ): ActionTypes[typeof SET_SCROLL_ID] =>
   ({type: SET_SCROLL_ID, nodeId});
+
+export const changeCodeOption =
+  (): ActionTypes[typeof CHANGE_CODE_OPTION] =>
+  ({type: CHANGE_CODE_OPTION});
 
 
 /**

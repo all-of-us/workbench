@@ -10,46 +10,40 @@ import {NodeComponent} from '../node/node.component';
  * children until "expanded" - expansion is basically its default state.
  */
 @Component({
-    selector: 'crit-tree',
-    templateUrl: './tree.component.html',
-    styleUrls: ['./tree.component.css']
+  selector: 'crit-tree',
+  templateUrl: './tree.component.html',
+  styleUrls: ['./tree.component.css']
 })
 export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
-    _type: string;
-    name: string;
+  _type: string;
+  name: string;
 
-    ngOnChanges() {
-        if (this.node.get('type') === TreeType[TreeType.ICD9]
-          || this.node.get('type') === TreeType[TreeType.ICD10]) {
-             super.ngOnInit();
-        }
-    }
-
-    ngOnInit() {
+  ngOnChanges() {
+    if (this.node.get('type') === TreeType[TreeType.ICD9]
+      || this.node.get('type') === TreeType[TreeType.ICD10]
+      || this.node.get('type') === TreeType[TreeType.CPT]) {
         super.ngOnInit();
-        setTimeout(() => super.loadChildren(true));
-        this._type = this.node.get('type', '');
     }
+  }
 
-    showSearch() {
-        return this.node.get('type') === TreeType[TreeType.VISIT]
-            || this.node.get('type') === TreeType[TreeType.DRUG]
-            || this.node.get('type') === TreeType[TreeType.MEAS]
-            || this.node.get('type') === TreeType[TreeType.PM]
-            || this.node.get('type') === TreeType[TreeType.CONDITION]
-            || this.node.get('type') === TreeType[TreeType.ICD9]
-            || this.node.get('type') === TreeType[TreeType.ICD10];
+  ngOnInit() {
+    super.ngOnInit();
+    setTimeout(() => super.loadChildren(true));
+    this._type = this.node.get('type', '');
+  }
+
+  showSearch() {
+    return this.node.get('type') !== TreeType[TreeType.DEMO];
+  }
+
+  showDropDown() {
+    return this.codes;
+  }
+
+  optionChange(flag) {
+    if (flag) {
+      this._type = flag;
+      setTimeout(() => super.loadChildren(true));
     }
-
-    showDropDown() {
-        return this.codes;
-    }
-
-    optionChange(flag) {
-        if (flag) {
-            this._type = flag;
-            setTimeout(() => super.loadChildren(true));
-        }
-    }
-
+  }
 }

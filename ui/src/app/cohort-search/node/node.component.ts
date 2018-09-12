@@ -67,6 +67,7 @@ export class NodeComponent implements OnInit, OnDestroy {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
     this.codes = this.ngRedux.getState().getIn(['wizard', 'codes']);
     if (!this.fullTree || this.node.get('id') === 0) {
+      // console.log(this.node.toJS());
       const _type = this.node.get('type');
       const subtype = this.codes ? this.node.get('subtype') : null;
       const parentId = this.node.get('id');
@@ -177,7 +178,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchDrugCriteria(_type, parentId, TreeSubType[TreeSubType.ATC]);
     } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
-    } else if (this.codes) {
+    } else if (this.codes && this.node.get('subtype')) {
       this.actions.fetchCriteriaBySubtype(_type, this.node.get('subtype'), parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);

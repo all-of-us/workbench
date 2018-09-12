@@ -22,6 +22,7 @@ export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
 export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
 export const ATTRIBUTE_REQUEST_ERROR = 'ATTRIBUTE_REQUEST_ERROR';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
+export const CHANGE_CODE_OPTION = 'CHANGE_CODE_OPTION';
 export const SET_SCROLL_ID = 'SET_SCROLL_ID';
 
 export const BEGIN_COUNT_REQUEST = 'BEGIN_COUNT_REQUEST';
@@ -135,6 +136,7 @@ export interface ActionTypes {
     type: typeof BEGIN_AUTOCOMPLETE_REQUEST;
     cdrVersionId: number;
     kind: string;
+    subtype: string;
     searchTerms: string;
   };
   BEGIN_INGREDIENT_REQUEST: {
@@ -188,6 +190,10 @@ export interface ActionTypes {
     parentId: number;
     error?: any;
   };
+  CHANGE_CODE_OPTION: {
+    type: typeof CHANGE_CODE_OPTION;
+  };
+
   SET_SCROLL_ID: {
     type: typeof SET_SCROLL_ID;
     nodeId: string;
@@ -375,6 +381,7 @@ export type RootAction =
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof ATTRIBUTE_REQUEST_ERROR]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
+  | ActionTypes[typeof CHANGE_CODE_OPTION]
   | ActionTypes[typeof SET_SCROLL_ID]
 
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]

@@ -14,7 +14,8 @@ export const DOMAIN_TYPES = [
     },
     { name: 'Procedures',    type: TreeType.PROCEDURE, codes: [
         { name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.PROC },
-        { name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.ICD10PCS}
+        { name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.ICD10PCS},
+        { name: 'CPT Codes', type: TreeType.CPT, subtype: null}
       ] },
     { name: 'Drugs',    type: TreeType.DRUG },
     { name: 'Measurements',    type: TreeType.MEAS },
