@@ -2,6 +2,9 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.util.HashMap;
+
+import org.pmiops.workbench.cdm.DomainTableEnum;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +28,7 @@ public class ParticipantCounter {
                     "from `${projectId}.${dataSetId}.person` person\n" +
                     "where\n";
 
-    private static final String CHART_INFO_SQL_TEMPLATE =
+    private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
             "select concept1.concept_code as gender, \n" +
                     "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
                     "case " + getAgeRangeSql(0, 18) + "\n" +
@@ -39,9 +42,28 @@ public class ParticipantCounter {
                     "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
                     "where\n";
 
-    private static final String CHART_INFO_SQL_GROUP_BY = "group by gender, race, ageRange\n" + "order by gender, race, ageRange\n";
+  private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
+    "SELECT concept_name, condition_source_concept_id, count(*) as count \n" +
+      "FROM `${projectId}.${dataSetId}.${table}` person\n" +
+      "JOIN `${projectId}.${dataSetId}.concept` c on d.${tableId} = c.concept_id\n" +
+      "where\n";
 
-    private static final String ID_SQL_ORDER_BY = "order by person_id\n" + "limit";
+  private static final String LAB_CHART_INFO_SQL_TEMPLATE =
+    "SELECT concept_name, condition_source_concept_id, count(*) as count \n" +
+      "FROM `${projectId}.${dataSetId}.${table}` person\n" +
+      "JOIN `${projectId}.${dataSetId}.concept` c on d.${tableId} = c.concept_id\n" +
+      "where\n";
+
+    private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
+      "group by gender, race, ageRange\n" +
+        "order by gender, race, ageRange\n";
+
+    private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
+      "group by concept_name, condition_source_concept_id\n" +
+      "order by count desc\n" +
+      "limit ${limit};";
+
+    private static final String ID_SQL_ORDER_BY = "order by person_id\nlimit";
 
     private static final String OFFSET_SUFFIX = " offset ";
 
@@ -53,19 +75,39 @@ public class ParticipantCounter {
     }
 
     /**
-     * Provides counts with demographic info for charts
-     * defined by the provided {@link SearchRequest}.
+     * Provides counts of unique subjects
+     * defined by the provided {@link ParticipantCriteria}.
      */
     public QueryJobConfiguration buildParticipantCounterQuery(ParticipantCriteria participantCriteria) {
         return buildQuery(participantCriteria, COUNT_SQL_TEMPLATE, "");
     }
 
     /**
-     * Provides counts of unique subjects
-     * defined by the provided {@link SearchRequest}.
+     * Provides counts with demographic info for charts
+     * defined by the provided {@link ParticipantCriteria}.
      */
-    public QueryJobConfiguration buildChartInfoCounterQuery(ParticipantCriteria participantCriteria) {
-        return buildQuery(participantCriteria, CHART_INFO_SQL_TEMPLATE, CHART_INFO_SQL_GROUP_BY);
+    public QueryJobConfiguration buildDemoChartInfoCounterQuery(ParticipantCriteria participantCriteria) {
+        return buildQuery(participantCriteria, DEMO_CHART_INFO_SQL_TEMPLATE, DEMO_CHART_INFO_SQL_GROUP_BY);
+    }
+
+    /**
+     * Provides counts with domain info for charts
+     * defined by the provided {@link ParticipantCriteria}.
+     */
+    public QueryJobConfiguration buildDomainChartInfoCounterQuery(ParticipantCriteria participantCriteria,
+                                                                  DomainType domainType,
+                                                                  int chartLimit) {
+      if (DomainType.LAB.equals(domainType)) {
+        String sqlTemplate = LAB_CHART_INFO_SQL_TEMPLATE
+          .replace("${table}", DomainTableEnum.getTableName("Measurement"))
+          .replace("${tableId}", DomainTableEnum.getSourceConceptId("Measurement"));
+        return buildQuery(participantCriteria, sqlTemplate, DOMAIN_CHART_INFO_SQL_GROUP_BY);
+      } else {
+        String sqlTemplate = LAB_CHART_INFO_SQL_TEMPLATE
+          .replace("${table}", DomainTableEnum.getTableName(domainType.name()))
+          .replace("${tableId}", DomainTableEnum.getSourceConceptId(domainType.name()));
+        return buildQuery(participantCriteria, DOMAIN_CHART_INFO_SQL_TEMPLATE, DOMAIN_CHART_INFO_SQL_GROUP_BY);
+      }
     }
 
     public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria,

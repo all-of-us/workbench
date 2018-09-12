@@ -21,8 +21,8 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AllEvents;
+import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.CohortSummaryListResponse;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Condition;
 import org.pmiops.workbench.model.CreateReviewRequest;
@@ -53,7 +53,6 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -340,12 +339,30 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CohortSummaryListResponse> getCohortSummary(String workspaceNamespace,
-                                                                    String workspaceId,
-                                                                    Long cohortId,
-                                                                    Long cdrVersionId,
-                                                                    String domain) {
-    return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new CohortSummaryListResponse());
+  public ResponseEntity<CohortChartDataListResponse> getCohortChartData(String workspaceNamespace,
+                                                                        String workspaceId,
+                                                                        Long cohortId,
+                                                                        Long cdrVersionId,
+                                                                        String domain,
+                                                                        Integer limit) {
+    int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
+      throw new BadRequestException(
+        String.format("Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
+    }
+    Cohort cohort = cohortReviewService.findCohort(cohortId);
+    CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+      cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
+
+    SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
+
+    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+      participantCounter.buildDomainChartInfoCounterQuery(new ParticipantCriteria(searchRequest), DomainType.fromValue(domain), chartLimit)));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    CohortChartDataListResponse response = new CohortChartDataListResponse();
+    response.count(cohortReview.getMatchedParticipantCount());
+    return ResponseEntity.ok(response);
   }
 
   @Override
