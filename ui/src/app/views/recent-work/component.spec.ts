@@ -14,6 +14,7 @@ import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
@@ -26,7 +27,6 @@ import {ResourceCardComponent} from 'app/views/resource-card/component';
 
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
-import {SignInServiceStub} from "../../../testing/stubs/sign-in-service-stub";
 
 describe('RecentWorkComponent', () => {
   let fixture: ComponentFixture<RecentWorkComponent>;
