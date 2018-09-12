@@ -129,10 +129,12 @@ describe('SearchGroupItemComponent', () => {
 
     const expectedContext = {
       criteriaType: TreeType[TreeType.ICD9],
+      criteriaSubtype: null,
       role: 'includes',
       groupId: 'include0',
       itemId: 'item001',
-      fullTree: false
+      fullTree: false,
+      codes: false
     };
 
     const editButton = fixture.debugElement.query(By.css('clr-icon[shape=pencil]')).parent;
