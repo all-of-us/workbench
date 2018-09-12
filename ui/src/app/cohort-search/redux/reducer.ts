@@ -390,7 +390,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           open: true,
           item: {
             id: action.itemId,
-            type: action.context.criteriaType,
+            type: action.itemType,
             fullTree: action.context.fullTree,
             searchParameters: [],
             modifiers: [],

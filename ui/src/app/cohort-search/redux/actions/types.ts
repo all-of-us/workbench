@@ -308,6 +308,7 @@ export interface ActionTypes {
   OPEN_WIZARD: {
     type: typeof OPEN_WIZARD;
     itemId: string;
+    itemType: string;
     context?: ActiveContext;
   };
   REOPEN_WIZARD: {

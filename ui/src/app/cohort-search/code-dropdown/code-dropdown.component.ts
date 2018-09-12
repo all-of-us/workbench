@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {
@@ -14,7 +14,7 @@ import {
     templateUrl: './code-dropdown.component.html',
     styleUrls: ['./code-dropdown.component.css']
 })
-export class CodeDropdownComponent implements  OnChanges, OnInit {
+export class CodeDropdownComponent implements  OnInit {
     dropDownSelected: string;
     options: any;
     subscription: Subscription;
@@ -30,20 +30,9 @@ export class CodeDropdownComponent implements  OnChanges, OnInit {
       this.subscription = this.options$.subscribe(options => {
         this.options = options.toJS();
         if (this.options.length) {
-          const selected = this.options.find(option => option.type === this._type);
-          console.log(this.options);
-          console.log(this._type);
+          this.dropDownSelected = this.options.find(option => option.type === this._type).name;
         }
       });
-    }
-
-    ngOnChanges() {
-        // if (this.selectedType) {
-        //     this.dropDownSelected = this.selectedType;
-        // } else {
-        //     this.dropDownSelected = '';
-        // }
-
     }
 
     launchTree(option) {
@@ -57,7 +46,6 @@ export class CodeDropdownComponent implements  OnChanges, OnInit {
         const criteriaType = option.type;
         const context = {criteriaType, itemId};
         this.actions.setWizardContext(context);
-      //  this.actions.resetStore();
     }
 
 }
