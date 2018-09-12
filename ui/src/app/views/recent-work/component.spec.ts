@@ -20,8 +20,8 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
-import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
+import {ResourceCardComponent} from 'app/views/resource-card/component';
 
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
