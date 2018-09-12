@@ -44,7 +44,7 @@ const commonNotebookFormat = {
   metadata: {},
   'nbformat': 4,
   'nbformat_minor': 2
-}
+};
 
 const rNotebookMetadata = {
   'kernelspec': {
@@ -207,7 +207,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   }
 
   private newNotebook(): Observable<string> {
-    let fileContent = commonNotebookFormat;
+    const fileContent = commonNotebookFormat;
     if (this.route.snapshot.queryParamMap.get('kernel-type') === Kernels.R.toString()) {
       fileContent.metadata = rNotebookMetadata;
     } else {

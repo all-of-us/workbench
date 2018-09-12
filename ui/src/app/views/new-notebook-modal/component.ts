@@ -23,7 +23,7 @@ export class NewNotebookModalComponent implements OnDestroy {
   @Input() existingNotebooks: FileDetail[];
   Kernels = Kernels;
   kernelType: number = Kernels.Python3;
-  nameConflict: boolean = false;
+  nameConflict = false;
   notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
 
   loading = false;
@@ -47,7 +47,8 @@ export class NewNotebookModalComponent implements OnDestroy {
 
   submitNewNotebook(): void {
     const existingNotebook =
-      this.existingNotebooks.find((notebook) => {return notebook.name === this.newName + '.ipynb'});
+      this.existingNotebooks.find((currentNotebook) =>
+        currentNotebook.name === this.newName + '.ipynb');
     if (existingNotebook !== undefined) {
       this.nameConflict = true;
       return;

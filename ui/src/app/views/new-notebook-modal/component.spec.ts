@@ -89,7 +89,8 @@ describe('NewNotebookModalComponent', () => {
   //   simulateClick(fixture, fixture.debugElement.query(By.css('select')));
   //   updateAndTick(fixture);
   //   simulateClick(fixture, fixture.debugElement.query(By.css('.r-option')));
-  //   fixture.debugElement.query(By.css('select')).nativeElement.dispatchEvent(new Event('change'));
+  //   fixture.debugElement.query(By.css('select'))
+  //      .nativeElement.dispatchEvent(new Event('change'));
   //   updateAndTick(fixture);
   //   simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
   //   const expectedUrlR = `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
