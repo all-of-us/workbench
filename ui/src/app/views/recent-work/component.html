@@ -8,7 +8,7 @@
     <div class="card-area">
         <div style="display: flex">
             <div *ngFor="let resource of resourceList">
-                <app-card [card]="resource"></app-card>
+                <app-resource-card [resourceCard]="resource" (onUpdate)="updateList($event)"></app-resource-card>
             </div>
         </div>
     </div>

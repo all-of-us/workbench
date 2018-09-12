@@ -18,7 +18,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 
-import {CardComponent} from 'app/views/card/component';
+import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {HomepageComponent} from 'app/views/homepage/component';
@@ -43,7 +43,7 @@ describe('HomepageComponent', () => {
         RecentWorkComponent,
         LeftScrollComponent,
         RightScrollComponent,
-        CardComponent,
+        ResourceCardComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         CohortEditModalComponent,
