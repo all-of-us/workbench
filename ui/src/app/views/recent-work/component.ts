@@ -53,4 +53,8 @@ export class RecentWorkComponent implements OnInit {
     return this.fullList.length > 0;
   }
 
+  // Exposed for testing
+  setUserMetricsService(svc: UserMetricsService) {
+    this.userMetricsService = svc;
+  }
 }
