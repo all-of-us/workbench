@@ -6,12 +6,13 @@
     <div class="form-section">
       <label class="modal-label">New Name</label>
       <input id="new-name" type="text" class="input"
-             [(ngModel)]="newName">
+             [(ngModel)]="newName" (ngModelChange)="nameConflict = false">
+      <div class="error" *ngIf="nameConflict">Notebook name in use</div>
       <label class="modal-label">Python or R?</label>
       <div class="select">
         <select [(ngModel)]="kernelType">
-          <option [ngValue]="Kernels.Python3">{{Kernels[Kernels.Python3]}}</option>
-          <option [ngValue]="Kernels.R">{{Kernels[Kernels.R]}}</option>
+          <option class="py-option" [ngValue]="Kernels.Python3">{{Kernels[Kernels.Python3]}}</option>
+          <option class="r-option" [ngValue]="Kernels.R">{{Kernels[Kernels.R]}}</option>
         </select>
       </div>
     </div>
@@ -19,7 +20,7 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="creatingNotebook=false">Cancel</button>
     <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-      <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
+      <button type="button" class="btn btn-primary confirm-name-btn" id="rename"
               (click)="submitNewNotebook()" [clrLoading]="loading" [disabled]="newNotebookDisabled">
         Create Notebook
       </button>

@@ -31,9 +31,7 @@ enum Progress {
   Redirecting
 }
 
-
-
-const rNotebookFileContent = {
+const commonNotebookFormat = {
   'cells': [
     {
       'cell_type': 'code',
@@ -43,56 +41,45 @@ const rNotebookFileContent = {
       'source': []
     }
   ],
-  'metadata': {
-    'kernelspec': {
-      'display_name': 'R',
-      'language': 'R',
-      'name': 'ir'
-    },
-    'language_info': {
-      'codemirror_mode': 'r',
-      'file_extension': '.r',
-      'mimetype': 'text/x-r-source',
-      'name': 'R',
-      'pygments_lexer': 'r',
-      'version': '3.4.4'
-    }
-  },
+  metadata: {},
   'nbformat': 4,
   'nbformat_minor': 2
+}
+
+const rNotebookMetadata = {
+  'kernelspec': {
+    'display_name': 'R',
+    'language': 'R',
+    'name': 'ir'
+  },
+  'language_info': {
+    'codemirror_mode': 'r',
+    'file_extension': '.r',
+    'mimetype': 'text/x-r-source',
+    'name': 'R',
+    'pygments_lexer': 'r',
+    'version': '3.4.4'
+  }
 };
 
-const pyNotebookFileContent = {
-  'cells': [
-    {
-      'cell_type': 'code',
-      'execution_count': null,
-      'metadata': {},
-      'outputs': [],
-      'source': []
-    }
-  ],
-  'metadata': {
-    'kernelspec': {
-      'display_name': 'Python 3',
-      'language': 'python',
-      'name': 'python3'
-    },
-    'language_info': {
-      'codemirror_mode': {
-        'name': 'ipython',
-        'version': 3
-      },
-      'file_extension': '.py',
-      'mimetype': 'text/x-python',
-      'name': 'python',
-      'nbconvert_exporter': 'python',
-      'pygments_lexer': 'ipython3',
-      'version': '3.4.2'
-    }
+const pyNotebookMetadata = {
+  'kernelspec': {
+    'display_name': 'Python 3',
+    'language': 'python',
+    'name': 'python3'
   },
-  'nbformat': 4,
-  'nbformat_minor': 2
+  'language_info': {
+    'codemirror_mode': {
+      'name': 'ipython',
+      'version': 3
+    },
+    'file_extension': '.py',
+    'mimetype': 'text/x-python',
+    'name': 'python',
+    'nbconvert_exporter': 'python',
+    'pygments_lexer': 'ipython3',
+    'version': '3.4.2'
+  }
 };
 
 @Component({
@@ -106,7 +93,7 @@ const pyNotebookFileContent = {
 export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
 
-  fileContent: string;
+  fileContent: any;
 
   Progress = Progress;
 
@@ -136,10 +123,11 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
     if (this.creating) {
       this.notebookName = this.route.snapshot.queryParamMap.get('notebook-name');
+      this.fileContent = commonNotebookFormat;
       if (this.route.snapshot.queryParamMap.get('kernel-type') === Kernels.R.toString()) {
-        this.fileContent = JSON.stringify(rNotebookFileContent);
+        this.fileContent.metadata = rNotebookMetadata;
       } else {
-        this.fileContent = JSON.stringify(pyNotebookFileContent);
+        this.fileContent.metadata = pyNotebookMetadata;
       }
     } else {
       this.notebookName = this.route.snapshot.params['nbName'];
@@ -235,7 +223,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         workspaceDir, this.notebookName + '.ipynb', {
           'type': 'file',
           'format': 'text',
-          'content': this.fileContent
+          'content': JSON.stringify(this.fileContent)
         }).map(resp => `${localDir}/${resp.name}`);
     });
   }

@@ -6,7 +6,7 @@ import {Kernels} from 'app/utils/notebook-kernels';
 
 import {environment} from 'environments/environment';
 
-import {Workspace} from 'generated';
+import {FileDetail, Workspace} from 'generated';
 
 
 @Component({
@@ -20,8 +20,10 @@ export class NewNotebookModalComponent implements OnDestroy {
   public creatingNotebook = false;
   public newName = '';
   @Input() workspace: Workspace;
+  @Input() existingNotebooks: FileDetail[];
   Kernels = Kernels;
   kernelType: number = Kernels.Python3;
+  nameConflict: boolean = false;
   notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
 
   loading = false;
@@ -44,10 +46,15 @@ export class NewNotebookModalComponent implements OnDestroy {
   }
 
   submitNewNotebook(): void {
-    const nbUrl = `/workspaces/` + encodeURIComponent(this.workspace.namespace) + '/' +
-        encodeURIComponent(this.workspace.id) + '/notebooks/create/?notebook-name=' +
-        encodeURIComponent(this.newName) + '&kernel-type=' +
-        encodeURIComponent(this.kernelType.toString());
+    const existingNotebook =
+      this.existingNotebooks.find((notebook) => {return notebook.name === this.newName + '.ipynb'});
+    if (existingNotebook !== undefined) {
+      this.nameConflict = true;
+      return;
+    }
+    const nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/` +
+        `notebooks/create/?notebook-name=` + encodeURIComponent(this.newName) +
+        `&kernel-type=${this.kernelType}`;
 
     const notebook = window.open(nbUrl, '_blank');
 
