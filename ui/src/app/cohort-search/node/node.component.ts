@@ -7,7 +7,6 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {
   activeCriteriaTreeType,
-  activeItem,
   CohortSearchActions,
   CohortSearchState,
   criteriaChildren,
@@ -55,10 +54,9 @@ export class NodeComponent implements OnInit, OnDestroy {
   loading = false;
   error = false;
   fullTree: boolean;
-  activeItem: any;
+  codes: any;
   subscription: Subscription;
   @select(subtreeSelected) selected$: Observable<any>;
-  @select(activeItem) activeItem$: Observable<any>;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -67,8 +65,10 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
+    this.codes = this.ngRedux.getState().getIn(['wizard', 'codes']);
     if (!this.fullTree || this.node.get('id') === 0) {
       const _type = this.node.get('type');
+      const subtype = this.codes ? this.node.get('subtype') : null;
       const parentId = this.node.get('id');
       const errorSub = this.ngRedux
         .select(criteriaError(_type, parentId))
@@ -80,7 +80,7 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(loading => this.loading = loading);
 
       const childSub = this.ngRedux
-        .select(criteriaChildren(_type, parentId))
+        .select(criteriaChildren(_type, subtype, parentId))
         .subscribe(children => {
           if (this.fullTree) {
             let criteriaList = [];
@@ -125,15 +125,12 @@ export class NodeComponent implements OnInit, OnDestroy {
           this.node = this.node.set('name', displayName);
         });
 
-      const itemSub = this.activeItem$.subscribe(item => this.activeItem = item);
-
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
       this.subscription.add(subtreeSub);
       this.subscription.add(subtreeSelectSub);
-      this.subscription.add(itemSub);
     }
     if (this.fullTree) {
       this.expanded = this.node.get('expanded', false);
@@ -180,6 +177,8 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchDrugCriteria(_type, parentId, TreeSubType[TreeSubType.ATC]);
     } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
+    } else if (this.codes) {
+      this.actions.fetchCriteriaBySubtype(_type, this.node.get('subtype'), parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
     }

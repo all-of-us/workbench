@@ -6,6 +6,7 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {
+  activeCriteriaSubtype,
   activeCriteriaTreeType,
   activeCriteriaType,
   activeItem,
@@ -29,17 +30,18 @@ import {stripHtml, typeToTitle} from '../utils';
 })
 export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
+  @select(activeCriteriaSubtype) criteriaSubtype$: Observable<any>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
   @select(activeItem) item$: Observable<any>;
   @select(activeParameterList) selection$: Observable<any>;
   @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
-  @select(codeDropdownOptions) codeOptions$: Observable<any>;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
   ctype: string;
+  subtype: string;
   item: any;
   fullTree: boolean;
   subscription: Subscription;
@@ -114,7 +116,11 @@ export class ModalComponent implements OnInit, OnDestroy {
       }
     }));
 
-    this.subscription.add(this.codeOptions$.subscribe(options => this.codeOptions = options));
+    this.subscription.add(this.criteriaSubtype$
+      .subscribe(subtype => {
+        this.subtype = subtype;
+      })
+    );
   }
   setScroll(nodeId: string) {
     let node: any;
@@ -148,20 +154,12 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   /* Used to bootstrap the criteria tree */
   get rootNode() {
-    if (this.ctype === this.treeType[this.treeType.CONDITION]) {
-      // this.ctype= this.treeType[this.treeType.ICD9];
-      return Map({
-        type: this.treeType[this.treeType.ICD9],
-        fullTree: this.fullTree,
-        id: 0,    // root parent ID is always 0
-      });
-    } else {
-      return Map({
-        type: this.ctype,
-        fullTree: this.fullTree,
-        id: 0,    // root parent ID is always 0
-      });
-    }
+    return Map({
+      type: this.ctype,
+      subtype: this.subtype,
+      fullTree: this.fullTree,
+      id: 0,    // root parent ID is always 0
+    });
   }
 
   get selectionTitle() {

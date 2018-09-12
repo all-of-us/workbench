@@ -51,6 +51,7 @@ export class CohortSearchActions {
    * (B) can easily perform multi-step, complex actions from this service
    */
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
+  @dispatch() requestCriteriaBySubtype = ActionFuncs.requestCriteriaBySubtype;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
   @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
@@ -217,6 +218,15 @@ export class CohortSearchActions {
       return;
     }
     this.requestCriteria(this.cdrVersionId, kind, parentId);
+  }
+
+  fetchCriteriaBySubtype(kind: string, subtype: string, parentId: number): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'tree', kind, subtype, parentId]);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    this.requestCriteriaBySubtype(this.cdrVersionId, kind, subtype, parentId);
   }
 
   fetchAllCriteria(kind: string, parentId: number): void {
