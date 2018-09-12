@@ -1,0 +1,54 @@
+<div class="card item-card {{type}}-card">
+  <div class="header-area">
+    <clr-dropdown>
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <div *ngFor="let action of actions">
+          <button
+                  class="action-item"
+                  (click) =this[action.link](this.resourceCard)>
+            <clr-icon [attr.shape]=action.class></clr-icon>
+            {{action.text}}
+          </button>
+        </div>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <div class="name" (click)="openResource(this.resourceCard)">
+      {{resourceCard.notebook?.name}}
+      {{resourceCard.cohort?.name}}
+    </div>
+  </div>
+  <div>
+    {{resourceCard.cohort?.description}}
+  </div>
+  <div class="footer">
+    <div class="last-modified">Last Updated <br/>{{resourceCard.modifiedTime | date}}</div>
+    <div class="item-type {{type}}">
+      <div *ngIf="resourceCard.cohort">CH</div>
+      <div *ngIf="resourceCard.notebook">NB</div>
+    </div>
+  </div>
+</div>
+
+<app-confirm-delete-modal [resourceType]=resourceType
+                          [resource]=resource
+                          (receiveDelete)=receiveDelete($event)></app-confirm-delete-modal>
+
+
+<app-rename-modal [resourceType]="'notebook'"
+                  [resource]="resourceCard.notebook"
+                  (receiveRename)="receiveNotebookRename($event)"></app-rename-modal>
+
+<app-cohort-edit-modal [cohort]="resourceCard.cohort"></app-cohort-edit-modal>
+
+<div *ngIf="resourceTypeInvalidError">
+    <clr-modal>
+      <h3 class="modal-title">Invalid Resource Type</h3>
+      <div class="modal-content">Please Report a Bug.</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="this.invalidResourceError=false">OK</button>
+      </div>
+    </clr-modal>
+</div>
