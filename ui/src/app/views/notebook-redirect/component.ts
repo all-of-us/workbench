@@ -92,15 +92,14 @@ const pyNotebookMetadata = {
 })
 export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
-
-  fileContent: any;
-
   Progress = Progress;
 
   progress = Progress.Unknown;
   notebookName: string;
 
   creating: boolean;
+
+  kernelType: Kernels;
 
   private wsId: string;
   private wsNamespace: string;
@@ -123,12 +122,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
     if (this.creating) {
       this.notebookName = this.route.snapshot.queryParamMap.get('notebook-name');
-      this.fileContent = commonNotebookFormat;
-      if (this.route.snapshot.queryParamMap.get('kernel-type') === Kernels.R.toString()) {
-        this.fileContent.metadata = rNotebookMetadata;
-      } else {
-        this.fileContent.metadata = pyNotebookMetadata;
-      }
+      this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernel-type')];
     } else {
       this.notebookName = this.route.snapshot.params['nbName'];
     }
@@ -213,6 +207,12 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   }
 
   private newNotebook(): Observable<string> {
+    let fileContent = commonNotebookFormat;
+    if (this.route.snapshot.queryParamMap.get('kernel-type') === Kernels.R.toString()) {
+      fileContent.metadata = rNotebookMetadata;
+    } else {
+      fileContent.metadata = pyNotebookMetadata;
+    }
     return this.localizeNotebooks([]).flatMap((localDir) => {
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
@@ -223,7 +223,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         workspaceDir, this.notebookName + '.ipynb', {
           'type': 'file',
           'format': 'text',
-          'content': JSON.stringify(this.fileContent)
+          'content': JSON.stringify(fileContent)
         }).map(resp => `${localDir}/${resp.name}`);
     });
   }
