@@ -18,12 +18,12 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 
-import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {HomepageComponent} from 'app/views/homepage/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
+import {ResourceCardComponent} from 'app/views/resource-card/component';
 
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';

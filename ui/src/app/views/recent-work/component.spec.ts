@@ -18,8 +18,8 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {ResourceCardComponent} from 'app/views/resource-card/component';
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 
