@@ -79,24 +79,20 @@ describe('NewNotebookModalComponent', () => {
 
   // TODO: Get this to work. for some reason nothing would register
   //       as an actual successful change of the select element.
-  // it('allows creation of R notebooks', fakeAsync(() => {
-  //   spyOn(window, 'open');
-  //   const name = 'new-name-r';
-  //   updateAndTick(fixture);
-  //   simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), name);
-  //   updateAndTick(fixture);
-  //   simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), name);
-  //   simulateClick(fixture, fixture.debugElement.query(By.css('select')));
-  //   updateAndTick(fixture);
-  //   simulateClick(fixture, fixture.debugElement.query(By.css('.r-option')));
-  //   fixture.debugElement.query(By.css('select'))
-  //      .nativeElement.dispatchEvent(new Event('change'));
-  //   updateAndTick(fixture);
-  //   simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
-  //   const expectedUrlR = `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
-  //     `${WorkspaceStubVariables.DEFAULT_WORKSPACE_ID}/` +
-  //     `notebooks/create/?notebook-name=` + encodeURIComponent(name) +
-  //     `&kernel-type=${Kernels.R}`;
-  //   expect(window.open).toHaveBeenCalledWith(expectedUrlR, '_blank');
-  // }));
+  it('allows creation of R notebooks', fakeAsync(() => {
+    spyOn(window, 'open');
+    const name = 'new-name-r';
+    updateAndTick(fixture);
+    simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), name);
+    updateAndTick(fixture);
+    simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), name);
+    fixture.componentInstance.kernelType = Kernels.R;
+    updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
+    const expectedUrlR = `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
+      `${WorkspaceStubVariables.DEFAULT_WORKSPACE_ID}/` +
+      `notebooks/create/?notebook-name=` + encodeURIComponent(name) +
+      `&kernel-type=${Kernels.R}`;
+    expect(window.open).toHaveBeenCalledWith(expectedUrlR, '_blank');
+  }));
 });
