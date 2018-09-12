@@ -1,8 +1,18 @@
 <clr-modal [(clrModalOpen)]="sharing">
   <div class="modal-title">
     <h2 class="modal-title-text">
-      Add a Collaborator
-      <clr-icon shape="info-standard is-solid"></clr-icon>
+      Share {{workspace.name}}
+      <clr-tooltip style="cursor: pointer">
+        <clr-icon #infoIcon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition="middle-right" clrSize="lg" *clrIfOpen>
+          <div>
+            Workspaces can only be shared with existing All of Us users. If you want to share your
+            workspace with someone who is not yet a part of the All of Us community, have them
+            <a routerLink="/" target="_blank">create an account</a> first and then you can share
+            the workspace with them.
+          </div>
+        </clr-tooltip-content>
+      </clr-tooltip>
     </h2>
   </div>
   <div class="modal-body" id="sharing-modal-body">
