@@ -8,6 +8,10 @@
   align-items: center;
 }
 
+.search-box input {
+  width: 90%;
+}
+
 clr-icon {
   height: 18px;
   width: 18px;
@@ -21,6 +25,8 @@ clr-icon {
 .dropdown {
   width: 100%;
   margin-top: 0;
+  border-bottom: 1px solid gray;
+  padding-bottom: .5rem;
 }
 
 .dropdown.open {
@@ -77,11 +83,11 @@ clr-icon {
 .collaborator-icon {
   margin: 0 0 0 1rem;
   color: #888;
+  cursor: pointer;
 }
 
 .collaborator, .collaborator-icon {
   display: block;
-  cursor: pointer;
 }
 
 clr-dropdown {
@@ -151,4 +157,8 @@ clr-dropdown > button {
 
 .bordered {
   border-bottom: 1px solid lightgray;
+}
+
+.select select {
+  min-width: 5rem;
 }
