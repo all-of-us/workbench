@@ -15,15 +15,16 @@ import {NodeComponent} from '../node/node.component';
   styleUrls: ['./tree.component.css']
 })
 export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
-    _type: string;
-    name: string;
+  _type: string;
+  name: string;
 
-    ngOnChanges() {
-        if (this.node.get('type') === TreeType[TreeType.ICD9]
-          || this.node.get('type') === TreeType[TreeType.ICD10]) {
-             super.ngOnInit();
-        }
+  ngOnChanges() {
+    if (this.node.get('type') === TreeType[TreeType.ICD9]
+      || this.node.get('type') === TreeType[TreeType.ICD10]
+      || this.node.get('type') === TreeType[TreeType.CPT]) {
+        super.ngOnInit();
     }
+  }
 
   ngOnInit() {
     super.ngOnInit();
@@ -31,24 +32,18 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
     this._type = this.node.get('type', '');
   }
 
-    showSearch() {
-        return this.node.get('type') === TreeType[TreeType.VISIT]
-            || this.node.get('type') === TreeType[TreeType.DRUG]
-            || this.node.get('type') === TreeType[TreeType.MEAS]
-            || this.node.get('type') === TreeType[TreeType.PM]
-            || this.node.get('type') === TreeType[TreeType.CONDITION]
-            || this.node.get('type') === TreeType[TreeType.ICD9]
-            || this.node.get('type') === TreeType[TreeType.ICD10];
-    }
+  showSearch() {
+    return this.node.get('type') !== TreeType[TreeType.DEMO];
+  }
 
-    showDropDown() {
-        return this.codes;
-    }
+  showDropDown() {
+    return this.codes;
+  }
 
-    optionChange(flag) {
-        if (flag) {
-            this._type = flag;
-            setTimeout(() => super.loadChildren(true));
-        }
+  optionChange(flag) {
+    if (flag) {
+      this._type = flag;
+      setTimeout(() => super.loadChildren(true));
     }
+  }
 }

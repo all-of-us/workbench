@@ -148,13 +148,13 @@ export class CohortSearchEpics {
 
   fetchAutocompleteOptions: CSEpic = (action$) => (
     action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
-      ({cdrVersionId, kind, searchTerms}: AutocompleteRequestAction) => {
+      ({cdrVersionId, kind, subtype, searchTerms}: AutocompleteRequestAction) => {
         if (kind === DomainType[DomainType.DRUG]) {
           return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         } else {
-          return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms)
+          return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms, subtype)
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         }

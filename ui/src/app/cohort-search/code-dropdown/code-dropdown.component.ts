@@ -31,9 +31,8 @@ export class CodeDropdownComponent implements  OnInit {
         .filter(options => !!options)
         .subscribe(options => {
           this.options = options.toJS();
-          if (this.options.length) {
-            this.dropDownSelected = this.options.find(option => option.type === this._type).name;
-          }
+          const selected = this.options.find(option => option.type === this._type);
+          this.dropDownSelected = selected ? selected.name : null;
       });
     }
 
@@ -41,6 +40,7 @@ export class CodeDropdownComponent implements  OnInit {
       this.getTree(option);
       this.onOptionChange.emit(option.type);
       this.dropDownSelected = option.name;
+      this.actions.changeCodeOption();
     }
 
     getTree(option: any) {

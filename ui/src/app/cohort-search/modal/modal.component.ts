@@ -11,7 +11,6 @@ import {
   activeCriteriaType,
   activeItem,
   activeParameterList,
-  codeDropdownOptions,
   CohortSearchActions,
   nodeAttributes,
   subtreeSelected,
@@ -42,11 +41,10 @@ export class ModalComponent implements OnInit, OnDestroy {
   readonly treeType = TreeType;
   ctype: string;
   subtype: string;
-  item: any;
+  itemType: string;
   fullTree: boolean;
   subscription: Subscription;
   attributesNode: Map<any, any> = Map();
-  codeOptions: any;
 
   open = false;
   noSelection = true;
@@ -100,17 +98,17 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.item$.subscribe(item => {
-      const itemType = item.get('type');
+      this.itemType = item.get('type');
       this.title = 'Codes';
       for (const crit of DOMAIN_TYPES) {
         const regex = new RegExp(`.*${crit.type}.*`, 'i');
-        if (regex.test(itemType)) {
+        if (regex.test(this.itemType)) {
           this.title = crit.name;
         }
       }
       for (const crit of PROGRAM_TYPES) {
         const regex = new RegExp(`.*${crit.type}.*`, 'i');
-        if (regex.test(itemType)) {
+        if (regex.test(this.itemType)) {
           this.title = crit.name;
         }
       }
@@ -163,16 +161,15 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   get selectionTitle() {
-    const title = typeToTitle(this.ctype);
-    if ((this.ctype === 'ICD9' ) || (this.ctype === 'ICD10')) {
-      return title
-        ? `Add Selected CONDITIONS Criteria to Cohort`
-        : 'No Selection';
-    } else {
-      return title
-        ? `Add Selected ${title} Criteria to Cohort`
-        : 'No Selection';
-    }
+    const _type = [
+      TreeType[TreeType.CONDITION],
+      TreeType[TreeType.PROCEDURE]
+    ].includes(this.itemType)
+      ? this.itemType : this.ctype;
+    const title = typeToTitle(_type);
+    return title
+      ? `Add Selected ${title} Criteria to Cohort`
+      : 'No Selection';
   }
 
   get attributeTitle() {

@@ -68,6 +68,12 @@ export function typeToTitle(_type: string): string {
     case TreeType[TreeType.DRUG]:
       _type = 'Drug';
       break;
+    case TreeType[TreeType.CONDITION]:
+      _type = 'Conditions';
+      break;
+    case TreeType[TreeType.PROCEDURE]:
+      _type = 'Procedures';
+      break;
   }
   return _type;
 }

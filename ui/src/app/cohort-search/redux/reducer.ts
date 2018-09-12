@@ -35,6 +35,7 @@ import {
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  CHANGE_CODE_OPTION,
   SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
@@ -213,6 +214,12 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['criteria', 'errors', List([action.kind, action.parentId])],
             fromJS({error: action.error})
           );
+
+      case CHANGE_CODE_OPTION:
+        return state
+          .deleteIn(['criteria', 'subtree'])
+          .deleteIn(['criteria', 'search']);
+
 
       case SET_SCROLL_ID:
         return state.setIn(['criteria', 'tree', 'scroll'], action.nodeId);
