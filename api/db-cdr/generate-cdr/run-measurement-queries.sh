@@ -949,3 +949,10 @@ and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extra
 and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id != m1.measurement_concept_id
 and ar.analysis_id = 3000 and ar.stratum_3 = 'Measurement' and ar.stratum_4 != 'unknown'
 group by m1.measurement_source_concept_id,m1.value_source_value,stratum_2"
+
+
+# Set the counts > 0 and < 20 to 20
+echo "Binning counts < 20"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+set count_value = 20, source_count_value = 20 where analysis_id in (1900,1901) and ((count_value>0 and count_value<20) or (source_count_value>0 and source_count_value<20))"

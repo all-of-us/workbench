@@ -598,8 +598,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 }
                             }
                         }
-                        System.out.println(male_bin_max+"\t"+male_bin_min);
-                        System.out.println(female_bin_max+"\t"+female_bin_min);
                     }
 
 
@@ -607,7 +605,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     TreeSet<Float> female_bin_ranges = new TreeSet<Float>();
 
                     if(male_bin_max != null && male_bin_min != null){
-                        float male_bin_width = (male_bin_max-male_bin_min)/10;
+                        float male_bin_width = (male_bin_max-male_bin_min)/11;
                         male_bin_ranges.add(male_bin_min);
                         male_bin_ranges.add(male_bin_min+male_bin_width);
                         male_bin_ranges.add(male_bin_min+2*male_bin_width);
@@ -624,7 +622,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                     if(female_bin_max != null && female_bin_min != null){
 
-                        float female_bin_width = (female_bin_max-female_bin_min)/10;
+                        float female_bin_width = (female_bin_max-female_bin_min)/11;
                         female_bin_ranges.add(female_bin_min);
                         female_bin_ranges.add(female_bin_min+female_bin_width);
                         female_bin_ranges.add(female_bin_min+2*female_bin_width);
