@@ -8,6 +8,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
+import {SignInService} from 'app/services/sign-in.service';
 import {CohortsService} from 'generated/api/cohorts.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
@@ -25,6 +26,7 @@ import {ResourceCardComponent} from 'app/views/resource-card/component';
 
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
+import {SignInServiceStub} from "../../../testing/stubs/sign-in-service-stub";
 
 describe('RecentWorkComponent', () => {
   let fixture: ComponentFixture<RecentWorkComponent>;
@@ -49,6 +51,7 @@ describe('RecentWorkComponent', () => {
       ],
       providers: [
         {provide: CohortsService, useValue: new CohortsServiceStub()},
+        {provide: SignInService, useValue: new SignInServiceStub()},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
         {provide: UserMetricsService, useValue: spy},
       ]
