@@ -113,7 +113,6 @@ export class WorkspaceShareComponent implements OnInit {
     return username + '@' + this.gsuiteDomain;
   }
 
-
   addCollaborator(): void {
     if (this.selectedAccessLevel === undefined) {
       this.roleNotSelected = true;
@@ -290,4 +289,14 @@ export class WorkspaceShareComponent implements OnInit {
     this.autocompleteNoResults = false;
     this.autocompleteUsers = [];
   }
+
+  clearSelectedUser() {
+    this.selectedUser = undefined;
+    this.toShare = '';
+    this.searchTerm = '';
+    this.autocompleteLoading = false;
+    this.autocompleteNoResults = false;
+    this.autocompleteUsers = [];
+  }
+
 }

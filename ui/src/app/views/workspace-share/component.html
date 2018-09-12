@@ -2,7 +2,7 @@
   <div class="modal-title">
     <h2 class="modal-title-text">
       Share {{workspace.name}}
-      <clr-tooltip style="cursor: pointer">
+      <clr-tooltip>
         <clr-icon #infoIcon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
         <clr-tooltip-content clrPosition="middle-right" clrSize="lg" *clrIfOpen>
           <div>
@@ -44,8 +44,7 @@
 
       <div *ngIf="showSearchResults" class="dropdown-menu">
         <div *ngFor="let autocompleteUser of autocompleteUsers"
-             class="user dropdown-item"
-             style="display: flex; align-items: center;"
+             class="user dropdown-item bordered"
              (click)="selectUser(autocompleteUser)">
 
           <!-- TODO: Lots of duplicated code here. Can the user row be templatized???? -->
@@ -55,40 +54,44 @@
             </h5>
             <div class="user-email">{{autocompleteUser.email}}</div>
           </div>
-          <div class="collaborator-icon" style="margin-top: -1rem;">
+          <div class="collaborator-icon">
             <clr-icon shape="plus-circle"></clr-icon>
           </div>
         </div>
       </div>
 
       <div *ngIf="selectedUser">
-
-        <div style="display: flex; align-items: center;">
-
+        <div class="user">
           <div class="collaborator">
             <h5 class="user-name">
               {{selectedUser.givenName}} {{selectedUser.familyName}}
             </h5>
             <div class="user-email">{{selectedUser.email}}</div>
           </div>
-          <div class="collaborator-icon">
-            <clr-icon shape="plus-circle" (click)="addCollaborator()"></clr-icon>
-          </div>
+          <clr-tooltip>
+            <div class="collaborator-icon">
+              <clr-icon shape="minus-circle" clrTooltipTrigger (click)="clearSelectedUser()"></clr-icon>
+              <clr-tooltip-content clrPosition="middle-right" clrSize="sm" *clrIfOpen>
+                <span>Remove selected user</span>
+              </clr-tooltip-content>
+            </div>
+          </clr-tooltip>
         </div>
 
-        <div>
-          <clr-dropdown>
-            <button type="button" class="btn btn-outline-primary permissions-button" clrDropdownTrigger [disabled]="!hasPermission">
-              {{selectedPermission}}
-              <clr-icon shape="caret down"></clr-icon>
-            </button>
-            <clr-dropdown-menu *clrIfOpen>
-              <button type="button" clrDropdownItem (click)="setAccess('Reader')">Reader</button>
-              <button type="button" clrDropdownItem (click)="setAccess('Writer')">Writer</button>
-              <button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>
-            </clr-dropdown-menu>
-          </clr-dropdown>
-        </div>
+        <!--<div>-->
+          <!--<clr-dropdown>-->
+            <!--<button type="button" class="btn btn-outline-primary permissions-button" clrDropdownTrigger [disabled]="!hasPermission">-->
+              <!--{{selectedPermission}}-->
+              <!--<clr-icon shape="caret down"></clr-icon>-->
+            <!--</button>-->
+            <!--<clr-dropdown-menu *clrIfOpen>-->
+              <!--<button type="button" clrDropdownItem (click)="setAccess('Reader')">Reader</button>-->
+              <!--<button type="button" clrDropdownItem (click)="setAccess('Writer')">Writer</button>-->
+              <!--<button type="button" clrDropdownItem (click)="setAccess('Owner')">Owner</button>-->
+            <!--</clr-dropdown-menu>-->
+          <!--</clr-dropdown>-->
+        <!--</div>-->
+
       </div>
 
     </div>

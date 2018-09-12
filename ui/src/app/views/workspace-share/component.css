@@ -33,12 +33,14 @@ clr-icon {
   min-height: 30px;
   visibility: visible;
   overflow-y: scroll;
+  max-width: 16rem;
+  width: 100%;
+  margin-top: .25rem;
 }
 
 .dropdown-item {
   padding-top: .5rem;
   height: 60px;
-  /*line-height: 0;*/
 }
 
 .permissions-button {
@@ -73,12 +75,13 @@ clr-icon {
 }
 
 .collaborator-icon {
-  margin: 1rem 0 0 1rem;
+  margin: 0 0 0 1rem;
   color: #888;
 }
 
 .collaborator, .collaborator-icon {
   display: block;
+  cursor: pointer;
 }
 
 clr-dropdown {
@@ -135,4 +138,17 @@ clr-dropdown > button {
 .user-area {
   max-height: 12rem;
   overflow-y: scroll;
+}
+
+.info-icon {
+  cursor: pointer;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+}
+
+.bordered {
+  border-bottom: 1px solid lightgray;
 }
