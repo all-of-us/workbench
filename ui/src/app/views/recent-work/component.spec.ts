@@ -15,6 +15,7 @@ import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
+import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
@@ -28,11 +29,29 @@ import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
 
+import {RecentResourceResponse} from 'generated/model/recentResourceResponse';
+
+class UserMetricsLoadedStub extends UserMetricsServiceStub {
+  constructor(private numberOfResources: number) {
+    super();
+  }
+
+  getUserRecentResources(extraHttpRequestParams?: any): Observable<RecentResourceResponse> {
+    return new Observable<RecentResourceResponse>(observer => {
+      setTimeout(() => {
+        const resources = stubRecentResources(this.numberOfResources);
+        observer.next(resources);
+        observer.complete();
+      }, 0);
+    });
+  }
+}
+
 describe('RecentWorkComponent', () => {
   let fixture: ComponentFixture<RecentWorkComponent>;
-  let userMetricsSpy: jasmine.SpyObj<UserMetricsService>;
+  let recentWorkComponent: RecentWorkComponent;
+  let metricStub: UserMetricsServiceStub;
   beforeEach(fakeAsync(() => {
-    const spy = jasmine.createSpyObj('UserMetricsService', ['getUserRecentResources']);
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -53,24 +72,24 @@ describe('RecentWorkComponent', () => {
         {provide: CohortsService, useValue: new CohortsServiceStub()},
         {provide: SignInService, useValue: new SignInServiceStub()},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
-        {provide: UserMetricsService, useValue: spy},
+        {provide: UserMetricsService, useValue: new UserMetricsServiceStub()},
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(RecentWorkComponent);
-      userMetricsSpy = TestBed.get(UserMetricsService);
+      recentWorkComponent = fixture.componentInstance;
       tick();
     });
   }));
 
   it('should render', fakeAsync(() => {
-    userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of([]));
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
   }));
 
   // test that it displays 3 most recent resources from UserMetrics cache
   it('should display recent work', fakeAsync(() => {
-    userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(4)));
+    metricStub = new UserMetricsLoadedStub(4);
+    recentWorkComponent.setUserMetricsService(metricStub);
     updateAndTick(fixture);
     const de = fixture.debugElement;
     const cardsOnPage = de.queryAll(By.css('.card'));
@@ -82,7 +101,6 @@ describe('RecentWorkComponent', () => {
 
   // it should not render the component at all if user has no cache
   it('should not render if no cache', fakeAsync(() => {
-    userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of([]));
     updateAndTick(fixture);
     const recentWork = fixture.debugElement.queryAll(By.css('.recent-work'));
     expect(recentWork.length).toEqual(0);
@@ -90,7 +108,8 @@ describe('RecentWorkComponent', () => {
 
   // neither scroll indicator should show if cache < 4
   it('should not render either scroll indicator if cache fewer than 4', fakeAsync(() => {
-    userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of([]));
+    metricStub = new UserMetricsLoadedStub(3);
+    recentWorkComponent.setUserMetricsService(metricStub);
     updateAndTick(fixture);
     const scrolls = fixture.debugElement.queryAll(By.css('.scroll-indicator'));
     expect(scrolls.length).toEqual(0);
@@ -98,7 +117,8 @@ describe('RecentWorkComponent', () => {
 
   // right scroll should appear (but no left scroll) if cache > 3
   it('should render scroll indicators correctly if cache greater than 3', fakeAsync(() => {
-    userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(4)));
+    metricStub = new UserMetricsLoadedStub(4);
+    recentWorkComponent.setUserMetricsService(metricStub);
     updateAndTick(fixture);
     const de = fixture.debugElement;
     const leftScroll = de.queryAll(By.css('#left-scroll'));
@@ -113,28 +133,29 @@ describe('RecentWorkComponent', () => {
   //    moves up list on left scroll click
   //    left scroll disappears and right appears
   it('should scroll correctly', fakeAsync(() => {
-    userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(4)));
+    metricStub = new UserMetricsLoadedStub(4);
+    recentWorkComponent.setUserMetricsService(metricStub);
     updateAndTick(fixture);
     const de = fixture.debugElement;
-    const rightScroll = de.query(By.css('#right-scroll'));
-    const leftScroll = de.query(By.css('#left-scroll'));
-    simulateClick(fixture, rightScroll);
-    fixture.detectChanges();
-    tick();
+    const rightScroll = () => de.query(By.css('#right-scroll'));
+    const leftScroll = () => de.query(By.css('#left-scroll'));
+    const nameQuery = () => de.queryAll(By.css('.name'))
+      .map((card) => card.nativeElement.innerText.trim());
+    simulateClick(fixture, rightScroll());
+    updateAndTick(fixture);
     // should have scrolled right so should be FIRST 3 and NOT last
-    expect(de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText.trim()))
+    expect(nameQuery())
       .toEqual(['mockFile3.ipynb', 'mockFile2.ipynb', 'mockFile1.ipynb']);
     // right scroll should not be present and left present
-    expect(rightScroll).toBeNull();
-    expect(leftScroll).toBeDefined();
-    simulateClick(fixture, de.query(By.css('#left-scroll')));
-    tick();
-    fixture.detectChanges();
+    expect(rightScroll()).toBe(null);
+    expect(leftScroll()).not.toBe(null);
+    simulateClick(fixture, leftScroll());
+    updateAndTick(fixture);
     // all should be returned to orig state
-    expect(de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText.trim()))
+    expect(nameQuery())
       .toEqual(['mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
-    expect(rightScroll).toBeDefined();
-    expect(leftScroll).toBeNull();
+    expect(rightScroll()).not.toBe(null);
+    expect(leftScroll()).toBe(null);
   }));
 });
 
