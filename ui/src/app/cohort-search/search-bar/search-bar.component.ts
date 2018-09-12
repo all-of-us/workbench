@@ -152,7 +152,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.noResults = false;
       if (newVal.length >= 4) {
         const subtype = this.codes ? this.subtype : null;
-        console.log(subtype);
         this.actions.fetchAutocompleteOptions(this._type, subtype, newVal);
       } else {
         this.actions.setCriteriaSearchTerms([]);
