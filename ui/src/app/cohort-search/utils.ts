@@ -1,5 +1,6 @@
 import {TreeType} from 'generated';
 import {List} from 'immutable';
+import {DOMAIN_TYPES} from './constant';
 
 
 export function typeDisplay(parameter): string {
@@ -97,4 +98,9 @@ export function highlightMatches(terms: Array<string>, name: string) {
 
 export function stripHtml(string: string) {
   return string.replace(/<(.|\n)*?>/g, '');
+}
+
+export function getCodeOptions(itemType: string) {
+  const item =  DOMAIN_TYPES.find(domain => TreeType[domain.type] === itemType);
+  return (item && item['codes']) ? item['codes'] : false;
 }

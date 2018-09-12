@@ -3,10 +3,12 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {
+  activeItem,
   codeDropdownOptions,
   CohortSearchActions,
   CohortSearchState,
 } from '../redux';
+import {getCodeOptions} from '../utils';
 
 
 @Component({
@@ -20,6 +22,7 @@ export class CodeDropdownComponent implements  OnInit {
     subscription: Subscription;
     @Input() _type: string;
     @Output() onOptionChange = new EventEmitter<string>();
+    @select(activeItem) activeItem$: Observable<any>;
     @select(codeDropdownOptions) options$: Observable<any>;
     constructor(
         private ngRedux: NgRedux<CohortSearchState>,
@@ -27,12 +30,12 @@ export class CodeDropdownComponent implements  OnInit {
     ) {}
 
     ngOnInit() {
-      this.subscription = this.options$
-        .filter(options => !!options)
-        .subscribe(options => {
-          this.options = options.toJS();
-          const selected = this.options.find(option => option.type === this._type);
-          this.dropDownSelected = selected ? selected.name : null;
+      this.subscription = this.activeItem$
+        .filter(item => !!item)
+        .subscribe(item => {
+          this.options = getCodeOptions(item.get('type'));
+          this.dropDownSelected = this.options
+            ? this.options.find(option => option.type === this._type).name : null;
       });
     }
 
