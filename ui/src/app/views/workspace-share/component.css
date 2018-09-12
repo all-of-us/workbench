@@ -4,6 +4,8 @@
   padding: 7px 14px;
   border-radius: 5px;
   background-color: #DFF0FA;
+  display: flex;
+  align-items: center;
 }
 
 clr-icon {
@@ -11,7 +13,7 @@ clr-icon {
   width: 18px;
 }
 
-.no-border{
+.no-border {
   border: none!important;
   background: none!important;
 }
@@ -21,12 +23,16 @@ clr-icon {
   margin-top: 0;
 }
 
+.dropdown.open {
+  overflow-y: visible;
+}
+
 .dropdown-menu {
   display: block;
-  max-height: 15rem;
+  max-height: 12rem;
   min-height: 30px;
-  overflow-y: auto;
   visibility: visible;
+  overflow-y: scroll;
 }
 
 .dropdown-item {
@@ -34,21 +40,6 @@ clr-icon {
   height: 60px;
   /*line-height: 0;*/
 }
-
-/*input.share, .sharing-buttons {*/
-  /*width: 10rem;*/
-  /*color: #565656;*/
-  /*border: 1px #565656 solid;*/
-  /*border-radius: 0.2rem;*/
-  /*font-size: 0.35rem;*/
-  /*height: 1.1rem;*/
-  /*text-transform: uppercase;*/
-/*}*/
-
-/*.sharing-buttons, .add-button {*/
-  /*width: auto;*/
-  /*font-size: 0.5rem;*/
-/*}*/
 
 .permissions-button {
   margin-top: 0.5rem;
@@ -58,16 +49,6 @@ clr-icon {
   height: 1.1rem;
   line-height: 0.5em;
 }
-
-/*.add-by-text-area, .removing-area {*/
-  /*display: inline-block;*/
-  /*padding-top: 1rem;*/
-  /*width: 18rem;*/
-/*}*/
-
-/*.removing-area {*/
-  /*width: 22rem;*/
-/*}*/
 
 .user-name, .user-email, .user-role {
   font-weight: 300;
@@ -85,12 +66,6 @@ clr-icon {
   color: #565656;
   font-weight: 300;
   font-size: 0.4rem
-}
-
-.user {
-  /*margin-bottom: 0.5rem;*/
-  /*overflow: hidden;*/
-  /*clear: both;*/
 }
 
 .collaborator {
@@ -130,26 +105,12 @@ clr-dropdown > button {
   padding: 0.4rem;
 }
 
-/*.sharing-area {*/
-  /*display: flex;*/
-  /*justify-content: flex-start;*/
-/*}*/
-
-/*.adding-area {*/
-  /*flex: 0 0 auto;*/
-  /*border-right: 1px solid #979797;*/
-/*}*/
-
 .collaborator-label {
   font-size: 0.65rem;
   display: block;
   margin: 0 0 0.5rem 0;
   color: rgb(38, 34, 98);
 }
-
-/*.removing-area {*/
-  /*padding-left: 1rem;*/
-/*}*/
 
 .spinner-padded {
   padding-top: 1rem;
@@ -165,4 +126,13 @@ clr-dropdown > button {
 
 .modal-title-text {
   margin-top: 0;
+}
+
+:host::ng-deep .modal-dialog {
+  width: 18rem;
+}
+
+.user-area {
+  max-height: 12rem;
+  overflow-y: scroll;
 }
