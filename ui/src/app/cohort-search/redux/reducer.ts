@@ -424,12 +424,14 @@ export const rootReducer: Reducer<CohortSearchState> =
         }));
 
       case REOPEN_WIZARD:
+        const selections = state.getIn(['entities', 'parameters'], Map()).filter(
+          (_, key) => action.item.get('searchParameters', List()).includes(key)
+        );
         return state.mergeIn(['wizard'], Map({
           open: true,
           item: action.item,
-          selections: state.getIn(['entities', 'parameters'], Map()).filter(
-            (_, key) => action.item.get('searchParameters', List()).includes(key)
-          ),
+          selections: selections,
+
           ...action.context
         }));
 
