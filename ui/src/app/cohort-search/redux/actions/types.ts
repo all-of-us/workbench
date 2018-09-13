@@ -1,9 +1,11 @@
 import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
+export const BEGIN_SUBTYPE_CRITERIA_REQUEST = 'BEGIN_SUBTYPE_CRITERIA_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
+export const LOAD_CRITERIA_SUBTYPE_RESULTS = 'LOAD_CRITERIA_SUBTYPE_RESULTS';
 export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
 export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
@@ -13,12 +15,14 @@ export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
 export const BEGIN_CHILDREN_REQUEST = 'BEGIN_CHILDREN_REQUEST';
 export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
 export const LOAD_CHILDREN_LIST = 'LOAD_CHILDREN_LIST';
+export const SELECT_CHILDREN_LIST = 'SELECT_CHILDREN_LIST';
 export const LOAD_ATTRIBUTE_LIST = 'LOAD_ATTRIBUTE_LIST';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
 export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
 export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
 export const ATTRIBUTE_REQUEST_ERROR = 'ATTRIBUTE_REQUEST_ERROR';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
+export const CHANGE_CODE_OPTION = 'CHANGE_CODE_OPTION';
 export const SET_SCROLL_ID = 'SET_SCROLL_ID';
 
 export const BEGIN_COUNT_REQUEST = 'BEGIN_COUNT_REQUEST';
@@ -74,6 +78,13 @@ export interface ActionTypes {
     kind: string;
     parentId: number;
   };
+  BEGIN_SUBTYPE_CRITERIA_REQUEST: {
+    type: typeof BEGIN_SUBTYPE_CRITERIA_REQUEST;
+    cdrVersionId: number;
+    kind: string;
+    subtype: string;
+    parentId: number;
+  };
   BEGIN_ALL_CRITERIA_REQUEST: {
     type: typeof BEGIN_ALL_CRITERIA_REQUEST;
     cdrVersionId: number;
@@ -90,6 +101,13 @@ export interface ActionTypes {
   LOAD_CRITERIA_RESULTS: {
     type: typeof LOAD_CRITERIA_RESULTS;
     kind: string;
+    parentId: number;
+    results: Criteria[];
+  };
+  LOAD_CRITERIA_SUBTYPE_RESULTS: {
+    type: typeof LOAD_CRITERIA_SUBTYPE_RESULTS;
+    kind: string;
+    subtype: string;
     parentId: number;
     results: Criteria[];
   };
@@ -118,6 +136,7 @@ export interface ActionTypes {
     type: typeof BEGIN_AUTOCOMPLETE_REQUEST;
     cdrVersionId: number;
     kind: string;
+    subtype: string;
     searchTerms: string;
   };
   BEGIN_INGREDIENT_REQUEST: {
@@ -155,6 +174,11 @@ export interface ActionTypes {
     parentId: number;
     children: any;
   };
+  SELECT_CHILDREN_LIST: {
+    type: typeof SELECT_CHILDREN_LIST;
+    kind: string;
+    parentId: number;
+  };
   LOAD_ATTRIBUTE_LIST: {
     type: typeof LOAD_ATTRIBUTE_LIST;
     node: any;
@@ -166,6 +190,10 @@ export interface ActionTypes {
     parentId: number;
     error?: any;
   };
+  CHANGE_CODE_OPTION: {
+    type: typeof CHANGE_CODE_OPTION;
+  };
+
   SET_SCROLL_ID: {
     type: typeof SET_SCROLL_ID;
     nodeId: string;
@@ -262,6 +290,7 @@ export interface ActionTypes {
     type: typeof REMOVE_PARAMETER;
     parameterId: string;
     path: string;
+    id: number;
   };
   ADD_MODIFIER: {
     type: typeof ADD_MODIFIER;
@@ -301,6 +330,7 @@ export interface ActionTypes {
   OPEN_WIZARD: {
     type: typeof OPEN_WIZARD;
     itemId: string;
+    itemType: string;
     context?: ActiveContext;
   };
   REOPEN_WIZARD: {
@@ -330,9 +360,11 @@ export interface ActionTypes {
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
+  | ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
   | ActionTypes[typeof LOAD_CRITERIA_RESULTS]
+  | ActionTypes[typeof LOAD_CRITERIA_SUBTYPE_RESULTS]
   | ActionTypes[typeof LOAD_CRITERIA_SUBTREE]
   | ActionTypes[typeof LOAD_DEMO_CRITERIA_RESULTS]
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
@@ -344,10 +376,12 @@ export type RootAction =
   | ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof LOAD_INGREDIENT_LIST]
   | ActionTypes[typeof LOAD_CHILDREN_LIST]
+  | ActionTypes[typeof SELECT_CHILDREN_LIST]
   | ActionTypes[typeof LOAD_ATTRIBUTE_LIST]
   | ActionTypes[typeof AUTOCOMPLETE_REQUEST_ERROR]
   | ActionTypes[typeof ATTRIBUTE_REQUEST_ERROR]
   | ActionTypes[typeof CRITERIA_REQUEST_ERROR]
+  | ActionTypes[typeof CHANGE_CODE_OPTION]
   | ActionTypes[typeof SET_SCROLL_ID]
 
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]

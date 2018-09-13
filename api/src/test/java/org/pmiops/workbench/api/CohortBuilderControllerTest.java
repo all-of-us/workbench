@@ -216,7 +216,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(labMeasurement),
       controller
-        .getCriteriaAutoComplete(1L, TreeType.MEAS.name(),"LP12", null)
+        .getCriteriaAutoComplete(1L, TreeType.MEAS.name(),"LP12", null, null)
         .getBody()
         .getItems()
         .get(0)
@@ -228,7 +228,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(drugATCCriteria),
       controller
-        .getDrugBrandOrIngredientByName(1L, "drugN")
+        .getDrugBrandOrIngredientByName(1L, "drugN", null)
         .getBody()
         .getItems()
         .get(0)
@@ -237,7 +237,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(drugBrandCriteria),
       controller
-        .getDrugBrandOrIngredientByName(1L, "brandN")
+        .getDrugBrandOrIngredientByName(1L, "brandN", null)
         .getBody()
         .getItems()
         .get(0)

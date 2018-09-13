@@ -70,12 +70,15 @@ describe('SearchGroupSelectComponent', () => {
     expect(spy).toHaveBeenCalledWith({
       type: OPEN_WIZARD,
       itemId: 'Testitems',
+      itemType: 'test',
       context: {
         criteriaType: 'test',
+        criteriaSubtype: null,
         role: 'includes',
         groupId: 'Testincludes',
         itemId: 'Testitems',
-        fullTree: false
+        fullTree: false,
+        codes: false
       },
     });
   });

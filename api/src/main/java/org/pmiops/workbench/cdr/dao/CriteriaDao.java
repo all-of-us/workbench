@@ -9,7 +9,8 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
-  List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type, @Param("parentId") Long parentId);
+  List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
+                                                           @Param("parentId") Long parentId);
 
   @Query(value = "select * " +
     "from criteria " +
@@ -41,8 +42,10 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
-    "limit 250", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeForCodeOrName(@Param("type") String type, @Param("value") String value);
+    "limit :limit", nativeQuery = true)
+  List<Criteria> findCriteriaByTypeForCodeOrName(@Param("type") String type,
+                                                 @Param("value") String value,
+                                                 @Param("limit") Long limit);
 
   @Query(value = "select * from criteria where id in ( " +
     "select id from " +
@@ -59,16 +62,18 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
-    "limit 250", nativeQuery = true)
+    "limit :limit", nativeQuery = true)
   List<Criteria> findCriteriaByTypeAndSubtypeForCodeOrName(@Param("type") String type,
                                                            @Param("subtype") String subtype,
-                                                           @Param("value") String value);
+                                                           @Param("value") String value,
+                                                           @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "where c.type = :type " +
     "and c.subtype = :subtype " +
     "order by c.id asc", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeAndSubtypeOrderByIdAsc(@Param("type") String type, @Param("subtype") String subtype);
+  List<Criteria> findCriteriaByTypeAndSubtypeOrderByIdAsc(@Param("type") String type,
+                                                          @Param("subtype") String subtype);
 
   @Query(value = "select * from criteria c " +
     "where c.type = 'DRUG' " +
@@ -76,8 +81,9 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and c.is_selectable = 1 " +
     "and upper(c.name) like upper(concat('%',:name,'%')) " +
     "order by c.name asc " +
-    "limit 250", nativeQuery = true)
-  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name);
+    "limit :limit", nativeQuery = true)
+  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name,
+                                                 @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "inner join ( " +
@@ -91,7 +97,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "from criteria " +
     "where is_group = 0 " +
     "and is_selectable = 1 " +
-    "and path = ( " +
+    "and (path = ( " +
     "select concat( path, '.', id) as path " +
     "from criteria " +
     "where type = :type " +
@@ -106,7 +112,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and subtype = :subtype " +
     "and code = :code " +
     "and is_group = 1 " +
-    "and is_selectable = 1)", nativeQuery = true)
+    "and is_selectable = 1))", nativeQuery = true)
   List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
 
   @Query(value = "select * from criteria c " +
