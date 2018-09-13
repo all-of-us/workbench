@@ -49,7 +49,7 @@ export class NewNotebookModalComponent implements OnDestroy {
     const existingNotebook =
       this.existingNotebooks.find((currentNotebook) =>
         currentNotebook.name === this.newName + '.ipynb');
-    if (existingNotebook !== undefined) {
+    if (existingNotebook) {
       this.nameConflict = true;
       return;
     }

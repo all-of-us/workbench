@@ -59,7 +59,10 @@ describe('NewNotebookModalComponent', () => {
   }));
 
   it('does not allow blank names', fakeAsync(() => {
-
+    spyOn(window, 'open');
+    updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
+    expect(window.open).not.toHaveBeenCalled();
   }));
 
   it('allows creation of Py notebooks', fakeAsync(() => {
@@ -82,8 +85,6 @@ describe('NewNotebookModalComponent', () => {
   it('allows creation of R notebooks', fakeAsync(() => {
     spyOn(window, 'open');
     const name = 'new-name-r';
-    updateAndTick(fixture);
-    simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), name);
     updateAndTick(fixture);
     simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), name);
     fixture.componentInstance.kernelType = Kernels.R;
