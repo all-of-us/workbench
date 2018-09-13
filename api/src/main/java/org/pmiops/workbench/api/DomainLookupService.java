@@ -27,7 +27,7 @@ public class DomainLookupService {
      * @param searchGroups
      */
     public void findCodesForEmptyDomains(List<SearchGroup> searchGroups) {
-      String regex = TreeType.ICD9.name() + "|" + TreeType.ICD10.name() + "|" + TreeType.CPT.name() + "|" + TreeType.CONDITION.name() + "|" + TreeType.PROCEDURE.name();
+      String regex = TreeType.ICD9.name() + "|" + TreeType.ICD10.name() + "|" + TreeType.CONDITION.name() + "|" + TreeType.PROCEDURE.name();
       searchGroups.stream()
         .flatMap(searchGroup -> searchGroup.getItems().stream())
         .filter(item -> item.getType().matches(regex))

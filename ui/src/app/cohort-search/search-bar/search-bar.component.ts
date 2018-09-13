@@ -88,9 +88,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               }
             });
           }
-          this.noResults = (this._type === TreeType[TreeType.DRUG]
-              || this._type === TreeType[TreeType.MEAS])
-            && !this.optionSelected
+          this.noResults = !this.optionSelected
             && !this.options.length;
         }
       });
