@@ -13,7 +13,8 @@ import {FileDetail, Workspace} from 'generated';
   selector: 'app-new-notebook-modal',
   styleUrls: ['./component.css',
     '../../styles/buttons.css',
-    '../../styles/inputs.css'],
+    '../../styles/inputs.css',
+    '../../styles/errors.css'],
   templateUrl: './component.html',
 })
 export class NewNotebookModalComponent implements OnDestroy {
