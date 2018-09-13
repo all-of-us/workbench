@@ -45,7 +45,7 @@ clr-icon {
 }
 
 .dropdown-item {
-  padding-top: .5rem;
+  /*padding-top: .5rem;*/
   height: 60px;
 }
 
@@ -160,5 +160,5 @@ clr-dropdown > button {
 }
 
 .select select {
-  min-width: 5rem;
+  min-width: 3rem;
 }

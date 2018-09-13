@@ -33,7 +33,6 @@ import {
 export class WorkspaceShareComponent implements OnInit {
   @Input('workspace') workspace: Workspace;
   toShare = '';
-  toShareChanged = new Subject<string>();
   selectedPermission = 'Select Permission';
   roleNotSelected = false;
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
@@ -49,7 +48,7 @@ export class WorkspaceShareComponent implements OnInit {
 
   // All new stuff to handle autocomplete. TODO: Clean this up before PR
   searchTerm: string;
-  // searchUpdated: Subject = new Subject();
+  searchTermChanged = new Subject<string>();
   userResponse: UserResponse;
   autocompleteUsers: User[] = [];
   autocompleteNoResults = false;
@@ -67,14 +66,12 @@ export class WorkspaceShareComponent implements OnInit {
     serverConfigService.getConfig().subscribe((config) => {
       this.gsuiteDomain = config.gsuiteDomain;
     });
-    this.toShareChanged
-      .debounceTime(300) // wait 300 millisec after the last event before emitting last event
-      .distinctUntilChanged() // only emit if value is different from previous value
+    this.searchTermChanged
+      .debounceTime(300)
+      .distinctUntilChanged()
       .subscribe(model => {
-        this.toShare = model;
-
-        // Call your function which calls API or do anything you would like do after a lag of 1 sec
-        this.userSearch(this.toShare);
+        this.searchTerm = model;
+        this.userSearch(this.searchTerm);
       });
   }
 
@@ -83,11 +80,6 @@ export class WorkspaceShareComponent implements OnInit {
       this.usersLoading = false;
       this.userEmail = profile.username;
     });
-  }
-
-  toShareChangedEvent($event: string) {
-    this.autocompleteLoading = true;
-    this.toShareChanged.next($event);
   }
 
   setAccess(dropdownSelected: string): void {
@@ -113,6 +105,8 @@ export class WorkspaceShareComponent implements OnInit {
     return username + '@' + this.gsuiteDomain;
   }
 
+  // TODO: This needs to go away because we're never just adding a collaborator -
+  // TODO: we're always updating the full list, every time
   addCollaborator(): void {
     if (this.selectedAccessLevel === undefined) {
       this.roleNotSelected = true;
@@ -255,6 +249,11 @@ export class WorkspaceShareComponent implements OnInit {
   get showAutocompleteNoResults(): boolean {
     return this.autocompleteNoResults &&
         !isBlank(this.searchTerm);
+  }
+
+  searchTermChangedEvent($event: string) {
+    this.autocompleteLoading = true;
+    this.searchTermChanged.next($event);
   }
 
   userSearch(value: string): void {
