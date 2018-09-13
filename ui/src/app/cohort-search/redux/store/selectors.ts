@@ -123,7 +123,7 @@ export const criteriaChildren =
     } else {
       return state.getIn(['criteria', 'tree', kind, parentId], List());
     }
-  }
+  };
 
 export const demoCriteriaChildren =
   (kind: string, subtype: string) =>
