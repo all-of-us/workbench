@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.ErrorCode;
@@ -151,7 +152,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
             userInfo.getEmail(), null);
     } else {
       if (user.getDisabled()) {
-        throw new ForbiddenException(ExceptionUtils.errorResponse(ErrorCode.USER_DISABLED, "This user account has been disabled."));
+        throw new ForbiddenException(WorkbenchException
+            .errorResponse(ErrorCode.USER_DISABLED, "This user account has been disabled."));
       }
     }
 
