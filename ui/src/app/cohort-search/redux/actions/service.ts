@@ -51,6 +51,7 @@ export class CohortSearchActions {
    * (B) can easily perform multi-step, complex actions from this service
    */
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
+  @dispatch() requestCriteriaBySubtype = ActionFuncs.requestCriteriaBySubtype;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
   @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
@@ -62,6 +63,7 @@ export class CohortSearchActions {
   @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
   @dispatch() selectChildren = ActionFuncs.selectChildren;
   @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
+  @dispatch() changeCodeOption = ActionFuncs.changeCodeOption;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
@@ -219,6 +221,15 @@ export class CohortSearchActions {
     this.requestCriteria(this.cdrVersionId, kind, parentId);
   }
 
+  fetchCriteriaBySubtype(kind: string, subtype: string, parentId: number): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'tree', kind, subtype, parentId]);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    this.requestCriteriaBySubtype(this.cdrVersionId, kind, subtype, parentId);
+  }
+
   fetchAllCriteria(kind: string, parentId: number): void {
     const isLoading = isCriteriaLoading(kind, parentId)(this.state);
     const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
@@ -237,8 +248,8 @@ export class CohortSearchActions {
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
   }
 
-  fetchAutocompleteOptions(kind: string, terms: string): void {
-    this.requestAutocompleteOptions(this.cdrVersionId, kind, terms);
+  fetchAutocompleteOptions(kind: string, subtype: string, terms: string): void {
+    this.requestAutocompleteOptions(this.cdrVersionId, kind, subtype, terms);
   }
 
   fetchIngredientsForBrand(conceptId: number): void {
