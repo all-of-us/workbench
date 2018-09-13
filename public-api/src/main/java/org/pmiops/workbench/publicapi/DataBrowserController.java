@@ -67,6 +67,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Qualifier("defaultCdr")
     private Provider<CdrVersion> defaultCdrVersionProvider;
 
+    @Autowired
     private ConceptService conceptService;
 
     public DataBrowserController() {}
