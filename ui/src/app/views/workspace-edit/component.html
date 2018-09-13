@@ -71,7 +71,7 @@
                   name="disease-focused-research"
                   id="disease-focused-research"
                   [(ngModel)]="workspace.researchPurpose.diseaseFocusedResearch"
-                  [clrDisabled]="mode == Mode.Edit">
+                  [clrDisabled]=!canEditDataSet>
               </clr-checkbox>
               <div>
                 <label class="checkbox-label" for="clr-checkbox-disease-focused-research"><h3 class="data-use-label">
@@ -81,7 +81,7 @@
                 </div>
                 <div style="display: flex">
                   <input type="text" class="input" name="disease-specification"
-                      [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]="mode == Mode.Edit"
+                      [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]=!canEditDataSet
                       placeholder="Name of Disease"
                       style="width: calc(50% - 2rem); margin-right: 2rem; margin-to`p: 0.5rem">
                 </div>
@@ -95,7 +95,7 @@
                     name="methods-development"
                     id="methods-development"
                     [(ngModel)]="workspace.researchPurpose.methodsDevelopment"
-                    [clrDisabled]="mode == Mode.Edit">
+                    [clrDisabled]=!canEditDataSet>
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-methods-development"><h3 class="data-use-label">
@@ -112,7 +112,7 @@
                         name="aggregate-analysis"
                         id="aggregate-analysis"
                         [(ngModel)]="workspace.researchPurpose.aggregateAnalysis"
-                        [clrDisabled]="mode == Mode.Edit">
+                        [clrDisabled]=!canEditDataSet>
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-aggregate-analysis"><h3 class="data-use-label">
@@ -131,7 +131,7 @@
                     name="control-set"
                     id="control-set"
                     [(ngModel)]="workspace.researchPurpose.controlSet"
-                    [clrDisabled]="mode == Mode.Edit">
+                    [clrDisabled]=!canEditDataSet>
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-control-set"><h3 class="data-use-label">
@@ -148,7 +148,7 @@
                         name="ancestry"
                         id="ancestry"
                         [(ngModel)]="workspace.researchPurpose.ancestry"
-                        [clrDisabled]="mode == Mode.Edit">
+                        [clrDisabled]=!canEditDataSet>
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-ancestry"><h3 class="data-use-label">
@@ -167,7 +167,7 @@
                         name="population"
                         id="population"
                         [(ngModel)]="workspace.researchPurpose.population"
-                        [clrDisabled]="mode == Mode.Edit">
+                        [clrDisabled]=!canEditDataSet>
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-population"><h3 class="data-use-label">
@@ -184,7 +184,7 @@
                         name="commercial-purpose"
                         id="commercial-purpose"
                         [(ngModel)]="workspace.researchPurpose.commercialPurpose"
-                        [clrDisabled]="mode == Mode.Edit">
+                        [clrDisabled]=!canEditDataSet>
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-commercial-purpose"><h3 class="data-use-label">
@@ -233,7 +233,7 @@
                           class="underserved-checkbox"
                           name="{{underservedCategories[categoryHeader][item]}}"
                           id="{{underservedCategories[categoryHeader][item]}}"
-                          [clrDisabled]="mode == Mode.Edit">
+                          [clrDisabled]=!canEditDataSet>
                         {{item}}
                       </clr-checkbox>
                     </div>
@@ -253,7 +253,7 @@
               name="request-approval"
               id="request-approval"
               [(ngModel)]="workspace.researchPurpose.reviewRequested"
-              [clrDisabled]="mode == Mode.Edit">
+              [clrDisabled]=!canEditDataSet>
           </clr-checkbox>
           <div>
             <div class="section-text">
