@@ -20,10 +20,7 @@ export const DOMAIN_TYPES = [
     { name: 'Drugs',    type: TreeType.DRUG },
     { name: 'Measurements',    type: TreeType.MEAS },
     { name: 'Visits',    type: TreeType.VISIT, fullTree: true },
-    { name: 'ICD9 Codes',   type: TreeType.ICD9 },
-    { name: 'ICD10 Codes',  type: TreeType.ICD10 },
     // { name: 'PheCodes',     type: 'phecode' },
-    { name: 'CPT Codes',    type: TreeType.CPT },
     // { name: 'Temporal',     type: 'temporal' }
 ];
 

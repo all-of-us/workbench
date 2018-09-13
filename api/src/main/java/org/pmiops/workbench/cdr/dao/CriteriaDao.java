@@ -97,7 +97,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "from criteria " +
     "where is_group = 0 " +
     "and is_selectable = 1 " +
-    "and path = ( " +
+    "and (path = ( " +
     "select concat( path, '.', id) as path " +
     "from criteria " +
     "where type = :type " +
@@ -112,7 +112,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and subtype = :subtype " +
     "and code = :code " +
     "and is_group = 1 " +
-    "and is_selectable = 1)", nativeQuery = true)
+    "and is_selectable = 1))", nativeQuery = true)
   List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
 
   @Query(value = "select * from criteria c " +
