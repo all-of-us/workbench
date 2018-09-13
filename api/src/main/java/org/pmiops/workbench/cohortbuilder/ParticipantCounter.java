@@ -18,50 +18,46 @@ public class ParticipantCounter {
 
     private CohortQueryBuilder cohortQueryBuilder;
 
-    private static final String COUNT_SQL_TEMPLATE =
-            "select count(*) as count\n" +
-                    "from `${projectId}.${dataSetId}.person` person\n" +
-                    "where\n";
+  private static final String COUNT_SQL_TEMPLATE =
+    "select count(*) as count\n" +
+      "from `${projectId}.${dataSetId}.person` person\n" +
+      "where\n";
 
-    private static final String ID_SQL_TEMPLATE =
-            "select person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
-                    "from `${projectId}.${dataSetId}.person` person\n" +
-                    "where\n";
+  private static final String ID_SQL_TEMPLATE =
+    "select person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
+      "from `${projectId}.${dataSetId}.person` person\n" +
+      "where\n";
 
-    private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
-            "select concept1.concept_code as gender, \n" +
-                    "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
-                    "case " + getAgeRangeSql(0, 18) + "\n" +
-                    getAgeRangeSql(19, 44) + "\n" +
-                    getAgeRangeSql(45, 64) + "\n" +
-                    "else '> 65'\n" +
-                    "end as ageRange,\n" +
-                    "count(*) as count\n" +
-                    "from `${projectId}.${dataSetId}.person` person\n" +
-                    "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id = 'Gender')\n" +
-                    "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
-                    "where\n";
+  private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
+    "select concept1.concept_code as gender, \n" +
+      "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
+      "case " + getAgeRangeSql(0, 18) + "\n" +
+      getAgeRangeSql(19, 44) + "\n" +
+      getAgeRangeSql(45, 64) + "\n" +
+      "else '> 65'\n" +
+      "end as ageRange,\n" +
+      "count(*) as count\n" +
+      "from `${projectId}.${dataSetId}.person` person\n" +
+      "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id = 'Gender')\n" +
+      "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
+      "where\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
-    "SELECT concept_name, condition_source_concept_id, count(*) as count \n" +
-      "FROM `${projectId}.${dataSetId}.${table}` person\n" +
-      "JOIN `${projectId}.${dataSetId}.concept` c on d.${tableId} = c.concept_id\n" +
+    "select concept_name, concept_id, s.count\n" +
+      "from `${projectId}.${dataSetId}.concept`\n" +
+      "join (select ${tableId}, count(*) as count\n" +
+      "from `${projectId}.${dataSetId}.${table}` person\n" +
       "where\n";
 
-  private static final String LAB_CHART_INFO_SQL_TEMPLATE =
-    "SELECT concept_name, condition_source_concept_id, count(*) as count \n" +
-      "FROM `${projectId}.${dataSetId}.${table}` person\n" +
-      "JOIN `${projectId}.${dataSetId}.concept` c on d.${tableId} = c.concept_id\n" +
-      "where\n";
+  private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
+    "group by gender, race, ageRange\n" +
+      "order by gender, race, ageRange\n";
 
-    private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
-      "group by gender, race, ageRange\n" +
-        "order by gender, race, ageRange\n";
-
-    private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
-      "group by concept_name, condition_source_concept_id\n" +
+  private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
+    "and ${tableId} != 0\n" +
+      "group by ${tableId}\n" +
       "order by count desc\n" +
-      "limit ${limit};";
+      "limit ${limit) as s on concept_id = s.${tableId}";
 
     private static final String ID_SQL_ORDER_BY = "order by person_id\nlimit";
 
