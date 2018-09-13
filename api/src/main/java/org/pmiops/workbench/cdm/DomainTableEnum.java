@@ -6,44 +6,54 @@ package org.pmiops.workbench.cdm;
 public enum DomainTableEnum {
     CONDITION("Condition",
       "condition_occurrence",
+      "condition_concept_id",
       "condition_source_concept_id",
       "condition_start_date"),
     PROCEDURE("Procedure",
       "procedure_occurrence",
+      "procedure_concept_id",
       "procedure_source_concept_id",
       "procedure_date"),
     OBSERVATION("Observation",
       "observation",
+      "observation_concept_id",
       "observation_source_concept_id",
       "observation_date"),
     MEASUREMENT("Measurement",
       "measurement",
+      "measurement_concept_id",
       "measurement_source_concept_id",
       "measurement_date"),
     DRUG("Drug",
       "drug_exposure",
+      "drug_concept_id",
       "drug_source_concept_id",
       "drug_exposure_start_date"),
     DEVICE("Device",
       "device_exposure",
+      "device_concept_id",
       "device_source_concept_id",
       "device_exposure_start_date"),
     VISIT("Visit",
       "visit_occurrence",
+      "visit_concept_id",
       "visit_source_concept_id",
       "visit_start_date");
 
     private String domainId;
     private String tableName;
     private String sourceConceptId;
+    private String conceptId;
     private String entryDate;
 
     private DomainTableEnum(String domainId,
                             String tableName,
                             String sourceConceptId,
+                            String conceptId,
                             String entryDate) {
         this.domainId = domainId;
         this.tableName = tableName;
+        this.conceptId = conceptId;
         this.sourceConceptId = sourceConceptId;
         this.entryDate = entryDate;
     }
@@ -52,6 +62,15 @@ public enum DomainTableEnum {
         for (DomainTableEnum item: values()) {
             if (item.domainId.equalsIgnoreCase(domainId)) {
                 return item.tableName;
+            }
+        }
+        return null;
+    }
+
+    public static String getConceptId(String domainId) {
+        for (DomainTableEnum item: values()) {
+            if (item.domainId.equalsIgnoreCase(domainId)) {
+                return item.conceptId;
             }
         }
         return null;
