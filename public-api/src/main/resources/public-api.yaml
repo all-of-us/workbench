@@ -572,6 +572,9 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/AchillesResultDist"
+      unitName:
+        description: unit name
+        type: string
 
   AnalysisListResponse:
     type: object
@@ -662,9 +665,6 @@ definitions:
         description: measurement distribution analysis
         type: object
         $ref: "#/definitions/Analysis"
-      unitName:
-        description: measurement unit
-        type: string
 
   ConceptAnalysisListResponse:
     type: object

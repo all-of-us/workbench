@@ -1,10 +1,9 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {TreeType} from 'generated';
+import {TreeSubType, TreeType} from 'generated';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {CRITERIA_SUBTYPES} from '../constant';
 
 import {
   activeCriteriaTreeType,
@@ -112,8 +111,7 @@ export class NodeComponent implements OnInit, OnDestroy {
 
       const subtreeSub = this.ngRedux
         .select(criteriaSubtree(_type))
-        .filter(nodeIds => nodeIds.includes(parentId.toString()))
-        .subscribe(() =>  this.expanded = true);
+        .subscribe(nodeIds => this.expanded = nodeIds.includes(parentId.toString()));
 
       const subtreeSelectSub = this.selected$
         .filter(selectedIds => !!selectedIds && parentId !== 0)
@@ -173,7 +171,7 @@ export class NodeComponent implements OnInit, OnDestroy {
      * time this function is called.  Subsequent calls are no-ops
      */
     if (_type === TreeType[TreeType.DRUG]) {
-      this.actions.fetchDrugCriteria(_type, parentId, CRITERIA_SUBTYPES.ATC);
+      this.actions.fetchDrugCriteria(_type, parentId, TreeSubType[TreeSubType.ATC]);
     } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
     } else {

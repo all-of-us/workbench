@@ -50,6 +50,15 @@ task manageClusters(type: JavaExec) {
   }
 }
 
+task updateCdrVersions(type: JavaExec) {
+  classpath sourceSets.main.runtimeClasspath
+  main = "org.pmiops.workbench.tools.UpdateCdrVersions"
+  systemProperties = dbProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 buildscript {    // Configuration for building
   repositories {
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more

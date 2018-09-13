@@ -24,6 +24,7 @@ public class AchillesAnalysis {
     private String stratum5Name;
     private String chartType;
     private String dataType;
+    private String unitName;
     private List<AchillesResult> results = new ArrayList<>();
     private List<AchillesResultDist> distResults = new ArrayList<>();
 
@@ -150,6 +151,18 @@ public class AchillesAnalysis {
     }
     public AchillesAnalysis dataType(String val) {
         this.dataType = val;
+        return this;
+    }
+
+    @Transient
+    public String getUnitName() {
+        return unitName;
+    }
+    public void setUnitName(String unitName) {
+        this.unitName = unitName;
+    }
+    public AchillesAnalysis unitName(String unitName) {
+        this.unitName = unitName;
         return this;
     }
 
