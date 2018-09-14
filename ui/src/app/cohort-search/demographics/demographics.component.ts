@@ -14,7 +14,6 @@ import {
 } from '../redux';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
-import {Observable} from "rxjs/Observable";
 
 const minAge = 18;
 const maxAge = 120;
@@ -97,9 +96,9 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     ) {}
 
     ngOnChanges(){
-        if(this.selectedTypes === 'Age') {
+        if (this.selectedTypes === 'Age') {
             this.ageClicked = false;
-        } else if(this.selectedTypes === 'Deceased'){
+        } else if (this.selectedTypes === 'Deceased') {
             this.deceasedClicked = false;
         }
     }
@@ -344,10 +343,11 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
                 : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
         }));
     }
-    selectedDeasease(){
+
+    selectedDeasease() {
         this.actions.addParameter(this.deceasedNode);
         this.deceasedClicked = true;
-        this.actions.requestPreview()
+        this.actions.requestPreview();
 
     }
 
@@ -380,7 +380,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    getIncrementedValue(){
+    getIncrementedValue() {
         // this.ageRange
         this.ageClicked = true;
         this.actions.addParameter(this.tesetNode);
@@ -389,8 +389,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
     requestPreview(flag?) {
         setTimeout (() => {
-            if(flag){
-                this.enableSpinner = true
+            if (flag) {
+                this.enableSpinner = true;
                 this.actions.requestPreview();
             }
         } , 3000 );

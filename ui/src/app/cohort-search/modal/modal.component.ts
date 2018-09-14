@@ -1,4 +1,3 @@
-
 import {select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {DomainType, TreeType} from 'generated';
@@ -60,7 +59,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    console.log(this.selections);
     this.subscription = this.open$
       .filter(open => !!open)
       .subscribe(_ => {
