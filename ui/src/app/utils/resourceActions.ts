@@ -1,5 +1,5 @@
-export class NotebookActions {
-  public static actionList = [{
+  export const NotebookActionList = [
+    {
     type: 'notebook',
     class: 'pencil',
     link: 'renameNotebook',
@@ -15,10 +15,9 @@ export class NotebookActions {
     text: 'Delete',
     link: 'deleteResource'
   }];
-}
 
-export class CohortActions {
-  public static actionList = [{
+export const CohortActionList = [
+  {
     type: 'cohort',
     class: 'copy',
     text: 'Clone',
@@ -39,10 +38,7 @@ export class CohortActions {
     text: 'Delete',
     link: 'deleteResource'
   }];
-}
 
-export class ResourceActions {
-  public static actionList = NotebookActions.actionList.concat(CohortActions.actionList);
-}
+export const ResourceActionList =  NotebookActionList.concat(CohortActionList);
 
 

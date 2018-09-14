@@ -26,8 +26,8 @@
   <div class="footer">
     <div class="last-modified">Last Updated <br/>{{resourceCard.modifiedTime | date}}</div>
     <div class="item-type {{resourceType}}">
-      <div *ngIf="resourceCard.cohort">CH</div>
-      <div *ngIf="resourceCard.notebook">NB</div>
+      <div id="cohort-decoration" *ngIf="resourceCard.cohort">CH</div>
+      <div id="notebook-decoration" *ngIf="resourceCard.notebook">NB</div>
     </div>
   </div>
 </div>
