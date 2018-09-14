@@ -1,3 +1,4 @@
+
 import {select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {DomainType, TreeType} from 'generated';
@@ -54,6 +55,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
   scrollTime: number;
   count = 0;
+  objectKey = Object.keys;
+  demoitemsType: any;
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -199,13 +202,11 @@ export class ModalComponent implements OnInit, OnDestroy {
             : typeToTitle(this.ctype) + ' Detail';
     }
 
-    demoPId(flag){
-        console.log(flag)
-        if(flag){
-            this.demoItemsDeleted = flag;
-            // this.selectedDemoItems = false;
+    demoPId(e){
+        if(e ){
+            this.demoItemsDeleted = e.paramId;
+            this.demoitemsType = e.type;
         }
-
     }
 
   get showHeader() {

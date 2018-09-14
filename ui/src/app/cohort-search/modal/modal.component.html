@@ -46,6 +46,7 @@
             <ng-container [ngSwitch]="ctype">
               <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
                                  [selectedParamId] = "demoItemsDeleted"
+                                 [selectedTypes]="demoitemsType"
                                  (cancel)="cancel()"
                                  (finish)="finish()">
               </crit-demographics>

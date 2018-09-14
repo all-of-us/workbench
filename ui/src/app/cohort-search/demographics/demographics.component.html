@@ -38,9 +38,7 @@
   <div class="age-label">
     Current Age
   </div>
-  <!--<ng-container [ngClass]="[deceasedClicked? 'deceaseNoCursor':'deceaseCursor']">-->
   <div class="control-wrapper slider-wrapper" [ngClass]="[deceasedClicked? 'deceaseNoCursor':'deceaseCursor']">
-
     <input type="number"
            id="min-age"
            [min]="minAge" [max]="maxAge"
@@ -68,22 +66,8 @@
            formControlName="ageMax"
            class="number-display"
            (blur)="checkMax()">
-    <!--<button-->
-    <!--[formControl]="demoForm.controls.ageRange"-->
-    <!--type="button"-->
-    <!--class="btn btn-sm btn-link selection-button"-->
-    <!--(click)="getIncrementedValue()">-->
-    <!--<clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39'></clr-icon>-->
-    <!--&lt;!&ndash;<clr-icon *ngIf="hasAttributes" shape="slider" dir="right" size="20" class="selection-icon-blue is-solid"></clr-icon>&ndash;&gt;-->
-    <!--</button>-->
-
-
-
-
-
-    <clr-icon  *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getIncrementedValue()"></clr-icon>
+    <clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getIncrementedValue()"></clr-icon>
     <clr-icon *ngIf= "ageClicked" class="selection-icon" shape="check-circle" size = '39'></clr-icon>
-
   </div>
   <!--</ng-container>-->
 
@@ -137,6 +121,7 @@
         Ethnicity
       </div>
       <div class="control-wrapper">
+        {{selectedParamId}}
         <crit-multi-select
                 [includeSearchBox]="false"
                 (addedItems)="requestPreview($event)"

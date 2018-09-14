@@ -1,5 +1,5 @@
 h3 {
-  margin-left: 7rem;
+  margin-left: 1rem;
 }
 
 /* Form grid / layout */
@@ -50,7 +50,7 @@ h3 {
 
 /* Slider elements */
 .control-wrapper.slider-wrapper {
-  width: 70%;
+  width: 100%;
 }
 
 .slider {

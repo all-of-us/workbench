@@ -1,4 +1,3 @@
-
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, NgForm} from '@angular/forms';
@@ -47,6 +46,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     @Output() finish = new EventEmitter<boolean>();
     @select(activeParameterList) selection$;
     @Input() selectedParamId: any;
+    @Input() selectedTypes: any;
     @Output() itemsAddedFlag = new EventEmitter<boolean>();
     @select(previewStatus) preview$;
     readonly minAge = minAge;
@@ -97,16 +97,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     ) {}
 
     ngOnChanges(){
-        if(this.selectedParamId){
-            this.itemDeleted = this.selectedParamId;
-            console.log(this.itemDeleted);
+        if(this.selectedTypes === 'Age') {
             this.ageClicked = false;
+        } else if(this.selectedTypes === 'Deceased'){
             this.deceasedClicked = false;
-            // this.actions.requestPreview();
-            // this.deceasedGreyedOut = false;
-            console.log("------------------->>>>>>>>")
         }
     }
+
     ngOnInit() {
         // Set back to false at the end of loadNodesFromApi (i.e. the end of the
         // initialization routine)
@@ -284,14 +281,12 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
      * using a hash?)
      */
     initAgeRange(selections) {
-        console.log(JSON.stringify(selections) )
         const min = this.demoForm.get('ageMin');
         const max = this.demoForm.get('ageMax');
 
         const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.AGE]);
         if (existent) {
             const range = existent.getIn(['attributes', '0', 'operands']).toArray();
-            console.log(range);
             this.ageRange.setValue(range);
             min.setValue(range[0]);
             max.setValue(range[1]);
@@ -330,12 +325,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             }
 
             this.tesetNode = newNode;
-            console.log(JSON.stringify(this.tesetNode) );
             //  this.actions.addParameter(newNode);
         }));
-
-
-        console.log(this.ageNode);
     }
 
     initDeceased(selections) {

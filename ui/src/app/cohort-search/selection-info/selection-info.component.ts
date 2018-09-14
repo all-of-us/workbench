@@ -9,30 +9,21 @@ import {attributeDisplay, nameDisplay, typeDisplay} from '../utils';
     templateUrl: './selection-info.component.html',
     styleUrls: ['./selection-info.component.css']
 })
-export class SelectionInfoComponent implements OnChanges{
+export class SelectionInfoComponent{
     @Input() parameter;
     @Input() index;
-    @Output() demoItems = new EventEmitter<boolean>();
+    @Output() demoItems = new EventEmitter<any>();
     @Input() itemsSelected;
     readonly treeType = TreeType;
 
     constructor(private actions: CohortSearchActions) {}
 
-    ngOnChanges() {
-        if(this.name){
-            console.log("checking")
-            // this.demoItems.emit(false);
-        }
-        else{
-            console.log("nothing")
-        }
-    }
 
     remove(): void {
         if(this.treeType.DEMO){
             const paramId = this.parameter.get('parameterId');
-            console.log(paramId);
-            this.demoItems.emit(paramId);
+            const type = this._type;
+            this.demoItems.emit({paramId,type});
             this.actions.removeParameter(paramId);
 
         } else{
