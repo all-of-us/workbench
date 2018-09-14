@@ -48,8 +48,8 @@ public enum DomainTableEnum {
 
     private DomainTableEnum(String domainId,
                             String tableName,
-                            String sourceConceptId,
                             String conceptId,
+                            String sourceConceptId,
                             String entryDate) {
         this.domainId = domainId;
         this.tableName = tableName;
