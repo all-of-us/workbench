@@ -1,4 +1,4 @@
-<div class="card item-card {{type}}-card">
+<div class="card item-card {{resourceType}}-card">
   <div class="header-area">
     <clr-dropdown>
       <button type="button" clrDropdownTrigger>
@@ -25,7 +25,7 @@
   </div>
   <div class="footer">
     <div class="last-modified">Last Updated <br/>{{resourceCard.modifiedTime | date}}</div>
-    <div class="item-type {{type}}">
+    <div class="item-type {{resourceType}}">
       <div *ngIf="resourceCard.cohort">CH</div>
       <div *ngIf="resourceCard.notebook">NB</div>
     </div>
