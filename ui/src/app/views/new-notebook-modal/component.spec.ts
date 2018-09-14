@@ -61,8 +61,9 @@ describe('NewNotebookModalComponent', () => {
   it('does not allow blank names', fakeAsync(() => {
     spyOn(window, 'open');
     updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
-    expect(window.open).not.toHaveBeenCalled();
+    const button = fixture.debugElement.query(By.css('.confirm-name-btn'))
+    simulateClick(fixture, button);
+    expect(button.properties.disabled).toBeTruthy();
   }));
 
   it('allows creation of Py notebooks', fakeAsync(() => {
