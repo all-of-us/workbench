@@ -80,9 +80,6 @@ describe('NewNotebookModalComponent', () => {
     expect(window.open).toHaveBeenCalledWith(expectedUrl, '_blank');
   }));
 
-
-  // TODO: Get this to work. for some reason nothing would register
-  //       as an actual successful change of the select element.
   it('allows creation of R notebooks', fakeAsync(() => {
     spyOn(window, 'open');
     const name = 'new-name-r';
