@@ -188,11 +188,8 @@ definitions:
       name:
         description: the name of the parameter
         type: string
-      value:
-        description: A string value for this parameter.
-        type: string
       values:
-        description: An array of string values for this parameter.
+        description: An array of string values for this parameter. (It may contain just one value.)
         type: array
         items:
           type: string
@@ -202,11 +199,8 @@ definitions:
       valueDatetime:
         description: A datetime (yyyy-MM-dd HH:mm:ss zzz) value for this parameter
         type: string
-      valueNumber:
-        description: A number value for this parameter.
-        type: number
       valueNumbers:
-        description: An array of number values for this parameter
+        description: An array of number values for this parameter. (It may contain just one value.)
         type: array
         items:
           type: number
@@ -222,7 +216,7 @@ definitions:
         type: string
       statusFilter:
         description: >
-          An array of status values; participants with these statuses will be have their annotations
+          An array of status values; participants with these statuses will have their annotations
           retrieved. Defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW] --
           everything but EXCLUDED.
         type: array
