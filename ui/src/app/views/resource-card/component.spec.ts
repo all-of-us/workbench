@@ -49,7 +49,7 @@ describe('ResourceCardComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        ResourceCardWrapper,
+        ResourceCardWrapperComponent,
         ResourceCardComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
@@ -63,7 +63,7 @@ describe('ResourceCardComponent', () => {
       ]
     }).compileComponents()
       .then(() => {
-      fixture = TestBed.createComponent(ResourceCardWrapper);
+      fixture = TestBed.createComponent(ResourceCardWrapperComponent);
       component = fixture.debugElement.children[0].componentInstance;
 
       fixture.detectChanges();
