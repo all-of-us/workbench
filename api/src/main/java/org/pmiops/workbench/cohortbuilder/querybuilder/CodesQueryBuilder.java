@@ -46,15 +46,24 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       "from `${projectId}.${dataSetId}.criteria` \n" +
       "where is_group = 0\n" +
       "and is_selectable = 1\n" +
-      "and path in (\n" +
+      "and (path = (\n" +
       "  select CONCAT( path, '.', CAST(id as STRING)) as path\n" +
       "  from `${projectId}.${dataSetId}.criteria`\n" +
       "  where type = ${type}\n" +
       "  and subtype = ${subtype}\n" +
-      "  and REGEXP_CONTAINS(code, ${code})\n" +
+      "  and code = ${code}\n" +
       "  and is_group = 1\n" +
       "  and is_selectable = 1\n" +
-      "))\n" +
+      ")\n" +
+      "or path like (\n" +
+      "  select CONCAT( path, '.', CAST(id as STRING), '.%') as path\n" +
+      "  from `${projectId}.${dataSetId}.criteria`\n" +
+      "  where type = ${type}\n" +
+      "  and subtype = ${subtype}\n" +
+      "  and code = ${code}\n" +
+      "  and is_group = 1\n" +
+      "  and is_selectable = 1\n" +
+      ")))\n" +
       "${encounterSql}";
 
   private static final String UNION_TEMPLATE = " union all\n";
@@ -81,14 +90,15 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         } else {
           List<String> codes =
             paramList.stream().map(SearchParameter::getValue).collect(Collectors.toList());
-          String codeParam = "^(" + String.join("|", codes) + ")";
-          buildInnerQuery(parameter.getType(),
-            parameter.getSubtype(),
-            queryParts,
-            queryParams,
-            parameter.getDomain(),
-            QueryParameterValue.string(codeParam),
-            GROUP_CODE_LIKE_TEMPLATE);
+          for (String code : codes) {
+            buildInnerQuery(parameter.getType(),
+              parameter.getSubtype(),
+              queryParts,
+              queryParams,
+              parameter.getDomain(),
+              QueryParameterValue.string(code),
+              GROUP_CODE_LIKE_TEMPLATE);
+          }
         }
     }
 
