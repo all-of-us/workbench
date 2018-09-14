@@ -65,7 +65,7 @@ import {
 } from './types';
 /* tslint:enable:ordered-imports */
 
-import {ChartInfo, Criteria, SearchRequest} from 'generated';
+import {Criteria, DemoChartInfo, SearchRequest} from 'generated';
 
 /**
  * Criteria loading mgmt
@@ -245,7 +245,7 @@ export const requestCharts =
   ({type: BEGIN_CHARTS_REQUEST, cdrVersionId, entityType, entityId, request});
 
 export const loadChartsRequestResults =
-  (entityType: string, entityId: string, chartData: ChartInfo[]
+  (entityType: string, entityId: string, chartData: DemoChartInfo[]
   ): ActionTypes[typeof LOAD_CHARTS_RESULTS] =>
   ({type: LOAD_CHARTS_RESULTS, entityType, entityId, chartData});
 
