@@ -61,7 +61,7 @@ describe('NewNotebookModalComponent', () => {
   it('does not allow blank names', fakeAsync(() => {
     spyOn(window, 'open');
     updateAndTick(fixture);
-    const button = fixture.debugElement.query(By.css('.confirm-name-btn'))
+    const button = fixture.debugElement.query(By.css('.confirm-name-btn'));
     simulateClick(fixture, button);
     expect(button.properties.disabled).toBeTruthy();
   }));
