@@ -142,7 +142,7 @@ describe('RecentWorkComponent', () => {
 function stubRecentResources(numberOfResources: number) {
   const currentCache = [];
   while (numberOfResources > 0) {
-    const currentResource = {
+    currentCache.push({
       workspaceId: numberOfResources,
       workspaceNamespace: 'defaultNamespace' + numberOfResources,
       workspaceFirecloudName: 'defaultFirecloudName' + numberOfResources,
@@ -153,8 +153,7 @@ function stubRecentResources(numberOfResources: number) {
         'lastModifiedTime': 100
       },
       lastModified: Date.now()
-    };
-    currentCache.push(currentResource);
+    });
     numberOfResources--;
   }
   return currentCache;
