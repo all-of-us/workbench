@@ -1164,6 +1164,25 @@ paths:
           schema:
             $ref: "#/definitions/ConceptSet"
 
+# Concepts ###############################################################################
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainInfo:
+      get:
+        tags:
+          - concepts
+        description: >
+          Returns information on the domains of data in the workspace's CDR version along
+          with participant and concept counts
+        operationId: "getDomainInfo"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+        responses:
+          200:
+            description: information on the domains
+            schema:
+              $ref: "#/definitions/DomainInfoResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1745,6 +1764,48 @@ definitions:
         items:
           type: integer
           format: int64
+
+  DomainInfo:
+    type: object
+    required:
+      - domain
+      - name
+      - description
+      - standardConceptCount
+      - allConceptCount
+      - participantCount
+    properties:
+      domain:
+        description: the domain ID
+        $ref: "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      description:
+        description: description of the domain
+        type: string
+      standardConceptCount:
+        description: number of standard concepts in this domain
+        type: integer
+        format: int64
+      allConceptCount:
+        description: number of concepts in this domain (standard or non-standard)
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for a concept in this domain
+        type: integer
+        format: int64
+
+  DomainInfoResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/DomainInfo"
 
 
   CreateAccountRequest:
