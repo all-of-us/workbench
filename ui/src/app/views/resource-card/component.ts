@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 
-import {ResourceActions} from 'app/utils/resourceActions';
+import {ResourceActionList} from 'app/utils/resourceActions';
 
 import {
   CohortsService, NotebookRename,
@@ -42,7 +42,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   wsId: string;
   resource: any;
   router: Router;
-  actionList = ResourceActions.actionList;
+  actionList = ResourceActionList;
   invalidResourceError = false;
   notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
 
