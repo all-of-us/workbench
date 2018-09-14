@@ -21,11 +21,13 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AllEvents;
+import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Condition;
 import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Drug;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -362,6 +364,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     CohortChartDataListResponse response = new CohortChartDataListResponse();
     response.count(cohortReview.getMatchedParticipantCount());
+    for (List<FieldValue> row : result.iterateAll()) {
+      response.addItemsItem(new CohortChartData()
+        .name(bigQueryService.getString(row, rm.get("name")))
+        .conceptId(bigQueryService.getLong(row, rm.get("conceptId")))
+        .count(bigQueryService.getLong(row, rm.get("count"))));
+    }
+
     return ResponseEntity.ok(response);
   }
 

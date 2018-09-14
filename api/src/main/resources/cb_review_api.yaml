@@ -721,13 +721,13 @@ definitions:
     type: object
     required:
       - name
-      - sourceConceptId
+      - conceptId
       - count
     properties:
       name:
         type: string
         description: the name of this data
-      sourceConceptId:
+      conceptId:
         type: integer
         format: int64
         description: the source concept id for this data

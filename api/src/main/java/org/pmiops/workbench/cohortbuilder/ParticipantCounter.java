@@ -43,7 +43,7 @@ public class ParticipantCounter {
       "where\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
-    "select concept_name, concept_id, s.count\n" +
+    "select concept_name as name, concept_id as conceptId, s.count\n" +
       "from `${projectId}.${dataSetId}.concept`\n" +
       "join (select ${tableId}, count(*) as count\n" +
       "from `${projectId}.${dataSetId}.${table}` person\n" +
@@ -53,11 +53,20 @@ public class ParticipantCounter {
     "group by gender, race, ageRange\n" +
       "order by gender, race, ageRange\n";
 
+  private static final String LAB_SQL_TEMPLATE =
+    "and ${tableId} in (\n" +
+      "  select concept_id\n" +
+      "  from `${projectId}.${dataSetId}.criteria`\n" +
+      "  where type = 'MEAS'\n" +
+      "    and subtype = 'LAB'\n" +
+      "    and is_selectable = 1\n" +
+      ")\n";
+
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
     "and ${tableId} != 0\n" +
       "group by ${tableId}\n" +
-      "order by count desc\n" +
-      "limit ${limit) as s on concept_id = s.${tableId}";
+      "limit ${limit}) as s on concept_id = s.${tableId}\n" +
+      "order by count desc, name asc\n";
 
     private static final String ID_SQL_ORDER_BY = "order by person_id\nlimit";
 
@@ -93,17 +102,23 @@ public class ParticipantCounter {
     public QueryJobConfiguration buildDomainChartInfoCounterQuery(ParticipantCriteria participantCriteria,
                                                                   DomainType domainType,
                                                                   int chartLimit) {
-      if (DomainType.LAB.equals(domainType)) {
-        String sqlTemplate = LAB_CHART_INFO_SQL_TEMPLATE
-          .replace("${table}", DomainTableEnum.getTableName("Measurement"))
-          .replace("${tableId}", DomainTableEnum.getSourceConceptId("Measurement"));
-        return buildQuery(participantCriteria, sqlTemplate, DOMAIN_CHART_INFO_SQL_GROUP_BY);
-      } else {
-        String sqlTemplate = LAB_CHART_INFO_SQL_TEMPLATE
-          .replace("${table}", DomainTableEnum.getTableName(domainType.name()))
-          .replace("${tableId}", DomainTableEnum.getSourceConceptId(domainType.name()));
-        return buildQuery(participantCriteria, DOMAIN_CHART_INFO_SQL_TEMPLATE, DOMAIN_CHART_INFO_SQL_GROUP_BY);
+      String domain = domainType.equals(DomainType.LAB) ? "Measurement" : domainType.name();
+      String table = DomainTableEnum.getTableName(domain);
+      String tableId = DomainTableEnum.getConceptId(domain);
+      if (domain.equals(DomainType.CONDITION.name()) || domain.equals(DomainType.PROCEDURE.name())) {
+        tableId = DomainTableEnum.getSourceConceptId(domain);
       }
+      String limit = Integer.toString(chartLimit);
+      String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
+        .replace("${table}", table)
+        .replace("${tableId}", tableId);
+      String endSqlTemplate = DomainType.LAB.equals(domainType) ?
+        LAB_SQL_TEMPLATE + DOMAIN_CHART_INFO_SQL_GROUP_BY :
+        DOMAIN_CHART_INFO_SQL_GROUP_BY;
+      endSqlTemplate = endSqlTemplate
+        .replace("${limit}", limit)
+        .replace("${tableId}", tableId);
+      return buildQuery(participantCriteria, sqlTemplate, endSqlTemplate);
     }
 
     public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria,
