@@ -16,7 +16,7 @@ import {
   subtreeSelected,
   wizardOpen,
 } from '../redux';
-import {stripHtml,subtypeToTitle,typeToTitle} from '../utils';
+import {stripHtml, subtypeToTitle, typeToTitle} from '../utils';
 
 
 @Component({
@@ -203,11 +203,12 @@ export class ModalComponent implements OnInit, OnDestroy {
       : typeToTitle(this.ctype) + ' Detail';
   }
     selectionHeader(_type: string) {
-        return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
+        return this.itemType === TreeType[TreeType.DEMO] ?
+            subtypeToTitle(_type) : typeToTitle(_type);
     }
 
-    demoPId(e){
-        if(e ){
+    demoPId(e) {
+        if (e) {
             this.demoItemsDeleted = e.paramId;
             this.demoitemsType = e.type;
         }

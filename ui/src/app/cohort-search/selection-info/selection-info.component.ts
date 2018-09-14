@@ -9,7 +9,7 @@ import {attributeDisplay, nameDisplay, typeDisplay} from '../utils';
     templateUrl: './selection-info.component.html',
     styleUrls: ['./selection-info.component.css']
 })
-export class SelectionInfoComponent{
+export class SelectionInfoComponent {
     @Input() parameter;
     @Input() index;
     @Output() demoItems = new EventEmitter<any>();
@@ -20,13 +20,13 @@ export class SelectionInfoComponent{
 
 
     remove(): void {
-        if(this.treeType.DEMO){
+        if (this.treeType.DEMO) {
             const paramId = this.parameter.get('parameterId');
             const type = this._type;
             this.demoItems.emit({paramId,type});
             this.actions.removeParameter(paramId);
 
-        } else{
+        } else {
             const paramId = this.parameter.get('parameterId');
             const path = this.parameter.get('path');
             const id = this.parameter.get('id');

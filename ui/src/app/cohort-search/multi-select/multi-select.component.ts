@@ -1,5 +1,5 @@
 
-import {Component, ViewChild, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
@@ -10,7 +10,7 @@ import {
     CohortSearchState,
     subtreeSelected
 } from '../redux';
-import {Observable} from "rxjs/Observable";
+import {Observable} from 'rxjs/Observable';
 
 @Component({
     selector: 'crit-multi-select',
@@ -39,10 +39,10 @@ export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
         };
     @ViewChild('target') input: ElementRef;
     constructor(private actions: CohortSearchActions,
-                private ngRedux: NgRedux<CohortSearchState>,) {}
+                private ngRedux: NgRedux<CohortSearchState>) {}
 
-    ngOnChanges(){
-        if(this.getParamId){
+    ngOnChanges() {
+        if (this.getParamId) {
             this.selectedOption.selected[this.getParamId] = '';
         }
     }
@@ -70,7 +70,7 @@ export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
 
     select(opt) {
 
-        this.selectedOption.selected[opt.get('parameterId')]= opt.get('parameterId');
+        this.selectedOption.selected[opt.get('parameterId')] = opt.get('parameterId');
         this.actions.addParameter(opt);
         // this.addedItems.emit(true);
 
