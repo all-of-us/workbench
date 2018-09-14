@@ -24,7 +24,6 @@ export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
     @Input() set initialSelection(opts) {
         const _selections = opts.map(opt => opt.get('parameterId')).toSet();
         this.selected = this.selected.union(_selections);
-        console.log(JSON.stringify(this.selected))
     }
     @Input() loading: boolean;
     @Input() deleteFlag = false;
@@ -45,21 +44,6 @@ export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
     ngOnChanges(){
         if(this.getParamId){
             this.selectedOption.selected[this.getParamId] = '';
-            // this.actions.removeParameter(this.getParamId);
-            // this.selectedOptions[i] = this.getParamId
-
-            // console.log("deleted array-------->>>>");
-            //  console.log(JSON.stringify( this.selectedOptions));
-            // this.demoParamId = this.getParamId
-            // this.subscription = this.ngRedux
-            //     .select(activeParameterList)
-            //     .subscribe(val => {
-            //         if(val){
-            //             this.selectedOption.selected[this.getParamId] = this.getParamId;
-            //             console.log(this.selectedOption.selected[this.getParamId]);
-            //             // console.log(JSON.stringify( this.selected));
-            //         }
-            //     });
         }
     }
 

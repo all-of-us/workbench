@@ -1,4 +1,4 @@
-import {TreeType} from 'generated';
+import {TreeSubType, TreeType} from 'generated';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 
@@ -77,6 +77,27 @@ export function typeToTitle(_type: string): string {
       break;
   }
   return _type;
+}
+export function subtypeToTitle(subtype: string): string {
+    let title;
+    switch (subtype) {
+        case TreeSubType[TreeSubType.AGE]:
+            title = 'Age';
+            break;
+        case TreeSubType[TreeSubType.DEC]:
+            title = 'Deceased';
+            break;
+        case TreeSubType[TreeSubType.ETH]:
+            title = 'Ethnicity';
+            break;
+        case TreeSubType[TreeSubType.GEN]:
+            title = 'Gender';
+            break;
+        case TreeSubType[TreeSubType.RACE]:
+            title = 'Race';
+            break;
+    }
+    return title;
 }
 
 export function highlightMatches(terms: Array<string>, name: string) {
