@@ -93,7 +93,7 @@ describe('ResourceCardComponent', () => {
   it('should have correct options in menu when it is a cohort', fakeAsync(() => {
     const de = fixture.debugElement;
     simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
-    const actionItems = de.queryAll(By.css('.action-item'));
+    const actionItems = de.queryAll(By.css('.action-item'))
       .map((item) => item.nativeElement.innerText.trim());
     ['Clone', 'Edit', 'Review', 'Delete'].forEach((action) => {
       expect(actionItems).toContain(action);
