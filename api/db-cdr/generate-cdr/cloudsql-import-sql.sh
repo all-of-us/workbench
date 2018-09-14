@@ -8,7 +8,7 @@ IFS=$'\n\t'
 
 
 # get options
-USAGE="./generate-clousql-cdr/cloudsql-import.sh --project <PROJECT> --instance <INSTANCE> --sql-dump-file <cdrYYYYMMDD.sql> --bucket <BUCKET>"
+USAGE="./generate-clousql-cdr/cloudsql-import-sql.sh --project <PROJECT> --instance <INSTANCE> --sql-dump-file <cdrYYYYMMDD.sql> --bucket <BUCKET>"
 # example account for test : all-of-us-workbench-test@appspot.gserviceaccount.com
 while [ $# -gt 0 ]; do
   echo "1 is $1"
@@ -64,7 +64,7 @@ echo "Granting GCS access to ${SQL_SERVICE_ACCOUNT} to bucket $BUCKET/$SQL_DUMP_
 gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R gs://$BUCKET/$SQL_DUMP_FILE
 
 # Import asynch
-gcloud sql instances import --project $PROJECT --account $SERVICE_ACCOUNT $INSTANCE gs://$BUCKET/$SQL_DUMP_FILE --async
+gcloud sql import sql --project $PROJECT --account $SERVICE_ACCOUNT $INSTANCE gs://$BUCKET/$SQL_DUMP_FILE --async
 
 echo "Import started, waiting for it to complete."
 echo "You can also kill this script and check status at at https://console.cloud.google.com/sql/instances/${INSTANCE}/operations?project=${PROJECT}."

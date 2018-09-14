@@ -641,6 +641,17 @@ Common.register_command({
   :fn => ->() { run_local_public_data_migrations() }
 })
 
+def make_bq_denormalized_tables(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-denormalized-tables} + args
+end
+
+Common.register_command({
+  :invocation => "make-bq-denormalized-tables",
+  :description => "make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized tables. Used by cohort reviewer. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_tables(*args) }
+})
 def generate_cdr_counts(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
@@ -654,6 +665,18 @@ Generates databases in bigquery with data from a cdr that will be imported to my
   :fn => ->(*args) { generate_cdr_counts(*args) }
 })
 
+def generate_cloudsql_db(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-cloudsql-db} + args
+end
+
+Common.register_command({
+  :invocation => "generate-cloudsql-db",
+  :description => "./generate-cdr/generate-cloudsql-db.sh --project <PROJECT> --instance <INSTANCE> \
+--database <cdrYYYYMMDD> --bucket <BUCKET>
+Generates a cloudsql database from data in a bucket. Used to make cdr and public count databases.",
+  :fn => ->(*args) { generate_cloudsql_db(*args) }
+})
 
 def generate_local_cdr_db(*args)
   common = Common.new
