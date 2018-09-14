@@ -260,7 +260,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .dbType(cdr.getDbType())
                             .domainRoute(cdr.getDomainRoute())
                             .conceptId(cdr.getConceptId())
-                            .countValue(cdr.getCountValue())
+                            .countValue(cdr.getStandardConceptCount())
                             .participantCount(cdr.getParticipantCount());
                 }
             };

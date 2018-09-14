@@ -1,12 +1,15 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import javax.persistence.*;
-import java.util.Objects;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 
 @Entity
@@ -21,7 +24,8 @@ public class DbDomain {
     private String dbType;
     private String domainRoute;
     private long conceptId;
-    private long countValue;
+    private long allConceptCount;
+    private long standardConceptCount;
     private long participantCount;
 
     public static Map<Long, Long> conceptCountMap  = new HashMap<Long, Long>();
@@ -111,17 +115,31 @@ public class DbDomain {
         return this;
     }
 
-    @Column(name = "count_value")
-    public Long getCountValue() {
-        return countValue;
+    @Transient
+    public Long getAllConceptCount() {
+        return allConceptCount;
     }
 
-    public void setCountValue(Long countValue) {
-        this.countValue = countValue;
+    public void setAllConceptCount(Long allConceptCount) {
+        this.allConceptCount = allConceptCount;
     }
 
-    public DbDomain countValue(Long countValue) {
-        this.countValue = countValue;
+    public DbDomain allConceptCount(Long allConceptCount) {
+        this.allConceptCount = allConceptCount;
+        return this;
+    }
+
+    @Transient
+    public Long getStandardConceptCount() {
+        return standardConceptCount;
+    }
+
+    public void setStandardConceptCount(Long standardConceptCount) {
+        this.standardConceptCount = standardConceptCount;
+    }
+
+    public DbDomain standardConceptCount(Long standardConceptCount) {
+        this.standardConceptCount = standardConceptCount;
         return this;
     }
 
@@ -150,13 +168,12 @@ public class DbDomain {
                 Objects.equals(domainDesc, dbDomain.domainDesc) &&
                 Objects.equals(dbType, dbDomain.dbType) &&
                 Objects.equals(domainRoute, dbDomain.domainRoute) &&
-                Objects.equals(conceptId,dbDomain.conceptId) &&
-                Objects.equals(countValue,dbDomain.countValue);
+                Objects.equals(conceptId, dbDomain.conceptId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(domainId, domainDisplay, domainDesc, dbType, domainRoute, conceptId, countValue);
+        return Objects.hash(domainId, domainDisplay, domainDesc, dbType, domainRoute, conceptId);
     }
 
     @Override

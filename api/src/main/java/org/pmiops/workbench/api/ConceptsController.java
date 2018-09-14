@@ -14,6 +14,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -75,6 +76,11 @@ public class ConceptsController implements ConceptsApiDelegate {
     this.conceptSynonymDao = conceptSynonymDao;
   }
 
+  @Override
+  public ResponseEntity<DomainInfoResponse> getDomainInfo(String workspaceNamespace,
+      String workspaceId) {
+    return null;
+  }
 
   @Override
   public ResponseEntity<ConceptListResponse> searchConcepts(String workspaceNamespace,

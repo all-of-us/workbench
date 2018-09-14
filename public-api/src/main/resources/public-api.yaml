@@ -189,7 +189,7 @@ paths:
       tags:
         - dataBrowser
 
-      description: Gets list of analysis definitions
+      description: Gets list of analysis definitions (not used?)
       operationId: "getDbDomains"
       parameters: []
       responses:
@@ -204,7 +204,7 @@ paths:
       tags:
         - dataBrowser
 
-      description: Gets domain filters
+      description: Gets domain filters (not used?)
       operationId: "getDomainFilters"
       parameters: []
       responses:
@@ -220,7 +220,7 @@ paths:
       tags:
         - dataBrowser
 
-      description: Gets survey list
+      description: Gets survey list (redundant with domain-totals?)
       operationId: "getSurveyList"
       parameters: []
       responses:
