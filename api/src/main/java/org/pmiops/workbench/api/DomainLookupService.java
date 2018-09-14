@@ -39,7 +39,7 @@ public class DomainLookupService {
                 criteriaDao.findCriteriaByTypeAndSubtypeAndCode(
                   parameter.getType(),
                   parameter.getSubtype(),
-                  "^" + parameter.getValue());
+                  parameter.getValue());
 
               for (String row : domainLookups) {
                 paramsWithDomains.add(new SearchParameter()
