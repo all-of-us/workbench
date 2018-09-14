@@ -1,20 +1,16 @@
 package org.pmiops.workbench.firecloud;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-
-import com.google.common.collect.ImmutableList;
+import javax.inject.Provider;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+
+import com.google.common.collect.ImmutableList;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
@@ -82,7 +78,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public boolean getFirecloudStatus() {
     try {
-      new StatusApi().status();
+      new FireCloudConfig().statusApi(configProvider.get()).status();
     } catch (ApiException e) {
       log.log(Level.WARNING, "Firecloud status check request failed", e);
       String response = e.getResponseBody();
@@ -201,10 +197,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public List<BillingProjectMembership> getBillingProjectMemberships() {
     return retryHandler.run((context) -> profileApiProvider.get().billing());
-  }
-
-  private boolean isTrue(Boolean b) {
-    return b != null && b;
   }
 
   @Override
