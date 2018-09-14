@@ -6,8 +6,10 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {
+  activeCriteriaSubtype,
   activeCriteriaTreeType,
   activeCriteriaType,
+  activeItem,
   activeParameterList,
   CohortSearchActions,
   nodeAttributes,
@@ -27,8 +29,10 @@ import {stripHtml, typeToTitle} from '../utils';
 })
 export class ModalComponent implements OnInit, OnDestroy {
   @select(wizardOpen) open$: Observable<boolean>;
+  @select(activeCriteriaSubtype) criteriaSubtype$: Observable<any>;
   @select(activeCriteriaType) criteriaType$: Observable<string>;
   @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
+  @select(activeItem) item$: Observable<any>;
   @select(activeParameterList) selection$: Observable<any>;
   @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
@@ -36,6 +40,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   readonly domainType = DomainType;
   readonly treeType = TreeType;
   ctype: string;
+  subtype: string;
+  itemType: string;
   fullTree: boolean;
   subscription: Subscription;
   attributesNode: Map<any, any> = Map();
@@ -45,7 +51,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
 
-  scrollTime: number;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
 
@@ -62,25 +67,10 @@ export class ModalComponent implements OnInit, OnDestroy {
       .filter(ctype => !!ctype)
       .subscribe(ctype => {
         this.ctype = ctype;
-        this.title = 'Codes';
-        for (const crit of DOMAIN_TYPES) {
-          const regex = new RegExp(`.*${crit.type}.*`, 'i');
-          if (regex.test(this.ctype)) {
-            this.title = crit.name;
-          }
-        }
-        for (const crit of PROGRAM_TYPES) {
-          const regex = new RegExp(`.*${crit.type}.*`, 'i');
-          if (regex.test(this.ctype)) {
-            this.title = crit.name;
-          }
-        }
       })
     );
 
-    this.subscription.add(this.isFullTree$
-      .subscribe(fullTree => this.fullTree = fullTree)
-    );
+    this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
 
     this.subscription.add(this.selection$
       .map(sel => sel.size === 0)
@@ -104,6 +94,29 @@ export class ModalComponent implements OnInit, OnDestroy {
         if (nodeId) {
           this.setScroll(nodeId);
         }
+      })
+    );
+
+    this.subscription.add(this.item$.subscribe(item => {
+      this.itemType = item.get('type');
+      this.title = 'Codes';
+      for (const crit of DOMAIN_TYPES) {
+        const regex = new RegExp(`.*${crit.type}.*`, 'i');
+        if (regex.test(this.itemType)) {
+          this.title = crit.name;
+        }
+      }
+      for (const crit of PROGRAM_TYPES) {
+        const regex = new RegExp(`.*${crit.type}.*`, 'i');
+        if (regex.test(this.itemType)) {
+          this.title = crit.name;
+        }
+      }
+    }));
+
+    this.subscription.add(this.criteriaSubtype$
+      .subscribe(subtype => {
+        this.subtype = subtype;
       })
     );
   }
@@ -141,13 +154,19 @@ export class ModalComponent implements OnInit, OnDestroy {
   get rootNode() {
     return Map({
       type: this.ctype,
+      subtype: this.subtype,
       fullTree: this.fullTree,
       id: 0,    // root parent ID is always 0
     });
   }
 
   get selectionTitle() {
-    const title = typeToTitle(this.ctype);
+    const _type = [
+      TreeType[TreeType.CONDITION],
+      TreeType[TreeType.PROCEDURE]
+    ].includes(this.itemType)
+      ? this.itemType : this.ctype;
+    const title = typeToTitle(_type);
     return title
       ? `Add Selected ${title} Criteria to Cohort`
       : 'No Selection';

@@ -7,10 +7,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
-
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -255,11 +254,11 @@ public class UserService {
     List<Short> dataAccessLevels;
     if (configProvider.get().firecloud.enforceRegistered) {
       dataAccessLevels = Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-          .map(StorageEnums::dataAccessLevelToStorage)
+          .map(CommonStorageEnums::dataAccessLevelToStorage)
           .collect(Collectors.toList());
     } else {
       dataAccessLevels = Stream.of(DataAccessLevel.values())
-          .map(StorageEnums::dataAccessLevelToStorage)
+          .map(CommonStorageEnums::dataAccessLevelToStorage)
           .collect(Collectors.toList());
     }
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);

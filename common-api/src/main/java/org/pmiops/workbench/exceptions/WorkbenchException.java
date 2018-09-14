@@ -1,5 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
+import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
 
 public class WorkbenchException extends RuntimeException {
@@ -11,7 +12,7 @@ public class WorkbenchException extends RuntimeException {
   }
 
   public WorkbenchException(String message) {
-    this(ExceptionUtils.errorResponse(message));
+    this(errorResponse(message));
   }
 
   public WorkbenchException(ErrorResponse errorResponse) {
@@ -25,10 +26,21 @@ public class WorkbenchException extends RuntimeException {
 
   public WorkbenchException(String message, Throwable t) {
     super(message, t);
-    this.errorResponse = ExceptionUtils.errorResponse(message);
+    this.errorResponse = errorResponse(message);
   }
 
   public ErrorResponse getErrorResponse() {
     return errorResponse;
+  }
+
+  public static ErrorResponse errorResponse(String message) {
+    return errorResponse(null, message);
+  }
+
+  public static ErrorResponse errorResponse(ErrorCode code, String message) {
+    ErrorResponse response = new ErrorResponse();
+    response.setMessage(message);
+    response.setErrorCode(code);
+    return response;
   }
 }

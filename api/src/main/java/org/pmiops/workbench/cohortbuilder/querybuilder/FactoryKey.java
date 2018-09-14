@@ -46,6 +46,7 @@ public enum FactoryKey {
         tMap.put(TreeType.ICD10.name(), FactoryKey.CODES);
         tMap.put(TreeType.CPT.name(), FactoryKey.CODES);
         tMap.put(TreeType.CONDITION.name(), FactoryKey.CODES);
+        tMap.put(TreeType.PROCEDURE.name(), FactoryKey.CODES);
         tMap.put(TreeType.DEMO.name(), FactoryKey.DEMO);
         tMap.put(TreeType.VISIT.name(), FactoryKey.VISIT);
         tMap.put(TreeType.PM.name(), FactoryKey.PM);

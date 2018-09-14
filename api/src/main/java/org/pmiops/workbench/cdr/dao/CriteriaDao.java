@@ -58,7 +58,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "@curType \\:= name as name, " +
     "concept_id " +
     "from (select * from criteria where type = upper(:type) and subtype = upper(:subtype) and " +
-    "(upper(code) like upper(concat('%',:value,'%')) or upand subtype = upper(:subtype) andper(name) like upper(concat('%',:value,'%'))) ) a, " +
+    "(upper(code) like upper(concat('%',:value,'%')) or upper(name) like upper(concat('%',:value,'%'))) ) a, " +
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
@@ -97,14 +97,22 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "from criteria " +
     "where is_group = 0 " +
     "and is_selectable = 1 " +
-    "and path in ( " +
+    "and (path = ( " +
     "select concat( path, '.', id) as path " +
     "from criteria " +
     "where type = :type " +
     "and subtype = :subtype " +
-    "and code regexp :code " +
+    "and code = :code " +
     "and is_group = 1 " +
-    "and is_selectable = 1)", nativeQuery = true)
+    "and is_selectable = 1) " +
+    "or path like (" +
+    "select concat( path, '.', id, '.%') as path " +
+    "from criteria " +
+    "where type = :type " +
+    "and subtype = :subtype " +
+    "and code = :code " +
+    "and is_group = 1 " +
+    "and is_selectable = 1))", nativeQuery = true)
   List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
 
   @Query(value = "select * from criteria c " +

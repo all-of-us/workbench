@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -42,12 +43,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 import java.time.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.fail;
 
@@ -1217,6 +1220,19 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       assertThat(bre.getMessage())
         .isEqualTo("Please provide a chart limit between 1 and 20.");
     }
+  }
+
+  @Test
+  public void getCohortChartData() throws Exception {
+
+    CohortChartDataListResponse response = controller.getCohortChartData(NAMESPACE,
+      NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      DomainType.CONDITION.name(),
+      11).getBody();
+    assertEquals(response.getItems().size(), 1);
+    assertEquals(response.getItems().get(0), new CohortChartData());
   }
 
   private void assertResponse(ParticipantDataListResponse response, PageRequest expectedPageRequest, List<ParticipantData> expectedData, int totalCount) {

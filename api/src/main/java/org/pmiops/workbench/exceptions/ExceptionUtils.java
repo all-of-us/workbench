@@ -85,16 +85,5 @@ public class ExceptionUtils {
     }
   }
 
-  public static ErrorResponse errorResponse(String message) {
-    return errorResponse(null, message);
-  }
-
-  public static ErrorResponse errorResponse(ErrorCode code, String message) {
-    ErrorResponse response = new ErrorResponse();
-    response.setMessage(message);
-    response.setErrorCode(code);
-    return response;
-  }
-
   private ExceptionUtils() {}
 }
