@@ -98,3 +98,100 @@ label[for="deceased"] {
   font-size: 0.5rem;
   color: black;
 }
+
+.demo-container {
+  display: flex;
+  /*padding-left: 1.3rem;*/
+  justify-content: space-around;
+  /*transform: translate(0%, 0%);*/
+  /*width: calc(100vw - calc(19rem + 60px));*/
+}
+/*@media all and (max-width: 900px) {*/
+/*.demo-container {*/
+/*transform: translate(0%, 0%);*/
+/*}*/
+/*}*/
+
+.selection-icon {
+  margin: calc((1.25rem - 20px) / 2);
+  color: rgb(98, 164, 32);
+  padding-top: 0.2rem;
+  padding-left: 0.8rem;
+}
+
+.age-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262262;
+  padding-left: 1.3rem;
+}
+
+.demo-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262262;
+}
+
+.count-preview {
+  background-color: #E4F3FC;
+  padding:0.8rem;
+  margin-top: 1rem;
+}
+.count-preview  .calculate-btn{
+  background-color: #2691D0;
+  color: white;
+}
+
+.count-preview  .disable-link {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.count-preview  .add-button {
+  border-color:transparent;
+  outline: none;
+  background-color: transparent;
+  font-weight: 500;
+  color: #2691D0;
+}
+.count-preview .text-bold {
+  font-weight: bold;
+  color: #4A4A4A;
+}
+
+.spin-top-padding {
+  padding-top: 0.5rem;
+}
+
+.count-preview .result-text {
+  color: #262262;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.spinner-inline {
+  height: 0rem;
+  width: 0rem;
+}
+
+.deceaseCursor {
+  cursor: pointer;
+}
+
+.deceaseNoCursor {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.decease-selection-icon {
+  margin: calc((1.25rem - 20px) / 2);
+  color: rgb(98, 164, 32);
+  padding-left: 0.8rem;
+}
+
+.deceased-title {
+  padding-left: 1rem;
+  padding-top: 2rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: #262262;
+}

@@ -1,9 +1,10 @@
+
 <h3>
   Choose Demographics Filters
   <clr-icon shape="info-circle" class="is-highlight"
-    [popper]="explanation"
-    [popperTrigger]="'hover'"
-    [popperPlacement]="'right'">
+            [popper]="explanation"
+            [popperTrigger]="'hover'"
+            [popperPlacement]="'right'">
   </clr-icon>
 </h3>
 <popper-content #explanation>
@@ -34,121 +35,178 @@
 
 <form [formGroup]="demoForm" (ngSubmit)="finish.emit(true)">
   <!-- Age -->
-  <div class="form-row">
-    <div class="form-label">
-      Age
-    </div>
-    <div class="control-wrapper slider-wrapper">
-      <input type="number"
-        id="min-age"
-        [min]="minAge" [max]="maxAge"
-        formControlName="ageMin"
-        class="number-display"
-        (blur)="checkMin()">
-      <div class="slider">
-        <div id="count-wrapper">
+  <div class="age-label">
+    Current Age
+  </div>
+  <!--<ng-container [ngClass]="[deceasedClicked? 'deceaseNoCursor':'deceaseCursor']">-->
+  <div class="control-wrapper slider-wrapper" [ngClass]="[deceasedClicked? 'deceaseNoCursor':'deceaseCursor']">
+
+    <input type="number"
+           id="min-age"
+           [min]="minAge" [max]="maxAge"
+           formControlName="ageMin"
+           class="number-display"
+           (blur)="checkMin()">
+    <div class="slider">
+      <div id="count-wrapper">
           <span id="age-count" class="badge badge-info">
             {{ ageCount | number }}
           </span>
-        </div>
-        <nouislider
-          [min]="minAge" [max]="maxAge" [step]="1"
-          [behaviour]="'drag'"
-          [connect]="true"
-          (slide)="centerAgeCount()"
-          [formControl]="demoForm.controls.ageRange">
-        </nouislider>
       </div>
-      <input type="number"
-        id="max-age"
-        [min]="minAge" [max]="maxAge"
-        formControlName="ageMax"
-        class="number-display"
-        (blur)="checkMax()">
+      <nouislider
+              [min]="minAge" [max]="maxAge" [step]="1"
+              [behaviour]="'drag'"
+              [connect]="true"
+              (slide)="centerAgeCount()"
+              [formControl]="demoForm.controls.ageRange">
+      </nouislider>
     </div>
+
+    <input type="number"
+           id="max-age"
+           [min]="minAge" [max]="maxAge"
+           formControlName="ageMax"
+           class="number-display"
+           (blur)="checkMax()">
+    <!--<button-->
+    <!--[formControl]="demoForm.controls.ageRange"-->
+    <!--type="button"-->
+    <!--class="btn btn-sm btn-link selection-button"-->
+    <!--(click)="getIncrementedValue()">-->
+    <!--<clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39'></clr-icon>-->
+    <!--&lt;!&ndash;<clr-icon *ngIf="hasAttributes" shape="slider" dir="right" size="20" class="selection-icon-blue is-solid"></clr-icon>&ndash;&gt;-->
+    <!--</button>-->
+
+
+
+
+
+    <clr-icon  *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getIncrementedValue()"></clr-icon>
+    <clr-icon *ngIf= "ageClicked" class="selection-icon" shape="check-circle" size = '39'></clr-icon>
+
   </div>
+  <!--</ng-container>-->
 
   <!-- Genders -->
-  <div class="form-row">
-    <div class="form-label">
-      <div class="circle-wrapper">
-        <div class="and-circle">AND</div>
+  <!--start-->
+  <div class="demo-container test-container">
+    <div class="">
+      <div class="demo-title">
+        <!--<div class="circle-wrapper">-->
+        <!--<div class="and-circle">AND</div>-->
+        <!--</div>-->
+        Gender
       </div>
-      Gender
+      <div class="control-wrapper">
+        <crit-multi-select
+                (addedItems)="requestPreview($event)"
+                [options]="genderNodes"
+                [getParamId]="selectedParamId"
+                [includeSearchBox]="false"
+                [initialSelection]="initialGenders"
+                [loading]="loading">
+        </crit-multi-select>
+      </div>
     </div>
-    <div class="control-wrapper">
-      <crit-multi-select
-        [options]="genderNodes"
-        [includeSearchBox]="false"
-        [initialSelection]="initialGenders"
-        [loading]="loading">
-      </crit-multi-select>
+
+    <!-- Races -->
+    <div class="">
+      <div class="demo-title">
+        <!--<div class="circle-wrapper">-->
+        <!--<div class="and-circle">AND</div>-->
+        <!--</div>-->
+        Race
+      </div>
+      <div class="control-wrapper">
+        <crit-multi-select
+                (addedItems)="requestPreview($event)"
+                [options]="raceNodes"
+                [getParamId]="selectedParamId"
+                [initialSelection]="initialRaces"
+                [loading]="loading">
+        </crit-multi-select>
+      </div>
+    </div>
+
+    <!-- Ethnicities -->
+    <div class="">
+      <div class="demo-title">
+        <!--<div class="circle-wrapper">-->
+        <!--<div class="and-circle">AND</div>-->
+        <!--</div>-->
+        Ethnicity
+      </div>
+      <div class="control-wrapper">
+        <crit-multi-select
+                [includeSearchBox]="false"
+                (addedItems)="requestPreview($event)"
+                [options]="ethnicityNodes"
+                [getParamId]="selectedParamId"
+                [initialSelection]="initialEthnicities"
+                [loading]="loading">
+        </crit-multi-select>
+      </div>
     </div>
   </div>
-
-  <!-- Races -->
-  <div class="form-row">
-    <div class="form-label">
-      <div class="circle-wrapper">
-        <div class="and-circle">AND</div>
-      </div>
-      Race
-    </div>
-    <div class="control-wrapper">
-      <crit-multi-select
-        [options]="raceNodes"
-        [initialSelection]="initialRaces"
-        [loading]="loading">
-      </crit-multi-select>
-    </div>
-  </div>
-
-  <!-- Ethnicities -->
-  <div class="form-row">
-    <div class="form-label">
-      <div class="circle-wrapper">
-        <div class="and-circle">AND</div>
-      </div>
-      Ethnicity
-    </div>
-    <div class="control-wrapper">
-      <crit-multi-select
-        [options]="ethnicityNodes"
-        [initialSelection]="initialEthnicities"
-        [loading]="loading">
-      </crit-multi-select>
-    </div>
-  </div>
-
+  <!--End-->
   <!-- Deceased status -->
-  <div class="form-row">
-    <div class="form-label">
-      <div class="circle-wrapper">
-        <div class="and-circle">AND</div>
-      </div>
+  <!--<div class="form-row">-->
+  <!--<div class="form-label">-->
+
+  <!--&lt;!&ndash;<div class="circle-wrapper">&ndash;&gt;-->
+  <!--&lt;!&ndash;<div class="and-circle">AND</div>&ndash;&gt;-->
+  <!--&lt;!&ndash;</div>&ndash;&gt;-->
+  <!--Deceased-->
+  <!--</div>-->
+  <!--<div class="control-wrapper">-->
+  <!--<div class="checkbox">-->
+  <!--<input type="checkbox"-->
+  <!--formControlName="deceased"-->
+  <!--id="deceased"-->
+  <!--name="deceased">-->
+  <!--<label for="deceased">Is Deceased</label>-->
+  <!--</div>-->
+  <!--</div>-->
+  <!--</div>-->
+
+  <div class="">
+    <div class="deceased-title">
+
+      <!--<div class="circle-wrapper">-->
+      <!--<div class="and-circle">AND</div>-->
+      <!--</div>-->
       Deceased
     </div>
     <div class="control-wrapper">
-      <div class="checkbox">
-        <input type="checkbox"
-          formControlName="deceased"
-          id="deceased"
-          name="deceased">
-        <label for="deceased">Is Deceased</label>
-      </div>
+      <div class="" (click)="selectedDeasease()" [ngClass]="[ageClicked? 'deceaseNoCursor':'deceaseCursor']">
+        <clr-icon *ngIf= "!deceasedClicked" class="decease-selection-icon" shape="plus-circle" size = '39'  ></clr-icon>
+        <clr-icon *ngIf= "deceasedClicked" class="decease-selection-icon" shape="check-circle" size = '39'></clr-icon>
+        Is Deceased</div>
     </div>
   </div>
-
-  <div class="form-footer">
-    <button type="button"
-      class="btn btn-link"
-      (click)="cancel.emit(true)">
-      Cancel
-    </button>
-    <button type="submit"
-      class="btn btn-primary"
-      (click)="finish.emit(true)">
-      Finish
-    </button>
-  </div>
 </form>
+<div class="container count-preview" *ngIf="!noSelection">
+  <div class="row">
+    <div class="col-lg-1 " *ngIf="preview.get('requesting')">
+       <span  class="spinner spinner-md">
+    </span>
+    </div>
+    <div class="col-lg-2 ">
+      Calculate
+    </div>
+    <ng-container *ngIf="!(preview.get('requesting'))">
+      <div class="col-lg-6 text-padding">
+        <div class="result-text">
+          Results
+        </div>
+        <div>
+          Number Participants:
+          <span class="text-bold" >
+       {{ preview.get('count', 0) | number }}
+        </span>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
+

@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {DomainType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -39,6 +39,8 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
+  demoItemsDeleted = false;
+  selectedDemoItems = false;
   ctype: string;
   subtype: string;
   itemType: string;
@@ -46,13 +48,11 @@ export class ModalComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   attributesNode: Map<any, any> = Map();
   selections = {};
-  objectKey = Object.keys;
-
   open = false;
   noSelection = true;
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
-
+  scrollTime: number;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
 
@@ -193,11 +193,20 @@ export class ModalComponent implements OnInit, OnDestroy {
       : 'No Selection';
   }
 
-  get attributeTitle() {
-    return this.ctype === TreeType[TreeType.PM]
-      ? stripHtml(this.attributesNode.get('name'))
-      : typeToTitle(this.ctype) + ' Detail';
-  }
+    get attributeTitle() {
+        return this.ctype === TreeType[TreeType.PM]
+            ? stripHtml(this.attributesNode.get('name'))
+            : typeToTitle(this.ctype) + ' Detail';
+    }
+
+    demoPId(flag){
+        console.log(flag)
+        if(flag){
+            this.demoItemsDeleted = flag;
+            // this.selectedDemoItems = false;
+        }
+
+    }
 
   get showHeader() {
     return this.itemType === TreeType[TreeType.CONDITION]
@@ -208,4 +217,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   selectionHeader(_type: string) {
     return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
   }
+
 }
+

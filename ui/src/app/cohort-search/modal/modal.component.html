@@ -2,10 +2,10 @@
   <div class="crit-modal-content">
     <div class="container title-margin">
       <div class="row">
-        <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === treeType[treeType.DEMO]}">
+        <div class="col col-sm-8 padding-zero">
           <div class="title-bar">
             <div class="btn-group btn-link">
-              <ng-container *ngIf="(ctype !== treeType[treeType.DEMO])">
+              <ng-container>
                 <button  *ngIf="attributesNode.size === 0"
                   type="button"
                   class="btn tab"
@@ -19,13 +19,13 @@
                   {{attributeTitle}}
                 </button>
 
-                <div *ngIf="ctype !== treeType[treeType.PM]" class="vbar"></div>
+                <div *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO]" class="vbar"></div>
                 <button type="button"
-                  class="btn tab"
-                  *ngIf="ctype !== treeType[treeType.PM]"
-                  [class.active]="mode === 'modifiers'"
-                  [disabled]="noSelection"
-                  (click)="mode = 'modifiers'">
+                        class="btn tab"
+                        *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO]"
+                        [class.active]="mode === 'modifiers'"
+                        [disabled]="noSelection"
+                        (click)="mode = 'modifiers'">
                   Modifiers
                 </button>
               </ng-container>
@@ -37,14 +37,15 @@
               drugs by brand names outside of All of Us
             </div>
             <button *ngIf="attributesNode.size > 0"
-              (click)="back()"
-              class="btn btn-link btn-icon">
+                    (click)="back()"
+                    class="btn btn-link btn-icon">
               <clr-icon size="24" shape="close"></clr-icon>
             </button>
           </div>
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
+                                 [selectedParamId] = "demoItemsDeleted"
                                  (cancel)="cancel()"
                                  (finish)="finish()">
               </crit-demographics>
@@ -69,7 +70,7 @@
           </div>
         </div>
 
-        <div class="col col-sm-4 padding-zero" *ngIf="ctype !== treeType[treeType.DEMO]">
+        <div class="col col-sm-4 padding-zero">
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>
@@ -81,24 +82,25 @@
                       <crit-selection-info
                         *ngFor="let parameter of selections[type]; let i = index"
                         [index]="i"
+                        (demoItems) = "demoPId($event)"
                         [parameter]="parameter">
                       </crit-selection-info>
                     </ng-container>
                   </div>
-                  <div *ngIf="ctype !== treeType[treeType.DEMO]" class="footer">
+                  <div class="footer">
                     <button type="button"
                             (click)="cancel()"
                             class="btn btn-link">
                       Cancel
                     </button>
-                    <button  *ngIf="ctype !== treeType[treeType.PM] && mode !== 'modifiers'"
-                            type="button"
-                            [disabled]="noSelection"
+                    <button  *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO] && mode !== 'modifiers'"
+                             type="button"
+                             [disabled]="noSelection"
                              (click)="mode = 'modifiers'"
-                            class="btn btn-primary">
+                             class="btn btn-primary">
                       Next
                     </button>
-                    <button  *ngIf="ctype !== treeType[treeType.PM] && mode === 'modifiers'"
+                    <button  *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO] && mode === 'modifiers'"
                              type="button"
                              (click)="mode = 'tree'"
                              class="btn btn-primary">
