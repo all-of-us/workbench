@@ -88,7 +88,8 @@ describe('NewNotebookModalComponent', () => {
     const name = 'new-name-r';
     updateAndTick(fixture);
     simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), name);
-    fixture.componentInstance.kernelType = Kernels.R;
+    updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.query(By.css('#r-radio')));
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
     const expectedUrlR = `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +

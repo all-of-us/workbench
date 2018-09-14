@@ -8,12 +8,17 @@
       <input id="new-name" type="text" class="input"
              [(ngModel)]="newName" (ngModelChange)="nameConflict = false">
       <div class="error" *ngIf="nameConflict">Notebook name in use</div>
-      <label class="modal-label">Python or R?</label>
-      <div class="select">
-        <select [(ngModel)]="kernelType">
-          <option class="py-option" [ngValue]="Kernels.Python3">{{Kernels[Kernels.Python3]}}</option>
-          <option class="r-option" [ngValue]="Kernels.R">{{Kernels[Kernels.R]}}</option>
-        </select>
+      <label class="modal-label">Programming Language:</label>
+      <div class="clr-control-container">
+        <div class="clr-radio-wrapper">
+          <!-- type="radio" required for angular to pick up this input correctly -->
+          <input type="radio" name="language-radio" id="py-radio" class="clr-radio" (click)="kernelType = Kernels.Python3" checked/>
+          <label>{{Kernels[Kernels.Python3]}}</label>
+        </div>
+        <div class="clr-radio-wrapper">
+          <input type="radio" name="language-radio" id="r-radio" class="clr-radio" (click)="kernelType = Kernels.R"/>
+          <label>{{Kernels[Kernels.R]}}</label>
+        </div>
       </div>
     </div>
   </div>
