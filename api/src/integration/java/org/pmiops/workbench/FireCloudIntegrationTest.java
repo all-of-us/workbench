@@ -58,7 +58,7 @@ public class FireCloudIntegrationTest {
   }
 
   private static WorkbenchConfig createConfig() throws Exception {
-    String testConfig = Resources.toString(Resources.getResource("config_local.json"), Charset.defaultCharset());
+    String testConfig = Resources.toString(Resources.getResource("config_prod.json"), Charset.defaultCharset());
     WorkbenchConfig workbenchConfig = new Gson().fromJson(testConfig, WorkbenchConfig.class);
     workbenchConfig.firecloud.debugEndpoints = true;
     return workbenchConfig;
