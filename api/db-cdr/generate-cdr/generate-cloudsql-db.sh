@@ -47,6 +47,7 @@ fi
 startDate=$(date)
 echo " Starting generate-cloudsql-db $DATABASE from bucket $BUCKET $startDate"
 
+
 # Init the local database
 echo "Initializing new  $DATABASE"
 if ./generate-cdr/init-new-cdr-db.sh --drop-if-exists --cdr-db-name ${DATABASE}
@@ -68,7 +69,7 @@ fi
 
 # Import Sql dump and data in bucket to cloudsql
 if ./generate-cdr/cloudsql-import-bucket.sh --project $PROJECT --instance $INSTANCE --bucket $BUCKET \
-    --database $DATABASE --create-dump-file $DATABASE.sql
+    --database $DATABASE
 then
   echo "Success"
 else

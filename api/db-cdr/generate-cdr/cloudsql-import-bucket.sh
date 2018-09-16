@@ -2,6 +2,7 @@
 
 # Imports all sql and csv files in the bucket to the database.
 # IF --create-dump-file is specified, it is ran first
+# Table names for csvs are determined from the filename.
 
 set -xeuo pipefail
 IFS=$'\n\t'
@@ -65,24 +66,42 @@ if [ "${CREATE_DUMP_FILE}" ]
 then
     create_gs_file=$create_gs_file$BUCKET/$CREATE_DUMP_FILE
     echo "Creating cloudsql DB from dump file ${CREATE_DUMP_FILE}"
-    gcloud sql import sql --project $PROJECT --quiet --account $SERVICE_ACCOUNT $INSTANCE $create_gs_file
+    gcloud sql import sql $INSTANCE $create_gs_file --project $PROJECT --database=$DATABASE \
+        --account $SERVICE_ACCOUNT --quiet
     # If above fails let it die as user obviously intended to create the db
+    gsutil mv $create_gs_file gs://$BUCKET/imported_to_cloudsql/
 fi
 
-#Import files, do sql first as they may have some schema changes
+#Import files, do sql first as they are intended for schema changes and such
+#
+
 # gsutil returns error if no files match thus the "2> /dev/null || true" part
 sqls=( $(gsutil ls gs://$BUCKET/*.sql* 2> /dev/null || true))
 
 for gs_file in "${sqls[@]}"
 do
-
-
     if [ "$gs_file" = "$create_gs_file" ]
     then
         echo "Skipping create dump file ";
     else
-        # Note big sql files might error out here. These are intended for schema changes and small things
-        gcloud sql import sql --project $PROJECT --quiet --account $SERVICE_ACCOUNT $INSTANCE $gs_file
+        gcloud sql import sql $INSTANCE $gs_file --project $PROJECT --account $SERVICE_ACCOUNT --quiet --async
+        echo "Import started, waiting for it to complete."
+        seconds_waited=0
+        wait_interval=15
+        while true; do
+            sleep $wait_interval
+            seconds_waited=$((seconds_waited + wait_interval))
+            import_status=
+            if [[ $(gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT.*RUNNING") ]]
+            then
+                echo "Import is still running after ${seconds_waited} seconds."
+            else
+                echo "Import finished after ${seconds_waited} seconds."
+                # Move file to imported dir
+                gsutil mv $gs_file gs://$BUCKET/imported_to_cloudsql/
+                break
+            fi
+        done
     fi
 done
 
@@ -101,24 +120,25 @@ do
         gcloud sql import csv $INSTANCE $gs_file --project $PROJECT --quiet --account $SERVICE_ACCOUNT \
         --database=$DATABASE --table=$table --async
         echo "Import started, waiting for it to complete."
-        minutes_waited=0
+        seconds_waited=0
+        wait_interval=15
         while true; do
-            sleep 1m
-            minutes_waited=$((minutes_waited + 1))
-            import_status=$(gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT")
-            if [[ $import_status =~ .*RUNNING* ]]
+            sleep $wait_interval
+            seconds_waited=$((seconds_waited + wait_interval))
+            import_status=
+            if [[ $(gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT.*RUNNING") ]]
             then
-                echo "Import is still running after ${minutes_waited} minutes."
+                echo "Import is still running after ${seconds_waited} seconds."
             else
-                echo "Import finished after ${minutes_waited} minutes."
+                echo "Import finished after ${seconds_waited} seconds."
+                # Move file to imported dir
+                gsutil mv $gs_file gs://$BUCKET/imported_to_cloudsql/
                 break
             fi
         done
    else
         echo "Unable to parse table from $filename. Skipping it."
    fi
-
-
 done
 
 
