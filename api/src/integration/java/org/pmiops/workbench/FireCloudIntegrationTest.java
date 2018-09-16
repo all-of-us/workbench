@@ -6,11 +6,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
@@ -39,8 +41,9 @@ public class FireCloudIntegrationTest {
 
   @Before
   public void setUp() throws Exception {
+    WorkbenchConfig config = createConfig();
     fireCloudService = new FireCloudServiceImpl(
-        Providers.of(createConfig()),
+        Providers.of(config),
         Providers.of(profileApi),
         Providers.of(billingApi),
         // All of us groups api
@@ -48,6 +51,7 @@ public class FireCloudIntegrationTest {
         // End user groups api.
         Providers.of(groupsApi),
         Providers.of(workspacesApi),
+        Providers.of(new FireCloudConfig().statusApi(config)),
         new FirecloudRetryHandler(new NoBackOffPolicy())
     );
   }

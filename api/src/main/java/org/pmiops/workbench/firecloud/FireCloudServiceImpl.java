@@ -11,6 +11,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
@@ -38,6 +39,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<GroupsApi> endUserGroupsApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
+  private final Provider<StatusApi> statusApiProvider;
   private final FirecloudRetryHandler retryHandler;
 
   private static final String MEMBER_ROLE = "member";
@@ -55,7 +57,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<BillingApi> billingApiProvider,
       @Qualifier(FireCloudConfig.ALL_OF_US_GROUPS_API) Provider<GroupsApi> groupsApiProvider,
       @Qualifier(FireCloudConfig.END_USER_GROUPS_API) Provider<GroupsApi> endUserGroupsApiProvider,
-      Provider<WorkspacesApi> workspacesApiProvider,
+      Provider<WorkspacesApi> workspacesApiProvider, Provider<StatusApi> statusApiProvider,
       FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
@@ -63,6 +65,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.groupsApiProvider = groupsApiProvider;
     this.endUserGroupsApiProvider = endUserGroupsApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
+    this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
   }
 
@@ -78,7 +81,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public boolean getFirecloudStatus() {
     try {
-      new FireCloudConfig().statusApi(configProvider.get()).status();
+      statusApiProvider.get().status();
     } catch (ApiException e) {
       log.log(Level.WARNING, "Firecloud status check request failed", e);
       String response = e.getResponseBody();
