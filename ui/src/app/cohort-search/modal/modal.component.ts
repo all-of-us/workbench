@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {DomainType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -16,44 +16,45 @@ import {
   subtreeSelected,
   wizardOpen,
 } from '../redux';
-import {stripHtml, typeToTitle} from '../utils';
+import {stripHtml, subtypeToTitle, typeToTitle} from '../utils';
 
 
 @Component({
-    selector: 'app-modal',
-    templateUrl: './modal.component.html',
-    styleUrls: [
-        './modal.component.css',
-        '../../styles/buttons.css',
-    ]
+  selector: 'app-modal',
+  templateUrl: './modal.component.html',
+  styleUrls: [
+    './modal.component.css',
+    '../../styles/buttons.css',
+  ]
 })
 export class ModalComponent implements OnInit, OnDestroy {
-    @select(wizardOpen) open$: Observable<boolean>;
-    @select(activeCriteriaSubtype) criteriaSubtype$: Observable<any>;
-    @select(activeCriteriaType) criteriaType$: Observable<string>;
-    @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
-    @select(activeParameterList) selection$: Observable<any>;
-    @select(nodeAttributes) attributes$: Observable<any>;
-    @select(subtreeSelected) scrollTo$: Observable<any>;
-    @select(activeItem) item$: Observable<any>;
-    demoItemsDeleted = false;
-    readonly domainType = DomainType;
-    readonly treeType = TreeType;
-    subtype: string;
-    itemType: string;
-    ctype: string;
-    fullTree: boolean;
-    subscription: Subscription;
-    attributesNode: Map<any, any> = Map();
+  @select(wizardOpen) open$: Observable<boolean>;
+  @select(activeCriteriaSubtype) criteriaSubtype$: Observable<any>;
+  @select(activeCriteriaType) criteriaType$: Observable<string>;
+  @select(activeCriteriaTreeType) isFullTree$: Observable<boolean>;
+  @select(activeItem) item$: Observable<any>;
+  @select(activeParameterList) selection$: Observable<any>;
+  @select(nodeAttributes) attributes$: Observable<any>;
+  @select(subtreeSelected) scrollTo$: Observable<any>;
 
-    open = false;
-    noSelection = true;
-    title = '';
-    mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
-    count = 0;
-    selections = {};
-    demoItemsType: any;
-    constructor(private actions: CohortSearchActions) {}
+  readonly domainType = DomainType;
+  readonly treeType = TreeType;
+  ctype: string;
+  subtype: string;
+  itemType: string;
+  fullTree: boolean;
+  subscription: Subscription;
+  attributesNode: Map<any, any> = Map();
+  selections = {};
+  objectKey = Object.keys;
+  open = false;
+  noSelection = true;
+  title = '';
+  mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
+  demoItemsDeleted = false;
+  demoItemsType: string;
+  count = 0;
+  constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
     this.subscription = this.open$
@@ -73,10 +74,16 @@ export class ModalComponent implements OnInit, OnDestroy {
 
     this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
 
-      this.subscription.add(this.selection$
-          .map(sel => sel.size === 0)
-          .subscribe(sel => this.noSelection = sel)
-      );
+    this.subscription.add(this.selection$
+      .subscribe(selections => {
+        this.selections = {};
+        this.noSelection = selections.size === 0;
+        selections.forEach(selection => {
+          this.addSelectionToGroup(selection);
+        });
+      })
+    );
+
     this.subscription.add(this.attributes$
       .subscribe(node => {
         this.attributesNode = node;
@@ -120,6 +127,17 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
   }
+
+  addSelectionToGroup(selection: any) {
+    const key = selection.get('type') === TreeType[TreeType.DEMO]
+      ? selection.get('subtype') : selection.get('type');
+    if (this.selections[key] && !this.selections[key].includes(selection)) {
+      this.selections[key].push(selection);
+    } else {
+      this.selections[key] = [selection];
+    }
+  }
+
   setScroll(nodeId: string) {
     let node: any;
     Observable.interval(100)
@@ -137,6 +155,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   cancel() {
+    this.selections = {};
     this.open = false;
     this.actions.cancelWizard();
   }
@@ -146,6 +165,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   finish() {
+    this.selections = {};
     this.open = false;
     this.actions.finishWizard();
   }
@@ -176,6 +196,16 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
       : typeToTitle(this.ctype) + ' Detail';
+  }
+
+  get showHeader() {
+    return this.itemType === TreeType[TreeType.CONDITION]
+    || this.itemType === TreeType[TreeType.PROCEDURE]
+    || this.itemType === TreeType[TreeType.DEMO];
+  }
+
+  selectionHeader(_type: string) {
+    return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
   }
 
   demoPId(e) {

@@ -8,15 +8,15 @@
             <div class="btn-group btn-link">
               <ng-container>
                 <button  *ngIf="attributesNode.size === 0"
-                         type="button"
-                         class="btn tab"
-                         [class.active]="mode === 'tree'"
-                         (click)="mode = 'tree'">
+                 type="button"
+                 class="btn tab"
+                 [class.active]="mode === 'tree'"
+                 (click)="mode = 'tree'">
                   {{ title }}
                 </button>
                 <button *ngIf="attributesNode.size > 0"
-                        type="button"
-                        class="btn tab-node">
+                  type="button"
+                  class="btn tab-node">
                   {{attributeTitle}}
                 </button>
 
@@ -79,13 +79,16 @@
                 <div class="panel-right-container">
                   <h5 class="selection-title">{{ selectionTitle }}</h5>
                   <div class="panel-right selected">
-                    <crit-selection-info
-                            *ngFor="let parameter of (selection$ | async); let i = index"
-                            [index]="i"
-                            [parameterObj] = "selection$"
-                            (demoItems) = "demoPId($event)"
-                            [parameter]="parameter">
-                    </crit-selection-info>
+                      <ng-container *ngFor="let type of objectKey(selections)">
+                          <h6 class="selection-header" *ngIf="showHeader">{{selectionHeader(type)}}</h6>
+                          <crit-selection-info
+                                  *ngFor="let parameter of selections[type]; let i = index"
+                                  [index]="i"
+                                  [parameter]="parameter"
+                                  [parameterObj] = "selection$"
+                                  (demoItems) = "demoPId($event)">
+                          </crit-selection-info>
+                      </ng-container>
                   </div>
                   <div class="footer">
                     <button type="button"
