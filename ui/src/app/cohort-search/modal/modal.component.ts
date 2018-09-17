@@ -16,7 +16,7 @@ import {
   subtreeSelected,
   wizardOpen,
 } from '../redux';
-import {stripHtml, typeToTitle} from '../utils';
+import {stripHtml, subtypeToTitle, typeToTitle} from '../utils';
 
 
 @Component({
@@ -75,8 +75,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
-
-<<<<<<< HEAD
     this.subscription.add(this.selection$
       .subscribe(selections => {
         this.selections = {};
@@ -86,13 +84,10 @@ export class ModalComponent implements OnInit, OnDestroy {
         });
       })
     );
-
-=======
       this.subscription.add(this.selection$
           .map(sel => sel.size === 0)
           .subscribe(sel => this.noSelection = sel)
       );
->>>>>>> RW-1303 demographic bydefault age selection
     this.subscription.add(this.attributes$
       .subscribe(node => {
         this.attributesNode = node;
@@ -136,8 +131,6 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
   }
-<<<<<<< HEAD
-
   addSelectionToGroup(selection: any) {
     const key = selection.get('type') === TreeType[TreeType.DEMO]
       ? selection.get('subtype') : selection.get('type');
@@ -147,9 +140,6 @@ export class ModalComponent implements OnInit, OnDestroy {
       this.selections[key] = [selection];
     }
   }
-
-=======
->>>>>>> RW-1303 demographic bydefault age selection
   setScroll(nodeId: string) {
     let node: any;
     Observable.interval(100)
@@ -204,20 +194,16 @@ export class ModalComponent implements OnInit, OnDestroy {
       : 'No Selection';
   }
 
-<<<<<<< HEAD
     get attributeTitle() {
         return this.ctype === TreeType[TreeType.PM]
             ? stripHtml(this.attributesNode.get('name'))
             : typeToTitle(this.ctype) + ' Detail';
     }
-=======
   get attributeTitle() {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
       : typeToTitle(this.ctype) + ' Detail';
   }
-
->>>>>>> RW-1303 demographic bydefault age selection
 
     demoPId(e){
         if(e ){

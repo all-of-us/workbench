@@ -23,22 +23,22 @@ let maxAge = 120;
  * by a 'name' key
  */
 function sortByCountThenName(critA, critB) {
-    const A = critA.count || 0;
-    const B = critB.count || 0;
-    const diff = B - A;
-    return diff === 0
-        ? (critA.name > critB.name ? 1 : -1)
-        : diff;
+  const A = critA.count || 0;
+  const B = critB.count || 0;
+  const diff = B - A;
+  return diff === 0
+    ? (critA.name > critB.name ? 1 : -1)
+    : diff;
 }
 
 @Component({
-    selector: 'crit-demographics',
-    templateUrl: './demographics.component.html',
-    // Buttons styles picked up from parent (wizard.ts)
-    styleUrls: [
-        './demographics.component.css',
-        '../../styles/buttons.css',
-    ]
+  selector: 'crit-demographics',
+  templateUrl: './demographics.component.html',
+  // Buttons styles picked up from parent (wizard.ts)
+  styleUrls: [
+    './demographics.component.css',
+    '../../styles/buttons.css',
+  ]
 })
 export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     @Output() cancel = new EventEmitter<boolean>();
@@ -48,13 +48,12 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() selectedTypes: any;
     @Output() itemsAddedFlag = new EventEmitter<boolean>();
     @select(previewStatus) preview$;
-     minAge = minAge;
-     maxAge = maxAge;
+    readonly minAge = minAge;
+    readonly maxAge = maxAge;
     loading = false;
     subscription = new Subscription();
     hasSelection = false;
     tesetNode: any;
-    enableSpinner = false;
     preview = Map();
     ageClicked = false;
 
@@ -83,11 +82,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
     ethnicityNodes = List();
     initialEthnicities = List();
-    itemDeleted: any;
     deceasedClicked = false;
-    deceasedGreyedOut = false;
     noSelection = true;
-    testOldNode: any;
     isCancelTimerInitiated: any = false;
     constructor(
         private route: ActivatedRoute,
@@ -324,7 +320,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             .withLatestFrom(selectedAge)
             .filter(([newNode, oldNode]) => {
                 if (oldNode) {
-                    this.testOldNode = oldNode;
                     return oldNode.get('parameterId') !== newNode.get('parameterId');
                 }
                 return true;
@@ -335,7 +330,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             }
 
             this.tesetNode = newNode;
-            //  this.actions.addParameter(newNode);
         }));
     }
 
@@ -391,9 +385,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    getIncrementedValue() {
+    getAgeValue() {
         this.ageClicked = true;
-
         if(!this.tesetNode){
             this.ageRange.updateValueAndValidity({onlySelf: false, emitEvent:true});
             setTimeout(()=>{
@@ -406,16 +399,4 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             this.actions.requestPreview();
         }
     }
-
-    requestPreview(flag?) {
-        // setTimeout (() => {
-            if (flag) {
-                this.enableSpinner = true;
-                this.actions.requestPreview();
-            }
-        // } , 3000 );
-
-
-    }
 }
-

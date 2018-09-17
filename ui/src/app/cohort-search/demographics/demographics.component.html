@@ -2,9 +2,9 @@
 <h3>
   Choose Demographics Filters
   <clr-icon shape="info-circle" class="is-highlight"
-            [popper]="explanation"
-            [popperTrigger]="'hover'"
-            [popperPlacement]="'right'">
+    [popper]="explanation"
+    [popperTrigger]="'hover'"
+    [popperPlacement]="'right'">
   </clr-icon>
 </h3>
 <popper-content #explanation>
@@ -33,7 +33,7 @@
   </p>
 </popper-content>
 
-<form [formGroup]="demoForm" (ngSubmit)="finish.emit(true)">
+<form class="form-container" [formGroup]="demoForm" (ngSubmit)="finish.emit(true)">
   <!-- Age -->
   <div class="age-label">
     Current Age
@@ -59,31 +59,24 @@
               [formControl]="demoForm.controls.ageRange">
       </nouislider>
     </div>
-
     <input type="number"
            id="max-age"
            [min]="minAge" [max]="maxAge"
            formControlName="ageMax"
            class="number-display"
            (blur)="checkMax()">
-    <clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getIncrementedValue()"></clr-icon>
-    <clr-icon *ngIf= "ageClicked" class="selection-icon" shape="check-circle" size = '39'></clr-icon>
+    <clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getAgeValue()"></clr-icon>
+    <clr-icon *ngIf= "ageClicked" class="selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
   </div>
-  <!--</ng-container>-->
 
   <!-- Genders -->
-  <!--start-->
   <div class="demo-container test-container">
-    <div class="">
+    <div>
       <div class="demo-title">
-        <!--<div class="circle-wrapper">-->
-        <!--<div class="and-circle">AND</div>-->
-        <!--</div>-->
         Gender
       </div>
       <div class="control-wrapper">
         <crit-multi-select
-                (addedItems)="requestPreview($event)"
                 [options]="genderNodes"
                 [getParamId]="selectedParamId"
                 [includeSearchBox]="false"
@@ -94,16 +87,12 @@
     </div>
 
     <!-- Races -->
-    <div class="">
+    <div>
       <div class="demo-title">
-        <!--<div class="circle-wrapper">-->
-        <!--<div class="and-circle">AND</div>-->
-        <!--</div>-->
         Race
       </div>
       <div class="control-wrapper">
         <crit-multi-select
-                (addedItems)="requestPreview($event)"
                 [options]="raceNodes"
                 [getParamId]="selectedParamId"
                 [initialSelection]="initialRaces"
@@ -113,18 +102,13 @@
     </div>
 
     <!-- Ethnicities -->
-    <div class="">
+    <div>
       <div class="demo-title">
-        <!--<div class="circle-wrapper">-->
-        <!--<div class="and-circle">AND</div>-->
-        <!--</div>-->
         Ethnicity
       </div>
       <div class="control-wrapper">
-        {{selectedParamId}}
         <crit-multi-select
                 [includeSearchBox]="false"
-                (addedItems)="requestPreview($event)"
                 [options]="ethnicityNodes"
                 [getParamId]="selectedParamId"
                 [initialSelection]="initialEthnicities"
@@ -133,39 +117,14 @@
       </div>
     </div>
   </div>
-  <!--End-->
-  <!-- Deceased status -->
-  <!--<div class="form-row">-->
-  <!--<div class="form-label">-->
-
-  <!--&lt;!&ndash;<div class="circle-wrapper">&ndash;&gt;-->
-  <!--&lt;!&ndash;<div class="and-circle">AND</div>&ndash;&gt;-->
-  <!--&lt;!&ndash;</div>&ndash;&gt;-->
-  <!--Deceased-->
-  <!--</div>-->
-  <!--<div class="control-wrapper">-->
-  <!--<div class="checkbox">-->
-  <!--<input type="checkbox"-->
-  <!--formControlName="deceased"-->
-  <!--id="deceased"-->
-  <!--name="deceased">-->
-  <!--<label for="deceased">Is Deceased</label>-->
-  <!--</div>-->
-  <!--</div>-->
-  <!--</div>-->
-
-  <div class="">
+  <div>
     <div class="deceased-title">
-
-      <!--<div class="circle-wrapper">-->
-      <!--<div class="and-circle">AND</div>-->
-      <!--</div>-->
       Deceased
     </div>
     <div class="control-wrapper">
-      <div class="" (click)="selectedDeasease()" [ngClass]="[ageClicked? 'deceaseNoCursor':'deceaseCursor']">
+      <div (click)="selectedDeasease()" [ngClass]="[ageClicked? 'deceaseNoCursor':'deceaseCursor']">
         <clr-icon *ngIf= "!deceasedClicked" class="decease-selection-icon" shape="plus-circle" size = '39'  ></clr-icon>
-        <clr-icon *ngIf= "deceasedClicked" class="decease-selection-icon" shape="check-circle" size = '39'></clr-icon>
+        <clr-icon *ngIf= "deceasedClicked" class="decease-selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
         Is Deceased</div>
     </div>
   </div>
@@ -173,14 +132,14 @@
 <div class="container count-preview" *ngIf="!noSelection">
   <div class="row">
     <div class="col-lg-1 " *ngIf="preview.get('requesting')">
-       <span  class="spinner spinner-md">
+       <span class="spinner spinner-md">
     </span>
     </div>
     <div class="col-lg-2 " *ngIf="preview.get('requesting')">
       Calculate
     </div>
-    <ng-container *ngIf="!(preview.get('requesting')) &&  preview.get('count', 0)">
-      <div class="col-lg-6 text-padding">
+    <ng-container *ngIf="!preview.get('requesting')">
+      <div class="col-lg-6 text-padding" *ngIf="preview.get('count') >= 0">
         <div class="result-text">
           Results
         </div>

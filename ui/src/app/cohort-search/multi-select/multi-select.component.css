@@ -54,7 +54,7 @@
 }
 
 .search-option-list {
-  height: 9.9rem;
+  height: 9.77rem;
   overflow: auto;
 }
 .option {
@@ -73,7 +73,6 @@
 
 .demo-search-box {
   height: 40px;
-  /*width: 100%;*/
   padding: 7px 14px;
   border-radius: 5px;
   background-color: #DFF0FA;
@@ -82,17 +81,13 @@
 }
 
 .items-selection-icon {
-  /*margin: calc((1.25rem - 20px) / 2);*/
   color: rgb(98, 164, 32);
-  /*padding-left: 0.8rem;*/
 }
 
 .items-disabled-icon {
-  /*margin: calc((1.25rem - 20px) / 2);*/
   color: rgb(98, 164, 32);
   opacity: 0.4;
   pointer-events: none;
-  /*padding-left: 0.8rem;*/
 }
 
 .disable-option{

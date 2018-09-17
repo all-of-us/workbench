@@ -46,7 +46,7 @@
             <ng-container [ngSwitch]="ctype">
               <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
                                  [selectedParamId] = "demoItemsDeleted"
-                                 [selectedTypes]="demoitemsType"
+                                 [selectedTypes]="demoItemsType"
                                  (cancel)="cancel()"
                                  (finish)="finish()">
               </crit-demographics>
@@ -78,7 +78,6 @@
                 <div class="panel-right-container">
                   <h5 class="selection-title">{{ selectionTitle }}</h5>
                   <div class="panel-right selected">
-<<<<<<< HEAD
                     <ng-container *ngFor="let type of objectKey(selections)">
                       <h6 class="selection-header" *ngIf="showHeader">{{selectionHeader(type)}}</h6>
                       <crit-selection-info
@@ -88,8 +87,6 @@
                         [parameter]="parameter">
                       </crit-selection-info>
                     </ng-container>
-=======
-                    hello{{noSelection}}
                     <crit-selection-info
                             *ngFor="let parameter of (selection$ | async); let i = index"
                             [index]="i"
@@ -97,7 +94,6 @@
                             (demoItems) = "demoPId($event)"
                             [parameter]="parameter">
                     </crit-selection-info>
->>>>>>> RW-1303 demographic bydefault age selection
                   </div>
                   <div class="footer">
                     <button type="button"
