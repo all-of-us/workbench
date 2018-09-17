@@ -36,9 +36,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     @select(nodeAttributes) attributes$: Observable<any>;
     @select(subtreeSelected) scrollTo$: Observable<any>;
     @select(activeItem) item$: Observable<any>;
-    // @Output() demoItemsDeleted = new EventEmitter();
     demoItemsDeleted = false;
-    selectedDemoItems = false;
     readonly domainType = DomainType;
     readonly treeType = TreeType;
     subtype: string;
@@ -52,12 +50,9 @@ export class ModalComponent implements OnInit, OnDestroy {
     noSelection = true;
     title = '';
     mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
-
-    scrollTime: number;
     count = 0;
     selections = {};
-    objectKey = Object.keys;
-    demoitemsType: any;
+    demoItemsType: any;
     constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -183,19 +178,11 @@ export class ModalComponent implements OnInit, OnDestroy {
       : typeToTitle(this.ctype) + ' Detail';
   }
 
-
-    demoPId(e) {
-        if (e) {
-            this.demoItemsDeleted = e.paramId;
-            this.demoitemsType = e.type;
-        }
+  demoPId(e) {
+    if (e) {
+        this.demoItemsDeleted = e.paramId;
+        this.demoItemsType = e.type;
     }
-    // demoItemsAdded(flag) {
-    //     //this.demoItemsDeleted = false;
-    // if(flag){
-    //   this.selectedDemoItems = true;
-    //     this.demoItemsDeleted = false;
-    // }
-    // }
+  }
 }
 

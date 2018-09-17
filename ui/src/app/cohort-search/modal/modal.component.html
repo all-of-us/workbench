@@ -47,7 +47,7 @@
             <ng-container [ngSwitch]="ctype">
               <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
                                  [selectedParamId] = "demoItemsDeleted"
-                                 [selectedTypes]="demoitemsType"
+                                 [selectedTypes]="demoItemsType"
                                  (cancel)="cancel()"
                                  (finish)="finish()">
               </crit-demographics>
@@ -79,11 +79,10 @@
                 <div class="panel-right-container">
                   <h5 class="selection-title">{{ selectionTitle }}</h5>
                   <div class="panel-right selected">
-                    hello{{noSelection}}
                     <crit-selection-info
                             *ngFor="let parameter of (selection$ | async); let i = index"
                             [index]="i"
-                            [paramenterObj] = "selection$"
+                            [parameterObj] = "selection$"
                             (demoItems) = "demoPId($event)"
                             [parameter]="parameter">
                     </crit-selection-info>
@@ -118,7 +117,6 @@
               </ng-container>
             </ng-container>
           </div>
-
         </div>
       </div>
     </div>

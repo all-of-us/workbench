@@ -1,5 +1,5 @@
 h3 {
-  margin-left: 1rem;
+  margin-left: 2rem;
 }
 
 /* Form grid / layout */
@@ -42,7 +42,6 @@ h3 {
 }
 
 .control-wrapper {
-  width: 80%;
   margin: 0 1rem 0 0;
   display: flex;
   align-items: center;
@@ -50,7 +49,8 @@ h3 {
 
 /* Slider elements */
 .control-wrapper.slider-wrapper {
-  width: 100%;
+  width: 96%;
+  padding-left: 1rem;
 }
 
 .slider {
@@ -101,16 +101,8 @@ label[for="deceased"] {
 
 .demo-container {
   display: flex;
-  /*padding-left: 1.3rem;*/
   justify-content: space-around;
-  /*transform: translate(0%, 0%);*/
-  /*width: calc(100vw - calc(19rem + 60px));*/
 }
-/*@media all and (max-width: 900px) {*/
-/*.demo-container {*/
-/*transform: translate(0%, 0%);*/
-/*}*/
-/*}*/
 
 .selection-icon {
   margin: calc((1.25rem - 20px) / 2);
@@ -123,7 +115,7 @@ label[for="deceased"] {
   font-size: 14px;
   font-weight: 500;
   color: #262262;
-  padding-left: 1.3rem;
+  padding-left: 1rem;
 }
 
 .demo-title {
@@ -134,7 +126,7 @@ label[for="deceased"] {
 
 .count-preview {
   background-color: #E4F3FC;
-  padding:0.8rem;
+  padding: 0.8rem;
   margin-top: 1rem;
 }
 .count-preview  .calculate-btn{
@@ -147,7 +139,7 @@ label[for="deceased"] {
   opacity: 0.3;
 }
 .count-preview  .add-button {
-  border-color:transparent;
+  border-color: transparent;
   outline: none;
   background-color: transparent;
   font-weight: 500;
@@ -194,4 +186,13 @@ label[for="deceased"] {
   font-size: 14px;
   font-weight: 500;
   color: #262262;
+}
+
+.form-container {
+  padding-left: 1rem;
+}
+
+.selection-check-icon {
+  opacity: 0.4;
+  pointer-events: none;
 }

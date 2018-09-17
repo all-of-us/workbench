@@ -1,5 +1,5 @@
 
-import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {TreeType} from 'generated';
 import {CohortSearchActions} from '../redux';
 import {attributeDisplay, nameDisplay, typeDisplay} from '../utils';
@@ -14,7 +14,7 @@ export class SelectionInfoComponent {
     @Input() index;
     @Output() demoItems = new EventEmitter<any>();
     @Input() itemsSelected;
-    @Input() paramenterObj;
+    @Input() parameterObj;
     treeType = TreeType;
 
     constructor(private actions: CohortSearchActions) {}
