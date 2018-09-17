@@ -54,6 +54,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   loading = false;
   error = false;
   fullTree: boolean;
+  codes: any;
   subscription: Subscription;
   @select(subtreeSelected) selected$: Observable<any>;
 
@@ -64,8 +65,10 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
+    this.codes = this.ngRedux.getState().getIn(['wizard', 'codes']);
     if (!this.fullTree || this.node.get('id') === 0) {
       const _type = this.node.get('type');
+      const subtype = this.codes ? this.node.get('subtype') : null;
       const parentId = this.node.get('id');
       const errorSub = this.ngRedux
         .select(criteriaError(_type, parentId))
@@ -77,7 +80,7 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(loading => this.loading = loading);
 
       const childSub = this.ngRedux
-        .select(criteriaChildren(_type, parentId))
+        .select(criteriaChildren(_type, subtype, parentId))
         .subscribe(children => {
           if (this.fullTree) {
             let criteriaList = [];
@@ -174,6 +177,8 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchDrugCriteria(_type, parentId, TreeSubType[TreeSubType.ATC]);
     } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
+    } else if (this.codes && this.node.get('subtype')) {
+      this.actions.fetchCriteriaBySubtype(_type, this.node.get('subtype'), parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
     }

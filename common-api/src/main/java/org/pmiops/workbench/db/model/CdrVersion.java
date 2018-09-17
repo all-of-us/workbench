@@ -58,11 +58,11 @@ public class CdrVersion {
 
   @Transient
   public DataAccessLevel getDataAccessLevelEnum() {
-    return StorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
+    return CommonStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(StorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+    setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @Column(name = "release_number")

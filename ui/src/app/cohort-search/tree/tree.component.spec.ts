@@ -6,6 +6,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
+import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
 import {NodeInfoComponent} from '../node-info/node-info.component';
 import {NodeComponent} from '../node/node.component';
 import {
@@ -43,6 +44,7 @@ describe('TreeComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [
+        CodeDropdownComponent,
         TreeComponent,
         NodeComponent,
         NodeInfoComponent,

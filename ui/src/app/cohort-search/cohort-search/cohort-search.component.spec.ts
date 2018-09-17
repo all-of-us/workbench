@@ -12,6 +12,7 @@ import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
 import {AttributesPageComponent} from '../attributes-page/attributes-page.component';
+import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
 import {DemographicsComponent} from '../demographics/demographics.component';
 import {GenderChartComponent} from '../gender-chart/gender-chart.component';
 import {ModalComponent} from '../modal/modal.component';
@@ -60,6 +61,7 @@ describe('CohortSearchComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         AttributesPageComponent,
+        CodeDropdownComponent,
         CohortSearchComponent,
         ComboChartComponent,
         DemographicsComponent,

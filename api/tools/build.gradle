@@ -72,7 +72,8 @@ buildscript {    // Configuration for building
 sourceSets {
   main {
     java {
-      srcDirs = ['src/main/java', '../src/main/java', '../src/generated/java']
+      srcDirs = ['src/main/java', '../src/main/java', '../src/generated/java',
+                 '../../common-api/src/main/java']
       includes = ['org/pmiops/workbench/tools/**/*.java',
                   'org/pmiops/workbench/db/**/*.java',
                   'org/pmiops/workbench/notebooks/**/*.java',

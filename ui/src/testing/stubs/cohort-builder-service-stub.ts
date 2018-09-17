@@ -1,4 +1,4 @@
-import {ChartInfoListResponse} from 'generated';
+import {DemoChartInfoListResponse} from 'generated';
 import {Observable} from 'rxjs/Observable';
 
 
@@ -6,7 +6,7 @@ export class CohortBuilderServiceStub {
 
   constructor() {}
 
-  getChartInfo(): Observable<ChartInfoListResponse> {
-    return Observable.of(<ChartInfoListResponse> {items: []});
+  getDemoChartInfo(): Observable<DemoChartInfoListResponse> {
+    return Observable.of(<DemoChartInfoListResponse> {items: []});
   }
 }

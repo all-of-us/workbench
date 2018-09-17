@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
 
+  private final static Long DEFAULT_LIMIT = 100L;
+
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
   private CriteriaDao criteriaDao;
@@ -104,11 +106,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<CriteriaListResponse> getCriteriaAutoComplete(Long cdrVersionId,
                                                                       String type,
                                                                       String value,
-                                                                      String subtype) {
+                                                                      String subtype,
+                                                                      Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     final List<Criteria> criteriaList = subtype == null ?
-      criteriaDao.findCriteriaByTypeForCodeOrName(type, value) :
-      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value);
+      criteriaDao.findCriteriaByTypeForCodeOrName(type, value, resultLimit) :
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -117,9 +121,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId, String drugName) {
+  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId,
+                                                                             String drugName,
+                                                                             Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName);
+    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -156,17 +163,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ChartInfoListResponse> getChartInfo(Long cdrVersionId, SearchRequest request) {
+  public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    ChartInfoListResponse response = new ChartInfoListResponse();
+    DemoChartInfoListResponse response = new DemoChartInfoListResponse();
 
-    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildChartInfoCounterQuery(
+    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildDemoChartInfoCounterQuery(
       new ParticipantCriteria(request)));
     QueryResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     for (List<FieldValue> row : result.iterateAll()) {
-      response.addItemsItem(new ChartInfo()
+      response.addItemsItem(new DemoChartInfo()
         .gender(bigQueryService.getString(row, rm.get("gender")))
         .race(bigQueryService.getString(row, rm.get("race")))
         .ageRange(bigQueryService.getString(row, rm.get("ageRange")))

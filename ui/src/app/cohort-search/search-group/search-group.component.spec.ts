@@ -109,12 +109,15 @@ describe('SearchGroupComponent', () => {
     expect(spy).toHaveBeenCalledWith({
       type: OPEN_WIZARD,
       itemId: 'TestId',
+      itemType: TreeType[TreeType.ICD9],
       context: {
         criteriaType: TreeType[TreeType.ICD9],
+        criteriaSubtype: null,
         role: 'includes',
         groupId: 'include0',
         itemId: 'TestId',
-        fullTree: false
+        fullTree: false,
+        codes: false
       }
     });
   });

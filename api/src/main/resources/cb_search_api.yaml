@@ -101,6 +101,12 @@ paths:
           type: string
           required: true
           description: the value to search for
+        - in: query
+          name: limit
+          type: integer
+          format: int64
+          required: false
+          description: number of criteria matches to return
       responses:
         200:
           description: A collection of criteria
@@ -121,6 +127,12 @@ paths:
           type: string
           required: true
           description: name of ingredient or brand
+        - in: query
+          name: limit
+          type: integer
+          format: int64
+          required: false
+          description: number of criteria matches to return
       responses:
         200:
           description: A collection of criteria
@@ -198,7 +210,7 @@ paths:
       tags:
         - cohortBuilder
       description: Searches for demographic info about subjects.
-      operationId: "getChartInfo"
+      operationId: "getDemoChartInfo"
       parameters:
         - in: body
           name: request
@@ -210,7 +222,7 @@ paths:
         200:
           description: A collection of criteria
           schema:
-            $ref: "#/definitions/ChartInfoListResponse"
+            $ref: "#/definitions/DemoChartInfoListResponse"
 
   /v1/cohortbuilder/{cdrVersionId}/quicksearch/{type}/{value}:
     parameters:
@@ -583,7 +595,7 @@ definitions:
       description: possible subtypes of trees
       enum: [CM, PROC, ICD10CM, ICD10PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR, HR-DETAIL, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC, BRAND, CLIN, LAB]
 
-  ChartInfoListResponse:
+  DemoChartInfoListResponse:
     type: object
     required:
       - items
@@ -591,9 +603,9 @@ definitions:
       items:
         type: "array"
         items:
-          $ref: "#/definitions/ChartInfo"
+          $ref: "#/definitions/DemoChartInfo"
 
-  ChartInfo:
+  DemoChartInfo:
     type: object
     required:
       - gender

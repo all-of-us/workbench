@@ -7,6 +7,7 @@ import {WorkspaceData} from 'app/resolvers/workspace';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {environment} from 'environments/environment';
 
@@ -60,7 +61,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   renameModal: RenameModalComponent;
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
-
+  @ViewChild(NewNotebookModalComponent)
+  newNotebookModal: NewNotebookModalComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -165,7 +167,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   newNotebook(): void {
-    this.openNotebook();
+    this.newNotebookModal.open();
   }
 
   renameThis(notebook: FileDetail): void {

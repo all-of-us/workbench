@@ -116,7 +116,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
     this.subscription.add(this.ctype$.subscribe(ctype => {
       this.ctype = ctype;
-      if ([TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(ctype) === -1) {
+      if (this.addEncounters) {
         this.modifiers.push({
           name: 'encounters',
           label: 'During Visit Type',
@@ -131,7 +131,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       }
     }));
 
-    this.subscription.add(this.ngRedux.select(criteriaChildren(TreeType[TreeType.VISIT], 0))
+    this.subscription.add(this.ngRedux.select(criteriaChildren(TreeType[TreeType.VISIT], null, 0))
       .filter(visiTypes => visiTypes.size > 0)
       .subscribe(visitTypes => {
         if (this.modifiers[3]) {
@@ -267,6 +267,11 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         }
       }
     });
+  }
+
+  get addEncounters() {
+    return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(this.ctype) === -1
+      && !this.modifiers.find(modifier => modifier.modType === ModifierType.ENCOUNTERS);
   }
 
   requestPreview() {

@@ -7,6 +7,7 @@ import {Observable} from 'rxjs/Observable';
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
@@ -31,6 +32,7 @@ import {
 
 import {
   loadCriteriaRequestResults,
+  loadCriteriaSubtypeRequestResults,
   criteriaRequestError,
 
   loadCountRequestResults,
@@ -61,6 +63,7 @@ import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
+type CritSubRequestAction = ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
 type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
@@ -89,8 +92,22 @@ export class CohortSearchEpics {
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        return this.service.getCriteriaBy(cdrVersionId, kind, null, parentId, null)
+        return this.service.getCriteriaBy(cdrVersionId, kind, null, parentId)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
+          .race(action$
+            .ofType(CANCEL_CRITERIA_REQUEST)
+            .filter(compare({kind, parentId}))
+            .first())
+          .catch(e => Observable.of(criteriaRequestError(kind, parentId, e)));
+      }
+    )
+  )
+
+  fetchCriteriaBySubtype: CSEpic = (action$) => (
+    action$.ofType(BEGIN_SUBTYPE_CRITERIA_REQUEST).mergeMap(
+      ({cdrVersionId, kind, subtype, parentId}: CritSubRequestAction) => {
+        return this.service.getCriteriaBy(cdrVersionId, kind, subtype, parentId)
+          .map(result => loadCriteriaSubtypeRequestResults(kind, subtype, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
             .filter(compare({kind, parentId}))
@@ -103,7 +120,7 @@ export class CohortSearchEpics {
   fetchAllCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_ALL_CRITERIA_REQUEST).mergeMap(
       ({cdrVersionId, kind, parentId}: CritRequestAction) => {
-        return this.service.getCriteriaBy(cdrVersionId, kind, null, null, null)
+        return this.service.getCriteriaBy(cdrVersionId, kind)
           .map(result => loadCriteriaRequestResults(kind, parentId, result.items))
           .race(action$
             .ofType(CANCEL_CRITERIA_REQUEST)
@@ -131,13 +148,13 @@ export class CohortSearchEpics {
 
   fetchAutocompleteOptions: CSEpic = (action$) => (
     action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
-      ({cdrVersionId, kind, searchTerms}: AutocompleteRequestAction) => {
+      ({cdrVersionId, kind, subtype, searchTerms}: AutocompleteRequestAction) => {
         if (kind === DomainType[DomainType.DRUG]) {
           return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         } else {
-          return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms, null)
+          return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms, subtype)
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         }
@@ -213,7 +230,7 @@ export class CohortSearchEpics {
   fetchChartData: CSEpic = (action$) => (
     action$.ofType(BEGIN_CHARTS_REQUEST).mergeMap(
       ({cdrVersionId, entityType, entityId, request}: ChartRequestAction) =>
-      this.service.getChartInfo(cdrVersionId, request)
+      this.service.getDemoChartInfo(cdrVersionId, request)
         .map(result => loadChartsRequestResults(entityType, entityId, result.items))
         .race(action$
           .ofType(CANCEL_CHARTS_REQUEST)

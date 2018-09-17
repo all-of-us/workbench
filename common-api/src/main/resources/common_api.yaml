@@ -1,0 +1,96 @@
+# Swagger definitions for API objects common to both api and public-api.
+
+swagger: '2.0'
+info:
+  version: "0.1.0"
+  title: "AllOfUs Common API"
+  description: "API objects common to both api and public-api"
+  termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
+  contact:
+    name: "developer_help@pmi-ops.org"
+  license:
+    name: "MIT"
+host: "api.pmi-ops.org"
+schemes:
+  - "https"
+produces:
+  - "application/json"
+
+paths:
+
+  # CDR versions #########################################################################
+
+  /v1/cdrVersions:
+    get:
+      tags:
+        - cdrVersions
+      description: Returns all curated data repository (CDR) versions that the user has access to
+      operationId: getCdrVersions
+      responses:
+        200:
+          description: A list of CDR versions.
+          schema:
+            $ref: "#/definitions/CdrVersionListResponse"
+
+definitions:
+  DataAccessLevel:
+    type: string
+    description: levels of access to data in the curated data repository
+    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
+
+  CdrVersionListResponse:
+    type: object
+    required:
+      - items
+      - defaultCdrVersionId
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CdrVersion"
+      defaultCdrVersionId:
+        type: "string"
+        description: ID of the CDR versions that should be used by the user by default
+
+  CdrVersion:
+    type: object
+    required:
+      - cdrVersionId
+      - name
+      - dataAccessLevel
+      - creationTime
+    properties:
+      cdrVersionId:
+        type: string
+      name:
+        type: string
+      dataAccessLevel:
+        $ref: "#/definitions/DataAccessLevel"
+      creationTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
+
+  ErrorResponse:
+    type: object
+    properties:
+      message:
+        description: General error message for the response.
+        type: string
+      statusCode:
+        type: integer
+        description: HTTP status code
+      errorClassName:
+        type: string
+      errorCode:
+        description: Short description of the type of error
+        $ref: "#/definitions/ErrorCode"
+      # TODO: add list of field-level error messages with field names.
+
+  ErrorCode:
+    type: string
+    description: Short parsable error descriptions
+    enum: [
+      PARSE_ERROR,
+      USER_DISABLED
+    ]
