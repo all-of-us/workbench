@@ -46,10 +46,7 @@
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
-                                 [selectedParamId] = "demoItemsDeleted"
-                                 [selectedTypes]="demoItemsType"
-                                 (cancel)="cancel()"
-                                 (finish)="finish()">
+                                 [selectedTypes]="demoItemsType">
               </crit-demographics>
 
               <ng-container *ngSwitchDefault>
@@ -85,7 +82,6 @@
                                   *ngFor="let parameter of selections[type]; let i = index"
                                   [index]="i"
                                   [parameter]="parameter"
-                                  [parameterObj] = "selection$"
                                   (demoItems) = "demoPId($event)">
                           </crit-selection-info>
                       </ng-container>

@@ -78,7 +78,6 @@
       <div class="control-wrapper">
         <crit-multi-select
                 [options]="genderNodes"
-                [getParamId]="selectedParamId"
                 [includeSearchBox]="false"
                 [initialSelection]="initialGenders"
                 [loading]="loading">
@@ -94,7 +93,6 @@
       <div class="control-wrapper">
         <crit-multi-select
                 [options]="raceNodes"
-                [getParamId]="selectedParamId"
                 [initialSelection]="initialRaces"
                 [loading]="loading">
         </crit-multi-select>
@@ -110,7 +108,6 @@
         <crit-multi-select
                 [includeSearchBox]="false"
                 [options]="ethnicityNodes"
-                [getParamId]="selectedParamId"
                 [initialSelection]="initialEthnicities"
                 [loading]="loading">
         </crit-multi-select>

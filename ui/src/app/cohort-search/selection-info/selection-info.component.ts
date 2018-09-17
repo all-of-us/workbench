@@ -13,8 +13,8 @@ export class SelectionInfoComponent {
     @Input() parameter;
     @Input() index;
     @Output() demoItems = new EventEmitter<any>();
-    @Input() itemsSelected;
-    @Input() parameterObj;
+    // @Input() itemsSelected;
+    // @Input() parameterObj;
     treeType = TreeType;
 
     constructor(private actions: CohortSearchActions) {}
@@ -26,7 +26,7 @@ export class SelectionInfoComponent {
         const id = this.parameter.get('id');
         const type = this._type;
         this.actions.removeParameter(paramId, path, id);
-        this.demoItems.emit ({paramId, type});
+        this.demoItems.emit ({type});
     }
 
     get _type()     { return typeDisplay(this.parameter); }

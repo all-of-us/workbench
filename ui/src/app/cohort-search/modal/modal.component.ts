@@ -51,7 +51,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   noSelection = true;
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
-  demoItemsDeleted = false;
   demoItemsType: string;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
@@ -210,7 +209,6 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   demoPId(e) {
     if (e) {
-        this.demoItemsDeleted = e.paramId;
         this.demoItemsType = e.type;
     }
   }
