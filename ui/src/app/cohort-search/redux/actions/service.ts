@@ -3,7 +3,6 @@ import {Injectable} from '@angular/core';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {CRITERIA_SUBTYPES} from '../../constant';
 
 import {
   activeGroupId,
@@ -25,11 +24,12 @@ import {
 import * as ActionFuncs from './creators';
 
 import {
-  SearchGroup,
-  SearchGroupItem,
-  SearchParameter,
-  SearchRequest,
-  TreeType
+    SearchGroup,
+    SearchGroupItem,
+    SearchParameter,
+    SearchRequest,
+    TreeSubType,
+    TreeType
 } from 'generated';
 
 
@@ -51,6 +51,7 @@ export class CohortSearchActions {
    * (B) can easily perform multi-step, complex actions from this service
    */
   @dispatch() requestCriteria = ActionFuncs.requestCriteria;
+  @dispatch() requestCriteriaBySubtype = ActionFuncs.requestCriteriaBySubtype;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
   @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
@@ -60,7 +61,9 @@ export class CohortSearchActions {
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
+  @dispatch() selectChildren = ActionFuncs.selectChildren;
   @dispatch() loadCriteriaSubtree = ActionFuncs.loadCriteriaSubtree;
+  @dispatch() changeCodeOption = ActionFuncs.changeCodeOption;
   @dispatch() setScrollId = ActionFuncs.setScrollId;
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
@@ -218,6 +221,15 @@ export class CohortSearchActions {
     this.requestCriteria(this.cdrVersionId, kind, parentId);
   }
 
+  fetchCriteriaBySubtype(kind: string, subtype: string, parentId: number): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    const isLoaded = this.state.getIn(['criteria', 'tree', kind, subtype, parentId]);
+    if (isLoaded || isLoading) {
+      return;
+    }
+    this.requestCriteriaBySubtype(this.cdrVersionId, kind, subtype, parentId);
+  }
+
   fetchAllCriteria(kind: string, parentId: number): void {
     const isLoading = isCriteriaLoading(kind, parentId)(this.state);
     const isLoaded = this.state.getIn(['criteria', 'tree', kind, parentId]);
@@ -236,8 +248,8 @@ export class CohortSearchActions {
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
   }
 
-  fetchAutocompleteOptions(kind: string, terms: string): void {
-    this.requestAutocompleteOptions(this.cdrVersionId, kind, terms);
+  fetchAutocompleteOptions(kind: string, subtype: string, terms: string): void {
+    this.requestAutocompleteOptions(this.cdrVersionId, kind, subtype, terms);
   }
 
   fetchIngredientsForBrand(conceptId: number): void {
@@ -248,8 +260,17 @@ export class CohortSearchActions {
     this.requestIngredientsForBrand(this.cdrVersionId, conceptId);
   }
 
-  fetchAllChildren(kind: string, parentId: number): void {
-    this.requestAllChildren(this.cdrVersionId, kind, parentId);
+  fetchAllChildren(node: any): void {
+    const kind = node.get('type');
+    const id = node.get('id');
+    if (kind === TreeType[TreeType.DRUG]) {
+      this.requestAllChildren(this.cdrVersionId, kind, id);
+    } else {
+      const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`;
+      const param = node.set('parameterId', paramId);
+      this.addParameter(param);
+      this.selectChildren(kind, id);
+    }
   }
 
   fetchAttributes(node: any): void {
@@ -445,7 +466,7 @@ export class CohortSearchActions {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
       name: immParam.get('name', ''),
-      value: CRITERIA_SUBTYPES.DEC === immParam.get('subtype')
+      value: TreeSubType[TreeSubType.DEC] === immParam.get('subtype')
           ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
@@ -457,11 +478,17 @@ export class CohortSearchActions {
       || param.type === TreeType[TreeType.VISIT]
       || param.type === TreeType[TreeType.PM]
       || param.type === TreeType[TreeType.MEAS]
-      || param.type === TreeType[TreeType.DRUG]) {
-        param.conceptId = immParam.get('conceptId');
-    } else if (param.type === TreeType[TreeType.ICD9]
+      || param.type === TreeType[TreeType.DRUG]
+      || param.type === TreeType[TreeType.ICD9]
       || param.type === TreeType[TreeType.ICD10]
-      || param.type === TreeType[TreeType.CPT]) {
+      || param.type === TreeType[TreeType.CPT]
+      || param.type === TreeType[TreeType.CONDITION]) {
+        param.conceptId = immParam.get('conceptId');
+    }
+    if (param.type === TreeType[TreeType.ICD9]
+      || param.type === TreeType[TreeType.ICD10]
+      || param.type === TreeType[TreeType.CPT]
+      || param.type === TreeType[TreeType.CONDITION]) {
         param.domain = immParam.get('domainId');
     }
 

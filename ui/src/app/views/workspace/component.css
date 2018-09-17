@@ -165,3 +165,21 @@ app-workspace-nav-bar {
   padding-right: 5%;
 }
 
+.action-item {
+  text-align: left;
+  color: #4A4A4A;
+  fill: none;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  background-color: transparent;
+}
+
+.action-item.disabled {
+  color: #AAAFB4;
+  cursor: not-allowed;
+}
+
+.action-item.disabled {
+  outline: none;
+}

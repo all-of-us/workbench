@@ -194,4 +194,46 @@ describe('WorkspaceEditComponent', () => {
         ProfileStubVariables.PROFILE_STUB.freeTierBillingProjectName);
       expect(spy).toHaveBeenCalled();
     })));
+
+  it('should not create a workspace without description and fill later checkbox not selected',
+      fakeAsync(() => {
+        spyOn(TestBed.get(Router), 'navigate');
+        workspacesService.workspaces = [];
+        setupComponent(WorkspaceEditMode.Create);
+
+        testComponent.workspace.namespace = 'foo';
+        testComponent.workspace.name = 'created';
+        testComponent.workspace.id = 'created';
+        testComponent.workspace.description = '';
+        testComponent.fillDetailsLater = false;
+        fixture.detectChanges();
+
+        fixture.debugElement.query(By.css('.add-button'))
+            .triggerEventHandler('click', null);
+        fixture.detectChanges();
+        tick();
+        expect(workspacesService.workspaces.length).toBe(0);
+      }));
+
+  it('should create a workspace without description and fill later checkbox selected',
+      fakeAsync(() => {
+        spyOn(TestBed.get(Router), 'navigate');
+        workspacesService.workspaces = [];
+        setupComponent(WorkspaceEditMode.Create);
+
+        testComponent.workspace.namespace = 'foo';
+        testComponent.workspace.name = 'created';
+        testComponent.workspace.id = 'created';
+        testComponent.workspace.description = '';
+        testComponent.fillDetailsLater = true;
+        fixture.detectChanges();
+
+        fixture.debugElement.query(By.css('.add-button'))
+            .triggerEventHandler('click', null);
+        fixture.detectChanges();
+        tick();
+        expect(workspacesService.workspaces.length).toBe(1);
+        expect(workspacesService.workspaces[0].name).toBe('created');
+        expect(workspacesService.workspaces[0].description).toBe('');
+      }));
 });

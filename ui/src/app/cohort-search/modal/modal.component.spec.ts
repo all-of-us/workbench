@@ -7,6 +7,7 @@ import {fromJS, Map} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {AttributesPageComponent} from '../attributes-page/attributes-page.component';
+import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
 import {DemographicsComponent} from '../demographics/demographics.component';
 import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
 import {MultiSelectComponent} from '../multi-select/multi-select.component';
@@ -48,6 +49,7 @@ describe('ModalComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         AttributesPageComponent,
+        CodeDropdownComponent,
         DemographicsComponent,
         ModalComponent,
         ModifierPageComponent,

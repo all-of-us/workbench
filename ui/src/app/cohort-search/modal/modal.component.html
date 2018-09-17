@@ -5,7 +5,7 @@
         <div class="col col-sm-8 padding-zero" [ngClass]="{'col col-lg-12': ctype === treeType[treeType.DEMO]}">
           <div class="title-bar">
             <div class="btn-group btn-link">
-              <ng-container *ngIf="ctype !== treeType[treeType.DEMO]">
+              <ng-container *ngIf="(ctype !== treeType[treeType.DEMO])">
                 <button  *ngIf="attributesNode.size === 0"
                   type="button"
                   class="btn tab"
@@ -112,7 +112,6 @@
               </ng-container>
             </ng-container>
           </div>
-
         </div>
       </div>
     </div>

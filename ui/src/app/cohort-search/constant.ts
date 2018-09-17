@@ -1,16 +1,4 @@
-import { Operator, TreeType } from 'generated';
-
-export const CRITERIA_SUBTYPES = {
-  'ATC': 'ATC',
-  'BRAND': 'BRAND',
-  'GEN': 'GEN',
-  'RACE': 'RACE',
-  'ETH': 'ETH',
-  'AGE': 'AGE',
-  'DEC': 'DEC',
-  'BP': 'BP',
-  'LAB': 'LAB'
-};
+import { Operator, TreeSubType, TreeType } from 'generated';
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys',    type: TreeType.SURVEY, children: [], disabled: true },
@@ -19,15 +7,20 @@ export const PROGRAM_TYPES = [
 
 export const DOMAIN_TYPES = [
     { name: 'Demographics', type: TreeType.DEMO },
-    { name: 'Conditions',    type: TreeType.CONDITION, disabled: true },
-    { name: 'Procedures',    type: TreeType.PROCEDURE, disabled: true },
+    { name: 'Conditions',    type: TreeType.CONDITION, codes: [
+        { name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.CM },
+        { name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.ICD10CM}
+      ]
+    },
+    { name: 'Procedures',    type: TreeType.PROCEDURE, codes: [
+        { name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.PROC },
+        { name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.ICD10PCS},
+        { name: 'CPT Codes', type: TreeType.CPT, subtype: null}
+      ] },
     { name: 'Drugs',    type: TreeType.DRUG },
     { name: 'Measurements',    type: TreeType.MEAS },
     { name: 'Visits',    type: TreeType.VISIT, fullTree: true },
-    { name: 'ICD9 Codes',   type: TreeType.ICD9 },
-    { name: 'ICD10 Codes',  type: TreeType.ICD10 },
     // { name: 'PheCodes',     type: 'phecode' },
-    { name: 'CPT Codes',    type: TreeType.CPT },
     // { name: 'Temporal',     type: 'temporal' }
 ];
 

@@ -2,6 +2,7 @@
   <service>public-api</service>
   <runtime>java8</runtime>
   <threadsafe>true</threadsafe>
+  <!-- Deploy complains about this tag, bug BigQuery needs it. -->
   <application>all-of-us-workbench-test</application>
 
   <system-properties>
@@ -10,12 +11,17 @@
 
   <env-variables>
     <env-var name="spring.datasource.driver-class-name" value="${DB_DRIVER}"/>
-    <env-var name="spring.datasource.url" value="${PUBLIC_DB_CONNECTION_STRING}"/>
+    <env-var name="spring.datasource.url" value="${DB_CONNECTION_STRING}"/>
     <env-var name="spring.datasource.username" value="${PUBLIC_DB_USER}"/>
     <env-var name="spring.datasource.password" value="${PUBLIC_DB_PASSWORD}"/>
+
+    <env-var name="cdr.datasource.url" value="${PUBLIC_DB_CONNECTION_STRING}"/>
+    <env-var name="cdr.datasource.username" value="${PUBLIC_DB_USER}"/>
+    <env-var name="cdr.datasource.password" value="${PUBLIC_DB_PASSWORD}"/>
   </env-variables>
 
   <automatic-scaling>
     <min-idle-instances>1</min-idle-instances>
   </automatic-scaling>
 </appengine-web-app>
+

@@ -90,3 +90,4 @@
 
 <app-rename-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveRename)="receiveRename($event)"></app-rename-modal>
 <app-confirm-delete-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
+<app-new-notebook-modal [workspace]="workspace" [existingNotebooks]="notebookList"></app-new-notebook-modal>

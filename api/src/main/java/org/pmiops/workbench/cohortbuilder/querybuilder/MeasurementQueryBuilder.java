@@ -28,7 +28,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   private static final String AND = " and ";
   private static final String OR = " or ";
   private static final String MEASUREMENT_SQL_TEMPLATE =
-    "select person_id, measurement_date as entry_date\n" +
+    "select person_id, measurement_date as entry_date, measurement_source_concept_id\n" +
       "from `${projectId}.${dataSetId}.measurement`\n" +
       "where measurement_concept_id = ${conceptId}\n" +
       "${encounterSql}";

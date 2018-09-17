@@ -29,8 +29,12 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortAnnotationsRequest;
+import org.pmiops.workbench.model.CohortAnnotationsResponse;
 import org.pmiops.workbench.model.CohortListResponse;
+import org.pmiops.workbench.model.DataTableSpecification;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -313,6 +317,20 @@ public class CohortsController implements CohortsApiDelegate {
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(
         cohortReview, cohortSpec, conceptIds, request);
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<CdrQuery> getDataTableQuery(String workspaceNamespace, String workspaceId,
+      DataTableSpecification request) {
+    // TODO: implement this
+    return null;
+  }
+
+  @Override
+  public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(String workspaceNamespace,
+      String workspaceId, CohortAnnotationsRequest request) {
+    // TODO: implement this
+    return null;
   }
 
   private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceNamespace,
