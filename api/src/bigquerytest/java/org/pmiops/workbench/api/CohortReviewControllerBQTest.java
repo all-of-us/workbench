@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.fail;
 
@@ -481,12 +482,16 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     workspace.setFirecloudName(NAME);
     workspaceDao.save(workspace);
 
+    Gson gson = new Gson();
+
     cohort = new Cohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
+    cohort.setCriteria(gson.toJson(SearchRequests.males()));
     cohortDao.save(cohort);
 
     CohortReview review = new CohortReview()
       .cdrVersionId(cdrVersion.getCdrVersionId())
+      .matchedParticipantCount(212)
       .cohortId(cohort.getCohortId());
     cohortReviewDao.save(review);
 
