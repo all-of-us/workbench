@@ -98,11 +98,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         } else if (this.selectedTypes === 'Deceased') {
             this.deceasedClicked = false;
         }
-        if (this.noSelection) {
-            if(this.isCancelTimerInitiated) clearTimeout ( this.isCancelTimerInitiated );
+        if (this.noSelection && this.isCancelTimerInitiated) {
+            clearTimeout ( this.isCancelTimerInitiated );
             return;
         }
-        if (this.isCancelTimerInitiated) clearTimeout ( this.isCancelTimerInitiated );
+        if (this.isCancelTimerInitiated) {
+            clearTimeout ( this.isCancelTimerInitiated );
+        }
         this.isCancelTimerInitiated = setTimeout (() => {
             this.actions.requestPreview();
         } , 3000 );
@@ -391,12 +393,12 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         this.ageClicked = true;
         if (!this.tesetNode) {
             this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent:true});
-            setTimeout(()=> {
-                this.actions.addParameter(this.tesetNode);
+            setTimeout (()=> {
+                this.actions.addParameter (this.tesetNode);
                 this.actions.requestPreview();
             },500)
         } else {
-            this.actions.addParameter(this.tesetNode);
+            this.actions.addParameter (this.tesetNode);
             this.actions.requestPreview();
         }
     }

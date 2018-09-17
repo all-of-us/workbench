@@ -60,7 +60,9 @@ export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
     select(opt) {
         this.selectedOption.selected[opt.get('parameterId')] = opt.get('parameterId');
         this.actions.addParameter(opt);
-        if(this.isTimerInitial) clearTimeout ( this.isTimerInitial );
+        if (this.isTimerInitial) {
+            clearTimeout ( this.isTimerInitial );
+        }
         this.isTimerInitial = setTimeout (() => {
             this.actions.requestPreview();
         } , 2000 );
