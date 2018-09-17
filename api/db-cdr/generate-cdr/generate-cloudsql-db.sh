@@ -12,7 +12,6 @@ USAGE="./generate-cdr/generate-cloudsql-db.sh --project <PROJECT> --instance <IN
 --bucket <BUCKET>"
 
 while [ $# -gt 0 ]; do
-  echo "1 is $1"
   case "$1" in
     --project) PROJECT=$2; shift 2;;
     --instance) INSTANCE=$2; shift 2;;
@@ -40,7 +39,6 @@ fi
 
 if [ -z "${BUCKET}" ]
 then
-  #echo "Usage: $USAGE"
   exit 1
 fi
 
@@ -68,8 +66,8 @@ else
 fi
 
 # Import Sql dump and data in bucket to cloudsql
-if ./generate-cdr/cloudsql-import-bucket.sh --project $PROJECT --instance $INSTANCE --bucket $BUCKET \
-    --database $DATABASE
+if ./generate-cdr/cloudsql-import.sh --project $PROJECT --instance $INSTANCE --bucket $BUCKET \
+    --database $DATABASE --create-db-sql-file $DATABASE.sql
 then
   echo "Success"
 else
@@ -79,5 +77,3 @@ fi
 stopDate=$(date)
 echo "Start $startDate Stop: $stopDate"
 echo $(date) " Finished generate-clousdsql-db "
-
-exit 0

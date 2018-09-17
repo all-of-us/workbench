@@ -649,7 +649,7 @@ end
 Common.register_command({
   :invocation => "make-bq-denormalized-tables",
   :description => "make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET>
-Generates big query denormalized tables. Used by cohort reviewer. Must be run once when a new cdr is released",
+Generates big query denormalized tables. Used by cohort builder. Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_denormalized_tables(*args) }
 })
 def generate_cdr_counts(*args)
