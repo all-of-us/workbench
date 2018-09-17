@@ -15,8 +15,8 @@ import {
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
 
-let minAge = 18;
-let maxAge = 120;
+const minAge = 18;
+const maxAge = 120;
 
 /*
  * Sorts a plain JS array of plain JS objects first by a 'count' key and then
@@ -92,17 +92,17 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         private ngRedux: NgRedux<CohortSearchState>
     ) {}
 
-    ngOnChanges(){
+    ngOnChanges() {
         if (this.selectedTypes === 'Age') {
             this.ageClicked = false;
         } else if (this.selectedTypes === 'Deceased') {
             this.deceasedClicked = false;
         }
-        if(this.noSelection) {
-            if(this.isCancelTimerInitiated) clearTimeout( this.isCancelTimerInitiated )
+        if (this.noSelection) {
+            if(this.isCancelTimerInitiated) clearTimeout ( this.isCancelTimerInitiated );
             return;
         }
-        if(this.isCancelTimerInitiated) clearTimeout( this.isCancelTimerInitiated )
+        if (this.isCancelTimerInitiated) clearTimeout ( this.isCancelTimerInitiated );
         this.isCancelTimerInitiated = setTimeout (() => {
             this.actions.requestPreview();
         } , 3000 );
@@ -162,7 +162,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             TreeSubType[TreeSubType.RACE],
             TreeSubType[TreeSubType.ETH]
         ].map(code => {
-            this.subscription.add(this.ngRedux.select(demoCriteriaChildren(TreeType[TreeType.DEMO], code))
+            this.subscription.add(this.ngRedux.select
+                (demoCriteriaChildren(TreeType[TreeType.DEMO], code))
                 .subscribe(options => {
                     if (options.size) {
                         this.loadOptions(options, code);
@@ -170,7 +171,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
                         this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
                             .subscribe(response => {
                                 const items = response.items
-                                    .filter(item => item.parentId !== 0 || code === TreeSubType[TreeSubType.DEC]);
+                                    .filter(item => item.parentId !== 0
+                                        || code === TreeSubType[TreeSubType.DEC]);
                                 items.sort(sortByCountThenName);
                                 const nodes = fromJS(items).map(node => {
                                     if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
@@ -387,10 +389,9 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
     getAgeValue() {
         this.ageClicked = true;
-        if(!this.tesetNode){
-            this.ageRange.updateValueAndValidity({onlySelf: false, emitEvent:true});
-            setTimeout(()=>{
-                console.log(this.tesetNode);
+        if (!this.tesetNode) {
+            this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent:true});
+            setTimeout(()=> {
                 this.actions.addParameter(this.tesetNode);
                 this.actions.requestPreview();
             },500)
