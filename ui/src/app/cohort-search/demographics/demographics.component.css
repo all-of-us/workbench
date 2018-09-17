@@ -196,3 +196,9 @@ label[for="deceased"] {
   opacity: 0.4;
   pointer-events: none;
 }
+
+.calculate-button {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262262;
+}

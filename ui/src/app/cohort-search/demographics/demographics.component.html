@@ -132,8 +132,8 @@
        <span class="spinner spinner-md">
     </span>
     </div>
-    <div class="col-lg-2 " *ngIf="preview.get('requesting')">
-      Calculate
+    <div class="col-lg-2 calculate-button" *ngIf="preview.get('requesting')">
+      Calculating ...
     </div>
     <ng-container *ngIf="!preview.get('requesting')">
       <div class="col-lg-6 text-padding" *ngIf="preview.get('count') >= 0">
