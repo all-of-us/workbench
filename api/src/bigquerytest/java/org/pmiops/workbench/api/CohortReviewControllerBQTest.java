@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.gson.Gson;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.After;
 import org.junit.Before;
@@ -8,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -32,6 +34,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +51,14 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.fail;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
-@ComponentScan(basePackages = "org.pmiops.workbench.cohortreview.*")
+@Import({TestJpaConfig.class,QueryBuilderFactory.class, BigQueryService.class,
+  ParticipantCounter.class, DomainLookupService.class, CohortQueryBuilder.class})
+@ComponentScan(basePackages = {"org.pmiops.workbench.cohortreview.*","org.pmiops.workbench.cohortbuilder.*"})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private static final String NAMESPACE = "aou-test";
@@ -151,7 +156,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       "p_observation",
       "p_measurement",
       "p_drug",
-      "p_physical_measure"
+      "p_physical_measure",
+      "person",
+      "measurement",
+      "condition_occurrence",
+      "procedure_occurrence",
+      "drug_exposure",
+      "concept",
+      "criteria"
     );
   }
 
@@ -470,12 +482,16 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     workspace.setFirecloudName(NAME);
     workspaceDao.save(workspace);
 
+    Gson gson = new Gson();
+
     cohort = new Cohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
+    cohort.setCriteria(gson.toJson(SearchRequests.males()));
     cohortDao.save(cohort);
 
     CohortReview review = new CohortReview()
       .cdrVersionId(cdrVersion.getCdrVersionId())
+      .matchedParticipantCount(212)
       .cohortId(cohort.getCohortId());
     cohortReviewDao.save(review);
 
@@ -1217,6 +1233,109 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       assertThat(bre.getMessage())
         .isEqualTo("Please provide a chart limit between 1 and 20.");
     }
+  }
+
+  @Test
+  public void getCohortChartDataBadLimit() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    try {
+      controller
+        .getCohortChartData(
+          NAMESPACE,
+          NAME,
+          cohort.getCohortId(),
+          cdrVersion.getCdrVersionId(),
+          DomainType.CONDITION.name(),
+          -1);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertThat(bre.getMessage())
+        .isEqualTo("Please provide a chart limit between 1 and 20.");
+    }
+  }
+
+  @Test
+  public void getCohortChartDataBadLimitOverHundred() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    try {
+      controller
+        .getCohortChartData(
+          NAMESPACE,
+          NAME,
+          cohort.getCohortId(),
+          cdrVersion.getCdrVersionId(),
+          DomainType.CONDITION.name(),
+          101);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertThat(bre.getMessage())
+        .isEqualTo("Please provide a chart limit between 1 and 20.");
+    }
+  }
+
+  @Test
+  public void getCohortChartDataLab() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    CohortChartDataListResponse response = controller.getCohortChartData(NAMESPACE,
+      NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      DomainType.LAB.name(),
+      10).getBody();
+    assertEquals(3, response.getItems().size());
+    assertEquals(new CohortChartData().name("name9").conceptId(9L).count(11L), response.getItems().get(0));
+    assertEquals(new CohortChartData().name("name10").conceptId(10L).count(3L), response.getItems().get(1));
+    assertEquals(new CohortChartData().name("name3").conceptId(3L).count(1L), response.getItems().get(2));
+  }
+
+  @Test
+  public void getCohortChartDataDrug() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    CohortChartDataListResponse response = controller.getCohortChartData(NAMESPACE,
+      NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      DomainType.DRUG.name(),
+      10).getBody();
+    assertEquals(1, response.getItems().size());
+    assertEquals(new CohortChartData().name("name11").conceptId(11L).count(1L), response.getItems().get(0));
+  }
+
+  @Test
+  public void getCohortChartDataCondition() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    CohortChartDataListResponse response = controller.getCohortChartData(NAMESPACE,
+      NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      DomainType.CONDITION.name(),
+      10).getBody();
+    assertEquals(2, response.getItems().size());
+    assertEquals(new CohortChartData().name("name1").conceptId(1L).count(1L), response.getItems().get(0));
+    assertEquals(new CohortChartData().name("name7").conceptId(7L).count(1L), response.getItems().get(1));
+  }
+
+  @Test
+  public void getCohortChartDataProcedure() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    CohortChartDataListResponse response = controller.getCohortChartData(NAMESPACE,
+      NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId(),
+      DomainType.PROCEDURE.name(),
+      10).getBody();
+    assertEquals(3, response.getItems().size());
+    assertEquals(new CohortChartData().name("name2").conceptId(2L).count(1L), response.getItems().get(0));
+    assertEquals(new CohortChartData().name("name4").conceptId(4L).count(1L), response.getItems().get(1));
+    assertEquals(new CohortChartData().name("name8").conceptId(8L).count(1L), response.getItems().get(2));
   }
 
   private void assertResponse(ParticipantDataListResponse response, PageRequest expectedPageRequest, List<ParticipantData> expectedData, int totalCount) {

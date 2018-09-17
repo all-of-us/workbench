@@ -46,7 +46,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       "from `${projectId}.${dataSetId}.criteria` \n" +
       "where is_group = 0\n" +
       "and is_selectable = 1\n" +
-      "and path = (\n" +
+      "and (path = (\n" +
       "  select CONCAT( path, '.', CAST(id as STRING)) as path\n" +
       "  from `${projectId}.${dataSetId}.criteria`\n" +
       "  where type = ${type}\n" +
@@ -63,7 +63,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       "  and code = ${code}\n" +
       "  and is_group = 1\n" +
       "  and is_selectable = 1\n" +
-      "))\n" +
+      ")))\n" +
       "${encounterSql}";
 
   private static final String UNION_TEMPLATE = " union all\n";
