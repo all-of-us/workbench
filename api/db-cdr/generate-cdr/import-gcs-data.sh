@@ -57,7 +57,7 @@ function mysqlimport_table () {
    file=$2
 
    echo "Mysql importing $file into $db.$table..."
-   mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-optionally-enclosed-by='"' \
+   mysqlimport --fields-terminated-by=, --fields-optionally-enclosed-by='"' \
       --verbose --local -h ${DB_HOST} --port ${DB_PORT} \
       -u root -p${MYSQL_ROOT_PASSWORD} $db $file
 }
@@ -68,7 +68,7 @@ function mysqlimport_concept_synonym_table () {
    file=$2
 
    echo "Mysql importing $file into $db.$table..."
-   mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-optionally-enclosed-by='"' --columns=concept_id,concept_synonym_name,language_concept_id \
+   mysqlimport --fields-terminated-by=, --fields-optionally-enclosed-by='"' --columns=concept_id,concept_synonym_name,language_concept_id \
       --verbose --local -h ${DB_HOST} --port ${DB_PORT} \
       -u root -p${MYSQL_ROOT_PASSWORD} $db $file
 }
