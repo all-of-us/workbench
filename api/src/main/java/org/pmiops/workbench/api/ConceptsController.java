@@ -1,19 +1,17 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableMultimap;
-
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.dao.DbDomainDao;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
+import org.pmiops.workbench.cdr.model.DbDomain;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
@@ -22,6 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 public class ConceptsController implements ConceptsApiDelegate {
@@ -52,6 +54,7 @@ public class ConceptsController implements ConceptsApiDelegate {
 
   private final ConceptService conceptService;
   private final WorkspaceService workspaceService;
+  private final DbDomainDao dbDomainDao;
 
   static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->  new Concept()
@@ -66,20 +69,36 @@ public class ConceptsController implements ConceptsApiDelegate {
             .vocabularyId(concept.getVocabularyId())
             .conceptSynonyms(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
 
+  static final Function<DbDomain, DomainInfo> TO_CLIENT_DOMAIN_INFO =
+      (dbDomain) -> new DomainInfo()
+          .domain(Domain.fromValue(dbDomain.getDomainId().toUpperCase()))
+          .name(dbDomain.getDomainDisplay())
+          .description(dbDomain.getDomainDesc())
+          .allConceptCount(dbDomain.getAllConceptCount())
+          .standardConceptCount(dbDomain.getStandardConceptCount())
+          .participantCount(dbDomain.getParticipantCount());
+
   @Autowired
   ConceptSynonymDao conceptSynonymDao;
 
   @Autowired
-  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,ConceptSynonymDao conceptSynonymDao) {
+  public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,
+                            ConceptSynonymDao conceptSynonymDao, DbDomainDao dbDomainDao) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
     this.conceptSynonymDao = conceptSynonymDao;
+    this.dbDomainDao = dbDomainDao;
   }
 
   @Override
   public ResponseEntity<DomainInfoResponse> getDomainInfo(String workspaceNamespace,
       String workspaceId) {
-    return null;
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    List<DbDomain> domains = dbDomainDao.findDomainFilterTotals();
+    DomainInfoResponse response = new DomainInfoResponse().items(
+        domains.stream().map(TO_CLIENT_DOMAIN_INFO).collect(Collectors.toList()));
+    return ResponseEntity.ok(response);
   }
 
   @Override

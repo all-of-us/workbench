@@ -59,11 +59,12 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
 
     @Query(nativeQuery=true, value="select d.domain_id, d.domain_display, d.domain_desc, d.db_type,\n" +
         "d.domain_route, d.concept_id, COUNT(c.concept_id) as concept_count,\n" +
-        "SUM(c.standard_concept IN ('S', 'C')) as standard_concept_count\n" +
+        "SUM(c.standard_concept IN ('S', 'C')) as standard_concept_count,\n" +
         "dc.count_value participantCount from db_domain d\n" +
-        "join concept c on d.domain_id = c.domain_id\n" +
         "join concept dc on d.concept_id = c.concept_id\n" +
-        "where d.db_type = 'domain_filter' and c.count_value > 0 and c.standard_concept in (?1)\n" +
-        "group by d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.concept_id")
-    List<DbDomain> findDomainFilterTotals(List<String> standardConceptValues);
+        "left outer join concept c on d.domain_id = c.domain_id\n" +
+        "where d.db_type = 'domain_filter'\n" +
+        "group by d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.concept_id\n" +
+        "order by d.domain_id")
+    List<DbDomain> findDomainFilterTotals();
 }
