@@ -57,6 +57,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
+    console.log(this.selections);
     this.subscription = this.open$
       .filter(open => !!open)
       .subscribe(_ => {
