@@ -16,7 +16,7 @@ import {
   subtreeSelected,
   wizardOpen,
 } from '../redux';
-import {stripHtml, subtypeToTitle, typeToTitle} from '../utils';
+import {stripHtml, typeToTitle} from '../utils';
 
 
 @Component({
@@ -79,15 +79,9 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
 
       this.subscription.add(this.selection$
-          .subscribe(selections => {
-              this.selections = {};
-              this.noSelection = selections.size === 0;
-              selections.forEach(selection => {
-                  this.addSelectionToGroup(selection);
-              });
-          })
+          .map(sel => sel.size === 0)
+          .subscribe(sel => this.noSelection = sel)
       );
-
     this.subscription.add(this.attributes$
       .subscribe(node => {
         this.attributesNode = node;
@@ -131,16 +125,6 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
   }
-
-    addSelectionToGroup(selection: any) {
-        const key = selection.get('type') === TreeType[TreeType.DEMO]
-            ? selection.get('subtype') : selection.get('type');
-        if (this.selections[key] && !this.selections[key].includes(selection)) {
-            this.selections[key].push(selection);
-        } else {
-            this.selections[key] = [selection];
-        }
-    }
   setScroll(nodeId: string) {
     let node: any;
     Observable.interval(100)
@@ -192,20 +176,13 @@ export class ModalComponent implements OnInit, OnDestroy {
       ? `Add Selected ${title} Criteria to Cohort`
       : 'No Selection';
   }
-    get showHeader() {
-        return this.itemType === TreeType[TreeType.CONDITION]
-            || this.itemType === TreeType[TreeType.PROCEDURE]
-            || this.itemType === TreeType[TreeType.DEMO];
-    }
+
   get attributeTitle() {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
       : typeToTitle(this.ctype) + ' Detail';
   }
-    selectionHeader(_type: string) {
-        return this.itemType === TreeType[TreeType.DEMO] ?
-            subtypeToTitle(_type) : typeToTitle(_type);
-    }
+
 
     demoPId(e) {
         if (e) {

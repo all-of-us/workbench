@@ -176,10 +176,10 @@
        <span  class="spinner spinner-md">
     </span>
     </div>
-    <div class="col-lg-2 ">
+    <div class="col-lg-2 " *ngIf="preview.get('requesting')">
       Calculate
     </div>
-    <ng-container *ngIf="!(preview.get('requesting'))">
+    <ng-container *ngIf="!(preview.get('requesting')) &&  preview.get('count', 0)">
       <div class="col-lg-6 text-padding">
         <div class="result-text">
           Results

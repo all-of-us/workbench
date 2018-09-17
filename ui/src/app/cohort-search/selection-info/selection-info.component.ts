@@ -14,24 +14,19 @@ export class SelectionInfoComponent {
     @Input() index;
     @Output() demoItems = new EventEmitter<any>();
     @Input() itemsSelected;
-    readonly treeType = TreeType;
+    @Input() paramenterObj;
+    treeType = TreeType;
 
     constructor(private actions: CohortSearchActions) {}
 
 
     remove(): void {
-        if (this.treeType.DEMO) {
-            const paramId = this.parameter.get('parameterId');
-            const type = this._type;
-            this.demoItems.emit({paramId,type});
-            this.actions.removeParameter(paramId);
-
-        } else {
-            const paramId = this.parameter.get('parameterId');
-            const path = this.parameter.get('path');
-            const id = this.parameter.get('id');
-            this.actions.removeParameter(paramId, path, id);
-        }
+        const paramId = this.parameter.get('parameterId');
+        const path = this.parameter.get('path');
+        const id = this.parameter.get('id');
+        const type = this._type;
+        this.actions.removeParameter(paramId, path, id);
+        this.demoItems.emit({paramId,type});
     }
 
     get _type()     { return typeDisplay(this.parameter); }
