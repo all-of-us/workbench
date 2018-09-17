@@ -6,7 +6,7 @@ export class CohortBuilderServiceStub {
 
   constructor() {}
 
-  getChartInfo(): Observable<DemoChartInfoListResponse> {
+  getDemoChartInfo(): Observable<DemoChartInfoListResponse> {
     return Observable.of(<DemoChartInfoListResponse> {items: []});
   }
 }
