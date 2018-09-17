@@ -5,6 +5,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+
+import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,6 +23,7 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
+import org.pmiops.workbench.firecloud.model.SystemStatus;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
@@ -53,6 +56,24 @@ public class FireCloudServiceImplTest {
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
         Providers.of(endUserGroupsApi), Providers.of(workspacesApi), Providers.of(statusApi),
         new FirecloudRetryHandler(new NoBackOffPolicy()));
+  }
+
+  @Test
+  public void testStatus_success() throws ApiException {
+    when(statusApi.status()).thenReturn(new SystemStatus());
+    assertThat(service.getFirecloudStatus()).isTrue();
+  }
+
+  @Test
+  public void testStatus_handleApiException() throws ApiException {
+    when(statusApi.status()).thenThrow(new ApiException(500, null, "{\"ok\": false}"));
+    assertThat(service.getFirecloudStatus()).isFalse();
+  }
+
+  @Test
+  public void testStatus_handleJsonException() throws ApiException {
+    when(statusApi.status()).thenThrow(new ApiException(500, null, "unparseable response"));
+    assertThat(service.getFirecloudStatus()).isFalse();
   }
 
   @Test(expected = NotFoundException.class)
