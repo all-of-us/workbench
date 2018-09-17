@@ -1,17 +1,20 @@
 
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {CohortSearchActions} from '../redux';
 
+import {activeParameterList, CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
+import {TreeType} from 'generated';
+import {NgRedux} from '@angular-redux/store';
 @Component({
   selector: 'crit-multi-select',
   templateUrl: './multi-select.component.html',
   styleUrls: ['./multi-select.component.css']
 })
-export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
+export class MultiSelectComponent implements OnInit, OnDestroy {
     @Input() includeSearchBox = true;
     @Input() options = List();
     @Input() set initialSelection(opts) {
@@ -27,24 +30,28 @@ export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getParamId: any;
     @Output() addedItems = new EventEmitter<boolean>();
     isTimerInitial: any = false;
-    selectedOption =
-        {
-            selected: ['']
-        };
+    selectedOption: any;
     count = 0;
-    constructor(private actions: CohortSearchActions) {}
+    constructor(private actions: CohortSearchActions,
+                private ngRedux: NgRedux<CohortSearchState>) {}
 
-    ngOnChanges() {
-        if (this.getParamId) {
-            this.selectedOption.selected[this.getParamId] = '';
-        }
-    }
 
     ngOnInit() {
         this.subscription = this.filter.valueChanges
             .map(value => value || '')
             .map(value => new RegExp(value, 'i'))
             .subscribe(regex => this.regex = regex);
+
+        this.subscription.add (this.ngRedux
+            .select(activeParameterList)
+            .subscribe(val => {
+                this.selectedOption = [];
+                val.forEach( paramList =>{
+                    if(paramList.get('type') === TreeType.DEMO){
+                        this.selectedOption.push(paramList.get('parameterId'));
+                    }
+                });
+            }));
     }
 
     ngOnDestroy() {
@@ -53,12 +60,10 @@ export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
 
     get filteredOptions() {
         return this.options
-            .filter(opt => this.regex.test(opt.get('name', '')))
-            .filter(opt => !this.selected.has(opt.get('parameterId')));
+            .filter(opt => this.regex.test(opt.get('name', '')));
     }
 
     select(opt) {
-        this.selectedOption.selected[opt.get('parameterId')] = opt.get('parameterId');
         this.actions.addParameter(opt);
         if (this.isTimerInitial) {
             clearTimeout ( this.isTimerInitial );
@@ -72,5 +77,3 @@ export class MultiSelectComponent implements OnInit, OnChanges, OnDestroy {
         this.filter.setValue(null);
     }
 }
-
-

@@ -141,13 +141,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         this.subscription.add (this.ngRedux
             .select(activeParameterList)
             .subscribe(val => {
-                val.forEach( paramList =>{
-                    if(paramList.get('subtype') === TreeSubType.DEC){
+                val.forEach( paramList => {
+                    if (paramList.get('subtype') === TreeSubType.DEC) {
                        this.deceasedClicked = paramList.get('name');
-                    } else if(paramList.get('subtype') === TreeSubType.AGE){
+                    } else if (paramList.get('subtype') === TreeSubType.AGE) {
                        this.ageClicked = paramList.get('name');
                     }
-                })
+                });
             }));
     }
 
