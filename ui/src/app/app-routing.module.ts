@@ -173,13 +173,15 @@ const routes: Routes = [
         path: 'workspaces/:ns/:wsid/notebooks/create',
         component: NotebookRedirectComponent,
         data: {
-          title: 'Creating a new Notebook'
+          title: 'Creating a new Notebook',
+          creating: true
         }
       }, {
         path: 'workspaces/:ns/:wsid/notebooks/:nbName',
         component: NotebookRedirectComponent,
         data: {
-          title: 'Opening a Notebook'
+          title: 'Opening a Notebook',
+          creating: false
         }
       }
     ]

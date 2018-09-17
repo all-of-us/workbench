@@ -53,26 +53,49 @@ parameters:
 
 paths:
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/getDataTableQuery:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
     post:
       tags:
         - cohorts
-      description: Materializes a cohort for a given CDR version to specified output
-      operationId: "materializeCohort"
+      description: >
+        Translates a data table specification into a SQL query to run against the CDR.
+      operationId: "getDataTableQuery"
       parameters:
-       - in: body
-         name: request
-         description: cohort materialization request
-         schema:
-           $ref: "#/definitions/MaterializeCohortRequest"
+        - in: body
+          name: request
+          description: a query specification for a data table
+          schema:
+            $ref: "#/definitions/DataTableSpecification"
       responses:
         200:
-          description: The results of materializing the cohort
+          description: the query to run against the CDR to retrieve the data
           schema:
-            $ref: "#/definitions/MaterializeCohortResponse"
+            $ref: "#/definitions/CdrQuery"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/getCohortAnnotations:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - cohorts
+      description: >
+        Retrieves annotations for a cohort in the workspace
+      operationId: "getCohortAnnotations"
+      parameters:
+        - in: body
+          name: request
+          description: a request indicating what annotations to retrieve
+          schema:
+            $ref: "#/definitions/CohortAnnotationsRequest"
+      responses:
+        200:
+          description: the requested annotations
+          schema:
+            $ref: "#/definitions/CohortAnnotationsResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/searchConcepts:
       post:
@@ -99,17 +122,20 @@ paths:
 
 definitions:
 
-  MaterializeCohortRequest:
+  DataTableSpecification:
     type: object
     properties:
       cohortName:
         description: >
-         The name of a cohort that is to be evaluated. Either this or cohortSpec should be specified
+         The name of a cohort that data should be retrieved for. This and cohortSpec should not
+         be used at the same time. If neither cohortName nor cohortSpec are specified, data will
+         be extracted for everyone in the CDR.
         type: string
       cohortSpec:
         description: >
           JSON representation of a cohort to be evaluated (using the same format used for saved
-          cohorts). Either this or cohortName should be specified
+          cohorts). This and cohortName should not be used at the same time. If neither cohortName
+          nor cohortSpec are specified, data will be extracted for everyone in the CDR.
         type: string
       statusFilter:
         description: >
@@ -124,63 +150,104 @@ definitions:
           The name of a CDR version to use when evaluating the cohort; if none is specified,
           the CDR version currently associated with the workspace will be used
         type: string
-      pageToken:
+      tableQuery:
         description: >
-          Pagination token retrieved from a previous call to materializeCohort; used for
-          retrieving additional pages of results. If this is specified, all other fields on
-          MaterializeCohortRequest apart from pageSize must match the values specified
-          on the request that generated this token.
-        type: string
-      pageSize:
-        description: >
-          Maximum number of results to return in a response. Defaults to 1000.
-        type: integer
-        format: int32
-      fieldSet:
-        description: >
-          Specification defining what data to return for participants in the cohort. Defaults to
-          just participant IDs.
-        $ref: "#/definitions/FieldSet"
-      # TODO: add output information
+            A query specifying how to pull data out of a single table. If tableQuery is not
+            specified, just Person.person_id will be extracted.
+        $ref: "#/definitions/TableQuery"
 
-  MaterializeCohortResponse:
+  CdrQuery:
+    type: object
+    required:
+      - sql
+      - bigqueryProject
+      - bigqueryDataset
+
+    properties:
+      sql:
+        description: Google SQL to use when querying the CDR
+        type: string
+      parameters:
+        description: named query parameters used when executing the above SQL
+        type: array
+        items:
+          $ref: "#/definitions/CdrQueryParameter"
+      bigqueryProject:
+        description: name of the Google Cloud project containing the CDR dataset
+        type: string
+      bigqueryDataset:
+        description: name of the CDR BigQuery dataset
+        type: string
+
+  CdrQueryParameter:
+    type: object
+    required:
+      - name
+    description: A query parameter and value. One (and only one) of the value fields should be set.
+    properties:
+      name:
+        description: the name of the parameter
+        type: string
+      values:
+        description: An array of string values for this parameter. (It may contain just one value.)
+        type: array
+        items:
+          type: string
+      valueDate:
+        description: A date (yyyy-MM-dd) value for this parameter
+        type: string
+      valueDatetime:
+        description: A datetime (yyyy-MM-dd HH:mm:ss zzz) value for this parameter
+        type: string
+      valueNumbers:
+        description: An array of number values for this parameter. (It may contain just one value.)
+        type: array
+        items:
+          type: number
+
+  CohortAnnotationsRequest:
+    type: object
+    required:
+      - cohortName
+    properties:
+      cohortName:
+        description: >
+         The name of a cohort that annotations should be retrieved for.
+        type: string
+      statusFilter:
+        description: >
+          An array of status values; participants with these statuses will have their annotations
+          retrieved. Defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW] --
+          everything but EXCLUDED.
+        type: array
+        items:
+          $ref: "#/definitions/CohortStatus"
+      cdrVersionName:
+        description: >
+          The name of a CDR version to use when retrieving annotations; if none is specified,
+          the CDR version currently associated with the workspace will be used
+        type: string
+      annotationQuery:
+        description: >
+          Specification defining what annotations to retrieve.
+        $ref: "#/definitions/AnnotationQuery"
+
+  CohortAnnotationsResponse:
     type: object
     required:
       - results
     properties:
       results:
         description: >
-          An array of JSON dictionaries representing results to the cohort materialization.
+          An array of JSON dictionaries, with each dictionary representing the requested
+          annotations and/or review status for a single person.
           (In Java, this is represented as Map<String, Object>[]. In Python clients, this is a
           list[object] where each object is a dictionary. In Typescript clients, this is an
-          Array<any> where each object is a dictionary.) Keys in the dictionaries will be the
-          columns selected in the field set provided in the request, and the values will
-          be the values of those columns.
+          Array<any> where each object is a dictionary.) Keys in the dictionaries will be
+          "person_id", "review_status", or the name of an annotation.
         type: array
         items:
           type: object
-      nextPageToken:
-        description: >
-          Pagination token that can be used in a subsequent call to MaterializeCohortRequest to
-          retrieve more results. If not set, there are no more results to retrieve.
-        type: string
-
-  FieldSet:
-    type: object
-    description: >
-      A specification for fields to retrieve about participants in a cohort.
-      Exactly one of the properties below should be specified.
-    properties:
-      tableQuery:
-        description: >
-          A query specifying how to pull data out of a single table. Either this or annotationQuery
-          should be set (not both.)
-        $ref: "#/definitions/TableQuery"
-      annotationQuery:
-        description: >
-          A query specifying how to retrieve annotation values created about participants in a
-          cohort during cohort review. Either this or tableQuery should be set (not both.)
-        $ref: "#/definitions/AnnotationQuery"
 
   TableQuery:
     type: object
