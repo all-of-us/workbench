@@ -1,12 +1,12 @@
 
+import {NgRedux} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {NgRedux} from '@angular-redux/store';
+import {TreeType} from 'generated';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-
 import {activeParameterList, CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
-import {TreeType} from 'generated';
+
 
 @Component({
   selector: 'crit-multi-select',
