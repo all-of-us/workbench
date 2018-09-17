@@ -16,7 +16,7 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
     List<DbDomain> findByDbTypeAndConceptIdNot(String db_type,Long concept_id);
 
         @Query(nativeQuery=true,value="select d.domain_id, d.domain_display, d.domain_desc,\n" +
-                "d.db_type, d.domain_route,d.concept_id, count(c.concept_id) as standard_concept_count\n" +
+                "d.db_type, d.domain_route,d.concept_id, count(distinct c.concept_id) as standard_concept_count\n" +
                 "from db_domain d\n" +
                 "join concept c on d.domain_id = c.domain_id\n" +
                 "left join concept_synonym cs on c.concept_id=cs.concept_id \n" +
@@ -29,7 +29,7 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
                 "union\n" +
                 " \n" +
                 "select d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.domain_route,\n" +
-                "d.concept_id, count(q.concept_id) as standard_concept_count from db_domain d\n" +
+                "d.concept_id, count(distinct q.concept_id) as standard_concept_count from db_domain d\n" +
                 "join achilles_results r on d.concept_id = r.stratum_1\n" +
                 "join concept q on r.stratum_2 = q.concept_id\n" +
                 "left join concept_synonym cs on q.concept_id=cs.concept_id \n" +
