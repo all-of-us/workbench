@@ -3,6 +3,8 @@
 # Imports sql and csv files in a bucket to a cloudsql database.
 # IF --create-db-sql-file is specified, it is ran first to create the database
 # IF --file is specified, it is ran next after create-db-sql-file and then it quits.
+# *Note IF you want to import a single file only, always use the --file option. Even if it is an entire db dump file.
+# Otherwise it will try to import the rest of the files in the bucket.
 # IF --file is NOT specified, it carries on running sql files first, then csv files
 # Table names for csvs are determined from the filename.
 # The files can be gzipped or not. gcloud sql import does not care either way.
@@ -14,8 +16,8 @@ CREATE_DB_SQL_FILE=
 FILE=
 
 # get options
-USAGE="./generate-clousql-cdr/cloudsql-import --project <PROJECT> --instance <INSTANCE> --bucket <BUCKET> \
-[--create-db-sql-file <filename.sql>] [--file <just_import_me_filename>]"
+USAGE="./generate-clousql-cdr/cloudsql-import.sh --project <PROJECT> --instance <INSTANCE> --bucket <BUCKET> \
+--database <database> [--create-db-sql-file <filename.sql>] [--file <just_import_me_filename>]"
 # example account for test : all-of-us-workbench-test@appspot.gserviceaccount.com
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -43,6 +45,12 @@ then
 fi
 
 if [ -z "${BUCKET}" ]
+then
+  echo "Usage: $USAGE"
+  exit 1
+fi
+
+if [ -z "${DATABASE}" ]
 then
   echo "Usage: $USAGE"
   exit 1

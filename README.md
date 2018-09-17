@@ -281,6 +281,10 @@ Description of arguments for these scripts are as follows. See examples below.
 * instance: Cloud Sql Instance
 
 ###Examples:
+#### Generate denormalized tables in the BigQuery cdr only one time when it is released or as needed
+`./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
+##### Result is
+1. The BigQuery dataset has new denormalized tables for cohort builder to work.
 #### Generate count data in BigQuery from a cdr release
 `./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180206 --bin-size 20 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is
@@ -314,14 +318,14 @@ Description of arguments for these scripts are as follows. See examples below.
 1. cdr20180206.sql uploaded to all-of-us-workbench-private-cloudsql
 1. public20180206.sql uploaded to all-of-us-workbench-public-cloudsql
 
-#### Import a dump to cloudsql instance.
-`./project.rb cloudsql-import --project all-of-us-workbench-test --instance workbenchmaindb --sql-dump-file cdr20180206.sql --bucket all-of-us-workbench-private-cloudsql`
+#### Import a dump to cloudsql instance by specifying dump file in the --file option.
+`./project.rb cloudsql-import --project all-of-us-workbench-test --instance workbenchmaindb --bucket all-of-us-workbench-private-cloudsql --database cdr20180206 --file cdr20180206.sql `
 ##### Note a 3GB dump like cdr and public can take an hour or so to finish. You must wait before running another import on same instance (Cloudsql limitation) You can check status of import at the website: https://console.cloud.google.com/sql/instances/workbenchmaindb/operations?project=all-of-us-workbench-test
 ##### Or with this command:
 `gcloud sql operations list --instance [INSTANCE_NAME] --limit 10`
 
 ##### Run again for the public db
-`./project.rb cloudsql-import  --account all-of-us-workbench-test@appspot.gserviceaccount.com --project all-of-us-workbench-test --instance workbenchmaindb --sql-dump-file public20180206.sql --bucket all-of-us-workbench-public-cloudsql`
+`./project.rb cloudsql-import --project all-of-us-workbench-test --instance workbenchmaindb --bucket all-of-us-workbench-public-cloudsql --database public20180206 --file public20180206.sql`
 
 ##### Result
 1) databases are live in cloudsql
