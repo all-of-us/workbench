@@ -1,8 +1,7 @@
-import {Component, EventEmitter, OnChanges, OnInit, Output} from '@angular/core';
+import {Component, OnChanges, OnInit} from '@angular/core';
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
-// import {CRITERIA_TYPES} from '../constant';
-// import {activeItem} from '../redux/store';
+import {cancelWizard} from '../redux/actions';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -32,12 +31,16 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
     this._type = this.node.get('type', '');
   }
 
-  showSearch() {
-    return this.node.get('type') !== TreeType[TreeType.DEMO];
+  get showSearch() {
+    return !this.isEmpty && this.node.get('type') !== TreeType[TreeType.DEMO];
   }
 
-  showDropDown() {
-    return this.codes;
+  get showDropDown() {
+    return !this.isEmpty && this.codes;
+  }
+
+  get isEmpty() {
+    return !this.loading && (!this.children || !this.children.size);
   }
 
   optionChange(flag) {
