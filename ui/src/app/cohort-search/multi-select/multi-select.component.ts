@@ -1,12 +1,13 @@
 
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
+import {NgRedux} from '@angular-redux/store';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {activeParameterList, CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
 import {TreeType} from 'generated';
-import {NgRedux} from '@angular-redux/store';
+
 @Component({
   selector: 'crit-multi-select',
   templateUrl: './multi-select.component.html',
@@ -44,8 +45,8 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
             .select(activeParameterList)
             .subscribe(val => {
                 this.selectedOption = [];
-                val.forEach( paramList =>{
-                    if(paramList.get('type') === TreeType.DEMO){
+                val.forEach( paramList => {
+                    if (paramList.get('type') === TreeType.DEMO) {
                         this.selectedOption.push(paramList.get('parameterId'));
                     }
                 });
