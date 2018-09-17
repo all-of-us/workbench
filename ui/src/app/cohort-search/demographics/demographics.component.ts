@@ -41,8 +41,6 @@ function sortByCountThenName(critA, critB) {
   ]
 })
 export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
-    @Output() cancel = new EventEmitter<boolean>();
-    @Output() finish = new EventEmitter<boolean>();
     @select(activeParameterList) selection$;
     @Input() selectedParamId: any;
     @Input() selectedTypes: any;
@@ -53,7 +51,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     loading = false;
     subscription = new Subscription();
     hasSelection = false;
-    tesetNode: any;
+    selectedNode: any;
     preview = Map();
     ageClicked = false;
 
@@ -140,7 +138,17 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             .map(sel => sel.size === 0)
             .subscribe(sel => this.noSelection = sel)
         );
-
+        this.subscription.add (this.ngRedux
+            .select(activeParameterList)
+            .subscribe(val => {
+                val.forEach( paramList =>{
+                    if(paramList.get('subtype') === TreeSubType.DEC){
+                       this.deceasedClicked = paramList.get('name');
+                    } else if(paramList.get('subtype') === TreeSubType.AGE){
+                       this.ageClicked = paramList.get('name');
+                    }
+                })
+            }));
     }
 
     ngOnDestroy() {
@@ -334,8 +342,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             if (oldNode) {
                 this.actions.removeParameter(oldNode.get('parameterId'));
             }
-
-            this.tesetNode = newNode;
+            this.selectedNode = newNode;
         }));
     }
 
@@ -345,10 +352,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             this.deceased.setValue(true);
         }
         this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
+            console.log(includeDeceased)
             if (!this.deceasedNode) {
+                this.deceasedClicked = includeDeceased;
                 console.warn('No node from which to make parameter for deceased status');
                 return ;
             }
+            this.deceasedClicked = includeDeceased;
             includeDeceased
                 ? this.actions.addParameter(this.deceasedNode)
                 : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
@@ -356,8 +366,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     selectedDeasease() {
-        this.actions.addParameter(this.deceasedNode);
-        this.deceasedClicked = true;
+         this.actions.addParameter(this.deceasedNode);
         this.actions.requestPreview();
 
     }
@@ -375,6 +384,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
     centerAgeCount() {
         this.calculateAgeCount();
+        this.ageClicked = false;
         const slider = <HTMLElement> document.getElementsByClassName('noUi-connect')[0];
         const wrapper = document.getElementById('count-wrapper');
         const count = document.getElementById('age-count');
@@ -392,16 +402,15 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getAgeValue() {
-        this.ageClicked = true;
-        if (!this.tesetNode) {
+        if (!this.selectedNode) {
             this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent: true});
             setTimeout (() => {
-                this.actions.addParameter (this.tesetNode);
-                this.actions.requestPreview();
+                this.actions.addParameter (this.selectedNode);
+                 this.actions.requestPreview();
             }, 500);
         } else {
-            this.actions.addParameter (this.tesetNode);
-            this.actions.requestPreview();
+            this.actions.addParameter (this.selectedNode);
+             this.actions.requestPreview();
         }
     }
 }
