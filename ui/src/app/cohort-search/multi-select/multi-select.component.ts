@@ -5,8 +5,8 @@ import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {activeParameterList, CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
-import {NgRedux} from "@angular-redux/store";
 import {TreeType} from 'generated';
+import {NgRedux} from '@angular-redux/store';
 @Component({
   selector: 'crit-multi-select',
   templateUrl: './multi-select.component.html',
@@ -28,10 +28,7 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
     @Input() getParamId: any;
     @Output() addedItems = new EventEmitter<boolean>();
     isTimerInitial: any = false;
-    selectedOption:any;
-        // {
-        //     selected: ['']
-        // };
+    selectedOption: any;
     count = 0;
     constructor(private actions: CohortSearchActions,
                 private ngRedux: NgRedux<CohortSearchState>) {}
@@ -51,7 +48,7 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
                     if(paramList.get('type') === TreeType.DEMO){
                         this.selectedOption.push(paramList.get('parameterId'));
                     }
-                })
+                });
             }));
     }
 
