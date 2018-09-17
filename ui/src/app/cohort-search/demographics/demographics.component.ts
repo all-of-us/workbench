@@ -178,12 +178,14 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
                                 items.sort(sortByCountThenName);
                                 const nodes = fromJS(items).map(node => {
                                     if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-                                        const paramId = `param${node.get('conceptId', node.get('code'))}`;
+                                        const paramId =
+                                            `param${node.get('conceptId', node.get('code'))}`;
                                         node = node.set('parameterId', paramId);
                                     }
                                     return node;
                                 });
-                                this.actions.loadDemoCriteriaRequestResults(TreeType[TreeType.DEMO], code, nodes);
+                                this.actions.loadDemoCriteriaRequestResults
+                                (TreeType[TreeType.DEMO], code, nodes);
                             });
                     }
                 })
@@ -392,11 +394,11 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     getAgeValue() {
         this.ageClicked = true;
         if (!this.tesetNode) {
-            this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent:true});
-            setTimeout (()=> {
+            this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent: true});
+            setTimeout (() => {
                 this.actions.addParameter (this.tesetNode);
                 this.actions.requestPreview();
-            },500)
+            }, 500);
         } else {
             this.actions.addParameter (this.tesetNode);
             this.actions.requestPreview();
