@@ -26,7 +26,6 @@
           {{ opt.get('name', '') | titlecase }}
           <span *ngIf="opt.get('count')" class="badge badge-info">
             {{ opt.get('count') | number }}
-            {{selectedOption.includes(opt.get('parameterId'))}}
           </span>
         </div>
       </div>
