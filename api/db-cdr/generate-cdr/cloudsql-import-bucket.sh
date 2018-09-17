@@ -108,14 +108,11 @@ done
 csvs=( $(gsutil ls gs://$BUCKET/*.csv* 2> /dev/null || true))
 for gs_file in "${csvs[@]}"
 do
-   # Get table name from file, Table name can only contain letters, numbers, -, _
+   # Get table name from file, It is everything before the first '.'
    filename="${gs_file##*/}"
-   table=
-   if [[ $filename =~ ([[:alnum:]_-]*) ]]
+   table=${filename%%.*}
+   if [[ $table ]]
    then
-        # Strip extension and the 00000* digits in case big tables were dumped into multiple files
-        table=${BASH_REMATCH[1]}
-        table=${table%%[0-9]*}
         echo "Importing file into $table"
         gcloud sql import csv $INSTANCE $gs_file --project $PROJECT --quiet --account $SERVICE_ACCOUNT \
         --database=$DATABASE --table=$table --async

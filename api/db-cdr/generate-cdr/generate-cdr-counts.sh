@@ -86,6 +86,8 @@ PUBLIC_DATASET=public$CDR_VERSION
 startDate=$(date)
 echo $(date) " Starting generate-cdr-counts $startDate"
 
+
+
 ## Make BigQuery cdr
 echo "Making BigQuery cdr dataset"
 if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT \
@@ -132,3 +134,5 @@ fi
 stopDate=$(date)
 echo "Start $startDate Stop: $stopDate"
 echo $(date) " Finished generate-cdr-counts "
+
+exit 0

@@ -285,10 +285,22 @@ Description of arguments for these scripts are as follows. See examples below.
 `./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180206 --bin-size 20 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is
 1. BigQuery datasets:  all-of-us-workbench-test:cdr20180206 and all-of-us-workbench-test:public20180206
-2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20180206/*.csv and public20180206/*.csv with public counts in multiples of bin-size
+2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20180206/*.csv.gz and public20180206/*.csv.gz with public counts in multiples of bin-size
 3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
 3. Note cdr-version can be ''  to make datasets named cdr and public
-#### Generate local mysql databases -- cdr and public for data generated above
+#### Generate cloudsql databases from a bucket without downloading the data
+`# Once for private cdr`
+
+`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database cdr20180913 --bucket all-of-us-workbench-private-cloudsql/cdr20180913`
+
+`# Once for public cdr`
+
+`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database public20180913 --bucket all-of-us-workbench-private-cloudsql/public20180913`
+##### Result is
+1. Databases are live on cloudsql.
+2. TODO - Run .project.rb update-cdr-versions to use them in your environment ??
+
+#### Generate local mysql databases -- cdr and public for data generated above if you need to develop with a full test database
 `./project.rb generate-local-count-dbs --cdr-version 20180206 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is
 1. Local mysql database cdr20180206 fully populated with count data from cdr version 20180206
