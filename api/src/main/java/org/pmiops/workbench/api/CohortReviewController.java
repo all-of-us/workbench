@@ -27,7 +27,6 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Condition;
 import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Drug;
 import org.pmiops.workbench.model.EmptyResponse;
