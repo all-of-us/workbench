@@ -299,8 +299,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
      * using a hash?)
      */
     initAgeRange(selections) {
-        console.log(selections);
-        console.log(this.ageRange);
         const min = this.demoForm.get('ageMin');
         const max = this.demoForm.get('ageMax');
 
@@ -352,7 +350,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             this.deceased.setValue(true);
         }
         this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
-            console.log(includeDeceased)
             if (!this.deceasedNode) {
                 this.deceasedClicked = includeDeceased;
                 console.warn('No node from which to make parameter for deceased status');

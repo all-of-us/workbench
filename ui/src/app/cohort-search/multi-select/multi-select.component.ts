@@ -46,10 +46,8 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
         this.subscription.add (this.ngRedux
             .select(activeParameterList)
             .subscribe(val => {
-                // console.log(val.toJS());
                 this.selectedOption = [];
                 val.forEach( paramList =>{
-                    // console.log(val.toJS());
                     if(paramList.get('type') === TreeType.DEMO){
                         this.selectedOption.push(paramList.get('parameterId'));
                     }
