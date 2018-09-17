@@ -20,18 +20,15 @@
     <div class="dropdown"
          [class.open]="autocompleteUsers.length || autocompleteNoResults">
 
-      <div class="search-box">
-        <clr-icon shape="search"></clr-icon>
-        <input clrInput
-               class="no-border"
-               type="text"
-               name="to-share"
-               [(ngModel)]="searchTerm"
-               placeholder="Find Collaborators"
-               (ngModelChange)="searchTermChangedEvent($event)"
-               #usernameSharingInput [disabled]="!hasPermission"/>
-        <span *ngIf="autocompleteLoading" class="spinner spinner-inline"></span>
-      </div>
+      <clr-icon shape="search"></clr-icon>
+      <input class="no-border"
+             type="text"
+             name="to-share"
+             [(ngModel)]="searchTerm"
+             placeholder="Find Collaborators"
+             (ngModelChange)="searchTermChangedEvent($event)"
+             #usernameSharingInput [disabled]="!hasPermission"/>
+      <span *ngIf="autocompleteLoading" class="spinner spinner-inline"></span>
 
       <div *ngIf="showAutocompleteNoResults" class="dropdown-menu">
         <div class="dropdown-item disabled">
@@ -70,7 +67,8 @@
         </div>
         <div>
           <clr-dropdown>
-            <button type="button" class="btn btn-outline-primary permissions-button" clrDropdownTrigger [disabled]="!hasPermission">
+            <button type="button" class="btn btn-outline-primary permissions-button" clrDropdownTrigger
+                    [disabled]="!hasPermission">
               {{selectedPermission}}
               <clr-icon shape="caret down"></clr-icon>
             </button>
@@ -100,6 +98,7 @@
 
     <!-- Current Collaborators -->
     <div>
+      <h3>Current Collaborators</h3>
       <div *ngFor="let collaboratorUser of workspace.userRoles" class="user" [ngClass]="{'owner' : (collaboratorUser.email === userEmail || !hasPermission)}">
         <div class="collaborator">
           <h5 class="user-name">

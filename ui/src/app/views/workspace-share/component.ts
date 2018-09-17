@@ -167,22 +167,8 @@ export class WorkspaceShareComponent implements OnInit {
         }
       });
       updateList.splice(position, 1);
-      this.workspacesService.shareWorkspace(this.workspace.namespace,
-          this.workspace.id, {
-            workspaceEtag: this.workspace.etag,
-            items: updateList}).subscribe(
-        (resp: ShareWorkspaceResponse) => {
-          this.workspace.etag = resp.workspaceEtag;
-          this.usersLoading = false;
-          this.workspace.userRoles = resp.items;
-        },
-        (error) => {
-          this.usersLoading = false;
-          if (error.status === 409) {
-           this.workspaceUpdateConflictError = true;
-         }
-        }
-      );
+      this.workspace.userRoles = updateList;
+      this.usersLoading = false;
     }
   }
 
