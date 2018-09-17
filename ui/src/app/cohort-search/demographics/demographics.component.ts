@@ -51,7 +51,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     loading = false;
     subscription = new Subscription();
     hasSelection = false;
-    tesetNode: any;
+    selectedNode: any;
     preview = Map();
     ageClicked = false;
 
@@ -342,8 +342,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             if (oldNode) {
                 this.actions.removeParameter(oldNode.get('parameterId'));
             }
-
-            this.tesetNode = newNode;
+            this.selectedNode = newNode;
         }));
     }
 
@@ -403,15 +402,15 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getAgeValue() {
-        if (!this.tesetNode) {
+        if (!this.selectedNode) {
             this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent: true});
             setTimeout (() => {
-                this.actions.addParameter (this.tesetNode);
-                this.actions.requestPreview();
+                this.actions.addParameter (this.selectedNode);
+                 this.actions.requestPreview();
             }, 500);
         } else {
-            this.actions.addParameter (this.tesetNode);
-            this.actions.requestPreview();
+            this.actions.addParameter (this.selectedNode);
+             this.actions.requestPreview();
         }
     }
 }
