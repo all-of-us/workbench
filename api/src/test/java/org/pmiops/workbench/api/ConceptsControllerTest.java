@@ -16,7 +16,9 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.dao.DbDomainDao;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
+import org.pmiops.workbench.cdr.model.DbDomain;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -30,6 +32,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -54,6 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ConceptsControllerTest {
+
 
   private static final Concept CLIENT_CONCEPT_1 = new Concept()
           .conceptId(123L)
@@ -138,6 +142,45 @@ public class ConceptsControllerTest {
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_6 =
           makeConcept(CLIENT_CONCEPT_6);
 
+  private static final DbDomain MEASUREMENT_DOMAIN = new DbDomain()
+      .domainId("Measurement")
+      .domainDisplay("Measurement!")
+      .domainDesc("Measurements")
+      .domainRoute("m")
+      .conceptId(CONCEPT_1.getConceptId())
+      .dbType("domain_filter");
+
+  private static final DbDomain CONDITION_DOMAIN = new DbDomain()
+      .domainId("Condition")
+      .domainDisplay("Condition!")
+      .domainDesc("Conditions!")
+      .domainRoute("c")
+      .conceptId(CONCEPT_2.getConceptId())
+      .dbType("domain_filter");
+
+  private static final DbDomain PROCEDURE_DOMAIN = new DbDomain()
+      .domainId("Procedure")
+      .domainDisplay("Procedure!!!")
+      .domainDesc("Procedures!!!")
+      .domainRoute("p")
+      .conceptId(CONCEPT_3.getConceptId())
+      .dbType("domain_filter");
+
+  private static final DbDomain DRUG_DOMAIN = new DbDomain()
+      .domainId("Drug")
+      .domainDisplay("Drug!")
+      .domainDesc("Drugs!")
+      .domainRoute("d")
+      .conceptId(CONCEPT_4.getConceptId())
+      .dbType("domain_filter");
+
+  private static final DbDomain OTHER_DOMAIN = new DbDomain()
+      .domainId("Other")
+      .domainDisplay("Other!")
+      .domainDesc("Others!")
+      .domainRoute("o")
+      .conceptId(CONCEPT_5.getConceptId())
+      .dbType("other");
 
   @TestConfiguration
   @Import({
@@ -164,6 +207,8 @@ public class ConceptsControllerTest {
   @Autowired
   private CdrVersionDao cdrVersionDao;
   @Autowired
+  private DbDomainDao dbDomainDao;
+  @Autowired
   FireCloudService fireCloudService;
 
   @PersistenceContext
@@ -177,7 +222,7 @@ public class ConceptsControllerTest {
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
     ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
-    conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao);
+    conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao, dbDomainDao);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -200,6 +245,7 @@ public class ConceptsControllerTest {
         .thenReturn(fcResponse);
   }
 
+  /*
   @Test(expected = BadRequestException.class)
   public void testSearchConceptsBlankQuery() throws Exception {
     assertResults(
@@ -437,6 +483,44 @@ public class ConceptsControllerTest {
             new SearchConceptsRequest().query("con").maxResults(1001)), CLIENT_CONCEPT_2,
         CLIENT_CONCEPT_1);
   }
+*/
+  @Test
+  public void testGetDomainInfo() throws Exception {
+    saveConcepts();
+    saveDbDomains();
+    assertThat(conceptDao.findAll()).containsExactly();
+    List<DomainInfo> domainInfos = conceptsController.getDomainInfo("ns", "name")
+        .getBody().getItems();
+    assertThat(domainInfos).containsExactly(
+        new DomainInfo()
+            .domain(Domain.CONDITION)
+            .name("Condition!")
+            .description("Conditions!")
+            .participantCount(CONCEPT_2.getCountValue())
+            .allConceptCount(4L)
+            .standardConceptCount(2L),
+        new DomainInfo()
+            .domain(Domain.DRUG)
+            .name("Drug!")
+            .description("Drugs!")
+            .participantCount(CONCEPT_4.getCountValue())
+            .allConceptCount(0L)
+            .standardConceptCount(0L),
+        new DomainInfo()
+            .domain(Domain.MEASUREMENT)
+            .name("Measurement!")
+            .description("Measurements!!!")
+            .participantCount(CONCEPT_1.getCountValue())
+            .allConceptCount(1L)
+            .standardConceptCount(0L),
+        new DomainInfo()
+            .domain(Domain.PROCEDURE)
+            .name("Procedure!!!")
+            .description("Procedures!!!")
+            .participantCount(CONCEPT_3.getCountValue())
+            .allConceptCount(0L)
+            .standardConceptCount(0L)).inOrder();
+  }
 
   static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
     org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
@@ -461,6 +545,14 @@ public class ConceptsControllerTest {
     conceptDao.save(CONCEPT_4);
     conceptDao.save(CONCEPT_5);
     conceptDao.save(CONCEPT_6);
+  }
+
+  private void saveDbDomains() {
+    dbDomainDao.save(MEASUREMENT_DOMAIN);
+    dbDomainDao.save(PROCEDURE_DOMAIN);
+    dbDomainDao.save(CONDITION_DOMAIN);
+    dbDomainDao.save(DRUG_DOMAIN);
+    dbDomainDao.save(OTHER_DOMAIN);
   }
 
   private void assertResults(ResponseEntity<ConceptListResponse> response,
