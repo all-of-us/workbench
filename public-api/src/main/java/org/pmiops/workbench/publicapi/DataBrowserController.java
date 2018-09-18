@@ -1,5 +1,6 @@
 package org.pmiops.workbench.publicapi;
 
+import com.google.common.base.Strings;
 import org.pmiops.workbench.cdr.dao.*;
 import org.pmiops.workbench.cdr.model.*;
 import org.pmiops.workbench.model.ConceptListResponse;
@@ -420,36 +421,21 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getGenderAnalysis(){
         AchillesAnalysis genderAnalysis = achillesAnalysisDao.findAnalysisById(GENDER_ANALYSIS);
-        for(AchillesResult ar: genderAnalysis.getResults()){
-            String analysisStratumName =ar.getAnalysisStratumName();
-            if (analysisStratumName == null || analysisStratumName.equals("")) {
-                ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum1()));
-            }
-        }
+        addGenderStratum(genderAnalysis);
         return ResponseEntity.ok(TO_CLIENT_ANALYSIS.apply(genderAnalysis));
     }
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getRaceAnalysis(){
         AchillesAnalysis raceAnalysis = achillesAnalysisDao.findAnalysisById(RACE_ANALYSIS);
-        for(AchillesResult ar: raceAnalysis.getResults()){
-            String analysisStratumName =ar.getAnalysisStratumName();
-            if (analysisStratumName == null || analysisStratumName.equals("")) {
-                ar.setAnalysisStratumName(QuestionConcept.raceStratumNameMap.get(ar.getStratum1()));
-            }
-        }
+        addRaceStratum(raceAnalysis);
         return ResponseEntity.ok(TO_CLIENT_ANALYSIS.apply(raceAnalysis));
     }
 
     @Override
     public ResponseEntity<org.pmiops.workbench.model.Analysis> getEthnicityAnalysis(){
         AchillesAnalysis ethnicityAnalysis = achillesAnalysisDao.findAnalysisById(ETHNICITY_ANALYSIS);
-        for(AchillesResult ar: ethnicityAnalysis.getResults()){
-            String analysisStratumName =ar.getAnalysisStratumName();
-            if (analysisStratumName == null || analysisStratumName.equals("")) {
-                ar.setAnalysisStratumName(QuestionConcept.ethnicityStratumNameMap.get(ar.getStratum1()));
-            }
-        }
+        addEthnicityStratum(ethnicityAnalysis);
         return ResponseEntity.ok(TO_CLIENT_ANALYSIS.apply(ethnicityAnalysis));
     }
 
@@ -527,125 +513,24 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
                 aa.setUnitName(unitName);
                 if(analysisId == GENDER_ANALYSIS_ID){
-                    for(AchillesResult ar: aa.getResults()){
-                        String analysisStratumName =ar.getAnalysisStratumName();
-                        if (analysisStratumName == null || analysisStratumName.equals("")) {
-                            ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
-                        }
-                    }
+                    addGenderStratum(aa);
                     conceptAnalysis.setGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }else if(analysisId == AGE_ANALYSIS_ID){
-                    Set<String> uniqueAgeDeciles = new TreeSet<String>();
-                    for(AchillesResult ar: aa.getResults()){
-                        String analysisStratumName=ar.getAnalysisStratumName();
-                        uniqueAgeDeciles.add(ar.getStratum2());
-                        if (analysisStratumName == null || analysisStratumName.equals("")) {
-                            ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
-                        }
-                    }
-                    if(uniqueAgeDeciles.size() < 7){
-                        Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] {"2", "3", "4", "5", "6", "7", "8"}));
-                        completeAgeDeciles.removeAll(uniqueAgeDeciles);
-                        for(String missingAgeDecile: completeAgeDeciles){
-                            AchillesResult missingResult = new AchillesResult();
-                            missingResult.setAnalysisId(AGE_ANALYSIS_ID);
-                            missingResult.setStratum1(conceptId);
-                            missingResult.setStratum2(missingAgeDecile);
-                            missingResult.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(missingAgeDecile));
-                            missingResult.setCountValue(0L);
-                            missingResult.setSourceCountValue(0L);
-                            aa.getResults().add(missingResult);
-                        }
-                    }
+                    addAgeStratum(aa, conceptId);
                     conceptAnalysis.setAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }else if(analysisId == RACE_ANALYSIS_ID){
-                    for(AchillesResult ar: aa.getResults()){
-                        String analysisStratumName=ar.getAnalysisStratumName();
-                        if (analysisStratumName == null || analysisStratumName.equals("")) {
-                            ar.setAnalysisStratumName(QuestionConcept.raceStratumNameMap.get(ar.getStratum2()));
-                        }
-                    }
+                    addRaceStratum(aa);
                     conceptAnalysis.setRaceAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }else if(analysisId == ETHNICITY_ANALYSIS_ID){
-                    for(AchillesResult ar: aa.getResults()){
-                        String analysisStratumName=ar.getAnalysisStratumName();
-                        if (analysisStratumName == null || analysisStratumName.equals("")) {
-                            ar.setAnalysisStratumName(QuestionConcept.ethnicityStratumNameMap.get(ar.getStratum2()));
-                        }
-                    }
+                    addEthnicityStratum(aa);
                     conceptAnalysis.setEthnicityAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }else if(analysisId == MEASUREMENT_GENDER_ANALYSIS_ID){
-
                     isMeasurement = true;
-
-                    Float male_bin_min = null;
-                    Float male_bin_max = null;
-
-                    Float female_bin_min = null;
-                    Float female_bin_max = null;
-
-                    if(!unitName.equals("unknown")){
-                        for(AchillesResult achillesResult: aa.getResults()){
-                            if(Long.valueOf(achillesResult.getStratum2()) == MALE){
-                                if((achillesResult.getStratum3() != null && !achillesResult.getStratum3().isEmpty()) && (achillesResult.getStratum5() != null && !achillesResult.getStratum5().isEmpty())){
-                                    male_bin_min = Float.valueOf(achillesResult.getStratum3());
-                                    male_bin_max = Float.valueOf(achillesResult.getStratum5());
-                                }
-                            }else if(Long.valueOf(achillesResult.getStratum2()) == FEMALE){
-                                if((achillesResult.getStratum3() != null && !achillesResult.getStratum3().isEmpty()) && (achillesResult.getStratum5() != null && !achillesResult.getStratum5().isEmpty())){
-                                    female_bin_min = Float.valueOf(achillesResult.getStratum3());
-                                    female_bin_max = Float.valueOf(achillesResult.getStratum5());
-                                }
-                            }
-                        }
-                    }
-
-
-                    TreeSet<Float> male_bin_ranges = new TreeSet<Float>();
-                    TreeSet<Float> female_bin_ranges = new TreeSet<Float>();
-
-                    if(male_bin_max != null && male_bin_min != null){
-                        male_bin_ranges = makeBins(male_bin_min, male_bin_max);
-                    }
-
-                    if(female_bin_max != null && female_bin_min != null){
-                        female_bin_ranges = makeBins(female_bin_min, female_bin_max);
-                    }
-
-
-                    for(AchillesResult ar: aa.getResults()){
-                        String analysisStratumName=ar.getAnalysisStratumName();
-                        if(Long.valueOf(ar.getStratum2()) == MALE && male_bin_ranges.contains(Float.parseFloat(ar.getStratum1()))){
-                            male_bin_ranges.remove(Float.parseFloat(ar.getStratum1()));
-                        }else if(Long.valueOf(ar.getStratum2()) == FEMALE && male_bin_ranges.contains(Float.parseFloat(ar.getStratum1()))){
-                            female_bin_ranges.remove(Float.parseFloat(ar.getStratum1()));
-                        }
-                        if (analysisStratumName == null || analysisStratumName.equals("")) {
-                            ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
-                        }
-                    }
-
-                    for(float maleRemaining: male_bin_ranges){
-                        AchillesResult achillesResult = makeAchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(MALE), null, String.valueOf(maleRemaining), null, 0L, 0L);
-                        aa.addResult(achillesResult);
-                    }
-
-                    for(float femaleRemaining: female_bin_ranges){
-                        AchillesResult ar = makeAchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(FEMALE), null, String.valueOf(femaleRemaining), null, 0L, 0L);
-                        aa.addResult(ar);
-                    }
-
+                    processMeasurementGenderAnalysis(aa, conceptId, unitName);
                     conceptAnalysis.setMeasurementValueGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
-
                 }else if(analysisId == MEASUREMENT_AGE_ANALYSIS_ID){
                     isMeasurement = true;
-
-                    for(AchillesResult ar: aa.getResults()){
-                        String analysisStratumName=ar.getAnalysisStratumName();
-                        if (analysisStratumName == null || analysisStratumName.equals("")) {
-                            ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
-                        }
-                    }
+                    addAgeStratum(aa, conceptId);
                     conceptAnalysis.setMeasurementValueAgeAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }
             }
@@ -713,17 +598,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public TreeSet<Float> makeBins(Float min,Float max) {
         TreeSet<Float> bins = new TreeSet<>();
         float bin_width = (max-min)/11;
-        bins.add(bin_width);
-        bins.add(min+bin_width);
-        bins.add(min+2*bin_width);
-        bins.add(min+3*bin_width);
-        bins.add(min+4*bin_width);
-        bins.add(min+5*bin_width);
-        bins.add(min+6*bin_width);
-        bins.add(min+7*bin_width);
-        bins.add(min+8*bin_width);
-        bins.add(min+9*bin_width);
-        bins.add(min+10*bin_width);
+        bins.add(Float.valueOf(String.format("%.2f", min+bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+2*bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+3*bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+4*bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+5*bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+6*bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+7*bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+8*bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+9*bin_width)));
+        bins.add(Float.valueOf(String.format("%.2f", min+10*bin_width)));
         bins.add(max);
         return bins;
     }
@@ -741,5 +625,112 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return achillesResult;
     }
 
+    public void addGenderStratum(AchillesAnalysis aa){
+        for(AchillesResult ar: aa.getResults()){
+            String analysisStratumName =ar.getAnalysisStratumName();
+            if (analysisStratumName == null || analysisStratumName.equals("")) {
+                ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
+            }
+        }
+    }
+
+    public void addAgeStratum(AchillesAnalysis aa, String conceptId){
+        Set<String> uniqueAgeDeciles = new TreeSet<String>();
+        for(AchillesResult ar: aa.getResults()){
+            String analysisStratumName=ar.getAnalysisStratumName();
+            uniqueAgeDeciles.add(ar.getStratum2());
+            if (analysisStratumName == null || analysisStratumName.equals("")) {
+                ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
+            }
+        }
+        if(uniqueAgeDeciles.size() < 7){
+            Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] {"2", "3", "4", "5", "6", "7", "8"}));
+            completeAgeDeciles.removeAll(uniqueAgeDeciles);
+            for(String missingAgeDecile: completeAgeDeciles){
+                AchillesResult missingResult = new AchillesResult();
+                missingResult.setAnalysisId(AGE_ANALYSIS_ID);
+                missingResult.setStratum1(conceptId);
+                missingResult.setStratum2(missingAgeDecile);
+                missingResult.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(missingAgeDecile));
+                missingResult.setCountValue(0L);
+                missingResult.setSourceCountValue(0L);
+                aa.getResults().add(missingResult);
+            }
+        }
+    }
+
+    public void addRaceStratum(AchillesAnalysis aa) {
+        for(AchillesResult ar: aa.getResults()){
+            String analysisStratumName=ar.getAnalysisStratumName();
+            if (analysisStratumName == null || analysisStratumName.equals("")) {
+                   ar.setAnalysisStratumName(QuestionConcept.raceStratumNameMap.get(ar.getStratum2()));
+            }
+        }
+    }
+
+    public void addEthnicityStratum(AchillesAnalysis aa) {
+        for(AchillesResult ar: aa.getResults()){
+            String analysisStratumName=ar.getAnalysisStratumName();
+            if (analysisStratumName == null || analysisStratumName.equals("")) {
+                ar.setAnalysisStratumName(QuestionConcept.raceStratumNameMap.get(ar.getStratum2()));
+            }
+        }
+    }
+
+    public void processMeasurementGenderAnalysis(AchillesAnalysis aa, String conceptId, String unitName) {
+        Float male_bin_min = null;
+        Float male_bin_max = null;
+
+        Float female_bin_min = null;
+        Float female_bin_max = null;
+
+        if(!("unknown".equals(unitName))){
+            for(AchillesResult achillesResult: aa.getResults()){
+                if(Long.valueOf(achillesResult.getStratum2()) == MALE && !Strings.isNullOrEmpty(achillesResult.getStratum3()) && !Strings.isNullOrEmpty(achillesResult.getStratum5())){
+                    male_bin_min = Float.valueOf(achillesResult.getStratum3());
+                    male_bin_max = Float.valueOf(achillesResult.getStratum5());
+                }else if(Long.valueOf(achillesResult.getStratum2()) == FEMALE && Strings.isNullOrEmpty(achillesResult.getStratum3()) && !Strings.isNullOrEmpty(achillesResult.getStratum5())){
+                    female_bin_min = Float.valueOf(achillesResult.getStratum3());
+                    female_bin_max = Float.valueOf(achillesResult.getStratum5());
+                }
+            }
+        }
+
+
+        TreeSet<Float> male_bin_ranges = new TreeSet<Float>();
+        TreeSet<Float> female_bin_ranges = new TreeSet<Float>();
+
+        if(male_bin_max != null && male_bin_min != null){
+            male_bin_ranges = makeBins(male_bin_min, male_bin_max);
+        }
+
+        if(female_bin_max != null && female_bin_min != null){
+            female_bin_ranges = makeBins(female_bin_min, female_bin_max);
+        }
+
+
+        for(AchillesResult ar: aa.getResults()){
+            String analysisStratumName=ar.getAnalysisStratumName();
+            if(Long.valueOf(ar.getStratum2()) == MALE && male_bin_ranges.contains(Float.parseFloat(ar.getStratum4()))){
+                male_bin_ranges.remove(Float.parseFloat(ar.getStratum4()));
+            }else if(Long.valueOf(ar.getStratum2()) == FEMALE && male_bin_ranges.contains(Float.parseFloat(ar.getStratum4()))){
+                female_bin_ranges.remove(Float.parseFloat(ar.getStratum4()));
+            }
+            if (analysisStratumName == null || analysisStratumName.equals("")) {
+                ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
+            }
+        }
+
+        for(float maleRemaining: male_bin_ranges){
+            AchillesResult achillesResult = makeAchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(MALE), null, String.valueOf(maleRemaining), null, 0L, 0L);
+            aa.addResult(achillesResult);
+        }
+
+        for(float femaleRemaining: female_bin_ranges){
+            AchillesResult ar = makeAchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(FEMALE), null, String.valueOf(femaleRemaining), null, 0L, 0L);
+            aa.addResult(ar);
+        }
+
+    }
 
 }
