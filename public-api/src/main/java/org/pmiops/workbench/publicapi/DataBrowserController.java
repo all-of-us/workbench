@@ -605,36 +605,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     TreeSet<Float> female_bin_ranges = new TreeSet<Float>();
 
                     if(male_bin_max != null && male_bin_min != null){
-                        float male_bin_width = (male_bin_max-male_bin_min)/11;
-                        male_bin_ranges.add(male_bin_min);
-                        male_bin_ranges.add(male_bin_min+male_bin_width);
-                        male_bin_ranges.add(male_bin_min+2*male_bin_width);
-                        male_bin_ranges.add(male_bin_min+3*male_bin_width);
-                        male_bin_ranges.add(male_bin_min+4*male_bin_width);
-                        male_bin_ranges.add(male_bin_min+5*male_bin_width);
-                        male_bin_ranges.add(male_bin_min+6*male_bin_width);
-                        male_bin_ranges.add(male_bin_min+7*male_bin_width);
-                        male_bin_ranges.add(male_bin_min+8*male_bin_width);
-                        male_bin_ranges.add(male_bin_min+9*male_bin_width);
-                        male_bin_ranges.add(male_bin_min+10*male_bin_width);
-                        male_bin_ranges.add(male_bin_max);
+                        male_bin_ranges = makeBins(male_bin_min, male_bin_max);
                     }
 
                     if(female_bin_max != null && female_bin_min != null){
-
-                        float female_bin_width = (female_bin_max-female_bin_min)/11;
-                        female_bin_ranges.add(female_bin_min);
-                        female_bin_ranges.add(female_bin_min+female_bin_width);
-                        female_bin_ranges.add(female_bin_min+2*female_bin_width);
-                        female_bin_ranges.add(female_bin_min+3*female_bin_width);
-                        female_bin_ranges.add(female_bin_min+4*female_bin_width);
-                        female_bin_ranges.add(female_bin_min+5*female_bin_width);
-                        female_bin_ranges.add(female_bin_min+6*female_bin_width);
-                        female_bin_ranges.add(female_bin_min+7*female_bin_width);
-                        female_bin_ranges.add(female_bin_min+8*female_bin_width);
-                        female_bin_ranges.add(female_bin_min+9*female_bin_width);
-                        female_bin_ranges.add(female_bin_min+10*female_bin_width);
-                        female_bin_ranges.add(female_bin_max);
+                        female_bin_ranges = makeBins(female_bin_min, female_bin_max);
                     }
 
 
@@ -650,28 +625,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         }
                     }
 
-                    System.out.println(male_bin_ranges);
-                    System.out.println(female_bin_ranges);
-
                     for(float maleRemaining: male_bin_ranges){
-                        AchillesResult achillesResult = new AchillesResult();
-                        achillesResult.setAnalysisId(MEASUREMENT_GENDER_ANALYSIS_ID);
-                        achillesResult.setStratum1(conceptId);
-                        achillesResult.setStratum2(String.valueOf(MALE));
-                        achillesResult.setStratum4(String.valueOf(maleRemaining));
-                        achillesResult.setCountValue(20L);
-                        achillesResult.setSourceCountValue(0L);
+                        AchillesResult achillesResult = makeAchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(MALE), null, String.valueOf(maleRemaining), null, 0L, 0L);
                         aa.addResult(achillesResult);
                     }
 
                     for(float femaleRemaining: female_bin_ranges){
-                        AchillesResult ar = new AchillesResult();
-                        ar.setAnalysisId(MEASUREMENT_GENDER_ANALYSIS_ID);
-                        ar.setStratum1(conceptId);
-                        ar.setStratum2(String.valueOf(FEMALE));
-                        ar.setStratum4(String.valueOf(femaleRemaining));
-                        ar.setCountValue(20L);
-                        ar.setSourceCountValue(0L);
+                        AchillesResult ar = makeAchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(FEMALE), null, String.valueOf(femaleRemaining), null, 0L, 0L);
                         aa.addResult(ar);
                     }
 
@@ -748,6 +708,37 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         DbDomainListResponse resp = new DbDomainListResponse();
         resp.setItems(resultList.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
+    }
+
+    public TreeSet<Float> makeBins(Float min,Float max) {
+        TreeSet<Float> bins = new TreeSet<>();
+        float bin_width = (max-min)/11;
+        bins.add(bin_width);
+        bins.add(min+bin_width);
+        bins.add(min+2*bin_width);
+        bins.add(min+3*bin_width);
+        bins.add(min+4*bin_width);
+        bins.add(min+5*bin_width);
+        bins.add(min+6*bin_width);
+        bins.add(min+7*bin_width);
+        bins.add(min+8*bin_width);
+        bins.add(min+9*bin_width);
+        bins.add(min+10*bin_width);
+        bins.add(max);
+        return bins;
+    }
+
+    public AchillesResult makeAchillesResult(Long analysisId, String stratum1, String stratum2, String stratum3, String stratum4, String stratum5, Long countValue, Long sourceCountValue) {
+        AchillesResult achillesResult = new AchillesResult();
+        achillesResult.setAnalysisId(analysisId);
+        achillesResult.setStratum1(stratum1);
+        achillesResult.setStratum2(stratum2);
+        achillesResult.setStratum3(stratum3);
+        achillesResult.setStratum4(stratum4);
+        achillesResult.setStratum5(stratum5);
+        achillesResult.setCountValue(countValue);
+        achillesResult.setSourceCountValue(sourceCountValue);
+        return achillesResult;
     }
 
 
