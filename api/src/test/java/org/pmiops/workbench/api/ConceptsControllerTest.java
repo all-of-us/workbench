@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.junit.Before;
@@ -145,7 +146,7 @@ public class ConceptsControllerTest {
   private static final DbDomain MEASUREMENT_DOMAIN = new DbDomain()
       .domainId("Measurement")
       .domainDisplay("Measurement!")
-      .domainDesc("Measurements")
+      .domainDesc("Measurements!!!")
       .domainRoute("m")
       .conceptId(CONCEPT_1.getConceptId())
       .dbType("domain_filter");
@@ -488,7 +489,13 @@ public class ConceptsControllerTest {
   public void testGetDomainInfo() throws Exception {
     saveConcepts();
     saveDbDomains();
-    assertThat(conceptDao.findAll()).containsExactly();
+    Logger logger = Logger.getLogger(ConceptsControllerTest.class.getName());
+    for (org.pmiops.workbench.cdr.model.Concept concept : conceptDao.findAll()) {
+      logger.info("CONCEPT = " + concept.getConceptId() + ", " + concept.getDomainId());
+    }
+    for (org.pmiops.workbench.cdr.model.DbDomain dbDomain : dbDomainDao.findAll()) {
+      logger.info("DOMAIN = " + dbDomain.getConceptId() + ", " + dbDomain.getDomainId());
+    }
     List<DomainInfo> domainInfos = conceptsController.getDomainInfo("ns", "name")
         .getBody().getItems();
     assertThat(domainInfos).containsExactly(
@@ -527,7 +534,7 @@ public class ConceptsControllerTest {
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());
     result.setStandardConcept(concept.getStandardConcept() == null ? null :
-        (concept.getStandardConcept() ? "S" : "C"));
+        (concept.getStandardConcept() ? "S" : null));
     result.setConceptCode(concept.getConceptCode());
     result.setConceptClassId(concept.getConceptClassId());
     result.setVocabularyId(concept.getVocabularyId());

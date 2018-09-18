@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
+import javax.persistence.Basic;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -115,13 +116,14 @@ public class DbDomain {
         return this;
     }
 
-    @Transient
+    @Basic(optional = true)
+    @Column(name="all_concept_count", insertable=false, updatable=false)
     public Long getAllConceptCount() {
         return allConceptCount;
     }
 
     public void setAllConceptCount(Long allConceptCount) {
-        this.allConceptCount = allConceptCount;
+        this.allConceptCount = allConceptCount == null ? 0 : allConceptCount;
     }
 
     public DbDomain allConceptCount(Long allConceptCount) {
@@ -129,13 +131,14 @@ public class DbDomain {
         return this;
     }
 
-    @Transient
+    @Basic(optional = true)
+    @Column(name="standard_concept_count", insertable=false, updatable=false)
     public Long getStandardConceptCount() {
         return standardConceptCount;
     }
 
     public void setStandardConceptCount(Long standardConceptCount) {
-        this.standardConceptCount = standardConceptCount;
+        this.standardConceptCount = standardConceptCount == null ? 0 : standardConceptCount;
     }
 
     public DbDomain standardConceptCount(Long standardConceptCount) {
@@ -143,13 +146,14 @@ public class DbDomain {
         return this;
     }
 
-    @Transient
+    @Basic(optional = true)
+    @Column(name="participant_count", insertable=false, updatable=false)
     public Long getParticipantCount(){
         return participantCount;
     }
 
     public void setParticipantCount(Long participantCount){
-        this.participantCount = participantCount;
+        this.participantCount = participantCount == null ? 0 : participantCount;
     }
 
     public DbDomain participantCount(Long participantCount){
