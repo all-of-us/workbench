@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableList;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
@@ -85,13 +86,17 @@ public class FireCloudServiceImpl implements FireCloudService {
     } catch (ApiException e) {
       log.log(Level.WARNING, "Firecloud status check request failed", e);
       String response = e.getResponseBody();
-      JSONObject errorBody = new JSONObject(response);
-      JSONObject subSystemStatus = errorBody.getJSONObject(STATUS_SUBSYSTEMS_KEY);
-      if (subSystemStatus != null) {
-        return systemOkay(subSystemStatus, THURLOE_STATUS_NAME) &&
-            systemOkay(subSystemStatus, SAM_STATUS_NAME) &&
-            systemOkay(subSystemStatus, RAWLS_STATUS_NAME) &&
-            systemOkay(subSystemStatus, GOOGLE_BUCKETS_STATUS_NAME);
+      try {
+        JSONObject errorBody = new JSONObject(response);
+        JSONObject subSystemStatus = errorBody.getJSONObject(STATUS_SUBSYSTEMS_KEY);
+        if (subSystemStatus != null) {
+          return systemOkay(subSystemStatus, THURLOE_STATUS_NAME) &&
+              systemOkay(subSystemStatus, SAM_STATUS_NAME) &&
+              systemOkay(subSystemStatus, RAWLS_STATUS_NAME) &&
+              systemOkay(subSystemStatus, GOOGLE_BUCKETS_STATUS_NAME);
+        }
+      } catch (JSONException ignored) {
+        // noop - FC status has already failed at this point.
       }
       return false;
     }
