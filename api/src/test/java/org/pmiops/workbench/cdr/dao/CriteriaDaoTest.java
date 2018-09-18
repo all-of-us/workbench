@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -40,6 +41,9 @@ public class CriteriaDaoTest {
   @Autowired
   private ConceptRelationshipDao conceptRelationshipDao;
 
+  @Autowired
+  private ConceptSynonymDao conceptSynonymDao;
+
   private Criteria icd9Criteria1;
   private Criteria icd9Criteria2;
   private Criteria demoCriteria1;
@@ -63,7 +67,7 @@ public class CriteriaDaoTest {
   @Before
   public void setUp() {
     icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
-    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, false, true, null);
+    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, false, true, null).conceptId("123");
     parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
     demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
     demoCriteria1a = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "B", "African American", parentDemo.getId(), false, true, null);
@@ -102,12 +106,13 @@ public class CriteriaDaoTest {
     criteriaDao.save(drugCriteriaBrand);
     criteriaDao.save(labCriteria);
 
-    conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
+    conceptDao.save(new Concept().conceptId(123L).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
       new ConceptRelationship().conceptRelationshipId(
-        new ConceptRelationshipId().relationshipId("1").conceptId1(12345L).conceptId2(1L)
+        new ConceptRelationshipId().relationshipId("1").conceptId1(12345L).conceptId2(123L)
       )
     );
+    conceptSynonymDao.save(new ConceptSynonym().conceptId(123).conceptSynonymName("test1mywordTest"));
   }
 
   @After
@@ -191,10 +196,17 @@ public class CriteriaDaoTest {
     assertEquals(1, labs.size());
     assertEquals(labCriteria, labs.get(0));
 
+    //match on synonym
+    labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "myword", null);
+    assertEquals(1, labs.size());
+    assertEquals(labCriteria, labs.get(0));
+
+    //limit
     List<Criteria> cpts = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.CPT.name(), "zzz", 1L);
     assertEquals(1, cpts.size());
     assertEquals(cptCriteria2, cpts.get(0));
 
+    //no limit
     cpts = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.CPT.name(), "zzz", null);
     assertEquals(2, cpts.size());
     assertEquals(cptCriteria2, cpts.get(0));
@@ -214,6 +226,12 @@ public class CriteriaDaoTest {
     assertEquals(1, conditions.size());
     assertEquals(icd9Criteria2, conditions.get(0));
 
+    //match on synonym
+    conditions = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(), "myword", null);
+    assertEquals(1, conditions.size());
+    assertEquals(icd9Criteria2, conditions.get(0));
+
+    //no limit
     conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"00", null);
     assertEquals(4, conditions.size());
@@ -222,6 +240,7 @@ public class CriteriaDaoTest {
     assertEquals(parentIcd9, conditions.get(2));
     assertEquals(childIcd9, conditions.get(3));
 
+    //limit
     conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"00", 2L);
     assertEquals(2, conditions.size());

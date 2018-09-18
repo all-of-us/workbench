@@ -37,8 +37,15 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "code, " +
     "@curType \\:= name as name, " +
     "concept_id " +
-    "from (select * from criteria where type = upper(:type) and " +
-    "(upper(code) like upper(concat('%',:value,'%')) or upper(name) like upper(concat('%',:value,'%'))) ) a, " +
+    "from (select * from criteria " +
+    "where type = upper(:type) " +
+    "and (upper(code) like upper(concat('%',:value,'%')) " +
+    "     or upper(name) like upper(concat('%',:value,'%')) " +
+    "     or concept_id in " +
+    "      (select concept_id " +
+    "         from concept_synonym " +
+    "        where upper(concept_synonym_name) like upper(concat('%',:value,'%'))) " +
+    "    ) ) a, " +
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
@@ -57,8 +64,15 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "code, " +
     "@curType \\:= name as name, " +
     "concept_id " +
-    "from (select * from criteria where type = upper(:type) and subtype = upper(:subtype) and " +
-    "(upper(code) like upper(concat('%',:value,'%')) or upper(name) like upper(concat('%',:value,'%'))) ) a, " +
+    "from (select * from criteria where type = upper(:type) " +
+    "and subtype = upper(:subtype) " +
+    "and (upper(code) like upper(concat('%',:value,'%')) " +
+    "     or upper(name) like upper(concat('%',:value,'%')) " +
+    "     or concept_id in " +
+    "      (select concept_id " +
+    "         from concept_synonym " +
+    "        where upper(concept_synonym_name) like upper(concat('%',:value,'%'))) " +
+    "    ) ) a, " +
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
