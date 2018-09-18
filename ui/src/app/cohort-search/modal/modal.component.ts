@@ -16,7 +16,7 @@ import {
   subtreeSelected,
   wizardOpen,
 } from '../redux';
-import {stripHtml, typeToTitle} from '../utils';
+import {stripHtml, subtypeToTitle, typeToTitle} from '../utils';
 
 
 @Component({
@@ -45,6 +45,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   fullTree: boolean;
   subscription: Subscription;
   attributesNode: Map<any, any> = Map();
+  selections = {};
+  objectKey = Object.keys;
 
   open = false;
   noSelection = true;
@@ -55,6 +57,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
+    console.log(this.selections);
     this.subscription = this.open$
       .filter(open => !!open)
       .subscribe(_ => {
@@ -73,8 +76,13 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
 
     this.subscription.add(this.selection$
-      .map(sel => sel.size === 0)
-      .subscribe(sel => this.noSelection = sel)
+      .subscribe(selections => {
+        this.selections = {};
+        this.noSelection = selections.size === 0;
+        selections.forEach(selection => {
+          this.addSelectionToGroup(selection);
+        });
+      })
     );
 
     this.subscription.add(this.attributes$
@@ -120,6 +128,17 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
   }
+
+  addSelectionToGroup(selection: any) {
+    const key = selection.get('type') === TreeType[TreeType.DEMO]
+      ? selection.get('subtype') : selection.get('type');
+    if (this.selections[key] && !this.selections[key].includes(selection)) {
+      this.selections[key].push(selection);
+    } else {
+      this.selections[key] = [selection];
+    }
+  }
+
   setScroll(nodeId: string) {
     let node: any;
     Observable.interval(100)
@@ -137,6 +156,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   cancel() {
+    this.selections = {};
     this.open = false;
     this.actions.cancelWizard();
   }
@@ -146,6 +166,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   finish() {
+    this.selections = {};
     this.open = false;
     this.actions.finishWizard();
   }
@@ -176,5 +197,15 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
       : typeToTitle(this.ctype) + ' Detail';
+  }
+
+  get showHeader() {
+    return this.itemType === TreeType[TreeType.CONDITION]
+    || this.itemType === TreeType[TreeType.PROCEDURE]
+    || this.itemType === TreeType[TreeType.DEMO];
+  }
+
+  selectionHeader(_type: string) {
+    return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
   }
 }

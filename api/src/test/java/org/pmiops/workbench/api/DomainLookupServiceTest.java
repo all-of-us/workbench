@@ -10,6 +10,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 
 import java.util.ArrayList;
@@ -31,10 +32,12 @@ public class DomainLookupServiceTest {
     public void findCodesForEmptyDomains() throws Exception {
         SearchParameter searchParameter1 = new SearchParameter()
                 .type(TreeType.ICD9.name())
+                .subtype(TreeSubType.CM.name())
                 .value("001")
                 .domain("Condition");
         SearchParameter searchParameter2 = new SearchParameter()
                 .type(TreeType.ICD9.name())
+                .subtype(TreeSubType.CM.name())
                 .value("002")
                 .domain(null);
 
