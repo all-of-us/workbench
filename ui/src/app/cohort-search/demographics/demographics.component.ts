@@ -429,7 +429,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    getSearchResponse(){
+    getSearchResponse() {
         if (this.isCancelTimerInitiated) {
             clearTimeout(this.isCancelTimerInitiated);
         }
@@ -442,8 +442,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
     }
 
-    getItems(flag){
-        if(flag){
+    getItems(flag) {
+        if (flag) {
             this.showCalculateContainer = true;
             this.getSearchResponse();
         } else {
