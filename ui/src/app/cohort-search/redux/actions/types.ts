@@ -1,4 +1,4 @@
-import {ChartInfo, Criteria, Modifier, SearchRequest} from 'generated';
+import {Criteria, DemoChartInfo, Modifier, SearchRequest} from 'generated';
 
 export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
 export const BEGIN_SUBTYPE_CRITERIA_REQUEST = 'BEGIN_SUBTYPE_CRITERIA_REQUEST';
@@ -262,7 +262,7 @@ export interface ActionTypes {
     type: typeof LOAD_CHARTS_RESULTS;
     entityType: string;
     entityId: string;
-    chartData: ChartInfo[];
+    chartData: DemoChartInfo[];
   };
   CANCEL_CHARTS_REQUEST: {
     type: typeof CANCEL_CHARTS_REQUEST;

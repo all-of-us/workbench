@@ -5,7 +5,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
 
-import {ChartInfoListResponse, CohortBuilderService, SearchRequest} from 'generated';
+import {CohortBuilderService, DemoChartInfoListResponse, SearchRequest} from 'generated';
 
 
 @Component({
@@ -26,8 +26,8 @@ export class OverviewPage implements OnInit, OnDestroy {
     const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
     this.subscription = this.state.cohort$
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
-      .switchMap(request => this.chartAPI.getChartInfo(cdrVersionId, request))
-      .map(response => (<ChartInfoListResponse>response).items)
+      .switchMap(request => this.chartAPI.getDemoChartInfo(cdrVersionId, request))
+      .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => this.data = fromJS(data));
   }
 
