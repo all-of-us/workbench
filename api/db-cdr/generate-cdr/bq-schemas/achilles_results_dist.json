@@ -40,9 +40,9 @@
         "type": "INTEGER"
       },
       {
-      "mode": "NULLABLE",
-      "name": "min_value",
-      "type": "float"
+        "mode": "NULLABLE",
+        "name": "min_value",
+        "type": "float"
       },
       {
         "mode": "NULLABLE",

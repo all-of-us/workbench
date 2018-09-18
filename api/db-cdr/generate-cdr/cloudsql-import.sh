@@ -20,6 +20,7 @@ USAGE="./generate-clousql-cdr/cloudsql-import.sh --project <PROJECT> --instance 
 --database <database> [--create-db-sql-file <filename.sql>] [--file <just_import_me_filename>]"
 # example account for test : all-of-us-workbench-test@appspot.gserviceaccount.com
 while [ $# -gt 0 ]; do
+  echo "$1 in 1"
   case "$1" in
     --project) PROJECT=$2; shift 2;;
     --instance) INSTANCE=$2; shift 2;;
@@ -76,18 +77,6 @@ gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R gs://$BUCKET/*
 
 # Create db from sql file if specified
 create_gs_file=gs://
-if [ "${CREATE_DB_SQL_FILE}" ]
-then
-    create_gs_file=$create_gs_file$BUCKET/$CREATE_DB_SQL_FILE
-    echo "Creating cloudsql DB from sql file ${CREATE_DB_SQL_FILE}"
-    gcloud sql import sql $INSTANCE $create_gs_file --project $PROJECT --database=$DATABASE \
-        --account $SERVICE_ACCOUNT --quiet
-    # If above fails let it die as user obviously intended to create the db
-    gsutil mv $create_gs_file gs://$BUCKET/imported_to_cloudsql/
-fi
-
-gs_file=gs://
-# If file, just do that one
 if [ "${CREATE_DB_SQL_FILE}" ]
 then
     create_gs_file=$create_gs_file$BUCKET/$CREATE_DB_SQL_FILE
