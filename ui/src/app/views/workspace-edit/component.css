@@ -5,6 +5,20 @@
   color: #262262;
 }
 
+.cdr-version-dropdown {
+  text-align: left;
+  width: 300px;
+}
+
+.cdr-version-dropdown:disabled {
+  /* Clarity's dropdown and disabled button styles conflict, override here. */
+  cursor: not-allowed;
+}
+
+.cdr-version-item {
+  width: 300px;
+}
+
 .text-label {
   display: block;
   padding: 0 0 0.4rem 0;

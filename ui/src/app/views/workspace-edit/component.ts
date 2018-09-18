@@ -2,12 +2,14 @@ import {Location} from '@angular/common';
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
+import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 
 import {deepCopy, isBlank} from 'app/utils';
 
 import {
+  CdrVersion,
   CloneWorkspaceResponse,
   DataAccessLevel,
   UnderservedPopulationEnum,
@@ -190,11 +192,14 @@ export class WorkspaceEditComponent implements OnInit {
   fillDetailsLater = false;
   hideDetailsLaterOption = false;
   canEditResearchPurpose = true;
+  cdrVersions: CdrVersion[] = [];
+
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
       private workspacesService: WorkspacesService,
       private workspaceStorageService: WorkspaceStorageService,
+      private cdrVersionStorageService: CdrVersionStorageService,
       public profileStorageService: ProfileStorageService,
       private router: Router,
   ) {}
@@ -204,8 +209,7 @@ export class WorkspaceEditComponent implements OnInit {
       name: '',
       description: '',
       dataAccessLevel: DataAccessLevel.Registered,
-      // TODO - please set this properly
-      cdrVersionId: '1',
+      cdrVersionId: '',
       researchPurpose: {
         diseaseFocusedResearch: false,
         methodsDevelopment: false,
@@ -223,10 +227,15 @@ export class WorkspaceEditComponent implements OnInit {
       this.mode = this.route.routeConfig.data.mode;
     }
 
+    this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
+      this.cdrVersions = resp.items;
+      if (this.mode === WorkspaceEditMode.Create) {
+        this.workspace.cdrVersionId = resp.defaultCdrVersionId;
+      }
+    });
     if (this.mode === WorkspaceEditMode.Create || this.mode === WorkspaceEditMode.Clone) {
       // There is a new workspace to be created via this flow.
       this.accessLevel = WorkspaceAccessLevel.OWNER;
-
       this.profileStorageService.profile$.subscribe(profile => {
         this.workspace.namespace = profile.freeTierBillingProjectName;
       });
@@ -254,6 +263,7 @@ export class WorkspaceEditComponent implements OnInit {
     } else if (this.mode === WorkspaceEditMode.Clone) {
       this.workspace.name = 'Clone of ' + wsData.name;
       this.workspace.description = wsData.description;
+      this.workspace.cdrVersionId = wsData.cdrVersionId;
       const fromPurpose = wsData.researchPurpose;
       this.workspace.researchPurpose = {
         ...fromPurpose,
@@ -367,6 +377,14 @@ export class WorkspaceEditComponent implements OnInit {
           // Only expected errors are transient, so allow the user to try again.
           this.resetWorkspaceEditor();
         });
+  }
+
+  getSelectedCdrName(): string {
+    const version = this.cdrVersions.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
+    if (!version) {
+      return '';
+    }
+    return version.name;
   }
 
   get hasPermission(): boolean {

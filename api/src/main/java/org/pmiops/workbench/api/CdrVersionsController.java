@@ -12,6 +12,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.CdrVersionListResponse;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,8 +53,12 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
 
   @Override
   public ResponseEntity<CdrVersionListResponse> getCdrVersions() {
-    List<CdrVersion> cdrVersions = cdrVersionService.findAuthorizedCdrVersions(
-        userProvider.get().getDataAccessLevelEnum());
+    WorkbenchConfig config = workbenchConfigProvider.get();
+    DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
+    if (!config.firecloud.enforceRegistered) {
+      accessLevel = DataAccessLevel.REGISTERED;
+    }
+    List<CdrVersion> cdrVersions = cdrVersionService.findAuthorizedCdrVersions(accessLevel);
     if (cdrVersions.isEmpty()) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }

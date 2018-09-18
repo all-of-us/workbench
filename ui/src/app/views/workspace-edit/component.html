@@ -14,11 +14,28 @@
       </ng-container>
       <div class="required-text">(Required)</div>
     </div>
-    <div class="name-area required-field" [class.validation-error]="nameNotEntered">
+    <div class="name-area required-field" [class.validation-error]="nameNotEntered"
+          style="display: inline-block;">
       <input type="text" class="input name" name="workspace-name" autofocus
              [(ngModel)]="workspace.name" [disabled]="!hasPermission"
              placeholder="Workspace Name">
     </div>
+    <clr-dropdown style="display: inline-block;">
+      <button [disabled]="mode == Mode.Edit"
+          class="btn btn-dropdown cdr-version-dropdown" type="button" clrDropdownTrigger>
+        {{getSelectedCdrName()}}
+        <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <ng-container *ngFor="let version of cdrVersions">
+          <button type="button" clrDropdownItem class="cdr-version-item"
+                  [class.active]="workspace.cdrVersionId === version.cdrVersionId"
+                  (click)="workspace.cdrVersionId = version.cdrVersionId">
+            {{version.name}}
+          </button>
+        </ng-container>
+      </clr-dropdown-menu>
+    </clr-dropdown>
   </div>
   <div>
 
