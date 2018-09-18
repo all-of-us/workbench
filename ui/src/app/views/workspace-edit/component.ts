@@ -387,12 +387,15 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   containsUnderserved(enumValue: UnderservedPopulationEnum): boolean {
-    return this.workspacePopulationDetails.includes(enumValue);
+    return this.workspacePopulationDetails && this.workspacePopulationDetails.includes(enumValue);
   }
 
   switchUnderservedStatus(enumValue: UnderservedPopulationEnum): void {
     if (this.mode === WorkspaceEditMode.Edit) {
       return;
+    }
+    if (!this.workspacePopulationDetails) {
+      this.workspacePopulationDetails = [];
     }
     const positionOfValue = this.workspacePopulationDetails.findIndex(item => item === enumValue);
     if (positionOfValue !== -1) {
@@ -404,6 +407,10 @@ export class WorkspaceEditComponent implements OnInit {
 
   get workspacePopulationDetails() {
     return this.workspace.researchPurpose.underservedPopulationDetails;
+  }
+
+  set workspacePopulationDetails(details) {
+    this.workspace.researchPurpose.underservedPopulationDetails = details;
   }
 
   get isValidWorkspace() {
