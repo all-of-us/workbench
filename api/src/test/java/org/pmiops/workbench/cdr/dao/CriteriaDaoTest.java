@@ -106,12 +106,13 @@ public class CriteriaDaoTest {
     criteriaDao.save(drugCriteriaBrand);
     criteriaDao.save(labCriteria);
 
-    conceptDao.save(new Concept().conceptId(123L).conceptClassId("Ingredient"));
+    conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
       new ConceptRelationship().conceptRelationshipId(
-        new ConceptRelationshipId().relationshipId("1").conceptId1(12345L).conceptId2(123L)
+        new ConceptRelationshipId().relationshipId("1").conceptId1(12345L).conceptId2(1L)
       )
     );
+    conceptDao.save(new Concept().conceptId(123L));
     conceptSynonymDao.save(new ConceptSynonym().conceptId(123).conceptSynonymName("test1mywordTest"));
   }
 
