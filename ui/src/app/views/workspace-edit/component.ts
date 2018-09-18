@@ -189,6 +189,7 @@ export class WorkspaceEditComponent implements OnInit {
   researchPurposeItems = ResearchPurposeItems;
   fillDetailsLater = false;
   hideDetailsLaterOption = false;
+  canEditResearchPurpose = true;
   constructor(
       private locationService: Location,
       private route: ActivatedRoute,
@@ -245,8 +246,10 @@ export class WorkspaceEditComponent implements OnInit {
       this.accessLevel = wsData.accessLevel;
       if (isBlank(this.workspace.description)) {
         this.fillDetailsLater = true;
+        this.canEditResearchPurpose = true;
       } else {
         this.hideDetailsLaterOption = true;
+        this.canEditResearchPurpose = false;
       }
     } else if (this.mode === WorkspaceEditMode.Clone) {
       this.workspace.name = 'Clone of ' + wsData.name;
@@ -384,12 +387,15 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   containsUnderserved(enumValue: UnderservedPopulationEnum): boolean {
-    return this.workspacePopulationDetails.includes(enumValue);
+    return this.workspacePopulationDetails && this.workspacePopulationDetails.includes(enumValue);
   }
 
   switchUnderservedStatus(enumValue: UnderservedPopulationEnum): void {
     if (this.mode === WorkspaceEditMode.Edit) {
       return;
+    }
+    if (!this.workspacePopulationDetails) {
+      this.workspacePopulationDetails = [];
     }
     const positionOfValue = this.workspacePopulationDetails.findIndex(item => item === enumValue);
     if (positionOfValue !== -1) {
@@ -401,6 +407,10 @@ export class WorkspaceEditComponent implements OnInit {
 
   get workspacePopulationDetails() {
     return this.workspace.researchPurpose.underservedPopulationDetails;
+  }
+
+  set workspacePopulationDetails(details) {
+    this.workspace.researchPurpose.underservedPopulationDetails = details;
   }
 
   get isValidWorkspace() {
