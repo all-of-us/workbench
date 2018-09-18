@@ -19,10 +19,13 @@ import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
-import {updateAndTick} from 'testing/test-helpers';
-
-import {WorkspaceAccessLevel, WorkspacesService} from 'generated';
+import {
+  UnderservedPopulationEnum,
+  WorkspaceAccessLevel,
+  WorkspacesService
+} from 'generated';
 
 
 describe('WorkspaceEditComponent', () => {
@@ -236,4 +239,23 @@ describe('WorkspaceEditComponent', () => {
         expect(workspacesService.workspaces[0].name).toBe('created');
         expect(workspacesService.workspaces[0].description).toBe('');
       }));
+
+  it('should allow editing unset underserved population on clone', fakeAsync(() => {
+    spyOn(TestBed.get(Router), 'navigate');
+    setupComponent(WorkspaceEditMode.Clone);
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.underserved-icon')));
+    fixture.detectChanges();
+
+    simulateClick(fixture, de.query(By.css(
+      '.underserved-checkbox[ng-reflect-name="AGE_OLDER_ADULTS"]')));
+    fixture.detectChanges();
+
+    simulateClick(fixture, de.query(By.css('.add-button')));
+    tick();
+
+    expect(workspacesService.workspaces.length).toBe(2);
+    expect(workspacesService.workspaces[1].researchPurpose.underservedPopulationDetails)
+      .toContain(UnderservedPopulationEnum.AGEOLDERADULTS);
+  }));
 });

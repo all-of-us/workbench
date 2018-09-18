@@ -1,16 +1,14 @@
 package org.pmiops.workbench.firecloud;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-
-import com.google.common.collect.ImmutableList;
+import javax.inject.Provider;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Provider;
+
+import com.google.common.collect.ImmutableList;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
@@ -42,6 +40,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<GroupsApi> endUserGroupsApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
+  private final Provider<StatusApi> statusApiProvider;
   private final FirecloudRetryHandler retryHandler;
 
   private static final String MEMBER_ROLE = "member";
@@ -59,7 +58,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<BillingApi> billingApiProvider,
       @Qualifier(FireCloudConfig.ALL_OF_US_GROUPS_API) Provider<GroupsApi> groupsApiProvider,
       @Qualifier(FireCloudConfig.END_USER_GROUPS_API) Provider<GroupsApi> endUserGroupsApiProvider,
-      Provider<WorkspacesApi> workspacesApiProvider,
+      Provider<WorkspacesApi> workspacesApiProvider, Provider<StatusApi> statusApiProvider,
       FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
@@ -67,6 +66,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.groupsApiProvider = groupsApiProvider;
     this.endUserGroupsApiProvider = endUserGroupsApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
+    this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
   }
 
@@ -82,17 +82,21 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public boolean getFirecloudStatus() {
     try {
-      new StatusApi().status();
+      statusApiProvider.get().status();
     } catch (ApiException e) {
       log.log(Level.WARNING, "Firecloud status check request failed", e);
       String response = e.getResponseBody();
-      JSONObject errorBody = new JSONObject(response);
-      JSONObject subSystemStatus = errorBody.getJSONObject(STATUS_SUBSYSTEMS_KEY);
-      if (subSystemStatus != null) {
-        return systemOkay(subSystemStatus, THURLOE_STATUS_NAME) &&
-            systemOkay(subSystemStatus, SAM_STATUS_NAME) &&
-            systemOkay(subSystemStatus, RAWLS_STATUS_NAME) &&
-            systemOkay(subSystemStatus, GOOGLE_BUCKETS_STATUS_NAME);
+      try {
+        JSONObject errorBody = new JSONObject(response);
+        JSONObject subSystemStatus = errorBody.getJSONObject(STATUS_SUBSYSTEMS_KEY);
+        if (subSystemStatus != null) {
+          return systemOkay(subSystemStatus, THURLOE_STATUS_NAME) &&
+              systemOkay(subSystemStatus, SAM_STATUS_NAME) &&
+              systemOkay(subSystemStatus, RAWLS_STATUS_NAME) &&
+              systemOkay(subSystemStatus, GOOGLE_BUCKETS_STATUS_NAME);
+        }
+      } catch (JSONException ignored) {
+        // noop - FC status has already failed at this point.
       }
       return false;
     }
@@ -201,10 +205,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public List<BillingProjectMembership> getBillingProjectMemberships() {
     return retryHandler.run((context) -> profileApiProvider.get().billing());
-  }
-
-  private boolean isTrue(Boolean b) {
-    return b != null && b;
   }
 
   @Override

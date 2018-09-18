@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Rule;
@@ -13,20 +12,16 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.exceptions.ServerUnavailableException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.Enabled;
 import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
-import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.SystemStatus;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
@@ -47,6 +42,8 @@ public class FireCloudServiceImplTest {
   private GroupsApi groupsApi;
   @Mock
   private GroupsApi endUserGroupsApi;
+  @Mock
+  private StatusApi statusApi;
 
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -55,8 +52,26 @@ public class FireCloudServiceImplTest {
   public void setUp() {
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
-        Providers.of(endUserGroupsApi), Providers.of(workspacesApi),
+        Providers.of(endUserGroupsApi), Providers.of(workspacesApi), Providers.of(statusApi),
         new FirecloudRetryHandler(new NoBackOffPolicy()));
+  }
+
+  @Test
+  public void testStatus_success() throws ApiException {
+    when(statusApi.status()).thenReturn(new SystemStatus());
+    assertThat(service.getFirecloudStatus()).isTrue();
+  }
+
+  @Test
+  public void testStatus_handleApiException() throws ApiException {
+    when(statusApi.status()).thenThrow(new ApiException(500, null, "{\"ok\": false}"));
+    assertThat(service.getFirecloudStatus()).isFalse();
+  }
+
+  @Test
+  public void testStatus_handleJsonException() throws ApiException {
+    when(statusApi.status()).thenThrow(new ApiException(500, null, "unparseable response"));
+    assertThat(service.getFirecloudStatus()).isFalse();
   }
 
   @Test(expected = NotFoundException.class)
