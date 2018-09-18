@@ -2,9 +2,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
@@ -16,8 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Predicates.*;
 
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
@@ -44,11 +42,9 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
     List<String> queryParts = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
+    check(parametersEmpty()).validate(parameters.getParameters()).throwException("Bad Request: Please provide a valid search parameter.");
     for (SearchParameter parameter : parameters.getParameters()) {
       validateAttributes(parameter);
-      if (parameter.getConceptId() == null) {
-        throw new BadRequestException("Please provide valid concept id for Measurements.");
-      }
       String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", parameter.getConceptId().toString());
       List<String> tempQueryParts = new ArrayList<String>();
       for (Attribute attribute : parameter.getAttributes()) {
@@ -85,29 +81,17 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateAttributes(SearchParameter parameter) {
-    Predicate<Attribute> isCategoricalAndNotIn = a -> CATEGORICAL.equals(a.getName()) && !a.getOperator().equals(Operator.IN);
-    Predicate<Attribute> isOperandsEmpty = a -> a.getOperands().isEmpty();
-    Predicate<Attribute> isNameBlank = a -> StringUtils.isBlank(a.getName());
-    Predicate<Attribute> isOperatorNull = a -> a.getOperator() == null;
-    Predicate<Attribute> isBetweenAndNotTwoOperands = a -> a.getOperator().equals(Operator.BETWEEN) && a.getOperands().size() != 2;
-    Predicate<Attribute> isOperandsInvalid =
-      a -> !a
-        .getOperands()
-        .stream()
-        .filter(
-          o -> !NumberUtils.isNumber(o))
-        .collect(Collectors.toList()).isEmpty();
     parameter
       .getAttributes()
       .stream()
-      .filter(attribute -> !isNameAny(attribute))
-      .forEach(attribute -> {
-        Validation.from(isNameBlank).test(attribute).throwException("Please provide an attribute name.");
-        Validation.from(isOperatorNull).test(attribute).throwException("Please provide an attribute operator");
-        Validation.from(isOperandsEmpty).test(attribute).throwException("Please provide one or more operands.");
-        Validation.from(isCategoricalAndNotIn).test(attribute).throwException("Please provide the in operator when searching categorical attributes.");
-        Validation.from(isBetweenAndNotTwoOperands).test(attribute).throwException("Please provide two operands when using the between operator.");
-        Validation.from(isOperandsInvalid).test(attribute).throwException("Please provide valid numeric operands.");
+      .filter(attr -> !isNameAny(attr))
+      .forEach(attr -> {
+        check(nameBlank()).validate(attr).throwException("Bad Request: Please provide a valid attribute name. s% is not valid.", attr.getName());
+        check(operatorNull()).validate(attr).throwException("Bad Request: Please provide a valid operator. s% is not valid.", null);
+        check(operandsEmpty()).validate(attr).throwException("Bad Request: Please provide one or more operands.");
+        check(categoricalAndNotIn()).validate(attr).throwException("Bad Request: Please provide the in operator when searching categorical attributes.");
+        check(betweenAndNotTwoOperands()).validate(attr).throwException("Bad Request: Please provide two operands when using the between operator.");
+        check(operandsInvalid()).validate(attr).throwException("Bad Request: Please provide valid numeric operands.");
       });
   }
 

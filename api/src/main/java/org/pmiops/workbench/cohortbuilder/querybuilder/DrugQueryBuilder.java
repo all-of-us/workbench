@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Predicates.*;
+
 @Service
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
@@ -20,9 +23,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
-    if (parameters.getParameters().isEmpty()) {
-      throw new BadRequestException("Please provide a valid search parameter.");
-    }
+    check(parametersEmpty()).validate(parameters.getParameters()).throwException("Bad Request: Please provide a valid search parameter.");
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     String namedParameter = "drug" + getUniqueNamedParameterPostfix();
     Long[] conceptIds = parameters.getParameters()
@@ -46,9 +47,8 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
   }
 
   private Long validateConceptId(SearchParameter searchParameter) {
-    if (searchParameter.getConceptId() == null) {
-      throw new BadRequestException("Please provide a search parameter with a valid conceptId.");
-    }
+    check(conceptIdNull()).validate(searchParameter)
+      .throwException("Bad Request: Please provide a search parameter with a valid conceptId.");
     return searchParameter.getConceptId();
   }
 }
