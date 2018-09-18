@@ -13,7 +13,6 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.UnderservedPopulationEnum;
@@ -35,12 +34,6 @@ public class StorageEnumsTest {
         BillingProjectStatus.values(),
         (Function<Short, BillingProjectStatus>) StorageEnums::billingProjectStatusFromStorage,
         (Function<BillingProjectStatus, Short>) StorageEnums::billingProjectStatusToStorage
-      },
-      {
-        DataAccessLevel.class.getSimpleName(),
-        DataAccessLevel.values(),
-        (Function<Short, DataAccessLevel>) StorageEnums::dataAccessLevelFromStorage,
-        (Function<DataAccessLevel, Short>) StorageEnums::dataAccessLevelToStorage
       },
       {
         EmailVerificationStatus.class.getSimpleName(),

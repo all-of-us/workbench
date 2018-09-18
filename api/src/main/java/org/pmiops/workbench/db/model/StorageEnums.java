@@ -6,7 +6,6 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
@@ -88,22 +87,6 @@ public final class StorageEnums {
 
   public static Short billingProjectStatusToStorage(BillingProjectStatus s) {
     return CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS.get(s);
-  }
-
-  private static final BiMap<DataAccessLevel, Short> CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL =
-      ImmutableBiMap.<DataAccessLevel, Short>builder()
-      .put(DataAccessLevel.UNREGISTERED, (short) 0)
-      .put(DataAccessLevel.REGISTERED, (short) 1)
-      .put(DataAccessLevel.PROTECTED, (short) 2)
-      .put(DataAccessLevel.REVOKED, (short) 3)
-      .build();
-
-  public static DataAccessLevel dataAccessLevelFromStorage(Short level) {
-    return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.inverse().get(level);
-  }
-
-  public static Short dataAccessLevelToStorage(DataAccessLevel level) {
-    return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
   }
 
   private static final BiMap<EmailVerificationStatus, Short>

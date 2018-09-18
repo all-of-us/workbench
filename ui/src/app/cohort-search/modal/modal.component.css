@@ -198,6 +198,13 @@ h5.selection-title {
   padding-bottom: 0.5rem;
 }
 
+h6.selection-header {
+  margin-top: 0.25rem;
+  margin-left: 0.25rem;
+  color: #262262;
+  padding: 0;
+}
+
 .explore-link {
   padding-bottom: 0.8rem;
 }

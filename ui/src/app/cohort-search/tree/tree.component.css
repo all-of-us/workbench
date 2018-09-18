@@ -13,3 +13,21 @@
 .error {
   color: red;
 }
+
+.dropdown-search-container {
+  display: flex;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+.condition-dropdown{
+  padding-right: 1.5rem;
+}
+
+.search-container {
+  width:100%;
+}
+
+.search-width {
+  width:100%;
+}

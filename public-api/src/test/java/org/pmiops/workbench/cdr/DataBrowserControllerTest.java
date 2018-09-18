@@ -1,42 +1,45 @@
 package org.pmiops.workbench.publicapi;
 
-import java.util.stream.Collectors;
-import java.util.function.Function;
-
 import static com.google.common.truth.Truth.assertThat;
 
-import java.util.Arrays;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
-import java.util.List;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.Analysis;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
-import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
-import org.pmiops.workbench.cdr.dao.DbDomainDao;
-import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
-import org.pmiops.workbench.model.StandardConceptFilter;
-import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
-import org.pmiops.workbench.cdr.dao.AchillesResultDao;
 import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
-import org.pmiops.workbench.cdr.model.ConceptRelationship;
-import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
-import org.pmiops.workbench.model.SearchConceptsRequest;
-import org.pmiops.workbench.cdr.model.DbDomain;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.dao.DbDomainDao;
+import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
 import org.pmiops.workbench.cdr.model.AchillesResult;
-import org.pmiops.workbench.model.ConceptListResponse;
-import org.pmiops.workbench.model.ConceptAnalysisListResponse;
+import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.ConceptRelationship;
+import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
+import org.pmiops.workbench.cdr.model.DbDomain;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.model.Analysis;
 import org.pmiops.workbench.model.ConceptAnalysis;
+import org.pmiops.workbench.model.ConceptAnalysisListResponse;
+import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DbDomainListResponse;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.SearchConceptsRequest;
+import org.pmiops.workbench.model.StandardConceptFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -430,6 +433,8 @@ public class DataBrowserControllerTest {
     @Autowired
     private ConceptDao conceptDao;
     @Autowired
+    private CdrVersionDao cdrVersionDao;
+    @Autowired
     ConceptRelationshipDao conceptRelationshipDao;
     @Autowired
     private DbDomainDao dbDomainDao;
@@ -447,14 +452,16 @@ public class DataBrowserControllerTest {
     private EntityManager entityManager;
 
 
+    private CdrVersion cdrVersion;
     private DataBrowserController dataBrowserController;
-
 
     @Before
     public void setUp() {
         saveData();
         ConceptService conceptService = new ConceptService(entityManager, conceptSynonymDao);
-        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao, entityManager);
+        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao,
+            achillesResultDao, achillesAnalysisDao, achillesResultDistDao, entityManager,
+            () -> cdrVersion);
     }
 
 
@@ -754,6 +761,8 @@ public class DataBrowserControllerTest {
     }
 
     private void saveData() {
+        makeCdrVersion(1L, "Test Registered CDR",
+            123L, DataAccessLevel.REGISTERED);
         conceptDao.save(CONCEPT_1);
         conceptDao.save(CONCEPT_2);
         conceptDao.save(CONCEPT_3);
@@ -795,6 +804,23 @@ public class DataBrowserControllerTest {
     private void assertResults(ResponseEntity<ConceptListResponse> response,
                                Concept... expectedConcepts) {
         assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
+    }
+
+    private CdrVersion makeCdrVersion(long cdrVersionId, String name, long creationTime,
+        DataAccessLevel dataAccessLevel) {
+        cdrVersion = new CdrVersion();
+        cdrVersion.setBigqueryDataset("a");
+        cdrVersion.setBigqueryProject("b");
+        cdrVersion.setCdrDbName("c");
+        cdrVersion.setCdrVersionId(cdrVersionId);
+        cdrVersion.setCreationTime(new Timestamp(creationTime));
+        cdrVersion.setDataAccessLevelEnum(dataAccessLevel);
+        cdrVersion.setName(name);
+        cdrVersion.setNumParticipants(123);
+        cdrVersion.setPublicDbName("p");
+        cdrVersion.setReleaseNumber((short) 1);
+        cdrVersionDao.save(cdrVersion);
+        return cdrVersion;
     }
 
 }

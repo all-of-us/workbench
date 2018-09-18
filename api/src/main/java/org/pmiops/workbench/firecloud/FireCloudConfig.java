@@ -11,6 +11,7 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,8 @@ public class FireCloudConfig {
 
   private static final String END_USER_API_CLIENT = "endUserApiClient";
   private static final String ALL_OF_US_API_CLIENT = "allOfUsApiClient";
+  private static final String X_APP_ID_HEADER = "X-App-ID";
+  private static final String X_APP_ID_HEADER_VALUE = "AoU-RW";
 
   public static final String END_USER_GROUPS_API = "endUserGroupsApi";
   public static final String ALL_OF_US_GROUPS_API = "allOfUsGroupsApi";
@@ -39,6 +42,7 @@ public class FireCloudConfig {
     apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
     apiClient.setAccessToken(userAuthentication.getCredentials());
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
+    addFireCloudDefaultHeader(apiClient);
     return apiClient;
   }
 
@@ -100,6 +104,22 @@ public class FireCloudConfig {
     GroupsApi api = new GroupsApi();
     api.setApiClient(apiClient);
     return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public StatusApi statusApi(WorkbenchConfig workbenchConfig) {
+    StatusApi statusApi = new StatusApi();
+    ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
+    apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
+    addFireCloudDefaultHeader(apiClient);
+    statusApi.setApiClient(apiClient);
+    return statusApi;
+  }
+
+  private void addFireCloudDefaultHeader(ApiClient apiClient) {
+    apiClient.addDefaultHeader(X_APP_ID_HEADER, X_APP_ID_HEADER_VALUE);
   }
 
 }

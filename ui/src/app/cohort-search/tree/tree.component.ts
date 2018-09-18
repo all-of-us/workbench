@@ -1,6 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnChanges, OnInit, Output} from '@angular/core';
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
+// import {CRITERIA_TYPES} from '../constant';
+// import {activeItem} from '../redux/store';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -12,8 +14,17 @@ import {NodeComponent} from '../node/node.component';
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css']
 })
-export class TreeComponent extends NodeComponent implements OnInit {
+export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   _type: string;
+  name: string;
+
+  ngOnChanges() {
+    if (this.node.get('type') === TreeType[TreeType.ICD9]
+      || this.node.get('type') === TreeType[TreeType.ICD10]
+      || this.node.get('type') === TreeType[TreeType.CPT]) {
+        super.ngOnInit();
+    }
+  }
 
   ngOnInit() {
     super.ngOnInit();
@@ -22,9 +33,17 @@ export class TreeComponent extends NodeComponent implements OnInit {
   }
 
   showSearch() {
-    return this.node.get('type') === TreeType[TreeType.VISIT]
-      || this.node.get('type') === TreeType[TreeType.DRUG]
-      || this.node.get('type') === TreeType[TreeType.MEAS]
-      || this.node.get('type') === TreeType[TreeType.PM];
+    return this.node.get('type') !== TreeType[TreeType.DEMO];
+  }
+
+  showDropDown() {
+    return this.codes;
+  }
+
+  optionChange(flag) {
+    if (flag) {
+      this._type = flag;
+      setTimeout(() => super.loadChildren(true));
+    }
   }
 }
