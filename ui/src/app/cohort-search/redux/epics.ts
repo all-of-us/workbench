@@ -230,7 +230,7 @@ export class CohortSearchEpics {
   fetchChartData: CSEpic = (action$) => (
     action$.ofType(BEGIN_CHARTS_REQUEST).mergeMap(
       ({cdrVersionId, entityType, entityId, request}: ChartRequestAction) =>
-      this.service.getChartInfo(cdrVersionId, request)
+      this.service.getDemoChartInfo(cdrVersionId, request)
         .map(result => loadChartsRequestResults(entityType, entityId, result.items))
         .race(action$
           .ofType(CANCEL_CHARTS_REQUEST)
