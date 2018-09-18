@@ -436,7 +436,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         this.isCancelTimerInitiated = setTimeout(() => {
             this.actions.requestPreview();
             this.testFlag = this.preview.get('count');
-            console.log(this.testFlag);
             this.showCalculateContainer = false;
         }, 3000);
 
