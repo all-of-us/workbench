@@ -52,6 +52,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
   demoItemsType: string;
+  demoParam: string;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
 
@@ -207,9 +208,10 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
   }
 
-  demoPId(e) {
+  getDemoParams(e) {
     if (e) {
         this.demoItemsType = e.type;
+        this.demoParam = e.paramId;
     }
   }
 }

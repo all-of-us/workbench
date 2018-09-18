@@ -28,9 +28,7 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
     subscription: Subscription;
     @Input() getParamId: any;
     @Output() addedItems = new EventEmitter<boolean>();
-    isTimerInitial: any = false;
     selectedOption: any;
-    count = 0;
     constructor(private actions: CohortSearchActions,
                 private ngRedux: NgRedux<CohortSearchState>) {}
 
@@ -64,12 +62,7 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
 
     select(opt) {
         this.actions.addParameter(opt);
-        if (this.isTimerInitial) {
-            clearTimeout ( this.isTimerInitial );
-        }
-        this.isTimerInitial = setTimeout (() => {
-            this.actions.requestPreview();
-        } , 2000 );
+        this.addedItems.emit(true);
     }
 
     unsetFilter() {
