@@ -189,6 +189,9 @@ sourceSets {
     runtimeClasspath += generated.output
   }
   integration {
+    resources {
+      srcDir "config/"
+    }
     java {
       compileClasspath += main.output + test.output + generated.output
       runtimeClasspath += main.output + test.output + generated.output
@@ -269,8 +272,8 @@ dependencies {
   compile 'com.google.cloud:google-cloud-storage:1.8.0'
   compile 'com.google.code.gson:gson:2.8.5'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
-  compile 'com.squareup.okhttp:okhttp:2.7.4'
-  compile 'com.squareup.okhttp:logging-interceptor:2.7.4'
+  compile 'com.squareup.okhttp:okhttp:2.7.5'
+  compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   compile 'joda-time:joda-time:2.10'
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
@@ -297,8 +300,8 @@ dependencies {
   generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
   generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
   generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
-  generatedCompile 'com.squareup.okhttp:okhttp:2.6.0'
-  generatedCompile 'com.squareup.okhttp:logging-interceptor:2.6.0'
+  generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
+  generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:2.10'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
