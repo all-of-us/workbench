@@ -42,7 +42,7 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
     List<DbDomain> findDomainSearchResults(String keyword,String query);
 
     @Query(nativeQuery=true,value="select d.domain_id, d.domain_display, d.domain_desc, d.db_type,\n" +
-            "d.domain_route, d.concept_id, count(c.concept_id) as standard_concept_count from db_domain d\n" +
+            "d.domain_route, d.concept_id, count(DISTINCT c.concept_id) as standard_concept_count from db_domain d\n" +
             "join concept c on d.domain_id = c.domain_id\n" +
             "where d.db_type = 'domain_filter' and c.count_value > 0 and c.standard_concept IN ('S', 'C')\n" +
             "group by d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.concept_id\n" +
@@ -58,10 +58,10 @@ public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
     List<DbDomain> findDomainTotals();
 
     @Query(nativeQuery=true, value="select d.domain_id, d.domain_display, d.domain_desc, d.db_type,\n" +
-        "d.domain_route, d.concept_id, COUNT(c.concept_id) as concept_count,\n" +
+        "d.domain_route, d.concept_id, COUNT(DISTINCT c.concept_id) as all_concept_count,\n" +
         "SUM(c.standard_concept IN ('S', 'C')) as standard_concept_count,\n" +
-        "dc.count_value participantCount from db_domain d\n" +
-        "join concept dc on d.concept_id = c.concept_id\n" +
+        "dc.count_value participant_count from db_domain d\n" +
+        "join concept dc on dc.concept_id = d.concept_id\n" +
         "left outer join concept c on d.domain_id = c.domain_id\n" +
         "where d.db_type = 'domain_filter'\n" +
         "group by d.domain_id, d.domain_display, d.domain_desc, d.db_type, d.concept_id\n" +
