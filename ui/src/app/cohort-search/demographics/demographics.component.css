@@ -197,6 +197,10 @@ label[for="deceased"] {
   pointer-events: none;
 }
 
+.white-background {
+  background-color: #FFFFFF;
+}
+
 .calculate-button {
   font-size: 14px;
   font-weight: 500;

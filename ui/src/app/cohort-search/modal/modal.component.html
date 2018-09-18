@@ -45,10 +45,8 @@
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
-                                 [selectedParamId] = "demoItemsDeleted"
                                  [selectedTypes]="demoItemsType"
-                                 (cancel)="cancel()"
-                                 (finish)="finish()">
+              [selectedParamId]="demoParam">
               </crit-demographics>
 
               <ng-container *ngSwitchDefault>
@@ -78,22 +76,15 @@
                 <div class="panel-right-container">
                   <h5 class="selection-title">{{ selectionTitle }}</h5>
                   <div class="panel-right selected">
-                    <ng-container *ngFor="let type of objectKey(selections)">
-                      <h6 class="selection-header" *ngIf="showHeader">{{selectionHeader(type)}}</h6>
-                      <crit-selection-info
-                        *ngFor="let parameter of selections[type]; let i = index"
-                        [index]="i"
-                        (demoItems) = "demoPId($event)"
-                        [parameter]="parameter">
-                      </crit-selection-info>
-                    </ng-container>
-                    <crit-selection-info
-                            *ngFor="let parameter of (selection$ | async); let i = index"
-                            [index]="i"
-                            [paramenterObj] = "selection$"
-                            (demoItems) = "demoPId($event)"
-                            [parameter]="parameter">
-                    </crit-selection-info>
+                      <ng-container *ngFor="let type of objectKey(selections)">
+                          <h6 class="selection-header" *ngIf="showHeader">{{selectionHeader(type)}}</h6>
+                          <crit-selection-info
+                                  *ngFor="let parameter of selections[type]; let i = index"
+                                  [index]="i"
+                                  [parameter]="parameter"
+                                  (demoItems) = "getDemoParams($event)">
+                          </crit-selection-info>
+                      </ng-container>
                   </div>
                   <div class="footer">
                     <button type="button"
@@ -130,3 +121,4 @@
     </div>
   </div>
 </div>
+

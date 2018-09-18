@@ -77,6 +77,7 @@
       </div>
       <div class="control-wrapper">
         <crit-multi-select
+                (addedItems)="getItems($event)"
                 [options]="genderNodes"
                 [getParamId]="selectedParamId"
                 [includeSearchBox]="false"
@@ -93,6 +94,7 @@
       </div>
       <div class="control-wrapper">
         <crit-multi-select
+                (addedItems)="getItems($event)"
                 [options]="raceNodes"
                 [getParamId]="selectedParamId"
                 [initialSelection]="initialRaces"
@@ -108,6 +110,7 @@
       </div>
       <div class="control-wrapper">
         <crit-multi-select
+                (addedItems)="getItems($event)"
                 [includeSearchBox]="false"
                 [options]="ethnicityNodes"
                 [getParamId]="selectedParamId"
@@ -131,23 +134,26 @@
 </form>
 <div class="container count-preview" *ngIf="!noSelection">
   <div class="row">
-    <div class="col-lg-1 " *ngIf="preview.get('requesting')">
+    <div class="col-lg-1 " *ngIf="showCalculateContainer || preview.get('requesting')">
        <span class="spinner spinner-md">
     </span>
     </div>
-    <div class="col-lg-2 calculate-button" *ngIf="preview.get('requesting')">
+    <div class="col-lg-2 calculate-button" *ngIf="showCalculateContainer || preview.get('requesting')">
       Calculating ...
     </div>
-    <ng-container *ngIf="!preview.get('requesting')">
-      <div class="col-lg-6 text-padding" *ngIf="preview.get('count') >= 0">
+    <ng-container *ngIf="!preview.get('requesting') || count">
+      <div class="col-lg-6 text-padding" *ngIf="preview.get('count') >= 0 || count">
         <div class="result-text">
           Results
         </div>
         <div>
           Number Participants:
-          <span class="text-bold" >
+          <span class="text-bold" *ngIf="preview.get('count') >= 0;else totalcount">
        {{ preview.get('count', 0) | number }}
         </span>
+          <ng-template #totalcount class="text-bold">
+            {{count}}
+          </ng-template>
         </div>
       </div>
     </ng-container>

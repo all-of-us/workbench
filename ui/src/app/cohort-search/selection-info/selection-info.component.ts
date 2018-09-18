@@ -13,8 +13,6 @@ export class SelectionInfoComponent {
     @Input() parameter;
     @Input() index;
     @Output() demoItems = new EventEmitter<any>();
-    @Input() itemsSelected;
-    @Input() parameterObj;
     treeType = TreeType;
 
     constructor(private actions: CohortSearchActions) {}
