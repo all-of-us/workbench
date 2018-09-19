@@ -40,6 +40,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   notebookRenameError = false;
   wsNamespace: string;
   wsId: string;
+  resource: any;
   router: Router;
   actionList = resourceActionList;
   invalidResourceError = false;
