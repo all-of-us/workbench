@@ -157,7 +157,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         break;
       }
       case ResourceType.NOTEBOOK: {
-        const nbUrl = '/workspaces/${this.wsNamespace}/${this.wsId}/notebooks/'
+        const nbUrl = '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/notebooks/'
           + encodeURIComponent(this.resourceCard.notebook.name);
         const notebook = window.open(nbUrl, '_blank');
 
