@@ -220,7 +220,7 @@ describe('WorkspaceEditComponent', () => {
     expect(spy).toHaveBeenCalled();
   }));
 
-  fit('should support cloning a workspace with cdr version change', fakeAsync(() => {
+  it('should support cloning a workspace with cdr version change', fakeAsync(() => {
     workspacesService.workspaceAccess.set(
       WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, WorkspaceAccessLevel.READER);
     setupComponent(WorkspaceEditMode.Clone);

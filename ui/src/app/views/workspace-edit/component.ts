@@ -379,7 +379,7 @@ export class WorkspaceEditComponent implements OnInit {
         });
   }
 
-  getSelectedCdrName(): string {
+  get selectedCdrName(): string {
     const version = this.cdrVersions.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
     if (!version) {
       return '';
