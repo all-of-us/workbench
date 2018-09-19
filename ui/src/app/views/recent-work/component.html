@@ -1,6 +1,6 @@
 <div *ngIf="elementVisible()" class="recent-work" style="display: inline-block">
   <div *ngIf="leftScrollVisible()" class="scroll-indicator" id="left-scroll"
-       (click)="moveDownList()">
+       (click)="scrollLeft()">
     <app-left-scroll-icon></app-left-scroll-icon>
   </div>
   <div class="title">
@@ -14,7 +14,7 @@
     </div>
   </div>
   <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
-       style="float: right; top: 3.2rem; right: -9rem" (click)="moveUpList()">
+       style="float: right; top: 3.2rem; right: -9rem" (click)="scrollRight()">
     <app-right-scroll-icon></app-right-scroll-icon>
   </div>
 </div>
