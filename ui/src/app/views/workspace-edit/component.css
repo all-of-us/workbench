@@ -34,6 +34,10 @@
   width: 100%;
 }
 
+.name-area {
+  margin-right: 20px;
+}
+
 .checkbox-group {
   padding: 0.6rem 0;
 }
