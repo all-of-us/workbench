@@ -2,18 +2,52 @@
   <div class="participant-title">Participants</div>
   <div class="total-heading">cohort Total: 9456 Participants</div>
 </div>
-<div class="overview-container">
-  <h1>Overview</h1>
+<div [ngClass]="[ openChartContainer? 'overview-container': 'overview-small-container']">
+  <div>
+    <span class="overview-title">Overview</span>
+    <span *ngIf="!openChartContainer" (click)="getCharts()"><clr-icon shape="play" size="15" style="transform: rotate(90deg);" class="is-solid play-icon"></clr-icon></span>
+    <span *ngIf="openChartContainer" (click)="collapseContainer()"><clr-icon size="15" shape="play" style="transform: rotate(270deg);" class="is-solid play-icon"></clr-icon></span>
+  </div>
+  <div class="button-chart-container" *ngIf="openChartContainer">
+    <div class="button-container">
+      <div (click)="getDemoCharts()" >
+        <button type="button"
+                [ngClass]="[ demoGraph? 'btn-outline': 'btn-primary']"
+                class="overview-buttons btn">
+          Demographics
+        </button>
+      </div>
+      <div (click)="getConditionCharts()">
+        <button type="button"
+                class="overview-buttons btn btn-primary">
+          CONDITIONS
+        </button>
+      </div>
+      <div>
+        <button type="button"
+                class="overview-buttons btn btn-primary">
+          PROCEDURES
+        </button>
+      </div>
+      <div>
+        <button type="button"
+                class="overview-buttons btn btn-primary">
+          MEDICATION
+        </button>
+      </div>
+      <div>
+        <button type="button"
+                class="overview-buttons btn btn-primary">
+          LABS
+        </button>
+      </div>
+    </div>
+    <div class="chart-container">
+      <app-combo-chart
+              *ngIf="data?.size && demoGraph"
+              [mode]="'stacked'"
+              [data]="data">
+      </app-combo-chart>
+    </div>
+  </div>
 </div>
-
-<!--<app-review-nav></app-review-nav>-->
-
-<!--<div>-->
-
-  <!--&lt;!&ndash;<app-detail-all-events></app-detail-all-events>&ndash;&gt;-->
-  <!--&lt;!&ndash;<app-combo-chart&ndash;&gt;-->
-    <!--&lt;!&ndash;*ngIf="data?.size"&ndash;&gt;-->
-    <!--&lt;!&ndash;[mode]="'stacked'"&ndash;&gt;-->
-    <!--&lt;!&ndash;[data]="data">&ndash;&gt;-->
-  <!--&lt;!&ndash;</app-combo-chart>&ndash;&gt;-->
-<!--</div>-->

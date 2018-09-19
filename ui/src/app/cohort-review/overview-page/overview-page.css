@@ -4,6 +4,7 @@
     border-radius: 3px;
     background-color: #FFFFFF;
     box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+    padding: 0.4rem;
 }
 
 .participant-container {
@@ -23,3 +24,41 @@
     font-weight: bold;
     line-height: 24px;
 }
+
+.overview-small-container {
+    height:2rem;
+    width: 100%;
+    border-radius: 3px;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+    padding: 0.4rem;
+}
+.overview-title {
+    color: #5FAEE0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.play-icon {
+    color: #5FAEE0;
+    font-weight: bold;
+    margin-left:0.5rem;
+}
+
+.button-chart-container {
+    display: flex;
+    padding: 1rem;
+}
+.button-chart-container .button-container {
+   padding-right: 4rem;
+}
+.overview-buttons {
+    width: 100%;
+    border: 1px solid #0077b7;
+}
+
+/*.btn.btn-primary.overview-buttons.active {*/
+    /*background-color: #4356a7;*/
+    /*color: #f1f2f2;*/
+    /*font-weight: bold;*/
+/*}*/

@@ -9,6 +9,7 @@
   </ngx-charts-bar-horizontal-normalized>
 
   <ngx-charts-bar-horizontal-stacked *ngIf="mode === 'stacked'"
+  [view]="[1100, 300]"
     [results]="data"
     [xAxis]="axis.x.show"
     [showXAxisLabel]="axis.x.showLabel"
