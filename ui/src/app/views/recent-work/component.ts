@@ -32,12 +32,12 @@ export class RecentWorkComponent implements OnInit {
   }
 
   moveDownList(): void {
-    this.startIndex = Math.min(this.startIndex - 1, 0);
+    this.startIndex = Math.max(this.startIndex - 1, 0);
     this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + this.size);
   }
 
   moveUpList(): void {
-    this.startIndex = Math.max(this.startIndex + 1, this.fullList.length) ;
+    this.startIndex = Math.min(this.startIndex + 1, this.fullList.length) ;
     this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + this.size);
   }
 
