@@ -15,9 +15,7 @@ public interface UserRecentResourceDao extends CrudRepository<UserRecentResource
   UserRecentResource findByUserIdAndWorkspaceIdAndCohort(long userId, long workspaceId, Cohort cohort);
 
   UserRecentResource findByUserIdAndWorkspaceIdAndNotebookName(long userId, long workspaceId, String notebookName);
-
-  void deleteUserRecentResourceByUserIdAndWorkspaceIdAndNotebookName(long userId, long workspaceId, String notebookName);
-
+  
   List<UserRecentResource> findUserRecentResourcesByUserIdOrderByLastAccessDateDesc(long userId);
 
 }
