@@ -9,7 +9,10 @@ import {CohortBuilderService, DemoChartInfoListResponse, SearchRequest} from 'ge
 
 
 @Component({
-  templateUrl: './overview-page.html',
+    selector: 'app-overview-charts',
+    templateUrl: './overview-page.html',
+    styleUrls: ['./overview-page.css'],
+
 })
 export class OverviewPage implements OnInit, OnDestroy {
 

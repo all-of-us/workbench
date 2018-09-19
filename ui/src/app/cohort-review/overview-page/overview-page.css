@@ -1,0 +1,25 @@
+.overview-container {
+    height:20rem;
+    width: 100%;
+    border-radius: 3px;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
+}
+
+.participant-container {
+    display:flex;
+}
+.participant-container .participant-title {
+    color: #262262;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 24px;
+    width: 80%;
+
+}
+.participant-container .total-heading {
+    color: #262262;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 24px;
+}
