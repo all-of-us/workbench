@@ -138,7 +138,7 @@
     <div class="col-lg-2 calculate-button" *ngIf="showCalculateContainer || preview.get('requesting')">
       Calculating ...
     </div>
-    <ng-container *ngIf="!preview.get('requesting') || count">
+    <ng-container *ngIf="!preview.get('requesting') && !showCalculateContainer">
       <div class="col-lg-6 text-padding" *ngIf="preview.get('count') >= 0 || count">
         <div class="result-text">
           Results
@@ -148,8 +148,10 @@
           <span class="text-bold" *ngIf="preview.get('count') >= 0;else totalcount">
        {{ preview.get('count', 0) | number }}
         </span>
-          <ng-template #totalcount class="text-bold">
-            {{count}}
+          <ng-template #totalcount >
+            <span class="text-bold">
+                {{count | number}}
+            </span>
           </ng-template>
         </div>
       </div>
