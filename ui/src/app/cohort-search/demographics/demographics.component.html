@@ -151,7 +151,7 @@
           <span class="text-bold" *ngIf="preview.get('count') >= 0;else totalcount">
        {{ preview.get('count', 0) | number }}
         </span>
-          <ng-template #totalcount >
+          <ng-template #totalcount>
             <span class="text-bold">
                 {{count | number}}
             </span>
