@@ -1,4 +1,4 @@
-import {TreeType, TreeSubType} from 'generated';
+import {TreeSubType, TreeType} from 'generated';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 
