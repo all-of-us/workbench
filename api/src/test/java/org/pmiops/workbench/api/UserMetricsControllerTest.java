@@ -108,6 +108,13 @@ public class UserMetricsControllerTest {
     workspace.setWorkspaceNamespace("workspaceNamespace1");
     workspace.setFirecloudName("Firecloudname1");
 
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
+    fcWorkspace.setNamespace("Firecloudname1");
+
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace2 = new org.pmiops.workbench.firecloud.model.Workspace();
+    fcWorkspace.setNamespace("Firecloudname2");
+
+
 
     Workspace workspace2 = new Workspace();
     workspace2.setWorkspaceId(WORKSPACE_2_ID);
@@ -116,9 +123,11 @@ public class UserMetricsControllerTest {
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
     workspaceResponse.setAccessLevel("OWNER");
+    workspaceResponse.setWorkspace(fcWorkspace);
 
     WorkspaceResponse workspaceResponse2 = new WorkspaceResponse();
     workspaceResponse2.setAccessLevel("READER");
+    workspaceResponse2.setWorkspace(fcWorkspace2);
 
     when(userProvider.get()).thenReturn(user);
     when(userRecentResourceService.findAllResourcesByUser(USER_ID))
