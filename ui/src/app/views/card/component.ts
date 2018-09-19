@@ -15,7 +15,6 @@ export class CardComponent {
   type: string;
   @Input('header')
   header: string;
-
   constructor(
   ) {
    this.actionList = [{

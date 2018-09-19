@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {
-  UserMetricsService,
-  RecentResource
+  RecentResource,
+  UserMetricsService
 } from 'generated';
 
 @Component({
