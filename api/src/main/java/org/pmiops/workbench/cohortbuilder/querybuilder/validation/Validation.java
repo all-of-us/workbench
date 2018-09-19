@@ -9,7 +9,7 @@ public class Validation<K> {
   private Predicate<K> predicate;
   private Boolean throwException;
 
-  public static <K> Validation<K> check(Predicate<K> predicate) {
+  public static <K> Validation<K> from(Predicate<K> predicate) {
     return new Validation<K>(predicate);
   }
 
@@ -17,7 +17,7 @@ public class Validation<K> {
     this.predicate = predicate;
   }
 
-  public Validation validate(K param) {
+  public Validation test(K param) {
     return predicate.test(param) ? throwException() : ok();
   }
 
@@ -32,16 +32,14 @@ public class Validation<K> {
   }
 
   public void throwException(String message) {
-    throwException(message, null);
+    if (throwException) {
+      throw new BadRequestException(message);
+    }
   }
 
   public void throwException(String message, String arg) {
     if (throwException) {
-      if (arg == null) {
-        throw new BadRequestException(message);
-      } else {
-        throw new BadRequestException(String.format(message, arg));
-      }
+      throw new BadRequestException(String.format(message, arg));
     }
   }
 

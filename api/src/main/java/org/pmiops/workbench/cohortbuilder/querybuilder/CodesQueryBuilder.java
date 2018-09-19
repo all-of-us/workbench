@@ -9,7 +9,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.TreeType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
 
 /**
  * CodesQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -61,6 +63,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters params) {
+    validateSearchParameters(params.getParameters());
     ListMultimap<MultiKey, SearchParameter> paramMap = getMappedParameters(params.getParameters());
     List<String> queryParts = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
@@ -100,6 +103,23 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       .setNamedParameters(queryParams)
       .setUseLegacySql(false)
       .build();
+  }
+
+  private void validateSearchParameters(List<SearchParameter> parameters) {
+    from(parametersEmpty()).test(parameters).throwException("Bad Request: Provide a valid search parameter.");
+    parameters
+      .forEach(param -> {
+        from(typeBlank().or(codeTypeInvalid()))
+          .test(param).throwException("Bad Request: Type '%s' is not valid.", param.getType());
+        from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid())))
+          .test(param).throwException("Bad Request: Subtype '%s' is not valid.", param.getSubtype());
+        from(domainBlank().or(domainInvalid()))
+          .test(param).throwException("Bad Request: Domain '%s' is not valid.", param.getDomain());
+        from(paramChild().and(conceptIdNull()))
+          .test(param).throwException("Bad Request: Concept Id 'null' is not valid.");
+        from(paramParent().and(codeBlank()))
+          .test(param).throwException("Bad Request: Code '%s' is not valid.", param.getValue());
+      });
   }
 
   private void buildInnerQuery(String type,

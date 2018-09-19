@@ -4,19 +4,20 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.AttributePredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.from;
 
 /**
  * DemoQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -25,8 +26,6 @@ import java.util.Optional;
  */
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
-
-  private static final String DECEASED = "Deceased";
 
   private static final String SELECT = "select person_id\n" +
     "from `${projectId}.${dataSetId}.person` p\n" +
@@ -58,12 +57,10 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
+    validateSearchParameters(parameters.getParameters());
     ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(parameters.getParameters());
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     List<String> queryParts = new ArrayList<>();
-    if (paramMap.keySet().contains(TreeSubType.AGE) && paramMap.keySet().contains(TreeSubType.DEC)) {
-      throw new BadRequestException("Cannot select age and deceased in the same context.");
-    }
 
     for (TreeSubType key : paramMap.keySet()) {
       String namedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
@@ -80,27 +77,19 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
           queryParams.put(namedParameter, QueryParameterValue.array(raceIds, Long.class));
           break;
         case AGE:
-          Optional<Attribute> attribute = Optional.ofNullable((Attribute) paramMap.get(key).get(0));
-          if (attribute.isPresent() && !CollectionUtils.isEmpty(attribute.get().getOperands())) {
-            List<String> operandParts = new ArrayList<>();
-            for (String operand : attribute.get().getOperands()) {
-              String ageNamedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
-              operandParts.add("@" + ageNamedParameter);
-              queryParams.put(ageNamedParameter, QueryParameterValue.int64(new Long(operand)));
-            }
-            queryParts.add(DEMO_AGE.replace("${operator}", OperatorUtils.getSqlOperator(attribute.get().getOperator()))
-              + String.join(" and ", operandParts) + "\n");
-            queryParts.add(AGE_NOT_EXISTS_DEATH);
-          } else {
-            throw new BadRequestException("Age must provide an operator and operands.");
+          Attribute attribute = (Attribute) paramMap.get(key).get(0);
+          List<String> operandParts = new ArrayList<>();
+          for (String operand : attribute.getOperands()) {
+            String ageNamedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
+            operandParts.add("@" + ageNamedParameter);
+            queryParams.put(ageNamedParameter, QueryParameterValue.int64(new Long(operand)));
           }
+          queryParts.add(DEMO_AGE.replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
+            + String.join(" and ", operandParts) + "\n");
+          queryParts.add(AGE_NOT_EXISTS_DEATH);
           break;
         case DEC:
-          if (DECEASED.equals(paramMap.get(key).get(0))) {
-            queryParts.add(DEMO_DEC);
-          } else {
-            throw new BadRequestException("Dec must provide a value of: " + DECEASED);
-          }
+          queryParts.add(DEMO_DEC);
           break;
         case ETH:
           queryParts.add(DEMO_ETH.replace("${eth}", "@" + namedParameter));
@@ -124,6 +113,27 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   @Override
   public FactoryKey getType() {
     return FactoryKey.DEMO;
+  }
+
+  private void validateSearchParameters(List<SearchParameter> parameters) {
+    from(parametersEmpty()).test(parameters).throwException("Bad Request: Provide a valid search parameter.");
+    from(containsAgeAndDec()).test(parameters).throwException("Bad Request: Cannot search age and deceased together.");
+    parameters
+      .forEach(param -> {
+        from(typeBlank().or(demoTypeInvalid())).test(param).throwException("Bad Request: Type '%s' is not valid.", param.getType());
+        from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException("Bad Request: Subtype '%s' is not valid.", param.getSubtype());
+        from(subtypeDec().and(valueNotDec())).test(param).throwException("Bad Request: Dec value '%s' is not valid.", param.getValue());
+        if (subtypeAge().test(param)) {
+          from(attributesEmpty()).test(param).throwException("Bad Request: Provide attributes for age.");
+          param.getAttributes().forEach(attr -> {
+            from(operatorNull()).test(attr).throwException("Bad Request: Operator 'null' is not valid.");
+            from(operandsEmpty()).test(attr).throwException("Bad Request: Provide valid operands.");
+            from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException("Bad Request: Provide one operand.");
+            from(betweenOperator().and(operandsNotTwo())).test(attr).throwException("Bad Request: Provide two operands.");
+            from(operandsNotNumbers()).test(attr).throwException("Bad Request: Operands must be numeric.");
+          });
+        }
+      });
   }
 
   protected ListMultimap<TreeSubType, Object> getMappedParameters(List<SearchParameter> searchParameters) {
