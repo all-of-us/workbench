@@ -1,13 +1,17 @@
 package org.pmiops.workbench.cdr.model;
 
+import javax.persistence.Basic;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import javax.persistence.*;
-import java.util.Objects;
-import java.util.Map;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+import java.util.Objects;
 
 @Entity
 //TODO need to add a way to dynamically switch between database versions
@@ -21,7 +25,8 @@ public class DbDomain {
     private String dbType;
     private String domainRoute;
     private long conceptId;
-    private long countValue;
+    private long allConceptCount;
+    private long standardConceptCount;
     private long participantCount;
 
     public static Map<Long, Long> conceptCountMap  = new HashMap<Long, Long>();
@@ -111,27 +116,44 @@ public class DbDomain {
         return this;
     }
 
-    @Column(name = "count_value")
-    public Long getCountValue() {
-        return countValue;
+    @Basic(optional = true)
+    @Column(name="all_concept_count", insertable=false, updatable=false)
+    public Long getAllConceptCount() {
+        return allConceptCount;
     }
 
-    public void setCountValue(Long countValue) {
-        this.countValue = countValue;
+    public void setAllConceptCount(Long allConceptCount) {
+        this.allConceptCount = allConceptCount == null ? 0 : allConceptCount;
     }
 
-    public DbDomain countValue(Long countValue) {
-        this.countValue = countValue;
+    public DbDomain allConceptCount(Long allConceptCount) {
+        this.allConceptCount = allConceptCount;
         return this;
     }
 
-    @Transient
+    @Basic(optional = true)
+    @Column(name="standard_concept_count", insertable=false, updatable=false)
+    public Long getStandardConceptCount() {
+        return standardConceptCount;
+    }
+
+    public void setStandardConceptCount(Long standardConceptCount) {
+        this.standardConceptCount = standardConceptCount == null ? 0 : standardConceptCount;
+    }
+
+    public DbDomain standardConceptCount(Long standardConceptCount) {
+        this.standardConceptCount = standardConceptCount;
+        return this;
+    }
+
+    @Basic(optional = true)
+    @Column(name="participant_count", insertable=false, updatable=false)
     public Long getParticipantCount(){
         return participantCount;
     }
 
     public void setParticipantCount(Long participantCount){
-        this.participantCount = participantCount;
+        this.participantCount = participantCount == null ? 0 : participantCount;
     }
 
     public DbDomain participantCount(Long participantCount){
@@ -150,13 +172,12 @@ public class DbDomain {
                 Objects.equals(domainDesc, dbDomain.domainDesc) &&
                 Objects.equals(dbType, dbDomain.dbType) &&
                 Objects.equals(domainRoute, dbDomain.domainRoute) &&
-                Objects.equals(conceptId,dbDomain.conceptId) &&
-                Objects.equals(countValue,dbDomain.countValue);
+                Objects.equals(conceptId, dbDomain.conceptId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(domainId, domainDisplay, domainDesc, dbType, domainRoute, conceptId, countValue);
+        return Objects.hash(domainId, domainDisplay, domainDesc, dbType, domainRoute, conceptId);
     }
 
     @Override

@@ -117,7 +117,7 @@ public class DbDomainDaoTest {
     @Test
     public void findDomainTotals() throws Exception{
         final List<DbDomain> list=dao.findDomainTotals();
-        Assert.assertEquals((Long)list.get(0).getCountValue(),Long.valueOf(0));
+        Assert.assertEquals((Long)list.get(0).getStandardConceptCount(),Long.valueOf(0));
         Assert.assertNotEquals(list,null);
     }
 
@@ -147,7 +147,7 @@ public class DbDomainDaoTest {
                 .dbType(dbType)
                 .domainRoute(domainRoute)
                 .conceptId(conceptId)
-                .countValue(count);
+                .standardConceptCount(count);
     }
 
     private Concept createConcept(Long conceptId,String conceptName,String standardConcept,String conceptCode,String conceptClassId,String vocabularyId,String domainId,Long count,float prevalence){

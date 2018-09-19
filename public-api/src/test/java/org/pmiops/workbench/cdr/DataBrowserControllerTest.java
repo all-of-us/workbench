@@ -92,7 +92,7 @@ public class DataBrowserControllerTest {
                             .dbType(dbDomain.getDbType())
                             .domainRoute(dbDomain.getDomainRoute())
                             .conceptId(dbDomain.getConceptId())
-                            .countValue(dbDomain.getCountValue())
+                            .standardConceptCount(dbDomain.getCountValue())
                             .participantCount(dbDomain.getParticipantCount());
                 }
             };
@@ -206,7 +206,7 @@ public class DataBrowserControllerTest {
             .dbType("domain_filter")
             .domainRoute("condition")
             .conceptId(19L)
-            .countValue(0L)
+            .standardConceptCount(0L)
             .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_2 = new DbDomain()
@@ -216,7 +216,7 @@ public class DataBrowserControllerTest {
             .dbType("domain_filter")
             .domainRoute("drug")
             .conceptId(13L)
-            .countValue(0L)
+            .standardConceptCount(0L)
             .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_3 = new DbDomain()
@@ -226,7 +226,7 @@ public class DataBrowserControllerTest {
             .dbType("survey")
             .domainRoute("ppi")
             .conceptId(1585855L)
-            .countValue(568120L)
+            .standardConceptCount(568120L)
             .participantCount(0L);
 
     private static final DbDomain CLIENT_DB_DOMAIN_4 = new DbDomain()
@@ -236,7 +236,7 @@ public class DataBrowserControllerTest {
             .dbType("survey")
             .domainRoute("ppi")
             .conceptId(1586134L)
-            .countValue(567437L)
+            .standardConceptCount(567437L)
             .participantCount(0L);
 
     private static final AchillesAnalysis CLIENT_ANALYSIS_1 = new AchillesAnalysis()
@@ -723,7 +723,7 @@ public class DataBrowserControllerTest {
         dbd.setDbType(dbDomain.getDbType());
         dbd.setDomainRoute(dbDomain.getDomainRoute());
         dbd.setConceptId(dbDomain.getConceptId());
-        dbd.setCountValue(dbDomain.getCountValue());
+        dbd.setStandardConceptCount(dbDomain.getStandardConceptCount());
         return dbd;
     }
 
