@@ -92,7 +92,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndNotebookName(workspaceId, userId, notebookName);
     if (resource != null) {
       getDao().delete(resource);
-    };
+    }
   }
 
   /**
