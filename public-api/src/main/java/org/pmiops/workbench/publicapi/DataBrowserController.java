@@ -691,13 +691,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] {"2", "3", "4", "5", "6", "7", "8"}));
             completeAgeDeciles.removeAll(uniqueAgeDeciles);
             for(String missingAgeDecile: completeAgeDeciles){
-                AchillesResult missingResult = new AchillesResult();
-                missingResult.setAnalysisId(AGE_ANALYSIS_ID);
-                missingResult.setStratum1(conceptId);
-                missingResult.setStratum2(missingAgeDecile);
+                AchillesResult missingResult = new AchillesResult(AGE_ANALYSIS_ID, conceptId, missingAgeDecile, null, null, null, 0L, 0L);
                 missingResult.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(missingAgeDecile));
-                missingResult.setCountValue(0L);
-                missingResult.setSourceCountValue(0L);
                 aa.getResults().add(missingResult);
             }
         }
