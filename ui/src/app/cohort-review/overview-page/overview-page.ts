@@ -15,7 +15,8 @@ import {CohortBuilderService, DemoChartInfoListResponse, SearchRequest} from 'ge
 
 })
 export class OverviewPage implements OnInit, OnDestroy {
-
+  openChartContainer = false;
+    demoGraph = false;
   data = List();
   private subscription: Subscription;
 
@@ -33,7 +34,19 @@ export class OverviewPage implements OnInit, OnDestroy {
       .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => this.data = fromJS(data));
   }
+    getCharts() {
+        this.openChartContainer = true;
+    }
+    collapseContainer(){
+        this.openChartContainer = false;
+    }
+    getDemoCharts (){
+        this.demoGraph = true;
+    }
 
+    getConditionCharts(){
+        this.demoGraph = false;
+    }
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
