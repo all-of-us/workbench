@@ -19,7 +19,7 @@ export class RecentWorkComponent implements OnInit {
     private userMetricsService: UserMetricsService
   ) {}
   index: Number;
-
+  size = 3;
   ngOnInit(): void {
     this.updateList();
   }
@@ -27,26 +27,26 @@ export class RecentWorkComponent implements OnInit {
   updateList(): void {
     this.userMetricsService.getUserRecentResources().subscribe((resources) => {
       this.fullList = resources;
-      this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + 3);
+      this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + this.size);
     });
   }
 
   moveDownList(): void {
-    this.startIndex = this.startIndex - 1;
-    this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + 3);
+    this.startIndex = Math.min(this.startIndex - 1, 0);
+    this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + this.size);
   }
 
   moveUpList(): void {
-    this.startIndex = this.startIndex + 1;
-    this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + 3);
+    this.startIndex = Math.max(this.startIndex + 1, this.fullList.length) ;
+    this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + this.size);
   }
 
   rightScrollVisible(): boolean {
-    return (this.fullList.length > 3) && (this.fullList.length > this.startIndex + 3);
+    return (this.fullList.length > 3) && (this.fullList.length > this.startIndex + this.size);
   }
 
   leftScrollVisible(): boolean {
-    return (this.fullList.length > 3) && (this.startIndex > 0);
+    return (this.fullList.length > this.size) && (this.startIndex > 0);
   }
 
   elementVisible(): boolean {
