@@ -1,3 +1,4 @@
+
 <div class="crit-modal-container" [class.show]="open">
   <div class="crit-modal-content">
     <div class="container title-margin">
@@ -7,10 +8,10 @@
             <div class="btn-group btn-link">
               <ng-container>
                 <button  *ngIf="attributesNode.size === 0"
-                  type="button"
-                  class="btn tab"
-                  [class.active]="mode === 'tree'"
-                  (click)="mode = 'tree'">
+                 type="button"
+                 class="btn tab"
+                 [class.active]="mode === 'tree'"
+                 (click)="mode = 'tree'">
                   {{ title }}
                 </button>
                 <button *ngIf="attributesNode.size > 0"
