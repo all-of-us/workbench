@@ -15,8 +15,8 @@ import {
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
 
-const minAge = 18;
-const maxAge = 120;
+let minAge = 18;
+let maxAge = 120;
 
 /*
  * Sorts a plain JS array of plain JS objects first by a 'count' key and then
@@ -48,8 +48,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() selectedTypes: any;
     @Output() itemsAddedFlag = new EventEmitter<boolean>();
     @select(previewStatus) preview$;
-    readonly minAge = minAge;
-    readonly maxAge = maxAge;
+     minAge = minAge;
+     maxAge = maxAge;
     loading = false;
     subscription = new Subscription();
     hasSelection = false;
@@ -88,6 +88,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     deceasedGreyedOut = false;
     noSelection = true;
     testOldNode: any;
+    isCancelTimerInitiated: any = false;
     constructor(
         private route: ActivatedRoute,
         private api: CohortBuilderService,
@@ -101,6 +102,14 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         } else if (this.selectedTypes === 'Deceased') {
             this.deceasedClicked = false;
         }
+        if(this.noSelection) {
+            if(this.isCancelTimerInitiated) clearTimeout( this.isCancelTimerInitiated )
+            return;
+        }
+        if(this.isCancelTimerInitiated) clearTimeout( this.isCancelTimerInitiated )
+        this.isCancelTimerInitiated = setTimeout (() => {
+            this.actions.requestPreview();
+        } , 3000 );
     }
 
     ngOnInit() {
@@ -280,6 +289,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
      * using a hash?)
      */
     initAgeRange(selections) {
+        console.log(selections);
+        console.log(this.ageRange);
         const min = this.demoForm.get('ageMin');
         const max = this.demoForm.get('ageMax');
 
@@ -381,19 +392,28 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getIncrementedValue() {
-        // this.ageRange
         this.ageClicked = true;
-        this.actions.addParameter(this.tesetNode);
-        this.actions.requestPreview();
+
+        if(!this.tesetNode){
+            this.ageRange.updateValueAndValidity({onlySelf: false, emitEvent:true});
+            setTimeout(()=>{
+                console.log(this.tesetNode);
+                this.actions.addParameter(this.tesetNode);
+                this.actions.requestPreview();
+            },500)
+        } else {
+            this.actions.addParameter(this.tesetNode);
+            this.actions.requestPreview();
+        }
     }
 
     requestPreview(flag?) {
-        setTimeout (() => {
+        // setTimeout (() => {
             if (flag) {
                 this.enableSpinner = true;
                 this.actions.requestPreview();
             }
-        } , 3000 );
+        // } , 3000 );
 
 
     }
