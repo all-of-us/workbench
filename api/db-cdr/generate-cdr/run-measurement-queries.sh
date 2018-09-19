@@ -532,12 +532,18 @@ echo "Getting measurements binned gender value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,stratum_5,count_value,source_count_value)
-with measurement_quartile_data as
+with measurement_quartile_data_raw as
 (
-select cast(stratum_1 as int64) as concept,cast(stratum_3 as int64)as gender,min_value,max_value,p10_value,p25_value,p75_value,p90_value,(p75_value-p25_value) as iqr,(p25_value - 1.5*(p75_value-p25_value)) as iqr_min,
-(p75_value + 1.5*(p75_value-p25_value)) as iqr_max,
+select cast(stratum_1 as int64) as concept,cast(stratum_3 as int64)as gender,min_value,max_value,p10_value,p25_value,p75_value,p90_value,(p75_value-p25_value) as iqr,
+(case when (p25_value - 1.5*(p75_value-p25_value)) > min_value then (p25_value - 1.5*(p75_value-p25_value)) else min_value end) as iqr_min,
+(case when (p75_value + 1.5*(p75_value-p25_value)) < max_value then (p75_value + 1.5*(p75_value-p25_value)) else max_value end) as iqr_max,
 (((p75_value + 1.5*(p75_value-p25_value))-(p25_value - 1.5*(p75_value-p25_value)))/11) as bin_width
 from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\` where analysis_id=1815
+),
+measurement_quartile_data as
+(
+select concept,gender,min_value,max_value,p10_value,p25_value,p75_value,p90_value,iqr,iqr_min,iqr_max,
+((iqr_max-iqr_min)/11) as bin_width from measurement_quartile_data_raw
 )
 select 0 as id,1900 as analysis_id,
 CAST(m1.measurement_concept_id AS STRING) as stratum_1,
@@ -667,11 +673,18 @@ echo "Getting measurement response, age decile histogram data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,stratum_5,count_value,source_count_value)
-with measurement_quartile_data as
+with measurement_quartile_data_raw as
 (
-select cast(stratum_1 as int64) as concept,cast(stratum_3 as int64)as age_decile,min_value,max_value,p10_value,p25_value,p75_value,p90_value,(p75_value-p25_value) as iqr,(p25_value - 1.5*(p75_value-p25_value)) as iqr_min,
-(p75_value + 1.5*(p75_value-p25_value)) as iqr_max,(((p75_value + 1.5*(p75_value-p25_value))-(p25_value - 1.5*(p75_value-p25_value)))/11) as bin_width
+select cast(stratum_1 as int64) as concept,cast(stratum_3 as int64)as age_decile,min_value,max_value,p10_value,p25_value,p75_value,p90_value,(p75_value-p25_value) as iqr,
+(case when (p25_value - 1.5*(p75_value-p25_value)) > min_value then (p25_value - 1.5*(p75_value-p25_value)) else min_value end) as iqr_min,
+(case when (p75_value + 1.5*(p75_value-p25_value)) < max_value then (p75_value + 1.5*(p75_value-p25_value)) else max_value end) as iqr_max,
+(((p75_value + 1.5*(p75_value-p25_value))-(p25_value - 1.5*(p75_value-p25_value)))/11) as bin_width
 from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\` where analysis_id=1816
+),
+measurement_quartile_data as
+(
+select concept,age_decile,min_value,max_value,p10_value,p25_value,p75_value,p90_value,iqr,iqr_min,iqr_max,
+((iqr_max-iqr_min)/11) as bin_width from measurement_quartile_data_raw
 )
 select 0,1901 as analysis_id,
 CAST(m1.measurement_concept_id AS STRING) as stratum_1,
@@ -777,11 +790,18 @@ echo "Getting measurement response, age decile histogram data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,stratum_5,count_value,source_count_value)
-with measurement_quartile_data as
+with measurement_quartile_data_raw as
 (
-select cast(stratum_1 as int64) as concept,cast(stratum_3 as int64)as age_decile,min_value,max_value,p10_value,p25_value,p75_value,p90_value,(p75_value-p25_value) as iqr,(p25_value - 1.5*(p75_value-p25_value)) as iqr_min,
-(p75_value + 1.5*(p75_value-p25_value)) as iqr_max,(((p75_value + 1.5*(p75_value-p25_value))-(p25_value - 1.5*(p75_value-p25_value)))/11) as bin_width
+select cast(stratum_1 as int64) as concept,cast(stratum_3 as int64)as age_decile,min_value,max_value,p10_value,p25_value,p75_value,p90_value,(p75_value-p25_value) as iqr,
+(case when (p25_value - 1.5*(p75_value-p25_value)) > min_value then (p25_value - 1.5*(p75_value-p25_value)) else min_value end) as iqr_min,
+(case when (p75_value + 1.5*(p75_value-p25_value)) < max_value then (p75_value + 1.5*(p75_value-p25_value)) else max_value end) as iqr_max,
+(((p75_value + 1.5*(p75_value-p25_value))-(p25_value - 1.5*(p75_value-p25_value)))/11) as bin_width
 from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\` where analysis_id=1816
+),
+measurement_quartile_data as
+(
+select concept,age_decile,min_value,max_value,p10_value,p25_value,p75_value,p90_value,iqr,iqr_min,iqr_max,
+((iqr_max-iqr_min)/11) as bin_width from measurement_quartile_data_raw
 )
 select 0,1901 as analysis_id,
 CAST(m1.measurement_concept_id AS STRING) as stratum_1,

@@ -537,6 +537,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         analysisIds.add(MEASUREMENT_DIST_ANALYSIS_ID);
 
         for(String conceptId: conceptIds){
+
             ConceptAnalysis conceptAnalysis=new ConceptAnalysis();
 
             boolean isMeasurement = false;
@@ -668,19 +669,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return bins;
     }
 
-    public AchillesResult makeAchillesResult(Long analysisId, String stratum1, String stratum2, String stratum3, String stratum4, String stratum5, Long countValue, Long sourceCountValue) {
-        AchillesResult achillesResult = new AchillesResult();
-        achillesResult.setAnalysisId(analysisId);
-        achillesResult.setStratum1(stratum1);
-        achillesResult.setStratum2(stratum2);
-        achillesResult.setStratum3(stratum3);
-        achillesResult.setStratum4(stratum4);
-        achillesResult.setStratum5(stratum5);
-        achillesResult.setCountValue(countValue);
-        achillesResult.setSourceCountValue(sourceCountValue);
-        return achillesResult;
-    }
-
     public void addGenderStratum(AchillesAnalysis aa){
         for(AchillesResult ar: aa.getResults()){
             String analysisStratumName =ar.getAnalysisStratumName();
@@ -734,6 +722,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     public void processMeasurementGenderAnalysis(AchillesAnalysis aa, String conceptId, String unitName) {
+
         Float male_bin_min = null;
         Float male_bin_max = null;
 
@@ -778,12 +767,12 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }
 
         for(float maleRemaining: male_bin_ranges){
-            AchillesResult achillesResult = makeAchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(MALE), null, String.valueOf(maleRemaining), null, 0L, 0L);
+            AchillesResult achillesResult = new AchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(MALE), null, String.valueOf(maleRemaining), null, 0L, 0L);
             aa.addResult(achillesResult);
         }
 
         for(float femaleRemaining: female_bin_ranges){
-            AchillesResult ar = makeAchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(FEMALE), null, String.valueOf(femaleRemaining), null, 0L, 0L);
+            AchillesResult ar = new AchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, String.valueOf(FEMALE), null, String.valueOf(femaleRemaining), null, 0L, 0L);
             aa.addResult(ar);
         }
 
