@@ -189,18 +189,15 @@ public class DataBrowserControllerTest {
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_1 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cstest 1")
-            .languageConceptId(0L);
+            .conceptSynonymName("cstest 1");
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_2 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cstest 2")
-            .languageConceptId(0L);
+            .conceptSynonymName("cstest 2");
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_3 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cstest 3")
-            .languageConceptId(0L);
+            .conceptSynonymName("cstest 3");
 
     private static final DbDomain CLIENT_DB_DOMAIN_1 = new DbDomain()
             .domainId("Condition")
@@ -747,7 +744,6 @@ public class DataBrowserControllerTest {
         ConceptSynonym cs = new ConceptSynonym();
         cs.setConceptId(conceptSynonym.getConceptId());
         cs.setConceptSynonymName(conceptSynonym.getConceptSynonymName());
-        cs.setLanguageConceptId(conceptSynonym.getLanguageConceptId());
         return cs;
     }
 
