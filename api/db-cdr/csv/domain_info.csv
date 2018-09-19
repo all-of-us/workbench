@@ -1,0 +1,5 @@
+"domain","concept_id","name","description"
+0,19,"Conditions","Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient."
+3,13,"Drugs","Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body."
+4,21,"Measurements","Measurement"
+6,10,"Procedures","Procedure"

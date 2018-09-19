@@ -33,6 +33,24 @@ public class DomainInfo {
   private long participantCount;
 
   @Id
+  @Column(name = "domain")
+  public short getDomain() {
+    return domain;
+  }
+
+  public void setDomain(short domain) {
+    this.domain = domain;
+  }
+
+  @Transient
+  public Domain getDomainEnum() {
+    return CommonStorageEnums.domainFromStorage(domain);
+  }
+
+  public void setDomainEnum(Domain domain) {
+    this.domain = CommonStorageEnums.domainToStorage(domain);
+  }
+
   @Column(name = "concept_id")
   public Long getConceptId() {
     return conceptId;
@@ -56,23 +74,6 @@ public class DomainInfo {
     this.name = name;
   }
 
-  @Column(name = "domain")
-  public short getDomain() {
-    return domain;
-  }
-
-  public void setDomain(short domain) {
-    this.domain = domain;
-  }
-
-  @Transient
-  public Domain getDomainEnum() {
-    return CommonStorageEnums.domainFromStorage(domain);
-  }
-
-  public void setDomainEnum(Domain domain) {
-    this.domain = CommonStorageEnums.domainToStorage(domain);
-  }
 
   @Column(name = "description")
   public String getDescription() {
