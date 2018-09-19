@@ -38,6 +38,11 @@ definitions:
     description: levels of access to data in the curated data repository
     enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
 
+  Domain:
+    type: string
+    description: a domain for concepts corresponding to a table in the OMOP schema
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT]
+
   CdrVersionListResponse:
     type: object
     required:
@@ -70,6 +75,38 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+
+  DomainInfo:
+    type: object
+    required:
+      - domain
+      - name
+      - description
+      - standardConceptCount
+      - allConceptCount
+      - participantCount
+    properties:
+      domain:
+        description: the domain ID
+        $ref: "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      description:
+        description: description of the domain
+        type: string
+      standardConceptCount:
+        description: number of standard concepts in this domain
+        type: integer
+        format: int64
+      allConceptCount:
+        description: number of concepts in this domain (standard or non-standard)
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for a concept in this domain
+        type: integer
+        format: int64
 
   ErrorResponse:
     type: object

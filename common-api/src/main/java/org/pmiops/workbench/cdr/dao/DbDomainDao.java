@@ -7,13 +7,7 @@ import java.util.List;
 
 public interface DbDomainDao extends CrudRepository<DbDomain, Long> {
 
-    List<DbDomain> findByConceptIdNotNull();
 
-    DbDomain findByConceptId(long conceptId);
-
-    List<DbDomain> findByDbType(String db_type);
-
-    List<DbDomain> findByDbTypeAndConceptIdNot(String db_type,Long concept_id);
 
         @Query(nativeQuery=true,value="select d.domain_id, d.domain_display, d.domain_desc,\n" +
                 "d.db_type, d.domain_route,d.concept_id, count(distinct c.concept_id) as standard_concept_count\n" +

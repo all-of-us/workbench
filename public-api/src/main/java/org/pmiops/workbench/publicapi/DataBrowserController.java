@@ -343,21 +343,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 }
             };
 
-
-    @Override
-    public ResponseEntity<DbDomainListResponse> getDomainFilters() {
-        // TODO: change all the APIs to accept CDR version ID as a parameter, use it here and below.
-        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
-        List<DbDomain> domains=dbDomainDao.findByDbType("domain_filter");
-        DbDomainListResponse resp=new DbDomainListResponse();
-        resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-    }
-
     @Override
     public ResponseEntity<DbDomainListResponse> getSurveyList() {
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
-        List<DbDomain> domains=dbDomainDao.findByDbTypeAndConceptIdNot("survey",0L);
+        // TODO: use config
         DbDomainListResponse resp=new DbDomainListResponse();
         resp.setItems(domains.stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
@@ -503,7 +492,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         // Get survey definition
         QuestionConceptListResponse resp = new QuestionConceptListResponse();
-        DbDomain survey = dbDomainDao.findByConceptId(longSurveyConceptId);
+
+        // TODO: use config for questions here
+
         resp.setSurvey(TO_CLIENT_DBDOMAIN.apply(survey));
         // Get all analyses for question list and put the analyses on the question objects
         if (!questions.isEmpty()) {
@@ -621,21 +612,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(resp);
     }
 
-    /**
-     * This method gets concepts with maps to relationship in concept relationship table
-     *
-     * @param conceptId
-     * @return
-     */
-    @Override
-    public ResponseEntity<ConceptListResponse> getParentConcepts(Long conceptId) {
-        CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
-        List<Concept> conceptList = conceptDao.findConceptsMapsToParents(conceptId);
-        ConceptListResponse resp = new ConceptListResponse();
-        resp.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
-        return ResponseEntity.ok(resp);
-    }
-
     @Override
     public ResponseEntity<org.pmiops.workbench.model.AchillesResult> getParticipantCount() {
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
@@ -643,6 +619,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         return ResponseEntity.ok(TO_CLIENT_ACHILLES_RESULT.apply(result));
     }
 
+<<<<<<< HEAD
     @Override
     public ResponseEntity<DbDomainListResponse> getDbDomains() {
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
@@ -772,5 +749,4 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }
 
     }
-
 }
