@@ -1,4 +1,4 @@
-  export const NotebookActionList = [
+  export const notebookActionList = [
     {
     type: 'notebook',
     class: 'pencil',
@@ -16,7 +16,7 @@
     link: 'deleteResource'
   }];
 
-export const CohortActionList = [
+export const cohortActionList = [
   {
     type: 'cohort',
     class: 'copy',
@@ -39,6 +39,6 @@ export const CohortActionList = [
     link: 'deleteResource'
   }];
 
-export const ResourceActionList =  NotebookActionList.concat(CohortActionList);
+export const resourceActionList =  notebookActionList.concat(cohortActionList);
 
 
