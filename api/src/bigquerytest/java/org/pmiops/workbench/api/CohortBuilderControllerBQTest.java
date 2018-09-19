@@ -102,6 +102,158 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsCodesNoSearchParameter() throws Exception {
+    Criteria icd9ConditionChild =
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), new ArrayList<>(), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Provide a valid search parameter.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsICD9ChildNoDomain() throws Exception {
+    Criteria icd9ConditionChild =
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", null, "1");
+    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Domain 'null' is not valid.", bre.getMessage());
+    }
+
+    try {
+      icd9.setDomain("");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Domain '' is not valid.", bre.getMessage());
+    }
+
+    try {
+      icd9.setDomain("blah");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Domain 'blah' is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsICD9ChildNoConceptId() throws Exception {
+    Criteria icd9ConditionChild =
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
+    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1").conceptId(null);
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Concept Id 'null' is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsICD9ParentCodeException() throws Exception {
+    Criteria icd9ConditionParent =
+      createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), null).domainId(DomainType.CONDITION.name());
+    SearchParameter icd9 = createSearchParameter(icd9ConditionParent, null);
+    SearchRequest searchRequest = createSearchRequests(icd9ConditionParent.getType(), Arrays.asList(icd9), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Code 'null' is not valid.", bre.getMessage());
+    }
+
+    try {
+      icd9.setValue("");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Code '' is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsICD9ParentTypeException() throws Exception {
+    Criteria icd9ConditionParent =
+      createCriteriaParent(null, TreeSubType.CM.name(), "001").domainId(DomainType.CONDITION.name());
+    SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
+    SearchRequest searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Type 'null' is not valid.", bre.getMessage());
+    }
+
+    try {
+      icd9.setType("");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Type '' is not valid.", bre.getMessage());
+    }
+
+    try {
+      icd9.setType("blah");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Type 'blah' is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsICD9ParentSubtypeException() throws Exception {
+    Criteria icd9ConditionParent =
+      createCriteriaParent(TreeType.ICD9.name(), null, "001").domainId(DomainType.CONDITION.name());
+    SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
+    SearchRequest searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Subtype 'null' is not valid.", bre.getMessage());
+    }
+
+    try {
+      icd9.subtype("");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Subtype '' is not valid.", bre.getMessage());
+    }
+
+    try {
+      icd9.subtype("blah");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Subtype 'blah' is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
   public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
     Criteria icd9ConditionChild =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
@@ -480,7 +632,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoDecNoValue() throws Exception {
+  public void countSubjectsDemoDecValueException() throws Exception {
     Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
     SearchParameter demo = createSearchParameter(demoGender, "");
     SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
@@ -489,7 +641,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals(bre.getMessage(), "Dec must provide a value of: Deceased");
+      assertEquals("Bad Request: Dec value '' is not valid.", bre.getMessage());
+    }
+
+    try {
+      demo.setValue("blah");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Dec value 'blah' is not valid.", bre.getMessage());
     }
   }
 
@@ -504,6 +665,82 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
+  }
+
+  @Test
+  public void countSubjectsDemoNoParameters() throws Exception {
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), new ArrayList<>(), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Provide a valid search parameter.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsDemoTypeException() throws Exception {
+    Criteria demoAge = createDemoCriteria(null, "AGE", null);
+    SearchParameter demo = createSearchParameter(demoAge, null);
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Type 'null' is not valid.", bre.getMessage());
+    }
+
+    try {
+      demo.setType("");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Type '' is not valid.", bre.getMessage());
+    }
+
+    try {
+      demo.setType("blah");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Type 'blah' is not valid.", bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsDemoSubtypeException() throws Exception {
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), null, null);
+    SearchParameter demo = createSearchParameter(demoAge, null);
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Subtype 'null' is not valid.", bre.getMessage());
+    }
+
+    try {
+      demo.setSubtype("");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Subtype '' is not valid.", bre.getMessage());
+    }
+
+    try {
+      demo.setSubtype("blah");
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Subtype 'blah' is not valid.", bre.getMessage());
+    }
   }
 
   @Test
@@ -523,7 +760,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals(bre.getMessage(), "Cannot select age and deceased in the same context.");
+      assertEquals("Bad Request: Cannot search age and deceased together.", bre.getMessage());
     }
   }
 
@@ -537,22 +774,59 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals(bre.getMessage(), "Age must provide an operator and operands.");
+      assertEquals("Bad Request: Provide attributes for age.", bre.getMessage());
     }
   }
 
   @Test
-  public void countSubjectsDemoAgeNoAttributeOperands() throws Exception {
+  public void countSubjectsDemoAgeAtributeExceptions() throws Exception {
+    Attribute attribute = new Attribute();
     Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
     SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
-    demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL)));
+    demoAgeParameter.attributes(Arrays.asList(attribute));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals(bre.getMessage(), "Age must provide an operator and operands.");
+      assertEquals("Bad Request: Operator 'null' is not valid.", bre.getMessage());
+    }
+
+    try {
+      attribute.setOperator(Operator.EQUAL);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Provide valid operands.", bre.getMessage());
+    }
+
+    try {
+      attribute.operator(Operator.EQUAL).operands(Arrays.asList("1", "2"));
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Provide one operand.", bre.getMessage());
+    }
+
+    try {
+      attribute.operator(Operator.BETWEEN).operands(Arrays.asList("1"));
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Provide two operands.", bre.getMessage());
+    }
+
+    try {
+      attribute.operator(Operator.EQUAL).operands(Arrays.asList("blah"));
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      assertEquals("Bad Request: Operands must be numeric.", bre.getMessage());
     }
   }
 
@@ -825,7 +1099,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Please provide a valid search parameter.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid search parameter.", bre.getMessage());
     }
   }
 
@@ -838,7 +1112,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Please provide a search parameter with a valid conceptId.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid concept id. null is not valid.", bre.getMessage());
     }
   }
 

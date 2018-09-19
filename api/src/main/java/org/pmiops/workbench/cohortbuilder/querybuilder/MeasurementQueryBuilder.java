@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
@@ -15,7 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Predicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.AttributePredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.parametersEmpty;
 
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
@@ -42,7 +42,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
     List<String> queryParts = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
-    check(parametersEmpty()).validate(parameters.getParameters()).throwException("Bad Request: Please provide a valid search parameter.");
+    from(parametersEmpty()).test(parameters.getParameters()).throwException("Bad Request: Please provide a valid search parameter.");
     for (SearchParameter parameter : parameters.getParameters()) {
       validateAttributes(parameter);
       String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", parameter.getConceptId().toString());
@@ -86,12 +86,12 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       .stream()
       .filter(attr -> !isNameAny(attr))
       .forEach(attr -> {
-        check(nameBlank()).validate(attr).throwException("Bad Request: Please provide a valid attribute name. s% is not valid.", attr.getName());
-        check(operatorNull()).validate(attr).throwException("Bad Request: Please provide a valid operator. s% is not valid.", null);
-        check(operandsEmpty()).validate(attr).throwException("Bad Request: Please provide one or more operands.");
-        check(categoricalAndNotIn()).validate(attr).throwException("Bad Request: Please provide the in operator when searching categorical attributes.");
-        check(betweenAndNotTwoOperands()).validate(attr).throwException("Bad Request: Please provide two operands when using the between operator.");
-        check(operandsInvalid()).validate(attr).throwException("Bad Request: Please provide valid numeric operands.");
+        from(nameBlank()).test(attr).throwException("Bad Request: Please provide a valid attribute name. s% is not valid.", attr.getName());
+        from(operatorNull()).test(attr).throwException("Bad Request: Please provide a valid operator. null is not valid.");
+        from(operandsEmpty()).test(attr).throwException("Bad Request: Please provide one or more operands.");
+        from(categoricalAndNotIn()).test(attr).throwException("Bad Request: Please provide the in operator when searching categorical attributes.");
+        from(betweenAndNotTwoOperands()).test(attr).throwException("Bad Request: Please provide two operands when using the between operator.");
+        from(operandsInvalid()).test(attr).throwException("Bad Request: Please provide valid numeric operands.");
       });
   }
 

@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Predicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
 
 @Service
 public class DrugQueryBuilder extends AbstractQueryBuilder {
@@ -23,7 +22,9 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
-    check(parametersEmpty()).validate(parameters.getParameters()).throwException("Bad Request: Please provide a valid search parameter.");
+    from(parametersEmpty())
+      .test(parameters.getParameters())
+      .throwException("Bad Request: Please provide a valid search parameter.");
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     String namedParameter = "drug" + getUniqueNamedParameterPostfix();
     Long[] conceptIds = parameters.getParameters()
@@ -47,8 +48,9 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
   }
 
   private Long validateConceptId(SearchParameter searchParameter) {
-    check(conceptIdNull()).validate(searchParameter)
-      .throwException("Bad Request: Please provide a search parameter with a valid conceptId.");
+    from(conceptIdNull())
+      .test(searchParameter)
+      .throwException("Bad Request: Please provide a valid concept id. null is not valid.");
     return searchParameter.getConceptId();
   }
 }
