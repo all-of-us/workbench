@@ -10,16 +10,24 @@
     <validCheckSum>ANY</validCheckSum>
 
     <delete tableName="db_domain"/>
+    <delete tableName="domain_info"/>
 
-    <loadData tableName="db_domain" file="csv/db_domain.csv" encoding="UTF-8" quotchar='"'>
-      <column name="domain_id" type="STRING"/>
-      <column name="domain_display" type="STRING"/>
-      <column name="domain_desc" type="STRING"/>
-      <column name="domain_route" type="STRING"/>
-      <column name="db_type" type="STRING"/>
-      <column name="concept_id" type="NUMERIC"/>
-      <column name="count_value" type="NUMERIC" />
+    <loadData tableName="domain_info" file="csv/domain_info.csv" encoding="UTF-8" quotchar='"'>
+      <column name="concept_id" type="bigint"/>
+      <column name="domain_id" type="tinyint"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
+      <column name="all_concept_count" type="bigint"/>
+      <column name="standard_concept_count" type="bigint"/>
+      <column name="participant_count" type="bigint" />
     </loadData>
 
+    <loadData tableName="survey_module" file="csv/survey_modules.csv" encoding="UTF-8" quotchar='"'>
+      <column name="concept_id" type="bigint"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
+      <column name="question_count" type="bigint"/>
+      <column name="participant_count" type="bigint" />
+    </loadData>
   </changeSet>
 </databaseChangeLog>

@@ -1,22 +1,13 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import javax.persistence.Basic;
-import javax.persistence.CollectionTable;
+import java.util.Objects;
+import java.util.function.Function;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.model.Domain;
 
@@ -24,8 +15,18 @@ import org.pmiops.workbench.model.Domain;
 @Table(name = "domain_info")
 public class DomainInfo {
 
+  public static final Function<DomainInfo, org.pmiops.workbench.model.DomainInfo> TO_CLIENT_DOMAIN_INFO =
+      (domain) -> new org.pmiops.workbench.model.DomainInfo()
+          .domain(domain.getDomainEnum())
+          .name(domain.getName())
+          .description(domain.getDescription())
+          .allConceptCount(domain.getAllConceptCount())
+          .standardConceptCount(domain.getStandardConceptCount())
+          .participantCount(domain.getParticipantCount());
+
   private long conceptId;
   private short domain;
+  private String domainId;
   private String name;
   private String description;
   private long allConceptCount;
@@ -33,24 +34,6 @@ public class DomainInfo {
   private long participantCount;
 
   @Id
-  @Column(name = "domain")
-  public short getDomain() {
-    return domain;
-  }
-
-  public void setDomain(short domain) {
-    this.domain = domain;
-  }
-
-  @Transient
-  public Domain getDomainEnum() {
-    return CommonStorageEnums.domainFromStorage(domain);
-  }
-
-  public void setDomainEnum(Domain domain) {
-    this.domain = CommonStorageEnums.domainToStorage(domain);
-  }
-
   @Column(name = "concept_id")
   public Long getConceptId() {
     return conceptId;
@@ -65,6 +48,39 @@ public class DomainInfo {
     return this;
   }
 
+  @Column(name = "domain")
+  public short getDomain() {
+    return domain;
+  }
+
+  public void setDomain(short domain) {
+    this.domain = domain;
+  }
+
+  public DomainInfo domain(short domain) {
+    this.domain = domain;
+    return this;
+  }
+
+  @Transient
+  public Domain getDomainEnum() {
+    return CommonStorageEnums.domainFromStorage(domain);
+  }
+
+  @Column(name = "domain_id")
+  public String getDomainId() {
+    return domainId;
+  }
+
+  public void setDomainId(String domainId) {
+    this.domainId = domainId;
+  }
+
+  public DomainInfo domainId(String domainId) {
+    this.domainId = domainId;
+    return this;
+  }
+
   @Column(name = "name")
   public String getName() {
     return name;
@@ -74,6 +90,10 @@ public class DomainInfo {
     this.name = name;
   }
 
+  public DomainInfo name(String name) {
+    this.name = name;
+    return this;
+  }
 
   @Column(name = "description")
   public String getDescription() {
@@ -82,6 +102,11 @@ public class DomainInfo {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public DomainInfo description(String description) {
+    this.description = description;
+    return this;
   }
 
   @Column(name="all_concept_count")

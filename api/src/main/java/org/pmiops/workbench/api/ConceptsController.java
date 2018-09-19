@@ -1,16 +1,18 @@
 package org.pmiops.workbench.api;
 
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
-import org.pmiops.workbench.cdr.dao.DbDomainDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
-import org.pmiops.workbench.cdr.model.DbDomain;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
-import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
@@ -21,40 +23,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 @RestController
 public class ConceptsController implements ConceptsApiDelegate {
-
-  // TODO: consider putting this in CDM config, fetching it from there
-  static final ImmutableMultimap<Domain, String> DOMAIN_MAP =
-      ImmutableMultimap.<Domain, String>builder()
-          .put(Domain.CONDITION, "Condition")
-          .put(Domain.CONDITION, "Condition/Meas")
-          .put(Domain.CONDITION, "Condition/Device")
-          .put(Domain.CONDITION, "Condition/Procedure")
-          .put(Domain.DEVICE, "Device")
-          .put(Domain.DEVICE, "Condition/Device")
-          .put(Domain.DRUG, "Drug")
-          .put(Domain.ETHNICITY, "Ethnicity")
-          .put(Domain.GENDER, "Gender")
-          .put(Domain.MEASUREMENT, "Measurement")
-          .put(Domain.MEASUREMENT, "Meas/Procedure")
-          .put(Domain.OBSERVATION, "Observation")
-          .put(Domain.PROCEDURE, "Procedure")
-          .put(Domain.PROCEDURE, "Meas/Procedure")
-          .put(Domain.PROCEDURE, "Condition/Procedure")
-          .put(Domain.RACE, "Race")
-          .build();
 
   private static final Integer DEFAULT_MAX_RESULTS = 20;
   private static final int MAX_MAX_RESULTS = 1000;
 
   private final ConceptService conceptService;
   private final WorkspaceService workspaceService;
-  private final DbDomainDao dbDomainDao;
+  private final DomainInfoDao domainInfoDao;
 
   static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->  new Concept()
@@ -69,25 +46,16 @@ public class ConceptsController implements ConceptsApiDelegate {
             .vocabularyId(concept.getVocabularyId())
             .conceptSynonyms(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
 
-  static final Function<DbDomain, DomainInfo> TO_CLIENT_DOMAIN_INFO =
-      (dbDomain) -> new DomainInfo()
-          .domain(Domain.fromValue(dbDomain.getDomainId().toUpperCase()))
-          .name(dbDomain.getDomainDisplay())
-          .description(dbDomain.getDomainDesc())
-          .allConceptCount(dbDomain.getAllConceptCount())
-          .standardConceptCount(dbDomain.getStandardConceptCount())
-          .participantCount(dbDomain.getParticipantCount());
-
   @Autowired
   ConceptSynonymDao conceptSynonymDao;
 
   @Autowired
   public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,
-                            ConceptSynonymDao conceptSynonymDao, DbDomainDao dbDomainDao) {
+                            ConceptSynonymDao conceptSynonymDao, DomainInfoDao domainInfoDao) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
     this.conceptSynonymDao = conceptSynonymDao;
-    this.dbDomainDao = dbDomainDao;
+    this.domainInfoDao = domainInfoDao;
   }
 
   @Override
@@ -95,9 +63,11 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<DbDomain> domains = dbDomainDao.findDomainFilterTotals();
+    List<org.pmiops.workbench.cdr.model.DomainInfo> domains =
+        ImmutableList.copyOf(domainInfoDao.findAll());
     DomainInfoResponse response = new DomainInfoResponse().items(
-        domains.stream().map(TO_CLIENT_DOMAIN_INFO).collect(Collectors.toList()));
+        domains.stream().map(org.pmiops.workbench.cdr.model.DomainInfo.TO_CLIENT_DOMAIN_INFO)
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
@@ -124,7 +94,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     }
     List<String> domainIds = null;
     if (request.getDomain() != null) {
-      domainIds = DOMAIN_MAP.get(request.getDomain()).asList();
+      domainIds = ImmutableList.of(CommonStorageEnums.domainToDomainId(request.getDomain()));
     }
     ConceptService.StandardConceptFilter convertedConceptFilter =
         ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
@@ -135,7 +105,6 @@ public class ConceptsController implements ConceptsApiDelegate {
     Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
               request.getVocabularyIds(), domainIds, maxResults, minCount);
 
-    // TODO: move Swagger codegen to common-api, pass request with modified values into service
     ConceptListResponse response = new ConceptListResponse();
     if(concepts != null){
       response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)

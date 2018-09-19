@@ -108,6 +108,29 @@ definitions:
         type: integer
         format: int64
 
+  SurveyModule:
+    type: object
+    required:
+      - name
+      - description
+      - questionCount
+      - participantCount
+    properties:
+      name:
+        description: display name of the module
+        type: string
+      description:
+        description: description of the module
+        type: string
+      questionCount:
+        description: number of questions in the module
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for questions in this module
+        type: integer
+        format: int64
+
   ErrorResponse:
     type: object
     properties:

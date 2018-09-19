@@ -137,7 +137,7 @@ paths:
       security: []
       tags:
         - dataBrowser
-      description: Gets the domain filters with the count of matched concepts
+      description: Gets the domain filters and survey modules with the count of matched concepts
       operationId: "getDomainSearchResults"
       parameters:
         - in: query
@@ -147,22 +147,22 @@ paths:
           description: search key word
       responses:
         200:
-          description: A collection of domains
+          description: A collection of domains and survey modules
           schema:
-            $ref: "#/definitions/DbDomainListResponse"
+            $ref: "#/definitions/DomainInfosAndSurveyModulesResponse"
   /v1/databrowser/domain-totals:
     get:
       security: []
       tags:
         - dataBrowser
-      description: Gets the domain filters with the count of matched concepts
+      description: Gets the domain filters and survey modules with the count of all concepts and questions
       operationId: "getDomainTotals"
       parameters: []
       responses:
         200:
-          description: A collection of domains
+          description: A collection of domains and survey modules
           schema:
-            $ref: "#/definitions/DbDomainListResponse"
+            $ref: "#/definitions/DomainInfosAndSurveyModulesResponse"
 
   /v1/databrowser/searchConcepts:
     post:
@@ -183,51 +183,6 @@ paths:
           schema:
             $ref: "#/definitions/ConceptListResponse"
 
-  /v1/databrowser/db-domains:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets list of analysis definitions (not used?)
-      operationId: "getDbDomains"
-      parameters: []
-      responses:
-        200:
-          description: A collection of databrowser domains
-          schema:
-            $ref: "#/definitions/DbDomainListResponse"
-
-  /v1/databrowser/domain-filters:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets domain filters (not used?)
-      operationId: "getDomainFilters"
-      parameters: []
-      responses:
-        200:
-          description: A collection of domain filters
-          schema:
-            $ref: "#/definitions/DbDomainListResponse"
-
-
-  /v1/databrowser/survey-list:
-    get:
-      security: []
-      tags:
-        - dataBrowser
-
-      description: Gets survey list (redundant with domain-totals?)
-      operationId: "getSurveyList"
-      parameters: []
-      responses:
-        200:
-          description: A collection of surveys
-          schema:
-            $ref: "#/definitions/DbDomainListResponse"
 
   /v1/databrowser/source-concepts:
     get:
@@ -255,29 +210,6 @@ paths:
           description: a collection of concepts
           schema:
             $ref: "#/definitions/ConceptListResponse"
-
-  /v1/databrowser/parent-concepts:
-      get:
-        security: []
-        tags:
-          - dataBrowser
-
-        description: Gets parent concepts for the given concept
-        operationId: "getParentConcepts"
-        parameters:
-          - in: query
-            name: concept_id
-            type: integer
-            format: int64
-            required: true
-            description: concept id to get maps to concepts
-        responses:
-          200:
-            description: A collection of databrowser domains
-            schema:
-              $ref: "#/definitions/ConceptListResponse"
-
-
 
 ##########################################################################################
 ## DEFINITIONS
@@ -400,7 +332,7 @@ definitions:
       - items
     properties:
       survey:
-        $ref: "#/definitions/DbDomain"
+        $ref: "#/definitions/SurveyModule"
       items:
         type: array
         items:
@@ -586,48 +518,20 @@ definitions:
         items:
           $ref: "#/definitions/Analysis"
 
-  DbDomain:
+  DomainInfosAndSurveyModulesResponse:
     type: object
     required:
-      - domainId
+      - domainInfos
+      - surveyModules
     properties:
-      domainId:
-        description: domain id
-        type: string
-      domainDisplay:
-        description:  web display name
-        type: string
-      domainDesc:
-        description:  full desc text
-        type: string
-      dbType:
-        description:  type of domain
-        type: string
-      domainRoute:
-        description:  route
-        type: string
-      conceptId:
-        description: concept id of domain
-        type: integer
-        format: int64
-      countValue:
-        description: count value
-        type: integer
-        format: int64
-      participantCount:
-        description: participant count
-        type: integer
-        format: int64
-
-  DbDomainListResponse:
-    type: object
-    required:
-      - items
-    properties:
-      items:
+      domainInfos:
         type: "array"
         items:
-          $ref: "#/definitions/DbDomain"
+          $ref: "#/definitions/DomainInfo"
+      surveyModules:
+        type: "array"
+        items:
+          $ref: "#/definitions/SurveyModule"
 
   ConceptAnalysis:
     type: object
