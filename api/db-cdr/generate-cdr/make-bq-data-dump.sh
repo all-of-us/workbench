@@ -56,9 +56,16 @@ fi
 
 for table in ${tables[@]}; do
   echo "Dumping table : $table"
-  # Always dump with .*. in case they are big.
-  bq extract --project_id $PROJECT --compression=GZIP --print_header=false $PROJECT:$DATASET.$table \
+  # It would be nice to use .* for everything but bq extract does a bad job and you end up with a hundred small files
+  # for tables that should just be one file without the .*
+  if [[ $table =~ ^(concept|concept_relationship|concept_ancestor|concept_synonym)$ ]]
+  then
+    bq extract --project_id $PROJECT --compression=GZIP --print_header=false $PROJECT:$DATASET.$table \
     gs://$BUCKET/$DATASET/$table.*.csv.gz
+  else
+    bq extract --project_id $PROJECT --compression=GZIP --print_header=false $PROJECT:$DATASET.$table \
+    gs://$BUCKET/$DATASET/$table.csv.gz
+  fi
 done
 
 exit 0

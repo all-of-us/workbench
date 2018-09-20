@@ -24,7 +24,7 @@ done
 
 if [ -z "${PROJECT}" ]
 then
-  echo $USAGE # codacy doesn't like not using this.
+  echo $USAGE
   exit 1
 fi
 

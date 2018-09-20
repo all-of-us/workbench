@@ -19,7 +19,6 @@ USAGE="./generate-clousql-cdr/cloudsql-import.sh --project <PROJECT> --instance 
 --database <database> [--create-db-sql-file <filename.sql>] [--file <just_import_me_filename>]"
 # example account for test : all-of-us-workbench-test@appspot.gserviceaccount.com
 while [ $# -gt 0 ]; do
-  echo "$1 in 1"
   case "$1" in
     --project) PROJECT=$2; shift 2;;
     --instance) INSTANCE=$2; shift 2;;
@@ -121,7 +120,6 @@ then
   # Just grant access to this file
   gs_file=gs://$BUCKET/$FILE
   grant_access_to_files $gs_file
-  echo "Acces granted to $gs_file"
   if [[ $FILE =~ \.sql.* ]]
   then
     sqls[0]=$gs_file
