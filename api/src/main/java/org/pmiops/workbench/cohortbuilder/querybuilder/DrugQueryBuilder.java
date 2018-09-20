@@ -2,11 +2,9 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
@@ -23,12 +21,15 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
-    validateSearchParameters(parameters.getParameters());
+    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     String namedParameter = "drug" + getUniqueNamedParameterPostfix();
     Long[] conceptIds = parameters.getParameters()
       .stream()
-      .map(this::validateConceptId)
+      .map(param -> {
+        from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
+        return param.getConceptId();
+      })
       .toArray(Long[]::new);
     queryParams.put(namedParameter, QueryParameterValue.array(conceptIds, Long.class));
     String drugSql = DRUG_SQL_TEMPLATE.replace("${conceptIds}", "@" + namedParameter);
@@ -44,14 +45,5 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
   @Override
   public FactoryKey getType() {
     return FactoryKey.DRUG;
-  }
-
-  private void validateSearchParameters(List<SearchParameter> parameters) {
-    from(parametersEmpty()).test(parameters).throwException(EMPTY_MESSAGE, PARAMETERS);
-  }
-
-  private Long validateConceptId(SearchParameter searchParameter) {
-    from(conceptIdNull()).test(searchParameter).throwException(NOT_VALID_MESSAGE, CONCEPT_ID);
-    return searchParameter.getConceptId();
   }
 }

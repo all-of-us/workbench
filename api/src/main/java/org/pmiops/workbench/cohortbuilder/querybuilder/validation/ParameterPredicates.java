@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 public class ParameterPredicates {
 
   private static final String DECEASED = "Deceased";
+  private static final String SYSTOLIC = "Systolic";
+  private static final String DIASTOLIC = "Diastolic";
+  private static final String ANY = "Any";
 
   private static final List<String> VALID_DOMAINS =
     Arrays.asList(DomainType.CONDITION.name(), DomainType.PROCEDURE.name(), DomainType.MEASUREMENT.name(),
@@ -36,6 +39,9 @@ public class ParameterPredicates {
   private static final List<String> DEMO_SUBTYPES =
     Arrays.asList(TreeSubType.AGE.name(), TreeSubType.DEC.name(), TreeSubType.GEN.name(),
       TreeSubType.RACE.name(), TreeSubType.ETH.name());
+
+  private static final List<String> DEMO_GEN_RACE_ETH_SUBTYPES =
+    Arrays.asList(TreeSubType.GEN.name(), TreeSubType.RACE.name(), TreeSubType.ETH.name());
 
   public static Predicate<List<SearchParameter>> parametersEmpty() {
     return params -> params.isEmpty();
@@ -105,15 +111,47 @@ public class ParameterPredicates {
     return sp -> !DEMO_SUBTYPES.contains(sp.getSubtype());
   }
 
-  public static Predicate<SearchParameter> subtypeAge() {
-    return sp -> sp.getSubtype().equals(TreeSubType.AGE.name());
-  }
-
   public static Predicate<SearchParameter> subtypeDec() {
     return sp -> sp.getSubtype().equals(TreeSubType.DEC.name());
+  }
+  public static Predicate<SearchParameter> subTypeGenRaceEth() {
+    return sp -> DEMO_GEN_RACE_ETH_SUBTYPES.contains(sp.getSubtype());
   }
 
   public static Predicate<SearchParameter> valueNotDec() {
     return sp -> !sp.getValue().equals(DECEASED);
+  }
+
+  public static Predicate<SearchParameter> valueNull() {
+    return sp -> sp.getValue() == null;
+  }
+
+  public static Predicate<SearchParameter> valueNotNumber() {
+    return sp -> !NumberUtils.isNumber(sp.getValue());
+  }
+
+  public static Predicate<SearchParameter> twoAttributes() {
+    return sp -> sp.getAttributes().size() == 2;
+  }
+
+  public static Predicate<SearchParameter> systolic() {
+    return sp -> sp.getAttributes()
+      .stream()
+      .filter(a -> SYSTOLIC.equals(a.getName()))
+      .collect(Collectors.toList()).size() == 1;
+  }
+
+  public static Predicate<SearchParameter> diastolic() {
+    return sp -> sp.getAttributes()
+      .stream()
+      .filter(a -> DIASTOLIC.equals(a.getName()))
+      .collect(Collectors.toList()).size() == 1;
+  }
+
+  public static Predicate<SearchParameter> notAnyAttr() {
+    return sp -> sp.getAttributes()
+      .stream()
+      .filter(a -> ANY.equals(a.getName()))
+      .collect(Collectors.toList()).size() == 0;
   }
 }

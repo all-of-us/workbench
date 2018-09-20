@@ -14,6 +14,8 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.MeasurementQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.querybuilder.PMQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -30,6 +32,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -111,7 +114,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Provide a valid search parameter.", bre.getMessage());
+      String message = AbstractQueryBuilder.EMPTY_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.PARAMETERS};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -126,7 +132,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Domain \"null\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.DOMAIN, icd9.getDomain()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -135,7 +144,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Domain \"\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.DOMAIN, icd9.getDomain()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -144,7 +156,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Domain \"blah\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.DOMAIN, icd9.getDomain()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -159,7 +174,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Concept Id \"null\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.CONCEPT_ID, icd9.getConceptId()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -174,7 +192,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Code \"null\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.CODE, icd9.getValue()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -183,7 +204,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Code \"\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.CODE, icd9.getValue()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -198,7 +222,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type \"null\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.TYPE, icd9.getType()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -207,7 +234,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type \"\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.TYPE, icd9.getType()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -216,7 +246,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type \"blah\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.TYPE, icd9.getType()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -231,7 +264,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype \"null\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.SUBTYPE, icd9.getSubtype()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -240,7 +276,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype \"\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.SUBTYPE, icd9.getSubtype()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -249,7 +288,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype \"blah\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.SUBTYPE, icd9.getSubtype()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -609,7 +651,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoGender() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
     SearchParameter demo = createSearchParameter(demoGender, null);
     SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -617,7 +659,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoEthnicity() throws Exception {
-    Criteria demoEthnicity = createDemoCriteria("DEMO", "ETH", "9898");
+    Criteria demoEthnicity = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.ETH.name(), "9898");
     SearchParameter demo = createSearchParameter(demoEthnicity, null);
     SearchRequest searchRequest = createSearchRequests(demoEthnicity.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -625,7 +667,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoDec() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.DEC.name(), null);
     SearchParameter demo = createSearchParameter(demoGender, "Deceased");
     SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -633,7 +675,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoDecValueException() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.DEC.name(), null);
     SearchParameter demo = createSearchParameter(demoGender, "");
     SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
     try {
@@ -641,7 +683,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Dec value \"\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.DEC, demo.getValue()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -650,7 +695,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Dec value \"blah\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {DemoQueryBuilder.DEC, demo.getValue()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -660,7 +708,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), null);
     SearchParameter demo = createSearchParameter(demoAge, null);
     demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
@@ -675,13 +723,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Provide a valid search parameter.", bre.getMessage());
+      String message = AbstractQueryBuilder.EMPTY_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.PARAMETERS};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
   @Test
   public void countSubjectsDemoTypeException() throws Exception {
-    Criteria demoAge = createDemoCriteria(null, "AGE", null);
+    Criteria demoAge = createDemoCriteria(null, TreeSubType.AGE.name(), null);
     SearchParameter demo = createSearchParameter(demoAge, null);
     SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
     try {
@@ -689,7 +740,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type \"null\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.TYPE, demo.getType()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -698,7 +752,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type \"\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.TYPE, demo.getType()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -707,7 +764,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type \"blah\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.TYPE, demo.getType()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -721,7 +781,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype \"null\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.SUBTYPE, demo.getSubtype()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -730,7 +793,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype \"\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.SUBTYPE, demo.getSubtype()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -739,7 +805,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype \"blah\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.SUBTYPE, demo.getSubtype()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
+    }
+  }
+
+  @Test
+  public void countSubjectsDemoConceptIdException() throws Exception {
+    Criteria demoRace = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), null);
+    SearchParameter demo = createSearchParameter(demoRace, null);
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.CONCEPT_ID, demoRace.getConceptId()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -749,8 +835,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
-    Criteria demoDec = createDemoCriteria("DEMO", "DEC", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
+    Criteria demoDec = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.DEC.name(), null);
     SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
     SearchParameter demoDecParameter = createSearchParameter(demoDec, null);
     demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
@@ -760,13 +846,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Cannot search age and deceased together.", bre.getMessage());
+      assertEquals(DemoQueryBuilder.AGE_DEC_MESSAGE, bre.getMessage());
     }
   }
 
   @Test
   public void countSubjectsDemoAgeNoAttribute() throws Exception {
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
     SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
     try {
@@ -774,14 +860,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Provide attributes for age.", bre.getMessage());
+      String message = AbstractQueryBuilder.EMPTY_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.ATTRIBUTES};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
   @Test
   public void countSubjectsDemoAgeAtributeExceptions() throws Exception {
     Attribute attribute = new Attribute();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
     SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
     demoAgeParameter.attributes(Arrays.asList(attribute));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
@@ -790,7 +879,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Operator \"null\" is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.OPERATOR, attribute.getOperator()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -799,7 +891,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Provide valid operands.", bre.getMessage());
+      String message = AbstractQueryBuilder.EMPTY_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.OPERANDS};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
 
     try {
@@ -808,7 +903,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Provide one operand.", bre.getMessage());
+      assertEquals(AbstractQueryBuilder.ONE_OPERAND_MESSAGE, bre.getMessage());
     }
 
     try {
@@ -817,7 +912,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Provide two operands.", bre.getMessage());
+      assertEquals(AbstractQueryBuilder.TWO_OPERAND_MESSAGE, bre.getMessage());
     }
 
     try {
@@ -832,7 +927,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoAgeBetween() throws Exception {
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
     SearchParameter demo = createSearchParameter(demoAge, null);
     demo.attributes(Arrays.asList(
       new Attribute().operator(Operator.BETWEEN).operands(Arrays.asList("15","99"))
@@ -843,14 +938,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoGenderAndAge() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), null);
     SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
     demoAgeSearchParam.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
 
@@ -862,14 +957,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsICD9AndDemo() throws Exception {
     Criteria icd9MeasurementChild =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name(), "3");
-    Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), null);
     SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
     demoAgeSearchParam.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
 
@@ -885,7 +980,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoExcluded() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
     SearchParameter demoGenderSearchParamExclude = createSearchParameter(demoGender, null);
@@ -1074,7 +1169,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException e) {
       // success
-      assertEquals("Please provide a valid concept Id", e.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.CONCEPT_ID, visitCriteria.getConceptId()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, e.getMessage());
     }
   }
 
@@ -1099,7 +1197,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Please provide a valid search parameter.", bre.getMessage());
+      String message = AbstractQueryBuilder.EMPTY_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.PARAMETERS};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -1112,7 +1213,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Please provide a valid concept id. null is not valid.", bre.getMessage());
+      String message = AbstractQueryBuilder.NOT_VALID_MESSAGE;
+      Object[] args = new Object[] {AbstractQueryBuilder.CONCEPT_ID, drug.getConceptId()};
+      String expected = new MessageFormat(message).format(args);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -1691,7 +1795,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsBloodPressureSysstolicBetweenThreeOperands() throws Exception {
     Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.BETWEEN).operands(Arrays.asList("90","122","200")).conceptId(903118L);
     Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
+    Criteria hypotensive = new Criteria().type(TreeType.PM.name()).subtype(TreeSubType.BP.name())
+      .name("Hypotensive (Systolic <= 90 / Diastolic <= 60)").group(false).selectable(true)
+      .count("16").domainId("Measurement");
+    SearchParameter hypotensiveSP = createSearchParameter(hypotensive, null);
+    hypotensiveSP.attributes(Arrays.asList(systolicAttr, diastolicAttr));
+    SearchRequest searchRequest = createSearchRequests(hypotensive.getType(), Arrays.asList(hypotensiveSP), new ArrayList<>());
+    try {
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+      fail("Should have thrown a BadRequestExeption!");
+    } catch (BadRequestException e) {
+      //success
+      assertThat(e.getMessage()).isEqualTo(PMQueryBuilder.BP_TWO_ATTRIBUTE_MESSAGE);
+    }
   }
 
   @Test

@@ -28,21 +28,22 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractQueryBuilder {
 
-  protected static final String EMPTY_MESSAGE = "Bad Request: Search {0} are empty.";
-  protected static final String NOT_VALID_MESSAGE = "Bad Request: {0} \"{1}\" is not valid.";
-  protected static final String ONE_OPERAND_MESSAGE = "Bad Request: Provide one operand.";
-  protected static final String TWO_OPERAND_MESSAGE = "Bad Request: Provide two operands.";
-  protected static final String OPERANDS_NUMERIC_MESSAGE = "Bad Request: Operands must be numeric.";
-  protected static final String PARAMETERS = "Parameters";
-  protected static final String ATTRIBUTES = "Attributes";
-  protected static final String OPERANDS = "Operands";
-  protected static final String OPERATOR = "Operator";
-  protected static final String TYPE = "Type";
-  protected static final String SUBTYPE = "Subtype";
-  protected static final String DOMAIN = "Domain";
-  protected static final String CONCEPT_ID = "Concept Id";
-  protected static final String CODE = "Code";
-  protected static final String NAME = "Name";
+  public static final String EMPTY_MESSAGE = "Bad Request: Search {0} are empty.";
+  public static final String NOT_VALID_MESSAGE = "Bad Request: {0} \"{1}\" is not valid.";
+  public static final String ONE_OPERAND_MESSAGE = "Bad Request: Provide one operand.";
+  public static final String TWO_OPERAND_MESSAGE = "Bad Request: Provide two operands.";
+  public static final String OPERANDS_NUMERIC_MESSAGE = "Bad Request: Operands must be numeric.";
+  public static final String PARAMETERS = "Parameters";
+  public static final String ATTRIBUTES = "Attributes";
+  public static final String OPERANDS = "Operands";
+  public static final String OPERATOR = "Operator";
+  public static final String TYPE = "Type";
+  public static final String SUBTYPE = "Subtype";
+  public static final String DOMAIN = "Domain";
+  public static final String CONCEPT_ID = "Concept Id";
+  public static final String CODE = "Code";
+  public static final String NAME = "Name";
+  public static final String VALUE = "Value";
 
   ImmutableMap<ModifierType, String> exceptionText = ImmutableMap.<ModifierType, String>builder()
     .put(ModifierType.AGE_AT_EVENT, "age at event")
