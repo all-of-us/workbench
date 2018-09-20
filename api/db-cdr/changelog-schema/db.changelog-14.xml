@@ -18,9 +18,6 @@
       <column name="concept_synonym_name" type="VARCHAR(1000)">
         <constraints nullable="true"/>
       </column>
-      <column name="language_concept_id" type="INTEGER">
-        <constraints nullable="true"/>
-      </column>
     </createTable>
 
   </changeSet>

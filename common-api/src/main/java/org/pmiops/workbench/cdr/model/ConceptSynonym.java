@@ -16,7 +16,6 @@ public class ConceptSynonym {
     private long conceptId;
     private Concept concept;
     private String conceptSynonymName;
-    private long languageConceptId;
 
     @Id
     public Long getId() {
@@ -71,33 +70,18 @@ public class ConceptSynonym {
         return this;
     }
 
-    @Column(name = "language_concept_id")
-    public long getLanguageConceptId() {
-        return languageConceptId;
-    }
-
-    public void setLanguageConceptId(long languageConceptId) {
-        this.languageConceptId = languageConceptId;
-    }
-
-    public ConceptSynonym languageConceptId(long languageConceptId) {
-        this.languageConceptId = languageConceptId;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ConceptSynonym conceptSynonym = (ConceptSynonym) o;
         return conceptId == conceptSynonym.conceptId &&
-                Objects.equals(conceptSynonymName, conceptSynonym.conceptSynonymName) &&
-                Objects.equals(languageConceptId, conceptSynonym.languageConceptId);
+                Objects.equals(conceptSynonymName, conceptSynonym.conceptSynonymName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(conceptId, concept, conceptSynonymName, languageConceptId);
+        return Objects.hash(conceptId, concept, conceptSynonymName);
     }
 
     @Override
