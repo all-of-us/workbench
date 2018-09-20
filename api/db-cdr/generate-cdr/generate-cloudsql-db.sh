@@ -24,21 +24,25 @@ done
 
 if [ -z "${PROJECT}" ]
 then
+  echo $USAGE # codacy doesn't like not using this.
   exit 1
 fi
 
 if [ -z "${INSTANCE}" ]
 then
+  echo $USAGE
   exit 1
 fi
 
 if [ -z "${DATABASE}" ]
 then
+  echo $USAGE
   exit 1
 fi
 
 if [ -z "${BUCKET}" ]
 then
+  echo $USAGE
   exit 1
 fi
 

@@ -43,7 +43,7 @@ then
   exit 1
 fi
 
-# TODO Next Populate achilles_results
+# Next Populate achilles_results
 echo "Running achilles queries..."
 
 echo "Getting person count"

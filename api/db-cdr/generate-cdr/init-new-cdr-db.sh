@@ -21,7 +21,7 @@ while [ $# -gt 0 ]; do
     * ) break ;;
   esac
 done
-# Todo check versions are of form YYYYMMDD
+
 if [ -z "${CDR_DB_NAME}" ]
 then
   echo "Usage: $USAGE"

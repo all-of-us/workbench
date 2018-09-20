@@ -65,7 +65,6 @@ function import_wait () {
   while true; do
     sleep $wait_interval
     seconds_waited=$((seconds_waited + wait_interval))
-    import_status=
     if [[ $(gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT.*RUNNING") ]]
     then
         echo "Import of $gs_file is still running after ${seconds_waited} seconds."
