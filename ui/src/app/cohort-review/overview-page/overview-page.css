@@ -50,13 +50,54 @@
     padding: 1rem;
 }
 .button-chart-container .button-container {
-   padding-right: 4rem;
+   padding-right: 12rem;
 }
 .overview-buttons {
     width: 100%;
     border: 1px solid #0077b7;
 }
 
+.chart-heading {
+   padding-left: 29rem;
+    color: #4A4A4A;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+
+
+.loading-spinner {
+    margin-left: 10rem;
+    margin-top: 4rem;
+
+}
+
+.data-container {
+   display: flex;
+}
+.data-blue {
+    background-color: #262262;
+
+}
+
+ .light-grey {
+    background-color: grey;
+     width: 31rem;
+}
+.divider {
+    border-right: 1px solid black;
+}
+.data-bar-container {
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+}
+.data-heading {
+    padding-top: 0.5rem;
+}
+.data-percent {
+    padding-top: 0.5rem;
+    padding-left: 1rem;
+}
 /*.btn.btn-primary.overview-buttons.active {*/
     /*background-color: #4356a7;*/
     /*color: #f1f2f2;*/
