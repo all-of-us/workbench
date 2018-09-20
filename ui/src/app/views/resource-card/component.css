@@ -12,6 +12,16 @@
   box-shadow: 0 0 0 0;
 }
 
+.card.item-card.for-list {
+  width: 200px;
+  height: 223px;
+  margin-right: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0.75rem;
+}
+
 .card.item-card .name {
   cursor: pointer;
   word-wrap: break-word;

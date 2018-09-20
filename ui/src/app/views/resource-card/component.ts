@@ -15,6 +15,7 @@ import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {Observable} from 'rxjs/Observable';
+import {FileDetail} from "../../../generated/model/fileDetail";
 
 enum ResourceType {
   NOTEBOOK = 'notebook',
@@ -35,6 +36,10 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   resourceType: ResourceType;
   @Input('resourceCard')
   resourceCard: RecentResource;
+  @Input('incomingResource')
+  incomingResource: any;
+  @Input('forList')
+  forList: string;
   @Output() onUpdate: EventEmitter<void> = new EventEmitter();
   actions = [];
   notebookRenameError = false;
@@ -97,7 +102,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     this.workspacesService
         .renameNotebook(this.wsNamespace, this.wsId, rename)
         .subscribe(() => {
-          this.onUpdate.emit();
+          this.onUpdate.emit(rename);
           this.renameModal.close();
     });
   }
