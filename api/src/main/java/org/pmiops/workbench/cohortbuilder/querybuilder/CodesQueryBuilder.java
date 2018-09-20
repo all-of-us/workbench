@@ -7,6 +7,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
+import com.sun.java.browser.plugin2.DOM;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
@@ -106,19 +107,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateSearchParameters(List<SearchParameter> parameters) {
-    from(parametersEmpty()).test(parameters).throwException("Bad Request: Provide a valid search parameter.");
-    parameters
-      .forEach(param -> {
-        from(typeBlank().or(codeTypeInvalid()))
-          .test(param).throwException("Bad Request: Type '%s' is not valid.", param.getType());
-        from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid())))
-          .test(param).throwException("Bad Request: Subtype '%s' is not valid.", param.getSubtype());
-        from(domainBlank().or(domainInvalid()))
-          .test(param).throwException("Bad Request: Domain '%s' is not valid.", param.getDomain());
-        from(paramChild().and(conceptIdNull()))
-          .test(param).throwException("Bad Request: Concept Id 'null' is not valid.");
-        from(paramParent().and(codeBlank()))
-          .test(param).throwException("Bad Request: Code '%s' is not valid.", param.getValue());
+    from(parametersEmpty()).test(parameters).throwException(EMPTY_MESSAGE, PARAMETERS);
+    parameters.forEach(param -> {
+        from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, TYPE, param.getType());
+        from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, SUBTYPE, param.getSubtype());
+        from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, DOMAIN, param.getDomain());
+        from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
+        from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, CODE, param.getValue());
       });
   }
 
