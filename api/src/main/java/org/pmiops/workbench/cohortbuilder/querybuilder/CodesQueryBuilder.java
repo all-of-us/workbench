@@ -7,7 +7,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
-import com.sun.java.browser.plugin2.DOM;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
@@ -64,7 +63,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters params) {
-    validateSearchParameters(params.getParameters());
+    from(parametersEmpty()).test(params.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     ListMultimap<MultiKey, SearchParameter> paramMap = getMappedParameters(params.getParameters());
     List<String> queryParts = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
@@ -106,15 +105,12 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       .build();
   }
 
-  private void validateSearchParameters(List<SearchParameter> parameters) {
-    from(parametersEmpty()).test(parameters).throwException(EMPTY_MESSAGE, PARAMETERS);
-    parameters.forEach(param -> {
-        from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, TYPE, param.getType());
-        from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, SUBTYPE, param.getSubtype());
-        from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, DOMAIN, param.getDomain());
-        from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
-        from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, CODE, param.getValue());
-      });
+  private void validateSearchParameter(SearchParameter param) {
+    from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, TYPE, param.getType());
+    from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, SUBTYPE, param.getSubtype());
+    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, DOMAIN, param.getDomain());
+    from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
+    from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, CODE, param.getValue());
   }
 
   private void buildInnerQuery(String type,
@@ -159,6 +155,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     ListMultimap<MultiKey, SearchParameter> fullMap = ArrayListMultimap.create();
     searchParameters
       .forEach(param -> {
+          validateSearchParameter(param);
           fullMap.put(new MultiKey(param), param);
         }
       );

@@ -13,12 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.AttributePredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.parametersEmpty;
 
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
+
+  public static final String CATEGORICAL_MESSAGE =
+    "Bad Request: Please provide the in operator when searching categorical attributes.";
 
   public static final String NUMERICAL = "NUM";
   public static final String CATEGORICAL = "CAT";
@@ -40,11 +43,11 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
+    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
-    from(parametersEmpty()).test(parameters.getParameters()).throwException("Bad Request: Please provide a valid search parameter.");
     for (SearchParameter parameter : parameters.getParameters()) {
-      validateAttributes(parameter);
+      validateSearchParameter(parameter);
       String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", parameter.getConceptId().toString());
       List<String> tempQueryParts = new ArrayList<String>();
       for (Attribute attribute : parameter.getAttributes()) {
@@ -80,8 +83,9 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     return FactoryKey.MEAS;
   }
 
-  private void validateAttributes(SearchParameter parameter) {
-    parameter
+  private void validateSearchParameter(SearchParameter param) {
+    from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
+    param
       .getAttributes()
       .stream()
       .filter(attr -> !isNameAny(attr))
@@ -89,7 +93,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
         from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, NAME, attr.getName());
         from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, OPERATOR);
         from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
-        from(categoricalAndNotIn()).test(attr).throwException("Bad Request: Please provide the in operator when searching categorical attributes.");
+        from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
         from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE);
         from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE);
       });

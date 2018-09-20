@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 public class AttributePredicates {
 
   public static Predicate<Attribute> categoricalAndNotIn() {
-    return a -> MeasurementQueryBuilder.CATEGORICAL.equals(a.getName()) && !a.getOperator().equals(Operator.IN);
+    return a -> MeasurementQueryBuilder.CATEGORICAL.equals(a.getName()) &&
+      !a.getOperator().equals(Operator.IN);
   }
 
   public static Predicate<Attribute> betweenOperator() {
@@ -51,18 +52,7 @@ public class AttributePredicates {
       .collect(Collectors.toList()).isEmpty();
   }
 
-
-
-  public static Predicate<Attribute> betweenAndNotTwoOperands() {
-    return a -> a.getOperator().equals(Operator.BETWEEN) && a.getOperands().size() != 2;
-  }
-
-  public static Predicate<Attribute> operandsInvalid() {
-    return a -> !a
-      .getOperands()
-      .stream()
-      .filter(
-        o -> !NumberUtils.isNumber(o))
-      .collect(Collectors.toList()).isEmpty();
+  public static Predicate<Attribute> attrConceptIdNull() {
+    return a -> a.getConceptId() == null;
   }
 }

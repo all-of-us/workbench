@@ -27,8 +27,8 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validat
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
-  protected static final String AGE_DEC_MESSAGE = "Bad Request: Cannot search age and deceased together.";
-  protected static final String DEC = "Dec";
+  public static final String AGE_DEC_MESSAGE = "Bad Request: Cannot search age and deceased together.";
+  public static final String DEC = "Dec";
 
   private static final String SELECT = "select person_id\n" +
     "from `${projectId}.${dataSetId}.person` p\n" +
@@ -60,7 +60,8 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
-    validateSearchParameters(parameters.getParameters());
+    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+    from(containsAgeAndDec()).test(parameters.getParameters()).throwException(AGE_DEC_MESSAGE);
     ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(parameters.getParameters());
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     List<String> queryParts = new ArrayList<>();
@@ -118,37 +119,37 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     return FactoryKey.DEMO;
   }
 
-  private void validateSearchParameters(List<SearchParameter> parameters) {
-    from(parametersEmpty()).test(parameters).throwException(EMPTY_MESSAGE, PARAMETERS);
-    from(containsAgeAndDec()).test(parameters).throwException(AGE_DEC_MESSAGE);
-    parameters
-      .forEach(param -> {
-        from(typeBlank().or(demoTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, TYPE, param.getType());
-        from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, SUBTYPE, param.getSubtype());
-        from(subtypeDec().and(valueNotDec())).test(param).throwException(NOT_VALID_MESSAGE, DEC, param.getValue());
-        if (subtypeAge().test(param)) {
-          from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
-          param.getAttributes().forEach(attr -> {
-            from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, OPERATOR, attr.getOperator());
-            from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
-            from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE);
-            from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE);
-            from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE);
-          });
-        }
-      });
+  private void validateSearchParameter(SearchParameter param) {
+    from(typeBlank().or(demoTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, TYPE, param.getType());
+    from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, SUBTYPE, param.getSubtype());
+    from(subtypeDec().and(valueNotDec())).test(param).throwException(NOT_VALID_MESSAGE, DEC, param.getValue());
+    from(subTypeGenRaceEth().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
+  }
+
+  private void validateAttributes(SearchParameter param) {
+    from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
+    param.getAttributes().forEach(attr -> {
+      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, OPERATOR, attr.getOperator());
+      from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+      from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE);
+      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE);
+      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE);
+    });
   }
 
   protected ListMultimap<TreeSubType, Object> getMappedParameters(List<SearchParameter> searchParameters) {
     ListMultimap<TreeSubType, Object> mappedParameters = ArrayListMultimap.create();
-    for (SearchParameter parameter : searchParameters)
+    for (SearchParameter parameter : searchParameters) {
+      validateSearchParameter(parameter);
       if (parameter.getSubtype().equals(TreeSubType.AGE.name())) {
+        validateAttributes(parameter);
         mappedParameters.put(TreeSubType.AGE, parameter.getAttributes().isEmpty() ? null : parameter.getAttributes().get(0));
       } else if (parameter.getSubtype().equals(TreeSubType.DEC.name())) {
         mappedParameters.put(TreeSubType.DEC, parameter.getValue());
       } else {
         mappedParameters.put(TreeSubType.fromValue(parameter.getSubtype()), parameter.getConceptId());
       }
+    }
     return mappedParameters;
   }
 }
