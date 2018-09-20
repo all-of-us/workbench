@@ -22,7 +22,7 @@ import {ReviewStateService} from '../review-state.service';
 })
 export class OverviewPage implements OnInit, OnDestroy {
   openChartContainer = false;
-  demoGraph = false;
+    demoGraph = false;
   data = List();
   typesList = [DomainType[DomainType.CONDITION],
               DomainType[DomainType.PROCEDURE],
