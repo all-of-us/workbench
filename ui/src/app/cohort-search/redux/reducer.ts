@@ -507,13 +507,19 @@ export const rootReducer: Reducer<CohortSearchState> =
      */
       case BEGIN_CHART_DATA_REQUEST:
           return state
-              .deleteIn([action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit])
-              .setIn([action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit], true);
+              .deleteIn(
+                  [action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit])
+              .setIn(
+                  [action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit],
+                  true);
 
       case LOAD_CHART_RESULTS:
           return state
-              .setIn([action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit], fromJS(action.results)
-              .deleteIn([action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit]));
+              .setIn(
+                  [action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit],
+                  fromJS(action.results)
+              .deleteIn(
+                  [action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit]));
       default: return state;
     }
 };
