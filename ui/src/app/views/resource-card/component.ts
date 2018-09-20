@@ -219,8 +219,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   }
 
   get writePermission(): boolean {
-    return this.accessLevel === WorkspaceAccessLevel.OWNER
-      || this.accessLevel === WorkspaceAccessLevel.WRITER;
+    return this.resourceCard.permission === 'OWNER'
+      || this.resourceCard.permission === 'WRITER';
   }
 
 }
