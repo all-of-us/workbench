@@ -46,6 +46,7 @@ export class OverviewPage implements OnInit, OnDestroy {
     private chartAPI: CohortBuilderService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
+    private actions: CohortSearchActions,
   ) {}
 
   ngOnInit() {
