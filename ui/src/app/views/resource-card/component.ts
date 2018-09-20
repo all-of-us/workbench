@@ -5,7 +5,7 @@ import {resourceActionList} from 'app/utils/resourceActions';
 
 import {
   CohortsService, NotebookRename,
-  RecentResource, UserMetricsService,
+  RecentResource, WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
 
@@ -15,7 +15,6 @@ import {environment} from 'environments/environment';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {Observable} from 'rxjs/Observable';
 
 enum ResourceType {
   NOTEBOOK = 'notebook',
@@ -40,7 +39,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   incomingResource: any;
   @Input('forList')
   forList: string;
-  @Output() onUpdate: EventEmitter<void> = new EventEmitter();
+  @Output() onUpdate: EventEmitter<any> = new EventEmitter();
   actions = [];
   notebookRenameError = false;
   wsNamespace: string;
@@ -65,7 +64,6 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       private workspacesService: WorkspacesService,
       private signInService: SignInService,
       private route: Router,
-      private userMetricsService: UserMetricsService
   ) {}
 
   ngOnInit() {
@@ -144,11 +142,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
-          .subscribe(() => Observable.empty());
-        this.userMetricsService.deleteRecentResource(this.wsNamespace, this.wsId, {notebookName: $event.name})
-          .subscribe(() => {
-          this.onUpdate.emit();
-          });
+          .subscribe(() => this.onUpdate.emit());
         break;
       }
       case ResourceType.COHORT: {
@@ -218,6 +212,15 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
+  }
+
+  get actionsDisabled(): boolean {
+    return !this.writePermission;
+  }
+
+  get writePermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER
+      || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
 
 }

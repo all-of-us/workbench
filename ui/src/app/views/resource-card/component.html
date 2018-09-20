@@ -8,14 +8,16 @@
         <div *ngFor="let action of actions">
           <button
                   class="action-item"
-                  (click) =this[action.link](this.resourceCard)>
+                  (click) =this[action.link](this.resourceCard)
+                  [class.disabled]="actionsDisabled"
+                  [disabled]="actionsDisabled">
             <clr-icon [attr.shape]=action.class></clr-icon>
             {{action.text}}
           </button>
         </div>
       </clr-dropdown-menu>
     </clr-dropdown>
-    <div class="name" (click)="openResource(this.resourceCard)">
+    <div class="name" [class.disabled]="actionsDisabled" (click)="actionsDisabled || openResource(this.resourceCard)">
       {{resourceCard.notebook?.name}}
       {{resourceCard.cohort?.name}}
     </div>
