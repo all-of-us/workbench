@@ -6,8 +6,6 @@ import org.pmiops.workbench.cohortbuilder.querybuilder.MeasurementQueryBuilder;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 

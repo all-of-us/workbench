@@ -86,12 +86,12 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       .stream()
       .filter(attr -> !isNameAny(attr))
       .forEach(attr -> {
-        from(nameBlank()).test(attr).throwException("Bad Request: Please provide a valid attribute name. s% is not valid.", attr.getName());
-        from(operatorNull()).test(attr).throwException("Bad Request: Please provide a valid operator. null is not valid.");
-        from(operandsEmpty()).test(attr).throwException("Bad Request: Please provide one or more operands.");
+        from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, NAME, attr.getName());
+        from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, OPERATOR);
+        from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
         from(categoricalAndNotIn()).test(attr).throwException("Bad Request: Please provide the in operator when searching categorical attributes.");
-        from(betweenAndNotTwoOperands()).test(attr).throwException("Bad Request: Please provide two operands when using the between operator.");
-        from(operandsInvalid()).test(attr).throwException("Bad Request: Please provide valid numeric operands.");
+        from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE);
+        from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE);
       });
   }
 

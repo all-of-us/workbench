@@ -27,6 +27,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validat
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
+  protected static final String AGE_DEC_MESSAGE = "Bad Request: Cannot search age and deceased together.";
+  protected static final String DEC = "Dec";
+
   private static final String SELECT = "select person_id\n" +
     "from `${projectId}.${dataSetId}.person` p\n" +
     "where\n";
@@ -116,21 +119,21 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateSearchParameters(List<SearchParameter> parameters) {
-    from(parametersEmpty()).test(parameters).throwException("Bad Request: Provide a valid search parameter.");
-    from(containsAgeAndDec()).test(parameters).throwException("Bad Request: Cannot search age and deceased together.");
+    from(parametersEmpty()).test(parameters).throwException(EMPTY_MESSAGE, PARAMETERS);
+    from(containsAgeAndDec()).test(parameters).throwException(AGE_DEC_MESSAGE);
     parameters
       .forEach(param -> {
-        from(typeBlank().or(demoTypeInvalid())).test(param).throwException("Bad Request: Type '%s' is not valid.", param.getType());
-        from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException("Bad Request: Subtype '%s' is not valid.", param.getSubtype());
-        from(subtypeDec().and(valueNotDec())).test(param).throwException("Bad Request: Dec value '%s' is not valid.", param.getValue());
+        from(typeBlank().or(demoTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, TYPE, param.getType());
+        from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, SUBTYPE, param.getSubtype());
+        from(subtypeDec().and(valueNotDec())).test(param).throwException(NOT_VALID_MESSAGE, DEC, param.getValue());
         if (subtypeAge().test(param)) {
-          from(attributesEmpty()).test(param).throwException("Bad Request: Provide attributes for age.");
+          from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
           param.getAttributes().forEach(attr -> {
-            from(operatorNull()).test(attr).throwException("Bad Request: Operator 'null' is not valid.");
-            from(operandsEmpty()).test(attr).throwException("Bad Request: Provide valid operands.");
-            from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException("Bad Request: Provide one operand.");
-            from(betweenOperator().and(operandsNotTwo())).test(attr).throwException("Bad Request: Provide two operands.");
-            from(operandsNotNumbers()).test(attr).throwException("Bad Request: Operands must be numeric.");
+            from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, OPERATOR, attr.getOperator());
+            from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+            from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE);
+            from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE);
+            from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE);
           });
         }
       });
@@ -146,7 +149,6 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
       } else {
         mappedParameters.put(TreeSubType.fromValue(parameter.getSubtype()), parameter.getConceptId());
       }
-
     return mappedParameters;
   }
 }

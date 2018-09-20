@@ -126,7 +126,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Domain 'null' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Domain \"null\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -135,7 +135,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Domain '' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Domain \"\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -144,7 +144,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Domain 'blah' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Domain \"blah\" is not valid.", bre.getMessage());
     }
   }
 
@@ -159,7 +159,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Concept Id 'null' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Concept Id \"null\" is not valid.", bre.getMessage());
     }
   }
 
@@ -174,7 +174,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Code 'null' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Code \"null\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -183,7 +183,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Code '' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Code \"\" is not valid.", bre.getMessage());
     }
   }
 
@@ -198,7 +198,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type 'null' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Type \"null\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -207,7 +207,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type '' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Type \"\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -216,7 +216,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type 'blah' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Type \"blah\" is not valid.", bre.getMessage());
     }
   }
 
@@ -231,7 +231,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype 'null' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Subtype \"null\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -240,7 +240,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype '' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Subtype \"\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -249,7 +249,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype 'blah' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Subtype \"blah\" is not valid.", bre.getMessage());
     }
   }
 
@@ -641,7 +641,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Dec value '' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Dec value \"\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -650,7 +650,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Dec value 'blah' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Dec value \"blah\" is not valid.", bre.getMessage());
     }
   }
 
@@ -689,7 +689,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type 'null' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Type \"null\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -698,7 +698,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type '' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Type \"\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -707,7 +707,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Type 'blah' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Type \"blah\" is not valid.", bre.getMessage());
     }
   }
 
@@ -721,7 +721,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype 'null' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Subtype \"null\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -730,7 +730,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype '' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Subtype \"\" is not valid.", bre.getMessage());
     }
 
     try {
@@ -739,7 +739,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Subtype 'blah' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Subtype \"blah\" is not valid.", bre.getMessage());
     }
   }
 
@@ -790,7 +790,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertEquals("Bad Request: Operator 'null' is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Operator \"null\" is not valid.", bre.getMessage());
     }
 
     try {
