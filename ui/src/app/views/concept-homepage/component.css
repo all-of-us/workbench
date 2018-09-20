@@ -1,0 +1,115 @@
+.search-box {
+  margin-top: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  height: 8rem;
+  width: 95.7%;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #FFFFFF 0%, rgba(236,236,236,0) 100%);
+  box-shadow: 0 0 0 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
+}
+
+:host::ng-deep .nav {
+  padding-left: 1rem;
+  padding-top: 1rem;
+  box-shadow: none;
+}
+
+.btn.btn-link.nav-link.nav-item {
+  color: #2691D0;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 24px;
+}
+
+.btn.btn-link.nav-link.nav-item.active {
+  font-weight: bolder;
+}
+
+#concept-search-input {
+  margin-left: 1%;
+  border: none;
+  box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+  height: 3rem;
+  width: 64.3%;
+  background-color: #A3D3F232;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 19px;
+  color: #000000;
+  padding-left: 2rem;
+}
+
+.btn.btn-secondary {
+  height: 26.6px;
+  width: 6.56%;
+  border: 0.7px solid #216FB4;
+  border-radius: 3.5px;
+  color: #216FB4;
+  font-size: 9.8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  position: relative;
+  right: 9%;
+}
+
+.checkbox {
+  right: 4rem;
+}
+
+.domain-box {
+  width: 95.7%;
+  margin-top: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+.card.item-card {
+  width: 11rem;
+  align-items: flex-start;
+}
+
+.card .footer {
+  position: absolute;
+  bottom: .7rem;
+}
+
+.concept-name {
+  color: #2691D0;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 22px;
+  margin-bottom: 0.2rem;
+}
+
+.card .concept-text {
+  margin-top: 0.3rem;
+  font-size: 14px;
+  font-weight: 300;
+  color: #4A4A4A;
+  display: flex;
+  flex-direction: column;
+}
+
+.concept-count-text {
+  font-size: 30px;
+}
+
+.concept-label-text {
+  font-size: 18px;
+}
+
+.participant-count-text {
+  font-weight: bolder;
+}
+
+.btn.btn-link {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
+  color: #2691D0;
+  text-transform: none;
+}
+
