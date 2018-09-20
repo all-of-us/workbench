@@ -4,6 +4,11 @@ export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
 export const BEGIN_SUBTYPE_CRITERIA_REQUEST = 'BEGIN_SUBTYPE_CRITERIA_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
+//review
+export const BEGIN_CHART_DATA_REQUEST = 'BEGIN_CHART_DATA_REQUEST';
+export const LOAD_CHART_RESULTS = 'LOAD_CHART_RESULTS';
+
+
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const LOAD_CRITERIA_SUBTYPE_RESULTS = 'LOAD_CRITERIA_SUBTYPE_RESULTS';
 export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
@@ -98,6 +103,29 @@ export interface ActionTypes {
     parentId: number;
     subtype: string;
   };
+
+  // for review
+    BEGIN_CHART_DATA_REQUEST: {
+        type: typeof BEGIN_CHART_DATA_REQUEST;
+        ns:any;
+        wsid:any;
+        cid:any;
+        cdrid:any;
+        domain: string;
+        limit: number;
+    };
+    LOAD_CHART_RESULTS: {
+        type: typeof LOAD_CHART_RESULTS;
+        ns:any;
+        wsid:any;
+        cid:any;
+        cdrid:any;
+        domain: string;
+        limit: number;
+        results:any;
+    };
+
+
   LOAD_CRITERIA_RESULTS: {
     type: typeof LOAD_CRITERIA_RESULTS;
     kind: string;
@@ -360,6 +388,8 @@ export interface ActionTypes {
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
+  | ActionTypes[typeof BEGIN_CHART_DATA_REQUEST]
+  | ActionTypes[typeof LOAD_CHART_RESULTS]
   | ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]

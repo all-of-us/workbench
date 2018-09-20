@@ -10,6 +10,7 @@ import {
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
+    BEGIN_CHART_DATA_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
@@ -32,6 +33,7 @@ import {
 
 import {
   loadCriteriaRequestResults,
+    loadChartRequestResults,
   loadCriteriaSubtypeRequestResults,
   criteriaRequestError,
 
@@ -59,12 +61,13 @@ import {
 import {CohortSearchState} from './store';
 /* tslint:enable:ordered-imports */
 
-import {CohortBuilderService} from 'generated';
+import {CohortBuilderService, CohortReviewService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
 type CritSubRequestAction = ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
+type ReviewChartRequestAction = ActionTypes[typeof BEGIN_CHART_DATA_REQUEST];
 type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
 type ChildrenRequestAction = ActionTypes[typeof BEGIN_CHILDREN_REQUEST];
@@ -87,7 +90,8 @@ const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
  */
 @Injectable()
 export class CohortSearchEpics {
-  constructor(private service: CohortBuilderService) {}
+  constructor(private service: CohortBuilderService,
+              private reviewservice: CohortReviewService) {}
 
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
@@ -146,6 +150,22 @@ export class CohortSearchEpics {
     )
   )
 
+    //review
+
+    fetchReviewChartsData: CSEpic = (action$) => (
+        action$.ofType(BEGIN_CHART_DATA_REQUEST).mergeMap(
+            ({ns, wsid, cid, cdrid, domain, limit}: ReviewChartRequestAction) => {
+                return this.reviewservice
+                    .getCohortChartData(ns, wsid, cid, cdrid, domain, limit, null)
+                    .map(result => loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result.items))
+                    // .race(action$
+                    //     .ofType(CANCEL_CRITERIA_REQUEST)
+                    //     .filter(compare({domain, limit}))
+                    //     .first())
+                    // .catch(e => Observable.of(criteriaRequestError(domain, limit, e)));
+            }
+        )
+    )
   fetchAutocompleteOptions: CSEpic = (action$) => (
     action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
       ({cdrVersionId, kind, subtype, searchTerms}: AutocompleteRequestAction) => {

@@ -1,13 +1,15 @@
+import {NgRedux, select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-
+import {CohortReviewService, DomainType} from 'generated';
 import {ReviewStateService} from '../review-state.service';
 
 import {CohortBuilderService, DemoChartInfoListResponse, SearchRequest} from 'generated';
-import {TreeType} from "../../../generated";
+import {TreeSubType, TreeType} from "../../../generated";
 import {typeToTitle} from "../../cohort-search/utils";
+import {CohortSearchActions, CohortSearchState, isChartLoading} from "../../cohort-search/redux";
 
 
 @Component({
@@ -20,15 +22,18 @@ export class OverviewPage implements OnInit, OnDestroy {
   openChartContainer = false;
   demoGraph = false;
   data = List();
-  typesList= ['CONDITIONS','PROCEDURES', 'MEDICATION', 'LABS'];
+  typesList= [DomainType[DomainType.CONDITION],DomainType[DomainType.PROCEDURE], DomainType[DomainType.MEASUREMENT],DomainType[DomainType.LAB]];
   title: string;
   showTitle = false;
   private subscription: Subscription;
 
   constructor(
+      private ngRedux: NgRedux<CohortSearchState>,
     private chartAPI: CohortBuilderService,
+    private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
+    private actions: CohortSearchActions,
   ) {}
 
   ngOnInit() {
@@ -54,23 +59,22 @@ export class OverviewPage implements OnInit, OnDestroy {
     }
 
     getDifferentCharts(names){
-      console.log(names);
         this.demoGraph = false;
         this.showTitle = true;
         this.title = names;
+        this.fetchChartsData(names);
         return this.title;
+
     }
 
-    //
-    // get selectionTitle() {
-    //     const _type = [
-    //         TreeType[TreeType.CONDITION],
-    //         TreeType[TreeType.PROCEDURE]
-    //     ].includes(this.itemType)
-    //         ? this.itemType : this.ctype;
-    //     const title = typeToTitle(_type);
-    //     return title
-    // }
+    fetchChartsData(name){
+        const domain = name
+        const limit = 10;
+        const {ns, wsid, cid} = this.route.parent.snapshot.params;
+        const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+           this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
+    }
+
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
