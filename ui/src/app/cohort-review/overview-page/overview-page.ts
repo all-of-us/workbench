@@ -44,10 +44,8 @@ export class OverviewPage implements OnInit, OnDestroy {
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
     private chartAPI: CohortBuilderService,
-    private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    private actions: CohortSearchActions,
   ) {}
 
   ngOnInit() {
