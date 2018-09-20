@@ -712,57 +712,23 @@ end
 
 Common.register_command({
   :invocation => "mysqldump-local-db",
-  :description => "mysqldump-local-db db-name <LOCALDB> --bucket <BUCKET>
+  :description => "mysqldump-local-db --db-name <LOCALDB> --bucket <BUCKET>
 Dumps the local mysql db and uploads the .sql file to bucket",
   :fn => ->(*args) { mysqldump_db(*args) }
 })
 
-def cloudsql_import(cmd_name, *args)
-  op = WbOptionsParser.new(cmd_name, args)
-  op.add_option(
-      "--project [project]",
-      ->(opts, v) { opts.project = v},
-      "Project to import the database into (e.g. all-of-us-rw-stable)"
-  )
-  op.add_option(
-    "--instance [instance]",
-    ->(opts, v) { opts.instance = v},
-    "Database instance to import into (e.g. workbenchmaindb)"
-  )
-  op.add_option(
-    "--bucket [bucket]",
-    ->(opts, v) { opts.bucket = v},
-    "Name of the GCS bucket containing the SQL dump"
-  )
-  op.add_option(
-      "--database [database]",
-      ->(opts, v) { opts.database = v},
-      "Database to import to"
-  )
-  op.add_option(
-      "--create-db-sql-file [filename]",
-      ->(opts, v) { opts.create-db-sql-file = v},
-      "Sql file with create db statements"
-  )
-  op.add_option(
-      "--file [filename]",
-      ->(opts, v) { opts.file = v},
-      "Single File to import from bucket. Defaults to all files in the bucket"
-  )
-  op.parse.validate
-  ServiceAccountContext.new(op.opts.project).run do
-    common = Common.new
-    common.run_inline %W{docker-compose run db-cloudsql-import --instance #{op.opts.instance}
-        --create-db-sql-file #{op.opts.create-db-sql-file} --file #{op.opts.file}
-        --bucket #{op.opts.bucket} --project #{op.opts.project} --database #{op.opts.database}}
-  end
+
+def cloudsql_import(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-cloudsql-import} + args
 end
+
 Common.register_command({
                             :invocation => "cloudsql-import",
                             :description => "cloudsql-import --project <PROJECT> --instance <CLOUDSQL_INSTANCE>
                             --bucket <BUCKET> --database <DATABASE> [--create-db-sql-file <SQL.sql>] [--file <ONLY_IMPORT_ME>]
-Imports .sql file to cloudsql instance",
-                            :fn => ->(*args) { cloudsql_import("cloudsql-import", *args) }
+Import bucket of files or a single file in a bucket to a cloudsql database",
+                            :fn => ->(*args) { cloudsql_import(*args) }
                         })
 
 def local_mysql_import(cmd_name, *args)
