@@ -13,7 +13,7 @@
     "merge-swagger": "../api/build.rb merge-yaml",
     "codegen-clean": "rm -rf src/generated src/publicGenerated",
     "post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/generated/variables.ts",
-    "public-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../public-api/src/main/resources/public-api.yaml --output src/publicGenerated --additional-properties ngVersion=2",
+    "public-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../public-api/src/main/resources/merged.yaml --output src/publicGenerated --additional-properties ngVersion=2",
     "public-post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/publicGenerated/variables.ts",
     "coverage": "ng test --sourcemaps=false --watch=false --code-coverage"
   },

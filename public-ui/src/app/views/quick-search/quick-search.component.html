@@ -35,7 +35,7 @@
               {{r.domainDisplay}}
             </h5>
             <div class="card-stat">
-              {{r.countValue | number}}
+              {{r.standardConceptCount | number}}
             </div>
             <p class="card-text bigger">
               <em> <b>concepts </b></em>
@@ -47,7 +47,7 @@
             </p>
 
             <div class="card-text bottom">
-              <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
+              <button class="btn btn-primary" (click)="viewEhrDomain(r)"> View Full List </button>
             </div>
           </div>
       </div>
@@ -65,14 +65,14 @@
             {{r.domainDisplay}}
           </h5>
           <div class="card-stat">
-            {{r.countValue | number}}
+            {{r.questionCount | number}}
           </div>
           <p class="card-text bigger">
-            There are {{r.countValue }} survey questions on this survey related to your search.
+            There are {{r.questionCount }} survey questions on this survey related to your search.
           </p>
 
           <div class="card-text bottom" >
-            <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
+            <button class="btn btn-primary" (click)="viewSurvey(r)"> View Full List </button>
           </div>
         </div>
       </div>

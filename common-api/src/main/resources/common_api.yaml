@@ -111,11 +111,16 @@ definitions:
   SurveyModule:
     type: object
     required:
+      - conceptId
       - name
       - description
       - questionCount
       - participantCount
     properties:
+      conceptId:
+        description: the concept ID for the survey module
+        type: integer
+        format: int64
       name:
         description: display name of the module
         type: string
