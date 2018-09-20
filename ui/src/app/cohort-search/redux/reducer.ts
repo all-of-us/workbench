@@ -108,20 +108,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
           .setIn(['criteria', 'requests', action.kind, action.parentId], true);
 
-// review
-        case BEGIN_CHART_DATA_REQUEST:
-            return state
-                // .deleteIn(['criteria', 'errors', action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit])
-                // .setIn(['criteria', 'requests',  action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit], true);
-
-          case LOAD_CHART_RESULTS:
-              return state
-                  // .setIn(['criteria', 'tree', action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit))
-                  // .deleteIn(['criteria', 'requests',action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
-
-
-
-
       case LOAD_CRITERIA_RESULTS:
         return state
           .setIn(['criteria', 'tree', action.kind, action.parentId], fromJS(action.results))
@@ -516,6 +502,18 @@ export const rootReducer: Reducer<CohortSearchState> =
       case RESET_STORE:
         return initialState;
 
+    /**
+     * Cohort Review Charts
+     */
+      case BEGIN_CHART_DATA_REQUEST:
+          return state
+              .deleteIn([action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit])
+              .setIn([action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit], true);
+
+      case LOAD_CHART_RESULTS:
+          return state
+              .setIn([action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit], fromJS(action.results)
+              .deleteIn([action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit]));
       default: return state;
     }
 };
