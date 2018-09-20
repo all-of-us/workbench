@@ -143,12 +143,6 @@ export const isCriteriaLoading =
   (state): boolean =>
   state.getIn(['criteria', 'requests', kind, parentId], false);
 
-export const isChartLoading =
-    (ns:any, wsid:any, cid:any, cdrid:any, domain: string, limit: number) =>
-        (state): List<any> =>
-            state.getIn([ns, wsid, cid, cdrid, domain, limit], false);
-
-
 export const autocompleteOptions =
   () => (state): Array<any> =>
   state.getIn(['criteria', 'search', 'options'], null);
@@ -183,3 +177,13 @@ export const subtreeSelected = (state) =>
 export const chartData =
   (state): List<any> =>
   state.get('chartData', List());
+
+/**
+ * Cohort Review Charts
+ */
+export const isChartLoading =
+    (ns:any, wsid:any, cid:any, cdrid:any, domain: string, limit: number) =>
+        (state): List<any> =>
+            state.getIn([ns, wsid, cid, cdrid, domain, limit], false);
+
+
