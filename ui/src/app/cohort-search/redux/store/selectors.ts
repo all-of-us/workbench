@@ -182,8 +182,8 @@ export const chartData =
  * Cohort Review Charts
  */
 export const isChartLoading =
-    (ns:any, wsid:any, cid:any, cdrid:any, domain: string, limit: number) =>
+    (ns: any, wsid: any, cid: any, cdrid: any, domain: string, limit: number) =>
         (state): List<any> =>
-            state.getIn([ns, wsid, cid, cdrid, domain, limit], false);
+        state.getIn([ns, wsid, cid, cdrid, domain, limit], false);
 
 
