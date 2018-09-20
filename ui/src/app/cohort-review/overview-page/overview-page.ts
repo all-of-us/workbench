@@ -1,11 +1,12 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {CohortSearchActions, CohortSearchState} from '../../cohort-search/redux';
 import {CohortBuilderService, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
-import {CohortSearchActions, CohortSearchState} from '../../cohort-search/redux';
+
 
 
 @Component({
@@ -49,6 +50,7 @@ export class OverviewPage implements OnInit, OnDestroy {
     getCharts() {
         this.openChartContainer = true;
     }
+
     collapseContainer(){
         this.openChartContainer = false;
     }
