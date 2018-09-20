@@ -76,12 +76,11 @@ function import_wait () {
 }
 
 # Function to Grant Access to files for service account and db
-# Errors out if file does not exist
 function grant_access_to_files () {
   bucket_path=$1
   SERVICE_ACCOUNT="${PROJECT}@appspot.gserviceaccount.com"
 
-  gsutil acl ch -u $SERVICE_ACCOUNT:O $bucket_path # Error here if doesn't exist
+  gsutil acl ch -u $SERVICE_ACCOUNT:O $bucket_path 2> /dev/null || true # Don't error if there are no files
   gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
   # Grant access to buckets for service account for cloudsql
@@ -93,7 +92,7 @@ function grant_access_to_files () {
 
   echo "Granting GCS access to ${SQL_SERVICE_ACCOUNT} to $bucket_path"
   # Note, this only applies to files already existing in the bucket.
-  gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R $bucket_path
+  gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R $bucket_path 2> /dev/null || true # Don't error if no files
 }
 
 
@@ -105,7 +104,7 @@ then
     create_gs_file=$create_gs_file$BUCKET/$CREATE_DB_SQL_FILE
     grant_access_to_files $create_gs_file
     echo "Creating cloudsql DB from sql file ${CREATE_DB_SQL_FILE}"
-    gcloud sql import sql $INSTANCE $create_gs_file --project $PROJECT --database=$DATABASE \
+    gcloud sql import sql $INSTANCE $create_gs_file --project $PROJECT  \
         --account $SERVICE_ACCOUNT --quiet --async
     import_wait $create_gs_file 15
     # If above fails let it die as user obviously intended to create the db
@@ -135,7 +134,7 @@ then
   fi
 else
     grant_access_to_files gs://$BUCKET/*
-    # gsutil returns error if no files match thus the "2> /dev/null || true" part
+    # gsutil returns error if no files match thus the "2> /dev/null || true" part to ignore error
     sqls=( $(gsutil ls gs://$BUCKET/*.sql* 2> /dev/null || true))
     csvs=( $(gsutil ls gs://$BUCKET/*.csv* 2> /dev/null || true))
 fi
@@ -146,6 +145,7 @@ do
     then
         echo "Skipping create db sql file ";
     else
+        # Don't pass database to sql import . Use use <db> inside sql.
         gcloud sql import sql $INSTANCE $gs_file --project $PROJECT --account $SERVICE_ACCOUNT --quiet --async
         import_wait $gs_file 15
         # Move file to imported dir
