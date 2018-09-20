@@ -9,6 +9,7 @@ import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
 import {InterceptedHttp} from './factory/InterceptedHttp';
+import {CdrVersionStorageService} from './services/cdr-version-storage.service';
 import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
@@ -174,6 +175,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
       deps: [ServerConfigService],
       useClass: ErrorReporterService,
     },
+    CdrVersionStorageService,
     ProfileStorageService,
     SignInService,
     StatusCheckService,
