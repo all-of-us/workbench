@@ -150,22 +150,6 @@ export class CohortSearchEpics {
     )
   )
 
-    //review
-
-    fetchReviewChartsData: CSEpic = (action$) => (
-        action$.ofType(BEGIN_CHART_DATA_REQUEST).mergeMap(
-            ({ns, wsid, cid, cdrid, domain, limit}: ReviewChartRequestAction) => {
-                return this.reviewservice
-                    .getCohortChartData(ns, wsid, cid, cdrid, domain, limit, null)
-                    .map(result => loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result.items))
-                    // .race(action$
-                    //     .ofType(CANCEL_CRITERIA_REQUEST)
-                    //     .filter(compare({domain, limit}))
-                    //     .first())
-                    // .catch(e => Observable.of(criteriaRequestError(domain, limit, e)));
-            }
-        )
-    )
   fetchAutocompleteOptions: CSEpic = (action$) => (
     action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
       ({cdrVersionId, kind, subtype, searchTerms}: AutocompleteRequestAction) => {
@@ -259,4 +243,24 @@ export class CohortSearchEpics {
         .catch(e => Observable.of(chartsRequestError(entityType, entityId, e)))
     )
   )
+
+/**
+ * Cohort Review Charts
+ */
+
+ fetchReviewChartsData: CSEpic = (action$) => (
+    action$.ofType(BEGIN_CHART_DATA_REQUEST).mergeMap(
+        ({ns, wsid, cid, cdrid, domain, limit}: ReviewChartRequestAction) => {
+            return this.reviewservice
+                .getCohortChartData(ns, wsid, cid, cdrid, domain, limit, null)
+                .map(result =>
+                    loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result.items));
+            // .race(action$
+            //     .ofType(CANCEL_CRITERIA_REQUEST)
+            //     .filter(compare({domain, limit}))
+            //     .first())
+            // .catch(e => Observable.of(criteriaRequestError(domain, limit, e)));
+        }
+    )
+ )
 }

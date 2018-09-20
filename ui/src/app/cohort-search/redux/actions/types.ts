@@ -104,28 +104,6 @@ export interface ActionTypes {
     subtype: string;
   };
 
-  // for review
-    BEGIN_CHART_DATA_REQUEST: {
-        type: typeof BEGIN_CHART_DATA_REQUEST;
-        ns:any;
-        wsid:any;
-        cid:any;
-        cdrid:any;
-        domain: string;
-        limit: number;
-    };
-    LOAD_CHART_RESULTS: {
-        type: typeof LOAD_CHART_RESULTS;
-        ns:any;
-        wsid:any;
-        cid:any;
-        cdrid:any;
-        domain: string;
-        limit: number;
-        results:any;
-    };
-
-
   LOAD_CRITERIA_RESULTS: {
     type: typeof LOAD_CRITERIA_RESULTS;
     kind: string;
@@ -383,6 +361,30 @@ export interface ActionTypes {
   };
   RESET_STORE: {
     type: typeof RESET_STORE;
+  };
+
+  /**
+   * Cohort Review Charts
+   */
+
+  BEGIN_CHART_DATA_REQUEST: {
+      type: typeof BEGIN_CHART_DATA_REQUEST;
+      ns: any;
+      wsid: any;
+      cid: any;
+      cdrid: any;
+      domain: string;
+      limit: number;
+  };
+  LOAD_CHART_RESULTS: {
+      type: typeof LOAD_CHART_RESULTS;
+      ns: any;
+      wsid: any;
+      cid: any;
+      cdrid: any;
+      domain: string;
+      limit: number;
+      results: any;
   };
 }
 

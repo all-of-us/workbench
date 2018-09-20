@@ -1,11 +1,10 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {CohortReviewService, DomainType} from 'generated';
+import {CohortBuilderService, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
-import {CohortBuilderService, DemoChartInfoListResponse, SearchRequest} from 'generated';
 import {CohortSearchActions, CohortSearchState} from '../../cohort-search/redux';
 
 
@@ -19,7 +18,10 @@ export class OverviewPage implements OnInit, OnDestroy {
   openChartContainer = false;
   demoGraph = false;
   data = List();
-  typesList= [DomainType[DomainType.CONDITION],DomainType[DomainType.PROCEDURE], DomainType[DomainType.MEASUREMENT],DomainType[DomainType.LAB]];
+  typesList= [DomainType[DomainType.CONDITION],
+              DomainType[DomainType.PROCEDURE],
+              DomainType[DomainType.MEASUREMENT],
+              DomainType[DomainType.LAB]];
   title: string;
   showTitle = false;
   private subscription: Subscription;
