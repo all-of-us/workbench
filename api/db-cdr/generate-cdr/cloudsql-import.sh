@@ -60,17 +60,18 @@ fi
 function import_wait () {
   gs_file=$1
   wait_interval=$2
-  seconds_waited=0
+  # Sleep an initial 5 seconds before checking for small files to import
+  sleep 5
+  seconds_waited=5
   while true; do
-    seconds_waited=$((seconds_waited + wait_interval))
     if [[ $(gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT.*RUNNING") ]]
     then
         sleep $wait_interval
+        seconds_waited=$((seconds_waited + wait_interval))
     else
         echo "Import of $gs_file finished after ${seconds_waited} seconds."
         break
     fi
-
   done
 }
 
