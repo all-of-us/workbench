@@ -15,7 +15,6 @@ import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {Observable} from 'rxjs/Observable';
-import {FileDetail} from "../../../generated/model/fileDetail";
 
 enum ResourceType {
   NOTEBOOK = 'notebook',

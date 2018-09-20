@@ -106,19 +106,19 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   convertToResources(fileList: FileDetail[]): void {
     this.resourceList = [];
-    for (let file of fileList) {
+    for (const file of fileList) {
       this.resourceList.push(this.convertToResource(file));
     }
   }
 
   convertToResource(file: FileDetail): RecentResource {
     let mTime: string;
-    if (file.lastModifiedTime == undefined) {
+    if (file.lastModifiedTime === undefined) {
       mTime = new Date().toDateString();
     } else {
       mTime = file.lastModifiedTime.toString();
     }
-    let newResource: RecentResource = {
+    const newResource: RecentResource = {
       workspaceNamespace: this.wsNamespace,
       workspaceFirecloudName: this.wsId,
       permission: WorkspaceAccessLevel[this.accessLevel],
@@ -137,11 +137,11 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   updateList(rename: NotebookRename): void {
-    if (rename == undefined) {
+    if (rename === undefined) {
       this.loadNotebookList();
     } else {
-      let nb = this.resourceList.filter(nb => nb.notebook.name === rename.name)[0];
-      let newNb = Object.assign({}, nb);
+      const nb = this.resourceList.filter(resource => resource.notebook.name === rename.name)[0];
+      const newNb = Object.assign({}, nb);
       newNb.notebook.name = rename.newName;
       this.resourceList.splice(this.resourceList.indexOf(nb), 1, newNb);
     }
