@@ -66,17 +66,13 @@ export class RoutingSpinnerComponent implements OnInit {
 
   private showSpinner() {
     this.zone.runOutsideAngular(() => {
-      this.renderer.setStyle(this.spinnerContainer, 'opacity', 0.8);
-      this.renderer.setStyle(this.spinnerContainer, 'z-index', 1);
-      this.renderer.setStyle(this.spinner, 'opacity', 1);
+      this.renderer.setStyle(this.spinnerContainer, 'display', 'block');
     });
   }
 
   private hideSpinner() {
     this.zone.runOutsideAngular(() => {
-      this.renderer.setStyle(this.spinnerContainer, 'opacity', 0);
-      this.renderer.setStyle(this.spinnerContainer, 'z-index', -1);
-      this.renderer.setStyle(this.spinner, 'opacity', 0);
+      this.renderer.setStyle(this.spinnerContainer, 'display', 'none');
     });
   }
 }
