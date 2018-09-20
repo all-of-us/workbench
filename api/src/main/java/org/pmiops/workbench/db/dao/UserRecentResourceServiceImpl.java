@@ -88,8 +88,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    * Deletes notebook entry from user_recent_resource
    */
   @Override
-  public void deleteNotebookEntry(long workspaceId, long userId, String notebookName) {
-    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndNotebookName(workspaceId, userId, notebookName);
+  public void deleteNotebookEntry(long workspaceId, long userId, String notebookPath) {
+    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookPath);
     if (resource != null) {
       getDao().delete(resource);
     }

@@ -5,7 +5,8 @@ import {resourceActionList} from 'app/utils/resourceActions';
 
 import {
   CohortsService, NotebookRename,
-  RecentResource, WorkspacesService
+  RecentResource, UserMetricsService,
+  WorkspacesService
 } from 'generated';
 
 import {SignInService} from 'app/services/sign-in.service';
@@ -64,6 +65,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       private workspacesService: WorkspacesService,
       private signInService: SignInService,
       private route: Router,
+      private userMetricsService: UserMetricsService
   ) {}
 
   ngOnInit() {
@@ -110,7 +112,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, resource.notebook.name)
-          .subscribe(() => Observable.empty());
+          .subscribe(() => this.onUpdate.emit());
         break;
       }
       case ResourceType.COHORT: {
@@ -118,10 +120,10 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
           '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?criteria=';
         this.route.navigateByUrl(url
           + resource.cohort.criteria);
+        this.onUpdate.emit();
         break;
       }
     }
-    this.onUpdate.emit();
   }
 
   deleteResource(resource: RecentResource): void {
@@ -143,14 +145,17 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
           .subscribe(() => Observable.empty());
+        this.userMetricsService.deleteRecentResource(this.wsNamespace, this.wsId, {notebookName: $event.name})
+          .subscribe(() => {
+          this.onUpdate.emit();
+          });
         break;
       }
       case ResourceType.COHORT: {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
-          .subscribe(() => Observable.empty());
+          .subscribe(() => this.onUpdate.emit());
       }
     }
-    this.onUpdate.emit();
     this.deleteModal.close();
   }
 
