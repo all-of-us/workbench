@@ -19,7 +19,7 @@ public interface SurveyModuleDao extends CrudRepository<SurveyModule, Long> {
       "join achilles_results r on m.concept_id = r.stratum_1\n" +
       "join concept q on r.stratum_2 = q.concept_id\n" +
       "left join concept_synonym cs on q.concept_id=cs.concept_id\n" +
-      "where d.db_type = 'survey' and r.analysis_id = 3110\n" +
+      "where r.analysis_id = 3110\n" +
       "and (((match(q.concept_name) against(?1 in boolean mode)) or\n" +
       "(match(cs.concept_synonym_name) against(?1 in boolean mode)) or\n" +
       "q.concept_id=?2 or q.concept_code=?2) or\n" +

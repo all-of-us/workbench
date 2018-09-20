@@ -75,8 +75,8 @@ public class SurveyModule {
     return questionCount;
   }
 
-  public void setQuestionCount(long questionCount) {
-    this.questionCount = questionCount;
+  public void setQuestionCount(Long questionCount) {
+    this.questionCount = questionCount == null ? 0L : questionCount;
   }
 
   public SurveyModule questionCount(long questionCount) {
@@ -89,8 +89,8 @@ public class SurveyModule {
     return participantCount;
   }
 
-  public void setParticipantCount(long participantCount){
-    this.participantCount = participantCount;
+  public void setParticipantCount(Long participantCount) {
+    this.participantCount = participantCount == null ? 0L : participantCount;
   }
 
   public SurveyModule participantCount(long participantCount){

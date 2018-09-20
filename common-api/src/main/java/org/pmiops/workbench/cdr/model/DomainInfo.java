@@ -114,8 +114,8 @@ public class DomainInfo {
     return allConceptCount;
   }
 
-  public void setAllConceptCount(long allConceptCount) {
-    this.allConceptCount = allConceptCount;
+  public void setAllConceptCount(Long allConceptCount) {
+    this.allConceptCount = allConceptCount == null ? 0L : allConceptCount;
   }
 
   public DomainInfo allConceptCount(long allConceptCount) {
@@ -128,8 +128,8 @@ public class DomainInfo {
     return standardConceptCount;
   }
 
-  public void setStandardConceptCount(long standardConceptCount) {
-    this.standardConceptCount = standardConceptCount;
+  public void setStandardConceptCount(Long standardConceptCount) {
+    this.standardConceptCount = standardConceptCount == null ? 0L : standardConceptCount;
   }
 
   public DomainInfo standardConceptCount(long standardConceptCount) {
@@ -142,8 +142,8 @@ public class DomainInfo {
     return participantCount;
   }
 
-  public void setParticipantCount(long participantCount){
-    this.participantCount = participantCount;
+  public void setParticipantCount(Long participantCount){
+    this.participantCount = participantCount == null ? 0L : participantCount;
   }
 
   public DomainInfo participantCount(long participantCount){

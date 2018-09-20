@@ -32,7 +32,7 @@
       <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
           <div class="white-card-box search-result">
             <h5 class="box-title">
-              {{r.domainDisplay}}
+              {{r.name}}
             </h5>
             <div class="card-stat">
               {{r.standardConceptCount | number}}
@@ -62,7 +62,7 @@
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
         <div class="white-card-box search-result">
           <h5 class="box-title">
-            {{r.domainDisplay}}
+            {{r.name}}
           </h5>
           <div class="card-stat">
             {{r.questionCount | number}}
