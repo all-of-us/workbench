@@ -33,7 +33,7 @@ import {CohortReviewRoutingModule} from './routing/routing.module';
 // This is a temporary measure until we have specs and APIs for overview specific charts
 import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
 // This is to get cohortsaerchstore acces, might need to change
-import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from '../cohort-search/redux';
+import {ConfigureStore, CohortSearchActions, CohortSearchEpics, } from '../cohort-search/redux';
 /* tslint:enable:max-line-length */
 
 
