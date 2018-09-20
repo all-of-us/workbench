@@ -6,6 +6,8 @@ import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
 
 import {CohortBuilderService, DemoChartInfoListResponse, SearchRequest} from 'generated';
+import {TreeType} from "../../../generated";
+import {typeToTitle} from "../../cohort-search/utils";
 
 
 @Component({
@@ -16,8 +18,11 @@ import {CohortBuilderService, DemoChartInfoListResponse, SearchRequest} from 'ge
 })
 export class OverviewPage implements OnInit, OnDestroy {
   openChartContainer = false;
-    demoGraph = false;
+  demoGraph = false;
   data = List();
+  typesList= ['CONDITIONS','PROCEDURES', 'MEDICATION', 'LABS'];
+  title: string;
+  showTitle = false;
   private subscription: Subscription;
 
   constructor(
@@ -33,6 +38,9 @@ export class OverviewPage implements OnInit, OnDestroy {
       .switchMap(request => this.chartAPI.getDemoChartInfo(cdrVersionId, request))
       .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => this.data = fromJS(data));
+
+    this.getDemoCharts();
+    this.getCharts(); // if only one flag in future modify the method;
   }
     getCharts() {
         this.openChartContainer = true;
@@ -42,11 +50,27 @@ export class OverviewPage implements OnInit, OnDestroy {
     }
     getDemoCharts (){
         this.demoGraph = true;
+        this.showTitle = false;
     }
 
-    getConditionCharts(){
+    getDifferentCharts(names){
+      console.log(names);
         this.demoGraph = false;
+        this.showTitle = true;
+        this.title = names;
+        return this.title;
     }
+
+    //
+    // get selectionTitle() {
+    //     const _type = [
+    //         TreeType[TreeType.CONDITION],
+    //         TreeType[TreeType.PROCEDURE]
+    //     ].includes(this.itemType)
+    //         ? this.itemType : this.ctype;
+    //     const title = typeToTitle(_type);
+    //     return title
+    // }
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
