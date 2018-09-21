@@ -1,10 +1,11 @@
 package org.pmiops.workbench.cdr.dao;
 
-import java.util.List;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface ConceptDao extends CrudRepository<Concept, Long> {
 
@@ -42,9 +43,6 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
       "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
       nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
-
-    @Query(value = "select c.* from concept c join db_domain d on c.concept_id=d.concept_id", nativeQuery = true)
-    List<Concept> findDbDomainParticpantCounts();
 
     @Query(value = "select distinct c.conceptId from Concept c left join c.synonyms as cs " +
             "where match(cs.conceptSynonymName,?1) > 0 or match(c.conceptName,?1) > 0")

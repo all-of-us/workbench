@@ -86,7 +86,7 @@ else
 fi
 
 
-copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_synonym)
+copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_synonym)
 
 for t in "${copy_tables[@]}"
 do

@@ -490,7 +490,7 @@ public class ConceptsControllerTest {
   @Test
   public void testGetDomainInfo() throws Exception {
     saveConcepts();
-    saveDbDomains();
+    saveDomains();
     List<DomainInfo> domainInfos = conceptsController.getDomainInfo("ns", "name")
         .getBody().getItems();
     assertThat(domainInfos).containsExactly(
@@ -549,7 +549,7 @@ public class ConceptsControllerTest {
     conceptDao.save(CONCEPT_6);
   }
 
-  private void saveDbDomains() {
+  private void saveDomains() {
     domainInfoDao.save(MEASUREMENT_DOMAIN);
     domainInfoDao.save(PROCEDURE_DOMAIN);
     domainInfoDao.save(CONDITION_DOMAIN);
