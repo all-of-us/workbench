@@ -40,6 +40,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   @Input('forList')
   forList: string;
   @Output() onUpdate: EventEmitter<any> = new EventEmitter();
+  @Output() duplicateNameError: EventEmitter<any> = new EventEmitter();
   actions = [];
   notebookRenameError = false;
   wsNamespace: string;
@@ -98,12 +99,18 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       this.notebookRenameError = true;
       return;
     }
-    this.workspacesService
-        .renameNotebook(this.wsNamespace, this.wsId, rename)
-        .subscribe(() => {
+    this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
+      .switchMap((fileList) => {
+        if (fileList.filter((nb) => nb.name === newName).length > 0) {
+          this.duplicateNameError.emit(newName);
+        } else {
           this.onUpdate.emit(rename);
-          this.renameModal.close();
-    });
+          return this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename);
+        }
+      })
+      .subscribe(() => {
+        this.renameModal.close();
+      });
   }
 
   cloneResource(resource: RecentResource): void {

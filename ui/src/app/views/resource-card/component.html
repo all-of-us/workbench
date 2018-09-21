@@ -1,14 +1,14 @@
 <div class="card item-card {{forList}} {{resourceType}}-card">
   <div class="header-area">
     <clr-dropdown>
-      <button type="button" clrDropdownTrigger>
+      <button type="button" class="resource-menu" [disabled]="actionsDisabled" clrDropdownTrigger>
         <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
       </button>
       <clr-dropdown-menu *clrIfOpen>
         <div *ngFor="let action of actions">
           <button
-                  class="action-item"
-                  (click) =this[action.link](this.resourceCard)
+                  class="action-item {{action.class}}"
+                  (click)=this[action.link](this.resourceCard)
                   [class.disabled]="actionsDisabled"
                   [disabled]="actionsDisabled">
             <clr-icon [attr.shape]=action.class></clr-icon>

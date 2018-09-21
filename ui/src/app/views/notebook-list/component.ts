@@ -43,7 +43,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   showTip: boolean;
   newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
   firstVisit = true;
-  notebookInFocus: FileDetail;
   notebookRenameConflictError = false;
   notebookRenameError = false;
   duplicateName = '';
@@ -51,10 +50,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-  @ViewChild(RenameModalComponent)
-  renameModal: RenameModalComponent;
-  @ViewChild(ConfirmDeleteModalComponent)
-  deleteModal: ConfirmDeleteModalComponent;
   @ViewChild(NewNotebookModalComponent)
   newNotebookModal: NewNotebookModalComponent;
 
@@ -145,6 +140,11 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       newNb.notebook.name = rename.newName;
       this.resourceList.splice(this.resourceList.indexOf(nb), 1, newNb);
     }
+  }
+
+  duplicateNameError(dupName: string): void {
+    this.duplicateName = dupName;
+    this.notebookRenameConflictError = true;
   }
 
   submitNotebooksLoadBugReport(): void {

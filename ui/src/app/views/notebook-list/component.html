@@ -18,7 +18,7 @@
   </div>
 
   <div *ngFor="let notebook of resourceList">
-    <app-resource-card [resourceCard]="notebook" [forList]="'for-list'" (onUpdate)="updateList($event)"></app-resource-card>
+    <app-resource-card [resourceCard]="notebook" [forList]="'for-list'" (onUpdate)="updateList($event)" (duplicateNameError)="duplicateNameError($event)"></app-resource-card>
   </div>
 </div>
 
@@ -49,6 +49,4 @@
 </clr-modal>
 <app-bug-report></app-bug-report>
 
-<app-rename-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveRename)="receiveRename($event)"></app-rename-modal>
-<app-confirm-delete-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
 <app-new-notebook-modal [workspace]="workspace" [existingNotebooks]="notebookList"></app-new-notebook-modal>
