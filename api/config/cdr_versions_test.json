@@ -8,6 +8,17 @@
     "releaseNumber": 1,
     "numParticipants": 946237,
     "cdrDbName": "cdr20180831",
-    "publicDbName": "public20180831"
+    "publicDbName": "public20180920"
+  },
+  {
+    "name": "New Test Registered CDR",
+    "dataAccessLevel": 1,
+    "bigqueryProject": "all-of-us-ehr-dev",
+    "bigqueryDataset": "test_merge_dec26",
+    "creationTime": "2018-09-20 00:00:00Z",
+    "releaseNumber": 1,
+    "numParticipants": 946237,
+    "cdrDbName": "cdr20180920",
+    "publicDbName": "public20180920"
   }
 ]
