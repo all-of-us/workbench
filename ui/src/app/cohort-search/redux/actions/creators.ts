@@ -101,9 +101,9 @@ export const loadCriteriaSubtypeRequestResults =
   ({type: LOAD_CRITERIA_SUBTYPE_RESULTS, kind, subtype, parentId, results});
 
 export const loadCriteriaSubtree =
-  (kind: string, ids: Array<number>, path: Array<string>
+  (kind: string, subtype: string, ids: Array<number>, path: Array<string>
   ): ActionTypes[typeof LOAD_CRITERIA_SUBTREE] =>
-  ({type: LOAD_CRITERIA_SUBTREE, kind, ids, path});
+  ({type: LOAD_CRITERIA_SUBTREE, kind, subtype, ids, path});
 
 export const loadDemoCriteriaRequestResults =
   (kind: string, subtype: string, results: any
