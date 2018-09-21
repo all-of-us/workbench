@@ -294,11 +294,12 @@ Description of arguments these scripts take are as follows.
 3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
 3. Note cdr-version can be '' to make datasets named cdr and public
 #### Generate cloudsql databases from a bucket without downloading the data
+##### * NOTE The cloudsql instance is set in code for each environment in /api/libproject/devstart.rb. Thus each cdr release will be on the same cloudsql instance for an environment.  
 `# Once for private cdr`
 
 `./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database cdr20180913 --bucket all-of-us-workbench-private-cloudsql/cdr20180913`
 
-`# Once for public cdr`
+`# Once for public cdr.`
 
 `./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database public20180913 --bucket all-of-us-workbench-private-cloudsql/public20180913`
 ##### Result is
@@ -306,24 +307,23 @@ Description of arguments these scripts take are as follows.
 
 #### Tell workbench and databrowser about your new cdr release so they can use it
 1. For the environment you want, in the workbench/api/config/cdr_versions_ENV.json , add a new object to the array for your cdr. Properties are:
-  * name: unique name
-  * dataAccessLevel: 1 = registered, 2 = controlled
-  * bigqueryProject: project the BigQuery cdr is
-  * bigqueryDataset: dataset of cdr,
-  * creationTime: date string in this format "2018-09-20 00:00:00Z",
-  * releaseNumber: gets incremented by 1 each time an official release is made. It has the same value for a registered and controlled cdr release. 
-  * numParticipants: To get the number of participants look in your new cdrXXXXXXX cloudsql database at the achilles_results table where analysis_id = 1. `select count_value from achilles_results where analysis_id = 1` 
-  * cdrDbName: name of the the cloudsql count database used by workbench "cdr20180920",
-  * publicDbName: name of the public cloudsql database use by data browser and public api
-  
+   * name: unique name
+   * dataAccessLevel: 1 = registered, 2 = controlled
+   * bigqueryProject: project the BigQuery cdr is
+   * bigqueryDataset: dataset of cdr,
+   * creationTime: date string in this format "2018-09-20 00:00:00Z",
+   * releaseNumber: gets incremented by 1 each time an official release is made. It has the same value for a registered and controlled cdr release. 
+   * numParticipants: To get the number of participants look in your new cdrXXXXXXX cloudsql database at the achilles_results table where analysis_id = 1. `select count_value from achilles_results where analysis_id = 1` 
+   * cdrDbName: name of the the cloudsql count database used by workbench "cdr20180920",
+   * publicDbName: name of the public cloudsql database use by data browser and public api
 2. Set the default cdr version for the environment in config_ENV.json. 
-  * You probably don’t want to set your new cdr to the default before testing it.
-  * The cloudsql instance for the above mentioned dbs is set in this file. Each cdr release must be on the same cloudsql instance  
+   * You probably don’t want to set your new cdr to the default before testing it.
+   * NOTE The cloudsql instance is set in code for each environment in /api/libproject/devstart.rb  
 3. Make your config changes take effect:
-  * For non local environments: 
-    * commit and merge your config files with master and the changes will take effect on the next build.
-    * OR run `./project.rb update-cloud-config --project <project>` where project is the project for your environment. You can find this project in config_<ENV>.json server.projectId
-  * For local , run dev-up to build your api
+   * For non local environments: 
+     * commit and merge your config files with master and the changes will take effect on the next build.
+     * OR run `./project.rb update-cloud-config --project <project>` where project is the project for your environment. You can find this project in config_<ENV>.json server.projectId
+   * For local , run dev-up to build your api
 
 #### Generate full local mysql test databases -- cdr and public for data generated above if you need to develop with a full test database
 1. DO NOT do this with production data. It is not allowed.
