@@ -1,5 +1,6 @@
 import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
+import org.pmiops.workbench.build.GenerateAPIListingTask
 
 def swaggerTemplateDir = 'src/main/resources'
 def mergedApiSourceFile = 'src/main/resources/merged.yaml'
@@ -440,3 +441,5 @@ task incrementalHotSwap(type: IncrementalHotSwapTask) {
 }
 
 incrementalHotSwap.dependsOn compileJava
+
+task listProjectAPIs(type: GenerateAPIListingTask, dependsOn: generateMergedSwagger)
