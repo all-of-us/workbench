@@ -21,7 +21,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Attribu
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   public static final String CATEGORICAL_MESSAGE =
-    "Bad Request: Please provide the in operator when searching categorical attributes.";
+    "Bad Request: Attribute Categorical must provide In operator.";
 
   public static final String NUMERICAL = "NUM";
   public static final String CATEGORICAL = "CAT";
@@ -51,6 +51,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", parameter.getConceptId().toString());
       List<String> tempQueryParts = new ArrayList<String>();
       for (Attribute attribute : parameter.getAttributes()) {
+        validateAttribute(attribute);
         if (attribute.getName().equals(ANY)) {
           queryParts.add(baseSql);
         } else {
@@ -84,19 +85,22 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateSearchParameter(SearchParameter param) {
-    from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
-    param
-      .getAttributes()
-      .stream()
-      .filter(attr -> !isNameAny(attr))
-      .forEach(attr -> {
-        from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, NAME, attr.getName());
-        from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, OPERATOR);
-        from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
-        from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
-        from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE);
-        from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE);
-      });
+    from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
+    from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
+    from(typeBlank().or(measTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
+  }
+
+  private void validateAttribute(Attribute attr) {
+    if (!ANY.equals(attr.getName())) {
+      String name = attr.getName();
+      String oper = operatorText.get(attr.getOperator());
+      from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
+      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, name);
+      from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+      from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
+      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
+    }
   }
 
   private void processNumericalSql(List<String> queryParts,

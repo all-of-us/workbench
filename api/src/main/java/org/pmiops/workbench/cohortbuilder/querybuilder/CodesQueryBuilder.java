@@ -106,11 +106,11 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateSearchParameter(SearchParameter param) {
-    from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, TYPE, param.getType());
-    from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, SUBTYPE, param.getSubtype());
-    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, DOMAIN, param.getDomain());
-    from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
-    from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, CODE, param.getValue());
+    from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
+    from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, param.getSubtype());
+    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomain());
+    from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
+    from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CODE, param.getValue());
   }
 
   private void buildInnerQuery(String type,
