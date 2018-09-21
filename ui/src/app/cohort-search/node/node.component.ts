@@ -12,7 +12,7 @@ import {
   criteriaChildren,
   criteriaError,
   criteriaSearchTerms,
-  criteriaSubtree,
+  criteriaSubtree, ingredientsForBrand,
   isCriteriaLoading,
   subtreeSelected,
 } from '../redux';
@@ -51,10 +51,12 @@ export class NodeComponent implements OnInit, OnDestroy {
   modifiedTree = false;
   searchTerms: Array<string>;
   numMatches = 0;
+  subMatches = 0;
   loading = false;
   error = false;
   fullTree: boolean;
   codes: any;
+  ingredients = [];
   subscription: Subscription;
   @select(subtreeSelected) selected$: Observable<any>;
 
@@ -117,12 +119,26 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(nodeIds => this.expanded = nodeIds.includes(parentId.toString()));
 
       const subtreeSelectSub = this.selected$
-        .filter(selectedIds => !!selectedIds && parentId !== 0)
+        .filter(selectedIds => !!selectedIds)
         .subscribe(selectedIds => {
-          const displayName = selectedIds.includes(parentId)
-            ? highlightMatches(this.searchTerms, this.node.get('name'))
-            : stripHtml(this.node.get('name'));
-          this.node = this.node.set('name', displayName);
+          this.subMatches = selectedIds.length;
+          if (parentId !== 0) {
+            const displayName = selectedIds.includes(parentId)
+              ? highlightMatches(this.searchTerms, this.node.get('name'))
+              : stripHtml(this.node.get('name'));
+            this.node = this.node.set('name', displayName);
+          }
+        });
+
+      const ingredientSub = this.ngRedux
+        .select(ingredientsForBrand())
+        .subscribe(ingredients => {
+          this.ingredients = [];
+          ingredients.forEach(item => {
+            if (!this.ingredients.includes(item.name)) {
+              this.ingredients.push(item.name);
+            }
+          });
         });
 
       this.subscription = errorSub;
@@ -131,6 +147,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.subscription.add(searchSub);
       this.subscription.add(subtreeSub);
       this.subscription.add(subtreeSelectSub);
+      this.subscription.add(ingredientSub);
     }
     if (this.fullTree) {
       this.expanded = this.node.get('expanded', false);
@@ -257,5 +274,9 @@ export class NodeComponent implements OnInit, OnDestroy {
       }
     });
     return filtered;
+  }
+
+  get multipleMatches() {
+    return this.ingredients.length > 0 || this.subMatches > 1;
   }
 }
