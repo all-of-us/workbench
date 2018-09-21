@@ -22,30 +22,37 @@ class GenerateAPIListingTask extends DefaultTask {
 
     @TaskAction
     void defaultAction() {
-        List<String> methods = ["get", "delete", "patch", "post", "put"]
-        File yaml = new File("src/main/resources/merged.yaml")
+        String apiYaml = "src/main/resources/merged.yaml"
+        String publicYaml = "../public-api/src/main/resources/merged.yaml"
+        printPaths(getApisFromYamlFile(apiYaml))
+        printPaths(getApisFromYamlFile(publicYaml))
+    }
+
+    private void printPaths(LinkedHashMap<String, LinkedHashMap> paths) {
+        paths?.each {
+            String path = it.key
+            it.value.each { api ->
+                String method = api.key
+                String description = api.value.get("description")?.
+                        trim()?.
+                        replaceAll("\r", '')?.
+                        replaceAll("\n", '')
+                // logger does not go to stdout here.
+                println("${method.toUpperCase()} $path\t${description ?: ''}")
+            }
+        }
+    }
+
+    private LinkedHashMap<String, LinkedHashMap> getApisFromYamlFile(String path) {
+        File yaml = new File(path)
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
         try {
             Swagger swagger = mapper.readValue(yaml, Swagger.class)
-            swagger.paths?.each {
-                String path = it.key
-                // Find any APIs that match the methods we care about
-                Map apis = it.value.findAll { methods.contains(it.key) }
-                if (apis) {
-                    apis.each { api ->
-                        String method = api.key
-                        String description = api.value.get("description")?.
-                                trim()?.
-                                replaceAll("\r", '')?.
-                                replaceAll("\n", '')
-                        // logger does not go to stdout here.
-                        println("${method.toUpperCase()} $path\t${description ?: ''}")
-                    }
-                }
-            }
+            return swagger.paths
         } catch (Exception e) {
             logger.error(e.message)
         }
+        new LinkedHashMap()
     }
 
     /**
