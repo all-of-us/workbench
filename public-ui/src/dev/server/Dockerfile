@@ -10,8 +10,7 @@ RUN groupmod -g 666 node \
 # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/master/alpine/Dockerfile
 #
 
-# TODO: update this to a later version
-ENV CLOUD_SDK_VERSION 165.0.0
+ENV CLOUD_SDK_VERSION 217.0.0
 
 ENV PATH /google-cloud-sdk/bin:$PATH
 
