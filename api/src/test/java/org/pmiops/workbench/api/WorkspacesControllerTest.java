@@ -148,7 +148,7 @@ public class WorkspacesControllerTest {
           .conceptCode("conceptB")
           .conceptClassId("classId2")
           .vocabularyId("V2")
-          .domainId("Condition/Device")
+          .domainId("Condition")
           .countValue(456L)
           .prevalence(0.3F)
           .conceptSynonyms(new ArrayList<String>());

@@ -235,7 +235,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
           ImmutableList.copyOf(concepts).stream().filter(concept -> {
           Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());
-          return domain != domainEnum;
+          return !domainEnum.equals(domain);
         }).collect(Collectors.toList());
       if (!mismatchedConcepts.isEmpty()) {
         String mismatchedConceptIds = Joiner.on(", ").join(mismatchedConcepts.stream()
