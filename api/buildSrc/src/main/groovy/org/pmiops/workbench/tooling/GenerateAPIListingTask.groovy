@@ -33,8 +33,7 @@ class GenerateAPIListingTask extends DefaultTask {
                 Map.Entry api = it.value.find { methods.contains(it.key) }
                 if (api) {
                     String method = api.key
-                    String fullDescription = api.value.get("description")
-                    String description = fullDescription?.
+                    String description = api.value.get("description")?.
                             trim()?.
                             replaceAll("\r", '')?.
                             replaceAll("\n", '')
