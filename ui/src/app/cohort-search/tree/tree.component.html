@@ -6,13 +6,20 @@
   <clr-icon shape="error-standard"></clr-icon>
   <em>Failed to Load Criteria</em>
 </div>
-<clr-alert *ngIf="isEmpty" [clrAlertType]="'alert-warning'" [clrAlertClosable]="false">
-  <div clr-alert-item class="alert-item">
-    <span class="alert-text">
-      No results found
-    </span>
+
+<div *ngIf="isEmpty" class="alert alert-warning">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
+      </div>
+      <span class="alert-text">
+        A problem occurred and we were not able to retrieve the requested data
+      </span>
+    </div>
   </div>
-</clr-alert>
+</div>
+
 <div class="dropdown-search-container">
   <div [ngClass]="{'condition-dropdown' : showDropDown}">
     <ng-container *ngIf="showDropDown">
