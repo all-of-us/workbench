@@ -97,7 +97,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_ancestor concept_synonym)
+create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym)
 
 for t in "${create_tables[@]}"
 do
@@ -106,7 +106,7 @@ do
 done
 
 # Load tables from csvs we have. This is not cdr data but meta data needed for workbench app
-load_tables=(db_domain achilles_analysis criteria criteria_attribute)
+load_tables=(domain_info survey_module achilles_analysis criteria criteria_attribute)
 csv_path=generate-cdr/csv
 for t in "${load_tables[@]}"
 do
@@ -212,18 +212,23 @@ where count_value > 0 or source_count_value > 0"
 # concept survey participant count update#
 ##########################################
 
-#Set the survey participant count
+# Set the survey participant count on the concept
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
 set c1.count_value=count_val from
 (select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd
-on cr.concept_id_2=dbd.concept_id
-where dbd.db_type='survey' and dbd.concept_id is not null
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
+on cr.concept_id_2=sm.concept_id
 group by cr.concept_id_2)
 where c1.concept_id=survey_concept_id"
 
+# Set the survey participant count on the survey_module row
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
+set sm.participant_count=c.count_value from
+`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+where c.concept_id=sm.concept_id
 
 ################################
 # concept question count update#
@@ -234,8 +239,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set c1.count_value=count_val from
 (select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id,cr.concept_id_1 as question_id
 from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
-where dbd.db_type='survey' and cr.relationship_id = 'Has Module'
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
+on cr.concept_id_2 = sm.concept_id
+where cr.relationship_id = 'Has Module'
 group by survey_concept_id,cr.concept_id_1)
 where c1.concept_id=question_id
 "

@@ -20,7 +20,7 @@
       <column name="description" type="STRING"/>
     </loadData>
 
-    <loadData tableName="survey_module" file="csv/survey_modules.csv" encoding="UTF-8" quotchar='"'>
+    <loadData tableName="survey_module" file="csv/survey_module.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>
       <column name="name" type="STRING"/>
       <column name="description" type="STRING"/>
