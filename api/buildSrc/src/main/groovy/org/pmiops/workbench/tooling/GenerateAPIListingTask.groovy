@@ -30,17 +30,18 @@ class GenerateAPIListingTask extends DefaultTask {
             swagger.paths?.each {
                 String path = it.key
                 // Find any APIs that match the methods we care about
-                Map.Entry api = it.value.find { methods.contains(it.key) }
-                if (api) {
-                    String method = api.key
-                    String description = api.value.get("description")?.
-                            trim()?.
-                            replaceAll("\r", '')?.
-                            replaceAll("\n", '')
-                    // logger does not go to stdout here.
-                    println("${method.toUpperCase()} $path\t${description ?: ''}")
+                Map apis = it.value.findAll { methods.contains(it.key) }
+                if (apis) {
+                    apis.each { api ->
+                        String method = api.key
+                        String description = api.value.get("description")?.
+                                trim()?.
+                                replaceAll("\r", '')?.
+                                replaceAll("\n", '')
+                        // logger does not go to stdout here.
+                        println("${method.toUpperCase()} $path\t${description ?: ''}")
+                    }
                 }
-
             }
         } catch (Exception e) {
             logger.error(e.message)
