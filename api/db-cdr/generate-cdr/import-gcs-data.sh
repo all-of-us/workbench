@@ -63,6 +63,7 @@ function mysqlimport_table () {
 }
 
 # Function for mysqlimport concept_synonym
+# TODO Test this in next pr and remove this function as we fixed this table so it should work normal
 function mysqlimport_concept_synonym_table () {
    db=$1
    file=$2
