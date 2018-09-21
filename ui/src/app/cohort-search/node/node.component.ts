@@ -12,7 +12,8 @@ import {
   criteriaChildren,
   criteriaError,
   criteriaSearchTerms,
-  criteriaSubtree, ingredientsForBrand,
+  criteriaSubtree,
+  ingredientsForBrand,
   isCriteriaLoading,
   subtreeSelected,
 } from '../redux';
