@@ -23,9 +23,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validat
 @Service
 public class PMQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String CONCEPT_ID = "conceptId";
-  public static final String BP_TWO_ATTRIBUTE_MESSAGE = "Bad Request: Provide two attributes for Blood Pressure.";
-  public static final String BP_ATTRIBUTE_MESSAGE = "Bad Request: Provide Systolic and Diastolic attributes.";
+  private static final String CONCEPTID = "conceptId";
+  public static final String BP_TWO_ATTRIBUTE_MESSAGE =
+    "Bad Request: Attribute Blood Pressure must provide two attributes(systolic and diastolic).";
 
   private static final List<String> PM_TYPES_WITH_ATTR =
     Arrays.asList(TreeSubType.BP.name(),
@@ -35,21 +35,6 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       TreeSubType.BMI.name(),
       TreeSubType.WC.name(),
       TreeSubType.HC.name());
-  private static final List<String> PM_TYPES_NO_ATTR =
-    Arrays.asList(TreeSubType.HR.name(),
-      TreeSubType.PREG.name(),
-      TreeSubType.WHEEL.name());
-  ImmutableMap<String, String> exceptionText = ImmutableMap.<String, String>builder()
-    .put(TreeSubType.HR_DETAIL.name(), "Heart Rate")
-    .put(TreeSubType.HEIGHT.name(), "Height")
-    .put(TreeSubType.WEIGHT.name(), "Weight")
-    .put(TreeSubType.BMI.name(), "BMI")
-    .put(TreeSubType.WC.name(), "Waist Circumference")
-    .put(TreeSubType.HC.name(), "Hip Circumference")
-    .put(TreeSubType.HR.name(), "Heart Rate")
-    .put(TreeSubType.PREG.name(), "Pregnancy")
-    .put(TreeSubType.WHEEL.name(), "Wheel Chair User")
-    .build();
 
   private static final String UNION_ALL = " union all\n";
   private static final String INTERSECT_DISTINCT = "intersect distinct\n";
@@ -83,7 +68,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
         for (Attribute attribute : parameter.getAttributes()) {
-          String namedParameterConceptId = CONCEPT_ID + getUniqueNamedParameterPostfix();
+          validateAttribute(attribute);
+          String namedParameterConceptId = CONCEPTID + getUniqueNamedParameterPostfix();
           String namedParameter1 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
           String namedParameter2 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
           if (attribute.getName().equals(ANY)) {
@@ -112,7 +98,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
           queryParts.addAll(tempQueryParts);
         }
       } else {
-        String namedParameterConceptId = CONCEPT_ID + getUniqueNamedParameterPostfix();
+        String namedParameterConceptId = CONCEPTID + getUniqueNamedParameterPostfix();
         String namedParameter = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
         queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
           .replace("${value}","@" + namedParameter));
@@ -138,81 +124,38 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateSearchParameter(SearchParameter param) {
-    from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
-    if (PM_TYPES_NO_ATTR.contains(param.getSubtype())) {
-      from(valueNull().and(valueNotNumber())).test(param).throwException(NOT_VALID_MESSAGE, VALUE, param.getValue());
+    String type = param.getType();
+    String subtype = param.getSubtype();
+    from(typeBlank().or(pmTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, type);
+    from(subtypeBlank().or(pmSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, subtype);
+    if (PM_TYPES_WITH_ATTR.contains(param.getSubtype())) {
+      from(notAnyAttr().and(attributesEmpty())).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
+      if (param.getSubtype().equals(TreeSubType.BP.name())) {
+        from(notAnyAttr().and(notTwoAttributes())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
+        from(notAnyAttr().and(notSystolicAndDiastolic())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
+      }
+    } else {
+      String domain = param.getDomain();
+      String value = param.getValue();
+      Long conceptId = param.getConceptId();
+      from(domainBlank().and(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, domain);
+      from(valueNull().and(valueNotNumber())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, VALUE, value);
+      from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, conceptId);
     }
-    if (param.getSubtype().equals(TreeSubType.BP.name())) {
-      from(notAnyAttr().and(twoAttributes())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
-      from(notAnyAttr().and(systolic().and(diastolic()))).test(param).throwException(BP_ATTRIBUTE_MESSAGE);
-    }
-    param
-      .getAttributes()
-      .stream()
-      .filter(attr -> !attr.getName().equals(ANY))
-      .forEach(attr -> {
-        from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, NAME, attr.getName());
-        from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, OPERATOR);
-        from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
-        from(attrConceptIdNull()).test(attr).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, attr.getConceptId());
-        from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE);
-        from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE);
-        from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE);
-      });
   }
-//    List<Attribute> attrs = parameter.getAttributes();
-//    Predicate<Attribute> systolic = nameIsSystolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
-//    Predicate<Attribute> diastolic = nameIsDiastolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
-//    if (parameter.getSubtype().equals(TreeSubType.BP.name())) {
-//      boolean systolicAttrs =
-//        attrs.stream().filter(systolic::test).collect(Collectors.toList()).size() != 1;
-//      boolean diastolicAttrs =
-//        attrs.stream().filter(diastolic::test).collect(Collectors.toList()).size() != 1;
-//      boolean anyAttrs =
-//        attrs.stream().filter(nameIsAny()::test).collect(Collectors.toList()).size() != 2;
-//      if ((systolicAttrs || diastolicAttrs) && anyAttrs) {
-//        throw new BadRequestException("Please provide valid search attributes" +
-//          "(name, operator, operands and conceptId) for Systolic and Diastolic.");
-//      }
-//    } else if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
-//      Predicate<Attribute> allTypes = operatorWithCorrectOperands().and(conceptIdNotNull());
-//      boolean allAttrs =
-//        parameter.getAttributes().stream().filter(allTypes::test).collect(Collectors.toList()).size() != 1;
-//      if (allAttrs) {
-//        throw new BadRequestException("Please provide valid search attributes(operator, operands) for "
-//          + exceptionText.get(parameter.getSubtype()) + ".");
-//      }
-//    }
 
-//  private void validateSearchParameter(SearchParameter parameter) {
-//    if (parameter.getConceptId() == null || parameter.getValue() == null) {
-//      throw new BadRequestException("Please provide valid conceptId and value for "
-//        + exceptionText.get(parameter.getSubtype()) + ".");
-//    } else if (!NumberUtils.isNumber(parameter.getValue())) {
-//      throw new BadRequestException("Please provide valid value for "
-//        + exceptionText.get(parameter.getSubtype()) + ".");
-//    }
-//
-//  }
-
-//  private static Predicate<Attribute> nameIsSystolic() {
-//    return attribute -> "Systolic".equals(attribute.getName());
-//  }
-//
-//  private static Predicate<Attribute> nameIsDiastolic() {
-//    return attribute -> "Diastolic".equals(attribute.getName());
-//  }
-//
-//  private static Predicate<Attribute> conceptIdNotNull() {
-//    return attribute -> attribute.getConceptId() != null;
-//  }
-//
-//  private static Predicate<Attribute> nameIsAny() { return attribute -> isNameAny(attribute); }
-//
-//  private static Predicate<Attribute> operatorWithCorrectOperands() {
-//    return attribute -> isNameAny(attribute)
-//      || isOperatorBetween(attribute)
-//      || isOperatorAnyEquals(attribute)
-//      || isOperatorIn(attribute);
-//  }
+  private void validateAttribute(Attribute attr) {
+    if (!ANY.equals(attr.getName())) {
+      String name = attr.getName();
+      String oper = operatorText.get(attr.getOperator());
+      Long conceptId = attr.getConceptId();
+      from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
+      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
+      from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+      from(attrConceptIdNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, CONCEPT_ID, conceptId);
+      from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
+    }
+  }
 }

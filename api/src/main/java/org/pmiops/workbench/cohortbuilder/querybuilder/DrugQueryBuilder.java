@@ -27,7 +27,8 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     Long[] conceptIds = parameters.getParameters()
       .stream()
       .map(param -> {
-        from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
+        from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
+        from(typeBlank().or(drugTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
         return param.getConceptId();
       })
       .toArray(Long[]::new);

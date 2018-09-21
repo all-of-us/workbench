@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
@@ -27,7 +28,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validat
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
 
-  public static final String AGE_DEC_MESSAGE = "Bad Request: Cannot search age and deceased together.";
+  public static final String AGE_DEC_MESSAGE = "Bad Request: Attribute Age and Deceased cannot be used together.";
   public static final String DEC = "Dec";
 
   private static final String SELECT = "select person_id\n" +
@@ -120,20 +121,22 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateSearchParameter(SearchParameter param) {
-    from(typeBlank().or(demoTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, TYPE, param.getType());
-    from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, SUBTYPE, param.getSubtype());
-    from(subtypeDec().and(valueNotDec())).test(param).throwException(NOT_VALID_MESSAGE, DEC, param.getValue());
-    from(subTypeGenRaceEth().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, CONCEPT_ID, param.getConceptId());
+    from(typeBlank().or(demoTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
+    from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, param.getSubtype());
+    from(subtypeDec().and(valueNotDec())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DEC, param.getValue());
+    from(subTypeGenRaceEth().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
   }
 
   private void validateAttributes(SearchParameter param) {
     from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
     param.getAttributes().forEach(attr -> {
-      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, OPERATOR, attr.getOperator());
+      String name = attr.getName();
+      String oper = operatorText.get(attr.getOperator());
+      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
       from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
-      from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE);
-      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE);
-      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE);
+      from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
     });
   }
 
