@@ -95,6 +95,19 @@ function grant_access_to_files () {
   gsutil acl ch -u ${SQL_SERVICE_ACCOUNT}:R $bucket_path 2> /dev/null || true # Don't error if no files
 }
 
+# Function to check database exists
+# if [ $(db_exists($DATABASE)) == 1 ]; then echo "database exists"; fi
+function db_exists () {
+  local db_name=$1
+  local db=$(gcloud sql databases list -i workbenchmaindb --project all-of-us-workbench-test --filter="NAME = $db_name" \
+--format="csv [no-heading] (NAME)")
+  if [ "$db" == "$db_name" ]
+  then
+    echo 1
+  else
+    echo 0;
+  fi
+}
 
 
 # Create db from sql file if specified
@@ -107,8 +120,15 @@ then
     gcloud sql import sql $INSTANCE $create_gs_file --project $PROJECT  \
         --account $SERVICE_ACCOUNT --quiet --async
     import_wait $create_gs_file 10
-    # If above fails let it die as user obviously intended to create the db
-    gsutil mv $create_gs_file gs://$BUCKET/imported_to_cloudsql/
+
+    if [ $(db_exists $DATABASE) == 1 ]
+    then
+      echo "$DATABASE created successfully"
+      gsutil mv $create_gs_file gs://$BUCKET/imported_to_cloudsql/
+    else
+      echo "Error importing create sql. "
+      exit 1
+    fi
 fi
 
 #Import sql and csv files, do sql first as they are intended for schema changes and such
@@ -134,8 +154,8 @@ then
 else
     grant_access_to_files gs://$BUCKET/*
     # gsutil returns error if no files match thus the "2> /dev/null || true" part to ignore error
-    sqls=( $(gsutil ls gs://$BUCKET/*.sql* 2> /dev/null || true))
-    csvs=( $(gsutil ls gs://$BUCKET/*.csv* 2> /dev/null || true))
+    sqls=( $(gsutil ls gs://$BUCKET/*.sql* 2> /dev/null || true) )
+    csvs=( $(gsutil ls gs://$BUCKET/*.csv* 2> /dev/null || true) )
 fi
 
 for gs_file in "${sqls[@]}"
@@ -151,6 +171,17 @@ do
         gsutil mv $gs_file gs://$BUCKET/imported_to_cloudsql/
     fi
 done
+
+# Check database exists before importing csvs as they need it.
+# It may have been created in sql imports above.
+# Even if we don't have any csv's we check it exists to ensure sql above ran
+if [ $(db_exists ${DATABASE}) == 1 ]
+then
+      echo "$DATABASE exists. Carrying on."
+else
+      echo "Error. $DATABASE database does not exist."
+      exit 1
+fi
 
 for gs_file in "${csvs[@]}"
 do
