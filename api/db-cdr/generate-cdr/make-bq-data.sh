@@ -209,11 +209,35 @@ case when count_value > 0 then round(count_value/$person_count, 2)
 where count_value > 0 or source_count_value > 0"
 
 ##########################################
-#
+# domain info updates                    #
 ##########################################
 
+# Set all_concept_count and standard_concept_count on domain_info
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d
+set d.all_concept_count = all_concept_count, d.standard_concept_count = standard_concept_count from
+(select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
+SUM(c.standard_concept IN ('S', 'C')) as standard_concept_count from
+`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.domain_info\` d2
+on d2.domain_id = c.domain_id
+and (c.count_value > 0 or c.source_count_value > 0)
+group by c.domain_id)
+where d.domain_id = domain_id
+"
+
+# Set participant counts for each domain
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d
+set d.participant_count = r.participant_count from
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\' r
+where r.analysis_id = 3000 and r.stratum_1 = d.concept_id
+and r.stratum_3 = d.domain_id
+and r.stratum_2 is null
+"
+
 ##########################################
-# concept survey participant count update#
+# survey count updates                   #
 ##########################################
 
 # Set the survey participant count on the concept
