@@ -64,7 +64,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     List<org.pmiops.workbench.cdr.model.DomainInfo> domains =
-        ImmutableList.copyOf(domainInfoDao.findAll());
+        ImmutableList.copyOf(domainInfoDao.findByOrderByDomainId());
     DomainInfoResponse response = new DomainInfoResponse().items(
         domains.stream().map(org.pmiops.workbench.cdr.model.DomainInfo.TO_CLIENT_DOMAIN_INFO)
             .collect(Collectors.toList()));

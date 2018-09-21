@@ -358,7 +358,7 @@ Common.register_command({
 
 def run_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
-  Common.new.run_inline %W{gradle test} + args
+  Common.new.run_inline %W{gradle :test} + args
 end
 
 Common.register_command({
@@ -372,7 +372,7 @@ Common.register_command({
 def run_public_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Dir.chdir('../public-api') do
-    Common.new.run_inline %W{gradle test} + args
+    Common.new.run_inline %W{gradle :test} + args
   end
 end
 
@@ -386,7 +386,7 @@ Common.register_command({
 def run_common_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Dir.chdir('../common-api') do
-    Common.new.run_inline %W{gradle test} + args
+    Common.new.run_inline %W{gradle :test} + args
   end
 end
 

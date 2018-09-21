@@ -29,4 +29,6 @@ public interface SurveyModuleDao extends CrudRepository<SurveyModule, Long> {
   List<SurveyModule> findSurveyModuleQuestionCounts(String keyword, String query);
 
   SurveyModule findByConceptId(long conceptId);
+
+  List<SurveyModule> findByOrderByName();
 }

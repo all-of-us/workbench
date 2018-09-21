@@ -67,6 +67,11 @@ public class DomainInfo {
     return CommonStorageEnums.domainFromStorage(domain);
   }
 
+  public DomainInfo domainEnum(Domain domain) {
+    this.domain = CommonStorageEnums.domainToStorage(domain);
+    return this;
+  }
+
   @Column(name = "domain_id")
   public String getDomainId() {
     return domainId;
