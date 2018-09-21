@@ -12,6 +12,9 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
   /**
    * Returns domain metadata and concept counts for domains, matching standard concepts by name
    * and all concepts by code or concept ID.
+   * @param matchExpression a boolean full text match expression based on the user's query; see
+   *                https://dev.mysql.com/doc/refman/5.7/en/fulltext-boolean.html
+   * @param query the exact query that the user entered
    */
   @Query(nativeQuery=true,value="select d.domain, d.domain_id, d.name, d.description,\n" +
       "d.concept_id, COUNT(DISTINCT c.concept_id) as all_concept_count,\n" +
@@ -27,12 +30,15 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
       "c.standard_concept IN ('S', 'C')) or (c.concept_id=?2 or c.concept_code=?2))\n" +
       "group by d.domain, d.domain_id, d.name, d.description, d.concept_id\n" +
       "order by d.domainId")
-  List<DomainInfo> findStandardOrCodeMatchConceptCounts(String keyword, String query);
+  List<DomainInfo> findStandardOrCodeMatchConceptCounts(String matchExpression, String query);
 
 
   /**
    * Returns domain metadata and concept counts for domains, matching both standard and non-standard
    * concepts by name, code, or concept ID.
+   * @param matchExpression a boolean full text match expression based on the user's query; see
+   *                https://dev.mysql.com/doc/refman/5.7/en/fulltext-boolean.html
+   * @param query the exact query that the user entered
    */
   @Query(nativeQuery=true,value="select d.domain, d.domain_id, d.name, d.description,\n" +
       "d.concept_id, COUNT(DISTINCT c.concept_id) as all_concept_count,\n" +
@@ -47,7 +53,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
       "(match(cs.concept_synonym_name) against(?1 in boolean mode))) or c.concept_id=?2 or c.concept_code=?2)\n" +
       "group by d.domain, d.domain_id, d.name, d.description, d.concept_id\n" +
       "order by d.domainId")
-  List<DomainInfo> findAllMatchConceptCounts(String keyword, String query);
+  List<DomainInfo> findAllMatchConceptCounts(String matchExpression, String query);
 
   List<DomainInfo> findByOrderByDomainId();
 }

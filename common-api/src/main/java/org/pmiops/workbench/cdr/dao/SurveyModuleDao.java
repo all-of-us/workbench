@@ -10,6 +10,9 @@ public interface SurveyModuleDao extends CrudRepository<SurveyModule, Long> {
   /**
    * Returns metadata and question counts for survey modules, matching questions by name, code,
    * or concept ID, and answers to questions by string value.
+   * @param matchExpression a boolean full text match expression based on the user's query; see
+   *                https://dev.mysql.com/doc/refman/5.7/en/fulltext-boolean.html
+   * @param query the exact query that the user entered
    */
   @Query(nativeQuery=true,value="select m.name, m.description,\n" +
       "m.concept_id, COUNT(DISTINCT q.concept_id) as question_count,\n" +
@@ -26,7 +29,7 @@ public interface SurveyModuleDao extends CrudRepository<SurveyModule, Long> {
       "(match(r.stratum_4) against(?1 in boolean mode)))\n" +
       "group by m.name, m.description, m.concept_id\n" +
       "order by m.name")
-  List<SurveyModule> findSurveyModuleQuestionCounts(String keyword, String query);
+  List<SurveyModule> findSurveyModuleQuestionCounts(String matchExpression, String query);
 
   SurveyModule findByConceptId(long conceptId);
 
