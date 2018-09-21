@@ -7,9 +7,10 @@ import 'rxjs/add/operator/switchMap';
 import {ISubscription} from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
-import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
+import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
+
 @Component({
   selector: 'app-survey-view',
   templateUrl: './survey-view.component.html',

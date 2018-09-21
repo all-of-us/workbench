@@ -59,19 +59,22 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.searchText.setValue(this.prevSearchText);
 
     this.subscriptions.push(
-      this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue)
+      this.api.getParticipantCount().subscribe(
+          result => this.totalParticipants = result.countValue)
     );
 
     // Do initial search if we have search text
     if (this.prevSearchText) {
       this.subscriptions.push(
-        this.searchDomains(this.prevSearchText).subscribe((data: DomainInfosAndSurveyModulesResponse) => {
+        this.searchDomains(this.prevSearchText).subscribe(
+            (data: DomainInfosAndSurveyModulesResponse) => {
           return this.searchCallback(data);
         }));
     }
     // Get domain totals only once so if they erase search we can load them
     this.subscriptions.push(
-      this.api.getDomainTotals().subscribe((data: DomainInfosAndSurveyModulesResponse) => {
+      this.api.getDomainTotals().subscribe(
+          (data: DomainInfosAndSurveyModulesResponse) => {
         this.domainResults = data.domainInfos;
         this.surveyResults = data.surveyModules;
         // Only set results to the totals if we don't have a searchText
