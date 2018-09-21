@@ -1,4 +1,4 @@
-package org.pmiops.workbench.build
+package org.pmiops.workbench.tooling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
