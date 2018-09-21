@@ -29,9 +29,10 @@ class GenerateAPIListingTask extends DefaultTask {
     }
 
     private void printPaths(LinkedHashMap<String, LinkedHashMap> paths) {
+        List<String> methods = ["get", "delete", "patch", "post", "put"]
         paths?.each {
             String path = it.key
-            it.value.each { api ->
+            it.value.findAll { methods.contains(it.key) }.each { api ->
                 String method = api.key
                 String description = api.value.get("description")?.
                         trim()?.
