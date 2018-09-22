@@ -217,9 +217,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d
 set d.all_concept_count = all_concept_count, d.standard_concept_count = standard_concept_count from
 (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
-SUM(c.standard_concept IN ('S', 'C')) as standard_concept_count from
-`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
-join \`${BQ_PROJECT}.${BQ_DATASET}.domain_info\` d2
+SUM(c.standard_concept IN (\'S\', \'C\')) as standard_concept_count from
+\`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by c.domain_id)
@@ -264,7 +264,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set sm.question_count=num_questions from
 (select count(distinct cr.concept_id_1) num_questions, cr.concept_id_2 as survey_concept_id from
 `${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-  join `${BQ_PROJECT}.${BQ_DATASET}.survey_module\` sm2
+  join `${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm2
     on cr.concept_id_2 = sm2.concept_id
 where cr.relationship_id = 'Has Module'
   group by survey_concept_id)
