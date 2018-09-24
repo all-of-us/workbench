@@ -1,12 +1,13 @@
+<div class="selected-cohort">{{selectedCohortName}}</div>
 <div class="participant-container">
   <div class="participant-title">Participants</div>
-  <div class="total-heading">cohort Total: 9456 Participants</div>
+  <div class="total-heading" *ngIf="totalParticipantCount">Cohort Total: {{totalParticipantCount | number}} Participants</div>
 </div>
 <div [ngClass]="[ openChartContainer? 'overview-container': 'overview-small-container']">
   <div>
     <span class="overview-title">Overview</span>
-    <span *ngIf="!openChartContainer" (click)="getCharts()"><clr-icon shape="play" size="15" style="transform: rotate(90deg);" class="is-solid play-icon"></clr-icon></span>
-    <span *ngIf="openChartContainer" (click)="collapseContainer()"><clr-icon size="15" shape="play" style="transform: rotate(270deg);" class="is-solid play-icon"></clr-icon></span>
+    <span *ngIf="openChartContainer" (click)="collapseContainer()"><clr-icon shape="play" size="15" style="transform: rotate(90deg);" class="is-solid play-icon"></clr-icon></span>
+    <span *ngIf="!openChartContainer" (click)="getCharts()"><clr-icon size="15" shape="play" style="transform: rotate(270deg);" class="is-solid play-icon"></clr-icon></span>
   </div>
   <!--<h1 (click)="fetchReviewChartsData()">Call Service</h1>-->
   <div class="chart-heading" *ngIf="showTitle">
@@ -23,6 +24,7 @@
       </div>
       <div *ngFor = "let name of typesList" (click)="getDifferentCharts(name)">
         <button type="button"
+                [ngClass]="[ name === title ?'btn-outline': 'btn-primary']"
                 class="overview-buttons btn btn-primary">
         {{name}}
         </button>
@@ -31,7 +33,7 @@
 
     <!--need to make another component start-->
     <div class="chart-container">
-      <div *ngIf="!data.size" class="loading-spinner spinner spinner-lg spin-in-overlay">
+      <div *ngIf="spinner" class="loading-spinner spinner spinner-lg spin-in-overlay">
         Loading...
       </div>
       <app-combo-chart
@@ -39,19 +41,20 @@
               [mode]="'stacked'"
               [data]="data">
       </app-combo-chart>
-      <div>
-        <div class="data-container" *ngIf="showTitle">
-          <div class=" data-heading">
-            Hypertensive heart disease
+      <div *ngIf="showTitle">
+        <div class="data-container" *ngFor="let items of domainItems">
+          <div class=" data-heading" >
+            {{items.name}}
           </div>
           <div class="divider"></div>
           <div class="data-bar-container">
             <div class="light-grey">
-              <div class="data-blue" style="height:24px;width:25%"></div>
+              <div class="data-blue" style="height:24px;" [style.width.%]="items.percentCount"></div>
+                <div class="count" style="height:24px;" [style.width.%]="100-items.percentCount"> {{items.count}} </div>
             </div>
           </div>
           <div class="data-percent">
-              95% of Cohort
+              {{items.percentCount| number:'2.0-0'}} % of Cohort
           </div>
         </div>
       </div>

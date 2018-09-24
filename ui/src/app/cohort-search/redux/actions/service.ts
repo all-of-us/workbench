@@ -250,15 +250,6 @@ export class CohortSearchActions {
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
   }
 
-  fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
-                        domain: string, limit: number): void {
-      const isLoading = isChartLoading(ns, wsid, cid, cdrid, domain, limit)(this.state);
-       const isLoaded = this.state.getIn([ns, wsid, cid, cdrid, domain, limit]);
-      if (isLoaded || isLoading) {
-          return;
-      }
-      this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
-  }
 
   fetchAutocompleteOptions(kind: string, subtype: string, terms: string): void {
     this.requestAutocompleteOptions(this.cdrVersionId, kind, subtype, terms);
@@ -507,6 +498,7 @@ export class CohortSearchActions {
     return param;
   }
 
+
   /*
    * Deserializes a JSONified SearchRequest into an entities object
    */
@@ -567,4 +559,17 @@ export class CohortSearchActions {
     this.idsInUse = Set<string>();
     this._resetStore();
   }
+
+
+    fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
+                          domain: string, limit: number): void {
+           const isLoading = isChartLoading(domain)(this.state);
+          const dataIsInStore = this.state.getIn(['reviewChartData', 'domainCharts', 'items']);
+          console.log("check--------->>>" +dataIsInStore);
+          console.log("check--------->>>" +isLoading);
+        if (isLoading || dataIsInStore) {
+            return;
+        }
+        this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
+    }
 }
