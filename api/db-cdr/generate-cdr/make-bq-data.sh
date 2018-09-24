@@ -230,7 +230,7 @@ where d.domain_id = c.domain_id
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d
 set d.participant_count = r.count_value from
-\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\' r
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` r
 where r.analysis_id = 3000 and r.stratum_1 = CAST(d.concept_id AS STRING)
 and r.stratum_3 = d.domain_id
 and r.stratum_2 is null
