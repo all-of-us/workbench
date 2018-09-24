@@ -8,8 +8,8 @@ import {
 } from '../../cohort-search/redux';
 import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
-import {ReviewStateService} from '../review-state.service';
 import {Subscription} from 'rxjs/Subscription';
+import {ReviewStateService} from '../review-state.service';
 
 @Component({
     selector: 'app-overview-charts',
