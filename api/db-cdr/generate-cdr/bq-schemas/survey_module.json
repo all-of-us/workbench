@@ -15,12 +15,12 @@
     "type": "STRING"
   },
   {
-    "mode":"NULLABLE",
+    "mode":"REQUIRED",
     "name": "question_count",
     "type": "INTEGER"
   },
   {
-    "mode":"NULLABLE",
+    "mode":"REQUIRED",
     "name": "participant_count",
     "type": "INTEGER"
   }

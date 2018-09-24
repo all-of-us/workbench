@@ -18,19 +18,19 @@
                 <constraints nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(30)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="description" type="VARCHAR(4000)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
-            <column name="all_concept_count" type="INTEGER">
-                <constraints nullable="true"/>
+            <column name="all_concept_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
             </column>
-            <column name="standard_concept_count" type="INTEGER">
-                <constraints nullable="true"/>
+            <column name="standard_concept_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
             </column>
-            <column name="participant_count" type="INTEGER">
-                <constraints nullable="true"/>
+            <column name="participant_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
             </column>
         </createTable>
         <createTable tableName="survey_module">
@@ -38,16 +38,16 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(30)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="description" type="VARCHAR(4000)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
-            <column name="question_count" type="INTEGER">
-                <constraints nullable="true"/>
+            <column name="question_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
             </column>
-            <column name="participant_count" type="INTEGER">
-                <constraints nullable="true"/>
+            <column name="participant_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>

@@ -25,17 +25,17 @@
     "type": "STRING"
   },
   {
-    "mode":"NULLABLE",
+    "mode":"REQUIRED",
     "name": "all_concept_count",
     "type": "INTEGER"
   },
   {
-    "mode":"NULLABLE",
+    "mode":"REQUIRED",
     "name": "standard_concept_count",
     "type": "INTEGER"
   },
   {
-    "mode":"NULLABLE",
+    "mode":"REQUIRED",
     "name": "participant_count",
     "type": "INTEGER"
   }

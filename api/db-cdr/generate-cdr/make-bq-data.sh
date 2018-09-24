@@ -255,23 +255,7 @@ set sm.participant_count=c.count_value from
 \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c
 where c.concept_id=sm.concept_id"
 
-# Set the question count on the survey_module row
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
-set sm.question_count=num_questions from
-(select count(distinct cr.concept_id_1) num_questions, cr.concept_id_2 as survey_concept_id from
-\`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-  join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm2
-    on cr.concept_id_2 = sm2.concept_id
-where cr.relationship_id = 'Has Module'
-  group by survey_concept_id)
-where sm.concept_id = survey_concept_id
-"
-
-#############################################
-# concept question participant count update #
-#############################################
-#Set the question participant counts
+# Set the question participant counts
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
 set c1.count_value=count_val from
@@ -282,6 +266,21 @@ on cr.concept_id_2 = sm.concept_id
 where cr.relationship_id = 'Has Module'
 group by survey_concept_id,cr.concept_id_1)
 where c1.concept_id=question_id
+"
+
+# Set the question count on the survey_module row
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
+set sm.question_count=num_questions from
+(select count(distinct cr.concept_id_1) num_questions, cr.concept_id_2 as survey_concept_id from
+\`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+  join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm2
+    on cr.concept_id_2 = sm2.concept_id
+  join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` qc
+    on cr.concept_id_1 = qc.concept_id
+where cr.relationship_id = 'Has Module' and qc.count_value > 0
+  group by survey_concept_id)
+where sm.concept_id = survey_concept_id
 "
 
 ########################
