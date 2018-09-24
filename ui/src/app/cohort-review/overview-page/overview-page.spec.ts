@@ -2,16 +2,16 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {CohortCommonModule} from '../../cohort-common/module.ts';
 import {CohortBuilderService, CohortReviewService} from 'generated';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
-import {ReviewNavComponent} from '../review-nav/review-nav.component';
 import {ReviewStateService} from '../review-state.service';
+import {ReviewNavComponent} from '../review-nav/review-nav.component';
 import {OverviewPage} from './overview-page';
 import {NgxPopperModule} from 'ngx-popper';
 import {NgRedux} from '@angular-redux/store';
-import {CohortCommonModule} from '../../cohort-common/module.ts';
 import {
     CohortSearchActions,
     isChartLoading,
@@ -41,12 +41,12 @@ describe('OverviewPage', () => {
 
     TestBed.configureTestingModule({
       declarations: [ ComboChartComponent, OverviewPage, ReviewNavComponent ],
-      imports: [ClarityModule, NgxChartsModule, NgxPopperModule,CohortCommonModule],
+      imports: [ClarityModule, NgxChartsModule, NgxPopperModule, CohortCommonModule],
       providers: [
         {provide: NgRedux},
-        {provide:CohortReviewService},
-        {provide:CohortSearchActions},
-        {provide:isChartLoading},
+        {provide: CohortReviewService},
+        {provide: CohortSearchActions},
+        {provide: isChartLoading},
         {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
