@@ -5,7 +5,7 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-    <changeSet author="danrodney" id="changelog-16" runAlways="true">
+    <changeSet author="danrodney" id="changelog-17">
         <validCheckSum>ANY</validCheckSum>
         <createTable tableName="domain_info">
             <column name="concept_id" type="INTEGER">
