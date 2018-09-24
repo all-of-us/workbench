@@ -1,17 +1,19 @@
+import {NgRedux} from '@angular-redux/store';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {CohortCommonModule} from '../../cohort-common/module.ts';
 import {CohortBuilderService, CohortReviewService} from 'generated';
+import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
-import {ReviewStateService} from '../review-state.service';
+import {CohortCommonModule} from '../../cohort-common/module.ts';
 import {ReviewNavComponent} from '../review-nav/review-nav.component';
+import {ReviewStateService} from '../review-state.service';
 import {OverviewPage} from './overview-page';
-import {NgxPopperModule} from 'ngx-popper';
-import {NgRedux} from '@angular-redux/store';
+
+
 import {
     CohortSearchActions,
     isChartLoading,
