@@ -30,7 +30,9 @@
     <app-search-bar *ngIf="showSearch" [_type]="_type"></app-search-bar>
   </div>
 </div>
-<div *ngIf="numMatches > 1">
-  <b>Note:</b> There are {{numMatches}} matches for your search
+<div class="tree-container" [class.multiple]="multipleMatches">
+  <div *ngIf="numMatches > 1">
+    <b>Note:</b> There are {{numMatches}} matches for your search
+  </div>
+  <crit-node *ngFor="let item of children" [node]="item"></crit-node>
 </div>
-<crit-node *ngFor="let item of children" [node]="item"></crit-node>

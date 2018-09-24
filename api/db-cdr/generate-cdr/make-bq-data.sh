@@ -256,9 +256,11 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
 echo "Inserting concept_synonym"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\`
- (concept_id, concept_synonym_name, language_concept_id)
-SELECT c.concept_id, c.concept_synonym_name, c.language_concept_id
+ (id, concept_id, concept_synonym_name)
+SELECT 0, c.concept_id, c.concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
+
+
 
 
 
