@@ -29,7 +29,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
       "(match(cs.concept_synonym_name) against(?1 in boolean mode))) and\n" +
       "c.standard_concept IN ('S', 'C')) or (c.concept_id=?2 or c.concept_code=?2))\n" +
       "group by d.domain, d.domain_id, d.name, d.description, d.concept_id\n" +
-      "order by d.domainId")
+      "order by d.domain_id")
   List<DomainInfo> findStandardOrCodeMatchConceptCounts(String matchExpression, String query);
 
 
@@ -52,7 +52,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
       "and  (((match(c.concept_name) against(?1 in boolean mode) ) or\n" +
       "(match(cs.concept_synonym_name) against(?1 in boolean mode))) or c.concept_id=?2 or c.concept_code=?2)\n" +
       "group by d.domain, d.domain_id, d.name, d.description, d.concept_id\n" +
-      "order by d.domainId")
+      "order by d.domain_id")
   List<DomainInfo> findAllMatchConceptCounts(String matchExpression, String query);
 
   List<DomainInfo> findByOrderByDomainId();
