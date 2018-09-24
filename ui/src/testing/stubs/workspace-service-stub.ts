@@ -60,7 +60,6 @@ export class WorkspacesServiceStub {
     }
   ];
   notebookList: FileDetail[];
-  resourceList: RecentResource[];
 
   constructor() {
 
@@ -328,8 +327,6 @@ export class WorkspacesServiceStub {
           'path': 'gs://bucket/notebooks/' + cloneName,
           'lastModifiedTime': 100
         });
-        this.resourceList = convertToResources(this.notebookList, workspaceNamespace, workspaceId,
-          WorkspaceAccessLevel.OWNER, ResourceType.NOTEBOOK);
         observer.complete();
       });
     });
