@@ -40,7 +40,7 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   }
 
   get isEmpty() {
-    return !this.loading && (!this.children || !this.children.size);
+    return !this.loading && (!this.children || !this.children.size || this.error);
   }
 
   optionChange(flag) {
