@@ -45,6 +45,7 @@
     color: #5FAEE0;
     font-weight: bold;
     margin-left:0.5rem;
+    cursor: pointer;
 }
 
 .button-chart-container {
@@ -129,6 +130,11 @@
     font-weight: 300;
     color: #4a4a4a;
     margin-bottom: 1rem;
+}
+
+.btn-disabled {
+    pointer-events: none;
+    opacity: 0.4;
 }
 /*.btn.btn-primary.overview-buttons.active {*/
     /*background-color: #4356a7;*/
