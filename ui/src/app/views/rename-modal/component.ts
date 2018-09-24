@@ -12,6 +12,7 @@ export class RenameModalComponent {
 
   @Output() receiveRename = new EventEmitter<object>();
   @Input() resource: any;
+  @Input() resourceType: string;
 
   loading = false;
 

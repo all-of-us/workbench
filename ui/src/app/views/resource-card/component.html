@@ -40,6 +40,7 @@
 
 
 <app-rename-modal [resource]="resourceCard.notebook"
+                  [resourceType]="Notebook"
                   (receiveRename)="receiveNotebookRename($event)"></app-rename-modal>
 
 <app-cohort-edit-modal [cohort]="resourceCard.cohort"
