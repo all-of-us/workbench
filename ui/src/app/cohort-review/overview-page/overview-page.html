@@ -49,12 +49,12 @@
           <div class="divider"></div>
           <div class="data-bar-container">
             <div class="light-grey">
-              <div class="data-blue" style="height:24px;" [style.width.%]="items.percentCount"></div>
+              <div class="data-blue" style="height:24px;" [style.width.%]="items.percentCount| number:'1.0-0'"></div>
                 <div class="count" style="height:24px;" [style.width.%]="100-items.percentCount"> {{items.count}} </div>
             </div>
           </div>
           <div class="data-percent">
-              {{items.percentCount| number:'2.0-0'}} % of Cohort
+              {{items.percentCount| number:'1.0-0'}} % of Cohort
           </div>
         </div>
       </div>
