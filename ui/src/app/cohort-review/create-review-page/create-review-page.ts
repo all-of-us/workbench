@@ -64,7 +64,7 @@ export class CreateReviewPage implements OnInit {
     this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request)
       .subscribe(_ => {
         this.creating = false;
-        this.router.navigate(['overview'], {relativeTo: this.route.parent});
+        this.router.navigate(['participants'], {relativeTo: this.route.parent});
       });
   }
 }

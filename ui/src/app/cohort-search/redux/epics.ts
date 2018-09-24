@@ -254,7 +254,7 @@ export class CohortSearchEpics {
             return this.reviewservice
                 .getCohortChartData(ns, wsid, cid, cdrid, domain, limit, null)
                 .map(result =>
-                    loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result.items));
+                    loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result));
             // .race(action$
             //     .ofType(CANCEL_CRITERIA_REQUEST)
             //     .filter(compare({domain, limit}))
