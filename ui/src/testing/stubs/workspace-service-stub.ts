@@ -1,11 +1,14 @@
 import {Observable} from 'rxjs/Observable';
 
+import {convertToResources} from 'app/utils/resourceActions';
+
 import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
   EmptyResponse,
   FileDetail,
   NotebookRename,
+  RecentResource,
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
   UpdateWorkspaceRequest,
@@ -57,6 +60,7 @@ export class WorkspacesServiceStub {
     }
   ];
   notebookList: FileDetail[];
+  resourceList: RecentResource[];
 
   constructor() {
 
@@ -324,6 +328,7 @@ export class WorkspacesServiceStub {
           'path': 'gs://bucket/notebooks/' + cloneName,
           'lastModifiedTime': 100
         });
+        this.resourceList = convertToResources(this.notebookList);
         observer.complete();
       });
     });

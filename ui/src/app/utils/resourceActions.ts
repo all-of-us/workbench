@@ -1,3 +1,9 @@
+  import {
+    FileDetail,
+    RecentResource,
+    WorkspaceAccessLevel
+  } from 'generated';
+
   export const notebookActionList = [
     {
     type: 'notebook',
@@ -40,5 +46,30 @@ export const cohortActionList = [
   }];
 
 export const resourceActionList =  notebookActionList.concat(cohortActionList);
+
+  export function convertToResources(fileList: FileDetail[]): RecentResource[] {
+    const resourceList = [];
+    for (const file of fileList) {
+      resourceList.push(this.convertToResource(file));
+    }
+    return resourceList;
+  }
+
+  export function convertToResource(file: FileDetail): RecentResource {
+    let mTime: string;
+    if (file.lastModifiedTime === undefined) {
+      mTime = new Date().toDateString();
+    } else {
+      mTime = file.lastModifiedTime.toString();
+    }
+    const newResource: RecentResource = {
+      workspaceNamespace: this.wsNamespace,
+      workspaceFirecloudName: this.wsId,
+      permission: WorkspaceAccessLevel[this.accessLevel],
+      notebook: file,
+      modifiedTime: mTime
+    };
+    return newResource;
+  }
 
 

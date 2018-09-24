@@ -1,6 +1,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
+import {convertToResources} from 'app/utils/resourceActions';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {BugReportComponent} from 'app/views/bug-report/component';
@@ -86,41 +87,18 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   private loadNotebookList() {
+    this.notebooksLoading = true;
     this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
       .subscribe(
         fileList => {
           this.notebookList = fileList;
-          this.convertToResources(fileList);
+          this.resourceList = convertToResources(fileList);
           this.notebooksLoading = false;
         },
         error => {
           this.notebooksLoading = false;
           this.notebookError = true;
         });
-  }
-
-  convertToResources(fileList: FileDetail[]): void {
-    this.resourceList = [];
-    for (const file of fileList) {
-      this.resourceList.push(this.convertToResource(file));
-    }
-  }
-
-  convertToResource(file: FileDetail): RecentResource {
-    let mTime: string;
-    if (file.lastModifiedTime === undefined) {
-      mTime = new Date().toDateString();
-    } else {
-      mTime = file.lastModifiedTime.toString();
-    }
-    const newResource: RecentResource = {
-      workspaceNamespace: this.wsNamespace,
-      workspaceFirecloudName: this.wsId,
-      permission: WorkspaceAccessLevel[this.accessLevel],
-      notebook: file,
-      modifiedTime: mTime
-    };
-    return newResource;
   }
 
   ngOnDestroy(): void {
@@ -131,7 +109,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.newNotebookModal.open();
   }
 
-  updateList(rename: NotebookRename): void {
+  updateList(rename?: NotebookRename): void {
     if (rename === undefined) {
       this.loadNotebookList();
     } else {
@@ -145,6 +123,10 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   duplicateNameError(dupName: string): void {
     this.duplicateName = dupName;
     this.notebookRenameConflictError = true;
+  }
+
+  invalidNameError(): void {
+    this.notebookRenameError = true;
   }
 
   submitNotebooksLoadBugReport(): void {

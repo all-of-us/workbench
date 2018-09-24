@@ -5,8 +5,7 @@ import {resourceActionList} from 'app/utils/resourceActions';
 
 import {
   CohortsService, NotebookRename,
-  RecentResource, WorkspaceAccessLevel,
-  WorkspacesService
+  RecentResource, WorkspacesService
 } from 'generated';
 
 import {SignInService} from 'app/services/sign-in.service';
@@ -41,8 +40,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   forList: string;
   @Output() onUpdate: EventEmitter<any> = new EventEmitter();
   @Output() duplicateNameError: EventEmitter<any> = new EventEmitter();
+  @Output() invalidNameError: EventEmitter<any> = new EventEmitter();
   actions = [];
-  notebookRenameError = false;
   wsNamespace: string;
   wsId: string;
   resource: any;
@@ -96,28 +95,31 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     }
     if (new RegExp('.*\/.*').test(newName)) {
       this.renameModal.close();
-      this.notebookRenameError = true;
+      this.invalidNameError.emit(newName);
       return;
     }
     this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
       .switchMap((fileList) => {
         if (fileList.filter((nb) => nb.name === newName).length > 0) {
-          this.duplicateNameError.emit(newName);
+          throw new Error(newName);
         } else {
           this.onUpdate.emit(rename);
           return this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename);
         }
       })
-      .subscribe(() => {
-        this.renameModal.close();
-      });
+      .subscribe(() => { this.renameModal.close(); },
+        (dupName) => {
+          this.duplicateNameError.emit(dupName);
+          this.renameModal.close();
+    });
   }
 
   cloneResource(resource: RecentResource): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, resource.notebook.name)
-          .subscribe(() => this.onUpdate.emit());
+          .map(() => this.onUpdate.emit())
+          .subscribe(() => {});
         break;
       }
       case ResourceType.COHORT: {
@@ -201,7 +203,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     }
   }
 
-  editCohort(resource: RecentResource): void {
+  editCohort(): void {
     // This ensures the cohort binding is picked up before the open resolves.
     setTimeout(_ => this.editModal.open(), 0);
   }

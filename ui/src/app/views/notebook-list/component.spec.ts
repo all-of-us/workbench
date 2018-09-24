@@ -172,21 +172,23 @@ describe('NotebookListComponent', () => {
   it('displays correct information when notebook cloned', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.notebook-menu')));
-    simulateClick(fixture, de.query(By.css('#clone-mockFile')));
+    simulateClick(fixture, de.query(By.css('.resource-menu')));
     updateAndTick(fixture);
+    simulateClick(fixture, de.query(By.css('.copy')));
+    fixture.componentInstance.updateList();
     tick();
+    updateAndTick(fixture);
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone.ipynb');
-    expect(fixture.componentInstance.notebookList.map(nb => nb.path))
-        .toContain('gs://bucket/notebooks/mockFile Clone.ipynb');
+    expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
+        .toContain('mockFile Clone.ipynb');
   }));
 
   it('displays correct information when notebook deleted', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.notebook-menu')));
-    simulateClick(fixture, de.query(By.css('#delete-mockFile')));
+    simulateClick(fixture, de.query(By.css('.resource-menu')));
+    simulateClick(fixture, de.query(By.css('.trash')));
     updateAndTick(fixture);
     simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
     updateAndTick(fixture);

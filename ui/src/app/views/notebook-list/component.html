@@ -18,7 +18,11 @@
   </div>
 
   <div *ngFor="let notebook of resourceList">
-    <app-resource-card [resourceCard]="notebook" [forList]="'for-list'" (onUpdate)="updateList($event)" (duplicateNameError)="duplicateNameError($event)"></app-resource-card>
+    <app-resource-card [resourceCard]="notebook" [forList]="'for-list'"
+                       (onUpdate)="updateList($event)"
+                       (duplicateNameError)="duplicateNameError($event)"
+                       (invalidNameError)="invalidNameError($event)">
+    </app-resource-card>
   </div>
 </div>
 
