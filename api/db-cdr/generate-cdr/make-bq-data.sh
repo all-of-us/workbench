@@ -272,15 +272,15 @@ where c1.concept_id=question_id
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
 set sm.question_count=num_questions from
-(select count(distinct cr.concept_id_1) num_questions, cr.concept_id_2 as survey_concept_id from
-\`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+(select count(distinct qc.concept_id) num_questions, r.stratum_1 as survey_concept_id from
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` r
   join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm2
-    on cr.concept_id_2 = sm2.concept_id
+    on r.stratum_1 = CAST(sm2.concept_id AS STRING)
   join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` qc
-    on cr.concept_id_1 = qc.concept_id
-where cr.relationship_id = 'Has Module' and qc.count_value > 0
+    on r.stratum_2 = CAST(qc.concept_id AS STRING)
+where r.analysis_id = 3110 and qc.count_value > 0
   group by survey_concept_id)
-where sm.concept_id = survey_concept_id
+where CAST(sm.concept_id AS STRING) = survey_concept_id
 "
 
 ########################
