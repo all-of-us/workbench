@@ -2,19 +2,14 @@ import {NgRedux, select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {
-    activeModifierList,
-    activeParameterList,
     CohortSearchActions,
     CohortSearchState,
     isChartLoading,
-    isCriteriaLoading, isParameterActive
 } from '../../cohort-search/redux';
 import {CohortBuilderService, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
-import {Observable} from "rxjs/Observable";
-import {Participant} from "../participant.model";
 import {CohortReview} from "../../../generated";
 
 
@@ -53,7 +48,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-     this.selectedCohortName = this.route.parent.snapshot.data.cohort.name
+     this.selectedCohortName = this.route.parent.snapshot.data.cohort.name;
       this.spinner = true;
       const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
       this.subscription = this.state.cohort$
@@ -71,15 +66,10 @@ export class OverviewPage implements OnInit, OnDestroy {
 
       });
       this.getDemoCharts();
-      this.getCharts();
+      this.openChartContainer = true;
   }
-    getCharts() {
-        this.openChartContainer = true;
-    }
 
-    collapseContainer(){
-        this.openChartContainer = false;
-    }
+
     getDemoCharts (){
         this.demoGraph = true;
         this.showTitle = false;
@@ -101,27 +91,40 @@ export class OverviewPage implements OnInit, OnDestroy {
       const limit = 10;
       const {ns, wsid, cid} = this.route.parent.snapshot.params;
       const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-      this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
-      const loadingSub = this.ngRedux
-        .select(isChartLoading(domain))
-        .filter(domain => !!domain)
-        .subscribe(loading => {
-            this.spinner = false;
-            this.showTitle = true;
-            this.loading = loading;
-            const totalCount = this.loading.toJS().count;
-            this.domainItems = this.loading.toJS().items;
-            this.domainItems.forEach(itemCount=> {
-                let test = itemCount.count;
-                let percentCount = ((test / totalCount) * 100);
-               Object.assign(itemCount, {percentCount: percentCount});
+      setTimeout(() => {
+            this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
+            this.getCharts(name)
+        }, 1000);
+    }
+
+    getCharts(domain) {
+        const loadingReviewCohortData = this.ngRedux
+            .select(isChartLoading(domain))
+            .filter(domain => !!domain)
+            .subscribe(loading => {
+                this.spinner = false;
+                this.showTitle = true;
+                this.loading = loading;
+                const totalCount = this.loading.toJS().count;
+                this.domainItems = this.loading.toJS().items;
+                this.domainItems.forEach(itemCount=> {
+                    let percentCount = ((itemCount.count / totalCount) * 100);
+                    Object.assign(itemCount, {percentCount: percentCount});
+                });
             });
-            // console.log(this.domainItems);
-        });
-       this.subscription = loadingSub;
+        this.subscription = loadingReviewCohortData;
     }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 }
+
+//
+// if (this.isCancelTimerInitiated) {
+//     clearTimeout(this.isCancelTimerInitiated);
+// }
+// this.isCancelTimerInitiated = setTimeout(() => {
+//     this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
+//     this.getCharts(name)
+// }, 1000);
