@@ -16,7 +16,7 @@
     font-size: 20px;
     font-weight: bold;
     line-height: 24px;
-    width: 80%;
+    width: 78%;
 
 }
 .participant-container .total-heading {
@@ -24,6 +24,7 @@
     font-size: 20px;
     font-weight: bold;
     line-height: 24px;
+    white-space: nowrap;
 }
 
 .overview-small-container {
@@ -51,7 +52,7 @@
     padding: 1rem;
 }
 .button-chart-container .button-container {
-   padding-right: 5rem;
+   padding-right: 3rem;
 }
 .overview-buttons {
     width: 100%;
@@ -79,13 +80,17 @@
 }
 .data-blue {
     background-color: #216FB4;
-
+    color: white;
+    font-size: 10px;
+    text-align: end;
+    padding-right:0.2rem;
+    font-weight: bold;
 }
 
  .light-grey {
     background-color: #CCCCCC;
      width: 23rem;
-     display: flex;
+     display: -webkit-box;
 }
 .divider {
     border-right: 1px solid black;
@@ -113,7 +118,7 @@
     color: #4a4a4a;
 }
 .count {
-    padding-left: 1rem;
+    padding-left: 0.2rem;
     font-size: 10px;
     font-weight: bold;
     color: #4a4a4a;
