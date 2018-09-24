@@ -1,7 +1,6 @@
 import {Component, OnChanges, OnInit} from '@angular/core';
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
-import {cancelWizard} from '../redux/actions';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
