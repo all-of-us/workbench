@@ -11,7 +11,7 @@
     "publicDbName": "public20180920"
   },
   {
-    "name": "Test Registered CDR 20180920",
+    "name": "New Test Registered CDR",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
     "bigqueryDataset": "test_merge_dec26",
