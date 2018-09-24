@@ -9,7 +9,7 @@
     <span *ngIf="openChartContainer" (click)="collapseContainer()"><clr-icon shape="play" size="15" style="transform: rotate(90deg);" class="is-solid play-icon"></clr-icon></span>
     <span *ngIf="!openChartContainer" (click)="getCharts()"><clr-icon size="15" shape="play" style="transform: rotate(270deg);" class="is-solid play-icon"></clr-icon></span>
   </div>
-  <div class="chart-heading" *ngIf="showTitle">
+  <div class="chart-heading" *ngIf="showTitle && openChartContainer">
     Top 10 {{title}} of Participants in Cohort
   </div>
   <div class="button-chart-container" *ngIf="openChartContainer">
@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <!--need to make another component start-->
+    <!--participants of cohort chart views start-->
     <div class="chart-container">
       <div *ngIf="spinner" class="loading-spinner spinner spinner-lg spin-in-overlay">
         Loading...
@@ -42,7 +42,13 @@
       </app-combo-chart>
       <div *ngIf="showTitle">
         <div class="data-container" *ngFor="let items of domainItems">
-          <div class=" data-heading" >
+          <div *ngIf="items.name.length >=50" class=" data-heading"
+               [popper]="codesPopper"
+               [popperTrigger]="'hover'"
+               [popperPlacement]="'bottom'">
+            {{items.name}}
+          </div>
+          <div *ngIf="items.name.length < 50" class=" data-heading">
             {{items.name}}
           </div>
           <div class="divider"></div>
@@ -63,9 +69,11 @@
           <div class="data-percent">
               {{items.percentCount| number:'1.0-0'}} % of Cohort
           </div>
+            <popper-content #codesPopper>
+              <p class="tooltip-text" [style.margin]="'0'">{{items.name}}</p>
+            </popper-content>
         </div>
       </div>
     </div>
-    <!--need to make another component end-->
   </div>
 </div>
