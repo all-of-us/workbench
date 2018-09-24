@@ -35,13 +35,13 @@ export class OverviewPage implements OnInit, OnDestroy {
               DomainType[DomainType.LAB]];
   title: string;
   showTitle = false;
-  private subscription: Subscription;
   loading: any;
   domainItems = [];
   spinner = false;
   selectedCohortName: string;
   review: CohortReview;
   totalParticipantCount: number;
+  private subscription: Subscription;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -88,7 +88,6 @@ export class OverviewPage implements OnInit, OnDestroy {
 
     getDifferentCharts(names){
         this.demoGraph = false;
-        // this.showTitle = true;
         this.title = names;
         this.fetchChartsData(names);
         return this.title;
