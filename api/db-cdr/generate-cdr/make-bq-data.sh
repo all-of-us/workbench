@@ -53,8 +53,6 @@ fi
 
 WORKBENCH_DATASET=cdr$CDR_VERSION
 
-
-
 # Check that bq_dataset exists and exit if not
 datasets=$(bq --project=$BQ_PROJECT ls)
 if [ -z "$datasets" ]
@@ -83,7 +81,6 @@ else
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
   exit 1
 fi
-
 
 # Make dataset for cdr cloudsql tables
 datasets=$(bq --project=$WORKBENCH_PROJECT ls)
@@ -255,7 +252,7 @@ where c1.concept_id=survey_concept_id"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
 set sm.participant_count=c.count_value from
-`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c
 where c.concept_id=sm.concept_id"
 
 # Set the question count on the survey_module row
@@ -263,8 +260,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
 set sm.question_count=num_questions from
 (select count(distinct cr.concept_id_1) num_questions, cr.concept_id_2 as survey_concept_id from
-`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-  join `${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm2
+\`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
+  join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm2
     on cr.concept_id_2 = sm2.concept_id
 where cr.relationship_id = 'Has Module'
   group by survey_concept_id)
