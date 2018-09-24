@@ -1,14 +1,14 @@
 import {NgRedux} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
+import {fromJS, List} from 'immutable';
+import {Subscription} from 'rxjs/Subscription';
 import {
     CohortSearchActions,
     CohortSearchState,
     isChartLoading,
 } from '../../cohort-search/redux';
-import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
-import {fromJS, List} from 'immutable';
-import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
 
 @Component({
