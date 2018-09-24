@@ -160,7 +160,6 @@ describe('NotebookListComponent', () => {
     updateAndTick(fixture);
     tick();
     const errorMessage = de.queryAll(By.css('.modal-title'));
-    console.log(errorMessage);
     expect(errorMessage.map(com => com.nativeElement.innerText)[0]).toEqual('Error:');
     simulateClick(fixture, de.query(By.css('.close')));
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
