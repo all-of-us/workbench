@@ -19,7 +19,6 @@ import {
   isAutocompleteLoading,
   isChartLoading,
   isCriteriaLoading,
-  isChartLoading,
   isRequesting,
   SR_ID,
 } from '../store';
@@ -250,17 +249,6 @@ export class CohortSearchActions {
     }
     this.requestDrugCriteria(this.cdrVersionId, kind, parentId, subtype);
   }
-  //for review
-    fetchReviewChartsData(ns:any, wsid:any, cid:any, cdrid:any, domain: string, limit: number): void {
-        const isLoading = isChartLoading(ns, wsid, cid, cdrid, domain, limit)(this.state);
-         const isLoaded = this.state.getIn([ns, wsid, cid, cdrid, domain, limit]);
-        if (isLoaded||isLoading) {
-            return;
-        }
-        this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
-    }
-
-
 
 
   fetchAutocompleteOptions(kind: string, subtype: string, terms: string): void {
