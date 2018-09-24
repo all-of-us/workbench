@@ -15,9 +15,7 @@
   </div>
   <div *ngFor="let cohort of resourceList">
     <app-resource-card [resourceCard]="cohort" [forList]="'for-list'"
-                       (onUpdate)="reloadCohorts($event)">
+                       (onUpdate)="reloadCohorts()">
     </app-resource-card>
   </div>
 </div>
-<app-confirm-delete-modal [resourceType]="'cohort'" [resource]="cohortInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
-<app-cohort-edit-modal [cohort]="cohortInFocus" (updateFinished)="updateFinished()"></app-cohort-edit-modal>
