@@ -215,23 +215,23 @@ where count_value > 0 or source_count_value > 0"
 # Set all_concept_count and standard_concept_count on domain_info
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d
-set d.all_concept_count = all_concept_count, d.standard_concept_count = standard_concept_count from
+set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
 (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
-SUM(c.standard_concept IN (\'S\', \'C\')) as standard_concept_count from
-\`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
+SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
-group by c.domain_id)
-where d.domain_id = domain_id
+group by c.domain_id) c
+where d.domain_id = c.domain_id
 "
 
 # Set participant counts for each domain
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d
-set d.participant_count = r.participant_count from
+set d.participant_count = r.count_value from
 \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\' r
-where r.analysis_id = 3000 and r.stratum_1 = d.concept_id
+where r.analysis_id = 3000 and r.stratum_1 = CAST(d.concept_id AS STRING)
 and r.stratum_3 = d.domain_id
 and r.stratum_2 is null
 "
@@ -255,8 +255,8 @@ where c1.concept_id=survey_concept_id"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
 set sm.participant_count=c.count_value from
-`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
-where c.concept_id=sm.concept_id
+`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c
+where c.concept_id=sm.concept_id"
 
 # Set the question count on the survey_module row
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
