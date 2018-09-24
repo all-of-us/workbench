@@ -21,11 +21,12 @@ import {
 } from 'testing/test-helpers';
 
 import {
-  UserRole,
+  UserRole, UserService,
   WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService
 } from 'generated';
+import {UserServiceStub} from '../../../testing/stubs/user-service-stub';
 
 interface UserRoleRow {
   fullName: string;
@@ -128,7 +129,6 @@ function convertToUserRoleRow(userRoles: UserRole[]): UserRoleRow[] {
 
 describe('WorkspaceShareComponent', () => {
   let workspaceSharePage: WorkspaceSharePage;
-
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -141,6 +141,7 @@ describe('WorkspaceShareComponent', () => {
         WorkspaceShareComponent
       ],
       providers: [
+        { provide: UserService, useValue: new UserServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
@@ -169,7 +170,7 @@ describe('WorkspaceShareComponent', () => {
   it('adds users correctly', fakeAsync(() => {
     workspaceSharePage.readPageData();
     simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField, 'sampleuser4');
-    workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
+//    workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
 
 
     simulateClick(workspaceSharePage.fixture,
@@ -212,7 +213,7 @@ describe('WorkspaceShareComponent', () => {
 
     workspaceSharePage.readPageData();
     simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField, 'sampleuser4');
-    workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
+  //  workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
 
 
     simulateClick(workspaceSharePage.fixture,
@@ -229,7 +230,7 @@ describe('WorkspaceShareComponent', () => {
     workspaceSharePage.readPageData();
     simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField,
       'sampleuser4@fake-research-aou.org');
-    workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
+   // workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
 
 
     simulateClick(workspaceSharePage.fixture,

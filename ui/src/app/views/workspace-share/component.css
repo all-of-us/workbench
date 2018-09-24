@@ -11,6 +11,9 @@
   width: 90%;
 }
 
+.header {
+  height: 24px;	width: 257px;	color: #302973;font-size: 20px;	font-weight: 500;	line-height: 24px;
+}
 clr-icon {
   height: 18px;
   width: 18px;
@@ -56,14 +59,26 @@ clr-icon {
   height: 1.1rem;
   line-height: 0.5em;
 }
+.info-icon {
+  color: #2691D0;
+}
+.user-name .user-email {
+  height: 3.88%;
+  width: 14.69%;
+  color: rgba(74,74,74,1);
+  font-family: "Gotham HTF";
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 14px;
+}
 
-.user-name, .user-email, .user-role {
+.user-role {
   font-weight: 300;
   line-height: 0.8rem;
   color: rgb(38, 34, 98);
 }
 
-.user-name, .user-email {
+.user-email {
   margin-top: 0;
   padding-top: 0;
   font-size: 0.5rem;
@@ -81,7 +96,7 @@ clr-icon {
 
 .collaborator-icon {
   margin: 0 0 0 1rem;
-  color: #888;
+  color: #2691D0;
   cursor: pointer;
 }
 
@@ -136,6 +151,15 @@ clr-dropdown > button {
   margin-top: 0;
 }
 
+.header {
+  height: 3%;
+  width: 20.08%;
+  color: rgba(48,41,115,1);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
 :host::ng-deep .modal-dialog {
   width: 18rem;
 }
@@ -149,8 +173,12 @@ clr-dropdown > button {
   cursor: pointer;
 }
 
+.search-icon {
+  color: rgba(48,41,115,1);
+}
+
 .user {
-  display: flex;
+  display: flow-root;
   align-items: center;
 }
 
@@ -158,6 +186,28 @@ clr-dropdown > button {
   border-bottom: 1px solid lightgray;
 }
 
-.select select {
-  min-width: 3rem;
+.select1 select {
+  height: 25px;
+  width: 117px;
+  border: 1px solid #CCCCCC;
+  border-radius: 3px;
+  background-color: #FAFAFA;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns: 9rem 0.1rem 0.1rem;
+  grid-gap: 10px;
+  align-items: center;
+}
+
+.box {
+  border-radius: 5px;
+  padding-top: 0.2rem;
+  padding-left: 0.2rem;
+  font-size: 150%;
+}
+
+.row {
+  margin-left: 0rem;
 }

@@ -32,19 +32,19 @@ import {
 })
 export class WorkspaceShareComponent implements OnInit {
   @Input('workspace') workspace: Workspace;
-  toShare = '';
-  selectedPermission = 'Select Permission';
-  roleNotSelected = false;
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
-  selectedAccessLevel: WorkspaceAccessLevel;
+  @ViewChild('usernameSharingInput') input: ElementRef;
+
+  toShare = '';
   notFound = false;
   userEmail: string;
   usersLoading = true;
   userNotFound = false;
   workspaceUpdateConflictError = false;
   public sharing = false;
-  @ViewChild('usernameSharingInput') input: ElementRef;
   gsuiteDomain: string;
+  userRolesList: UserRole[] = [];
+  noOwner = false;
 
   // All new stuff to handle autocomplete. TODO: Clean this up before PR
   searchTerm: string;
@@ -55,24 +55,22 @@ export class WorkspaceShareComponent implements OnInit {
   autocompleteLoading = false;
   selectedUser: User;
 
-  constructor(
-      private userService: UserService,
-      private locationService: Location,
-      private route: ActivatedRoute,
-      public profileStorageService: ProfileStorageService,
-      private workspacesService: WorkspacesService,
-      private serverConfigService: ServerConfigService
-  ) {
+  constructor(private userService: UserService,
+              private locationService: Location,
+              private route: ActivatedRoute,
+              public profileStorageService: ProfileStorageService,
+              private workspacesService: WorkspacesService,
+              private serverConfigService: ServerConfigService) {
     serverConfigService.getConfig().subscribe((config) => {
       this.gsuiteDomain = config.gsuiteDomain;
     });
     this.searchTermChanged
-      .debounceTime(300)
-      .distinctUntilChanged()
-      .subscribe(model => {
-        this.searchTerm = model;
-        this.userSearch(this.searchTerm);
-      });
+        .debounceTime(300)
+        .distinctUntilChanged()
+        .subscribe(model => {
+          this.searchTerm = model;
+          this.userSearch(this.searchTerm);
+        });
   }
 
   ngOnInit(): void {
@@ -82,83 +80,52 @@ export class WorkspaceShareComponent implements OnInit {
     });
   }
 
-  setAccess(dropdownSelected: string): void {
-    this.selectedPermission = dropdownSelected;
-    if (dropdownSelected === 'Owner') {
-      this.selectedAccessLevel = WorkspaceAccessLevel.OWNER;
-    } else if (dropdownSelected === 'Writer') {
-      this.selectedAccessLevel = WorkspaceAccessLevel.WRITER;
-    } else {
-      this.selectedAccessLevel = WorkspaceAccessLevel.READER;
-    }
-    this.roleNotSelected = false;
-  }
-
-  clearDropdown(): void {
-    this.autocompleteUsers = [];
-  }
-
-  convertToEmail(username: string): string {
-    if (username.endsWith('@' + this.gsuiteDomain)) {
-      return username;
-    }
-    return username + '@' + this.gsuiteDomain;
-  }
-
-  // TODO: This needs to go away because we're never just adding a collaborator -
-  // TODO: we're always updating the full list, every time
-  addCollaborator(): void {
-    if (this.selectedAccessLevel === undefined) {
-      this.roleNotSelected = true;
+  save(): void {
+    if (this.usersLoading) {
       return;
     }
-    if (!this.usersLoading) {
-      const email = this.convertToEmail(this.toShare);
-      const role = this.selectedAccessLevel;
-      if (this.checkUnique(email, role)) {
-        this.usersLoading = true;
-        // A user can only have one role on a workspace so we replace them in the list
-        const updateList = this.workspace.userRoles
-          .filter(r => r.email !== email)
-          .map((userRole) => ({email: userRole.email, role: userRole.role}));
-        updateList.push({
-          email: email,
-          role: role
-        });
-        this.workspacesService.shareWorkspace(
-          this.workspace.namespace,
-          this.workspace.id, {
-            workspaceEtag: this.workspace.etag,
-            items: updateList
-          }).subscribe(
-          (resp: ShareWorkspaceResponse) => {
-            this.workspace.etag = resp.workspaceEtag;
-            this.usersLoading = false;
-            this.workspace.userRoles = resp.items;
-            this.toShare = '';
-            this.input.nativeElement.focus();
-            this.selectedUser = undefined;
-            this.toShare = '';
-            this.searchTerm = '';
-          },
-          (error) => {
-            if (error.status === 400) {
-              this.userNotFound = true;
-            } else if (error.status === 409) {
-              this.workspaceUpdateConflictError = true;
-            }
-            this.usersLoading = false;
-          }
-        );
-      }
+    const ownerList = this.userRolesList.find(
+        userrole => userrole.role === WorkspaceAccessLevel.OWNER);
+
+    if (!ownerList) {
+      this.noOwner = true;
+      return;
     }
+
+    this.usersLoading = true;
+    this.workspace.userRoles = this.userRolesList;
+    this.workspacesService.shareWorkspace(
+        this.workspace.namespace,
+        this.workspace.id, {
+          workspaceEtag: this.workspace.etag,
+          items: this.userRolesList
+        }).subscribe(
+        (resp: ShareWorkspaceResponse) => {
+          this.workspace.etag = resp.workspaceEtag;
+          this.usersLoading = false;
+          this.workspace.userRoles = resp.items;
+          this.toShare = '';
+          this.input.nativeElement.focus();
+          this.selectedUser = undefined;
+          this.toShare = '';
+          this.searchTerm = '';
+          this.closeModal();
+        },
+        (error) => {
+          if (error.status === 400) {
+            this.userNotFound = true;
+          } else if (error.status === 409) {
+            this.workspaceUpdateConflictError = true;
+          }
+          this.usersLoading = false;
+        });
   }
 
   removeCollaborator(user: UserRole): void {
     if (!this.usersLoading) {
       this.usersLoading = true;
-      const updateList = this.workspace.userRoles
-        .map((userRole) => ({email: userRole.email, role: userRole.role}));
+      const updateList = this.userRolesList
+          .map((userRole) => ({email: userRole.email, role: userRole.role}));
       const position = updateList.findIndex((userRole) => {
         if (user.email === userRole.email) {
           return true;
@@ -167,74 +134,43 @@ export class WorkspaceShareComponent implements OnInit {
         }
       });
       updateList.splice(position, 1);
-      this.workspace.userRoles = updateList;
+      this.userRolesList = updateList;
       this.usersLoading = false;
     }
   }
 
   reloadWorkspace(): Observable<WorkspaceResponse> {
     const obs: Observable<WorkspaceResponse> = this.workspacesService.getWorkspace(
-      this.workspace.namespace,
-      this.workspace.id);
+        this.workspace.namespace,
+        this.workspace.id);
     obs.subscribe(
-      (workspaceResponse) => {
-        this.accessLevel = workspaceResponse.accessLevel;
-        this.workspace = workspaceResponse.workspace;
-      },
-      (error) => {
-        if (error.status === 404) {
-          this.notFound = true;
+        (workspaceResponse) => {
+          this.accessLevel = workspaceResponse.accessLevel;
+          this.workspace = workspaceResponse.workspace;
+        },
+        (error) => {
+          if (error.status === 404) {
+            this.notFound = true;
+          }
         }
-      }
     );
     return obs;
   }
 
-  reloadConflictingWorkspace(): void {
-    this.reloadWorkspace().subscribe(() => this.resetWorkspaceEditor());
-  }
-
-  resetWorkspaceEditor(): void {
-    this.workspaceUpdateConflictError = false;
-    this.usersLoading = false;
-  }
-
-  open(): void {
-    this.sharing = true;
-  }
-
-  closeModal() {
-    this.selectedUser = undefined;
-    this.toShare = '';
-    this.searchTerm = '';
-    this.sharing = false;
-  }
-
-  get hasPermission(): boolean {
-    return this.accessLevel === WorkspaceAccessLevel.OWNER;
-  }
-
-  navigateBack(): void {
-    this.locationService.back();
-  }
-
-  // Checks for an email + role combination in the current list of user roles.
-  checkUnique(email: String, role: WorkspaceAccessLevel): boolean {
-    return Array.from(this.workspace.userRoles)
-      .filter(r => r.email === email)
-      .filter(r => r.role === role)
-      .length === 0;
-  }
-
-  get showSearchResults(): boolean {
-    return !this.autocompleteLoading &&
-      this.autocompleteUsers.length > 0 &&
-      !isBlank(this.searchTerm);
-  }
-
-  get showAutocompleteNoResults(): boolean {
-    return this.autocompleteNoResults &&
-        !isBlank(this.searchTerm);
+  addCollaborator(user: User): void {
+    this.selectedUser = user;
+    this.toShare = user.email;
+    this.searchTerm = user.email;
+    this.autocompleteLoading = false;
+    this.autocompleteNoResults = false;
+    this.autocompleteUsers = [];
+    const userRole: UserRole = {
+      givenName: user.givenName,
+      familyName: user.familyName,
+      email: user.email,
+      role: WorkspaceAccessLevel.READER
+    };
+    this.userRolesList.splice(0, 0, userRole);
   }
 
   searchTermChangedEvent($event: string) {
@@ -256,7 +192,9 @@ export class WorkspaceShareComponent implements OnInit {
     this.userService.user(this.searchTerm).subscribe((response) => {
       this.autocompleteLoading = false;
       this.userResponse = response;
-      // We want to limit to the first four results
+      response.users = response.users.filter(user => {
+        return this.checkUnique(user.email, user.familyName, user.givenName);
+      });
       this.autocompleteUsers = response.users.splice(0, 4);
       if (this.autocompleteUsers.length === 0) {
         this.autocompleteNoResults = true;
@@ -266,22 +204,59 @@ export class WorkspaceShareComponent implements OnInit {
     });
   }
 
-  selectUser(user: User): void {
-    this.selectedUser = user;
-    this.toShare = user.email;
-    this.searchTerm = user.email;
-    this.autocompleteLoading = false;
-    this.autocompleteNoResults = false;
-    this.autocompleteUsers = [];
+  open(): void {
+    this.userRolesList = [];
+    this.sharing = true;
+    const cloneList = Object.assign({}, this.workspace.userRoles);
+    if (this.workspace && this.workspace.userRoles) {
+      this.workspace.userRoles.forEach(userR => {
+        this.userRolesList.push(<UserRole>Object.assign({}, userR));
+      });
+    }
   }
 
-  clearSelectedUser() {
+  closeModal() {
     this.selectedUser = undefined;
     this.toShare = '';
     this.searchTerm = '';
-    this.autocompleteLoading = false;
-    this.autocompleteNoResults = false;
-    this.autocompleteUsers = [];
+    this.sharing = false;
+  }
+
+  reloadConflictingWorkspace(): void {
+    this.reloadWorkspace().subscribe(() => this.resetWorkspaceEditor());
+  }
+
+  resetWorkspaceEditor(): void {
+    this.workspaceUpdateConflictError = false;
+    this.usersLoading = false;
+  }
+
+
+  get hasPermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER;
+  }
+
+  navigateBack(): void {
+    this.locationService.back();
+  }
+
+  checkUnique(email: String, familyName: String, givenName: String): boolean {
+    return Array.from(this.userRolesList)
+        .filter(r => r.email === email)
+        .filter(r => r.familyName === familyName)
+        .filter(r => r.givenName === givenName)
+        .length === 0;
+  }
+
+  get showSearchResults(): boolean {
+    return !this.autocompleteLoading &&
+        this.autocompleteUsers.length > 0 &&
+        !isBlank(this.searchTerm);
+  }
+
+  get showAutocompleteNoResults(): boolean {
+    return this.autocompleteNoResults &&
+        !isBlank(this.searchTerm);
   }
 
 }
