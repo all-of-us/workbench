@@ -49,10 +49,10 @@
 
 .button-chart-container {
     display: flex;
-    padding: 1rem;
+    padding: 0.4rem 0.2rem;
 }
 .button-chart-container .button-container {
-   padding-right: 3rem;
+   padding-right: 4rem;
 }
 .overview-buttons {
     width: 100%;
@@ -61,7 +61,7 @@
 }
 
 .chart-heading {
-   padding-left: 36.7rem;
+    padding-left: 32rem;
     color: #4A4A4A;
     font-size: 12px;
     font-weight: bold;
@@ -89,7 +89,7 @@
 
  .light-grey {
     background-color: #CCCCCC;
-     width: 23rem;
+     width: 30rem;
      display: -webkit-box;
 }
 .divider {
@@ -101,7 +101,7 @@
 }
 .data-heading {
     padding-top: 0.5rem;
-    width: 23rem;
+    width: 16rem;
     font-size: 10px;
     white-space: nowrap;
     overflow: hidden;
