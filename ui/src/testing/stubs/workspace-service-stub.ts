@@ -328,7 +328,7 @@ export class WorkspacesServiceStub {
           'path': 'gs://bucket/notebooks/' + cloneName,
           'lastModifiedTime': 100
         });
-        this.resourceList = convertToResources(this.notebookList);
+        this.resourceList = convertToResources(this.notebookList, this);
         observer.complete();
       });
     });

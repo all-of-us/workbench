@@ -13,57 +13,10 @@
       <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
     </div>
   </div>
-  <div class="card item-card" *ngFor="let cohort of cohortList">
-    <div>
-      <div class="header-area">
-        <clr-dropdown [clrCloseMenuOnItemClick]="false">
-          <button type="button" [disabled]="actionsDisabled" clrDropdownTrigger>
-            <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical" [class.disabled]="actionsDisabled"></clr-icon>
-          </button>
-          <clr-dropdown-menu *clrIfOpen>
-            <button class="action-item"
-                    [routerLink]="['build']"
-                    [queryParams]="{criteria: cohort.criteria}"
-                    [class.disabled]="actionsDisabled"
-                    [disabled]="actionsDisabled">
-              <clr-icon shape="copy"></clr-icon>
-              Clone
-            </button>
-            <button class="action-item edit-button"
-                    (click)="beginEdit(cohort)"
-                    [class.disabled]="actionsDisabled"
-                    [disabled]="actionsDisabled">
-              <clr-icon shape="pencil"></clr-icon>
-              Edit
-            </button>
-            <button class="action-item"
-                    routerLink="{{cohort.id}}/review"
-                    [class.disabled]="actionsDisabled"
-                    [disabled]="actionsDisabled">
-              <clr-icon shape="grid-view"></clr-icon>
-              Review
-            </button>
-            <button class="action-item delete-button"
-                    (click)="confirmDelete(cohort)"
-                    [class.disabled]="actionsDisabled"
-                    [disabled]="actionsDisabled">
-              <clr-icon shape="trash"></clr-icon>
-              Delete
-            </button>
-          </clr-dropdown-menu>
-        </clr-dropdown>
-        <div class="name"
-             [class.disabled]="actionsDisabled"
-             (click)="openCohort(cohort)">
-          {{cohort.name}}
-        </div>
-      </div>
-      <div class="description">{{cohort.description}}</div>
-    </div>
-    <div class="footer">
-      <div class="last-modified">Last Updated <br/>{{cohort.lastModifiedTime | date}}</div>
-      <div class="item-type cohort"><div>CH</div></div>
-    </div>
+  <div *ngFor="let cohort of resourceList">
+    <app-resource-card [resourceCard]="cohort" [forList]="'for-list'"
+                       (onUpdate)="reloadCohorts($event)">
+    </app-resource-card>
   </div>
 </div>
 <app-confirm-delete-modal [resourceType]="'cohort'" [resource]="cohortInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>

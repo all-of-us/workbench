@@ -1,8 +1,15 @@
   import {
+    Cohort,
     FileDetail,
     RecentResource,
     WorkspaceAccessLevel
   } from 'generated';
+
+  export enum ResourceType {
+    NOTEBOOK = 'notebook',
+    COHORT = 'cohort',
+    INVALID = 'invalid'
+  }
 
   export const notebookActionList = [
     {
@@ -47,29 +54,40 @@ export const cohortActionList = [
 
 export const resourceActionList =  notebookActionList.concat(cohortActionList);
 
-  export function convertToResources(fileList: FileDetail[]): RecentResource[] {
-    const resourceList = [];
-    for (const file of fileList) {
-      resourceList.push(this.convertToResource(file));
+export function convertToResources(list: any[], component): RecentResource[] {
+  const resourceList = [];
+  if (component.resourceType === ResourceType.NOTEBOOK) {
+    for (const file of list) {
+      resourceList.push(this.convertToResource(file, component));
+    }
+    return resourceList;
+  } else if (component.resourceType === ResourceType.COHORT) {
+    for (const cohort of list) {
+      resourceList.push(this.convertToResource(cohort, component));
     }
     return resourceList;
   }
+}
 
-  export function convertToResource(file: FileDetail): RecentResource {
-    let mTime: string;
-    if (file.lastModifiedTime === undefined) {
-      mTime = new Date().toDateString();
-    } else {
-      mTime = file.lastModifiedTime.toString();
-    }
-    const newResource: RecentResource = {
-      workspaceNamespace: this.wsNamespace,
-      workspaceFirecloudName: this.wsId,
-      permission: WorkspaceAccessLevel[this.accessLevel],
-      notebook: file,
-      modifiedTime: mTime
-    };
-    return newResource;
+export function convertToResource(resource: any, component): RecentResource {
+  let mTime: string;
+  if (resource.lastModifiedTime === undefined) {
+    mTime = new Date().toDateString();
+  } else {
+    mTime = resource.lastModifiedTime.toString();
   }
+  const newResource: RecentResource = {
+    workspaceNamespace: component.wsNamespace,
+    workspaceFirecloudName: component.wsId,
+    permission: WorkspaceAccessLevel[component.accessLevel],
+    modifiedTime: mTime
+  };
+  if (component.resourceType === ResourceType.NOTEBOOK) {
+    newResource.notebook = resource;
+  } else if (component.resourceType === ResourceType.COHORT) {
+    newResource.cohort = resource;
+  }
+  return newResource;
+}
 
 

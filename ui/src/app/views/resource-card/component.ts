@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 
-import {resourceActionList} from 'app/utils/resourceActions';
+import {resourceActionList, ResourceType} from 'app/utils/resourceActions';
 
 import {
   CohortsService, NotebookRename,
@@ -14,12 +14,6 @@ import {environment} from 'environments/environment';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-
-enum ResourceType {
-  NOTEBOOK = 'notebook',
-  COHORT = 'cohort',
-  INVALID = 'invalid'
-}
 
 @Component ({
   selector : 'app-resource-card',
@@ -112,6 +106,10 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
           this.duplicateNameError.emit(dupName);
           this.renameModal.close();
     });
+  }
+
+  receiveCohortRename(): void {
+    this.onUpdate.emit();
   }
 
   cloneResource(resource: RecentResource): void {

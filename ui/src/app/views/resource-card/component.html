@@ -39,11 +39,11 @@
                           (receiveDelete)=receiveDelete($event)></app-confirm-delete-modal>
 
 
-<app-rename-modal [resourceType]="'notebook'"
-                  [resource]="resourceCard.notebook"
+<app-rename-modal [resource]="resourceCard.notebook"
                   (receiveRename)="receiveNotebookRename($event)"></app-rename-modal>
 
-<app-cohort-edit-modal [cohort]="resourceCard.cohort"></app-cohort-edit-modal>
+<app-cohort-edit-modal [cohort]="resourceCard.cohort"
+                        (updateFinished)="receiveCohortRename($event)"></app-cohort-edit-modal>
 
 <div *ngIf="resourceTypeInvalidError">
     <clr-modal>

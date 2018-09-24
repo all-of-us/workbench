@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
-import {convertToResources} from 'app/utils/resourceActions';
+import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {BugReportComponent} from 'app/views/bug-report/component';
@@ -33,6 +33,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   notebooksLoading: boolean;
   notebookList: FileDetail[] = [];
   resourceList: RecentResource[] = [];
+  resourceType: ResourceType = ResourceType.NOTEBOOK;
   workspace: Workspace;
   notebookError: boolean;
   wsNamespace: string;
@@ -92,7 +93,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       .subscribe(
         fileList => {
           this.notebookList = fileList;
-          this.resourceList = convertToResources(fileList);
+          this.resourceList = convertToResources(fileList, this);
           this.notebooksLoading = false;
         },
         error => {

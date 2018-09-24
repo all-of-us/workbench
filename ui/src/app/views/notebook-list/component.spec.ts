@@ -25,7 +25,6 @@ import {
   BugReportService,
   CohortsService,
   ProfileService,
-  RecentResource,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -33,7 +32,6 @@ import {
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
-import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
