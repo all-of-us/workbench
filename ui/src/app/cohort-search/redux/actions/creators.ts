@@ -93,7 +93,6 @@ export const requestDrugCriteria =
   ): ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST] =>
   ({type: BEGIN_DRUG_CRITERIA_REQUEST, cdrVersionId, kind, parentId, subtype});
 
-
 /**
  * Cohort Review Charts
  */
