@@ -255,7 +255,7 @@ def deploy(cmd_name, args)
       #{op.opts.promote ? "--promote" : "--no-promote"}
   }
 
-  if ops.opts.project == PROD_PROJECT
+  if op.opts.project == PROD_PROJECT
     maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
                         "(including DB updates), skipping public-api " +
                         "(see DB-89)"
@@ -279,7 +279,7 @@ def deploy(cmd_name, args)
   }
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
 
-  if ops.opts.project == PROD_PROJECT
+  if op.opts.project == PROD_PROJECT
     maybe_log_jira.call "'#{op.opts.project}': Skipping Public-UI service " +
                         "deployment (see DB-89)"
   else
