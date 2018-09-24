@@ -32,9 +32,9 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   incomingResource: any;
   @Input('forList')
   forList: string;
-  @Output() onUpdate: EventEmitter<any> = new EventEmitter();
-  @Output() duplicateNameError: EventEmitter<any> = new EventEmitter();
-  @Output() invalidNameError: EventEmitter<any> = new EventEmitter();
+  @Output() onUpdate: EventEmitter<void | NotebookRename> = new EventEmitter();
+  @Output() duplicateNameError: EventEmitter<void | string> = new EventEmitter();
+  @Output() invalidNameError: EventEmitter<void | string> = new EventEmitter();
   actions = [];
   wsNamespace: string;
   wsId: string;
@@ -97,11 +97,13 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         if (fileList.filter((nb) => nb.name === newName).length > 0) {
           throw new Error(newName);
         } else {
-          this.onUpdate.emit(rename);
           return this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename);
         }
       })
-      .subscribe(() => { this.renameModal.close(); },
+      .subscribe(() => {
+          this.renameModal.close();
+          this.onUpdate.emit(rename);
+        },
         (dupName) => {
           this.duplicateNameError.emit(dupName);
           this.renameModal.close();
@@ -123,8 +125,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       case ResourceType.COHORT: {
         const url =
           '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?criteria=';
-        this.route.navigateByUrl(url
-          + resource.cohort.criteria);
+        this.route.navigateByUrl(url + resource.cohort.criteria);
         this.onUpdate.emit();
         break;
       }

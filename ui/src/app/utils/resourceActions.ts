@@ -54,31 +54,38 @@ export const cohortActionList = [
 
 export const resourceActionList =  notebookActionList.concat(cohortActionList);
 
-export function convertToResources(list: any[], component): RecentResource[] {
+export function convertToResources(list: FileDetail[] | Cohort[],
+                                   workspaceNamespace: string, workspaceId: string,
+                                   accessLevel: WorkspaceAccessLevel,
+                                   resourceType: ResourceType): RecentResource[] {
   const resourceList = [];
   for (const resource of list) {
-    resourceList.push(this.convertToResource(resource, component));
+    resourceList.push(this.convertToResource(resource, workspaceNamespace, workspaceId,
+      accessLevel, resourceType));
   }
   return resourceList;
 }
 
-export function convertToResource(resource: any, component): RecentResource {
+export function convertToResource(resource: FileDetail | Cohort,
+                                  workspaceNamespace: string, workspaceId: string,
+                                  accessLevel: WorkspaceAccessLevel,
+                                  resourceType: ResourceType): RecentResource {
   let modifiedTime: string;
-  if (resource.lastModifiedTime === undefined) {
+  if (!resource.lastModifiedTime) {
     modifiedTime = new Date().toDateString();
   } else {
     modifiedTime = resource.lastModifiedTime.toString();
   }
   const newResource: RecentResource = {
-    workspaceNamespace: component.wsNamespace,
-    workspaceFirecloudName: component.wsId,
-    permission: WorkspaceAccessLevel[component.accessLevel],
+    workspaceNamespace: workspaceNamespace,
+    workspaceFirecloudName: workspaceId,
+    permission: WorkspaceAccessLevel[accessLevel],
     modifiedTime: modifiedTime
   };
-  if (component.resourceType === ResourceType.NOTEBOOK) {
-    newResource.notebook = resource;
-  } else if (component.resourceType === ResourceType.COHORT) {
-    newResource.cohort = resource;
+  if (resourceType === ResourceType.NOTEBOOK) {
+    newResource.notebook = <FileDetail>resource;
+  } else if (resourceType === ResourceType.COHORT) {
+    newResource.cohort = <Cohort>resource;
   }
   return newResource;
 }

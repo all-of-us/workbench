@@ -93,7 +93,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
       .subscribe(
         fileList => {
           this.notebookList = fileList;
-          this.resourceList = convertToResources(fileList, this);
+          this.resourceList = convertToResources(fileList, this.wsNamespace,
+            this.wsId, this.accessLevel, this.resourceType);
           this.notebooksLoading = false;
         },
         error => {

@@ -68,7 +68,8 @@ export class CohortListComponent implements OnInit, OnDestroy {
           this.cohortList = cohortsReceived.items.map(function(cohorts) {
             return cohorts;
           });
-          this.resourceList = convertToResources(this.cohortList, this);
+          this.resourceList = convertToResources(this.cohortList, this.wsNamespace,
+            this.wsId, this.accessLevel, this.resourceType);
           this.cohortsLoading = false;
         },
         error => {

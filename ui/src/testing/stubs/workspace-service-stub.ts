@@ -1,6 +1,6 @@
 import {Observable} from 'rxjs/Observable';
 
-import {convertToResources} from 'app/utils/resourceActions';
+import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 
 import {
   CloneWorkspaceRequest,
@@ -328,7 +328,8 @@ export class WorkspacesServiceStub {
           'path': 'gs://bucket/notebooks/' + cloneName,
           'lastModifiedTime': 100
         });
-        this.resourceList = convertToResources(this.notebookList, this);
+        this.resourceList = convertToResources(this.notebookList, workspaceNamespace, workspaceId,
+          WorkspaceAccessLevel.OWNER, ResourceType.NOTEBOOK);
         observer.complete();
       });
     });
