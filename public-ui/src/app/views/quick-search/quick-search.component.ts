@@ -20,8 +20,8 @@ import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListR
 export class QuickSearchComponent implements OnInit, OnDestroy {
   pageImage = '/assets/db-images/man-standing.png';
   title = 'Quick Guided Search';
-  subTitle = 'Enter keywords to search EHR data and survey modules. ' +
-    'Or click on an EHR domain or survey.';
+  subTitle = 'Enter a keyword or data standards code (eg ICD, SNOMED) in the search bar ' +
+      'to search across Electronic Health Record (EHR) data and program surveys.';
   searchResults = [];
   domainResults = [];
   surveyResults = [];
@@ -49,9 +49,13 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     // Set title based on datatype
     if (this.dataType === this.EHR_DATATYPE) {
       this.title = 'Electronic Health Data';
+      this.subTitle = 'Enter a keyword or data standards code (eg ICD, SNOMED) in the search bar ' +
+          'to search across Electronic Health Record (EHR) data and program surveys.';
     }
     if (this.dataType === this.SURVEY_DATATYPE) {
       this.title = 'Participant Survey Data';
+      this.subTitle = 'Enter a keyword to search survey data. ' +
+          'Or click on a survey below to view full content.';
     }
     // Get search result from localStorage
     this.prevSearchText = localStorage.getItem('searchText');

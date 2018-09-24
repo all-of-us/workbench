@@ -12,15 +12,15 @@
 
 /* result card */
 .white-card-box.search-result {
-    height: 240px;
-    width: 240px;
+    height: 260px;
+    width: 250px;
     margin-top: 1rem;
     margin-bottom: 1rem;
     padding: .5rem 1rem;
 }
 
 .card-text.bottom {
-    padding-bottom: 1rem;
+    padding-bottom: .5rem;
 }
 
 .bolder {
