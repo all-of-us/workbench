@@ -30,8 +30,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   resourceCard: RecentResource;
   @Input('incomingResource')
   incomingResource: any;
-  @Input('forList')
-  forList: string;
+  @Input('cssClass')
+  cssClass: string;
   @Output() onUpdate: EventEmitter<void | NotebookRename> = new EventEmitter();
   @Output() duplicateNameError: EventEmitter<void | string> = new EventEmitter();
   @Output() invalidNameError: EventEmitter<void | string> = new EventEmitter();

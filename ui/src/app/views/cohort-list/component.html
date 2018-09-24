@@ -14,7 +14,7 @@
     </div>
   </div>
   <div *ngFor="let cohort of resourceList">
-    <app-resource-card [resourceCard]="cohort" [forList]="'for-list'"
+    <app-resource-card [resourceCard]="cohort" [cssClass]="'for-list'"
                        (onUpdate)="reloadCohorts()">
     </app-resource-card>
   </div>
