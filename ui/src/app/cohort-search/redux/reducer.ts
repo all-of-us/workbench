@@ -1,3 +1,4 @@
+import {TreeSubType} from 'generated';
 import {fromJS, List, Map, Set} from 'immutable';
 import {Reducer} from 'redux';
 
@@ -124,6 +125,9 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'requests', action.kind, action.subtype]);
 
       case LOAD_CRITERIA_SUBTREE:
+        if (action.subtype !== TreeSubType[TreeSubType.BRAND]) {
+          state = state.deleteIn(['criteria', 'search', 'ingredients']);
+        }
         return state
           .setIn(['criteria', 'subtree', action.kind], fromJS(action.path))
           .setIn(['criteria', 'subtree', 'selected'], action.ids)
