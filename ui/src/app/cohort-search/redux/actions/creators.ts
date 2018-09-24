@@ -102,15 +102,9 @@ export const requestChartData =
         ({type: BEGIN_CHART_DATA_REQUEST, ns, wsid, cid, cdrid, domain, limit});
 
 export const loadChartRequestResults =
-    (ns: string, wsid: string, cid: number, cdrid: number, domain: string, limit: number, results: any
-): ActionTypes[typeof LOAD_CHART_RESULTS] =>
+    (ns: string, wsid: string, cid: number, cdrid: number, domain: string, limit: number,
+     results: any): ActionTypes[typeof LOAD_CHART_RESULTS] =>
     ({type: LOAD_CHART_RESULTS, ns, wsid, cid, cdrid, domain, limit, results});
-    // (results: any
-    // ): ActionTypes[typeof LOAD_CHART_RESULTS] =>
-    //     ({type: LOAD_CHART_RESULTS, results});
-
-
-
 
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
