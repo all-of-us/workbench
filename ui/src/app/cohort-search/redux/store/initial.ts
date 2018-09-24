@@ -37,4 +37,9 @@ export const initialState = fromJS({
 
   initShowChart: false,
 
+  reviewChartData: {
+    domainCharts: {},
+    // selectedDomain: null
+  },
+
 });
