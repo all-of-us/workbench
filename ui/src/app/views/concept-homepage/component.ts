@@ -13,6 +13,8 @@ import {Component, OnInit} from '@angular/core';
 export class ConceptHomepageComponent implements OnInit {
   searchTerm: string;
   standardConceptsOnly = false;
+  searching = false;
+  selectedDomain: string;
 
   conceptDomainList = [
     {
@@ -47,8 +49,33 @@ export class ConceptHomepageComponent implements OnInit {
     },
   ];
 
+  concepts = [
+    {
+      name: "non-small cell lung cancer",
+      synonyms: [
+        "lung cancer",
+        "malignant tumor",
+        "carcinoma of the lung"
+      ],
+      code: 25463,
+      vocabulary: "SNOMED",
+      count: 2596
+    },
+    {
+      name: "Epidermal growth factor receptor positive non-small cell lung cancer",
+      synonyms: [],
+      code: 42696,
+      vocabulary: "SNOMED",
+      count: 209
+    }
+  ];
+
   constructor(
   ) {}
 
   ngOnInit(): void {}
+
+  selectDomain(domain: string) {
+    this.selectedDomain = domain;
+  }
 }

@@ -6,7 +6,7 @@
   width: 95.7%;
   border-radius: 8px;
   background: linear-gradient(180deg, #FFFFFF 0%, rgba(236,236,236,0) 100%);
-  box-shadow: 0 0 0 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
+  box-shadow: 0 -3px 5px 0 rgba(0,0,0,0.26), 0 -8px 10px 0 rgba(0,0,0,0.16);
 }
 
 :host::ng-deep .nav {
@@ -53,17 +53,19 @@
   right: 9%;
 }
 
-.checkbox {
+.standard-concepts-checkbox {
   right: 4rem;
 }
 
 .domain-box {
-  width: 95.7%;
-  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.lower-box {
+  width: 93.7%;
   margin-left: auto;
   margin-right: auto;
-  display: flex;
-  justify-content: space-between;
 }
 
 .card.item-card {
@@ -113,3 +115,92 @@
   text-transform: none;
 }
 
+:host::ng-deep .checkbox input[type=checkbox]:checked+label:before {
+  background-color: #7CC79B;
+}
+
+:host::ng-deep .checkbox input[type=checkbox]:focus+label:before {
+  box-shadow: none;
+}
+
+.chart-selector-tabs .btn.btn-link.nav-link.nav-item {
+  color: #2691D0;
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 18px;
+  text-align: start;
+  box-shadow: none;
+  width: 7rem;
+  height: 2.2rem;
+  padding-left: 0.5rem;
+  margin-right: 0;
+}
+
+:host::ng-deep .chart-selector-tabs .nav {
+  height: 2.2rem;
+  padding: 0;
+}
+
+.chart-selector-tabs .btn.btn-link.nav-link.nav-item * {
+  margin-left: auto;
+  margin-right: auto
+}
+
+.chart-selector-tabs .btn.btn-link.nav-link.nav-item.active {
+  background-color: #FAFAFA;
+  border-top: 1px solid #CCCCCC;
+  border-left: 1px solid #CCCCCC;
+  border-right: 1px solid #CCCCCC;
+  border-radius: 3px 3px 0 0;
+}
+
+.chart-selector-tabs .btn.btn-link.nav-link.nav-item .chart-selector-header {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.filter-options {
+  background-color: #FAFAFA;
+  height: 2rem;
+  border: 1px solid #CCCCCC;
+  margin-top: -1px;
+  padding-left: 0.5rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  line-height: 15px;
+  font-weight: 500;
+  font-size: 12px;
+  color: #4A4A4A;
+}
+
+.filter-checkbox {
+  width: 9rem;
+  padding-left: 1rem;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4A4A4A;
+}
+
+clr-datagrid {
+  padding-top: 0;
+}
+
+:host::ng-deep .datagrid {
+  margin-top: 0;
+  background-color: #F1F1F1;
+  border: none;
+}
+
+:host::ng-deep .datagrid-head {
+  margin-bottom: 0.5rem;
+  border: 1px solid #ccc;
+}
+
+:host::ng-deep .datagrid-body {
+  border: 1px solid #ccc
+}
+
+clr-dg-row {
+  background-color: white;
+}
