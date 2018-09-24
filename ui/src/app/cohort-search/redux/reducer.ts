@@ -504,18 +504,19 @@ export const rootReducer: Reducer<CohortSearchState> =
       case BEGIN_CHART_DATA_REQUEST:
           return state
               .deleteIn(
-                  [action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit])
+                  ['reviewChartData', 'request', action.domain])
               .setIn(
-                  [action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit],
+                  ['reviewChartData', 'request', action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit],
                   true);
 
-      case LOAD_CHART_RESULTS:
+        case LOAD_CHART_RESULTS:
           return state
               .setIn(
-                  [action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit],
-                  fromJS(action.results)
+                  ['reviewChartData', 'domainCharts', action.domain]
+                      ,fromJS(action.results ))
+              // .setIn(['reviewChartData', 'selectedDomain'], action.domain)
               .deleteIn(
-                  [action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit]));
+                  ['reviewChartData', 'request', action.ns, action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
       default: return state;
     }
 };

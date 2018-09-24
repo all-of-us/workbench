@@ -9,6 +9,7 @@
 
 .participant-container {
     display:flex;
+    margin-bottom: 1rem;
 }
 .participant-container .participant-title {
     color: #262262;
@@ -50,15 +51,16 @@
     padding: 1rem;
 }
 .button-chart-container .button-container {
-   padding-right: 12rem;
+   padding-right: 5rem;
 }
 .overview-buttons {
     width: 100%;
     border: 1px solid #0077b7;
+    margin-bottom:0.7rem;
 }
 
 .chart-heading {
-   padding-left: 29rem;
+   padding-left: 36.7rem;
     color: #4A4A4A;
     font-size: 12px;
     font-weight: bold;
@@ -76,13 +78,14 @@
    display: flex;
 }
 .data-blue {
-    background-color: #262262;
+    background-color: #216FB4;
 
 }
 
  .light-grey {
-    background-color: grey;
-     width: 31rem;
+    background-color: #CCCCCC;
+     width: 23rem;
+     display: flex;
 }
 .divider {
     border-right: 1px solid black;
@@ -93,10 +96,34 @@
 }
 .data-heading {
     padding-top: 0.5rem;
+    width: 23rem;
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: end;
+    padding-right: 0.5rem;
 }
 .data-percent {
     padding-top: 0.5rem;
     padding-left: 1rem;
+    white-space: nowrap;
+    font-size: 10px;
+    font-weight: bold;
+    color: #4a4a4a;
+}
+.count {
+    padding-left: 1rem;
+    font-size: 10px;
+    font-weight: bold;
+    color: #4a4a4a;
+}
+
+.selected-cohort {
+    font-size: 20px;
+    font-weight: 300;
+    color: #4a4a4a;
+    margin-bottom: 1rem;
 }
 /*.btn.btn-primary.overview-buttons.active {*/
     /*background-color: #4356a7;*/
