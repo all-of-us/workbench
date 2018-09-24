@@ -87,6 +87,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Autowired
     private ConceptService conceptService;
 
+    @Autowired
+    private ConceptSynonymDao conceptSynonymDao;
+
     public DataBrowserController() {}
 
     public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao,
@@ -424,8 +427,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
                     conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
                     }
-            }
 
+            }
 
             this.conceptSynonymNames.put(con.getConceptId(),conceptSynonymNames);
 
@@ -433,6 +436,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
 
                 List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
+                for(Concept concept: std_concepts){
+                    ArrayList<String> conceptSynonyms = conceptSynonymDao.findSynonymNamesByConceptId(concept.getConceptId());
+                    ArrayList<String> uniqueConceptSynonymNames = new ArrayList<>();
+                    for(String cs:conceptSynonyms){
+                        if(!uniqueConceptSynonymNames.contains(cs) && !concept.getConceptName().equals(cs)){
+                            uniqueConceptSynonymNames.add(cs);
+                        }
+                    }
+                    this.conceptSynonymNames.put(concept.getConceptId(),uniqueConceptSynonymNames);
+                }
                 response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
             }
 
@@ -441,7 +454,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         if(response.getMatchType() == null && response.getStandardConcepts() == null){
             response.setMatchType(MatchType.NAME);
         }
-
         response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }

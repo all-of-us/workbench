@@ -74,35 +74,25 @@
             </clr-alert>
           </div>
         </div>
-        <div class="row" *ngIf="standardConcepts.length > 0; else not_standard_concepts">
-          <div class="col-md grid-header flex-xs-middle"> <b>Standard Concept Name</b></div>
-          <div class="col-md grid-header flex-xs-middle"> Synonyms </div>
-          <div class="col-md-2 grid-header flex-xs-middle"> Participants of <b> {{totalParticipants | number}}</b> </div>
+        <div class="row">
+          <div class="col-md-2 grid-header flex-xs-middle"> Concept Name</div>
+          <div class="col-md-1 grid-header flex-xs-middle"> Concept Type </div>
+            <div class="col-md-2 grid-header flex-xs-middle"> Synonyms </div>
+          <div class="col-md-2 grid-header flex-items-xs-right"> Participants of <b> {{totalParticipants | number}}</b> </div>
           <div class="col-md-2 grid-header flex-xs-middle info-text">
             Vocabulary Code
             <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon>
           </div>
           <div class="col-md-1 grid-header flex-xs-middle info-text"> View graphs </div>
         </div>
-        <ng-template #not_standard_concepts>
-          <div class="row">
-            <div class="col-md grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
-            <div class="col-md grid-header flex-xs-middle"> Synonyms </div>
-            <div class="col-md-2 grid-header flex-xs-middle"> Participants of <b> {{totalParticipants | number}}</b> </div>
-            <div class="col-md-2 grid-header flex-xs-middle info-text">
-              Vocabulary Code
-              <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon>
-            </div>
-            <div class="col-md-1 grid-header flex-xs-middle info-text"> View graphs </div>
-
-          </div>
-        </ng-template>
         <div class="row expandable-grid-row"
-             *ngFor="let r of standardConcepts, let i = index"
+             *ngFor="let r of standardConcepts"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md flex-xs-middle" innerHtml="{{r.conceptName | highlightSearch : prevSearchText}}
+          <div class="col-md-2 flex-xs-middle" innerHtml="{{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
-          <div class="col-md flex-xs-middle" *ngIf="r.conceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"> </div>
+            <div class="col-md-1 flex-xs-middle"> Standard</div>
+          <div class="col-md-2 flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"></div>
+            <ng-template #noConceptSynonyms><div class="col-md-2 flex-xs-middle"></div></ng-template>
           <div class="col-md-2 flex-items-xs-right" style="margin-top: .5rem;">
             {{r.countValue | number }}
           </div>
@@ -120,22 +110,15 @@
             </app-concept-charts>
           </div>
         </div>
-        <div class="row" *ngIf="standardConcepts.length > 0">
-          <div class="col-md grid-header flex-xs-middle"><b>Source Concept Name</b></div>
-          <div class="col-md grid-header flex-xs-middle"> Synonyms </div>
-          <div class="col-md-2 grid-header flex-xs-middle"> Participants of <b> {{totalParticipants | number}}</b> </div>
-          <div class="col-md-2 grid-header flex-xs-middle info-text">
-            Vocabulary Code
-            <clr-icon class="" shape="info-standard" class="is-solid"></clr-icon>
-          </div>
-          <div class="col-md-1 grid-header flex-xs-middle info-text"> View graphs </div>
-        </div>
         <div class="row expandable-grid-row"
              *ngFor="let r of items, let i = index"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md flex-xs-middle" innerHtml="{{r.conceptName | highlightSearch : prevSearchText}}
+          <div class="col-md-2 flex-xs-middle" innerHtml="{{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
-          <div class="col-md flex-xs-middle" *ngIf="r.conceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"> </div>
+            <div class="col-md-1 flex-xs-middle" *ngIf="matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else not_code_match"> Source</div>
+            <ng-template #not_code_match> <div class="col-md-1 flex-xs-middle"> Standard</div></ng-template>
+            <div class="col-md-2 flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"></div>
+            <ng-template #noConceptSynonyms><div class="col-md-2 flex-xs-middle"></div></ng-template>
           <div class="col-md-2 flex-items-xs-right" style="margin-top: .5rem;">
             {{r.countValue | number }}
           </div>
