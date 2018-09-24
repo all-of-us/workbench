@@ -44,7 +44,7 @@ then
   exit 1
 fi
 
-# TODO Next Populate achilles_results
+# Next Populate achilles_results
 echo "Running measurement queries..."
 
 # 3000 Measurements that have numeric values - Number of persons with at least one measurement occurrence by measurement_concept_id, bin size of the measurement value for 10 bins, maximum and minimum from measurement value. Added value for measurement rows

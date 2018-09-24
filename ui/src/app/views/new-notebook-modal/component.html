@@ -4,7 +4,7 @@
   </div>
   <div class="modal-body">
     <div class="form-section">
-      <label class="modal-label">New Name</label>
+      <label class="modal-label">Name:</label>
       <input id="new-name" type="text" class="input"
              [(ngModel)]="newName" (ngModelChange)="nameConflict = false">
       <div class="error" *ngIf="nameConflict">Notebook name in use</div>

@@ -34,6 +34,7 @@ then
   exit 1
 fi
 
+
 # Check that bq_dataset exists and exit if not
 datasets=$(bq --project=$BQ_PROJECT ls)
 if [ -z "$datasets" ]

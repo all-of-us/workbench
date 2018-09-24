@@ -25,6 +25,7 @@ import {SignInService} from '../../services/sign-in.service';
 
 import {BreadcrumbComponent} from '../breadcrumb/component';
 import {BugReportComponent} from '../bug-report/component';
+import {RoutingSpinnerComponent} from '../routing-spinner/component';
 import {SignedInComponent} from '../signed-in/component';
 
 describe('SignedInComponent', () => {
@@ -40,6 +41,7 @@ describe('SignedInComponent', () => {
         BreadcrumbComponent,
         BugReportComponent,
         SignedInComponent,
+        RoutingSpinnerComponent
       ],
       providers: [
         {provide: BugReportService, useValue: new BugReportServiceStub()},
