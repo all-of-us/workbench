@@ -9,7 +9,6 @@
     <span *ngIf="openChartContainer" (click)="collapseContainer()"><clr-icon shape="play" size="15" style="transform: rotate(90deg);" class="is-solid play-icon"></clr-icon></span>
     <span *ngIf="!openChartContainer" (click)="getCharts()"><clr-icon size="15" shape="play" style="transform: rotate(270deg);" class="is-solid play-icon"></clr-icon></span>
   </div>
-  <!--<h1 (click)="fetchReviewChartsData()">Call Service</h1>-->
   <div class="chart-heading" *ngIf="showTitle">
     Top 10 {{title}} of Participants in Cohort
   </div>
@@ -49,8 +48,16 @@
           <div class="divider"></div>
           <div class="data-bar-container">
             <div class="light-grey">
-              <div class="data-blue" style="height:24px;" [style.width.%]="items.percentCount| number:'1.0-0'"></div>
-                <div class="count" style="height:24px;" [style.width.%]="100-items.percentCount"> {{items.count}} </div>
+              <div class="data-blue" style="height:24px;" [style.width.%]="items.percentCount| number:'1.0-0'">
+                <ng-container *ngIf="items.percentCount >= 90">
+                  {{items.count}}
+                </ng-container>
+              </div>
+              <div class="count" style="height:24px;" [style.width.%]="100-items.percentCount">
+                <ng-container *ngIf="items.percentCount < 90">
+                  {{items.count}}
+                </ng-container>
+              </div>
             </div>
           </div>
           <div class="data-percent">
