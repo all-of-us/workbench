@@ -13,6 +13,10 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
             "where cr.concept_id_1=?1 and cr.relationship_id='Maps to' ")
     List<Concept> findStandardConcepts(long concept_id);
 
+    @Query("select c from Concept c left join FETCH c.synonyms as cs " +
+            "where c.conceptId=?1")
+    Concept fetchConceptWithSynonyms(long conceptId);
+
     @Query(value="select c.* from concept c "+
             "join concept_relationship rel on " +
             "rel.concept_id_1 = c.concept_id and rel.concept_id_2 = :conceptId and " +

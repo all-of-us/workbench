@@ -49,7 +49,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     if (this.dataType === this.EHR_DATATYPE) {
       this.title = 'Electronic Health Data';
       this.subTitle = 'Enter a keyword or data standards code (eg ICD, SNOMED) in the search bar ' +
-          'to search across Electronic Health Record (EHR) data and program surveys.';
+          'to search across Electronic Health Record (EHR) data.';
     }
     if (this.dataType === this.SURVEY_DATATYPE) {
       this.title = 'Participant Survey Data';

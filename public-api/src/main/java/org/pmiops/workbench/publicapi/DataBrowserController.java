@@ -365,16 +365,19 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
 
                 List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
+                List<Concept> stdConceptswithSynonyms = new ArrayList<>();
                 for(Concept concept: std_concepts){
+                    Concept conceptWithSynonyms = conceptDao.fetchConceptWithSynonyms(concept.getConceptId());
+                    stdConceptswithSynonyms.add(conceptWithSynonyms);
                     ArrayList<String> uniqueConceptSynonymNames = new ArrayList<>();
-                    for(ConceptSynonym cs:concept.getSynonyms()){
+                    for(ConceptSynonym cs:conceptWithSynonyms.getSynonyms()){
                         if(!uniqueConceptSynonymNames.contains(cs.getConceptSynonymName()) && !concept.getConceptName().equals(cs.getConceptSynonymName())){
                             uniqueConceptSynonymNames.add(cs.getConceptSynonymName());
                         }
                     }
                     this.conceptSynonymNames.put(concept.getConceptId(),uniqueConceptSynonymNames);
                 }
-                response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+                response.setStandardConcepts(stdConceptswithSynonyms.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
             }
 
         }

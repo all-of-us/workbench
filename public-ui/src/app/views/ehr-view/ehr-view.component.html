@@ -32,7 +32,7 @@
 
       <div class="row">
         <h5 class="col-xs-12 box-title">
-          {{dbDomain.domainDisplay}}
+          {{ehrDomain.name}}
         </h5>
       </div>
 
@@ -75,7 +75,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-3 grid-header flex-xs-middle"> {{dbDomain.domainDisplay}}</div>
+          <div class="col-md-3 grid-header flex-xs-middle"> {{ehrDomain.name}}</div>
             <div class="col-md-4 grid-header flex-xs-middle"> Synonyms </div>
           <div class="col-md-2 grid-header flex-items-xs-right"> Participants of <b> {{totalParticipants | number}}</b> </div>
           <div class="col-md-2 grid-header flex-xs-middle info-text">
@@ -85,35 +85,16 @@
           <div class="col-md-1 grid-header flex-xs-middle info-text"> View graphs </div>
         </div>
         <div class="row expandable-grid-row"
-             *ngFor="let r of standardConcepts"
+             *ngFor="let r of standardConcepts.concat(items), let i = index"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-3 flex-xs-middle" innerHtml=" <b>Standard</b> {{r.conceptName | highlightSearch : prevSearchText}}
+          <div class="col-md-3 flex-xs-middle" *ngIf="matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else code_match_standard"
+               innerHtml="<b>Source</b> {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
-          <div class="col-md-4 flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"></div>
-            <ng-template #noConceptSynonyms><div class="col-md-2 flex-xs-middle"></div></ng-template>
-          <div class="col-md-2 flex-items-xs-right" style="margin-top: .5rem;">
-            {{r.countValue | number }}
-          </div>
-          <div class="col-md-2 flex-xs-middle">
-            {{r.vocabularyId}} {{r.conceptCode}}
-          </div>
-          <div class="col-md-1 flex-xs-middle">
-            <button class="icon-btn" (click)="r.expanded = !r.expanded">
-              <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
-            </button>
-          </div>
-          <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded">
-            <app-concept-charts [concept]="r" [showMeasurementGenderBins]="showMeasurementGenderBins" [showAge]="showAge" [showGender]="showGender"
-                                [showSources]="showSources" [backgroundColor]="'#ECF1F4'">
-            </app-concept-charts>
-          </div>
-        </div>
-        <div class="row expandable-grid-row"
-             *ngFor="let r of items, let i = index"
-             [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-3 flex-xs-middle" *ngIf="matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else not_code_match" innerHtml="<b>Source</b> {{r.conceptName | highlightSearch : prevSearchText}}
+          <ng-template #code_match_standard>
+            <div class="col-md-3 flex-xs-middle" *ngIf="matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard" innerHtml="<b>Standard</b> {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
-          <ng-template #not_code_match>
+          </ng-template>
+          <ng-template #code_match_not_standard>
             <div class="col-md-3 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
           </ng-template>
