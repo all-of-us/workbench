@@ -8,7 +8,7 @@ import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
-import {CohortCommonModule} from '../../cohort-common/module.ts';
+// import {CohortCommonModule} from '../../cohort-common/module';
 import {ReviewNavComponent} from '../review-nav/review-nav.component';
 import {ReviewStateService} from '../review-state.service';
 import {OverviewPage} from './overview-page';
@@ -37,13 +37,11 @@ describe('OverviewPage', () => {
     },
   };
   let route;
-    // const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
-    // this.selectedCohortName = this.route.parent.snapshot.data.cohort.name;
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
       declarations: [ ComboChartComponent, OverviewPage, ReviewNavComponent ],
-      imports: [ClarityModule, NgxChartsModule, NgxPopperModule, CohortCommonModule],
+      imports: [ClarityModule, NgxChartsModule, NgxPopperModule],
       providers: [
         {provide: NgRedux},
         {provide: CohortReviewService},
