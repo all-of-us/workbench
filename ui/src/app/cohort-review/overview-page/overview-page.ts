@@ -13,7 +13,6 @@ import {
 import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
 
-
 @Component({
     selector: 'app-overview-charts',
     templateUrl: './overview-page.html',
@@ -22,7 +21,7 @@ import {ReviewStateService} from '../review-state.service';
 })
 export class OverviewPage implements OnInit, OnDestroy {
   openChartContainer = false;
-    demoGraph = false;
+  demoGraph = false;
   data = List();
   typesList = [DomainType[DomainType.CONDITION],
               DomainType[DomainType.PROCEDURE],
@@ -61,6 +60,7 @@ export class OverviewPage implements OnInit, OnDestroy {
               this.data = fromJS(data);
                this.spinner = false;
           });
+
       this.subscription = this.state.review$.subscribe(review => {
           this.review = review;
           this.totalParticipantCount = review.matchedParticipantCount;
