@@ -127,11 +127,9 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
+    this.standardConcepts = this.searchResult.standardConcepts;
     if (this.searchResult.matchType) {
       this.matchType = this.searchResult.matchType;
-      if (this.matchType === 'CONCEPT_CODE') {
-        console.log('Code match');
-      }
     }
     if (this.searchResult.standardConcepts) {
       this.standardConcepts = this.searchResult.standardConcepts;
