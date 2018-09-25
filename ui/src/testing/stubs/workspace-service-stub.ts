@@ -1,14 +1,11 @@
 import {Observable} from 'rxjs/Observable';
 
-import {convertToResources, ResourceType} from 'app/utils/resourceActions';
-
 import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
   EmptyResponse,
   FileDetail,
   NotebookRename,
-  RecentResource,
   ShareWorkspaceRequest,
   ShareWorkspaceResponse,
   UpdateWorkspaceRequest,

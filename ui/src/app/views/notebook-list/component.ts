@@ -33,7 +33,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   notebooksLoading: boolean;
   notebookList: FileDetail[] = [];
   resourceList: RecentResource[] = [];
-  resourceType: ResourceType = ResourceType.NOTEBOOK;
   workspace: Workspace;
   notebookError: boolean;
   wsNamespace: string;
@@ -94,7 +93,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
         fileList => {
           this.notebookList = fileList;
           this.resourceList = convertToResources(fileList, this.wsNamespace,
-            this.wsId, this.accessLevel, this.resourceType);
+            this.wsId, this.accessLevel, ResourceType.NOTEBOOK);
           this.notebooksLoading = false;
         },
         error => {

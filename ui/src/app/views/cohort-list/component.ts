@@ -27,7 +27,6 @@ export class CohortListComponent implements OnInit, OnDestroy {
   accessLevel: WorkspaceAccessLevel;
   cohortList: Cohort[] = [];
   resourceList: RecentResource[] = [];
-  resourceType: ResourceType = ResourceType.COHORT;
   workspace: Workspace;
   cohortsLoading = true;
   cohortsError = false;
@@ -69,7 +68,7 @@ export class CohortListComponent implements OnInit, OnDestroy {
             return cohorts;
           });
           this.resourceList = convertToResources(this.cohortList, this.wsNamespace,
-            this.wsId, this.accessLevel, this.resourceType);
+            this.wsId, this.accessLevel, ResourceType.COHORT);
           this.cohortsLoading = false;
         },
         error => {
