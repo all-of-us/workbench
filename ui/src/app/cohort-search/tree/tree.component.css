@@ -42,7 +42,7 @@
 }
 
 .tree-container.multiple {
-  margin-top: 3rem;
+  margin-top: 3.5rem;
 }
 
 .alert.alert-warning {
@@ -52,4 +52,8 @@
 
 .alert.alert-warning .alert-icon {
   color: #E28327;
+}
+.match-container {
+  font-weight: bold;
+  padding-bottom: 0.25rem;
 }
