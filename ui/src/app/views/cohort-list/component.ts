@@ -10,9 +10,12 @@ import {
   Cohort,
   CohortListResponse,
   CohortsService,
+  RecentResource,
   Workspace,
   WorkspaceAccessLevel,
 } from 'generated';
+
+import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -23,6 +26,7 @@ import {
 export class CohortListComponent implements OnInit, OnDestroy {
   accessLevel: WorkspaceAccessLevel;
   cohortList: Cohort[] = [];
+  resourceList: RecentResource[] = [];
   workspace: Workspace;
   cohortsLoading = true;
   cohortsError = false;
@@ -63,6 +67,8 @@ export class CohortListComponent implements OnInit, OnDestroy {
           this.cohortList = cohortsReceived.items.map(function(cohorts) {
             return cohorts;
           });
+          this.resourceList = convertToResources(this.cohortList, this.wsNamespace,
+            this.wsId, this.accessLevel, ResourceType.COHORT);
           this.cohortsLoading = false;
         },
         error => {
@@ -80,34 +86,12 @@ export class CohortListComponent implements OnInit, OnDestroy {
     this.router.navigate(['build'], {relativeTo: this.route});
   }
 
-  openCohort(cohort: Cohort): void {
-    if (!this.actionsDisabled) {
-      this.router.navigate([cohort.id, 'review'], {relativeTo: this.route});
-    }
-  }
-
   public deleteCohort(cohort: Cohort): void {
     this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, cohort.id).subscribe(() => {
       this.cohortList.splice(
         this.cohortList.indexOf(cohort), 1);
       this.deleteModal.close();
     });
-  }
-
-  confirmDelete(cohort: Cohort): void {
-    this.cohortInFocus = cohort;
-    this.deleteModal.open();
-  }
-
-  beginEdit(cohort: Cohort): void {
-    this.cohortInFocus = cohort;
-
-    // This ensures the cohort binding is picked up before the open resolves.
-    setTimeout(_ => this.editModal.open(), 0);
-  }
-
-  receiveDelete($event): void {
-    this.deleteCohort($event);
   }
 
   get writePermission(): boolean {

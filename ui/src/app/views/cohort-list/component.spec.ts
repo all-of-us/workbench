@@ -1,6 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
@@ -9,6 +9,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
   simulateClick,
@@ -16,15 +17,20 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
+import {SignInService} from 'app/services/sign-in.service';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {CohortListComponent} from 'app/views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {RenameModalComponent} from 'app/views/rename-modal/component';
+import {ResourceCardComponent} from 'app/views/resource-card/component';
 
 import {
   Cohort,
   CohortsService,
-  WorkspaceAccessLevel
+  WorkspaceAccessLevel,
+  WorkspacesService
 } from 'generated';
+
 
 const activatedRouteStub  = {
   snapshot: {
@@ -70,17 +76,22 @@ describe('CohortListComponent', () => {
       imports: [
         BrowserAnimationsModule,
         RouterTestingModule,
+        FormsModule,
         ReactiveFormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
         CohortEditModalComponent,
         CohortListComponent,
-        ConfirmDeleteModalComponent
+        ConfirmDeleteModalComponent,
+        RenameModalComponent,
+        ResourceCardComponent
       ],
       providers: [
         { provide: ActivatedRoute, useValue: activatedRouteStub},
         { provide: CohortsService, useValue: new CohortsServiceStub()},
+        { provide: SignInService, useValue: new SignInServiceStub()},
+        { provide: WorkspacesService, useValue: new WorkspacesServiceStub()}
       ] }).compileComponents().then(() => {
       cohortListPage = new CohortListPage(TestBed);
     });
@@ -103,10 +114,10 @@ describe('CohortListComponent', () => {
     const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
     const deletedCohort: Cohort = app.cohortList.find(
       (cohort: Cohort) => cohort.name === firstCohortName);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.dropdown-toggle')));
+    simulateClick(fixture, fixture.debugElement.query(By.css('.resource-menu')));
     updateAndTick(fixture);
     updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.delete-button')));
+    simulateClick(fixture, fixture.debugElement.query(By.css('.trash')));
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-delete-btn')));
     updateAndTick(fixture);
@@ -122,10 +133,10 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     updateAndTick(fixture);
     const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
-    simulateClick(fixture, fixture.debugElement.query(By.css('.dropdown-toggle')));
+    simulateClick(fixture, fixture.debugElement.query(By.css('.resource-menu')));
     updateAndTick(fixture);
     updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.edit-button')));
+    simulateClick(fixture, fixture.debugElement.query(By.css('.pencil')));
     updateAndTick(fixture);
     simulateInput(fixture, fixture.debugElement.query(By.css('.name-input')), editValue);
     updateAndTick(fixture);
