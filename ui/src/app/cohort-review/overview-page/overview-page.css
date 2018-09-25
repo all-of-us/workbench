@@ -52,17 +52,15 @@
     display: flex;
     padding: 0.4rem 0.2rem;
 }
-.button-chart-container .button-container {
-   padding-right: 4rem;
-}
+
 .overview-buttons {
-    width: 100%;
+    width: 82%;
     border: 1px solid #0077b7;
     margin-bottom:0.7rem;
 }
 
 .chart-heading {
-    padding-left: 32rem;
+    padding-left: 29.5rem;
     color: #4A4A4A;
     font-size: 12px;
     font-weight: bold;
@@ -77,7 +75,7 @@
 }
 
 .data-container {
-   display: flex;
+   display: -webkit-box;
 }
 .data-blue {
     background-color: #216FB4;
@@ -90,7 +88,7 @@
 
  .light-grey {
     background-color: #CCCCCC;
-     width: 30rem;
+     /*width: 31rem;*/
      display: -webkit-box;
 }
 .divider {
@@ -99,6 +97,7 @@
 .data-bar-container {
     padding-left: 1rem;
     padding-top: 0.5rem;
+    border-left: 1px solid black;
 }
 .data-heading {
     padding-top: 0.5rem;
@@ -112,7 +111,6 @@
 }
 .data-percent {
     padding-top: 0.5rem;
-    padding-left: 1rem;
     white-space: nowrap;
     font-size: 10px;
     font-weight: bold;
@@ -132,12 +130,20 @@
     margin-bottom: 1rem;
 }
 
-.btn-disabled {
+.btn-outline {
     pointer-events: none;
-    opacity: 0.4;
 }
-/*.btn.btn-primary.overview-buttons.active {*/
-    /*background-color: #4356a7;*/
-    /*color: #f1f2f2;*/
-    /*font-weight: bold;*/
-/*}*/
+.container-margin {
+    margin: 0;
+    min-width: 100%;
+}
+
+.button-padding {
+    padding-top: 1rem;
+}
+.button-padding-zero {
+    padding-top: 0rem;
+}
+.chart-width {
+    margin: 0;
+}
