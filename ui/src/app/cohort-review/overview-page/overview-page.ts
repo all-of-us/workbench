@@ -126,5 +126,6 @@ export class OverviewPage implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
+
 }
 
