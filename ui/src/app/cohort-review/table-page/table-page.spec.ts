@@ -1,4 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
+import { APP_BASE_HREF } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -9,9 +10,12 @@ import {CohortAnnotationDefinitionService, CohortReviewService} from 'generated'
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
+import {CohortBuilderService} from '../../../generated';
+import {CohortBuilderServiceStub} from '../../../testing/stubs/cohort-builder-service-stub';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
-import  {OverviewPage} from "../overview-page/overview-page";
+import {CohortSearchActions} from '../../cohort-search/redux';
 import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
+import {OverviewPage} from '../overview-page/overview-page';
 import {ReviewNavComponent} from '../review-nav/review-nav.component';
 import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
@@ -20,16 +24,14 @@ import {SetAnnotationListComponent} from '../set-annotation-list/set-annotation-
 import {SetAnnotationModalComponent} from '../set-annotation-modal/set-annotation-modal.component';
 import {StatusFilterComponent} from '../status-filter/status-filter.component';
 import {TablePage} from './table-page';
-import { APP_BASE_HREF } from '@angular/common';
-import {CohortSearchActions} from "../../cohort-search/redux";
-import {CohortBuilderService} from "../../../generated";
-import {CohortBuilderServiceStub} from "../../../testing/stubs/cohort-builder-service-stub";
+
+
+
 describe('TablePage', () => {
   let component: TablePage;
   let fixture: ComponentFixture<TablePage>;
 
   const activatedRouteStub = {
-      parent: {
       snapshot: {
           data: {
               concepts: {
@@ -39,9 +41,19 @@ describe('TablePage', () => {
               }
           },
           pathFromRoot: [{data: {workspace: {cdrVersionId: 1}}}]
-      }
-  }
-
+      },
+      parent: {
+          snapshot: {
+              data: {
+                  workspace: {
+                      cdrVersionId: 1
+                  },
+                  cohort: {
+                      name: ''
+                  }
+              }
+          }
+      },
   };
   let route;
 
@@ -96,9 +108,14 @@ describe('TablePage', () => {
         SetAnnotationListComponent,
         SetAnnotationModalComponent,
         StatusFilterComponent,
+          OverviewPage,
         ComboChartComponent
       ],
-      imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule, NgxPopperModule, NgxChartsModule],
+      imports: [ClarityModule,
+                ReactiveFormsModule,
+                RouterTestingModule,
+                NgxPopperModule,
+                NgxChartsModule],
       providers: [
         {provide: NgRedux},
         {provide: CohortReviewService},
