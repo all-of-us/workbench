@@ -72,7 +72,7 @@ export class OverviewPage implements OnInit, OnDestroy {
         this.spinner = true;
          setTimeout(() => {
             this.demoGraph = true;
-            if(this.data.size){
+            if (this.data.size) {
                 this.spinner = false;
             }
          }, 1000);
