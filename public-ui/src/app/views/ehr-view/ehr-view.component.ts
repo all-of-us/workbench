@@ -15,7 +15,8 @@ import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
 import { ISubscription } from 'rxjs/Subscription';
 
-/* This displays concept search for a Domain. */
+/* This displays concept search for a Domain. Lists results
+  * Todo eventually handle more than 100 rows  */
 
 @Component({
   selector: 'app-ehr-view',
