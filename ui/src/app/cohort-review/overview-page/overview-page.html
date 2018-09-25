@@ -3,82 +3,108 @@
   <div class="participant-title">Participants</div>
   <div class="total-heading" *ngIf="totalParticipantCount">Cohort Total: {{totalParticipantCount | number}} Participants</div>
 </div>
-<div [ngClass]="[ openChartContainer? 'overview-container': 'overview-small-container']">
-  <div>
-    <span class="overview-title">Overview</span>
-    <span *ngIf="openChartContainer" (click)="openChartContainer=!openChartContainer"><clr-icon shape="play" size="15" style="transform: rotate(90deg);" class="is-solid play-icon"></clr-icon></span>
-    <span *ngIf="!openChartContainer" (click)="openChartContainer=!openChartContainer"><clr-icon size="15" shape="play" style="transform: rotate(270deg);" class="is-solid play-icon"></clr-icon></span>
-  </div>
-  <div class="chart-heading" *ngIf="showTitle && openChartContainer">
-    Top 10 {{title}} of Participants in Cohort
-  </div>
-  <div class="button-chart-container" *ngIf="openChartContainer">
-    <div class="button-container">
-      <div (click)="getDemoCharts()" >
-        <button type="button"
-                [ngClass]="[ demoGraph? 'btn-outline': 'btn-primary']"
-                class="overview-buttons btn">
-          Demographics
-        </button>
-      </div>
-      <div *ngFor = "let name of typesList" (click)="getDifferentCharts(name)">
-        <button type="button"
-                [ngClass]="[ name === title ?'btn-outline': 'btn-primary']"
-                class="overview-buttons btn btn-primary">
-        {{name}}
-        </button>
-      </div>
-    </div>
-
-    <!--participants of cohort chart views start-->
-    <div class="chart-container">
-      <div *ngIf="spinner" class="loading-spinner spinner spinner-lg spin-in-overlay">
-        Loading...
-      </div>
-      <app-combo-chart
-              *ngIf="data?.size && demoGraph"
-              [mode]="'stacked'"
-              [data]="data">
-      </app-combo-chart>
-      <div *ngIf="showTitle">
-        <div class="data-container" *ngFor="let items of domainItems">
-          <ng-container *ngIf="items.name.length >=50">
-            <div  class=" data-heading"
-                 [popper]="codesPopper"
-                 [popperTrigger]="'hover'"
-                 [popperPlacement]="'bottom'">
-              {{items.name}}
+<div class="container container-margin">
+  <div class="row">
+    <div class="col-sm-12" [ngClass]="[ openChartContainer? 'overview-container': 'overview-small-container']">
+      <div class="container container-margin">
+        <div class="row">
+          <div class="col-sm-12">
+            <div>
+              <span class="overview-title">Overview</span>
+              <span *ngIf="openChartContainer" (click)="openChartContainer=!openChartContainer"><clr-icon shape="play" size="15" style="transform: rotate(90deg);" class="is-solid play-icon"></clr-icon></span>
+              <span *ngIf="!openChartContainer" (click)="openChartContainer=!openChartContainer"><clr-icon size="15" shape="play" style="transform: rotate(270deg);" class="is-solid play-icon"></clr-icon></span>
             </div>
-          </ng-container>
-       <ng-container  *ngIf="items.name.length < 50">
-         <div class=" data-heading">
-           {{items.name}}
-         </div>
-       </ng-container>
-
-          <div class="divider"></div>
-          <div class="data-bar-container">
-            <div class="light-grey">
-              <div class="data-blue" style="height:24px;" [style.width.%]="items.percentCount| number:'1.0-0'">
-                <ng-container *ngIf="items.percentCount >= 90">
-                  {{items.count}}
-                </ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="container container-margin">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="chart-heading" *ngIf="showTitle && openChartContainer">
+              Top 10 {{title}} of Participants in Cohort
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container container-margin" *ngIf="openChartContainer">
+        <div class="row" [ngClass]="showTitle?'button-padding-zero' :'button-padding'">
+          <div class="col-sm-2 col-lg-2 col-xl-2" >
+            <div>
+              <div (click)="getDemoCharts()" >
+                <button type="button"
+                        [ngClass]="[ demoGraph? 'btn-outline': 'btn-primary']"
+                        class="overview-buttons btn">
+                  Demographics
+                </button>
               </div>
-              <div class="count" style="height:24px;" [style.width.%]="100-items.percentCount">
-                <ng-container *ngIf="items.percentCount < 90">
-                  {{items.count}}
-                </ng-container>
+              <div *ngFor = "let name of typesList" (click)="getDifferentCharts(name)">
+                <button type="button"
+                        [ngClass]="[ name === title ?'btn-outline': 'btn-primary']"
+                        class="overview-buttons btn">
+                  {{name}}
+                </button>
               </div>
             </div>
           </div>
-          <div class="data-percent">
-              {{items.percentCount| number:'1.0-0'}} % of Cohort
+          <div class="col-sm-10 col-lg-10 col-xl-10">
+            <div class="chart-container">
+              <div *ngIf="spinner" class="loading-spinner spinner spinner-lg spin-in-overlay">
+                Loading...
+              </div>
+              <app-combo-chart
+                      *ngIf="data?.size && demoGraph"
+                      [mode]="'stacked'"
+                      [data]="data">
+              </app-combo-chart>
+
+              <!--top 10 participant chart view start-->
+              <div class = "container chart-width" *ngIf="showTitle">
+                <div class="data-container row" *ngFor="let items of domainItems">
+                  <ng-container *ngIf="items.name.length >=30">
+                    <div  class=" data-heading col-sm-3 col-lg-3 col-xl-3"
+                          [popper]="codesPopper"
+                          [popperTrigger]="'hover'"
+                          [popperPlacement]="'bottom'">
+                      {{items.name}}
+                    </div>
+                  </ng-container>
+                  <ng-container  *ngIf="items.name.length < 30">
+                    <div class=" col-sm-3 col-lg-3 col-xl-3 data-heading">
+                      {{items.name}}
+                    </div>
+                  </ng-container>
+
+                  <!--<div class="divider"></div>-->
+                  <div class="data-bar-container col-sm-8 col-lg-8 col-xl-8">
+                    <div class="light-grey">
+                      <div class="data-blue" style="height:24px;" [style.width.%]="items.percentCount| number:'1.0-0'">
+                        <ng-container *ngIf="items.percentCount >= 90">
+                          {{items.count}}
+                        </ng-container>
+                      </div>
+                      <div class="count" style="height:24px;" [style.width.%]="100-items.percentCount">
+                        <ng-container *ngIf="items.percentCount < 90">
+                          {{items.count}}
+                        </ng-container>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div class="data-percent" col-sm-1 col-lg-1 col-xl-1>
+                    {{items.percentCount| number:'1.0-0'}} % of Cohort
+                  </div>
+                  <popper-content #codesPopper>
+                    <p class="tooltip-text" [style.margin]="'0'">{{items.name}}</p>
+                  </popper-content>
+                </div>
+              </div>
+              <!--top 10 participant chart view end-->
+            </div>
           </div>
-            <popper-content #codesPopper>
-              <p class="tooltip-text" [style.margin]="'0'">{{items.name}}</p>
-            </popper-content>
         </div>
       </div>
     </div>
   </div>
 </div>
+
