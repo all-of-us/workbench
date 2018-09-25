@@ -1,15 +1,20 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import java.util.Map;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
+import org.pmiops.workbench.cdr.model.DomainInfo;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
@@ -92,20 +97,43 @@ public class ConceptsController implements ConceptsApiDelegate {
     if (standardConceptFilter == null) {
       standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
     }
+    String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
+    // TODO: consider doing these queries in parallel
+    List<DomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
+    List<DomainInfo> domainInfos = null;
+    if (matchExp == null) {
+      domainInfos = allDomainInfos;
+    } else {
+      if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
+        domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp, request.getQuery());
+      } else {
+        domainInfos = domainInfoDao.findStandardConceptCounts(matchExp, request.getQuery());
+      }
+    }
+    ConceptListResponse response = new ConceptListResponse();
+    Map<Domain, DomainInfo> domainCountMap = Maps.uniqueIndex(domainInfos, DomainInfo::getDomainEnum);
+    // Loop through all domains to populate the results (so we get zeros for domains with no
+    // matches.)
+    for (DomainInfo domainInfo : allDomainInfos) {
+      Domain domain = domainInfo.getDomainEnum();
+      DomainInfo resultInfo = domainCountMap.get(domain);
+      response.addDomainCountsItem(new DomainCount().domain(domain).conceptCount(
+          resultInfo == null ? 0L : resultInfo.getAllConceptCount()));
+    }
+
+
+
     List<String> domainIds = null;
     if (request.getDomain() != null) {
       domainIds = ImmutableList.of(CommonStorageEnums.domainToDomainId(request.getDomain()));
     }
     ConceptService.StandardConceptFilter convertedConceptFilter =
         ConceptService.StandardConceptFilter.valueOf(standardConceptFilter.name());
-    if (request.getQuery().trim().isEmpty()) {
-      throw new BadRequestException("Query must be non-whitespace");
-    }
 
-    Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(request.getQuery(), convertedConceptFilter,
-              request.getVocabularyIds(), domainIds, maxResults, minCount);
+    Slice<org.pmiops.workbench.cdr.model.Concept> concepts = conceptService.searchConcepts(
+        request.getQuery(), convertedConceptFilter,
+        request.getVocabularyIds(), domainIds, maxResults, minCount);
 
-    ConceptListResponse response = new ConceptListResponse();
     if(concepts != null){
       response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT)
               .collect(Collectors.toList()));
