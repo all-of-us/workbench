@@ -1,10 +1,10 @@
   import {
     Cohort,
+    ConceptSet,
     FileDetail,
     RecentResource,
     WorkspaceAccessLevel
   } from 'generated';
-  import {ConceptSet} from "../../generated/model/conceptSet";
 
   export enum ResourceType {
     NOTEBOOK = 'notebook',
@@ -69,7 +69,8 @@ export const conceptSetActionList = [
   }
 ];
 
-export const resourceActionList =  notebookActionList.concat(cohortActionList).concat(conceptSetActionList);
+export const resourceActionList =  notebookActionList.concat(cohortActionList)
+  .concat(conceptSetActionList);
 
 export function convertToResources(list: FileDetail[] | Cohort[] | ConceptSet[],
                                    workspaceNamespace: string, workspaceId: string,

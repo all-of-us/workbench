@@ -11,8 +11,8 @@ import {IconsModule} from 'app/icons/icons.module';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {NotebookListComponent} from 'app/views/notebook-list/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
@@ -97,7 +97,7 @@ describe('NotebookListComponent', () => {
       ],
       declarations: [
         BugReportComponent,
-        CohortEditModalComponent,
+        EditModalComponent,
         ConfirmDeleteModalComponent,
         NewNotebookModalComponent,
         NotebookListComponent,

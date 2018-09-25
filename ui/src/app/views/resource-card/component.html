@@ -43,8 +43,8 @@
                   [resourceType]="'Notebook'"
                   (receiveRename)="receiveNotebookRename($event)"></app-rename-modal>
 
-<app-cohort-edit-modal [cohort]="resourceCard.cohort"
-                        (updateFinished)="receiveCohortRename()"></app-cohort-edit-modal>
+<app-edit-modal [resource]="resourceCard"
+                        (updateFinished)="receiveRename()"></app-edit-modal>
 
 <div *ngIf="resourceTypeInvalidError">
     <clr-modal>

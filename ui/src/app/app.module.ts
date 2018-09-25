@@ -29,7 +29,6 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
-import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptAddModalComponent} from './views/concept-add-modal/component';
 import {CreateConceptModalComponent} from './views/concept-create-modal/component';
@@ -37,6 +36,7 @@ import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptTableComponent} from './views/concept-table/component';
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
+import {EditModalComponent} from './views/edit-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
@@ -141,6 +141,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptTableComponent,
     ConceptSetListComponent,
     ConfirmDeleteModalComponent,
+    EditModalComponent,
     ErrorHandlerComponent,
     HighlightSearchPipe,
     InitialErrorComponent,
