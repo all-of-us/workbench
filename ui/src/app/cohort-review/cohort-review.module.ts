@@ -15,6 +15,7 @@ import {AnnotationItemComponent} from './annotation-item/annotation-item.compone
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
 import {CreateReviewPage} from './create-review-page/create-review-page';
+// This is a temporary measure until we have specs and APIs for overview specific charts
 import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
 import {DetailPage} from './detail-page/detail-page';
@@ -32,19 +33,13 @@ import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
-
-
-
-// This is a temporary measure until we have specs and APIs for overview specific charts
-
-
 /* tslint:enable:max-line-length */
 
 
 @NgModule({
   imports: [
     // Angular
-      NgReduxModule,
+    NgReduxModule,
     CommonModule,
     ReactiveFormsModule,
     // Routes
