@@ -86,7 +86,7 @@ else
 fi
 
 
-copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_synonym)
+copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_synonym)
 
 for t in "${copy_tables[@]}"
 do
@@ -172,3 +172,25 @@ set est_count =
         cast(ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where est_count > 0"
+
+# domain_info
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.domain_info\`
+set participant_count =
+    case when participant_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where participant_count > 0"
+
+# survey_module
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.survey_module\`
+set participant_count =
+    case when participant_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where participant_count > 0"

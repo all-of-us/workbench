@@ -120,6 +120,7 @@ export interface ActionTypes {
   LOAD_CRITERIA_SUBTREE: {
     type: typeof LOAD_CRITERIA_SUBTREE;
     kind: string;
+    subtype: string;
     ids: Array<number>;
     path: Array<string>;
   };

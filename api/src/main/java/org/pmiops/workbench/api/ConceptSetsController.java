@@ -3,13 +3,11 @@ package org.pmiops.workbench.api;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableList;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
@@ -21,6 +19,7 @@ import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -235,8 +234,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       conceptService.fetchConceptSynonyms(Lists.newArrayList(concepts));
       List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
           ImmutableList.copyOf(concepts).stream().filter(concept -> {
-          Collection<Domain> domain = ConceptsController.DOMAIN_MAP.inverse().get(concept.getDomainId());
-          return domain == null || !domain.contains(domainEnum);
+          Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());
+          return !domainEnum.equals(domain);
         }).collect(Collectors.toList());
       if (!mismatchedConcepts.isEmpty()) {
         String mismatchedConceptIds = Joiner.on(", ").join(mismatchedConcepts.stream()

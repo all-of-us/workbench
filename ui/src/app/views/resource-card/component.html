@@ -1,21 +1,23 @@
-<div class="card item-card {{resourceType}}-card">
+<div class="card item-card {{cssClass}} {{resourceType}}-card">
   <div class="header-area">
     <clr-dropdown>
-      <button type="button" clrDropdownTrigger>
+      <button type="button" class="resource-menu" [disabled]="actionsDisabled" clrDropdownTrigger>
         <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
       </button>
       <clr-dropdown-menu *clrIfOpen>
         <div *ngFor="let action of actions">
           <button
-                  class="action-item"
-                  (click) =this[action.link](this.resourceCard)>
+                  class="action-item {{action.class}}"
+                  (click)=this[action.link](this.resourceCard)
+                  [class.disabled]="actionsDisabled"
+                  [disabled]="actionsDisabled">
             <clr-icon [attr.shape]=action.class></clr-icon>
             {{action.text}}
           </button>
         </div>
       </clr-dropdown-menu>
     </clr-dropdown>
-    <div class="name" (click)="openResource(this.resourceCard)">
+    <div class="name" [class.disabled]="actionsDisabled" (click)="actionsDisabled || openResource(this.resourceCard)">
       {{resourceCard.notebook?.name}}
       {{resourceCard.cohort?.name}}
     </div>
@@ -37,11 +39,12 @@
                           (receiveDelete)=receiveDelete($event)></app-confirm-delete-modal>
 
 
-<app-rename-modal [resourceType]="'notebook'"
-                  [resource]="resourceCard.notebook"
+<app-rename-modal [resource]="resourceCard.notebook"
+                  [resourceType]="'Notebook'"
                   (receiveRename)="receiveNotebookRename($event)"></app-rename-modal>
 
-<app-cohort-edit-modal [cohort]="resourceCard.cohort"></app-cohort-edit-modal>
+<app-cohort-edit-modal [cohort]="resourceCard.cohort"
+                        (updateFinished)="receiveCohortRename()"></app-cohort-edit-modal>
 
 <div *ngIf="resourceTypeInvalidError">
     <clr-modal>

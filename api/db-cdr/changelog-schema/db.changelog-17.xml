@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="danrodney" id="changelog-17">
+        <validCheckSum>ANY</validCheckSum>
+        <createTable tableName="domain_info">
+            <column name="concept_id" type="INTEGER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="domain" type="tinyint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="domain_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="all_concept_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="standard_concept_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="participant_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="survey_module">
+            <column name="concept_id" type="INTEGER">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="participant_count" defaultValue="0" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

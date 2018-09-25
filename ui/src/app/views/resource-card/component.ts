@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 
-import {resourceActionList} from 'app/utils/resourceActions';
+import {resourceActionList, ResourceType} from 'app/utils/resourceActions';
 
 import {
   CohortsService, NotebookRename,
@@ -14,13 +14,6 @@ import {environment} from 'environments/environment';
 import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {Observable} from 'rxjs/Observable';
-
-enum ResourceType {
-  NOTEBOOK = 'notebook',
-  COHORT = 'cohort',
-  INVALID = 'invalid'
-}
 
 @Component ({
   selector : 'app-resource-card',
@@ -35,9 +28,12 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   resourceType: ResourceType;
   @Input('resourceCard')
   resourceCard: RecentResource;
-  @Output() onUpdate: EventEmitter<void> = new EventEmitter();
+  @Input('cssClass')
+  cssClass: string;
+  @Output() onUpdate: EventEmitter<void | NotebookRename> = new EventEmitter();
+  @Output() duplicateNameError: EventEmitter<string> = new EventEmitter();
+  @Output() invalidNameError: EventEmitter<string> = new EventEmitter();
   actions = [];
-  notebookRenameError = false;
   wsNamespace: string;
   wsId: string;
   resource: any;
@@ -91,33 +87,47 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     }
     if (new RegExp('.*\/.*').test(newName)) {
       this.renameModal.close();
-      this.notebookRenameError = true;
+      this.invalidNameError.emit(newName);
       return;
     }
-    this.workspacesService
-        .renameNotebook(this.wsNamespace, this.wsId, rename)
-        .subscribe(() => {
-          this.onUpdate.emit();
+    this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
+      .switchMap((fileList) => {
+        if (fileList.filter((nb) => nb.name === newName).length > 0) {
+          throw new Error(newName);
+        } else {
+          return this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename);
+        }
+      })
+      .subscribe(() => {
+          this.renameModal.close();
+          this.onUpdate.emit(rename);
+        },
+        (dupName) => {
+          this.duplicateNameError.emit(dupName);
           this.renameModal.close();
     });
+  }
+
+  receiveCohortRename(): void {
+    this.onUpdate.emit();
   }
 
   cloneResource(resource: RecentResource): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, resource.notebook.name)
-          .subscribe(() => Observable.empty());
+          .map(() => this.onUpdate.emit())
+          .subscribe(() => {});
         break;
       }
       case ResourceType.COHORT: {
         const url =
           '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?criteria=';
-        this.route.navigateByUrl(url
-          + resource.cohort.criteria);
+        this.route.navigateByUrl(url + resource.cohort.criteria);
+        this.onUpdate.emit();
         break;
       }
     }
-    this.onUpdate.emit();
   }
 
   deleteResource(resource: RecentResource): void {
@@ -138,15 +148,14 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
-          .subscribe(() => Observable.empty());
+          .subscribe(() => this.onUpdate.emit());
         break;
       }
       case ResourceType.COHORT: {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
-          .subscribe(() => Observable.empty());
+          .subscribe(() => this.onUpdate.emit());
       }
     }
-    this.onUpdate.emit();
     this.deleteModal.close();
   }
 
@@ -191,7 +200,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     }
   }
 
-  editCohort(resource: RecentResource): void {
+  editCohort(): void {
     // This ensures the cohort binding is picked up before the open resolves.
     setTimeout(_ => this.editModal.open(), 0);
   }
@@ -209,6 +218,15 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
+  }
+
+  get actionsDisabled(): boolean {
+    return !this.writePermission;
+  }
+
+  get writePermission(): boolean {
+    return this.resourceCard.permission === 'OWNER'
+      || this.resourceCard.permission === 'WRITER';
   }
 
 }
