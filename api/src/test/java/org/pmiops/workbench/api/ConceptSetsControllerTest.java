@@ -101,7 +101,7 @@ public class ConceptSetsControllerTest {
           .conceptCode("conceptC")
           .conceptClassId("classId3")
           .vocabularyId("V3")
-          .domainId("Condition/Device")
+          .domainId("Condition")
           .countValue(789L)
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<String>());
@@ -114,7 +114,7 @@ public class ConceptSetsControllerTest {
           .conceptCode("conceptE")
           .conceptClassId("classId5")
           .vocabularyId("V5")
-          .domainId("Condition/Procedure")
+          .domainId("Condition")
           .countValue(7890L)
           .prevalence(0.9F)
           .conceptSynonyms(new ArrayList<String>());

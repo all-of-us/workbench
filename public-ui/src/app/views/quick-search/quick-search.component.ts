@@ -9,7 +9,7 @@ import 'rxjs/add/operator/switchMap';
 import { Observable } from 'rxjs/Rx';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
-import {DbDomainListResponse} from '../../../publicGenerated/model/dbDomainListResponse';
+import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/model/domainInfosAndSurveyModulesResponse';
 
 
 @Component({
@@ -22,13 +22,11 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   title = 'Quick Guided Search';
   subTitle = 'Enter keywords to search EHR data and survey modules. ' +
     'Or click on an EHR domain or survey.';
-  searchResults = [];
   domainResults = [];
   surveyResults = [];
   searchText: FormControl = new FormControl();
   prevSearchText = '';
   totalParticipants;
-  domains = [];
   loading = true;
   dataType = null;
   EHR_DATATYPE = 'ehr';
@@ -61,20 +59,24 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.searchText.setValue(this.prevSearchText);
 
     this.subscriptions.push(
-      this.api.getParticipantCount().subscribe(result => this.totalParticipants = result.countValue)
+      this.api.getParticipantCount().subscribe(
+          result => this.totalParticipants = result.countValue)
     );
 
     // Do initial search if we have search text
     if (this.prevSearchText) {
       this.subscriptions.push(
-        this.searchDomains(this.prevSearchText).subscribe((data: DbDomainListResponse) => {
+        this.searchDomains(this.prevSearchText).subscribe(
+            (data: DomainInfosAndSurveyModulesResponse) => {
           return this.searchCallback(data);
         }));
     }
     // Get domain totals only once so if they erase search we can load them
     this.subscriptions.push(
-      this.api.getDomainTotals().subscribe((data: DbDomainListResponse) => {
-        this.domains = data.items;
+      this.api.getDomainTotals().subscribe(
+          (data: DomainInfosAndSurveyModulesResponse) => {
+        this.domainResults = data.domainInfos;
+        this.surveyResults = data.surveyModules;
         // Only set results to the totals if we don't have a searchText
         if (!this.prevSearchText) {
           this.searchCallback(data);
@@ -89,7 +91,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
         .debounceTime(300)
         .distinctUntilChanged()
         .switchMap((query) => this.searchDomains(query))
-        .subscribe((data: DbDomainListResponse) => {
+        .subscribe((data: DomainInfosAndSurveyModulesResponse) => {
           this.searchCallback(data);
         })
     );
@@ -108,19 +110,21 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     return !this.loading && (!this.dataType || this.dataType === showType);
   }
 
-  private searchCallback(results: DbDomainListResponse) {
-    this.searchResults = results.items;
-    this.domainResults = results.items.filter(d => d.dbType === 'domain_filter');
-    this.surveyResults = results.items.filter(s => s.dbType === 'survey');
+  private searchCallback(results: DomainInfosAndSurveyModulesResponse) {
+    this.domainResults = results.domainInfos;
+    this.surveyResults = results.surveyModules;
     this.loading = false;
   }
   public searchDomains(query: string) {
     this.prevSearchText = query;
     localStorage.setItem('searchText', query);
-    // If query empty reset to already reatrieved domain totals
+    // If query empty reset to already retrieved domain totals
     if (query.length === 0) {
       const resultsObservable = new Observable((observer) => {
-        const domains: DbDomainListResponse = {items: this.domains};
+        const domains: DomainInfosAndSurveyModulesResponse = {
+            domainInfos: this.domainResults,
+            surveyModules: this.surveyResults
+        };
         observer.next(domains);
         observer.complete();
       });
@@ -130,15 +134,16 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     return this.api.getDomainSearchResults(query);
   }
 
-  public viewResults(r) {
-    localStorage.setItem('dbDomain', JSON.stringify(r));
+  public viewSurvey(r) {
+    localStorage.setItem('surveyModule', JSON.stringify(r));
     localStorage.setItem('searchText', this.prevSearchText);
+    this.router.navigateByUrl('/survey/' + r.conceptId);
+  }
 
-    if (r.dbType === 'survey') {
-      this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
-    } else {
-      this.router.navigateByUrl('/ehr/' + r.domainId.toLowerCase());
-    }
+  public viewEhrDomain(r) {
+    localStorage.setItem('ehrDomain', JSON.stringify(r));
+    localStorage.setItem('searchText', this.prevSearchText);
+    this.router.navigateByUrl('/ehr/' + r.domain.toLowerCase());
   }
 
 }
