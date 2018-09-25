@@ -48,6 +48,7 @@ import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
+import {TopBoxComponent} from './views/top-box/component';
 import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
@@ -145,6 +146,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SettingsComponent,
     SignedInComponent,
     StigmatizationPageComponent,
+    TopBoxComponent,
     UnregisteredComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,

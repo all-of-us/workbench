@@ -168,3 +168,7 @@ clr-dropdown-menu {
   color: #AAAFB4;
   cursor: not-allowed;
 }
+
+.padding-wrapper {
+  padding: 1rem;
+}

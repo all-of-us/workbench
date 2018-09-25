@@ -414,11 +414,6 @@ definitions:
     description: filter on whether standard, non-standard, or all concepts should be returned\
     enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS, STANDARD_OR_CODE_ID_MATCH]
 
-  Domain:
-    type: string
-    description: filter on the domain in which concepts should be returned
-    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, RACE, GENDER, ETHNICITY]
-
   MatchType:
     type: string
     description: match column type on concept search
@@ -498,14 +493,13 @@ definitions:
 
   SearchConceptsRequest:
     type: object
-    required:
-      - query
     properties:
       query:
         type: string
         description: >
           A query string that can be used to match a subset of the name (case-insensitively),
-          the entire code value (case-insensitively), or the concept ID.
+          the entire code value (case-insensitively), or the concept ID. If not specified, all
+          concepts are returned.
       standardConceptFilter:
         description: >
           STANDARD_CONCEPTS if only standard concepts should be returned,
@@ -541,11 +535,45 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Concept"
-      matchType:
-        description: match column type on which concept search was successful
-        $ref: "#/definitions/MatchType"
-      standardConcepts:
+      domainCounts:
         type: "array"
         items:
-          $ref: "#/definitions/Concept"
-        description: standard concepts associated with the matched concept
+          $ref: "#/definitions/DomainCount"
+      vocabularyCounts:
+        type: "array"
+        items:
+          $ref: "#/definitions/VocabularyCount"
+
+  DomainCount:
+    type: object
+    required:
+      - domain
+      - name
+      - concept_count
+    properties:
+      domain:
+        description: the domain ID
+        $ref: "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      concept_count:
+        description: number of concepts matching the search query in this domain
+        type: integer
+        format: int64
+
+  VocabularyCount:
+    type: object
+    required:
+      - vocabularyId
+      - concept_count
+    properties:
+      vocabularyId:
+        description: ID / display name of the vocabulary
+        type: string
+      concept_count:
+        description: number of concepts matching the search query in this vocabulary
+        type: integer
+        format: int64
+
+

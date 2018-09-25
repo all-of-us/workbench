@@ -32,17 +32,17 @@
       <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
           <div class="white-card-box search-result">
             <h5 class="box-title">
-              {{r.domainDisplay}}
+              {{r.name}}
             </h5>
             <div class="card-stat">
-              {{r.countValue | number}}
+              {{r.standardConceptCount | number}}
             </div>
             <p class="card-text bigger">
               <span> matching medical concepts </span>
             </p>
 
             <div class="card-text bottom">
-              <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
+              <button class="btn btn-primary" (click)="viewEhrDomain(r)"> View Full List </button>
             </div>
           </div>
       </div>
@@ -57,10 +57,10 @@
       <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
         <div class="white-card-box search-result">
           <h5 class="box-title">
-            {{r.domainDisplay}}
+            {{r.name}}
           </h5>
           <div class="card-stat">
-            {{r.countValue | number}}
+            {{r.questionCount | number}}
           </div>
           <p class="card-text bigger">
              matching survey questions <br>
@@ -68,7 +68,7 @@
           </p>
 
           <div class="card-text bottom">
-            <button class="btn btn-primary" (click)="viewResults(r)"> View Full List </button>
+            <button class="btn btn-primary" (click)="viewSurvey(r)"> View Full List </button>
           </div>
         </div>
       </div>
