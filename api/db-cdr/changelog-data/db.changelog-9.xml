@@ -9,17 +9,21 @@
 
     <validCheckSum>ANY</validCheckSum>
 
-    <delete tableName="db_domain"/>
+    <delete tableName="domain_info"/>
+    <delete tableName="survey_module"/>
 
-    <loadData tableName="db_domain" file="csv/db_domain.csv" encoding="UTF-8" quotchar='"'>
-      <column name="domain_id" type="STRING"/>
-      <column name="domain_display" type="STRING"/>
-      <column name="domain_desc" type="STRING"/>
-      <column name="domain_route" type="STRING"/>
-      <column name="db_type" type="STRING"/>
+    <loadData tableName="domain_info" file="csv/domain_info.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>
-      <column name="count_value" type="NUMERIC" />
+      <column name="domain" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
     </loadData>
 
+    <loadData tableName="survey_module" file="csv/survey_module.csv" encoding="UTF-8" quotchar='"'>
+      <column name="concept_id" type="NUMERIC"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
+    </loadData>
   </changeSet>
 </databaseChangeLog>

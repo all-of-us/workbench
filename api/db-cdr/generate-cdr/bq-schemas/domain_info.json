@@ -1,0 +1,42 @@
+[
+  {
+    "mode":"REQUIRED",
+    "name": "concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode":"REQUIRED",
+    "name": "domain",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "domain_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "description",
+    "type": "STRING"
+  },
+  {
+    "mode":"REQUIRED",
+    "name": "all_concept_count",
+    "type": "INTEGER"
+  },
+  {
+    "mode":"REQUIRED",
+    "name": "standard_concept_count",
+    "type": "INTEGER"
+  },
+  {
+    "mode":"REQUIRED",
+    "name": "participant_count",
+    "type": "INTEGER"
+  }
+]

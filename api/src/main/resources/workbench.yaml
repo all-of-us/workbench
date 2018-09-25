@@ -1164,6 +1164,25 @@ paths:
           schema:
             $ref: "#/definitions/ConceptSet"
 
+# Concepts ###############################################################################
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainInfo:
+      get:
+        tags:
+          - concepts
+        description: >
+          Returns information on the domains of data in the workspace's CDR version along
+          with participant and concept counts
+        operationId: "getDomainInfo"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+        responses:
+          200:
+            description: information on the domains
+            schema:
+              $ref: "#/definitions/DomainInfoResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -1745,6 +1764,16 @@ definitions:
         items:
           type: integer
           format: int64
+
+  DomainInfoResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/DomainInfo"
 
 
   CreateAccountRequest:

@@ -15,9 +15,14 @@
 }
 
 .dropdown-search-container {
+  position: absolute;
+  width: 95%;
+  margin-top: -1px;
   display: flex;
   padding-top: 0.4rem;
   padding-bottom: 0.4rem;
+  background-color: #FFFFFF;
+  z-index: 1;
 }
 
 .condition-dropdown{
@@ -30,4 +35,21 @@
 
 .search-width {
   width:100%;
+}
+
+.tree-container {
+  margin-top: 2.5rem;
+}
+
+.tree-container.multiple {
+  margin-top: 3rem;
+}
+
+.alert.alert-warning {
+  color: #E28327;
+  border: 0;
+}
+
+.alert.alert-warning .alert-icon {
+  color: #E28327;
 }

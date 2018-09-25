@@ -414,11 +414,6 @@ definitions:
     description: filter on whether standard, non-standard, or all concepts should be returned\
     enum: &STANDARD_CONCEPT_FILTER [ALL_CONCEPTS, STANDARD_CONCEPTS, NON_STANDARD_CONCEPTS, STANDARD_OR_CODE_ID_MATCH]
 
-  Domain:
-    type: string
-    description: filter on the domain in which concepts should be returned
-    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, RACE, GENDER, ETHNICITY]
-
   MatchType:
     type: string
     description: match column type on concept search
