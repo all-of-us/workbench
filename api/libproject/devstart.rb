@@ -1420,7 +1420,7 @@ def deploy(cmd_name, args)
       --quiet
     } + dry_flag
     deploy_api(cmd_name, deploy_args)
-    if not op.opts.skip_public_api
+    unless op.opts.skip_public_api
       deploy_public_api(cmd_name, deploy_args)
     end
   end
