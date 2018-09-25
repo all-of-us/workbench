@@ -560,7 +560,6 @@ export class CohortSearchActions {
     this._resetStore();
   }
 
-
   fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
                         domain: string, limit: number): void {
     const isLoading = isChartLoading(domain)(this.state);

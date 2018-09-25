@@ -16,7 +16,6 @@ import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.c
 import {CohortSearchActions} from '../../cohort-search/redux';
 import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {OverviewPage} from '../overview-page/overview-page';
-import {ReviewNavComponent} from '../review-nav/review-nav.component';
 import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
 import {SetAnnotationItemComponent} from '../set-annotation-item/set-annotation-item.component';
@@ -57,58 +56,18 @@ describe('TablePage', () => {
   };
   let route;
 
-
-    // const activatedRouteStub = {
-    //     parent: {
-    //         snapshot: {
-    //             data: {
-    //                 workspace: {
-    //                     cdrVersionId: 1
-    //                 },
-    //             },
-    //             data: {
-    //                 concepts: {
-    //                     raceList: [{
-    //                         conceptId: 38003565,
-    //                         conceptName: "Hispanic or Latino"
-    //                     },
-    //                         {
-    //                             conceptId: 38003566,
-    //                             conceptName: "Not Hispanic or Latino"
-    //                         }],
-    //                     genderList: [{
-    //                         conceptId: 38003567,
-    //                         conceptName: "FEMALE"
-    //                     }, {
-    //                         conceptId: 38003568,
-    //                         conceptName: "MALE"
-    //                     }],
-    //                     ethnicityList: [{
-    //                         conceptId: 38003569,
-    //                         conceptName: "Hispanic or Latino"
-    //                     }, {
-    //                         conceptId: 38003570,
-    //                         conceptName: "Not Hispanic or Latino"
-    //                     }],
-    //                 }
-    //             }
-    //         }
-    //     },
-    // };
-
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
       declarations: [
         ChoiceFilterComponent,
-        ReviewNavComponent,
         TablePage,
         SetAnnotationCreateComponent,
         SetAnnotationItemComponent,
         SetAnnotationListComponent,
         SetAnnotationModalComponent,
         StatusFilterComponent,
-          OverviewPage,
+        OverviewPage,
         ComboChartComponent
       ],
       imports: [ClarityModule,
