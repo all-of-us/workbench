@@ -33,6 +33,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   selectedCohortName: string;
   review: CohortReview;
   totalParticipantCount: number;
+  isCancelTimerInitiated: any = false;
   private subscription: Subscription;
 
   constructor(
@@ -54,7 +55,7 @@ export class OverviewPage implements OnInit, OnDestroy {
           .map(response => (<DemoChartInfoListResponse>response).items)
           .subscribe(data => {
               this.data = fromJS(data);
-              this.spinner = false;
+               this.spinner = false;
           });
 
       this.subscription = this.state.review$.subscribe(review => {
@@ -68,9 +69,17 @@ export class OverviewPage implements OnInit, OnDestroy {
 
 
     getDemoCharts () {
-        this.demoGraph = true;
-        this.showTitle = false;
-        this.title = '';
+        this.spinner = true;
+         setTimeout(() => {
+            this.demoGraph = true;
+            if(this.data.size){
+                this.spinner = false;
+            }
+         }, 1000);
+            this.showTitle = false;
+            this.title = '';
+            this.isCancelTimerInitiated = false;
+        // this.spinner = false;
     }
 
     getDifferentCharts(names) {
@@ -81,16 +90,20 @@ export class OverviewPage implements OnInit, OnDestroy {
     }
 
     fetchChartsData(name) {
+        this.demoGraph = false;
       this.spinner = true;
       this.showTitle = false;
       const domain = name;
       const limit = 10;
       const {ns, wsid, cid} = this.route.parent.snapshot.params;
       const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-      setTimeout(() => {
+        if (this.isCancelTimerInitiated) {
+            clearTimeout(this.isCancelTimerInitiated);
+        }
+        this.isCancelTimerInitiated  = setTimeout(() => {
             this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
             this.getCharts(name);
-        }, 1000);
+        }, 2000);
     }
 
     getCharts(name) {
