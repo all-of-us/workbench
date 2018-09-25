@@ -44,3 +44,12 @@
 .tree-container.multiple {
   margin-top: 3rem;
 }
+
+.alert.alert-warning {
+  color: #E28327;
+  border: 0;
+}
+
+.alert.alert-warning .alert-icon {
+  color: #E28327;
+}
