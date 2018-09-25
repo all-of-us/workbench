@@ -10,7 +10,7 @@ import {
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
-    BEGIN_CHART_DATA_REQUEST,
+  BEGIN_CHART_DATA_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
@@ -33,7 +33,6 @@ import {
 
 import {
   loadCriteriaRequestResults,
-    loadChartRequestResults,
   loadCriteriaSubtypeRequestResults,
   criteriaRequestError,
 
@@ -56,6 +55,9 @@ import {
 
   loadAttributes,
   attributeRequestError,
+
+  loadChartRequestResults,
+  reviewChartsRequestError,
 } from './actions/creators';
 
 import {CohortSearchState} from './store';
@@ -254,12 +256,8 @@ export class CohortSearchEpics {
             return this.reviewservice
                 .getCohortChartData(ns, wsid, cid, cdrid, domain, limit, null)
                 .map(result =>
-                    loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result));
-            // .race(action$
-            //     .ofType(CANCEL_CRITERIA_REQUEST)
-            //     .filter(compare({domain, limit}))
-            //     .first())
-            // .catch(e => Observable.of(criteriaRequestError(domain, limit, e)));
+                    loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result))
+             .catch(e => Observable.of(reviewChartsRequestError(ns, wsid, cid, cdrid, domain, limit,e)));
         }
     )
  )
