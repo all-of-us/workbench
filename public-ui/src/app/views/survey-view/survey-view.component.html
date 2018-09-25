@@ -5,8 +5,8 @@
     <div class="col-xs-12">
       <div class="page-header">
         <div *ngIf="survey && survey.conceptId">
-          <h2> {{survey.domainDisplay}} Survey Module </h2>
-          <h4 class="view-sub-title">{{survey.domainDesc}}. </h4>
+          <h2> {{survey.name}} Survey Module </h2>
+          <h4 class="view-sub-title">{{survey.description}}. </h4>
         </div>
       </div>
     </div>
@@ -23,7 +23,7 @@
               Number Completed
             </h5>
             <div class="card-stat" *ngIf="!loading">
-              {{survey.countValue | number }}
+              {{survey.participantCount | number }}
             </div>
             <div class="card-text">
               partipants completed this survey
