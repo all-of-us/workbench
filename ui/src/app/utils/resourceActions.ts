@@ -60,7 +60,7 @@ export function convertToResources(list: FileDetail[] | Cohort[],
                                    resourceType: ResourceType): RecentResource[] {
   const resourceList = [];
   for (const resource of list) {
-    resourceList.push(this.convertToResource(resource, workspaceNamespace, workspaceId,
+    resourceList.push(convertToResource(resource, workspaceNamespace, workspaceId,
       accessLevel, resourceType));
   }
   return resourceList;
