@@ -11,6 +11,11 @@ import {
   Workspace
 } from 'generated';
 
+<<<<<<< HEAD
+=======
+import {ResourceType} from 'app/utils/resourceActions';
+
+>>>>>>> de-linting
 @Component({
   selector: 'app-edit-modal',
   styleUrls: ['./component.css',
@@ -52,6 +57,13 @@ export class EditModalComponent {
     this.editing = true;
     this.loading = false;
     this.form.setValue({ name: this.rName, description: this.rDescription });
+    if (this.resource.cohort) {
+      this.form.setValue({name: this.resource.cohort.name,
+        description: this.resource.cohort.description});
+    } else if (this.resource.conceptSet) {
+      this.form.setValue({name: this.resource.conceptSet.name,
+        description: this.resource.conceptSet.description});
+    }
   }
 
   close(): void {
@@ -97,6 +109,10 @@ export class EditModalComponent {
     if (this.editing) {
       const nameHasChanged = this.name.value !== this.rName;
       const descHasChanged = this.description.value !== this.rDescription;
+      const nameHasChanged = this.name.value !== this.resource.cohort.name ||
+        this.name.value !== this.resource.conceptSet.name;
+      const descHasChanged = this.description.value !== this.resource.cohort.description ||
+        this.description.value !== this.resource.conceptSet.description;
       return this.form.valid && (nameHasChanged || descHasChanged) && !this.loading;
     } else {
       return false;

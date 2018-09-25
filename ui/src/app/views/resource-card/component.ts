@@ -15,7 +15,6 @@ import {environment} from 'environments/environment';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {ConceptSetsService} from "../../../generated/api/conceptSets.service";
 
 @Component ({
   selector : 'app-resource-card',
