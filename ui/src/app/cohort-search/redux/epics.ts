@@ -257,7 +257,8 @@ export class CohortSearchEpics {
                 .getCohortChartData(ns, wsid, cid, cdrid, domain, limit, null)
                 .map(result =>
                     loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result))
-             .catch(e => Observable.of(reviewChartsRequestError(ns, wsid, cid, cdrid, domain, limit,e)));
+             .catch(e => Observable.of(reviewChartsRequestError
+                        (ns, wsid, cid, cdrid, domain, limit, e)));
         }
     )
  )

@@ -256,8 +256,9 @@ export const previewRequestError =
   (error?: any): ActionTypes[typeof PREVIEW_REQUEST_ERROR] =>
   ({type: PREVIEW_REQUEST_ERROR, error});
 export const reviewChartsRequestError =
-    (ns:any, wsid:any, cid:any, cdrid:any, domain:any, limit:any, error: any): ActionTypes[typeof REVIEW_CHART_REQUEST_ERROR] =>
-        ({type: REVIEW_CHART_REQUEST_ERROR,ns, wsid, cid, cdrid, domain, limit, error});
+    (ns: any, wsid: any, cid: any, cdrid: any, domain: any, limit: any, error: any):
+    ActionTypes[typeof REVIEW_CHART_REQUEST_ERROR] =>
+    ({type: REVIEW_CHART_REQUEST_ERROR, ns, wsid, cid, cdrid, domain, limit, error});
 
 export const requestCharts =
   (cdrVersionId: number, entityType: string, entityId: string, request: SearchRequest
