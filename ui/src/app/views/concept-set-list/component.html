@@ -1,0 +1,25 @@
+<div *ngIf="conceptSetsLoading" class="spinner-container">
+  <span class="spinner spinner-lg"></span>
+</div>
+<div class="card-area" *ngIf="!conceptSetsLoading">
+  <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
+       [class.disabled]="actionsDisabled" (click)="actionsDisabled || newConceptSet()">
+    <div class="create-text">
+      Create a<br/>Concept Set
+      <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+    </div>
+    <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create concept sets.</span>
+  </div>
+
+  <div *ngFor="let conceptSet of resourceList">
+    <app-resource-card [resourceCard]="conceptSet" [cssClass]="'for-list'"
+                       (onUpdate)="loadConceptSets()"
+                       (duplicateNameError)="duplicateNameError($event)">
+    </app-resource-card>
+  </div>
+</div>
+
+<clr-modal [(clrModalOpen)]="nameConflictError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">You already have a concept set named {{duplicateName}}. Please choose another name.</div>
+</clr-modal>

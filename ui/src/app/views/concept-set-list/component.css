@@ -1,0 +1,27 @@
+.spinner {
+    margin-top: 1rem;
+}
+
+.spinner-text {
+    text-align: center;
+    /* This forces the flex layout to put the text on a new line. */
+    width: 100%;
+}
+
+.spinner-container {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+}
+
+.card.item-card .name.disabled {
+    cursor: not-allowed;
+    word-wrap: break-word;
+    color: #AAAFB4;
+}
+
+.card-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}

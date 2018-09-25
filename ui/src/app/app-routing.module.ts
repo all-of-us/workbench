@@ -7,8 +7,12 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortListComponent} from './views/cohort-list/component';
+<<<<<<< HEAD
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptsListComponent} from './views/concept-list/component';
+=======
+import {ConceptSetListComponent} from "./views/concept-set-list/component";
+>>>>>>> the start
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
 import {NotebookListComponent} from './views/notebook-list/component';
@@ -150,15 +154,17 @@ const routes: Routes = [
               data: {
                 title: 'Search Concepts',
                 breadcrumb: 'Concepts'
-              }
-            },
-            {
-              path: 'concepts/list',
-              component: ConceptsListComponent,
-              data: {
-                title: 'Concepts Sets',
-                breadcrumb: 'Concepts'
-              }
+              },
+              children: [
+                {
+                  path: 'sets',
+                  component: ConceptSetListComponent,
+                  data: {
+                    title: 'View Concept Sets',
+                    breadcrumb: 'Param: Concept Sets Name'
+                  },
+                }
+              ]
             }]
           }
         ]
