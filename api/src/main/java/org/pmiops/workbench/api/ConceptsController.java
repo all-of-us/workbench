@@ -3,6 +3,8 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.Map;
+
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
@@ -17,6 +19,7 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptService conceptService;
   private final WorkspaceService workspaceService;
   private final DomainInfoDao domainInfoDao;
+  private final ConceptDao conceptDao;
 
   static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->  new Concept()
@@ -56,11 +60,13 @@ public class ConceptsController implements ConceptsApiDelegate {
 
   @Autowired
   public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,
-                            ConceptSynonymDao conceptSynonymDao, DomainInfoDao domainInfoDao) {
+                            ConceptSynonymDao conceptSynonymDao, DomainInfoDao domainInfoDao,
+                            ConceptDao conceptDao) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
     this.conceptSynonymDao = conceptSynonymDao;
     this.domainInfoDao = domainInfoDao;
+    this.conceptDao = conceptDao;
   }
 
   @Override
@@ -74,6 +80,50 @@ public class ConceptsController implements ConceptsApiDelegate {
         domains.stream().map(org.pmiops.workbench.cdr.model.DomainInfo.TO_CLIENT_DOMAIN_INFO)
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response,
+                               String matchExp, StandardConceptFilter standardConceptFilter) {
+    if (request.getIncludeDomainCounts()) {
+      List<DomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
+      List<DomainInfo> domainInfos = null;
+      if (matchExp == null) {
+        domainInfos = allDomainInfos;
+      } else {
+        if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
+          domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp, request.getQuery());
+        } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
+          domainInfos = domainInfoDao.findStandardConceptCounts(matchExp, request.getQuery());
+        } else {
+          return;
+        }
+      }
+      Map<Domain, DomainInfo> domainCountMap = Maps.uniqueIndex(domainInfos, DomainInfo::getDomainEnum);
+      // Loop through all domains to populate the results (so we get zeros for domains with no
+      // matches.)
+      for (DomainInfo domainInfo : allDomainInfos) {
+        Domain domain = domainInfo.getDomainEnum();
+        DomainInfo resultInfo = domainCountMap.get(domain);
+        response.addDomainCountsItem(new DomainCount().domain(domain).conceptCount(
+            resultInfo == null ? 0L : resultInfo.getAllConceptCount()));
+      }
+    }
+  }
+
+  private void addVocabularyCounts(SearchConceptsRequest request, ConceptListResponse response,
+                                   String matchExp, StandardConceptFilter standardConceptFilter) {
+    if (request.getDomain() == null) {
+      return;
+    }
+    String domainId = CommonStorageEnums.domainToDomainId(request.getDomain());
+    List<org.pmiops.workbench.cdr.model.VocabularyCount> vocabularyCounts;
+    if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
+      vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, request.getQuery(), domainId);
+    } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
+      vocabularyCounts = conceptDao.findVocabularyStandardConceptCounts(matchExp, request.getQuery(), domainId);
+    } else {
+      return;
+    }
   }
 
   @Override
@@ -99,29 +149,9 @@ public class ConceptsController implements ConceptsApiDelegate {
     }
     String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
     // TODO: consider doing these queries in parallel
-    List<DomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
-    List<DomainInfo> domainInfos = null;
-    if (matchExp == null) {
-      domainInfos = allDomainInfos;
-    } else {
-      if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
-        domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp, request.getQuery());
-      } else {
-        domainInfos = domainInfoDao.findStandardConceptCounts(matchExp, request.getQuery());
-      }
-    }
     ConceptListResponse response = new ConceptListResponse();
-    Map<Domain, DomainInfo> domainCountMap = Maps.uniqueIndex(domainInfos, DomainInfo::getDomainEnum);
-    // Loop through all domains to populate the results (so we get zeros for domains with no
-    // matches.)
-    for (DomainInfo domainInfo : allDomainInfos) {
-      Domain domain = domainInfo.getDomainEnum();
-      DomainInfo resultInfo = domainCountMap.get(domain);
-      response.addDomainCountsItem(new DomainCount().domain(domain).conceptCount(
-          resultInfo == null ? 0L : resultInfo.getAllConceptCount()));
-    }
-
-
+    addDomainCounts(request, response, matchExp, standardConceptFilter);
+    addVocabularyCounts(request, response, matchExp, standardConceptFilter);
 
     List<String> domainIds = null;
     if (request.getDomain() != null) {
