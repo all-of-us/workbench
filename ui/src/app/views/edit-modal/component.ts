@@ -11,8 +11,6 @@ import {
   Workspace
 } from 'generated';
 
-import {ResourceType} from 'app/utils/resourceActions';
-
 @Component({
   selector: 'app-edit-modal',
   styleUrls: ['./component.css',
@@ -28,6 +26,9 @@ export class EditModalComponent {
   @Input() cohort: any;
   @Output() updateFinished = new EventEmitter<any>();
   editing = false;
+  rType: string = this.resource.cohort ? "Cohort" : "Concept Set";
+  rName: string = this.resource.cohort ? this.resource.cohort.name : this.resource.conceptSet.name;
+  rDescription: string = this.resource.cohort ? this.resource.cohort.description : this.resource.conceptSet.description;
 
   /* Convenience property aliases */
   get name(): FormControl         { return this.form.get('name') as FormControl; }
@@ -49,13 +50,7 @@ export class EditModalComponent {
   open(): void {
     this.editing = true;
     this.loading = false;
-    if (this.resource.cohort) {
-      this.form.setValue({name: this.resource.cohort.name,
-        description: this.resource.cohort.description});
-    } else if (this.resource.conceptSet) {
-      this.form.setValue({name: this.resource.conceptSet.name,
-        description: this.resource.conceptSet.description});
-    }
+    this.form.setValue({ name:this.rName, description: this.rDescription });
   }
 
   close(): void {
@@ -99,10 +94,8 @@ export class EditModalComponent {
 
   get canSave(): boolean {
     if (this.editing) {
-      const nameHasChanged = this.name.value !== this.resource.cohort.name ||
-        this.name.value !== this.resource.conceptSet.name;
-      const descHasChanged = this.description.value !== this.resource.cohort.description ||
-        this.description.value !== this.resource.conceptSet.description;
+      const nameHasChanged = this.name.value !== this.rName;
+      const descHasChanged = this.description.value !== this.rDescription;
       return this.form.valid && (nameHasChanged || descHasChanged) && !this.loading;
     } else {
       return false;
