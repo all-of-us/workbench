@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -59,7 +59,7 @@ export class TablePage implements OnInit, OnDestroy {
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    private router: Router,
+    // private router: Router,
   ) {}
 
   ngOnInit() {
