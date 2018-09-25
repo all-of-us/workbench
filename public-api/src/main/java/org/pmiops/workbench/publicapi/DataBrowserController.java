@@ -79,16 +79,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private AchillesResultDistDao achillesResultDistDao;
     @PersistenceContext(unitName = "cdr")
     private EntityManager entityManager;
-
     @Autowired
     @Qualifier("defaultCdr")
     private Provider<CdrVersion> defaultCdrVersionProvider;
-
     @Autowired
     private ConceptService conceptService;
-
-    @Autowired
-    private ConceptSynonymDao conceptSynonymDao;
 
     public DataBrowserController() {}
 
@@ -437,11 +432,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                 List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
                 for(Concept concept: std_concepts){
-                    ArrayList<String> conceptSynonyms = conceptSynonymDao.findSynonymNamesByConceptId(concept.getConceptId());
                     ArrayList<String> uniqueConceptSynonymNames = new ArrayList<>();
-                    for(String cs:conceptSynonyms){
-                        if(!uniqueConceptSynonymNames.contains(cs) && !concept.getConceptName().equals(cs)){
-                            uniqueConceptSynonymNames.add(cs);
+                    for(ConceptSynonym cs:concept.getSynonyms()){
+                        if(!uniqueConceptSynonymNames.contains(cs.getConceptSynonymName()) && !concept.getConceptName().equals(cs.getConceptSynonymName())){
+                            uniqueConceptSynonymNames.add(cs.getConceptSynonymName());
                         }
                     }
                     this.conceptSynonymNames.put(concept.getConceptId(),uniqueConceptSynonymNames);

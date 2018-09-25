@@ -10,7 +10,4 @@ public interface ConceptSynonymDao extends CrudRepository<ConceptSynonym, Long> 
 
     List<ConceptSynonym> findByConceptIdIn(List<Long> conceptIds);
 
-    @Query(value = "select distinct cs.concept_synonym_name from concept_synonym cs where cs.concept_id=?1", nativeQuery = true)
-    ArrayList<String> findSynonymNamesByConceptId(Long conceptId);
-
 }
