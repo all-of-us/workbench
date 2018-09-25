@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -59,7 +59,7 @@ export class TablePage implements OnInit, OnDestroy {
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    private router: Router,
+    // private router: Router,
   ) {}
 
   ngOnInit() {
@@ -76,9 +76,7 @@ export class TablePage implements OnInit, OnDestroy {
     this.ethnicities = this.extractDemographics(concepts.ethnicityList);
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
+
 
   refresh(state: ClrDatagridStateInterface) {
     setTimeout(() => this.loading = true, 0);
@@ -145,4 +143,8 @@ export class TablePage implements OnInit, OnDestroy {
     const vals = new Set<string>(names);
     return Array.from(vals);
   }
+
+    ngOnDestroy() {
+        this.subscription.unsubscribe();
+    }
 }
