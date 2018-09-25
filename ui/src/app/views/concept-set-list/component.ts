@@ -1,12 +1,17 @@
-import {Component, OnInit} from "@angular/core";
-import {ConceptSetsService} from "../../../generated/api/conceptSets.service";
-import {Workspace} from "../../../generated/model/workspace";
-import {WorkspaceAccessLevel} from "../../../generated/model/workspaceAccessLevel";
-import {WorkspaceData} from "../../services/workspace-storage.service";
-import {ActivatedRoute} from "@angular/router";
-import {ConceptSet} from "../../../generated/model/conceptSet";
-import {RecentResource} from "../../../generated/model/recentResource";
-import {convertToResources, ResourceType} from "../../utils/resourceActions";
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+
+import {
+ConceptSet,
+ConceptSetsService,
+RecentResource,
+Workspace,
+WorkspaceAccessLevel,
+} from 'generated';
+
+import {WorkspaceData} from 'app/services/workspace-storage.service';
+
+import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -19,11 +24,11 @@ export class ConceptSetListComponent implements OnInit {
   accessLevel: WorkspaceAccessLevel;
   wsNamespace: string;
   wsId: string;
-  conceptSetsLoading: boolean = false;
+  conceptSetsLoading = false;
   conceptSetsList: ConceptSet[];
   resourceList: RecentResource[];
   duplicateName: string;
-  nameConflictError: boolean = false;
+  nameConflictError = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -31,7 +36,7 @@ export class ConceptSetListComponent implements OnInit {
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
-    this.accessLevel = wsData.accessLevel
+    this.accessLevel = wsData.accessLevel;
   }
 
   ngOnInit(): void {

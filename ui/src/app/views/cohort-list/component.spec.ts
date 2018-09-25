@@ -18,9 +18,9 @@ import {
 } from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {CohortListComponent} from 'app/views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
 
@@ -81,7 +81,7 @@ describe('CohortListComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        CohortEditModalComponent,
+        EditModalComponent,
         CohortListComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
