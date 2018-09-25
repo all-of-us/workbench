@@ -10,6 +10,7 @@ require_relative "../../api/libproject/wboptionsparser"
 
 DOCKER_KEY_FILE_PATH = "/creds/sa-key.json"
 
+TEST_PROJECT = "all-of-us-workbench-test"
 STAGING_PROJECT = "all-of-us-rw-staging"
 STABLE_PROJECT = "all-of-us-rw-stable"
 PROD_PROJECT = "all-of-us-rw-prod"
@@ -189,6 +190,14 @@ def deploy(cmd_name, args)
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
 
   op.parse.validate
+
+  if op.opts.account == "#{TEST_PROJECT}@appspot.gserviceaccount.com"
+    raise ArgumentError.new(
+        "Invalid --account: '#{op.opts.account}' is currently incompatible " +
+        "with the deploy script. Consider using " +
+        "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
+        "instead, which has similar permissions.")
+  end
 
   if op.opts.update_jira.nil?
      op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
