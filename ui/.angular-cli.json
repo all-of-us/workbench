@@ -46,8 +46,8 @@
       "exclude": [
         "**/src/generated/**/*.ts",
         "**/src/notebooks-generated/**/*.ts",
-        "**/node_modules/**/*",
-        "**/src/publicGenerated/**/*.ts"
+        "**/src/publicGenerated/**/*.ts",
+        "**/node_modules/**/*"
       ]
     },
     {
