@@ -66,8 +66,6 @@
     font-weight: bold;
 }
 
-
-
 .loading-spinner {
     margin-left: 10rem;
     margin-top: 4rem;
@@ -77,6 +75,7 @@
 .data-container {
    display: -webkit-box;
 }
+
 .data-blue {
     background-color: #216FB4;
     color: white;
@@ -86,19 +85,21 @@
     font-weight: bold;
 }
 
- .light-grey {
+.light-grey {
     background-color: #CCCCCC;
-     /*width: 31rem;*/
      display: -webkit-box;
 }
+
 .divider {
     border-right: 1px solid black;
 }
+
 .data-bar-container {
     padding-left: 1rem;
     padding-top: 0.5rem;
     border-left: 1px solid black;
 }
+
 .data-heading {
     padding-top: 0.5rem;
     width: 16rem;
@@ -109,6 +110,7 @@
     text-align: end;
     padding-right: 0.5rem;
 }
+
 .data-percent {
     padding-top: 0.5rem;
     white-space: nowrap;
@@ -116,6 +118,7 @@
     font-weight: bold;
     color: #4a4a4a;
 }
+
 .count {
     padding-left: 0.2rem;
     font-size: 10px;
@@ -133,6 +136,7 @@
 .btn-outline {
     pointer-events: none;
 }
+
 .container-margin {
     margin: 0;
     min-width: 100%;
@@ -141,9 +145,11 @@
 .button-padding {
     padding-top: 1rem;
 }
+
 .button-padding-zero {
     padding-top: 0rem;
 }
+
 .chart-width {
     margin: 0;
 }

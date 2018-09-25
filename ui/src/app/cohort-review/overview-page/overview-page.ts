@@ -79,7 +79,6 @@ export class OverviewPage implements OnInit, OnDestroy {
             this.showTitle = false;
             this.title = '';
             this.isCancelTimerInitiated = false;
-        // this.spinner = false;
     }
 
     getDifferentCharts(names) {
