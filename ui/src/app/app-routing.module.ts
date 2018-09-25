@@ -7,8 +7,11 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortListComponent} from './views/cohort-list/component';
+<<<<<<< HEAD
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptsListComponent} from './views/concept-list/component';
+=======
+>>>>>>> the start
 import {ConceptSetListComponent} from "./views/concept-set-list/component";
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';

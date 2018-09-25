@@ -69,8 +69,7 @@ export const conceptSetActionList = [
   }
 ];
 
-export const resourceActionList =  notebookActionList.concat(cohortActionList)
-  .concat(conceptSetActionList);
+export const resourceActionList =  notebookActionList.concat(cohortActionList).concat(conceptSetActionList);
 
 export function convertToResources(list: FileDetail[] | Cohort[] | ConceptSet[],
                                    workspaceNamespace: string, workspaceId: string,
