@@ -11,11 +11,8 @@ import {
   Workspace
 } from 'generated';
 
-<<<<<<< HEAD
-=======
 import {ResourceType} from 'app/utils/resourceActions';
 
->>>>>>> de-linting
 @Component({
   selector: 'app-edit-modal',
   styleUrls: ['./component.css',
@@ -64,6 +61,7 @@ export class EditModalComponent {
       this.form.setValue({name: this.resource.conceptSet.name,
         description: this.resource.conceptSet.description});
     }
+    this.form.setValue({ name:this.rName, description: this.rDescription });
   }
 
   close(): void {
