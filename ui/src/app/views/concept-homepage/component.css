@@ -1,14 +1,3 @@
-.search-box {
-  margin-top: 1rem;
-  margin-left: auto;
-  margin-right: auto;
-  height: 8rem;
-  width: 95.7%;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #FFFFFF 0%, rgba(236,236,236,0) 100%);
-  box-shadow: 0 -3px 5px 0 rgba(0,0,0,0.26), 0 -8px 10px 0 rgba(0,0,0,0.16);
-}
-
 :host::ng-deep .nav {
   padding-left: 1rem;
   padding-top: 1rem;
@@ -63,9 +52,9 @@
 }
 
 .lower-box {
-  width: 93.7%;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 1rem;
+  margin-left: 1%;
+  margin-right: 1%;
 }
 
 .card.item-card {
@@ -182,25 +171,35 @@
   color: #4A4A4A;
 }
 
-clr-datagrid {
-  padding-top: 0;
+.add-section {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  color: white;
+  border-radius: 3rem;
+  background-color: #2691D0;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 
-:host::ng-deep .datagrid {
-  margin-top: 0;
-  background-color: #F1F1F1;
-  border: none;
+.add-text {
+  padding: 0;
+  font-weight: 500;
+  max-width: 0;
+  overflow: hidden;
+  white-space: pre;
+  transition: max-width 0.5s ease-out, padding 0.1s linear 0.2s;
 }
 
-:host::ng-deep .datagrid-head {
-  margin-bottom: 0.5rem;
-  border: 1px solid #ccc;
+.add-text.hovering {
+  padding: 0 0.5rem;
+  max-width: 200px;
 }
 
-:host::ng-deep .datagrid-body {
-  border: 1px solid #ccc
-}
-
-clr-dg-row {
-  background-color: white;
+.add-icon {
+  fill: white;
+  height: 1.5rem;
+  width: 1.5rem;
 }

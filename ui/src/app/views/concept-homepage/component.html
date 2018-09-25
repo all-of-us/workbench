@@ -1,4 +1,4 @@
-<div class="search-box">
+<app-top-box>
   <clr-tabs>
     <clr-tab>
       <button clrTabLink (click)="searching = false;">Concepts</button>
@@ -15,60 +15,51 @@
       Standard concepts only
     </clr-checkbox>
   </div>
-</div>
-<div class="domain-box lower-box" *ngIf="!searching else chartBox">
-  <div class="card item-card" *ngFor="let domain of conceptDomainList">
-    <div class="concept-name">{{domain.name}}</div>
-    <div class="concept-text">
-      <div>
-        <span class="concept-count-text">{{domain.conceptCount}} </span>
-        <span class="concept-label-text">concepts</span>
+  <div class="domain-box lower-box" *ngIf="!searching else chartBox">
+    <div class="card item-card" *ngFor="let domain of conceptDomainList">
+      <div class="concept-name">{{domain.name}}</div>
+      <div class="concept-text">
+        <div>
+          <span class="concept-count-text">{{domain.conceptCount}} </span>
+          <span class="concept-label-text">concepts</span>
+        </div>
+        in this domain.
+        <div style="margin-top: 0.5rem">
+          <span class="participant-count-text">{{domain.participantCount}}</span>
+          participants in this domain.
+        </div>
       </div>
-      in this domain.
-      <div style="margin-top: 0.5rem">
-        <span class="participant-count-text">{{domain.participantCount}}</span>
-        participants in this domain.
+      <div class="footer"><button class="btn btn-link browse-btn">Browse Domain</button></div>
+    </div>
+  </div>
+  <ng-template #chartBox>
+    <div class="chart-box lower-box">
+      <clr-tabs class="chart-selector-tabs">
+        <clr-tab *ngFor="let domain of conceptDomainList">
+          <button clrTabLink (click)="selectDomain(domain.name)">
+            <div class="chart-selector-header">{{domain.name}}</div>
+            <div>{{domain.conceptCount}}</div>
+          </button>
+        </clr-tab>
+      </clr-tabs>
+      <div class="filter-options">
+        Filter by vocabulary:
+        <clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">
+          SNOMED (4011)
+        </clr-checkbox>
+        <clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">
+          CPT (2951)
+        </clr-checkbox>
+        <clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">
+          ICD10 (2112)
+        </clr-checkbox>
+      </div>
+      <app-concept-table [concepts]="concepts"></app-concept-table>
+      <div (mouseenter)="addTextHovering=true" (mouseleave)="addTextHovering=false" (click)="openAddModal()" class="add-section">
+        <div class="add-text" [class.hovering]="addTextHovering">Add to set</div>
+        <clr-icon class="add-icon" shape="plus"></clr-icon>
       </div>
     </div>
-    <div class="footer"><button class="btn btn-link browse-btn">Browse Domain</button></div>
-  </div>
-</div>
-<ng-template #chartBox>
-  <div class="chart-box lower-box">
-    <clr-tabs class="chart-selector-tabs">
-      <clr-tab *ngFor="let domain of conceptDomainList">
-        <button clrTabLink (click)="selectDomain(domain.name)">
-          <div class="chart-selector-header">{{domain.name}}</div>
-          <div>{{domain.conceptCount}}</div>
-        </button>
-      </clr-tab>
-    </clr-tabs>
-    <div class="filter-options">
-      Filter by vocabulary:
-      <clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">
-        SNOMED (4011)
-      </clr-checkbox>
-      <clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">
-        CPT (2951)
-      </clr-checkbox>
-      <clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">
-        ICD10 (2112)
-      </clr-checkbox>
-    </div>
-    <clr-datagrid>
-      <clr-dg-column>Name</clr-dg-column>
-      <clr-dg-column>Synonyms</clr-dg-column>
-      <clr-dg-column>Code</clr-dg-column>
-      <clr-dg-column>Vocabulary</clr-dg-column>
-      <clr-dg-column>Count</clr-dg-column>
-      <div class="break"></div>
-      <clr-dg-row *ngFor="let concept of concepts">
-        <clr-dg-cell>{{concept.name}}</clr-dg-cell>
-        <clr-dg-cell>{{concept.synonyms.join(', ')}}</clr-dg-cell>
-        <clr-dg-cell>{{concept.code}}</clr-dg-cell>
-        <clr-dg-cell>{{concept.vocabulary}}</clr-dg-cell>
-        <clr-dg-cell>{{concept.count}}</clr-dg-cell>
-      </clr-dg-row>
-    </clr-datagrid>
-  </div>
-</ng-template>
+  </ng-template>
+</app-top-box>
+<app-concept-add-modal></app-concept-add-modal>

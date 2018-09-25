@@ -1,4 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
+
+
+import {ConceptTableComponent} from 'app/views/concept-table/component';
+import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 
 
 @Component({
@@ -15,6 +19,13 @@ export class ConceptHomepageComponent implements OnInit {
   standardConceptsOnly = false;
   searching = false;
   selectedDomain: string;
+  addTextHovering = false;
+
+  @ViewChild(ConceptTableComponent)
+  conceptTable: ConceptTableComponent;
+
+  @ViewChild(ConceptAddModalComponent)
+  conceptAddModal: ConceptAddModalComponent;
 
   conceptDomainList = [
     {
@@ -75,7 +86,13 @@ export class ConceptHomepageComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  openAddModal(): void {
+    this.conceptAddModal.open();
+  }
+
   selectDomain(domain: string) {
     this.selectedDomain = domain;
   }
+
+
 }

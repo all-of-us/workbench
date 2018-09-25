@@ -30,7 +30,9 @@ import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
+import {ConceptAddModalComponent} from './views/concept-add-modal/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
+import {ConceptTableComponent} from './views/concept-table/component';
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
@@ -49,6 +51,7 @@ import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
+import {TopBoxComponent} from './views/top-box/component';
 import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
@@ -128,7 +131,9 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     BugReportComponent,
     CohortEditModalComponent,
     CohortListComponent,
+    ConceptAddModalComponent,
     ConceptHomepageComponent,
+    ConceptTableComponent,
     ConfirmDeleteModalComponent,
     ErrorHandlerComponent,
     WorkspaceListComponent,
@@ -147,6 +152,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SettingsComponent,
     SignedInComponent,
     StigmatizationPageComponent,
+    TopBoxComponent,
     UnregisteredComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,

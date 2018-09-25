@@ -1,0 +1,26 @@
+<clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'">
+  <div class="modal-body">
+    <div class="form-section">
+      <label>Add to Concept Set</label>
+      <select>
+        <option *ngFor="let conceptSet of conceptSets">{{conceptSet.name}}</option>
+      </select>
+    </div>
+    <div class="line-break"></div>
+    <div class="form-section">
+      <label>Or Create a new Concept Set</label>
+      <input id="new-name" type="text" class="input"
+             [(ngModel)]="newName">
+      <textarea
+        name="description">
+      </textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="renaming=false">Cancel</button>
+    <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
+            (click)="this.emitRename(resource);" [clrLoading]="loading" [disabled]="loading">
+      Rename {{resourceType}}
+    </button>
+  </div>
+</clr-modal>

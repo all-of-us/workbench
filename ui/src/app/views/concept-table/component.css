@@ -1,0 +1,22 @@
+clr-datagrid {
+  padding-top: 0;
+}
+
+:host::ng-deep .datagrid {
+  margin-top: 0;
+  background-color: #F1F1F1;
+  border: none;
+}
+
+:host::ng-deep .datagrid-head {
+  margin-bottom: 0.1rem;
+  border: 1px solid #ccc;
+}
+
+:host::ng-deep .datagrid-body {
+  border: 1px solid #ccc
+}
+
+clr-dg-row {
+  background-color: white;
+}
