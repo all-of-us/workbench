@@ -23,7 +23,6 @@ import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
-import {ReviewNavComponent} from './review-nav/review-nav.component';
 import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
@@ -64,8 +63,6 @@ import {TablePage} from './table-page/table-page';
     OverviewPage,
     PageLayout,
     TablePage,
-
-    ReviewNavComponent,
 
     /* Annotations */
     AnnotationItemComponent,
