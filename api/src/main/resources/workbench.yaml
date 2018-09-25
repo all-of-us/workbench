@@ -2180,6 +2180,8 @@ definitions:
         $ref: "#/definitions/Cohort"
       notebook:
         $ref: '#/definitions/FileDetail'
+      conceptSet:
+        $ref: '#/definitions/ConceptSet'
       modifiedTime:
         type: string
 

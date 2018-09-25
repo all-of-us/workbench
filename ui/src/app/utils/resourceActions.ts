@@ -4,10 +4,12 @@
     RecentResource,
     WorkspaceAccessLevel
   } from 'generated';
+  import {ConceptSet} from "../../generated/model/conceptSet";
 
   export enum ResourceType {
     NOTEBOOK = 'notebook',
     COHORT = 'cohort',
+    CONCEPT_SET = 'conceptSet',
     INVALID = 'invalid'
   }
 
@@ -52,9 +54,24 @@ export const cohortActionList = [
     link: 'deleteResource'
   }];
 
-export const resourceActionList =  notebookActionList.concat(cohortActionList);
+export const conceptSetActionList = [
+  {
+    type: 'conceptSet',
+    class: 'pencil',
+    text: 'Edit',
+    link: 'editConceptSet'
+  },
+  {
+    type: 'conceptSet',
+    class: 'trash',
+    text: 'Delete',
+    link: 'deleteResource'
+  }
+];
 
-export function convertToResources(list: FileDetail[] | Cohort[],
+export const resourceActionList =  notebookActionList.concat(cohortActionList).concat(conceptSetActionList);
+
+export function convertToResources(list: FileDetail[] | Cohort[] | ConceptSet[],
                                    workspaceNamespace: string, workspaceId: string,
                                    accessLevel: WorkspaceAccessLevel,
                                    resourceType: ResourceType): RecentResource[] {
@@ -66,7 +83,7 @@ export function convertToResources(list: FileDetail[] | Cohort[],
   return resourceList;
 }
 
-export function convertToResource(resource: FileDetail | Cohort,
+export function convertToResource(resource: FileDetail | Cohort | ConceptSet,
                                   workspaceNamespace: string, workspaceId: string,
                                   accessLevel: WorkspaceAccessLevel,
                                   resourceType: ResourceType): RecentResource {
@@ -86,8 +103,8 @@ export function convertToResource(resource: FileDetail | Cohort,
     newResource.notebook = <FileDetail>resource;
   } else if (resourceType === ResourceType.COHORT) {
     newResource.cohort = <Cohort>resource;
+  } else if (resourceType === ResourceType.CONCEPT_SET) {
+    newResource.conceptSet = <ConceptSet>resource;
   }
   return newResource;
 }
-
-
