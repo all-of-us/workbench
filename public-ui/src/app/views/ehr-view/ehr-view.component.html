@@ -99,7 +99,7 @@
             -- {{r.conceptId}}"> </div>
           </ng-template>
             <div class="col-md-4 flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"></div>
-            <ng-template #noConceptSynonyms><div class="col-md-2 flex-xs-middle"></div></ng-template>
+            <ng-template #noConceptSynonyms><div class="col-md-4 flex-xs-middle"></div></ng-template>
           <div class="col-md-2 flex-items-xs-right">
             {{r.countValue | number }}
           </div>
