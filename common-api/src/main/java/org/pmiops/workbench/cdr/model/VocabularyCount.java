@@ -7,5 +7,5 @@ public interface VocabularyCount {
 
   public String getVocabularyId();
 
-  public int getConceptCount();
+  public long getConceptCount();
 }

@@ -226,7 +226,7 @@ public class ConceptsControllerTest {
     // controller directly.
     ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
     conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao,
-        domainInfoDao);
+        domainInfoDao, conceptDao);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");

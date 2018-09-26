@@ -21,6 +21,7 @@ import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
@@ -55,6 +56,12 @@ public class ConceptsController implements ConceptsApiDelegate {
             .vocabularyId(concept.getVocabularyId())
             .conceptSynonyms(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
 
+  private static final Function<org.pmiops.workbench.cdr.model.VocabularyCount, VocabularyCount>
+      TO_CLIENT_VOCAB_COUNT =
+      (vocabCount) -> new VocabularyCount()
+          .conceptCount(vocabCount.getConceptCount())
+          .vocabularyId(vocabCount.getVocabularyId());
+
   @Autowired
   ConceptSynonymDao conceptSynonymDao;
 
@@ -84,7 +91,7 @@ public class ConceptsController implements ConceptsApiDelegate {
 
   private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response,
                                String matchExp, StandardConceptFilter standardConceptFilter) {
-    if (request.getIncludeDomainCounts()) {
+    if (request.getIncludeDomainCounts() != null && request.getIncludeDomainCounts()) {
       List<DomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
       List<DomainInfo> domainInfos = null;
       if (matchExp == null) {
@@ -117,13 +124,22 @@ public class ConceptsController implements ConceptsApiDelegate {
     }
     String domainId = CommonStorageEnums.domainToDomainId(request.getDomain());
     List<org.pmiops.workbench.cdr.model.VocabularyCount> vocabularyCounts;
+    Long queryId = null;
+    try {
+      queryId = Long.parseLong(request.getQuery());
+    } catch (NumberFormatException e) {
+    }
     if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
-      vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, request.getQuery(), domainId);
+      vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, request.getQuery(),
+          queryId, domainId);
     } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
-      vocabularyCounts = conceptDao.findVocabularyStandardConceptCounts(matchExp, request.getQuery(), domainId);
+      vocabularyCounts = conceptDao.findVocabularyStandardConceptCounts(matchExp, request.getQuery(),
+          queryId, domainId);
     } else {
       return;
     }
+    response.setVocabularyCounts(vocabularyCounts.stream().map(TO_CLIENT_VOCAB_COUNT)
+        .collect(Collectors.toList()));
   }
 
   @Override
