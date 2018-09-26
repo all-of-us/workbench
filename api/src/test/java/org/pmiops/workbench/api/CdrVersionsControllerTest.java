@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.CdrConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
@@ -71,6 +72,8 @@ public class CdrVersionsControllerTest {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.cdr = new CdrConfig();
       workbenchConfig.cdr.defaultCdrVersion = "Test Registered CDR";
+      workbenchConfig.firecloud = new FireCloudConfig();
+      workbenchConfig.firecloud.enforceRegistered = true;
       return workbenchConfig;
     }
   }

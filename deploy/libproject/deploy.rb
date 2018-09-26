@@ -247,10 +247,7 @@ def deploy(cmd_name, args)
 
   # TODO: Add more granular logging, e.g. call deploy natively and pass an
   # optional log writer. Also rescue and log if deployment fails.
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api and " +
-                      "public-api services (including DB updates)"
-  common.run_inline %W{
-    ../api/project.rb deploy
+  api_deploy_flags = %W{
       --project #{op.opts.project}
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
@@ -258,8 +255,19 @@ def deploy(cmd_name, args)
       #{op.opts.promote ? "--promote" : "--no-promote"}
   }
 
-  maybe_log_jira.call "'#{op.opts.project}': completed api and public-api " +
-                      "service deployment; beginning deploy of UI service"
+  if op.opts.project == PROD_PROJECT
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
+                        "(including DB updates), skipping public-api " +
+                        "(see DB-89)"
+    common.run_inline %W{../api/project.rb deploy-api} + api_deploy_flags
+  else
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api and " +
+                        "public-api services (including DB updates)"
+    common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
+  end
+
+  maybe_log_jira.call "'#{op.opts.project}': completed api service " +
+                      "deployment; beginning deploy of UI service"
   common.run_inline %W{
     ../ui/project.rb deploy-ui
       --project #{op.opts.project}
@@ -270,16 +278,22 @@ def deploy(cmd_name, args)
       --quiet
   }
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
-  common.run_inline %W{
-    ../public-ui/project.rb deploy-ui
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-  }
-  maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"
+
+  if op.opts.project == PROD_PROJECT
+    maybe_log_jira.call "'#{op.opts.project}': Skipping Public-UI service " +
+                        "deployment (see DB-89)"
+  else
+    common.run_inline %W{
+      ../public-ui/project.rb deploy-ui
+        --project #{op.opts.project}
+        --account #{op.opts.account}
+        --key-file #{op.opts.key_file}
+        --version #{op.opts.app_version}
+        #{op.opts.promote ? "--promote" : "--no-promote"}
+        --quiet
+    }
+    maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"
+  end
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,

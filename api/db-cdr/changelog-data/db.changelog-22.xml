@@ -15,7 +15,6 @@
     <loadData tableName="concept_synonym" file="csv/concept_synonym.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>
       <column name="concept_synonym_name" type="STRING"/>
-      <column name="language_concept_id" type="NUMERIC"/>
     </loadData>
 
   </changeSet>

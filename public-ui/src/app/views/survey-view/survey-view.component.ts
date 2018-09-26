@@ -7,9 +7,10 @@ import 'rxjs/add/operator/switchMap';
 import {ISubscription} from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
-import {DbDomain} from '../../../publicGenerated/model/dbDomain';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
+import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
+
 @Component({
   selector: 'app-survey-view',
   templateUrl: './survey-view.component.html',
@@ -21,7 +22,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   domainId: string;
   title ;
   subTitle;
-  surveys: DbDomain[] = [];
+  surveys: SurveyModule[] = [];
   survey;
   surveyConceptId;
   surveyResult: any;
@@ -48,7 +49,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
     this.loading = true;
     // Get the survey from local storage the user clicked on on a previous page
-    const obj = localStorage.getItem('dbDomain');
+    const obj = localStorage.getItem('surveyModule');
     if (obj) {
       const survey = JSON.parse(obj);
       this.surveyConceptId = survey.conceptId;

@@ -21,6 +21,19 @@ public class AchillesResult  {
     private Long sourceCountValue;
     private String analysisStratumName;
 
+    public AchillesResult() {}
+
+    public AchillesResult(Long analysisId, String stratum1, String stratum2, String stratum3, String stratum4, String stratum5, Long countValue, Long sourceCountValue) {
+            this.analysisId = analysisId;
+            this.stratum1 = stratum1;
+            this.stratum2 = stratum2;
+            this.stratum3 = stratum3;
+            this.stratum4 = stratum4;
+            this.stratum5 = stratum5;
+            this.countValue = countValue;
+            this.sourceCountValue = sourceCountValue;
+    }
+
     @Id
     public Long getId() {
         return id;

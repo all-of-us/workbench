@@ -112,7 +112,7 @@ public class CohortsControllerTest {
       .conceptCode("conceptC")
       .conceptClassId("classId3")
       .vocabularyId("V3")
-      .domainId("Condition/Device")
+      .domainId("Condition")
       .countValue(789L)
       .prevalence(0.4F);
 

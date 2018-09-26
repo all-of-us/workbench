@@ -1,5 +1,5 @@
 h3 {
-  margin-left: 7rem;
+  margin-left: 2rem;
 }
 
 /* Form grid / layout */
@@ -42,7 +42,6 @@ h3 {
 }
 
 .control-wrapper {
-  width: 80%;
   margin: 0 1rem 0 0;
   display: flex;
   align-items: center;
@@ -50,7 +49,8 @@ h3 {
 
 /* Slider elements */
 .control-wrapper.slider-wrapper {
-  width: 70%;
+  width: 96%;
+  padding-left: 1rem;
 }
 
 .slider {
@@ -97,4 +97,112 @@ label[for="deceased"] {
   font-weight: 400;
   font-size: 0.5rem;
   color: black;
+}
+
+.demo-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+.selection-icon {
+  margin: calc((1.25rem - 20px) / 2);
+  color: rgb(98, 164, 32);
+  padding-top: 0.2rem;
+  padding-left: 0.8rem;
+}
+
+.age-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262262;
+  padding-left: 1rem;
+}
+
+.demo-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262262;
+}
+
+.count-preview {
+  background-color: #E4F3FC;
+  padding: 0.8rem;
+  margin-top: 1rem;
+}
+.count-preview  .calculate-btn{
+  background-color: #2691D0;
+  color: white;
+}
+
+.count-preview  .disable-link {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.count-preview  .add-button {
+  border-color: transparent;
+  outline: none;
+  background-color: transparent;
+  font-weight: 500;
+  color: #2691D0;
+}
+.count-preview .text-bold {
+  font-weight: bold;
+  color: #4A4A4A;
+}
+
+.spin-top-padding {
+  padding-top: 0.5rem;
+}
+
+.count-preview .result-text {
+  color: #262262;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.spinner-inline {
+  height: 0rem;
+  width: 0rem;
+}
+
+.deceaseCursor {
+  cursor: pointer;
+}
+
+.deceaseNoCursor {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.decease-selection-icon {
+  margin: calc((1.25rem - 20px) / 2);
+  color: rgb(98, 164, 32);
+  padding-left: 0.8rem;
+}
+
+.deceased-title {
+  padding-left: 1rem;
+  padding-top: 2rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: #262262;
+}
+
+.form-container {
+  padding-left: 1rem;
+}
+
+.selection-check-icon {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.white-background {
+  background-color: #FFFFFF;
+}
+
+.calculate-button {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262262;
 }

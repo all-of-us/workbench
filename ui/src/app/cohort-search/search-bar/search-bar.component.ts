@@ -108,7 +108,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         });
         if (this.ingredientList.length) {
           this.actions.setCriteriaSearchTerms(this.ingredientList);
-          this.actions.loadCriteriaSubtree(this._type, ids, path);
+          this.actions.loadCriteriaSubtree(this._type, TreeSubType[TreeSubType.BRAND], ids, path);
         }
       });
 
@@ -173,7 +173,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           path = path.concat(multiple.path.split('.'));
         });
       }
-      this.actions.loadCriteriaSubtree(this._type, ids, path);
+      this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
     }
     this.actions.clearAutocompleteOptions();
   }

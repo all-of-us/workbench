@@ -53,8 +53,6 @@ fi
 
 WORKBENCH_DATASET=cdr$CDR_VERSION
 
-
-
 # Check that bq_dataset exists and exit if not
 datasets=$(bq --project=$BQ_PROJECT ls)
 if [ -z "$datasets" ]
@@ -84,7 +82,6 @@ else
   exit 1
 fi
 
-
 # Make dataset for cdr cloudsql tables
 datasets=$(bq --project=$WORKBENCH_PROJECT ls)
 re=\\b$WORKBENCH_DATASET\\b
@@ -97,7 +94,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_ancestor concept_synonym)
+create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym)
 
 for t in "${create_tables[@]}"
 do
@@ -106,7 +103,7 @@ do
 done
 
 # Load tables from csvs we have. This is not cdr data but meta data needed for workbench app
-load_tables=(db_domain achilles_analysis criteria criteria_attribute)
+load_tables=(domain_info survey_module achilles_analysis criteria criteria_attribute)
 csv_path=generate-cdr/csv
 for t in "${load_tables[@]}"
 do
@@ -209,35 +206,81 @@ case when count_value > 0 then round(count_value/$person_count, 2)
 where count_value > 0 or source_count_value > 0"
 
 ##########################################
-# concept survey participant count update#
+# domain info updates                    #
 ##########################################
 
-#Set the survey participant count
+# Set all_concept_count and standard_concept_count on domain_info
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d
+set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
+(select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
+SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d2
+on d2.domain_id = c.domain_id
+and (c.count_value > 0 or c.source_count_value > 0)
+group by c.domain_id) c
+where d.domain_id = c.domain_id
+"
+
+# Set participant counts for each domain
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_info\` d
+set d.participant_count = r.count_value from
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` r
+where r.analysis_id = 3000 and r.stratum_1 = CAST(d.concept_id AS STRING)
+and r.stratum_3 = d.domain_id
+and r.stratum_2 is null
+"
+
+##########################################
+# survey count updates                   #
+##########################################
+
+# Set the survey participant count on the concept
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
 set c1.count_value=count_val from
 (select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd
-on cr.concept_id_2=dbd.concept_id
-where dbd.db_type='survey' and dbd.concept_id is not null
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
+on cr.concept_id_2=sm.concept_id
 group by cr.concept_id_2)
 where c1.concept_id=survey_concept_id"
 
+# Set the participant count on the survey_module row
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
+set sm.participant_count=c.count_value from
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c
+where c.concept_id=sm.concept_id"
 
-################################
-# concept question count update#
-################################
-#Set the questions count
+# Set the question participant counts
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c1
 set c1.count_value=count_val from
 (select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id,cr.concept_id_1 as question_id
 from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.db_domain\` dbd on cr.concept_id_2 = dbd.concept_id
-where dbd.db_type='survey' and cr.relationship_id = 'Has Module'
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
+on cr.concept_id_2 = sm.concept_id
+where cr.relationship_id = 'Has Module'
 group by survey_concept_id,cr.concept_id_1)
 where c1.concept_id=question_id
+"
+
+# Set the question count on the survey_module row
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm
+set sm.question_count=num_questions from
+(select count(distinct qc.concept_id) num_questions, r.stratum_1 as survey_concept_id from
+\`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` r
+  join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm2
+    on r.stratum_1 = CAST(sm2.concept_id AS STRING)
+  join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` qc
+    on r.stratum_2 = CAST(qc.concept_id AS STRING)
+where r.analysis_id = 3110 and qc.count_value > 0
+  group by survey_concept_id)
+where CAST(sm.concept_id AS STRING) = survey_concept_id
 "
 
 ########################
@@ -256,9 +299,11 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
 echo "Inserting concept_synonym"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\`
- (concept_id, concept_synonym_name, language_concept_id)
-SELECT c.concept_id, c.concept_synonym_name, c.language_concept_id
+ (id, concept_id, concept_synonym_name)
+SELECT 0, c.concept_id, c.concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
+
+
 
 
 

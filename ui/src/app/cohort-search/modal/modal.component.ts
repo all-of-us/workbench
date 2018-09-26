@@ -47,17 +47,16 @@ export class ModalComponent implements OnInit, OnDestroy {
   attributesNode: Map<any, any> = Map();
   selections = {};
   objectKey = Object.keys;
-
   open = false;
   noSelection = true;
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
-
+  demoItemsType: string;
+  demoParam: string;
   count = 0;
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    console.log(this.selections);
     this.subscription = this.open$
       .filter(open => !!open)
       .subscribe(_ => {
@@ -74,7 +73,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
-
     this.subscription.add(this.selection$
       .subscribe(selections => {
         this.selections = {};
@@ -84,7 +82,10 @@ export class ModalComponent implements OnInit, OnDestroy {
         });
       })
     );
-
+      this.subscription.add(this.selection$
+          .map(sel => sel.size === 0)
+          .subscribe(sel => this.noSelection = sel)
+      );
     this.subscription.add(this.attributes$
       .subscribe(node => {
         this.attributesNode = node;
@@ -128,7 +129,6 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
   }
-
   addSelectionToGroup(selection: any) {
     const key = selection.get('type') === TreeType[TreeType.DEMO]
       ? selection.get('subtype') : selection.get('type');
@@ -138,7 +138,6 @@ export class ModalComponent implements OnInit, OnDestroy {
       this.selections[key] = [selection];
     }
   }
-
   setScroll(nodeId: string) {
     let node: any;
     Observable.interval(100)
@@ -208,4 +207,12 @@ export class ModalComponent implements OnInit, OnDestroy {
   selectionHeader(_type: string) {
     return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
   }
+
+  getDemoParams(e) {
+    if (e) {
+        this.demoItemsType = e.type;
+        this.demoParam = e.paramId;
+    }
+  }
 }
+

@@ -37,7 +37,7 @@ REMOTE_DATA_LOC=https://storage.googleapis.com/$BUCKET
 echo "Importing data files from $REMOTE_DATA_LOC"
 
 # Add tables names of files to import here
-TABLES=(achilles_analysis achilles_results achilles_results_dist db_domain domain vocabulary criteria criteria_attribute concept concept_relationship concept_ancestor concept_synonym)
+TABLES=(achilles_analysis achilles_results achilles_results_dist domain_info survey_module domain vocabulary criteria criteria_attribute concept concept_relationship concept_ancestor concept_synonym)
 
 # Make a dir for the csvs
 local_fpath=/tmp/$CDR_DB_NAME
@@ -57,18 +57,19 @@ function mysqlimport_table () {
    file=$2
 
    echo "Mysql importing $file into $db.$table..."
-   mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-optionally-enclosed-by='"' \
+   mysqlimport --fields-terminated-by=, --fields-optionally-enclosed-by='"' \
       --verbose --local -h ${DB_HOST} --port ${DB_PORT} \
       -u root -p${MYSQL_ROOT_PASSWORD} $db $file
 }
 
 # Function for mysqlimport concept_synonym
+# TODO Test this in next pr and remove this function as we fixed this table so it should work normal
 function mysqlimport_concept_synonym_table () {
    db=$1
    file=$2
 
    echo "Mysql importing $file into $db.$table..."
-   mysqlimport --ignore-lines=1 --fields-terminated-by=, --fields-optionally-enclosed-by='"' --columns=concept_id,concept_synonym_name,language_concept_id \
+   mysqlimport --fields-terminated-by=, --fields-optionally-enclosed-by='"' --columns=concept_id,concept_synonym_name,language_concept_id \
       --verbose --local -h ${DB_HOST} --port ${DB_PORT} \
       -u root -p${MYSQL_ROOT_PASSWORD} $db $file
 }
