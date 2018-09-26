@@ -34,9 +34,14 @@
             <h5 class="box-title">
               {{r.name}}
             </h5>
-            <div class="card-stat">
+            <div class="card-stat" *ngIf="searchText.value; else standard_count">
               {{r.allConceptCount | number}}
             </div>
+            <ng-template #standard_count>
+              <div class="card-stat">
+                {{r.standardConceptCount | number}}
+              </div>
+            </ng-template>
             <p class="card-text bigger">
               <span *ngIf="searchText.value; else no_search_value">matching medical concepts</span>
               <ng-template #no_search_value><span>medical concepts</span></ng-template>

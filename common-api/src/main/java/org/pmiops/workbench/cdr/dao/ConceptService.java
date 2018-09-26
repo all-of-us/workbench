@@ -231,7 +231,13 @@ public class ConceptService {
         List<Long> conceptIds = concepts.stream().map(Concept::getConceptId).collect(Collectors.toList());
         Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
         for(Concept concept: concepts) {
-            concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
+            List<ConceptSynonym> uniqueConceptSynonyms = new ArrayList<>();
+            for(ConceptSynonym cs: synonymMap.get(concept.getConceptId())) {
+                if(!cs.getConceptSynonymName().equals(concept.getConceptName())) {
+                    uniqueConceptSynonyms.add(cs);
+                }
+            }
+            concept.setSynonyms(uniqueConceptSynonyms);
         }
         return concepts;
     }

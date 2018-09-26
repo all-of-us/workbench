@@ -78,7 +78,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           const notAnswerPercent = this.countPercentage(didNotAnswerCount);
           const didNotAnswerResult = {
             analysisId : result.analysisId,
-            countValue: didNotAnswerCount ,
+            countValue: didNotAnswerCount,
             countPercent: notAnswerPercent,
             stratum1: result.stratum1,
             stratum2: result.stratum2,
@@ -130,7 +130,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   public countPercentage(countValue: number) {
     if (!countValue || countValue <= 0) { return 0; }
     let percent: number = countValue / this.survey.participantCount ;
-    percent = parseFloat(percent.toFixed(2));
+    percent = parseFloat(percent.toFixed(4));
 
     return percent * 100;
   }

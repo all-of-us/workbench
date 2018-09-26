@@ -75,8 +75,8 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-3 grid-header flex-xs-middle"> {{ehrDomain.name}}</div>
-            <div class="col-md-4 grid-header flex-xs-middle"> Synonyms </div>
+          <div class="col-md grid-header flex-xs-middle"> {{ehrDomain.name}}</div>
+            <div class="col-md grid-header flex-xs-middle"> Synonyms </div>
           <div class="col-md-2 grid-header flex-items-xs-right"> Participants of <b> {{totalParticipants | number}}</b> </div>
           <div class="col-md-2 grid-header flex-xs-middle info-text">
             Vocabulary Code
@@ -87,20 +87,20 @@
         <div class="row expandable-grid-row"
              *ngFor="let r of standardConcepts.concat(items), let i = index"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-3 flex-xs-middle" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else code_match_standard"
+          <div class="col-md flex-xs-middle" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else code_match_standard"
                innerHtml="<b>Source</b> {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
           <ng-template #code_match_standard>
-            <div class="col-md-3 flex-xs-middle" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard" innerHtml="<b>Standard</b> {{r.conceptName | highlightSearch : prevSearchText}}
+            <div class="col-md flex-xs-middle" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard" innerHtml="<b>Standard</b> {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
           </ng-template>
           <ng-template #code_match_not_standard>
-            <div class="col-md-3 flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}
+            <div class="col-md flex-xs-middle" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
           </ng-template>
-            <div class="col-md-4 flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"></div>
-            <ng-template #noConceptSynonyms><div class="col-md-4 flex-xs-middle"></div></ng-template>
-          <div class="col-md-2 flex-items-xs-right">
+            <div class="col-md flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"></div>
+            <ng-template #noConceptSynonyms><div class="col-md flex-xs-middle"></div></ng-template>
+          <div class="col-md-2 flex-items-xs-right card-view">
             {{r.countValue | number }}
           </div>
           <div class="col-md-2 flex-xs-middle">
