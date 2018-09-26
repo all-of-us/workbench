@@ -1400,6 +1400,14 @@ definitions:
     required:
      - workspace
     properties:
+      includeUserRoles:
+        type: boolean
+        description: >
+          Whether to clone the user roles (sharing settings) on the workspace.
+          By default, clone follows the behavior of CreateWorkspace - it is
+          shared solely with the creator as an OWNER. If true, all user roles
+          are also copied onto the new workspace in addition to the caller
+          becoming an OWNER.
       workspace:
         $ref: "#/definitions/Workspace"
         description: >

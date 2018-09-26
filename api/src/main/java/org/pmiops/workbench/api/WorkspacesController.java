@@ -584,8 +584,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .getWorkspace()
           .getBucketName();
 
-    org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
-        workspaceNamespace, workspaceId);
+    org.pmiops.workbench.db.model.Workspace fromWorkspace =
+        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     if (fromWorkspace == null) {
       throw new NotFoundException(String.format(
           "Workspace %s/%s not found", workspaceNamespace, workspaceId));
@@ -655,17 +655,30 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
     dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
 
-    WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.setRoleEnum(WorkspaceAccessLevel.OWNER);
-    permissions.setWorkspace(dbWorkspace);
-    permissions.setUser(user);
+    WorkspaceUserRole ownerRole = new WorkspaceUserRole();
+    ownerRole.setRoleEnum(WorkspaceAccessLevel.OWNER);
+    ownerRole.setWorkspace(dbWorkspace);
+    ownerRole.setUser(user);
 
-    dbWorkspace.addWorkspaceUserRole(permissions);
+    dbWorkspace.addWorkspaceUserRole(ownerRole);
+    org.pmiops.workbench.db.model.Workspace savedWorkspace =
+        workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
 
-    dbWorkspace = workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
-    CloneWorkspaceResponse resp = new CloneWorkspaceResponse();
-    resp.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, toFcWorkspace));
-    return ResponseEntity.ok(resp);
+    if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
+      Set<WorkspaceUserRole> clonedRoles = fromWorkspace.getWorkspaceUserRoles().stream()
+          .filter((role) -> role.getUser().getUserId() != user.getUserId())
+          .map((role) -> {
+            WorkspaceUserRole to = new WorkspaceUserRole();
+            to.setUser(role.getUser());
+            to.setWorkspace(dbWorkspace);
+            return to;
+          })
+          .collect(Collectors.toSet());
+      clonedRoles.add(ownerRole);
+      savedWorkspace = workspaceService.updateUserRoles(savedWorkspace, clonedRoles);
+    }
+    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(
+        TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(savedWorkspace, toFcWorkspace)));
   }
 
   @Override

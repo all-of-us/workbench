@@ -7,6 +7,7 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -243,13 +244,7 @@ public class WorkspacesControllerTest {
 
   @Before
   public void setUp() {
-    User user = new User();
-    user.setEmail(LOGGED_IN_USER_EMAIL);
-    user.setUserId(123L);
-    user.setFreeTierBillingProjectName("TestBillingProject1");
-    user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    user = userDao.save(user);
+    User user = createUser(LOGGED_IN_USER_EMAIL);
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);
     cohortsController.setUserProvider(userProvider);
@@ -277,6 +272,15 @@ public class WorkspacesControllerTest {
     CLOCK.setInstant(NOW);
   }
 
+  private User createUser(String email) {
+    User user = new User();
+    user.setEmail(email);
+    user.setFreeTierBillingProjectName("TestBillingProject1");
+    user.setDisabled(false);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    return userDao.save(user);
+  }
+
   private JSONObject createDemoCriteria() {
     JSONObject criteria = new JSONObject();
     criteria.append("includes", new JSONArray());
@@ -302,6 +306,12 @@ public class WorkspacesControllerTest {
     fcWorkspace.setCreatedBy(creator);
     fcWorkspace.setBucketName(BUCKET_NAME);
     return fcWorkspace;
+  }
+
+  private void stubFcUpdateWorkspaceACL() {
+    when(fireCloudService.updateWorkspaceACL(
+        anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(
+            new WorkspaceACLUpdateResponseList());
   }
 
   private void stubGetWorkspace(String ns, String name, String creator,
@@ -350,6 +360,7 @@ public class WorkspacesControllerTest {
     when(bigQueryService.getLong(null, 5)).thenReturn(0L);
   }
 
+  // TODO(calbach): Clean up this test file to make better use of chained builders.
   public Workspace createDefaultWorkspace() throws Exception {
     ResearchPurpose researchPurpose = new ResearchPurpose();
     researchPurpose.setDiseaseFocusedResearch(true);
@@ -656,8 +667,7 @@ public class WorkspacesControllerTest {
     writer.setRole(WorkspaceAccessLevel.WRITER);
     shareWorkspaceRequest.addItemsItem(writer);
 
-    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(),
-        anyListOf(WorkspaceACLUpdate.class))).thenReturn(new WorkspaceACLUpdateResponseList());
+    stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
@@ -1024,6 +1034,51 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getUserRoles().get(0).getEmail()).isEqualTo(cloner.getEmail());
   }
 
+  @Test
+  public void testCloneWorkspaceIncludeUserRoles() throws Exception {
+    User cloner = createUser("cloner@gmail.com");
+    createUser("reader@gmail.com");
+    createUser("writer@gmail.com");
+
+    Workspace workspace = workspacesController.createWorkspace(createDefaultWorkspace()).getBody();
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspace(
+        workspace.getNamespace(), workspace.getId(),
+        new ShareWorkspaceRequest()
+          .workspaceEtag(workspace.getEtag())
+          .items(ImmutableList.of(
+              new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
+              new UserRole().email("cloner@gmail.com").role(WorkspaceAccessLevel.READER),
+              new UserRole().email("reader@gmail.com").role(WorkspaceAccessLevel.READER),
+              new UserRole().email("writer@gmail.com").role(WorkspaceAccessLevel.WRITER))));
+
+    when(userProvider.get()).thenReturn(cloner);
+
+    Workspace modWorkspace = new Workspace()
+      .namespace("cloned-ns")
+      .name("cloned")
+      .researchPurpose(workspace.getResearchPurpose());
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        "cloner@gmail.com", WorkspaceAccessLevel.READER);
+    stubGetWorkspace("cloned-ns", "cloned",
+        "cloner@gmail.com", WorkspaceAccessLevel.OWNER);
+    Workspace workspace2 = workspacesController.cloneWorkspace(
+        workspace.getNamespace(), workspace.getId(),
+        new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
+        .getBody().getWorkspace();
+
+    assertThat(workspace2.getCreator()).isEqualTo("cloner@gmail.com");
+    assertThat(workspace2.getUserRoles().size()).isEqualTo(4);
+    List<UserRole> clonerRoles = workspace2.getUserRoles().stream()
+        .filter((role) -> role.getEmail() == "cloner@gmail.com")
+        .collect(Collectors.toList());
+    assertThat(clonerRoles.size()).isEqualTo(1);
+    assertThat(clonerRoles.get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
+
+    verify(fireCloudService).updateWorkspaceACL(eq("cloned-ns"), eq("cloned"), any());
+  }
+
   @Test(expected = BadRequestException.class)
   public void testCloneWorkspaceBadRequest() throws Exception {
     Workspace workspace = createDefaultWorkspace();
@@ -1130,8 +1185,7 @@ public class WorkspacesControllerTest {
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
-    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    stubFcUpdateWorkspaceACL();
     ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest).getBody();
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
@@ -1184,8 +1238,7 @@ public class WorkspacesControllerTest {
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
-    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    stubFcUpdateWorkspaceACL();
     try {
       workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
       fail("expected bad request exception for no role");
@@ -1285,8 +1338,7 @@ public class WorkspacesControllerTest {
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
-    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
 
