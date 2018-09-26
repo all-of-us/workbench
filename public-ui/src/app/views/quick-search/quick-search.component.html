@@ -38,7 +38,8 @@
               {{r.allConceptCount | number}}
             </div>
             <p class="card-text bigger">
-              <span> matching medical concepts </span>
+              <span *ngIf="searchText.value; else no_search_value">matching medical concepts</span>
+              <ng-template #no_search_value><span>medical concepts</span></ng-template>
             </p>
 
             <div class="card-text bottom">

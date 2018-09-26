@@ -87,11 +87,11 @@
         <div class="row expandable-grid-row"
              *ngFor="let r of standardConcepts.concat(items), let i = index"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
-          <div class="col-md-3 flex-xs-middle" *ngIf="matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else code_match_standard"
+          <div class="col-md-3 flex-xs-middle" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else code_match_standard"
                innerHtml="<b>Source</b> {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
           <ng-template #code_match_standard>
-            <div class="col-md-3 flex-xs-middle" *ngIf="matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard" innerHtml="<b>Standard</b> {{r.conceptName | highlightSearch : prevSearchText}}
+            <div class="col-md-3 flex-xs-middle" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard" innerHtml="<b>Standard</b> {{r.conceptName | highlightSearch : prevSearchText}}
             -- {{r.conceptId}}"> </div>
           </ng-template>
           <ng-template #code_match_not_standard>

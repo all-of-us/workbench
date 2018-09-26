@@ -35,7 +35,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   loading = true;
   totalParticipants: number;
   top10Results: any[] = []; // We graph top10 results
-  matchType: any;
   private searchRequest: SearchConceptsRequest;
   private subscriptions: ISubscription[] = [];
   private initSearchSubscription: ISubscription = null;
@@ -119,7 +118,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   }
 
   private setGraphsToDisplay() {
-    if (this.ehrDomain.name === 'Measurement') {
+    if (this.ehrDomain.name === 'Measurements') {
       this.showGender = false;
       this.showMeasurementGenderBins = true;
     }
@@ -127,10 +126,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
-    this.standardConcepts = this.searchResult.standardConcepts;
-    if (this.searchResult.matchType) {
-      this.matchType = this.searchResult.matchType;
-    }
     if (this.searchResult.standardConcepts) {
       this.standardConcepts = this.searchResult.standardConcepts;
     } else {
