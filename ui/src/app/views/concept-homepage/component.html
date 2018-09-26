@@ -17,7 +17,7 @@
       </button>
       <span *ngIf="searchTermNotLongEnough" class="tooltip-content">Search must be at least three letters long</span>
     </span>
-    <clr-checkbox class="standard-concepts-checkbox" [clrChecked]="standardConceptsOnly">
+    <clr-checkbox class="standard-concepts-checkbox" [(clrChecked)]="standardConceptsOnly">
       Standard concepts only
     </clr-checkbox>
   </div>
@@ -32,7 +32,10 @@
         </div>
         <div class="concept-text">
           <div>
-            <span class="concept-count-text">{{domain.allConceptCount}} </span>
+            <span class="concept-count-text" *ngIf="!standardConceptsOnly else standardCount">{{domain.allConceptCount}}</span>
+            <ng-template #standardCount>
+              <span class="concept-count-text">{{domain.standardConceptCount}} </span>
+            </ng-template>
             <span class="concept-label-text">concepts</span>
           </div>
           in this domain.
@@ -41,23 +44,22 @@
             participants in this domain.
           </div>
         </div>
-        <!-- TODO: Implement browse domain -->
-        <div class="footer"><button class="btn btn-link browse-btn" [disabled]="true">Browse Domain</button></div>
+        <div class="footer"><button class="btn btn-link browse-btn" [disabled]="true" (click)="browseDomain(domain)">Browse Domain</button></div>
       </div>
     </ng-template>
   </div>
   <ng-template #chartBox>
     <div class="chart-box lower-box">
-      <clr-tabs class="chart-selector-tabs">
-        <clr-tab *ngFor="let domain of conceptDomainList">
-          <button clrTabLink (click)="selectDomain(domain.domain)" [disabled]="searchLoading">
+      <div class="chart-selector-tabs">
+        <div *ngFor="let domain of conceptDomainList" class="chart-selector-tab">
+          <button (click)="selectDomain(domain.domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain" [disabled]="searchLoading">
             <div class="chart-selector-header">
               {{domain.name}}
             </div>
             <div>{{domain.allConceptCount}}</div>
           </button>
-        </clr-tab>
-      </clr-tabs>
+        </div>
+      </div>
       <div class="filter-options">
         Filter by vocabulary:
         <clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">

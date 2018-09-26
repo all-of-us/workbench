@@ -126,12 +126,14 @@
   width: 7rem;
   height: 2.2rem;
   padding-left: 0.5rem;
-  margin-right: 0;
+  margin: 0;
 }
 
-:host::ng-deep .chart-selector-tabs .nav {
+.chart-selector-tabs {
   height: 2.2rem;
   padding: 0;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .chart-selector-tabs .btn.btn-link.nav-link.nav-item * {
@@ -177,7 +179,7 @@
 }
 
 .add-section {
-  position: absolute;
+  position: fixed;
   bottom: 1rem;
   right: 1rem;
   color: white;
@@ -225,4 +227,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.domain-selector-button {
+  width: 3rem;
+
 }

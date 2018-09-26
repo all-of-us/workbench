@@ -90,9 +90,15 @@ export class ConceptHomepageComponent implements OnInit {
     this.searchConcepts();
   }
 
-  searchConcepts() {
-    this.searching = true;
+  browseDomain(domain: DomainInfo) {
+    this.currentSearchString = '';
+    this.selectedDomain = domain.domain;
+    this.searchConcepts();
+  }
 
+  searchConcepts() {
+    console.log(this.standardConceptsOnly);
+    this.searching = true;
     this.searchLoading = true;
     let standardConceptFilter: StandardConceptFilter;
     if (this.standardConceptsOnly) {
@@ -108,8 +114,6 @@ export class ConceptHomepageComponent implements OnInit {
     numCallsSubject$.subscribe((finishedCalls) => {
       if (finishedCalls === this.conceptsCache.length) {
         this.searchLoading = false;
-        this.selectedDomain = this.conceptDomainList[0].domain;
-
         this.setConcepts();
       }
     });
@@ -140,5 +144,9 @@ export class ConceptHomepageComponent implements OnInit {
 
   get searchTermNotLongEnough() {
     return this.searchTerm === undefined || this.searchTerm.length < 3;
+  }
+
+  setStandardOnly() {
+    this.standardConceptsOnly = !this.standardConceptsOnly;
   }
 }
