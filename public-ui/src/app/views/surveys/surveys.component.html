@@ -16,16 +16,16 @@
 
         <!-- Show a card for each survey -->
         <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 survey-cards" *ngFor="let survey of surveys; let i = index" >
-          <a (click)="viewResults(survey)" class="card clickable">
+          <a (click)="viewSurvey(survey)" class="card clickable">
             <div class="card-header">
-              {{survey.domainDisplay}}
+              {{survey.name}}
             </div>
             <div class="card-block">
               <div class="card-title">
-                {{survey.countValue | number}} Participants
+                {{survey.participantCount | number}} Participants
               </div>
               <div class="card-text smaller">
-                {{survey.domainDesc}}
+                {{survey.description}}
               </div>
             </div>
           </a>

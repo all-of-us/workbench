@@ -68,11 +68,10 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         for (const q of this.surveyResult.items) {
           // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
-          let didNotAnswerCount  = this.survey.countValue;
+          let didNotAnswerCount  = this.survey.participantCount;
           for (const a of q.countAnalysis.results) {
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
-
           }
           const result = q.countAnalysis.results[0];
           if (didNotAnswerCount < 0 ) { didNotAnswerCount = 0; }
@@ -130,7 +129,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   public countPercentage(countValue: number) {
     if (!countValue || countValue <= 0) { return 0; }
-    let percent: number = countValue / this.survey.countValue ;
+    let percent: number = countValue / this.survey.participantCount ;
     percent = parseFloat(percent.toFixed(2));
 
     return percent * 100;
