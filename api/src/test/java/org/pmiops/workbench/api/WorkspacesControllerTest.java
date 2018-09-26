@@ -1071,8 +1071,8 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getCreator()).isEqualTo("cloner@gmail.com");
     assertThat(workspace2.getUserRoles().size()).isEqualTo(4);
     List<UserRole> clonerRoles = workspace2.getUserRoles().stream()
-        .filter((role) -> role.getEmail() == "cloner@gmail.com")
-        .collect(Collectors.toList());
+      .filter((role) -> "cloner@gmail.com".equals(role.getEmail()))
+      .collect(Collectors.toList());
     assertThat(clonerRoles.size()).isEqualTo(1);
     assertThat(clonerRoles.get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
 
