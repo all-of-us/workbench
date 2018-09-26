@@ -43,5 +43,9 @@ export class ConceptAddModalComponent {
     this.modalOpen = false;
   }
 
+  createConceptSet(): void {
+    // TODO: Implement
+  }
+
 
 }

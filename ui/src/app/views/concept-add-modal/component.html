@@ -9,18 +9,17 @@
     <div class="line-break"></div>
     <div class="form-section">
       <label>Or Create a new Concept Set</label>
-      <input id="new-name" type="text" class="input"
-             [(ngModel)]="newName">
+      <input id="new-name" type="text" class="input">
       <textarea
         name="description">
       </textarea>
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline" (click)="renaming=false">Cancel</button>
+    <button type="button" class="btn btn-outline" (click)="modalOpen=false">Cancel</button>
     <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
-            (click)="this.emitRename(resource);" [clrLoading]="loading" [disabled]="loading">
-      Rename {{resourceType}}
+            (click)="createConceptSet()" [clrLoading]="loading" [disabled]="loading">
+      Save
     </button>
   </div>
 </clr-modal>
