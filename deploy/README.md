@@ -55,10 +55,14 @@ specified for deployment.
 # Manual testing
 
 Note: See above for an explanation of why this process is special right now.
-This could be improved in the future by supporting builds via dirtly clients.
+This could be improved in the future by supporting builds via dirty clients.
 
-Use the --dry-run flag to test changes. To ensure your local changes are picked
-up during the deploy process, follow this process:
+- To test changes without deploying, use the --dry-run flag
+- To run a full manual test deployment, use --project all-of-us-workbench-test
+  --app-version *username* --no-promote.
+
+To ensure your local changes are picked up during the deploy process, follow
+this process:
 
 1. Commit your changes to the deploy scripts
 1. Push your branch to GitHub, e.g. 'ch/deploy-fix'

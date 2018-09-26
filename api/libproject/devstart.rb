@@ -48,6 +48,10 @@ ENVIRONMENTS = {
   }
 }
 
+def run_inline_or_log(dry_run, args)
+  common.run_inline(DRY_RUN_CMD + args)
+end
+
 def get_config(project)
   unless ENVIRONMENTS.fetch(project, {}).has_key?(:config_json)
     raise ArgumentError.new("project #{project} lacks a valid env configuration")
@@ -1131,15 +1135,14 @@ def deploy_gcs_artifacts(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  cmd_prefix = op.opts.dry_run ? DRY_RUN_CMD : []
-  common.run_inline(cmd_prefix + %W{
+  run_inline_or_log(op.opts.dry_run, %W{
     gsutil cp scripts/setup_notebook_cluster.sh
     gs://#{gcc.project}-scripts/setup_notebook_cluster.sh
   })
   # This file must be readable by all AoU researchers and the Leonardo service
   # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make it
   # public since the script's source is public anyways.
-  common.run_inline(cmd_prefix + %W{
+  run_inline_or_log(op.opts.dry_run, %W{
     gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh
   })
 end
@@ -1168,7 +1171,7 @@ def deploy_gcs_demos(cmd_name, args)
   cmd_prefix = op.opts.dry_run ? DRY_RUN_CMD : []
   # Run but ignore failure statuses, as these files may not exist.
   Process.wait spawn(*cmd_prefix, "gsutil", "rm", "gs://#{gcc.project}-demos/**")
-  common.run_inline(cmd_prefix + %W{gsutil cp demos/* gs://#{gcc.project}-demos/})
+  run_inline_or_log(op.opts.dry_run, %W{gsutil cp demos/* gs://#{gcc.project}-demos/})
 end
 
 Common.register_command({
@@ -1231,8 +1234,7 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     promote = op.opts.version ? "--no-promote" : "--promote"
   end
 
-  cmd_prefix = op.opts.dry_run ? DRY_RUN_CMD : []
-  common.run_inline(cmd_prefix + %W{
+  run_inline_or_log(op.opts.dry_run, %W{
     gcloud app deploy
       build/staged-app/app.yaml
   } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
@@ -1290,9 +1292,8 @@ end
 def migrate_database(dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
-  cmd_prefix = dry_run ? DRY_RUN_CMD : []
   Dir.chdir("db") do
-    common.run_inline(cmd_prefix + %W{gradle --info update -PrunList=main})
+    run_inline_or_log(op.opts.dry_run, %W{gradle --info update -PrunList=main})
   end
 end
 
@@ -1322,10 +1323,9 @@ def load_config(project, dry_run = false)
 
   common = Common.new
   common.status "Loading #{config_json} into database..."
-  cmd_prefix = dry_run ? DRY_RUN_CMD : []
   Dir.chdir("tools") do
-    common.run_inline(cmd_prefix + %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}})
-    common.run_inline(cmd_prefix + %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json})
+    run_inline_or_log(op.opts.dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}})
+    run_inline_or_log(op.opts.dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json})
   end
 end
 

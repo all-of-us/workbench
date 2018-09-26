@@ -192,6 +192,10 @@ def deploy(cmd_name, args)
   op.parse.validate
 
   if op.opts.account == "#{TEST_PROJECT}@appspot.gserviceaccount.com"
+    # This is due to some special-cased handling of the test service account
+    # credential in our tooling (where we try to avoid redownloading it). It
+    # could probably be fixed but the circle deploy account is a better
+    # simulation anyways.
     raise ArgumentError.new(
         "Invalid --account: '#{op.opts.account}' is currently incompatible " +
         "with the deploy script. Consider using " +
