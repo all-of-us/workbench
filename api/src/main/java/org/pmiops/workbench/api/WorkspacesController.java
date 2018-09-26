@@ -671,6 +671,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             WorkspaceUserRole to = new WorkspaceUserRole();
             to.setUser(role.getUser());
             to.setWorkspace(dbWorkspace);
+            to.setRole(role.getRole());
             return to;
           })
           .collect(Collectors.toSet());
