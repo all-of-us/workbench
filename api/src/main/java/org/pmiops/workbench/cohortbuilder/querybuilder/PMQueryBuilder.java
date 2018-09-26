@@ -29,7 +29,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
 
   private static final List<String> PM_TYPES_WITH_ATTR =
     Arrays.asList(TreeSubType.BP.name(),
-      TreeSubType.HR_DETAIL.name(),
+      TreeSubType.HR_DETAIL.toString(),
       TreeSubType.HEIGHT.name(),
       TreeSubType.WEIGHT.name(),
       TreeSubType.BMI.name(),
@@ -41,14 +41,14 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_NUMBER = "and value_as_number ${operator} ${value}\n";
 
   private static final String BP_INNER_SQL_TEMPLATE =
-    "select person_id, measurement_date from `${projectId}.${dataSetId}.measurement`\n" +
+    "select person_id, measurement_date from `${projectId}.${dataSetId}.${tableName}`\n" +
     "   where measurement_source_concept_id = ${conceptId}\n";
 
   private static final String BP_SQL_TEMPLATE =
     "select person_id from( ${bpInnerSqlTemplate} )";
 
   private static final String BASE_SQL_TEMPLATE =
-    "select person_id from `${projectId}.${dataSetId}.measurement`\n" +
+    "select person_id from `${projectId}.${dataSetId}.${tableName}`\n" +
       "where measurement_source_concept_id = ${conceptId}\n";
 
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
@@ -75,7 +75,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
           if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             tempQueryParts.add(tempSql
-              .replace("${conceptId}", "@" + namedParameterConceptId));
+              .replace("${conceptId}", "@" + namedParameterConceptId)
+              .replace("${tableName}", parameter.getDomain().toLowerCase()));
             queryParams.put(namedParameterConceptId, QueryParameterValue.int64(attribute.getConceptId()));
           } else {
             boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
@@ -84,7 +85,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
               .replace("${conceptId}", "@" + namedParameterConceptId)
               .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
               .replace("${value}", isBetween ? "@" + namedParameter1 + " and " + "@" + namedParameter2
-                : "@" + namedParameter1));
+                : "@" + namedParameter1)
+              .replace("${tableName}", parameter.getDomain().toLowerCase()));
             queryParams.put(namedParameterConceptId, QueryParameterValue.int64(attribute.getConceptId()));
             queryParams.put(namedParameter1, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
             if (isBetween) {
@@ -101,7 +103,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
         String namedParameterConceptId = CONCEPTID + getUniqueNamedParameterPostfix();
         String namedParameter = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
         queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
-          .replace("${value}","@" + namedParameter));
+          .replace("${value}","@" + namedParameter)
+          .replace("${tableName}", parameter.getDomain().toLowerCase()));
         queryParams.put(namedParameterConceptId, QueryParameterValue.int64(parameter.getConceptId()));
         queryParams.put(namedParameter, QueryParameterValue.int64(new Long(parameter.getValue())));
       }
@@ -138,8 +141,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       String domain = param.getDomain();
       String value = param.getValue();
       Long conceptId = param.getConceptId();
-      from(domainBlank().and(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, domain);
-      from(valueNull().and(valueNotNumber())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, VALUE, value);
+      from(domainBlank().or(domainNotMeasurement())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, domain);
+      from(valueNull().or(valueNotNumber())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, VALUE, value);
       from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, conceptId);
     }
   }

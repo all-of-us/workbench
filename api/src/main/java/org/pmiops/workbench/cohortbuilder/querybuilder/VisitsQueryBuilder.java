@@ -46,8 +46,8 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     List<Long> parentList = new ArrayList<>();
     List<Long> childList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getParameters()) {
-      from(conceptIdNull()).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
       from(typeBlank().or(visitTypeInvalid())).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, parameter.getType());
+      from(conceptIdNull()).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
       if (parameter.getGroup()) {
         parentList.add(parameter.getConceptId());
       } else {

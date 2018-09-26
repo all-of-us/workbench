@@ -210,7 +210,8 @@ public abstract class AbstractQueryBuilder {
 
   private void validateEncounctersModifier(Modifier modifier) {
     String name = modifierText.get(modifier.getName());
-    from(operatorNotIn()).test(modifier).throwException(NOT_IN_MODIFIER_MESSAGE, name, Operator.IN);
+    String oper = operatorText.get(Operator.IN);
+    from(operatorNotIn()).test(modifier).throwException(NOT_IN_MODIFIER_MESSAGE, name, oper);
     from(operandsNotNumbers()).test(modifier).throwException(OPERANDS_NUMERIC_MESSAGE, MODIFIER, name);
   }
 
