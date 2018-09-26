@@ -3,14 +3,12 @@ package org.pmiops.workbench.cohortbuilder.querybuilder.validation;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.Operator;
-import sun.tools.util.ModifierFilter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.Date;
 
 public class ModifierPredicates {
 

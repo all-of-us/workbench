@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class AttributePredicates {
 
   public static Predicate<Attribute> categoricalAndNotIn() {
-    return a -> MeasurementQueryBuilder.CATEGORICAL.equals(a.getName()) &&
+    return a -> MeasurementQueryBuilder.CATEGORICAL.equalsIgnoreCase(a.getName()) &&
       !a.getOperator().equals(Operator.IN);
   }
 

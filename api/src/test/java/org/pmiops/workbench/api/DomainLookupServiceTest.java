@@ -32,11 +32,13 @@ public class DomainLookupServiceTest {
     public void findCodesForEmptyDomains() throws Exception {
         SearchParameter searchParameter1 = new SearchParameter()
                 .type(TreeType.ICD9.name())
+                .group(false)
                 .subtype(TreeSubType.CM.name())
                 .value("001")
                 .domain("Condition");
         SearchParameter searchParameter2 = new SearchParameter()
                 .type(TreeType.ICD9.name())
+                .group(true)
                 .subtype(TreeSubType.CM.name())
                 .value("002")
                 .domain(null);

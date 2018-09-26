@@ -123,7 +123,6 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   private void validateSearchParameter(SearchParameter param) {
     from(typeBlank().or(demoTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
     from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, param.getSubtype());
-    from(subtypeDec().and(valueNotDec())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DEC, param.getValue());
     from(subTypeGenRaceEth().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
   }
 

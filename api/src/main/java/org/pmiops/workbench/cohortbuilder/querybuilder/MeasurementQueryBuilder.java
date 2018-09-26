@@ -86,8 +86,8 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   private void validateSearchParameter(SearchParameter param) {
     from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
-    from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
     from(typeBlank().or(measTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
+    from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
   }
 
   private void validateAttribute(Attribute attr) {
@@ -95,7 +95,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       String name = attr.getName();
       String oper = operatorText.get(attr.getOperator());
       from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
-      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, name);
+      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
       from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
       from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
       from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);

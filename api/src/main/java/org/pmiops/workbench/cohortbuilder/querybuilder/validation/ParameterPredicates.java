@@ -18,36 +18,36 @@ import java.util.stream.Collectors;
 
 public class ParameterPredicates {
 
-  private static final String DECEASED = "Deceased";
   private static final String SYSTOLIC = "Systolic";
   private static final String DIASTOLIC = "Diastolic";
   private static final String ANY = PMQueryBuilder.ANY;
 
   private static final List<String> VALID_DOMAINS =
-    Arrays.asList(DomainType.CONDITION.name(), DomainType.PROCEDURE.name(), DomainType.MEASUREMENT.name(),
-      DomainType.DRUG.name(), DomainType.OBSERVATION.name(), DomainType.VISIT.name(), DomainType.DEVICE.name());
+    Arrays.asList(DomainType.CONDITION.toString(), DomainType.PROCEDURE.toString(), DomainType.MEASUREMENT.toString(),
+      DomainType.DRUG.toString(), DomainType.OBSERVATION.toString(), DomainType.VISIT.toString(), DomainType.DEVICE.toString());
 
   private static final List<String> ICD_TYPES =
-    Arrays.asList(TreeType.ICD9.name(), TreeType.ICD10.name());
+    Arrays.asList(TreeType.ICD9.toString(), TreeType.ICD10.toString());
 
   private static final List<String> CODE_TYPES =
-    Arrays.asList(TreeType.ICD9.name(), TreeType.ICD10.name(), TreeType.CPT.name());
+    Arrays.asList(TreeType.ICD9.toString(), TreeType.ICD10.toString(), TreeType.CPT.toString());
 
   private static final List<String> CODE_SUBTYPES =
-    Arrays.asList(TreeSubType.CM.name(), TreeSubType.PROC.name(), TreeSubType.ICD10CM.name(),
-      TreeSubType.ICD10PCS.name(), TreeSubType.CPT4.name());
+    Arrays.asList(TreeSubType.CM.toString(), TreeSubType.PROC.toString(), TreeSubType.ICD10CM.toString(),
+      TreeSubType.ICD10PCS.toString(), TreeSubType.CPT4.toString());
 
   private static final List<String> DEMO_SUBTYPES =
-    Arrays.asList(TreeSubType.AGE.name(), TreeSubType.DEC.name(), TreeSubType.GEN.name(),
-      TreeSubType.RACE.name(), TreeSubType.ETH.name());
+    Arrays.asList(TreeSubType.AGE.toString(), TreeSubType.DEC.toString(), TreeSubType.GEN.toString(),
+      TreeSubType.RACE.toString(), TreeSubType.ETH.toString());
 
   private static final List<String> PM_SUBTYPES =
-    Arrays.asList(TreeSubType.BP.name(), TreeSubType.HR.name(), TreeSubType.HR_DETAIL.name(),
-      TreeSubType.HEIGHT.name(), TreeSubType.WEIGHT.name(), TreeSubType.BMI.name(),
-      TreeSubType.WC.name(), TreeSubType.HC.name(), TreeSubType.PREG.name(), TreeSubType.WHEEL.name());
+    Arrays.asList(TreeSubType.BP.toString(), TreeSubType.HR.toString(), TreeSubType.HR_DETAIL.toString(),
+      TreeSubType.HEIGHT.toString(), TreeSubType.WEIGHT.toString(), TreeSubType.BMI.toString(),
+      TreeSubType.WC.toString(), TreeSubType.HC.toString(), TreeSubType.PREG.toString(), TreeSubType.WHEEL.toString(),
+      TreeSubType.HR_IRR.toString(), TreeSubType.HR_NOIRR.toString());
 
   private static final List<String> DEMO_GEN_RACE_ETH_SUBTYPES =
-    Arrays.asList(TreeSubType.GEN.name(), TreeSubType.RACE.name(), TreeSubType.ETH.name());
+    Arrays.asList(TreeSubType.GEN.toString(), TreeSubType.RACE.toString(), TreeSubType.ETH.toString());
 
   public static Predicate<List<SearchParameter>> parametersEmpty() {
     return params -> params.isEmpty();
@@ -56,8 +56,8 @@ public class ParameterPredicates {
   public static Predicate<List<SearchParameter>> containsAgeAndDec() {
     return params -> params
       .stream()
-      .filter(param -> TreeSubType.AGE.name().equals(param.getSubtype()) ||
-        TreeSubType.DEC.name().equals(param.getSubtype()))
+      .filter(param -> TreeSubType.AGE.toString().equalsIgnoreCase(param.getSubtype()) ||
+        TreeSubType.DEC.toString().equalsIgnoreCase(param.getSubtype()))
       .collect(Collectors.toList()).size() == 2;
   }
 
@@ -82,7 +82,11 @@ public class ParameterPredicates {
   }
 
   public static Predicate<SearchParameter> domainInvalid() {
-    return sp -> !VALID_DOMAINS.contains(sp.getDomain());
+    return sp -> !VALID_DOMAINS.stream().anyMatch(sp.getDomain()::equalsIgnoreCase);
+  }
+
+  public static Predicate<SearchParameter> domainNotMeasurement() {
+    return sp -> !DomainType.MEASUREMENT.toString().equalsIgnoreCase(sp.getDomain());
   }
 
   public static Predicate<SearchParameter> domainBlank() {
@@ -94,31 +98,31 @@ public class ParameterPredicates {
   }
 
   public static Predicate<SearchParameter> codeTypeInvalid() {
-    return sp -> !CODE_TYPES.contains(sp.getType());
+    return sp -> !CODE_TYPES.stream().anyMatch(sp.getType()::equalsIgnoreCase);
   }
 
   public static Predicate<SearchParameter> demoTypeInvalid() {
-    return sp -> !TreeType.DEMO.name().contains(sp.getType());
+    return sp -> !TreeType.DEMO.toString().equalsIgnoreCase(sp.getType());
   }
 
   public static Predicate<SearchParameter> pmTypeInvalid() {
-    return sp -> !TreeType.PM.name().contains(sp.getType());
+    return sp -> !TreeType.PM.toString().equalsIgnoreCase(sp.getType());
   }
 
   public static Predicate<SearchParameter> drugTypeInvalid() {
-    return sp -> !TreeType.DRUG.name().contains(sp.getType());
+    return sp -> !TreeType.DRUG.toString().equalsIgnoreCase(sp.getType());
   }
 
   public static Predicate<SearchParameter> measTypeInvalid() {
-    return sp -> !TreeType.MEAS.name().contains(sp.getType());
+    return sp -> !TreeType.MEAS.toString().equalsIgnoreCase(sp.getType());
   }
 
   public static Predicate<SearchParameter> visitTypeInvalid() {
-    return sp -> !TreeType.VISIT.name().contains(sp.getType());
+    return sp -> !TreeType.VISIT.toString().equalsIgnoreCase(sp.getType());
   }
 
   public static Predicate<SearchParameter> typeICD() {
-    return sp -> ICD_TYPES.contains(sp.getType());
+    return sp -> ICD_TYPES.stream().anyMatch(sp.getType()::equalsIgnoreCase);
   }
 
   public static Predicate<SearchParameter> subtypeBlank() {
@@ -126,26 +130,19 @@ public class ParameterPredicates {
   }
 
   public static Predicate<SearchParameter> codeSubtypeInvalid() {
-    return sp -> !CODE_SUBTYPES.contains(sp.getSubtype());
+    return sp -> !CODE_SUBTYPES.stream().anyMatch(sp.getSubtype()::equalsIgnoreCase);
   }
 
   public static Predicate<SearchParameter> demoSubtypeInvalid() {
-    return sp -> !DEMO_SUBTYPES.contains(sp.getSubtype());
+    return sp -> !DEMO_SUBTYPES.stream().anyMatch(sp.getSubtype()::equalsIgnoreCase);
   }
 
   public static Predicate<SearchParameter> pmSubtypeInvalid() {
-    return sp -> !PM_SUBTYPES.contains(sp.getSubtype());
+    return sp -> !PM_SUBTYPES.stream().anyMatch(sp.getSubtype()::equalsIgnoreCase);
   }
 
-  public static Predicate<SearchParameter> subtypeDec() {
-    return sp -> sp.getSubtype().equals(TreeSubType.DEC.name());
-  }
   public static Predicate<SearchParameter> subTypeGenRaceEth() {
-    return sp -> DEMO_GEN_RACE_ETH_SUBTYPES.contains(sp.getSubtype());
-  }
-
-  public static Predicate<SearchParameter> valueNotDec() {
-    return sp -> !sp.getValue().equals(DECEASED);
+    return sp -> DEMO_GEN_RACE_ETH_SUBTYPES.stream().anyMatch(sp.getSubtype()::equalsIgnoreCase);
   }
 
   public static Predicate<SearchParameter> valueNull() {
@@ -163,14 +160,14 @@ public class ParameterPredicates {
   public static Predicate<SearchParameter> notSystolicAndDiastolic() {
     return sp -> sp.getAttributes()
       .stream()
-      .filter(a -> !SYSTOLIC.equals(a.getName()) && !DIASTOLIC.equals(a.getName()))
+      .filter(a -> !SYSTOLIC.equalsIgnoreCase(a.getName()) && !DIASTOLIC.equalsIgnoreCase(a.getName()))
       .collect(Collectors.toList()).size() != 0;
   }
 
   public static Predicate<SearchParameter> notAnyAttr() {
     return sp -> sp.getAttributes()
       .stream()
-      .filter(a -> ANY.equals(a.getName()))
+      .filter(a -> ANY.equalsIgnoreCase(a.getName()))
       .collect(Collectors.toList()).size() == 0;
   }
 }
