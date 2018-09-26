@@ -18,8 +18,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 /**
  * CodesQueryBuilder is an object that builds {@link QueryJobConfiguration}

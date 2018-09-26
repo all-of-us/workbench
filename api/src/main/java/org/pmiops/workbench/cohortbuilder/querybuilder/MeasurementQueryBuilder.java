@@ -13,20 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.AttributePredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
-
-  public static final String CATEGORICAL_MESSAGE =
-    "Bad Request: Attribute Categorical must provide In operator.";
-
-  public static final String NUMERICAL = "NUM";
-  public static final String CATEGORICAL = "CAT";
-  public static final String BOTH = "BOTH";
-  public static final String LAB = "LAB";
 
   private static final String UNION_ALL = " union all\n";
   private static final String AND = " and ";
