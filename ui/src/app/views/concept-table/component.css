@@ -6,6 +6,7 @@ clr-datagrid {
   margin-top: 0;
   background-color: #F1F1F1;
   border: none;
+  max-width: 100%;
 }
 
 :host::ng-deep .datagrid-head {

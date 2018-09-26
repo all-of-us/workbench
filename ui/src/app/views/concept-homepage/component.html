@@ -10,35 +10,51 @@
   <div style="display: flex; align-items: center; margin-top: 1.5%;">
     <clr-icon shape="search" style="position: absolute; height: 1rem; width: 1rem; fill: #216FB4; left: 5.3%;"></clr-icon>
     <input type="text" id="concept-search-input" [(ngModel)]="searchTerm" placeholder="Search concepts in domains">
-    <button class="btn btn-secondary" (click)="searching = true">Search</button>
+    <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right btn-search-container">
+      <button class="btn btn-secondary btn-search" (click)="searchButton()" [disabled]="getSearchDisabled">
+        Search
+        <span style="padding-left: 0.5rem; display: flex;" *ngIf="searchLoading"><span class="spinner spinner-sm"></span></span>
+      </button>
+      <span *ngIf="searchTermNotLongEnough" class="tooltip-content">Search must be at least three letters long</span>
+    </span>
     <clr-checkbox class="standard-concepts-checkbox" [clrChecked]="standardConceptsOnly">
       Standard concepts only
     </clr-checkbox>
   </div>
   <div class="domain-box lower-box" *ngIf="!searching else chartBox">
-    <div class="card item-card" *ngFor="let domain of conceptDomainList">
-      <div class="concept-name">{{domain.name}}</div>
-      <div class="concept-text">
-        <div>
-          <span class="concept-count-text">{{domain.conceptCount}} </span>
-          <span class="concept-label-text">concepts</span>
-        </div>
-        in this domain.
-        <div style="margin-top: 0.5rem">
-          <span class="participant-count-text">{{domain.participantCount}}</span>
-          participants in this domain.
-        </div>
-      </div>
-      <div class="footer"><button class="btn btn-link browse-btn">Browse Domain</button></div>
+    <div *ngIf="loadingDomains else domains" class="spinner-container">
+      <span class="spinner spinner-lg"></span>
     </div>
+    <ng-template #domains>
+      <div class="card item-card" *ngFor="let domain of conceptDomainList">
+        <div class="concept-name">
+          {{domain.name}}
+        </div>
+        <div class="concept-text">
+          <div>
+            <span class="concept-count-text">{{domain.allConceptCount}} </span>
+            <span class="concept-label-text">concepts</span>
+          </div>
+          in this domain.
+          <div style="margin-top: 0.5rem">
+            <span class="participant-count-text">{{domain.participantCount}}</span>
+            participants in this domain.
+          </div>
+        </div>
+        <!-- TODO: Implement browse domain -->
+        <div class="footer"><button class="btn btn-link browse-btn" [disabled]="true">Browse Domain</button></div>
+      </div>
+    </ng-template>
   </div>
   <ng-template #chartBox>
     <div class="chart-box lower-box">
       <clr-tabs class="chart-selector-tabs">
         <clr-tab *ngFor="let domain of conceptDomainList">
-          <button clrTabLink (click)="selectDomain(domain.name)">
-            <div class="chart-selector-header">{{domain.name}}</div>
-            <div>{{domain.conceptCount}}</div>
+          <button clrTabLink (click)="selectDomain(domain.domain)" [disabled]="searchLoading">
+            <div class="chart-selector-header">
+              {{domain.name}}
+            </div>
+            <div>{{domain.allConceptCount}}</div>
           </button>
         </clr-tab>
       </clr-tabs>
@@ -54,7 +70,7 @@
           ICD10 (2112)
         </clr-checkbox>
       </div>
-      <app-concept-table [concepts]="concepts"></app-concept-table>
+      <app-concept-table [concepts]="concepts" [selectedDomain]="selectedDomain" [loading]="searchLoading"></app-concept-table>
       <div (mouseenter)="addTextHovering=true" (mouseleave)="addTextHovering=false" (click)="openAddModal()" class="add-section">
         <div class="add-text" [class.hovering]="addTextHovering">Add to set</div>
         <clr-icon class="add-icon" shape="plus"></clr-icon>

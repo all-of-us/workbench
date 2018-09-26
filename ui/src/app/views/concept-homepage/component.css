@@ -31,15 +31,19 @@
 
 .btn.btn-secondary {
   height: 26.6px;
-  width: 6.56%;
+  width: 100%;
   border: 0.7px solid #216FB4;
   border-radius: 3.5px;
   color: #216FB4;
   font-size: 9.8px;
   font-weight: 500;
   text-transform: uppercase;
+}
+
+.btn-search-container {
   position: relative;
   right: 9%;
+  width: 6.56%;
 }
 
 .standard-concepts-checkbox {
@@ -146,6 +150,7 @@
 .chart-selector-tabs .btn.btn-link.nav-link.nav-item .chart-selector-header {
   font-weight: 500;
   font-size: 16px;
+  display: flex;
 }
 
 .filter-options {
@@ -202,4 +207,22 @@
   fill: white;
   height: 1.5rem;
   width: 1.5rem;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  flex-flow: row wrap;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.spinner.spinner-lg {
+  margin-top: 1rem;
+}
+
+.btn-search {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

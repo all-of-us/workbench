@@ -1,4 +1,4 @@
-<clr-datagrid [(clrDgSelected)]="selectedConcepts">
+<clr-datagrid [(clrDgSelected)]="selectedConcepts" [clrDgLoading]="loading">
   <clr-dg-column>Name</clr-dg-column>
   <clr-dg-column>Synonyms</clr-dg-column>
   <clr-dg-column>Code</clr-dg-column>
@@ -6,10 +6,10 @@
   <clr-dg-column>Count</clr-dg-column>
   <div class="break"></div>
   <clr-dg-row *ngFor="let concept of concepts" [clrDgItem]="concept">
-    <clr-dg-cell>{{concept.name}}</clr-dg-cell>
-    <clr-dg-cell>{{concept.synonyms.join(', ')}}</clr-dg-cell>
-    <clr-dg-cell>{{concept.code}}</clr-dg-cell>
-    <clr-dg-cell>{{concept.vocabulary}}</clr-dg-cell>
-    <clr-dg-cell>{{concept.count}}</clr-dg-cell>
+    <clr-dg-cell>{{concept.conceptName}}</clr-dg-cell>
+    <clr-dg-cell>{{concept.conceptSynonyms.join(', ')}}</clr-dg-cell>
+    <clr-dg-cell>{{concept.conceptCode}}</clr-dg-cell>
+    <clr-dg-cell>{{concept.vocabularyId}}</clr-dg-cell>
+    <clr-dg-cell>{{concept.countValue}}</clr-dg-cell>
   </clr-dg-row>
 </clr-datagrid>

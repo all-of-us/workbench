@@ -1,5 +1,7 @@
 import {Component, Input} from '@angular/core';
 
+import {Domain} from 'generated';
+
 @Component({
   selector: 'app-concept-table',
   styleUrls: ['./component.css',
@@ -8,8 +10,9 @@ import {Component, Input} from '@angular/core';
 })
 export class ConceptTableComponent {
   @Input() concepts: Object[];
+  @Input() selectedDomain: Domain;
+  @Input() loading: boolean;
 
-  loading = false;
 
   selectedConcepts: Array<any> = [];
 }
