@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.common.collect.ImmutableMap;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
@@ -11,30 +10,17 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.AttributePredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @Service
 public class PMQueryBuilder extends AbstractQueryBuilder {
-
-  private static final String CONCEPTID = "conceptId";
-  public static final String BP_TWO_ATTRIBUTE_MESSAGE =
-    "Bad Request: Attribute Blood Pressure must provide two attributes(systolic and diastolic).";
-
-  private static final List<String> PM_TYPES_WITH_ATTR =
-    Arrays.asList(TreeSubType.BP.name(),
-      TreeSubType.HR_DETAIL.toString(),
-      TreeSubType.HEIGHT.name(),
-      TreeSubType.WEIGHT.name(),
-      TreeSubType.BMI.name(),
-      TreeSubType.WC.name(),
-      TreeSubType.HC.name());
 
   private static final String UNION_ALL = " union all\n";
   private static final String INTERSECT_DISTINCT = "intersect distinct\n";
@@ -69,7 +55,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
         for (Attribute attribute : parameter.getAttributes()) {
           validateAttribute(attribute);
-          String namedParameterConceptId = CONCEPTID + getUniqueNamedParameterPostfix();
+          String namedParameterConceptId = CONCEPTID_PREFIX + getUniqueNamedParameterPostfix();
           String namedParameter1 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
           String namedParameter2 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
           if (attribute.getName().equals(ANY)) {
@@ -100,7 +86,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
           queryParts.addAll(tempQueryParts);
         }
       } else {
-        String namedParameterConceptId = CONCEPTID + getUniqueNamedParameterPostfix();
+        String namedParameterConceptId = CONCEPTID_PREFIX + getUniqueNamedParameterPostfix();
         String namedParameter = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
         queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
           .replace("${value}","@" + namedParameter)

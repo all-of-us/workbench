@@ -10,8 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 /**
  * VisitsQueryBuilder is an object that builds {@link QueryJobConfiguration}

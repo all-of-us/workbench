@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cohortbuilder.querybuilder.validation;
+package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import org.pmiops.workbench.exceptions.BadRequestException;
 

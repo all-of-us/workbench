@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @Service
 public class DrugQueryBuilder extends AbstractQueryBuilder {

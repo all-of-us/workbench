@@ -14,10 +14,6 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.querybuilder.AbstractQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.MeasurementQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.PMQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -40,6 +36,7 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
@@ -48,10 +45,6 @@ import static org.junit.Assert.fail;
 @MockBean({FireCloudService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
-
-  private static final String NUMERICAL = MeasurementQueryBuilder.NUMERICAL;
-  private static final String CATEGORICAL = MeasurementQueryBuilder.CATEGORICAL;
-  private static final String BOTH = MeasurementQueryBuilder.BOTH;
 
   @Autowired
   private CohortBuilderController controller;
@@ -108,64 +101,64 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsEmptyMessageException() throws Exception {
     //icd9 no search parameters
     SearchRequest searchRequest = createSearchRequests(TreeType.ICD9.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.PARAMETERS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
 
     //demo no search parameters
     searchRequest = createSearchRequests(TreeType.DEMO.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.PARAMETERS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
 
     //demo no attributes
     Criteria demoAge =
       createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
     SearchParameter demo = createSearchParameter(demoAge, null);
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.ATTRIBUTES);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
 
     //demo no attribute operands
     Attribute attr = new Attribute().operator(Operator.BETWEEN);
     demo.attributes(Arrays.asList(attr));
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.OPERANDS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
 
     //drug no search parameters
     searchRequest = createSearchRequests(TreeType.DRUG.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.PARAMETERS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
 
     //measurement no search parameters
     searchRequest = createSearchRequests(TreeType.MEAS.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.PARAMETERS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
 
     //measurement no attributes
     Criteria meas =
       createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
     SearchParameter measParam = createSearchParameter(meas, null);
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.ATTRIBUTES);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
 
     //measurement no attribute operands
     measParam.attributes(Arrays.asList(new Attribute().operator(Operator.IN).name("name")));
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.OPERANDS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
 
     //pm no search parameters
     searchRequest = createSearchRequests(TreeType.PM.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.PARAMETERS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
 
     //pm no attributes
     Criteria pm =
       createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
     SearchParameter pmParam = createSearchParameter(pm, null);
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.ATTRIBUTES);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
 
     //pm no attribute operands
     pmParam.attributes(Arrays.asList(new Attribute().operator(Operator.IN).name("name")));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.OPERANDS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
 
     //visit no search parameters
     searchRequest = createSearchRequests(TreeType.VISIT.name(), new ArrayList<>(), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.EMPTY_MESSAGE, DemoQueryBuilder.PARAMETERS);
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
   }
 
   @Test
@@ -175,115 +168,115 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(null, null, 0, "001", null, null);
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     SearchRequest searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, icd9.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, icd9.getType());
 
     //icd9 bad type
     icd9.type(TreeType.VISIT.name());
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, icd9.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, icd9.getType());
 
     //icd9 no subtype
     icd9.type(TreeType.ICD9.name());
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.SUBTYPE, icd9.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, icd9.getSubtype());
 
     //icd9 bad subtype
     icd9.subtype("badsubtype");
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.SUBTYPE, icd9.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, icd9.getSubtype());
 
     //icd9 no domain
     icd9.subtype(TreeSubType.CM.name());
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.DOMAIN, icd9.getDomain());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, icd9.getDomain());
 
     //icd9 bad domain
     icd9.domain("baddomain");
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.DOMAIN, icd9.getDomain());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, icd9.getDomain());
 
     //icd9 child no concept id
     icd9.domain(DomainType.CONDITION.name());
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.CONCEPT_ID, icd9.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, icd9.getConceptId());
 
     //icd9 parent no code
     icd9.group(true).value(null);
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.CODE, icd9.getValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CODE, icd9.getValue());
 
     //icd9 parent empty code
     icd9.group(true).value("");
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.CODE, icd9.getValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CODE, icd9.getValue());
 
     //demo no type
     Criteria demo =
       createCriteriaChild(null, null, 0, null, null, null);
     SearchParameter demoParam = createSearchParameter(demo, null);
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, demoParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, demoParam.getType());
 
     //demo bad type
     demoParam.type(TreeType.VISIT.name());
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, demoParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, demoParam.getType());
 
     //demo no subtype
     demoParam.type(TreeType.DEMO.name());
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.SUBTYPE, demoParam.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, demoParam.getSubtype());
 
     //demo bad subtype
     demoParam.subtype(TreeSubType.HEIGHT.name());
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.SUBTYPE, demoParam.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, demoParam.getSubtype());
 
     //demo no concept id for gender
     demoParam.subtype(TreeSubType.GEN.name());
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.CONCEPT_ID, demoParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, demoParam.getConceptId());
 
     //demo no concept id for gender
     Attribute age = new Attribute().name("Age");
     demoParam.subtype(TreeSubType.AGE.name()).attributes(Arrays.asList(age));
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.ATTRIBUTE, AbstractQueryBuilder.OPERATOR, age.getOperator());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, OPERATOR, age.getOperator());
 
     //drug no type
     Criteria drug =
       createCriteriaChild(null, null, 0, null, null, null);
     SearchParameter drugParam = createSearchParameter(drug, null);
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, drugParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, drugParam.getType());
 
     //drug bad type
     drugParam.type("blah");
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, drugParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, drugParam.getType());
 
     //drug no concept id
     drugParam.type(TreeType.DRUG.name());
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.CONCEPT_ID, drugParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, drugParam.getConceptId());
 
     //meas no type
     Criteria meas =
@@ -291,129 +284,129 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Attribute measAttr = new Attribute();
     SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, measParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, measParam.getType());
 
     //meas bad type
     measParam.type("blah");
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, measParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, measParam.getType());
 
     //meas no concept id
     measParam.type(TreeType.MEAS.name());
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.CONCEPT_ID, measParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, measParam.getConceptId());
 
     //meas no attr name
     measParam.conceptId(1L);
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.ATTRIBUTE, AbstractQueryBuilder.NAME, measAttr.getName());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, NAME, measAttr.getName());
 
     //meas no operator
     measParam.attributes(Arrays.asList(measAttr.name("name")));
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.ATTRIBUTE, AbstractQueryBuilder.OPERATOR, measAttr.getOperator());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, OPERATOR, measAttr.getOperator());
 
     //pm no type
     Criteria pm =
       createCriteriaChild(null, null, 0, null, null, null);
     SearchParameter pmParam = createSearchParameter(pm, null);
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, pmParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, pmParam.getType());
 
     //pm bad type
     pmParam.type("blah");
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, pmParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, pmParam.getType());
 
     //pm no subtype
     pmParam.type(TreeType.PM.name());
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.SUBTYPE, pmParam.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, pmParam.getSubtype());
 
     //pm bad subtype
     pmParam.subtype("blah");
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.SUBTYPE, pmParam.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, pmParam.getSubtype());
 
     //pm no domain
     pmParam.subtype(TreeSubType.PREG.name());
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.DOMAIN, pmParam.getDomain());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, pmParam.getDomain());
 
     //pm bad domain
     pmParam.domain("blah");
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.DOMAIN, pmParam.getDomain());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, pmParam.getDomain());
 
     //pm no value
     pmParam.domain(DomainType.MEASUREMENT.toString());
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.VALUE, pmParam.getValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, VALUE, pmParam.getValue());
 
     //pm value not a number
     pmParam.value("z");
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.VALUE, pmParam.getValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, VALUE, pmParam.getValue());
 
     //pm no concept id
     pmParam.value("10");
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.CONCEPT_ID, pmParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, pmParam.getConceptId());
 
     //pm no attribute name
     Attribute pmAttr = new Attribute();
     pmParam.subtype(TreeSubType.HEIGHT.name()).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.ATTRIBUTE, AbstractQueryBuilder.NAME, pmAttr.getName());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, NAME, pmAttr.getName());
 
     //pm no operator
     pmAttr.name("HEIGHT");
     pmParam.attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.ATTRIBUTE, AbstractQueryBuilder.OPERATOR, pmAttr.getOperator());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, OPERATOR, pmAttr.getOperator());
 
     //pm no attr concept id
     pmAttr.name("HEIGHT").operator(Operator.EQUAL).operands(Arrays.asList("1"));
     pmParam.attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.ATTRIBUTE, AbstractQueryBuilder.CONCEPT_ID, pmAttr.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, CONCEPT_ID, pmAttr.getConceptId());
 
     //visit no type
     Criteria visit =
       createCriteriaChild(null, null, 0, null, null, null);
     SearchParameter visitParam = createSearchParameter(visit, null);
     searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, visitParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, visitParam.getType());
 
     //visit bad type
     visitParam.type("blah");
     searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.TYPE, visitParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, visitParam.getType());
 
     //visit no concept id
     visitParam.type(TreeType.VISIT.name());
     searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_VALID_MESSAGE,
-      AbstractQueryBuilder.PARAMETER, AbstractQueryBuilder.CONCEPT_ID, visitParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, visitParam.getConceptId());
   }
 
   @Test
@@ -424,8 +417,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
     SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
     SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.ONE_OPERAND_MESSAGE, AbstractQueryBuilder.ATTRIBUTE, demoAttr.getName(),
-      AbstractQueryBuilder.operatorText.get(demoAttr.getOperator()));
+    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, ATTRIBUTE, demoAttr.getName(),
+      operatorText.get(demoAttr.getOperator()));
 
     //pm operands not one
     Attribute pmAttr = new Attribute().name("Height").operator(Operator.EQUAL).operands(Arrays.asList("1", "2")).conceptId(1L);
@@ -433,8 +426,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.ONE_OPERAND_MESSAGE, AbstractQueryBuilder.ATTRIBUTE, pmAttr.getName(),
-      AbstractQueryBuilder.operatorText.get(pmAttr.getOperator()));
+    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, ATTRIBUTE, pmAttr.getName(),
+      operatorText.get(pmAttr.getOperator()));
 
     //modifier operands not one
     Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("1", "2"));
@@ -442,9 +435,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
     SearchParameter drugParam = createSearchParameter(drug, null);
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, AbstractQueryBuilder.ONE_OPERAND_MESSAGE, AbstractQueryBuilder.MODIFIER,
-      AbstractQueryBuilder.modifierText.get(modifier.getName()),
-      AbstractQueryBuilder.operatorText.get(pmAttr.getOperator()));
+    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()),
+      operatorText.get(pmAttr.getOperator()));
   }
 
   @Test
@@ -455,8 +448,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
     SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
     SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.TWO_OPERAND_MESSAGE, AbstractQueryBuilder.ATTRIBUTE,
-      demoAttr.getName(), AbstractQueryBuilder.operatorText.get(demoAttr.getOperator()));
+    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
+      demoAttr.getName(), operatorText.get(demoAttr.getOperator()));
 
     //pm operands not two
     Attribute pmAttr = new Attribute().name("Height").operator(Operator.BETWEEN).operands(Arrays.asList("1")).conceptId(1L);
@@ -464,8 +457,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.TWO_OPERAND_MESSAGE, AbstractQueryBuilder.ATTRIBUTE,
-      pmAttr.getName(), AbstractQueryBuilder.operatorText.get(pmAttr.getOperator()));
+    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
+      pmAttr.getName(), operatorText.get(pmAttr.getOperator()));
 
     //meas operands not two
     Attribute measAttr = new Attribute().name("Meas").operator(Operator.BETWEEN).operands(Arrays.asList("1"));
@@ -473,8 +466,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
     SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.TWO_OPERAND_MESSAGE, AbstractQueryBuilder.ATTRIBUTE,
-      measAttr.getName(), AbstractQueryBuilder.operatorText.get(measAttr.getOperator()));
+    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
+      measAttr.getName(), operatorText.get(measAttr.getOperator()));
 
     //modifier operands not two
     Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.BETWEEN).operands(Arrays.asList("1"));
@@ -482,8 +475,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
     SearchParameter drugParam = createSearchParameter(drug, null);
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, AbstractQueryBuilder.TWO_OPERAND_MESSAGE, AbstractQueryBuilder.MODIFIER,
-      AbstractQueryBuilder.modifierText.get(modifier.getName()), AbstractQueryBuilder.operatorText.get(modifier.getOperator()));
+    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()), operatorText.get(modifier.getOperator()));
   }
 
   @Test
@@ -494,7 +487,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
     SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
     SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.OPERANDS_NUMERIC_MESSAGE, AbstractQueryBuilder.ATTRIBUTE,
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
       demoAttr.getName());
 
     //pm operands not a number
@@ -503,7 +496,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.OPERANDS_NUMERIC_MESSAGE, AbstractQueryBuilder.ATTRIBUTE,
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
       pmAttr.getName());
 
     //meas operands not a number
@@ -512,7 +505,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
     SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, AbstractQueryBuilder.OPERANDS_NUMERIC_MESSAGE, AbstractQueryBuilder.ATTRIBUTE,
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
       measAttr.getName());
 
     //encounters operands not a number
@@ -521,14 +514,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
     SearchParameter drugParam = createSearchParameter(drug, null);
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, AbstractQueryBuilder.OPERANDS_NUMERIC_MESSAGE, AbstractQueryBuilder.MODIFIER,
-      AbstractQueryBuilder.modifierText.get(modifier.getName()));
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()));
 
     //age at event operands not a number
     modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("z"));
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, AbstractQueryBuilder.OPERANDS_NUMERIC_MESSAGE, AbstractQueryBuilder.MODIFIER,
-      AbstractQueryBuilder.modifierText.get(modifier.getName()));
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()));
   }
 
   @Test
@@ -539,7 +532,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
     SearchParameter drugParam = createSearchParameter(drug, null);
     SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier1, modifier2));
-    assertMessageException(searchRequest, AbstractQueryBuilder.ONE_MODIFIER_MESSAGE, AbstractQueryBuilder.modifierText.get(modifier1.getName()));
+    assertMessageException(searchRequest, ONE_MODIFIER_MESSAGE, modifierText.get(modifier1.getName()));
   }
 
   @Test
@@ -549,8 +542,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
     SearchParameter drugParam = createSearchParameter(drug, null);
     SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, AbstractQueryBuilder.DATE_MODIFIER_MESSAGE, AbstractQueryBuilder.MODIFIER,
-      AbstractQueryBuilder.modifierText.get(modifier.getName()));
+    assertMessageException(searchRequest, DATE_MODIFIER_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()));
   }
 
   @Test
@@ -560,8 +553,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
     SearchParameter drugParam = createSearchParameter(drug, null);
     SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
-    assertMessageException(searchRequest, AbstractQueryBuilder.NOT_IN_MODIFIER_MESSAGE, AbstractQueryBuilder.modifierText.get(modifier.getName()),
-      AbstractQueryBuilder.operatorText.get(Operator.IN));
+    assertMessageException(searchRequest, NOT_IN_MODIFIER_MESSAGE, modifierText.get(modifier.getName()),
+      operatorText.get(Operator.IN));
   }
 
   @Test
@@ -574,17 +567,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
     SearchParameter decParam = createSearchParameter(dec, null);
     SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam, decParam), new ArrayList<>());
-    assertMessageException(searchRequest, DemoQueryBuilder.AGE_DEC_MESSAGE);
+    assertMessageException(searchRequest, AGE_DEC_MESSAGE);
   }
 
   @Test
   public void countSubjectsCategoricalMessageException() throws Exception {
-    Attribute measAttr = new Attribute().name(MeasurementQueryBuilder.CATEGORICAL).operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    Attribute measAttr = new Attribute().name(CATEGORICAL).operator(Operator.EQUAL).operands(Arrays.asList("1"));
     Criteria meas =
       createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
     SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
     SearchRequest searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, MeasurementQueryBuilder.CATEGORICAL_MESSAGE);
+    assertMessageException(searchRequest, CATEGORICAL_MESSAGE);
   }
 
   @Test
@@ -597,12 +590,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.PM.name(), TreeSubType.BP.name(), 0, null, null, null);
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(sysAttr));
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, PMQueryBuilder.BP_TWO_ATTRIBUTE_MESSAGE);
+    assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
 
     //2 but not systolic and diastolic
     pmParam.attributes(Arrays.asList(sysAttr, nonDiaAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, PMQueryBuilder.BP_TWO_ATTRIBUTE_MESSAGE);
+    assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
   }
 
   @Test
@@ -1118,7 +1111,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabTextAnyEncounter() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     Modifier modifier = new Modifier()
       .name(ModifierType.ENCOUNTERS)
       .operator(Operator.IN)
@@ -1131,7 +1124,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabTextAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1140,7 +1133,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabNumericalAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1158,7 +1151,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabCategoricalAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1176,7 +1169,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabBothAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1227,7 +1220,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabNumericalAnyAgeAtEvent() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.GREATER_THAN_OR_EQUAL_TO).operands(Arrays.asList("25"));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1241,8 +1234,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter lab1 = createSearchParameter(labCriteria1, null);
     SearchParameter lab2 = createSearchParameter(labCriteria2, null);
     SearchParameter lab3 = createSearchParameter(labCriteria3, null);
-    Attribute labText = new Attribute().name(MeasurementQueryBuilder.ANY);
-    Attribute labNumerical = new Attribute().name(MeasurementQueryBuilder.ANY);
+    Attribute labText = new Attribute().name(ANY);
+    Attribute labNumerical = new Attribute().name(ANY);
     Attribute labCategorical = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("77"));
     lab1.attributes(Arrays.asList(labText));
     lab2.attributes(Arrays.asList(labNumerical));
@@ -1265,8 +1258,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsBloodPressureAny() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name(PMQueryBuilder.ANY).operands(new ArrayList<>()).conceptId(903118L),
-      new Attribute().name(PMQueryBuilder.ANY).operands(new ArrayList<>()).conceptId(903115L)
+      new Attribute().name(ANY).operands(new ArrayList<>()).conceptId(903118L),
+      new Attribute().name(ANY).operands(new ArrayList<>()).conceptId(903115L)
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.BP.name(), "BP Name", attributes);
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());

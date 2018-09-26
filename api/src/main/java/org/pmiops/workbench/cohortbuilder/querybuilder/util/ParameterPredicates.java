@@ -1,12 +1,8 @@
-package org.pmiops.workbench.cohortbuilder.querybuilder.validation;
+package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.pmiops.workbench.cohortbuilder.querybuilder.MeasurementQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.PMQueryBuilder;
-import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.DomainType;
-import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -16,38 +12,60 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
+
 public class ParameterPredicates {
 
   private static final String SYSTOLIC = "Systolic";
   private static final String DIASTOLIC = "Diastolic";
-  private static final String ANY = PMQueryBuilder.ANY;
 
   private static final List<String> VALID_DOMAINS =
-    Arrays.asList(DomainType.CONDITION.toString(), DomainType.PROCEDURE.toString(), DomainType.MEASUREMENT.toString(),
-      DomainType.DRUG.toString(), DomainType.OBSERVATION.toString(), DomainType.VISIT.toString(), DomainType.DEVICE.toString());
+    Arrays
+      .stream(DomainType.values())
+      .map(dt -> dt.toString())
+      .collect(Collectors.toList());
 
   private static final List<String> ICD_TYPES =
-    Arrays.asList(TreeType.ICD9.toString(), TreeType.ICD10.toString());
+    Arrays.asList(TreeType.ICD9.toString(),
+      TreeType.ICD10.toString());
 
   private static final List<String> CODE_TYPES =
-    Arrays.asList(TreeType.ICD9.toString(), TreeType.ICD10.toString(), TreeType.CPT.toString());
+    Arrays.asList(TreeType.ICD9.toString(),
+      TreeType.ICD10.toString(),
+      TreeType.CPT.toString());
 
   private static final List<String> CODE_SUBTYPES =
-    Arrays.asList(TreeSubType.CM.toString(), TreeSubType.PROC.toString(), TreeSubType.ICD10CM.toString(),
-      TreeSubType.ICD10PCS.toString(), TreeSubType.CPT4.toString());
+    Arrays.asList(TreeSubType.CM.toString(),
+      TreeSubType.PROC.toString(),
+      TreeSubType.ICD10CM.toString(),
+      TreeSubType.ICD10PCS.toString(),
+      TreeSubType.CPT4.toString());
 
   private static final List<String> DEMO_SUBTYPES =
-    Arrays.asList(TreeSubType.AGE.toString(), TreeSubType.DEC.toString(), TreeSubType.GEN.toString(),
-      TreeSubType.RACE.toString(), TreeSubType.ETH.toString());
+    Arrays.asList(TreeSubType.AGE.toString(),
+      TreeSubType.DEC.toString(),
+      TreeSubType.GEN.toString(),
+      TreeSubType.RACE.toString(),
+      TreeSubType.ETH.toString());
 
   private static final List<String> PM_SUBTYPES =
-    Arrays.asList(TreeSubType.BP.toString(), TreeSubType.HR.toString(), TreeSubType.HR_DETAIL.toString(),
-      TreeSubType.HEIGHT.toString(), TreeSubType.WEIGHT.toString(), TreeSubType.BMI.toString(),
-      TreeSubType.WC.toString(), TreeSubType.HC.toString(), TreeSubType.PREG.toString(), TreeSubType.WHEEL.toString(),
-      TreeSubType.HR_IRR.toString(), TreeSubType.HR_NOIRR.toString());
+    Arrays.asList(TreeSubType.BP.toString(),
+      TreeSubType.HR.toString(),
+      TreeSubType.HR_DETAIL.toString(),
+      TreeSubType.HEIGHT.toString(),
+      TreeSubType.WEIGHT.toString(),
+      TreeSubType.BMI.toString(),
+      TreeSubType.WC.toString(),
+      TreeSubType.HC.toString(),
+      TreeSubType.PREG.toString(),
+      TreeSubType.WHEEL.toString(),
+      TreeSubType.HR_IRR.toString(),
+      TreeSubType.HR_NOIRR.toString());
 
   private static final List<String> DEMO_GEN_RACE_ETH_SUBTYPES =
-    Arrays.asList(TreeSubType.GEN.toString(), TreeSubType.RACE.toString(), TreeSubType.ETH.toString());
+    Arrays.asList(TreeSubType.GEN.toString(),
+      TreeSubType.RACE.toString(),
+      TreeSubType.ETH.toString());
 
   public static Predicate<List<SearchParameter>> parametersEmpty() {
     return params -> params.isEmpty();

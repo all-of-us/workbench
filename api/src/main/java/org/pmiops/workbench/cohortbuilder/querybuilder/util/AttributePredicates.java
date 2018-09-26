@@ -1,18 +1,19 @@
-package org.pmiops.workbench.cohortbuilder.querybuilder.validation;
+package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.pmiops.workbench.cohortbuilder.querybuilder.MeasurementQueryBuilder;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
+
 public class AttributePredicates {
 
   public static Predicate<Attribute> categoricalAndNotIn() {
-    return a -> MeasurementQueryBuilder.CATEGORICAL.equalsIgnoreCase(a.getName()) &&
+    return a -> CATEGORICAL.equalsIgnoreCase(a.getName()) &&
       !a.getOperator().equals(Operator.IN);
   }
 

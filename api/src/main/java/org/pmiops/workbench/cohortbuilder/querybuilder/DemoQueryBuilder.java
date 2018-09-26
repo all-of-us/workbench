@@ -5,7 +5,6 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Attribute;
-import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
@@ -16,9 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.AttributePredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 /**
  * DemoQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -27,9 +27,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.validation.Validat
  */
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
-
-  public static final String AGE_DEC_MESSAGE = "Bad Request: Attribute Age and Deceased cannot be used together.";
-  public static final String DEC = "Dec";
 
   private static final String SELECT = "select person_id\n" +
     "from `${projectId}.${dataSetId}.person` p\n" +
