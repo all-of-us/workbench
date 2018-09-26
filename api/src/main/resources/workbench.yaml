@@ -17,7 +17,7 @@ info:
   contact:
     name: "developer_help@pmi-ops.org"
   license:
-    name: "MIT"
+    name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
   # Establish the fact that *some endpoints* are OAuth protected
