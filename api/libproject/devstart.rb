@@ -49,7 +49,8 @@ ENVIRONMENTS = {
 }
 
 def run_inline_or_log(dry_run, args)
-  common.run_inline(DRY_RUN_CMD + args)
+  cmd_prefix = dry_run ? DRY_RUN_CMD : []
+  Common.new.run_inline(cmd_prefix + args)
 end
 
 def get_config(project)
@@ -1293,7 +1294,7 @@ def migrate_database(dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
   Dir.chdir("db") do
-    run_inline_or_log(op.opts.dry_run, %W{gradle --info update -PrunList=main})
+    run_inline_or_log(dry_run, %W{gradle --info update -PrunList=main})
   end
 end
 
@@ -1324,8 +1325,8 @@ def load_config(project, dry_run = false)
   common = Common.new
   common.status "Loading #{config_json} into database..."
   Dir.chdir("tools") do
-    run_inline_or_log(op.opts.dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}})
-    run_inline_or_log(op.opts.dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json})
+    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}})
+    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json})
   end
 end
 

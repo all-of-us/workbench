@@ -10,7 +10,6 @@ require_relative "../../api/libproject/wboptionsparser"
 
 DOCKER_KEY_FILE_PATH = "/creds/sa-key.json"
 
-TEST_PROJECT = "all-of-us-workbench-test"
 STAGING_PROJECT = "all-of-us-rw-staging"
 STABLE_PROJECT = "all-of-us-rw-stable"
 PROD_PROJECT = "all-of-us-rw-prod"
@@ -191,7 +190,7 @@ def deploy(cmd_name, args)
 
   op.parse.validate
 
-  if op.opts.account == "#{TEST_PROJECT}@appspot.gserviceaccount.com"
+  if op.opts.account == "all-of-us-workbench-test@appspot.gserviceaccount.com"
     # This is due to some special-cased handling of the test service account
     # credential in our tooling (where we try to avoid redownloading it). It
     # could probably be fixed but the circle deploy account is a better
