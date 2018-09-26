@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {
@@ -7,6 +7,8 @@ import {
     PageFilterType,
     ReviewColumns,
 } from 'generated';
+import {PageFilterRequest, SortOrder} from "../../../generated";
+import {Subscription} from "rxjs/Subscription";
 
 /* The most common column types */
 const itemDate = {
@@ -121,7 +123,44 @@ const labRefRange = {
   templateUrl: './detail-tabs.component.html',
   styleUrls: ['./detail-tabs.component.css']
 })
-export class DetailTabsComponent {
+export class DetailTabsComponent implements OnInit{
+  subscription: Subscription;
+  loading = false;
+  data;
+  ngOnInit(){
+    this.subscription = this.route.data
+      .map(({participant}) => participant)
+      .withLatestFrom(
+        this.route.data.map(({cohort}) => cohort),
+        this.route.data.map(({workspace}) => workspace),
+      )
+      .distinctUntilChanged()
+      .do(_ => this.loading = true)
+      .switchMap(([participant, cohort, workspace]) => {
+        this.data = [];
+        return this.reviewApi.getParticipantChartDataWithHttpInfo(
+          workspace.namespace,
+          workspace.id,
+          cohort.id,
+          workspace.cdrVersionId,
+          participant.participantId,
+          'CONDITION'
+          // <PageFilterRequest>{
+          //   page: 0,
+          //   pageSize: 10000,
+          //   sortOrder: SortOrder.Asc,
+          //   sortColumn: this.columns[0].name,
+          //   pageFilterType: this.filterType,
+          //   domain: this.domain,
+          // }
+        );
+      })
+      .subscribe(resp => {
+       console.log(resp);
+        // this.totalCount = resp.count;
+        // this.loading = false;
+      });
+  }
 
   readonly stubs = [
     'survey',
