@@ -356,7 +356,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
                     conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
                     }
-
             }
 
             this.conceptSynonymNames.put(con.getConceptId(),conceptSynonymNames);
