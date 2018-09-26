@@ -150,7 +150,7 @@ export class CohortSearchEpics {
     action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
       ({cdrVersionId, kind, subtype, searchTerms}: AutocompleteRequestAction) => {
         if (kind === DomainType[DomainType.DRUG]) {
-          return this.service.getDrugBrandOrIngredientByName(cdrVersionId, searchTerms)
+          return this.service.getDrugBrandOrIngredientByValue(cdrVersionId, searchTerms)
             .map(result => loadAutocompleteOptions(result.items))
             .catch(e => Observable.of(autocompleteRequestError(e)));
         } else {
