@@ -1037,8 +1037,8 @@ public class WorkspacesControllerTest {
   @Test
   public void testCloneWorkspaceIncludeUserRoles() throws Exception {
     User cloner = createUser("cloner@gmail.com");
-    createUser("reader@gmail.com");
-    createUser("writer@gmail.com");
+    User reader = createUser("reader@gmail.com");
+    User writer = createUser("writer@gmail.com");
 
     Workspace workspace = workspacesController.createWorkspace(createDefaultWorkspace()).getBody();
     stubFcUpdateWorkspaceACL();
@@ -1048,9 +1048,9 @@ public class WorkspacesControllerTest {
           .workspaceEtag(workspace.getEtag())
           .items(ImmutableList.of(
               new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
-              new UserRole().email("cloner@gmail.com").role(WorkspaceAccessLevel.READER),
-              new UserRole().email("reader@gmail.com").role(WorkspaceAccessLevel.READER),
-              new UserRole().email("writer@gmail.com").role(WorkspaceAccessLevel.WRITER))));
+              new UserRole().email(cloner.getEmail()).role(WorkspaceAccessLevel.READER),
+              new UserRole().email(reader.getEmail()).role(WorkspaceAccessLevel.READER),
+              new UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER))));
 
     when(userProvider.get()).thenReturn(cloner);
 
@@ -1060,18 +1060,18 @@ public class WorkspacesControllerTest {
       .researchPurpose(workspace.getResearchPurpose());
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
-        "cloner@gmail.com", WorkspaceAccessLevel.READER);
+        cloner.getEmail(), WorkspaceAccessLevel.READER);
     stubGetWorkspace("cloned-ns", "cloned",
-        "cloner@gmail.com", WorkspaceAccessLevel.OWNER);
+        cloner.getEmail(), WorkspaceAccessLevel.OWNER);
     Workspace workspace2 = workspacesController.cloneWorkspace(
         workspace.getNamespace(), workspace.getId(),
         new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
         .getBody().getWorkspace();
 
-    assertThat(workspace2.getCreator()).isEqualTo("cloner@gmail.com");
+    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
     assertThat(workspace2.getUserRoles().size()).isEqualTo(4);
     List<UserRole> clonerRoles = workspace2.getUserRoles().stream()
-      .filter((role) -> "cloner@gmail.com".equals(role.getEmail()))
+      .filter((role) -> cloner.getEmail().equals(role.getEmail()))
       .collect(Collectors.toList());
     assertThat(clonerRoles.size()).isEqualTo(1);
     assertThat(clonerRoles.get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
