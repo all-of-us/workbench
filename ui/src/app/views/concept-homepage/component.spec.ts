@@ -10,6 +10,8 @@ import {ConceptHomepageComponent} from 'app/views/concept-homepage/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
+import {HighlightSearchPipe} from 'app/utils/highlight-search.pipe';
+
 
 import {
   ConceptSetsService,
@@ -60,6 +62,7 @@ describe('ConceptHomepageComponent', () => {
         ConceptAddModalComponent,
         ConceptHomepageComponent,
         ConceptTableComponent,
+        HighlightSearchPipe,
         TopBoxComponent,
       ],
       providers: [
@@ -68,8 +71,6 @@ describe('ConceptHomepageComponent', () => {
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
         fixture = TestBed.createComponent(ConceptHomepageComponent);
-        tick();
-        tick();
         tick();
       });
   }));
