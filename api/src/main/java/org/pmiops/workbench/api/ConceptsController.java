@@ -2,8 +2,10 @@ package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import java.util.List;
 import java.util.Map;
-
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
@@ -19,7 +21,6 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
-import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -27,10 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 public class ConceptsController implements ConceptsApiDelegate {
@@ -127,11 +124,20 @@ public class ConceptsController implements ConceptsApiDelegate {
     String domainId = CommonStorageEnums.domainToDomainId(request.getDomain());
     List<org.pmiops.workbench.cdr.model.VocabularyCount> vocabularyCounts;
     if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
-      vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, request.getQuery(),
-          conceptId, domainId);
+      if (matchExp == null) {
+        vocabularyCounts = conceptDao.findVocabularyAllConceptCountsInDomain(domainId);
+      } else {
+        vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, request.getQuery(),
+            conceptId, domainId);
+      }
     } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
-      vocabularyCounts = conceptDao.findVocabularyStandardConceptCounts(matchExp, request.getQuery(),
-          conceptId, domainId);
+      if (matchExp == null) {
+        vocabularyCounts = conceptDao.findVocabularyStandardConceptCountsInDomain(domainId);
+      } else {
+        vocabularyCounts = conceptDao
+            .findVocabularyStandardConceptCounts(matchExp, request.getQuery(),
+                conceptId, domainId);
+      }
     } else {
       return;
     }
