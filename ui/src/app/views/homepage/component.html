@@ -1,136 +1,69 @@
 <div class="background-image">
-  <div class="row" style="display:flex; justify-content: center;flex-wrap: nowrap">
-    <div *ngFor="let card of cardDetails">
-      <div class="card double">
-        <div class="row">
-          <img class="icon topIcon" src={{card.icon}}>
-        </div>
-        <div class="row heading">
-          {{card.title}}
-        </div>
-        <div class="row">
-          <label class="text">{{card.text}}</label>
-        </div>
-        <div class="row button">
-          COMING SOON...
-        </div>
-      </div>
-    </div>
-  </div>
-  <div *ngIf="firstTimeUser">
-    <div class="row" style="display:flex; justify-content:center;">
-      <div class="card double">
-        <div class="row">
-          <img class="icon analyzeIcon" src="/assets/icons/Analyze.svg">
-        </div>
-        <div class="row analyzeHeading">Analyze and Publish with Workspaces
-        </div>
-        <div class="row">
-          <label class="text">Dolor sit amet consectetuer adipiscing sed diam
-            euismod tincidunt ut laoreet dolore.</label>
-        </div>
-        <div class="row">
-          <button class="btn btn-homepage" (click)="addWorkspace()">CREATE WORKSPACE</button>
-        </div>
-      </div>
-      <div class="card double">
-        <div class="row">
-          <img class="icon learnIcon" src="/assets/icons/learn-icon.svg">
-        </div>
-        <div class="row heading learnHeading">
-          Learn Researcher Workbench
-        </div>
-        <div class="row">
-          <label class="text">Dolor sit amet consectetuer adipiscing.</label>
-        </div>
-        <div class="row heading">
-          COMING SOON...
-        </div>
-      </div>
-    </div>
-  </div>
-  <div *ngIf="!firstTimeUser">
-    <div class="row" style="display:flex; justify-content:center">
-      <div class="card single">
-        <div class="row">
-          <div class="col">
-            <img src='/assets/icons/Analyze.svg' class="singleIcon">
-          </div>
-
-          <div class="col analyzeSingleHeader">Analyze and Publish with Workspaces</div>
-          <div class="col" style="display: flex; justify-content: right; width:15%;">
-            <div class="row">
-              <a class="links" (click)="addWorkspace()">Create a
-                workspace</a>
-              <div class="tooltip">
-                <a href="#" class="links">See All Notebooks</a>
-                <span class="tooltiptext">Coming Soon</span>
-              </div>
-            </div>
-            <div class="row">
-              <a class="links" (click)="listWorkspaces()">See All
-                Workspaces</a>
-              <div class="tooltip">
-                <a href="#" class="links">See All Cohorts</a>
-                <span class="tooltiptext">Coming Soon</span>
-              </div>
-            </div>
-          </div>
+  <div class="row" style="display:flex; justify-content:center">
+    <div class="card single">
+      <div class="row" style="flex-direction: row; height: 17.47%">
+        <div class="col main-heading">Researcher Workbench</div>
+        <div class="col heading-links" style="display: flex;">
           <div class="row">
-            <div style="margin-bottom: 2rem;">
-              <div class="card add-card" (click)="addWorkspace()">
-                <div class="card-text">
-                  Create a <br/> New Workspace <br/>
-                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
-                </div>
-              </div>
+            <a class="links" (click)="addWorkspace()">Create a
+              workspace</a>
+            <a class="links" (click)="listWorkspaces()">See All
+              Workspaces</a>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="flex-direction: row; flex-grow: 1;">
+        <div class="card add-card" style="height: 12.5rem" (click)="addWorkspace()">
+          <div class="card-text">
+            Create a <br/> New Workspace <br/>
+            <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+          </div>
+        </div>
+        <div style="margin-left: 2.4375rem;">
+          <app-recent-work></app-recent-work>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <div class="row">
+    <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
+  </div>
+  <div class="footerRtLink">
+    <div class="tooltip">
+      <a href="#" class="footerLink">
+        See all documentation</a>
+      <span class="tooltiptext">Coming Soon</span>
+    </div>
+  </div>
+  <div class="row" style="margin-left:12%">
+    <div *ngFor="let footer of footerLinks" class="row textGroup">
+      <div class="footerText">
+        <div class="title">{{footer.title}}</div>
+        <ul class="bullets">
+          <div *ngFor="let link of footer.links">
+            <div class="tooltip">
+              <li>
+                <a href="#" class="bullets">{{link}}</a>
+              </li>
+              <span class="tooltiptext">Coming Soon</span>
             </div>
-              <div style="margin-left: 2.4375rem;">
-                <app-recent-work></app-recent-work>
-              </div>
           </div>
-        </div>
+        </ul>
       </div>
     </div>
-    <div class="footer">
-      <div class="row">
-        <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
-      </div>
-      <div class="footerRtLink">
-        <div class="tooltip">
-          <a href="#" class="footerLink">
-            See all documentation</a>
-          <span class="tooltiptext">Coming Soon</span>
-        </div>
-      </div>
-      <div class="row" style="margin-left:12%">
-        <div *ngFor="let footer of footerLinks" class="row textGroup">
-          <div class="footerText">
-            <div class="title">{{footer.title}}</div>
-            <ul class="bullets">
-              <div *ngFor="let link of footer.links">
-                <div class="tooltip">
-                  <li>
-                    <a href="#" class="bullets">{{link}}</a>
-                  </li>
-                  <span class="tooltiptext">Coming Soon</span>
-                </div>
-              </div>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="bottom-banner">
-      <div class="logo">
-        <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
-      </div>
-      <div class="bottom-links">
-        Privacy Policy
-      </div>
-      <div class="bottom-links">
-        Terms of Service
-      </div>
-    </div>
+  </div>
+</div>
+<div class="bottom-banner">
+  <div class="logo">
+    <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
+  </div>
+  <div class="bottom-links">
+    Privacy Policy
+  </div>
+  <div class="bottom-links">
+    Terms of Service
+  </div>
   </div>
 

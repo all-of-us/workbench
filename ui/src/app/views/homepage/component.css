@@ -20,8 +20,13 @@
 }
 
 .card.single {
-  height: 379px;
-  max-width: 45rem;
+  height: 33.4%;
+  width: 87.34%;
+  max-width: 70rem;
+  min-height: 18rem;
+  max-height: 26rem;
+  display: flex;
+  flex-direction: column;
   border-radius: 5px;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
@@ -50,19 +55,31 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
-.analyzeHeading {
+.main-heading {
   opacity: 0.87;
   color: #FFFFFF;
   font-size: 28px;
-  font-weight: 500;
+  font-weight: 300;
   line-height: 34px;
-  width: 65%;
+  width: 25.86%;
   display: flex;
-  text-align: center;
-  margin-left: 18%;
-  margin-top: 1%;
+  min-width: 21rem;
+  margin-left: 1.56%;
+  margin-top: 2.58%;
+  letter-spacing: normal;
+}
+
+.heading-links {
+  right: -4.9%;
+  margin-top: 2.74%;
+  height: 2.68%;
+  width: 28.52%;
+  position: absolute;
+  min-width: 18rem;
+  font-size: 14px;
 }
 
 .text {
@@ -188,8 +205,8 @@
 }
 
 .card.add-card {
-  height: 223px;
-  width: 300px;
+  height: 63.89%;
+  width: 26.83%;
   background-color: #FFFFFF;
   align-content: left;
   margin-left: 25px;
