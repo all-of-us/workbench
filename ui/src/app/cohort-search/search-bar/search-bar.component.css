@@ -52,3 +52,7 @@ input {
     font-weight: bolder;
     background-color: rgba(101,159,61,0.2);
 }
+.match-container {
+    font-weight: bold;
+    padding-top: 0.3rem;
+}
