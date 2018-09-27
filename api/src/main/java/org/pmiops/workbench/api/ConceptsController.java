@@ -91,35 +91,37 @@ public class ConceptsController implements ConceptsApiDelegate {
 
   private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response,
                                String matchExp, Long conceptId, StandardConceptFilter standardConceptFilter) {
-    if (request.getIncludeDomainCounts() != null && request.getIncludeDomainCounts()) {
-      List<DomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
-      List<DomainInfo> domainInfos = null;
-      if (matchExp == null) {
-        domainInfos = allDomainInfos;
+    if (request.getIncludeDomainCounts() == null || !request.getIncludeDomainCounts()) {
+      return;
+    }
+    List<DomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
+    List<DomainInfo> domainInfos = null;
+    if (matchExp == null) {
+      domainInfos = allDomainInfos;
+    } else {
+      if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
+        domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp, request.getQuery(), conceptId);
+      } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
+        domainInfos = domainInfoDao.findStandardConceptCounts(matchExp, request.getQuery(), conceptId);
       } else {
-        if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
-          domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp, request.getQuery(), conceptId);
-        } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
-          domainInfos = domainInfoDao.findStandardConceptCounts(matchExp, request.getQuery(), conceptId);
-        } else {
-          return;
-        }
+        return;
       }
-      Map<Domain, DomainInfo> domainCountMap = Maps.uniqueIndex(domainInfos, DomainInfo::getDomainEnum);
-      // Loop through all domains to populate the results (so we get zeros for domains with no
-      // matches.)
-      for (DomainInfo domainInfo : allDomainInfos) {
-        Domain domain = domainInfo.getDomainEnum();
-        DomainInfo resultInfo = domainCountMap.get(domain);
-        response.addDomainCountsItem(new DomainCount().domain(domain).conceptCount(
-            resultInfo == null ? 0L : resultInfo.getAllConceptCount()));
-      }
+    }
+    Map<Domain, DomainInfo> domainCountMap = Maps.uniqueIndex(domainInfos, DomainInfo::getDomainEnum);
+    // Loop through all domains to populate the results (so we get zeros for domains with no
+    // matches.)
+    for (DomainInfo domainInfo : allDomainInfos) {
+      Domain domain = domainInfo.getDomainEnum();
+      DomainInfo resultInfo = domainCountMap.get(domain);
+      response.addDomainCountsItem(new DomainCount().domain(domain).conceptCount(
+          resultInfo == null ? 0L : resultInfo.getAllConceptCount()));
     }
   }
 
   private void addVocabularyCounts(SearchConceptsRequest request, ConceptListResponse response,
                                    String matchExp, Long conceptId, StandardConceptFilter standardConceptFilter) {
-    if (request.getDomain() == null) {
+    if (request.getDomain() == null || request.getIncludeVocabularyCounts() == null ||
+        !request.getIncludeVocabularyCounts()) {
       return;
     }
     String domainId = CommonStorageEnums.domainToDomainId(request.getDomain());

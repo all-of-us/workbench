@@ -528,6 +528,9 @@ definitions:
       includeDomainCounts:
         type: boolean
         description: True if per-domain counts of concepts matching the criteria should be included in the response
+      includeVocabularyCounts:
+        type: boolean
+        description: True if per-vocabulary counts of concepts matching the criteria in the specified domain should be included in the response
 
   ConceptListResponse:
     type: object
