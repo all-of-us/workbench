@@ -562,11 +562,6 @@ export class CohortSearchActions {
 
   fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
                         domain: string, limit: number): void {
-    const isLoading = isChartLoading(domain)(this.state);
-    const dataIsInStore = this.state.getIn(['reviewChartData', 'domainCharts', 'items']);
-      if (isLoading || dataIsInStore) {
-          return;
-      }
       this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
   }
 }

@@ -1,4 +1,4 @@
-import {TreeSubType, TreeType} from 'generated';
+import {TreeSubType, TreeType, DomainType} from 'generated';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 
@@ -74,6 +74,9 @@ export function typeToTitle(_type: string): string {
       break;
     case TreeType[TreeType.PROCEDURE]:
       _type = 'Procedures';
+      break;
+    case DomainType[DomainType.LAB]:
+      _type = 'Labs';
       break;
   }
   return _type;

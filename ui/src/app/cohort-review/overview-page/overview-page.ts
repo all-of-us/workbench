@@ -8,8 +8,11 @@ import {
     CohortSearchActions,
     CohortSearchState,
     isChartLoading,
+    isDomainNameExits
 } from '../../cohort-search/redux';
 import {ReviewStateService} from '../review-state.service';
+import {TreeType} from "../../../generated";
+import {typeToTitle} from "../../cohort-search/utils";
 
 @Component({
     selector: 'app-overview-charts',
@@ -34,6 +37,8 @@ export class OverviewPage implements OnInit, OnDestroy {
   review: CohortReview;
   totalParticipantCount: number;
   isCancelTimerInitiated: any = false;
+  domainTitle: '';
+  trackClickedDomains = false;
   private subscription: Subscription;
 
   constructor(
@@ -57,7 +62,6 @@ export class OverviewPage implements OnInit, OnDestroy {
               this.data = fromJS(data);
                this.spinner = false;
           });
-
       this.subscription = this.state.review$.subscribe(review => {
           this.review = review;
           this.totalParticipantCount = review.matchedParticipantCount;
@@ -68,60 +72,72 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
 
-    getDemoCharts () {
-        this.spinner = true;
-         setTimeout(() => {
-            this.demoGraph = true;
-            if (this.data.size) {
-                this.spinner = false;
-            }
-         }, 1000);
-            this.showTitle = false;
-            this.title = '';
-            this.isCancelTimerInitiated = false;
-    }
-
-    getDifferentCharts(names) {
-        this.demoGraph = false;
-        this.title = names;
-        this.fetchChartsData(names);
-        return this.title;
-    }
-
-    fetchChartsData(name) {
-        this.demoGraph = false;
+  getDemoCharts () {
       this.spinner = true;
-      this.showTitle = false;
-      const domain = name;
-      const limit = 10;
-      const {ns, wsid, cid} = this.route.parent.snapshot.params;
-      const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-        if (this.isCancelTimerInitiated) {
-            clearTimeout(this.isCancelTimerInitiated);
-        }
-        this.isCancelTimerInitiated  = setTimeout(() => {
-            this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
-            this.getCharts(name);
-        }, 2000);
+       setTimeout(() => {
+          this.demoGraph = true;
+          if (this.data.size) {
+              this.spinner = false;
+          }
+       }, 1000);
+          this.showTitle = false;
+          this.domainTitle = '';
+          this.isCancelTimerInitiated = false;
+  }
+
+  getDifferentCharts(names) {
+    this.demoGraph = false;
+    this.domainTitle = names
+    this.fetchChartsData(names);
+    this.title = typeToTitle(names);
+    return this.title;
+  }
+
+  fetchChartsData(name) {
+    const checkedDomainName = this.ngRedux
+      .select(isDomainNameExits(name))
+      .subscribe(itemName =>{
+        this.trackClickedDomains = itemName
+      })
+    this.subscription = checkedDomainName;
+    this.demoGraph = false;
+    this.spinner = true;
+    this.showTitle = false;
+    const domain = name;
+    const limit = 10;
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    if (this.trackClickedDomains) {
+       setTimeout(() => {
+        this.spinner = false;
+         this.getCharts(name);
+       }, 2000)
+    } else {
+      this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
+      this.getCharts(name);
     }
 
-    getCharts(name) {
-        const loadingReviewCohortData = this.ngRedux
-            .select(isChartLoading(name))
-            .filter(domain => !!domain)
-            .subscribe(loading => {
-                this.spinner = false;
-                this.showTitle = true;
-                this.loading = loading;
-                const totalCount = this.loading.toJS().count;
-                this.domainItems = this.loading.toJS().items;
-                this.domainItems.forEach(itemCount => {
-                    const percentCount = ((itemCount.count / totalCount) * 100);
-                    Object.assign(itemCount, {percentCount: percentCount});
-                });
-            });
-        this.subscription = loadingReviewCohortData;
-    }
+  }
+
+  getCharts(name) {
+    const loadingReviewCohortData = this.ngRedux
+        .select(isChartLoading(name))
+        .filter(domain => !!domain)
+        .subscribe(loading => {
+            this.loading = loading;
+            const totalCount = this.loading.toJS().count;
+            if(name === this.domainTitle){
+              this.spinner = false;
+              this.showTitle = true;
+              this.domainItems = this.loading.toJS().items;
+              this.domainItems.forEach(itemCount => {
+              const percentCount = ((itemCount.count / totalCount) * 100);
+              Object.assign(itemCount, {percentCount: percentCount});
+           });
+          }
+        });
+    this.subscription = loadingReviewCohortData;
+  }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
