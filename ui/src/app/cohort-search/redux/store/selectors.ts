@@ -125,6 +125,10 @@ export const criteriaChildren =
     }
   };
 
+export const isEmpty =
+  (kind: string) => (state): boolean =>
+    state.getIn(['criteria', 'tree', kind, 'empty'], false);
+
 export const demoCriteriaChildren =
   (kind: string, subtype: string) =>
   (state): List<any> =>

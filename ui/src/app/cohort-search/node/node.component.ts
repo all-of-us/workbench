@@ -15,6 +15,7 @@ import {
   criteriaSubtree,
   ingredientsForBrand,
   isCriteriaLoading,
+  isEmpty,
   subtreeSelected,
 } from '../redux';
 
@@ -54,6 +55,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   numMatches = 0;
   subMatches = 0;
   loading = false;
+  empty: boolean;
   error = false;
   fullTree: boolean;
   codes: any;
@@ -77,6 +79,10 @@ export class NodeComponent implements OnInit, OnDestroy {
         .select(criteriaError(_type, parentId))
         .map(err => !(err === null || err === undefined))
         .subscribe(err => this.error = err);
+
+      const emptySub = this.ngRedux
+        .select(isEmpty(_type))
+        .subscribe(empty => this.empty = empty);
 
       const loadingSub = this.ngRedux
         .select(isCriteriaLoading(_type, parentId))
@@ -144,6 +150,7 @@ export class NodeComponent implements OnInit, OnDestroy {
 
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
+      this.subscription.add(emptySub);
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
       this.subscription.add(subtreeSub);
