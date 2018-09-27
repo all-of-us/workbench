@@ -29,7 +29,7 @@
 
     <h5 class="box-heading" style="display:block" *ngIf="showDataType(EHR_DATATYPE)" > EHR Domains: </h5>
     <div class="row" *ngIf="showDataType(EHR_DATATYPE)" >
-      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
+      <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
           <div class="white-card-box search-result">
             <h5 class="box-title">
               {{r.name}}
@@ -45,6 +45,10 @@
             <p class="card-text bigger">
               <span *ngIf="searchText.value; else no_search_value">matching medical concepts</span>
               <ng-template #no_search_value><span>medical concepts</span></ng-template>
+              <br>
+              <span *ngIf="r.participantCount">
+                <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
+              </span>
             </p>
 
             <div class="card-text bottom">
@@ -60,7 +64,7 @@
 
     <h5 class="box-heading" *ngIf="showDataType(SURVEY_DATATYPE)"> Surveys:  </h5>
     <div class="row" *ngIf="showDataType(SURVEY_DATATYPE)">
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
+      <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
         <div class="white-card-box search-result">
           <h5 class="box-title">
             {{r.name}}

@@ -12,8 +12,8 @@
 
 /* result card */
 .white-card-box.search-result {
-    height: 264px;
-    width: 246px;
+    height: 100%;
+    width: 100%;
     margin-top: 1rem;
     margin-bottom: 1rem;
     padding: .5rem 1rem;
