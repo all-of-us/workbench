@@ -111,7 +111,10 @@ public class ConceptsController implements ConceptsApiDelegate {
       Domain domain = domainInfo.getDomainEnum();
       DomainInfo resultInfo = domainCountMap.get(domain);
       response.addDomainCountsItem(new DomainCount().domain(domain).conceptCount(
-          resultInfo == null ? 0L : resultInfo.getAllConceptCount()));
+          resultInfo == null ? 0L :
+              (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS ?
+                  resultInfo.getAllConceptCount() : resultInfo.getStandardConceptCount()))
+          .name(domainInfo.getName()));
     }
   }
 

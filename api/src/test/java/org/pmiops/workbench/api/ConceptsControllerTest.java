@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +32,11 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -261,11 +264,49 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsBlankQueryWithResults() throws Exception{
     saveConcepts();
+    saveDomains();
     assertResults(
         conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query(" ")),
         CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4, CLIENT_CONCEPT_3, CLIENT_CONCEPT_2,
         CLIENT_CONCEPT_1);
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryWithVocabStandardCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    ResponseEntity<ConceptListResponse> response =
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().includeVocabularyCounts(true).domain(Domain.CONDITION));
+    assertResultsWithCounts(response,
+        null,
+        ImmutableList.<VocabularyCount>of(
+            new VocabularyCount().vocabularyId("V1").conceptCount(1L),
+            new VocabularyCount().vocabularyId("V3").conceptCount(1L),
+            new VocabularyCount().vocabularyId("V5").conceptCount(2L)
+        ),
+        ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3,
+            CLIENT_CONCEPT_1));
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryWithDomainStandardCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    // When no query is provided, domain concept counts come from domain info directly.
+    ResponseEntity<ConceptListResponse> response =
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().includeDomainCounts(true));
+    assertResultsWithCounts(response,
+        ImmutableList.<DomainCount>of(
+            toDomainCount(CONDITION_DOMAIN, false),
+            toDomainCount(DRUG_DOMAIN, false),
+            toDomainCount(MEASUREMENT_DOMAIN, false),
+            toDomainCount(PROCEDURE_DOMAIN, false)),
+        null,
+        ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4, CLIENT_CONCEPT_3,
+            CLIENT_CONCEPT_2, CLIENT_CONCEPT_1));
   }
 
   @Test
@@ -522,8 +563,24 @@ public class ConceptsControllerTest {
     domainInfoDao.save(DRUG_DOMAIN);
   }
 
+  private DomainCount toDomainCount(org.pmiops.workbench.cdr.model.DomainInfo domainInfo, boolean standardCount) {
+    return new DomainCount().name(domainInfo.getName())
+        .conceptCount(standardCount ? domainInfo.getStandardConceptCount() : domainInfo.getAllConceptCount())
+        .domain(domainInfo.getDomainEnum());
+  }
+
+  private void assertResultsWithCounts(ResponseEntity<ConceptListResponse> response,
+      ImmutableList<DomainCount> domainCounts, ImmutableList<VocabularyCount> vocabularyCounts,
+      ImmutableList<Concept> concepts) {
+    assertThat(response.getBody().getDomainCounts()).isEqualTo(domainCounts);
+    assertThat(response.getBody().getVocabularyCounts()).isEqualTo(vocabularyCounts);
+    assertThat(response.getBody().getItems()).isEqualTo(concepts);
+  }
+
   private void assertResults(ResponseEntity<ConceptListResponse> response,
       Concept... expectedConcepts) {
-    assertThat(response.getBody().getItems()).containsExactly(expectedConcepts).inOrder();
+    assertThat(response.getBody().getItems()).isEqualTo(ImmutableList.of(expectedConcepts));
+    assertThat(response.getBody().getDomainCounts()).isNull();
+    assertThat(response.getBody().getVocabularyCounts()).isNull();
   }
 }

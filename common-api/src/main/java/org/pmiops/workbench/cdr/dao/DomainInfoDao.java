@@ -34,7 +34,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
 
   /**
    * Returns domain metadata and concept counts for domains, matching only standard concepts by name,
-   * code, or concept ID. allConceptCount is populated; standardConceptCount
+   * code, or concept ID. standardConceptCount is populated; allConceptCount
    * and participantCount are not needed and set to zero.
    * @param matchExpression a boolean full text match expression based on the user's query; see
    *                https://dev.mysql.com/doc/refman/5.7/en/fulltext-boolean.html
@@ -43,7 +43,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
    */
   @Query(value="select new org.pmiops.workbench.cdr.model.DomainInfo(\n" +
       "d.domain, d.domainId, d.name, d.description,\n" +
-      "d.conceptId, COUNT(DISTINCT c.conceptId), 0L, 0L)\n" +
+      "d.conceptId, 0L, COUNT(DISTINCT c.conceptId), 0L)\n" +
       "from DomainInfo d\n" +
       "join Concept c ON d.domainId = c.domainId\n" +
       "left join c.synonyms cs\n" +
