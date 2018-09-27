@@ -1,6 +1,7 @@
 import {
   Component,
   ElementRef,
+  Input,
   NgZone,
   OnInit,
   Renderer2,
@@ -25,6 +26,7 @@ import {Observable} from 'rxjs/Observable';
 })
 export class RoutingSpinnerComponent implements OnInit {
   @ViewChild('pageSpinner') pageSpinner: ElementRef;
+  @Input('alwaysShow') alwaysShow = false;
 
   constructor(
     private renderer: Renderer2,
@@ -33,6 +35,10 @@ export class RoutingSpinnerComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    if (this.alwaysShow) {
+      this.showSpinner();
+      return;
+    }
     /* TODO: The spinner should only show if the route is taking a certain
      * amount of time to load.  Also I'm not convinced that this is actually
      * activating for all the router start / end events we want it to.  But the

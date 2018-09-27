@@ -9,7 +9,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.TreeType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 /**
  * CodesQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -61,6 +64,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters params) {
+    from(parametersEmpty()).test(params.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     ListMultimap<MultiKey, SearchParameter> paramMap = getMappedParameters(params.getParameters());
     List<String> queryParts = new ArrayList<String>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
@@ -100,6 +104,14 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       .setNamedParameters(queryParams)
       .setUseLegacySql(false)
       .build();
+  }
+
+  private void validateSearchParameter(SearchParameter param) {
+    from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
+    from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, param.getSubtype());
+    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomain());
+    from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
+    from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CODE, param.getValue());
   }
 
   private void buildInnerQuery(String type,
@@ -144,6 +156,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     ListMultimap<MultiKey, SearchParameter> fullMap = ArrayListMultimap.create();
     searchParameters
       .forEach(param -> {
+          validateSearchParameter(param);
           fullMap.put(new MultiKey(param), param);
         }
       );

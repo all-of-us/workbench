@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 /**
  * VisitsQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -37,15 +40,15 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters inputParameters) {
+    from(parametersEmpty()).test(inputParameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<>();
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
     List<Long> parentList = new ArrayList<>();
     List<Long> childList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getParameters()) {
-      if (parameter.getConceptId() == null) {
-        throw new BadRequestException("Please provide a valid concept Id");
-      }
+      from(typeBlank().or(visitTypeInvalid())).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, parameter.getType());
+      from(conceptIdNull()).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
       if (parameter.getGroup()) {
         parentList.add(parameter.getConceptId());
       } else {

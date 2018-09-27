@@ -56,6 +56,7 @@ describe('NewNotebookModalComponent', () => {
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
     expect(fixture.debugElement.query(By.css('.error'))).toBeDefined();
+    expect(fixture.debugElement.query(By.css('clr-modal')).classes['open']).toBeTruthy();
   }));
 
   it('does not allow blank names', fakeAsync(() => {
@@ -78,6 +79,7 @@ describe('NewNotebookModalComponent', () => {
       `notebooks/create/?notebook-name=` + encodeURIComponent(name) +
       `&kernel-type=${Kernels.Python3}`;
     expect(window.open).toHaveBeenCalledWith(expectedUrl, '_blank');
+    expect(fixture.debugElement.query(By.css('clr-modal')).classes['open']).toBeFalsy();
   }));
 
   it('allows creation of R notebooks', fakeAsync(() => {
@@ -94,5 +96,6 @@ describe('NewNotebookModalComponent', () => {
       `notebooks/create/?notebook-name=` + encodeURIComponent(name) +
       `&kernel-type=${Kernels.R}`;
     expect(window.open).toHaveBeenCalledWith(expectedUrlR, '_blank');
+    expect(fixture.debugElement.query(By.css('clr-modal')).classes['open']).toBeFalsy();
   }));
 });

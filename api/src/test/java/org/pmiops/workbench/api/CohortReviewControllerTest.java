@@ -233,7 +233,7 @@ public class CohortReviewControllerTest {
     cohortWithoutReview = new Cohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     cohortWithoutReview.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"ICD10\",\"searchParameters\":[{\"parameterId\":\"param25164\"," +
-      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":true,\"domain\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":false,\"domain\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
     cohortDao.save(cohortWithoutReview);
 
     Timestamp today = new Timestamp(new Date().getTime());
@@ -349,7 +349,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Cohort Review size must be between 0 and 10000");
+        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
     }
   }
 
@@ -366,7 +366,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Cohort Review size must be between 0 and 10000");
+        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
     }
   }
 
@@ -388,7 +388,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Cohort Review already created for cohortId: " +
+        .isEqualTo("Bad Request: Cohort Review already created for cohortId: " +
           cohort.getCohortId() + ", cdrVersionId: " + cdrVersion.getCdrVersionId());
     }
   }
@@ -472,7 +472,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid cohort annotation definition id.");
+        .isEqualTo("Bad Request: Please provide a valid cohort annotation definition id.");
     }
 
   }
@@ -524,7 +524,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid participant id.");
+        .isEqualTo("Bad Request: Please provide a valid participant id.");
     }
   }
 
@@ -549,7 +549,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid cohort review id.");
+        .isEqualTo("Bad Request: Please provide a valid cohort review id.");
     }
   }
 
@@ -646,7 +646,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid cohort annotation definition id.");
+        .isEqualTo("Bad Request: Please provide a valid cohort annotation definition id.");
     }
   }
 
@@ -689,7 +689,7 @@ public class CohortReviewControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertThat(bre.getMessage()).isEqualTo("Invalid Request: Please provide a valid participant id.");
+      assertThat(bre.getMessage()).isEqualTo("Bad Request: Please provide a valid participant id.");
     }
   }
 
