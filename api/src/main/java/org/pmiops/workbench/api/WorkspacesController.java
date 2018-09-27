@@ -4,19 +4,23 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 import javax.inject.Provider;
+
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -664,7 +668,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace savedWorkspace =
         workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
 
-    if (Boolean.TRUE.equals(body.getIncludeUserRoles())) {
+    if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Set<WorkspaceUserRole> clonedRoles = fromWorkspace.getWorkspaceUserRoles().stream()
           .filter((role) -> role.getUser().getUserId() != user.getUserId())
           .map((role) -> {
