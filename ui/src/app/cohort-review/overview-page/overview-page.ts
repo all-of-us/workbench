@@ -13,6 +13,7 @@ import {
 import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
 
+
 @Component({
     selector: 'app-overview-charts',
     templateUrl: './overview-page.html',
