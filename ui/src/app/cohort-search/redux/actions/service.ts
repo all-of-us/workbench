@@ -263,6 +263,7 @@ export class CohortSearchActions {
 
 
 
+
   fetchAutocompleteOptions(kind: string, subtype: string, terms: string): void {
     this.requestAutocompleteOptions(this.cdrVersionId, kind, subtype, terms);
   }

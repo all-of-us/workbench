@@ -69,6 +69,7 @@ type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
 type CritSubRequestAction = ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
+type ReviewChartRequestAction = ActionTypes[typeof BEGIN_CHART_DATA_REQUEST];
 type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
 type ChildrenRequestAction = ActionTypes[typeof BEGIN_CHILDREN_REQUEST];

@@ -60,7 +60,7 @@ export class OverviewPage implements OnInit, OnDestroy {
           .map(response => (<DemoChartInfoListResponse>response).items)
           .subscribe(data => {
               this.data = fromJS(data);
-              this.spinner = false;
+               this.spinner = false;
           });
       this.subscription = this.state.review$.subscribe(review => {
           this.review = review;
