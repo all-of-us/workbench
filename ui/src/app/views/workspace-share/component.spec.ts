@@ -21,7 +21,8 @@ import {
 } from 'testing/test-helpers';
 
 import {
-  UserRole, UserService,
+  UserRole,
+  UserService,
   WorkspaceAccessLevel,
   WorkspaceResponse,
   WorkspacesService

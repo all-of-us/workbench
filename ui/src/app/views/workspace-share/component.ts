@@ -45,7 +45,6 @@ export class WorkspaceShareComponent implements OnInit {
   gsuiteDomain: string;
   userRolesList: UserRole[] = [];
 
-  // All new stuff to handle autocomplete.
   searchTerm: string;
   searchTermChanged = new Subject<string>();
   userResponse: UserResponse;
