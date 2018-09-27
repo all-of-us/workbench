@@ -45,6 +45,7 @@
     color: #5FAEE0;
     font-weight: bold;
     margin-left:0.5rem;
+    cursor: pointer;
 }
 
 .button-chart-container {
