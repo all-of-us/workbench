@@ -1,10 +1,10 @@
 package org.pmiops.workbench.cdr;
 
-import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.dialect.MySQL57InnoDBDialect;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.type.StandardBasicTypes;
 
-public class CommonTestDialect extends MySQLDialect {
+public class CommonTestDialect extends MySQL57InnoDBDialect {
 
     public CommonTestDialect() {
         super();

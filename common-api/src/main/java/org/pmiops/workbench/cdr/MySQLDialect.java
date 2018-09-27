@@ -3,7 +3,7 @@ package org.pmiops.workbench.cdr;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.type.StandardBasicTypes;
 
-public class MySQLDialect extends org.hibernate.dialect.MySQLDialect {
+public class MySQLDialect extends org.hibernate.dialect.MySQL57InnoDBDialect {
 
   public MySQLDialect() {
     super();
