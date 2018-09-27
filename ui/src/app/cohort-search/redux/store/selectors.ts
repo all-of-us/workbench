@@ -179,13 +179,19 @@ export const chartData =
   state.get('chartData', List());
 
 /**
- * Cohort Review Charts
+ * Cohort Review Charts selectors start
  */
 
 export const isChartLoading =
-     ( domain: string) =>
-        (state): any =>
-        state.getIn(['reviewChartData', 'domainCharts', domain]);
+  (domain: string) =>
+    (state): any =>
+    state.getIn(['reviewChartData', 'domainCharts', domain]);
 
 
-
+export const isDomainNameExits = (domain: string) => (state: any) => {
+  const domainCharts = state.getIn(['reviewChartData', 'domainCharts']).toJS();
+  const availableKeys = Object.keys(domainCharts);
+  return availableKeys.some((item) =>
+    item === domain
+  )
+}

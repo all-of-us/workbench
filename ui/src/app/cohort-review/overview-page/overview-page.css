@@ -153,3 +153,6 @@
 .chart-width {
     margin: 0;
 }
+.btn-disable {
+    pointer-events: none;
+}
