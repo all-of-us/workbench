@@ -13,6 +13,7 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortsService} from 'generated/api/cohorts.service';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {ResourceCardComponent} from './component';
@@ -58,6 +59,7 @@ describe('ResourceCardComponent', () => {
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         {provide: CohortsService, useValue: new CohortsServiceStub()},
+        {provide: ConceptSetsService },
         {provide: SignInService, useValue: new SignInServiceStub()},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
       ]

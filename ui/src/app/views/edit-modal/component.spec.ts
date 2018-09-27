@@ -25,7 +25,7 @@ class ActivatedRouteStub {
   }
 }
 
-describe('CohortEditModalComponent', () => {
+describe('EditModalComponent', () => {
   let component: EditModalComponent;
   let fixture: ComponentFixture<EditModalComponent>;
 
@@ -39,7 +39,7 @@ describe('CohortEditModalComponent', () => {
       providers: [
         { provide: Router, useClass: RouterStub },
         { provide: CohortsService, useClass: CohortsServiceStub },
-        { provider: ConceptSetsService },
+        { provide: ConceptSetsService },
         {
           provide: ActivatedRoute,
           deps: [CohortsServiceStub],
