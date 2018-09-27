@@ -263,7 +263,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private CdrVersion setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
-      return null;
+      throw new BadRequestException("missing cdrVersionId");
     }
     try {
       CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
@@ -274,8 +274,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setCdrVersion(cdrVersion);
       return cdrVersion;
     } catch (NumberFormatException e) {
-      throw new BadRequestException(String.format(
-          "Invalid cdr version ID: %s", cdrVersionId));
+      throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
     }
   }
 
