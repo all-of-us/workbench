@@ -11,8 +11,7 @@ import {
     isDomainNameExits
 } from '../../cohort-search/redux';
 import {ReviewStateService} from '../review-state.service';
-import {TreeType} from "../../../generated";
-import {typeToTitle} from "../../cohort-search/utils";
+import {typeToTitle} from '../../cohort-search/utils';
 
 @Component({
     selector: 'app-overview-charts',
@@ -87,7 +86,7 @@ export class OverviewPage implements OnInit, OnDestroy {
 
   getDifferentCharts(names) {
     this.demoGraph = false;
-    this.domainTitle = names
+    this.domainTitle = names;
     this.fetchChartsData(names);
     this.title = typeToTitle(names);
     return this.title;
@@ -96,9 +95,9 @@ export class OverviewPage implements OnInit, OnDestroy {
   fetchChartsData(name) {
     const checkedDomainName = this.ngRedux
       .select(isDomainNameExits(name))
-      .subscribe(itemName =>{
-        this.trackClickedDomains = itemName
-      })
+      .subscribe(itemName => {
+        this.trackClickedDomains = itemName;
+      });
     this.subscription = checkedDomainName;
     this.demoGraph = false;
     this.spinner = true;
@@ -111,7 +110,7 @@ export class OverviewPage implements OnInit, OnDestroy {
        setTimeout(() => {
         this.spinner = false;
          this.getCharts(name);
-       }, 2000)
+       }, 2000);
     } else {
       this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
       this.getCharts(name);
@@ -126,7 +125,7 @@ export class OverviewPage implements OnInit, OnDestroy {
         .subscribe(loading => {
             this.loading = loading;
             const totalCount = this.loading.toJS().count;
-            if(name === this.domainTitle){
+            if (name === this.domainTitle) {
               this.spinner = false;
               this.showTitle = true;
               this.domainItems = this.loading.toJS().items;
