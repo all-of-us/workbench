@@ -51,9 +51,9 @@ class WorkspaceSharePage {
     this.fixture.componentRef.instance.sharing = true;
 
     this.workspacesService.getWorkspace(
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
-      this.fixture.componentInstance.workspace = response.workspace;
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
+        this.fixture.componentInstance.workspace = response.workspace;
     });
     tick();
     this.readPageData();
@@ -84,9 +84,9 @@ class WorkspaceSharePage {
 const activatedRouteStub = {
   snapshot: {
     url: [
-      {path: 'workspaces'},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
+      { path: 'workspaces'},
+      { path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
+      { path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
     ],
     params: {
       'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -144,10 +144,10 @@ describe('WorkspaceShareComponent', () => {
         WorkspaceShareComponent
       ],
       providers: [
-        {provide: UserService, useValue: new UserServiceStub()},
-        {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
-        {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
+        { provide: UserService, useValue: new UserServiceStub()},
+        { provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
+        { provide: ActivatedRoute, useValue: activatedRouteStub},
+        { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
@@ -158,7 +158,6 @@ describe('WorkspaceShareComponent', () => {
     }).compileComponents().then(() => {
       workspaceSharePage = new WorkspaceSharePage(TestBed);
       workspaceSharePage.fixture.componentRef.instance.accessLevel = WorkspaceAccessLevel.OWNER;
-
       workspaceSharePage.fixture.componentRef.instance.open();
       workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
     });
@@ -169,7 +168,7 @@ describe('WorkspaceShareComponent', () => {
   it('displays correct information in default workspace sharing', fakeAsync(() => {
     workspaceSharePage.readPageData();
     const roleNamePairs =
-        convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
+      convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
     expect(workspaceSharePage.roleNamePairsOnPage)
         .toEqual(roleNamePairs);
   }));
@@ -184,19 +183,16 @@ describe('WorkspaceShareComponent', () => {
     workspaceSharePage.fixture.detectChanges();
 
     const roleNamePairs =
-        convertToUserRoleRow(workspaceSharePage.fixture.componentInstance.userRolesList);
+      convertToUserRoleRow(workspaceSharePage.fixture.componentInstance.userRolesList);
     workspaceSharePage.readPageData();
-    expect(workspaceSharePage.roleNamePairsOnPage)
-        .toEqual(roleNamePairs);
-    expect(workspaceSharePage.roleNamePairsOnPage.length)
-        .toBe(4);
+    expect(workspaceSharePage.roleNamePairsOnPage).toEqual(roleNamePairs);
+    expect(workspaceSharePage.roleNamePairsOnPage.length).toBe(4);
   }));
 
   it('removes users correctly and does not allow self removal', fakeAsync(() => {
-    workspaceSharePage.fixture.componentRef.instance.userEmail
-        = 'sampleuser1@fake-research-aou.org';
-    workspaceSharePage.fixture.componentRef.instance.accessLevel
-        = WorkspaceAccessLevel.OWNER;
+    workspaceSharePage.fixture.componentRef.instance.userEmail =
+        'sampleuser1@fake-research-aou.org';
+    workspaceSharePage.fixture.componentRef.instance.accessLevel = WorkspaceAccessLevel.OWNER;
     workspaceSharePage.readPageData();
     const de = workspaceSharePage.fixture.debugElement;
     de.queryAll(By.css('.remove-button')).forEach((removeButton) => {
@@ -205,13 +201,9 @@ describe('WorkspaceShareComponent', () => {
     workspaceSharePage.readPageData();
     const roleNamePairs =
         convertToUserRoleRow(workspaceSharePage.fixture.componentInstance.userRolesList);
-    expect(workspaceSharePage.roleNamePairsOnPage)
-        .toEqual(roleNamePairs);
-    expect(workspaceSharePage.roleNamePairsOnPage.length)
-        .toBe(1);
-    expect(workspaceSharePage.roleNamePairsOnPage[0].fullName)
-        .toBe('Sample User1');
-    expect(workspaceSharePage.roleNamePairsOnPage[0].role)
-        .toEqual(WorkspaceAccessLevel.OWNER);
+    expect(workspaceSharePage.roleNamePairsOnPage).toEqual(roleNamePairs);
+    expect(workspaceSharePage.roleNamePairsOnPage.length).toBe(1);
+    expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe('Sample User1');
+    expect(workspaceSharePage.roleNamePairsOnPage[0].role).toEqual(WorkspaceAccessLevel.OWNER);
   }));
 });
