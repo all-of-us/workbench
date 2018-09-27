@@ -23,10 +23,10 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 })
 export class AppComponent implements OnInit {
   isSignedIn = false;
+  initialSpinner = true;
   overriddenUrl: string = null;
   private baseTitle: string;
   private overriddenPublicUrl: string = null;
-
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -77,6 +77,9 @@ export class AppComponent implements OnInit {
 
     this.router.events.subscribe((event: RouterEvent) => {
       this.setTitleFromRoute(event);
+      if (event instanceof NavigationEnd) {
+        this.initialSpinner = false;
+      }
     });
   }
 

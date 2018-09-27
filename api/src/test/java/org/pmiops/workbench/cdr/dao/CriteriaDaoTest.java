@@ -79,9 +79,9 @@ public class CriteriaDaoTest {
     parentIcd9 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "003", "name", 0, true, true, null);
     parentIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), "003", "name", 0, true, true, "1.2");
     pmCriteria = createCriteria(TreeType.PM.name(), TreeSubType.BP.name(), "1", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true, "1.2.3.4");
-    drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
-    drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
-    drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "", "BLAH", 0, false, true, "");
+    drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
+    drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
+    drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "3", "BLAH", 0, false, true, "");
     labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
 
     criteriaDao.save(icd9Criteria1);
@@ -261,26 +261,30 @@ public class CriteriaDaoTest {
 
   @Test
   public void findDrugBrandOrIngredientByName() throws Exception {
-    List<Criteria> drugList = criteriaDao.findDrugBrandOrIngredientByName("ETAM", null);
+    List<Criteria> drugList = criteriaDao.findDrugBrandOrIngredientByValue("ETAM", null);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
 
-    drugList = criteriaDao.findDrugBrandOrIngredientByName("ACE", null);
+    drugList = criteriaDao.findDrugBrandOrIngredientByValue("ACE", null);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
 
-    drugList = criteriaDao.findDrugBrandOrIngredientByName("A", 1L);
+    drugList = criteriaDao.findDrugBrandOrIngredientByValue("A", 1L);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
 
-    drugList = criteriaDao.findDrugBrandOrIngredientByName("A", 3L);
+    drugList = criteriaDao.findDrugBrandOrIngredientByValue("A", 3L);
     assertEquals(2, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
     assertEquals(drugCriteriaBrand, drugList.get(1));
 
-    drugList = criteriaDao.findDrugBrandOrIngredientByName("BL", null);
+    drugList = criteriaDao.findDrugBrandOrIngredientByValue("BL", null);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaBrand, drugList.get(0));
+
+    drugList = criteriaDao.findDrugBrandOrIngredientByValue("2", null);
+    assertEquals(1, drugList.size());
+    assertEquals(drugCriteriaIngredient1, drugList.get(0));
   }
 
   @Test

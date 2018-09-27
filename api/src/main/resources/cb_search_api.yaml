@@ -12,7 +12,7 @@ info:
   contact:
     name: "developer_help@pmi-ops.org"
   license:
-    name: "MIT"
+    name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
   # Establish the fact that *some endpoints* are OAuth protected
@@ -119,14 +119,14 @@ paths:
     get:
       tags:
         - cohortBuilder
-      description: Returns criteria tree with the specified name
-      operationId: "getDrugBrandOrIngredientByName"
+      description: Returns criteria tree matching value
+      operationId: "getDrugBrandOrIngredientByValue"
       parameters:
         - in: query
-          name: name
+          name: value
           type: string
           required: true
-          description: name of ingredient or brand
+          description: matches name or code of drug
         - in: query
           name: limit
           type: integer
