@@ -7,18 +7,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
-import org.pmiops.workbench.cdr.model.VocabularyCount;
-import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -239,49 +233,14 @@ public class ConceptService {
     }
 
     public List<Concept> fetchConceptSynonyms(List<Concept> concepts) {
-        List<Long> conceptIds = concepts.stream().map(Concept::getConceptId).collect(Collectors.toList());
-        Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
-        for(Concept concept: concepts) {
-            concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
-        }
-        return concepts;
+      List<Long> conceptIds = concepts.stream().map(Concept::getConceptId)
+          .collect(Collectors.toList());
+      Multimap<Long, ConceptSynonym> synonymMap = Multimaps
+          .index(conceptSynonymDao.findByConceptIdIn(conceptIds), ConceptSynonym::getConceptId);
+      for (Concept concept : concepts) {
+        concept.setSynonyms(
+            synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
+      }
+      return concepts;
     }
-
-
-    /*
-    public List<VocabularyCount> findVocabularyConceptCounts(String matchExp, String query,
-        Domain domain, boolean standardConceptsOnly) {
-      CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-      CriteriaQuery<VocabularyCount> criteriaQuery = builder.createQuery(VocabularyCount.class);
-      Root<Concept> root = criteriaQuery.from(Concept.class);
-      Join<Concept, ConceptSynonym> synonymJoin = root.joinCollection("synonyms",
-          JoinType.LEFT);
-      criteriaQuery.select(builder.construct(VocabularyCount.class,
-          root.get("vocabularyId"),
-          builder.countDistinct(root.get("conceptId"))));
-      List<Predicate> predicates = new ArrayList<>();
-      // A count must be > 0
-      predicates.add(builder.or(
-          builder.greaterThan(root.get("countValue"), 0),
-          builder.greaterThan(root.get("sourceCountValue"), 0)));
-      // Either the concept name, synonym name, ID, or code must match.
-      predicates.add(builder.or(
-          builder.
-
-      criteriaQuery.where(builder.and(predicates.toArray(new Predicate[0])));
-      matchExp = criteriaBuilder.function("match", Double.class,
-          root.get("conceptName"), criteriaBuilder.literal(keyword));
-
-      subquery.select(subqueryRoot);
-
-      matchSynonymExp = criteriaBuilder.function("match", Double.class,
-          subqueryRoot.get("conceptSynonymName"), criteriaBuilder.literal(keyword));
-
-
-      Predicate synonymNamePredicate = criteriaBuilder.greaterThan(matchSynonymExp, 0.0);
-
-      return entityManager.createQuery(criteriaQuery).getResultList();
-
-    }
-*/
 }
