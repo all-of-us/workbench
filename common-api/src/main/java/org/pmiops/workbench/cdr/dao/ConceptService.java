@@ -49,7 +49,7 @@ public class ConceptService {
 
     public static String modifyMultipleMatchKeyword(String query){
         // This function modifies the keyword to match all the words if multiple words are present(by adding + before each word to indicate match that matching each word is essential)
-        if(query == null || query.isEmpty()){
+        if(query == null || query.trim().isEmpty()){
             return null;
         }
         String[] keywords = query.split("[,+\\s+]");

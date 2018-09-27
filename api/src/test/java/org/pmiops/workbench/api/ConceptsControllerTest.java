@@ -72,6 +72,7 @@ public class ConceptsControllerTest {
 
   private static final Concept CLIENT_CONCEPT_2 = new Concept()
           .conceptId(456L)
+          .standardConcept(false)
           .conceptName("b concept")
           .conceptCode("conceptB")
           .conceptClassId("classId2")
@@ -83,6 +84,7 @@ public class ConceptsControllerTest {
 
   private static final Concept CLIENT_CONCEPT_3 = new Concept()
           .conceptId(789L)
+          .standardConcept(false)
           .conceptName("multi word concept")
           .conceptCode("conceptC")
           .conceptClassId("classId3")
@@ -122,7 +124,7 @@ public class ConceptsControllerTest {
           .standardConcept(false)
           .conceptCode("conceptD")
           .conceptClassId("classId6")
-          .vocabularyId("V6")
+          .vocabularyId("V5")
           .domainId("Condition")
           .countValue(7891L)
           .prevalence(0.1F)
@@ -257,6 +259,35 @@ public class ConceptsControllerTest {
   }
 
   @Test
+  public void testSearchConceptsBlankQueryWithResults() throws Exception{
+    saveConcepts();
+    assertResults(
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query(" ")),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4, CLIENT_CONCEPT_3, CLIENT_CONCEPT_2,
+        CLIENT_CONCEPT_1);
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryInDomain() throws Exception{
+    saveConcepts();
+    assertResults(
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().domain(Domain.CONDITION).query(" ")),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3, CLIENT_CONCEPT_1);
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryInDomainWithVocabularyIds() throws Exception{
+    saveConcepts();
+    assertResults(
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().domain(Domain.CONDITION).vocabularyIds(
+                ImmutableList.of("V1", "V5")).query(" ")),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_1);
+  }
+
+  @Test
   public void testSearchNoConcepts() throws Exception {
     assertResults(
         conceptsController.searchConcepts("ns", "name",
@@ -285,7 +316,7 @@ public class ConceptsControllerTest {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con")), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
+            new SearchConceptsRequest().query("word")), CLIENT_CONCEPT_4, CLIENT_CONCEPT_3);
   }
 
   @Test
@@ -309,10 +340,9 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsMatchOrder() throws Exception{
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("conceptD"));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(2);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptD")),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4);
   }
 
   @Test
@@ -367,7 +397,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsDomainIdNoMatch() throws Exception {
     saveConcepts();
     ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con").domain(Domain.OBSERVATION));
+            new SearchConceptsRequest().query("zzz").domain(Domain.OBSERVATION));
     List<Concept> concepts = response.getBody().getItems();
     assertThat(concepts.size()).isEqualTo(0);
   }
@@ -405,61 +435,6 @@ public class ConceptsControllerTest {
     assertThat(concepts.size()).isEqualTo(0);
   }
 
-  @Test
-  public void testSearchConceptsMultiWordQueryOneResult() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("multi word").maxResults(1)),CLIENT_CONCEPT_3);
-  }
-
-  @Test
-  public void testSearchConceptsMatchMultiWordAndDomainId() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("multi concept").domain(Domain.CONDITION)),CLIENT_CONCEPT_3);
-  }
-
-  @Test
-  public void testSearchConceptsMultiWordQueryNoResult() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("multi war").maxResults(10)));
-  }
-
-  @Test
-  public void testSearchConceptsMultiWordWithQuotes() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("sample \"to\" test").maxResults(1)),CLIENT_CONCEPT_4);
-  }
-
-  @Test
-  public void testSearchConceptsShortMultiWord() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("to test search")
-                    .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)
-                    .domain(Domain.OBSERVATION)),CLIENT_CONCEPT_4);
-  }
-
-  @Test
-  public void testSearchConceptsMultiWordNoResult() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("to test")
-            .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS)
-            .domain(Domain.MEASUREMENT)));
-
-  }
-
-  @Test
-  public void testSearchConceptsTooShortWord() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("t")),CLIENT_CONCEPT_1,CLIENT_CONCEPT_2,CLIENT_CONCEPT_3,CLIENT_CONCEPT_4);
-  }
-
-  @Test
   public void testSearchConceptsOneResult() throws Exception {
     saveConcepts();
     ResponseEntity<ConceptListResponse> response =
@@ -470,21 +445,12 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsOneThousandResults() throws Exception {
+  public void testSearchConceptsSubstring() throws Exception {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con").maxResults(1000)),
-        CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
-  }
-
-  @Test
-  public void testSearchConceptsOneThousandOneResults() throws Exception {
-    saveConcepts();
-    assertResults(
-        conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con").maxResults(1001)), CLIENT_CONCEPT_2,
-        CLIENT_CONCEPT_1);
+            new SearchConceptsRequest().query("est").maxResults(1000)),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4);
   }
 
   @Test
@@ -558,6 +524,6 @@ public class ConceptsControllerTest {
 
   private void assertResults(ResponseEntity<ConceptListResponse> response,
       Concept... expectedConcepts) {
-    assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
+    assertThat(response.getBody().getItems()).containsExactly(expectedConcepts).inOrder();
   }
 }
