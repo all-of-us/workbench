@@ -1,42 +1,48 @@
 package org.pmiops.workbench.publicapi;
 
-import java.util.stream.Collectors;
-import java.util.function.Function;
-
 import static com.google.common.truth.Truth.assertThat;
 
-import java.util.Arrays;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
-import java.util.List;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.Analysis;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
-import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
-import org.pmiops.workbench.cdr.dao.DbDomainDao;
-import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
-import org.pmiops.workbench.model.StandardConceptFilter;
-import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
-import org.pmiops.workbench.cdr.dao.AchillesResultDao;
 import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDao;
+import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
-import org.pmiops.workbench.cdr.model.ConceptRelationship;
-import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
-import org.pmiops.workbench.model.SearchConceptsRequest;
-import org.pmiops.workbench.cdr.model.DbDomain;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
 import org.pmiops.workbench.cdr.model.AchillesResult;
-import org.pmiops.workbench.model.ConceptListResponse;
-import org.pmiops.workbench.model.ConceptAnalysisListResponse;
+import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.ConceptRelationship;
+import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.model.Analysis;
 import org.pmiops.workbench.model.ConceptAnalysis;
-import org.pmiops.workbench.model.DbDomainListResponse;
+import org.pmiops.workbench.model.ConceptAnalysisListResponse;
+import org.pmiops.workbench.model.ConceptListResponse;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainInfo;
+import org.pmiops.workbench.model.DomainInfosAndSurveyModulesResponse;
+import org.pmiops.workbench.model.SearchConceptsRequest;
+import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.SurveyModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -74,23 +80,6 @@ public class DataBrowserControllerTest {
                             .sourceCountValue(concept.getSourceCountValue())
                             .prevalence(concept.getPrevalence())
                             .synonyms(new ArrayList<>());
-                }
-            };
-
-    private static final Function<org.pmiops.workbench.model.DbDomain, DbDomain>
-            TO_CLIENT_DBDOMAIN =
-            new Function<org.pmiops.workbench.model.DbDomain, DbDomain>() {
-                @Override
-                public DbDomain apply(org.pmiops.workbench.model.DbDomain dbDomain) {
-                    return new DbDomain()
-                            .domainId(dbDomain.getDomainId())
-                            .domainDisplay(dbDomain.getDomainDisplay())
-                            .domainDesc(dbDomain.getDomainDesc())
-                            .dbType(dbDomain.getDbType())
-                            .domainRoute(dbDomain.getDomainRoute())
-                            .conceptId(dbDomain.getConceptId())
-                            .countValue(dbDomain.getCountValue())
-                            .participantCount(dbDomain.getParticipantCount());
                 }
             };
 
@@ -186,58 +175,45 @@ public class DataBrowserControllerTest {
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_1 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cstest 1")
-            .languageConceptId(0L);
+            .conceptSynonymName("cstest 1");
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_2 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cstest 2")
-            .languageConceptId(0L);
+            .conceptSynonymName("cstest 2");
 
     private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_3 = new ConceptSynonym()
             .conceptId(7892L)
-            .conceptSynonymName("cstest 3")
-            .languageConceptId(0L);
+            .conceptSynonymName("cstest 3");
 
-    private static final DbDomain CLIENT_DB_DOMAIN_1 = new DbDomain()
-            .domainId("Condition")
-            .domainDisplay("Diagnoses")
-            .domainDesc("Condition Domain")
-            .dbType("domain_filter")
-            .domainRoute("condition")
-            .conceptId(19L)
-            .countValue(0L)
-            .participantCount(0L);
+    private static final DomainInfo CLIENT_DOMAIN_1 = new DomainInfo()
+            .domain(Domain.CONDITION)
+            .name("Diagnoses")
+            .description("Condition Domain")
+            .allConceptCount(123L)
+            .standardConceptCount(456L)
+            .participantCount(789L);
 
-    private static final DbDomain CLIENT_DB_DOMAIN_2 = new DbDomain()
-            .domainId("Drug")
-            .domainDisplay("Medications")
-            .domainDesc("Drug Domain")
-            .dbType("domain_filter")
-            .domainRoute("drug")
-            .conceptId(13L)
-            .countValue(0L)
-            .participantCount(0L);
+    private static final DomainInfo CLIENT_DOMAIN_2 = new DomainInfo()
+            .domain(Domain.DRUG)
+            .name("Medications")
+            .description("Drug Domain")
+            .allConceptCount(1L)
+            .standardConceptCount(2L)
+            .participantCount(3L);
 
-    private static final DbDomain CLIENT_DB_DOMAIN_3 = new DbDomain()
-            .domainId("Lifestyle")
-            .domainDisplay("Lifestyle")
-            .domainDesc("he Lifestyle module provides information on smoking, alcohol and recreational drug use")
-            .dbType("survey")
-            .domainRoute("ppi")
+    private static final SurveyModule CLIENT_SURVEY_MODULE_1 = new SurveyModule()
+            .name("Lifestyle")
+            .description("The Lifestyle module provides information on smoking, alcohol and recreational drug use")
             .conceptId(1585855L)
-            .countValue(568120L)
-            .participantCount(0L);
+            .questionCount(568120L)
+            .participantCount(4L);
 
-    private static final DbDomain CLIENT_DB_DOMAIN_4 = new DbDomain()
-            .domainId("TheBasics")
-            .domainDisplay("The Basics")
-            .domainDesc("The Basics module provides demographics and economic information for participants")
-            .dbType("survey")
-            .domainRoute("ppi")
+    private static final SurveyModule CLIENT_SURVEY_MODULE_2 = new SurveyModule()
+            .name("The Basics")
+            .description("The Basics module provides demographics and economic information for participants")
             .conceptId(1586134L)
-            .countValue(567437L)
-            .participantCount(0L);
+            .questionCount(567437L)
+            .participantCount(5L);
 
     private static final AchillesAnalysis CLIENT_ANALYSIS_1 = new AchillesAnalysis()
             .analysisId(1900L)
@@ -421,21 +397,25 @@ public class DataBrowserControllerTest {
     private static final ConceptSynonym CONCEPT_SYNONYM_2 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_2);
     private static final ConceptSynonym CONCEPT_SYNONYM_3 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_3);
 
-    private static final DbDomain DBDOMAIN_1 =
-            makeDbDomain(CLIENT_DB_DOMAIN_1);
-    private static final DbDomain DBDOMAIN_2 =
-            makeDbDomain(CLIENT_DB_DOMAIN_2);
-    private static final DbDomain DBDOMAIN_3 =
-            makeDbDomain(CLIENT_DB_DOMAIN_3);
-    private static final DbDomain DBDOMAIN_4 =
-            makeDbDomain(CLIENT_DB_DOMAIN_4);
+    private static final org.pmiops.workbench.cdr.model.DomainInfo DOMAIN_1 =
+            makeDomain(CLIENT_DOMAIN_1, 1L);
+    private static final org.pmiops.workbench.cdr.model.DomainInfo DOMAIN_2 =
+            makeDomain(CLIENT_DOMAIN_2, 2L);
+    private static final org.pmiops.workbench.cdr.model.SurveyModule SURVEY_MODULE_1 =
+            makeSurveyModule(CLIENT_SURVEY_MODULE_1);
+    private static final org.pmiops.workbench.cdr.model.SurveyModule SURVEY_MODULE_2 =
+            makeSurveyModule(CLIENT_SURVEY_MODULE_2);
 
     @Autowired
     private ConceptDao conceptDao;
     @Autowired
+    private CdrVersionDao cdrVersionDao;
+    @Autowired
     ConceptRelationshipDao conceptRelationshipDao;
     @Autowired
-    private DbDomainDao dbDomainDao;
+    private DomainInfoDao domainInfoDao;
+    @Autowired
+    private SurveyModuleDao surveyModuleDao;
     @Autowired
     private QuestionConceptDao  questionConceptDao;
     @Autowired
@@ -450,24 +430,16 @@ public class DataBrowserControllerTest {
     private EntityManager entityManager;
 
 
+    private CdrVersion cdrVersion;
     private DataBrowserController dataBrowserController;
-
 
     @Before
     public void setUp() {
         saveData();
         ConceptService conceptService = new ConceptService(entityManager, conceptSynonymDao);
-        dataBrowserController = new DataBrowserController(conceptService, conceptDao, dbDomainDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao, entityManager);
-    }
-
-
-    @Test
-    public void testGetParentConcepts() throws Exception {
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.getParentConcepts(1234L);
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .containsExactly(CONCEPT_5)
-        ;
+        dataBrowserController = new DataBrowserController(conceptService, conceptDao, domainInfoDao,
+            surveyModuleDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao, entityManager,
+            () -> cdrVersion);
     }
 
 
@@ -481,26 +453,10 @@ public class DataBrowserControllerTest {
 
 
     @Test
-    public void testGetDomainFilters() throws Exception {
-        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getDomainFilters();
-        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
-        assertThat(domains)
-                .containsExactly(DBDOMAIN_1, DBDOMAIN_2);
-    }
-
-    @Test
-    public void testGetSurveyList() throws Exception{
-        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getSurveyList();
-        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
-        assertThat(domains).containsExactly(DBDOMAIN_3, DBDOMAIN_4);
-    }
-
-    @Test
-    public void testGetDbDomains() throws Exception{
-        ResponseEntity<DbDomainListResponse> response = dataBrowserController.getDbDomains();
-        List<DbDomain> domains = response.getBody().getItems().stream().map(TO_CLIENT_DBDOMAIN).collect(Collectors.toList());
-        assertThat(domains)
-                .containsExactly(DBDOMAIN_1, DBDOMAIN_2, DBDOMAIN_3, DBDOMAIN_4);
+    public void testGetDomainTotals() throws Exception {
+        ResponseEntity<DomainInfosAndSurveyModulesResponse> response = dataBrowserController.getDomainTotals();
+        assertThat(response.getBody().getDomainInfos()).containsExactly(CLIENT_DOMAIN_1, CLIENT_DOMAIN_2);
+        assertThat(response.getBody().getSurveyModules()).containsExactly(CLIENT_SURVEY_MODULE_1, CLIENT_SURVEY_MODULE_2);
     }
 
     @Test
@@ -711,16 +667,25 @@ public class DataBrowserControllerTest {
         return result;
     }
 
-    private static DbDomain makeDbDomain(DbDomain dbDomain){
-        DbDomain dbd = new DbDomain();
-        dbd.setDomainId(dbDomain.getDomainId());
-        dbd.setDomainDisplay(dbDomain.getDomainDisplay());
-        dbd.setDomainDesc(dbDomain.getDomainDesc());
-        dbd.setDbType(dbDomain.getDbType());
-        dbd.setDomainRoute(dbDomain.getDomainRoute());
-        dbd.setConceptId(dbDomain.getConceptId());
-        dbd.setCountValue(dbDomain.getCountValue());
-        return dbd;
+    private static org.pmiops.workbench.cdr.model.DomainInfo makeDomain(DomainInfo domain, long conceptId) {
+        return new org.pmiops.workbench.cdr.model.DomainInfo()
+            .domainEnum(domain.getDomain())
+            .domainId(CommonStorageEnums.domainToDomainId(domain.getDomain()))
+            .name(domain.getName())
+            .description(domain.getDescription())
+            .conceptId(conceptId)
+            .allConceptCount(domain.getAllConceptCount())
+            .standardConceptCount(domain.getStandardConceptCount())
+            .participantCount(domain.getParticipantCount());
+    }
+
+    private static org.pmiops.workbench.cdr.model.SurveyModule makeSurveyModule(SurveyModule surveyModule) {
+        return new org.pmiops.workbench.cdr.model.SurveyModule()
+            .conceptId(surveyModule.getConceptId())
+            .name(surveyModule.getName())
+            .description(surveyModule.getDescription())
+            .questionCount(surveyModule.getQuestionCount())
+            .participantCount(surveyModule.getParticipantCount());
     }
 
     private static AchillesAnalysis makeAchillesAnalysis(AchillesAnalysis achillesAnalysis){
@@ -740,7 +705,6 @@ public class DataBrowserControllerTest {
         ConceptSynonym cs = new ConceptSynonym();
         cs.setConceptId(conceptSynonym.getConceptId());
         cs.setConceptSynonymName(conceptSynonym.getConceptSynonymName());
-        cs.setLanguageConceptId(conceptSynonym.getLanguageConceptId());
         return cs;
     }
 
@@ -758,6 +722,8 @@ public class DataBrowserControllerTest {
     }
 
     private void saveData() {
+        makeCdrVersion(1L, "Test Registered CDR",
+            123L, DataAccessLevel.REGISTERED);
         conceptDao.save(CONCEPT_1);
         conceptDao.save(CONCEPT_2);
         conceptDao.save(CONCEPT_3);
@@ -769,10 +735,10 @@ public class DataBrowserControllerTest {
         conceptRelationshipDao.save(makeConceptRelationship(1234L, 7890L, "maps to"));
         conceptRelationshipDao.save(makeConceptRelationship(456L, 7890L, "maps to"));
 
-        dbDomainDao.save(DBDOMAIN_1);
-        dbDomainDao.save(DBDOMAIN_2);
-        dbDomainDao.save(DBDOMAIN_3);
-        dbDomainDao.save(DBDOMAIN_4);
+        domainInfoDao.save(DOMAIN_1);
+        domainInfoDao.save(DOMAIN_2);
+        surveyModuleDao.save(SURVEY_MODULE_1);
+        surveyModuleDao.save(SURVEY_MODULE_2);
 
         achillesAnalysisDao.save(ACHILLES_ANALYSIS_1);
         achillesAnalysisDao.save(ACHILLES_ANALYSIS_2);
@@ -799,6 +765,23 @@ public class DataBrowserControllerTest {
     private void assertResults(ResponseEntity<ConceptListResponse> response,
                                Concept... expectedConcepts) {
         assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
+    }
+
+    private CdrVersion makeCdrVersion(long cdrVersionId, String name, long creationTime,
+        DataAccessLevel dataAccessLevel) {
+        cdrVersion = new CdrVersion();
+        cdrVersion.setBigqueryDataset("a");
+        cdrVersion.setBigqueryProject("b");
+        cdrVersion.setCdrDbName("c");
+        cdrVersion.setCdrVersionId(cdrVersionId);
+        cdrVersion.setCreationTime(new Timestamp(creationTime));
+        cdrVersion.setDataAccessLevelEnum(dataAccessLevel);
+        cdrVersion.setName(name);
+        cdrVersion.setNumParticipants(123);
+        cdrVersion.setPublicDbName("p");
+        cdrVersion.setReleaseNumber((short) 1);
+        cdrVersionDao.save(cdrVersion);
+        return cdrVersion;
     }
 
 }

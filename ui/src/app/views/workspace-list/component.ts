@@ -6,7 +6,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {Workspace} from 'generated';
 
-import {WorkspacePermissions} from 'app/utils/workspacePermissions';
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';

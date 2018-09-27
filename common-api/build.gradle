@@ -1,3 +1,33 @@
+import io.swagger.codegen.DefaultGenerator
+import io.swagger.codegen.config.CodegenConfigurator
+
+def swaggerTemplateDir = 'src/main/resources'
+def commonApiSourceFile = 'src/main/resources/common_api.yaml'
+def swaggerTargetFolder = 'src/generated/java'
+
+task generateCommonApi {
+  inputs.file("$projectDir/$commonApiSourceFile")
+  outputs.dir("$projectDir/$swaggerTargetFolder")
+  doLast {
+    def config = new CodegenConfigurator()
+    config.setInputSpec("file:///$projectDir/$commonApiSourceFile")
+    config.setOutputDir("$projectDir")
+    config.setTemplateDir("$projectDir/$swaggerTemplateDir")
+    config.setLang('spring')
+    config.setAdditionalProperties([
+            'apiPackage'     : 'org.pmiops.workbench.api',
+            'modelPackage'   : 'org.pmiops.workbench.model',
+            'sourceFolder'   : swaggerTargetFolder,
+            'useTags'        : 'true',
+            // Generates delegate interfaces; used to make method annotations work without
+            // having to copy them to our implementations.
+            'delegatePattern': 'true'
+    ])
+    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+  }
+}
+
+
 buildscript {    // Configuration for building
   repositories {
     jcenter()    // Bintray's repository - a fast Maven Central mirror & more
@@ -7,6 +37,8 @@ buildscript {    // Configuration for building
   }
   dependencies {
     classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE'
+    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
+    classpath 'io.swagger:swagger-codegen:2.2.3'
   }
 }
 
@@ -14,6 +46,38 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'org.hidetake.swagger.generator'
+
+configurations {
+  generatedCompile
+  all {
+    exclude group: 'com.google.guava', module:'guava-jdk5'
+  }
+}
+
+sourceSets {
+  generated {
+    compileClasspath = configurations.generatedCompile
+  }
+  main {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+  test {
+    compileClasspath += generated.output
+    runtimeClasspath += generated.output
+  }
+}
+
+generateCommonApi.dependsOn validateSwagger
+ideaModule.dependsOn generateCommonApi
+compileGeneratedJava.dependsOn generateCommonApi
+classes.dependsOn generatedClasses
+compileJava.dependsOn compileGeneratedJava
+
+clean.doFirst {
+  delete("${projectDir}/$swaggerTargetFolder")
+}
 
 repositories {   // repositories for Jar's you access in your code
   jcenter()
@@ -35,6 +99,8 @@ dependencies {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
+  compile 'io.swagger:swagger-annotations:1.5.16'
+  compile 'com.google.code.gson:gson:2.8.5'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:1.10.19'
@@ -42,6 +108,19 @@ dependencies {
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.5.3'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
+
+  // For Swagger generation. These should include dependencies found in the Swagger codegen
+  // example here:
+  // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
+  generatedCompile 'org.springframework.boot:spring-boot-starter-data-rest'
+  generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
+  generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
+  generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
+  generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
+  generatedCompile 'com.google.code.gson:gson:2.8.5'
+  generatedCompile 'joda-time:joda-time:2.10'
+  generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
+
 }
 
 tasks.withType(Test) {

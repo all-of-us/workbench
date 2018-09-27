@@ -1,23 +1,21 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Headers, Http, Response} from '@angular/http';
 import {ActivatedRoute} from '@angular/router';
 
+import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {environment} from 'environments/environment';
 
 import {
   Cluster,
-  Cohort,
-  CohortsService,
   FileDetail,
   NotebookRename,
   PageVisit,
   ProfileService,
+  RecentResource,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService
@@ -34,6 +32,7 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   private static PAGE_ID = 'notebook';
   notebooksLoading: boolean;
   notebookList: FileDetail[] = [];
+  resourceList: RecentResource[] = [];
   workspace: Workspace;
   notebookError: boolean;
   wsNamespace: string;
@@ -42,13 +41,9 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   cluster: Cluster;
   notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
   private accessLevel: WorkspaceAccessLevel;
-  cohortList: Cohort[] = [];
   showTip: boolean;
-  cohortsLoading: boolean;
-  cohortsError: boolean;
   newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
   firstVisit = true;
-  notebookInFocus: FileDetail;
   notebookRenameConflictError = false;
   notebookRenameError = false;
   duplicateName = '';
@@ -56,43 +51,24 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-  @ViewChild(RenameModalComponent)
-  renameModal: RenameModalComponent;
-  @ViewChild(ConfirmDeleteModalComponent)
-  deleteModal: ConfirmDeleteModalComponent;
-
+  @ViewChild(NewNotebookModalComponent)
+  newNotebookModal: NewNotebookModalComponent;
 
   constructor(
     private route: ActivatedRoute,
-    private cohortsService: CohortsService,
     private profileService: ProfileService,
-    private signInService: SignInService,
     private workspacesService: WorkspacesService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
     this.showTip = false;
-    this.cohortsLoading = true;
-    this.cohortsError = false;
   }
 
   ngOnInit(): void {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.notebooksLoading = true;
-    this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
-      .subscribe(
-        cohortsReceived => {
-          for (const coho of cohortsReceived.items) {
-            this.cohortList.push(coho);
-          }
-          this.cohortsLoading = false;
-        },
-        error => {
-          this.cohortsLoading = false;
-          this.cohortsError = true;
-        });
     this.loadNotebookList();
     this.profileService.getMe().subscribe(
       profile => {
@@ -111,10 +87,13 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   private loadNotebookList() {
+    this.notebooksLoading = true;
     this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
       .subscribe(
         fileList => {
           this.notebookList = fileList;
+          this.resourceList = convertToResources(fileList, this.wsNamespace,
+            this.wsId, this.accessLevel, ResourceType.NOTEBOOK);
           this.notebooksLoading = false;
         },
         error => {
@@ -127,119 +106,34 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
   }
 
-  openNotebook(nb?: FileDetail): void {
-    let nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/notebooks/`;
-    if (nb) {
-      nbUrl += encodeURIComponent(nb.name);
-    } else {
-      nbUrl += 'create';
-    }
-    const notebook = window.open(nbUrl, '_blank');
-
-    // TODO(RW-474): Remove the authHandler integration. This is messy,
-    // non-standard, and currently will break in the following situation:
-    // - User opens a new notebook tab.
-    // - While that tab is loading, user immediately navigates away from this
-    //   page.
-    // This is not easily fixed without leaking listeners outside the lifespan
-    // of the workspace component.
-    const authHandler = (e: MessageEvent) => {
-      if (e.source !== notebook) {
-        return;
-      }
-      if (e.origin !== environment.leoApiUrl) {
-        return;
-      }
-      if (e.data.type !== 'bootstrap-auth.request') {
-        return;
-      }
-      notebook.postMessage({
-        'type': 'bootstrap-auth.response',
-        'body': {
-          'googleClientId': this.signInService.clientId
-        }
-      }, environment.leoApiUrl);
-    };
-    window.addEventListener('message', authHandler);
-    this.notebookAuthListeners.push(authHandler);
-  }
-
   newNotebook(): void {
-    this.openNotebook();
+    this.newNotebookModal.open();
   }
 
-  renameThis(notebook: FileDetail): void {
-    this.notebookInFocus = notebook;
-    this.renameModal.open();
-  }
-
-  receiveRename(rename: NotebookRename): void {
-    let newName = rename.newName;
-    if (!(new RegExp('^.+\.ipynb$').test(newName))) {
-      newName = rename.newName + '.ipynb';
-      rename.newName = newName;
-    }
-    if (new RegExp('.*\/.*').test(newName)) {
-      this.renameModal.close();
-      this.notebookRenameError = true;
-      return;
-    }
-    if (this.notebookList.filter((nb) => nb.name === newName).length > 0) {
-      this.renameModal.close();
-      this.notebookRenameConflictError = true;
-      this.duplicateName = newName;
-      return;
-    }
-   this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename).subscribe((newNb) => {
-      this.notebookList.splice(
-        this.notebookList.indexOf(this.notebookInFocus), 1, newNb
-      );
-     this.renameModal.close();
-   });
-  }
-
-  cloneThis(notebook: string): void {
-    this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, notebook)
-      .subscribe(() => {
+  updateList(rename?: NotebookRename): void {
+    if (rename === undefined) {
       this.loadNotebookList();
-    });
+    } else {
+      const nb = this.resourceList.filter(resource => resource.notebook.name === rename.name)[0];
+      const newNb = Object.assign({}, nb);
+      newNb.notebook.name = rename.newName;
+      this.resourceList.splice(this.resourceList.indexOf(nb), 1, newNb);
+    }
   }
 
-  confirmDelete(notebook: FileDetail): void {
-    this.notebookInFocus = notebook;
-    this.deleteModal.open();
+  duplicateNameError(dupName: string): void {
+    this.duplicateName = dupName;
+    this.notebookRenameConflictError = true;
   }
 
-  receiveDelete($event: FileDetail): void {
-    this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
-      .subscribe(() => {
-        this.notebooksLoading = true;
-        this.loadNotebookList();
-        this.deleteModal.close();
-      });
-  }
-
-  get writePermission(): boolean {
-    return this.accessLevel === WorkspaceAccessLevel.OWNER
-      || this.accessLevel === WorkspaceAccessLevel.WRITER;
-  }
-
-  get ownerPermission(): boolean {
-    return this.accessLevel === WorkspaceAccessLevel.OWNER;
-  }
-
-  get actionsDisabled(): boolean {
-    return !this.writePermission;
+  invalidNameError(): void {
+    this.notebookRenameError = true;
   }
 
   submitNotebooksLoadBugReport(): void {
     this.notebookError = false;
     this.bugReportComponent.reportBug();
     this.bugReportComponent.bugReport.shortDescription = 'Could not load notebooks';
-  }
-
-  get noCohorts(): boolean {
-    return this.cohortList.length === 0 && this.showTip;
   }
 
   dismissTip(): void {

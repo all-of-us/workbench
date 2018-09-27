@@ -1,0 +1,20 @@
+<div *ngIf="elementVisible()" class="recent-work" style="display: inline-block">
+  <div *ngIf="leftScrollVisible()" class="scroll-indicator" id="left-scroll"
+       (click)="scrollLeft()">
+    <app-left-scroll-icon></app-left-scroll-icon>
+  </div>
+  <div class="title">
+    Your Recent Work
+  </div>
+  <div class="card-area">
+    <div style="display: flex">
+      <div *ngFor="let resource of resourceList">
+        <app-resource-card [resourceCard]="resource" (onUpdate)="updateList($event)"></app-resource-card>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
+       style="float: right; top: 3.2rem; right: -9rem" (click)="scrollRight()">
+    <app-right-scroll-icon></app-right-scroll-icon>
+  </div>
+</div>

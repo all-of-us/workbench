@@ -121,24 +121,6 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    Criteria icd9CriteriaGroup =
-            new Criteria().group(true)
-                    .name("group")
-                    .selectable(true)
-                    .code(SearchRequests.ICD9_GROUP_CODE)
-                    .type(SearchRequests.ICD9_TYPE)
-                    .parentId(0);
-    criteriaDao.save(icd9CriteriaGroup);
-    Criteria icd9CriteriaChild =
-            new Criteria().group(false)
-                    .name("child")
-                    .selectable(true)
-                    .code(SearchRequests.ICD9_GROUP_CODE + ".1")
-                    .type(SearchRequests.ICD9_TYPE)
-                    .domainId("Condition")
-                    .parentId(icd9CriteriaGroup.getId());
-    criteriaDao.save(icd9CriteriaChild);
-
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
@@ -174,7 +156,7 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList("person", "concept", "condition_occurrence", "observation", "vocabulary");
+    return Arrays.asList("person", "concept", "condition_occurrence", "observation", "vocabulary", "criteria");
   }
 
   @Override
@@ -218,6 +200,29 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortICD9Group() {
+    //removed these inserts from setUp() because setUp
+    //get run for every test case and it was creating duplicate data.
+    Criteria icd9CriteriaGroup =
+      new Criteria().group(true)
+        .name("group")
+        .selectable(true)
+        .code(SearchRequests.ICD9_GROUP_CODE)
+        .type(SearchRequests.ICD9_TYPE)
+        .subtype(SearchRequests.ICD9_SUBTYPE)
+        .parentId(0)
+        .path("1.5");
+    criteriaDao.save(icd9CriteriaGroup);
+    Criteria icd9CriteriaChild =
+      new Criteria().group(false)
+        .name("child")
+        .selectable(true)
+        .code(SearchRequests.ICD9_GROUP_CODE + ".1")
+        .type(SearchRequests.ICD9_TYPE)
+        .subtype(SearchRequests.ICD9_SUBTYPE)
+        .domainId("Condition")
+        .parentId(icd9CriteriaGroup.getId())
+        .path("1.5." + icd9CriteriaGroup.getId());
+    criteriaDao.save(icd9CriteriaChild);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
             SearchRequests.icd9Codes(), null, 0, makeRequest(1000));
     assertPersonIds(response, 1L);

@@ -5,8 +5,8 @@
 }
 
 .ds-options {
-  min-width: 12rem;
-  width: 12rem;
+  min-width: 7rem;
+  max-width: 12rem;
 }
 
 .ds-options,
@@ -49,10 +49,14 @@
 }
 
 .option-list {
-  height: 5rem;
+  height: 11.7rem;
   overflow: auto;
 }
 
+.search-option-list {
+  height: 9.77rem;
+  overflow: auto;
+}
 .option {
   font-size: 0.5rem;
   font-weight: 400;
@@ -65,4 +69,27 @@
 .option:hover {
   background-color: rgb(219, 228, 233);
   cursor: pointer;
+}
+
+.demo-search-box {
+  height: 40px;
+  padding: 7px 14px;
+  border-radius: 5px;
+  background-color: #DFF0FA;
+  margin: 0.2rem;
+  border-bottom: none;
+}
+
+.items-selection-icon {
+  color: rgb(98, 164, 32);
+}
+
+.items-disabled-icon {
+  color: rgb(98, 164, 32);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.disable-option{
+  cursor: not-allowed;
 }

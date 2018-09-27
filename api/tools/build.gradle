@@ -72,7 +72,8 @@ buildscript {    // Configuration for building
 sourceSets {
   main {
     java {
-      srcDirs = ['src/main/java', '../src/main/java', '../src/generated/java']
+      srcDirs = ['src/main/java', '../src/main/java', '../src/generated/java',
+                 '../../common-api/src/main/java']
       includes = ['org/pmiops/workbench/tools/**/*.java',
                   'org/pmiops/workbench/db/**/*.java',
                   'org/pmiops/workbench/notebooks/**/*.java',
@@ -140,8 +141,8 @@ dependencies {
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.code.gson:gson:2.8.5'
   compile 'org.hibernate:hibernate-validator:5.3.5.Final'
-  compile 'com.squareup.okhttp:okhttp:2.6.0'
-  compile 'com.squareup.okhttp:logging-interceptor:2.6.0'
+  compile 'com.squareup.okhttp:okhttp:2.7.5'
+  compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
 }
 
 

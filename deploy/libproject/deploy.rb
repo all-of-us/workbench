@@ -91,8 +91,9 @@ def setup_and_enter_docker(cmd_name, opts)
   live_version = get_live_gae_version(opts.project, false)
   common.status "Current live version is '#{live_version}' (project " +
                 "#{opts.project})"
-  puts "Will deploy git version '#{opts.git_version}' as App Engine " +
-       "version '#{opts.app_version}' in project '#{opts.project}'"
+  log_prefix = opts.dry_run ? "[DRY_RUN] " : ""
+  puts "#{log_prefix}Will deploy git version '#{opts.git_version}' as App " +
+       "Engine version '#{opts.app_version}' in project '#{opts.project}'"
   printf "Continue? (Y/n): "
   got = STDIN.gets.chomp.strip.upcase
   unless got == '' or got == 'Y'
@@ -117,7 +118,8 @@ def setup_and_enter_docker(cmd_name, opts)
       --key-file #{DOCKER_KEY_FILE_PATH}
     } +
       (opts.circle_url.nil? ? [] : %W{--circle-url #{opts.circle_url}}) +
-      (opts.update_jira ? [] : %W{"--no-update-jira"})
+      (opts.update_jira ? [] : %W{--no-update-jira}) +
+      (opts.dry_run ? %W{--dry-run} : [])
   end
 end
 
@@ -138,6 +140,13 @@ def deploy(cmd_name, args)
     "--key-file [key file]",
     ->(opts, v) { opts.key_file = v},
     "Path to a service account key file to be used for deployment"
+  )
+  op.opts.dry_run = false
+  op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually deploy, just log the command lines which would be " +
+    "executed on a real invocation."
   )
   op.add_option(
     "--git-version [git version]",
@@ -181,10 +190,22 @@ def deploy(cmd_name, args)
 
   op.parse.validate
 
+  if op.opts.account == "all-of-us-workbench-test@appspot.gserviceaccount.com"
+    # This is due to some special-cased handling of the test service account
+    # credential in our tooling (where we try to avoid redownloading it). It
+    # could probably be fixed but the circle deploy account is a better
+    # simulation anyways.
+    raise ArgumentError.new(
+        "Invalid --account: '#{op.opts.account}' is currently incompatible " +
+        "with the deploy script. Consider using " +
+        "'circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com' " +
+        "instead, which has similar permissions.")
+  end
+
   if op.opts.update_jira.nil?
      op.opts.update_jira = RELEASE_MANAGED_PROJECTS.include? op.opts.project
   end
-  op.opts.update_jira = op.opts.update_jira and op.opts.promote
+  op.opts.update_jira = (op.opts.update_jira and op.opts.promote and not op.opts.dry_run)
 
   unless Workbench.in_docker?
     return setup_and_enter_docker(cmd_name, op.opts)
@@ -247,19 +268,27 @@ def deploy(cmd_name, args)
 
   # TODO: Add more granular logging, e.g. call deploy natively and pass an
   # optional log writer. Also rescue and log if deployment fails.
-  maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api and " +
-                      "public-api services (including DB updates)"
-  common.run_inline %W{
-    ../api/project.rb deploy
+  api_deploy_flags = %W{
       --project #{op.opts.project}
       --account #{op.opts.account}
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
-  }
+  } + (op.opts.dry_run ? %W{--dry-run} : [])
 
-  maybe_log_jira.call "'#{op.opts.project}': completed api and public-api " +
-                      "service deployment; beginning deploy of UI service"
+  if op.opts.project == PROD_PROJECT
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api " +
+                        "(including DB updates), skipping public-api " +
+                        "(see DB-89)"
+    common.run_inline %W{../api/project.rb deploy --skip-public-api} + api_deploy_flags
+  else
+    maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api and " +
+                        "public-api services (including DB updates)"
+    common.run_inline %W{../api/project.rb deploy} + api_deploy_flags
+  end
+
+  maybe_log_jira.call "'#{op.opts.project}': completed api service " +
+                      "deployment; beginning deploy of UI service"
   common.run_inline %W{
     ../ui/project.rb deploy-ui
       --project #{op.opts.project}
@@ -268,18 +297,24 @@ def deploy(cmd_name, args)
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
-  }
+  } + (op.opts.dry_run ? %W{--dry-run} : [])
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
-  common.run_inline %W{
-    ../public-ui/project.rb deploy-ui
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-  }
-  maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"
+
+  if op.opts.project == PROD_PROJECT
+    maybe_log_jira.call "'#{op.opts.project}': Skipping Public-UI service " +
+                        "deployment (see DB-89)"
+  else
+    common.run_inline %W{
+      ../public-ui/project.rb deploy-ui
+        --project #{op.opts.project}
+        --account #{op.opts.account}
+        --key-file #{op.opts.key_file}
+        --version #{op.opts.app_version}
+        #{op.opts.promote ? "--promote" : "--no-promote"}
+        --quiet
+    } + (op.opts.dry_run ? %W{--dry-run} : [])
+    maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"
+  end
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,

@@ -3,11 +3,11 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.junit.Before;
@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
@@ -30,6 +31,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -54,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ConceptsControllerTest {
+
 
   private static final Concept CLIENT_CONCEPT_1 = new Concept()
           .conceptId(123L)
@@ -138,6 +141,49 @@ public class ConceptsControllerTest {
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_6 =
           makeConcept(CLIENT_CONCEPT_6);
 
+  private static final org.pmiops.workbench.cdr.model.DomainInfo MEASUREMENT_DOMAIN =
+      new org.pmiops.workbench.cdr.model.DomainInfo()
+          .domainEnum(Domain.MEASUREMENT)
+          .domainId("Measurement")
+          .name("Measurement!")
+          .description("Measurements!!!")
+          .conceptId(CONCEPT_1.getConceptId())
+          .participantCount(123)
+          .standardConceptCount(3)
+          .allConceptCount(5);
+
+  private static final org.pmiops.workbench.cdr.model.DomainInfo CONDITION_DOMAIN =
+      new org.pmiops.workbench.cdr.model.DomainInfo()
+          .domainEnum(Domain.CONDITION)
+          .domainId("Condition")
+          .name("Condition!")
+          .description("Conditions!")
+          .conceptId(CONCEPT_2.getConceptId())
+          .participantCount(456)
+          .standardConceptCount(4)
+          .allConceptCount(6);
+
+  private static final org.pmiops.workbench.cdr.model.DomainInfo PROCEDURE_DOMAIN =
+      new org.pmiops.workbench.cdr.model.DomainInfo()
+          .domainEnum(Domain.PROCEDURE)
+          .domainId("Procedure")
+          .name("Procedure!!!")
+          .description("Procedures!!!")
+          .conceptId(CONCEPT_3.getConceptId())
+          .participantCount(789)
+          .standardConceptCount(1)
+          .allConceptCount(2);
+
+  private static final org.pmiops.workbench.cdr.model.DomainInfo DRUG_DOMAIN =
+      new org.pmiops.workbench.cdr.model.DomainInfo()
+          .domainEnum(Domain.DRUG)
+          .domainId("Drug")
+          .name("Drug!")
+          .description("Drugs!")
+          .conceptId(CONCEPT_4.getConceptId())
+          .participantCount(3)
+          .standardConceptCount(3)
+          .allConceptCount(4);
 
   @TestConfiguration
   @Import({
@@ -164,6 +210,8 @@ public class ConceptsControllerTest {
   @Autowired
   private CdrVersionDao cdrVersionDao;
   @Autowired
+  private DomainInfoDao domainInfoDao;
+  @Autowired
   FireCloudService fireCloudService;
 
   @PersistenceContext
@@ -177,7 +225,8 @@ public class ConceptsControllerTest {
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
     ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
-    conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao);
+    conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao,
+        domainInfoDao);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -438,12 +487,49 @@ public class ConceptsControllerTest {
         CLIENT_CONCEPT_1);
   }
 
+  @Test
+  public void testGetDomainInfo() throws Exception {
+    saveConcepts();
+    saveDomains();
+    List<DomainInfo> domainInfos = conceptsController.getDomainInfo("ns", "name")
+        .getBody().getItems();
+    assertThat(domainInfos).containsExactly(
+        new DomainInfo()
+            .domain(CONDITION_DOMAIN.getDomainEnum())
+            .name(CONDITION_DOMAIN.getName())
+            .description(CONDITION_DOMAIN.getDescription())
+            .participantCount(CONDITION_DOMAIN.getParticipantCount())
+            .allConceptCount(CONDITION_DOMAIN.getAllConceptCount())
+            .standardConceptCount(CONDITION_DOMAIN.getStandardConceptCount()),
+        new DomainInfo()
+            .domain(DRUG_DOMAIN.getDomainEnum())
+            .name(DRUG_DOMAIN.getName())
+            .description(DRUG_DOMAIN.getDescription())
+            .participantCount(DRUG_DOMAIN.getParticipantCount())
+            .allConceptCount(DRUG_DOMAIN.getAllConceptCount())
+            .standardConceptCount(DRUG_DOMAIN.getStandardConceptCount()),
+        new DomainInfo()
+            .domain(MEASUREMENT_DOMAIN.getDomainEnum())
+            .name(MEASUREMENT_DOMAIN.getName())
+            .description(MEASUREMENT_DOMAIN.getDescription())
+            .participantCount(MEASUREMENT_DOMAIN.getParticipantCount())
+            .allConceptCount(MEASUREMENT_DOMAIN.getAllConceptCount())
+            .standardConceptCount(MEASUREMENT_DOMAIN.getStandardConceptCount()),
+        new DomainInfo()
+            .domain(PROCEDURE_DOMAIN.getDomainEnum())
+            .name(PROCEDURE_DOMAIN.getName())
+            .description(PROCEDURE_DOMAIN.getDescription())
+            .participantCount(PROCEDURE_DOMAIN.getParticipantCount())
+            .allConceptCount(PROCEDURE_DOMAIN.getAllConceptCount())
+            .standardConceptCount(PROCEDURE_DOMAIN.getStandardConceptCount())).inOrder();
+  }
+
   static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
     org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());
     result.setStandardConcept(concept.getStandardConcept() == null ? null :
-        (concept.getStandardConcept() ? "S" : "C"));
+        (concept.getStandardConcept() ? "S" : null));
     result.setConceptCode(concept.getConceptCode());
     result.setConceptClassId(concept.getConceptClassId());
     result.setVocabularyId(concept.getVocabularyId());
@@ -461,6 +547,13 @@ public class ConceptsControllerTest {
     conceptDao.save(CONCEPT_4);
     conceptDao.save(CONCEPT_5);
     conceptDao.save(CONCEPT_6);
+  }
+
+  private void saveDomains() {
+    domainInfoDao.save(MEASUREMENT_DOMAIN);
+    domainInfoDao.save(PROCEDURE_DOMAIN);
+    domainInfoDao.save(CONDITION_DOMAIN);
+    domainInfoDao.save(DRUG_DOMAIN);
   }
 
   private void assertResults(ResponseEntity<ConceptListResponse> response,

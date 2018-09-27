@@ -45,21 +45,26 @@ echo "Dumping tables to csv from $BUCKET"
 
 # Get tables in project, stripping out tableId.
 # Note tables larger than 1 G need to be dumped into more than one file.
-# concept_relationship and concept are only big ones now.
+# Namin scheme is table_name.*.csv.gz
+
 if [[ $DATASET == *public* ]] || [[ $DATASET == *PUBLIC* ]];
 then
-    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria db_domain domain vocabulary concept_synonym)
+    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain_info survey_module domain vocabulary concept_synonym)
 else
-    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_ancestor concept_synonym)
+    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym)
 fi
 
 for table in ${tables[@]}; do
   echo "Dumping table : $table"
+  # It would be nice to use .* for everything but bq extract does a bad job and you end up with a hundred small files
+  # for tables that should just be one file without the .*
   if [[ $table =~ ^(concept|concept_relationship|concept_ancestor|concept_synonym)$ ]]
   then
-    bq extract $PROJECT:$DATASET.$table gs://$BUCKET/$DATASET/$table*.csv
+    bq extract --project_id $PROJECT --compression=GZIP --print_header=false $PROJECT:$DATASET.$table \
+    gs://$BUCKET/$DATASET/$table.*.csv.gz
   else
-    bq extract $PROJECT:$DATASET.$table gs://$BUCKET/$DATASET/$table.csv
+    bq extract --project_id $PROJECT --compression=GZIP --print_header=false $PROJECT:$DATASET.$table \
+    gs://$BUCKET/$DATASET/$table.csv.gz
   fi
 done
 

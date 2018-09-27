@@ -86,12 +86,12 @@ else
 fi
 
 
-copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute db_domain domain vocabulary concept_synonym)
+copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_synonym)
 
 for t in "${copy_tables[@]}"
 do
   bq --project=$WORKBENCH_PROJECT rm -f $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
-  bq --nosync cp $WORKBENCH_PROJECT:$WORKBENCH_DATASET.$t $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
+  bq --project=$WORKBENCH_PROJECT --nosync cp $WORKBENCH_PROJECT:$WORKBENCH_DATASET.$t $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
 done
 
 # Round counts for public dataset
@@ -123,7 +123,7 @@ where count_value >= 0"
 
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
-where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit')"
+where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit') and concept_code not in ('OMOP generated') "
 
 #delete concepts from concept_relationship that are not in concepts
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -172,3 +172,25 @@ set est_count =
         cast(ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where est_count > 0"
+
+# domain_info
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.domain_info\`
+set participant_count =
+    case when participant_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where participant_count > 0"
+
+# survey_module
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.survey_module\`
+set participant_count =
+    case when participant_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(ROUND(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where participant_count > 0"

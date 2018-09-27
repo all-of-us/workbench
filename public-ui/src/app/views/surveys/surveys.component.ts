@@ -21,18 +21,18 @@ export class SurveysComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.subscription = this.api.getSurveyList().subscribe(
+    this.subscription = this.api.getDomainTotals().subscribe(
       result => {
-        this.surveys = result.items.filter(item => item.conceptId );
+        this.surveys = result.surveyModules.filter(item => item.conceptId );
       });
   }
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
-  public viewResults(r) {
-    localStorage.setItem('dbDomain', JSON.stringify(r));
+  public viewSurvey(r) {
+    localStorage.setItem('surveyModule', JSON.stringify(r));
     localStorage.setItem('searchText', '');
-    this.router.navigateByUrl('/survey/' + r.domainId.toLowerCase());
+    this.router.navigateByUrl('/survey/' + r.conceptId);
   }
 
 }

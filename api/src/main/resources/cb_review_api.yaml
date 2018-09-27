@@ -12,7 +12,7 @@ info:
   contact:
     name: "developer_help@pmi-ops.org"
   license:
-    name: "MIT"
+    name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
   # Establish the fact that *some endpoints* are OAuth protected
@@ -194,19 +194,24 @@ paths:
     get:
       tags:
         - cohortReview
-      description: Returns a collection of CohortSummary for UI charting in cohort review.
-      operationId: "getCohortSummary"
+      description: Returns a collection of CohortChartData for UI charting in cohort review.
+      operationId: "getCohortChartData"
       parameters:
         - in: path
           name: domain
           type: string
           required: true
-          description: specifies which domain the CohortSummary should belong to.
+          description: specifies which domain the CohortChartData should belong to.
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: the limit search results to
       responses:
         200:
-          description: A collection of CohortSummary
+          description: A collection of CohortChartData
           schema:
-            $ref: "#/definitions/CohortSummaryListResponse"
+            $ref: "#/definitions/CohortChartDataListResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations:
     parameters:
@@ -506,7 +511,7 @@ definitions:
 
   DomainType:
     type: string
-    enum: [CONDITION, PROCEDURE, OBSERVATION, DRUG, ALL_EVENTS, DEVICE, VISIT, MEASUREMENT, PHYSICAL_MEASURE]
+    enum: [CONDITION, PROCEDURE, OBSERVATION, DRUG, ALL_EVENTS, DEVICE, VISIT, MEASUREMENT, PHYSICAL_MEASURE, LAB]
 
   SortOrder:
     type: string
@@ -585,15 +590,20 @@ definitions:
         items:
           $ref: "#/definitions/ParticipantChartData"
 
-  CohortSummaryListResponse:
+  CohortChartDataListResponse:
     type: object
     required:
+      - count
       - items
     properties:
+      count:
+        type: integer
+        format: int64
+        description: total count for cohort.
       items:
         type: "array"
         items:
-          $ref: "#/definitions/CohortSummary"
+          $ref: "#/definitions/CohortChartData"
 
   ParticipantCohortAnnotation:
     type: object
@@ -707,27 +717,24 @@ definitions:
         type: string
         description: sort column
 
-  CohortSummary:
+  CohortChartData:
     type: object
     required:
-      - type
       - name
-      - code
+      - conceptId
       - count
     properties:
-      type:
-        type: string
-        description: the criteria type
       name:
         type: string
-        description: the name of this criteria
-      code:
-        type: string
-        description: the code for this criteria
+        description: the name of this data
+      conceptId:
+        type: integer
+        format: int64
+        description: the source concept id for this data
       count:
         type: integer
         format: int64
-        description: the count for this criteria type in the cohort
+        description: the count for this data
 
   ParticipantChartData:
     type: object

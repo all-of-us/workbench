@@ -1,6 +1,8 @@
 package org.pmiops.workbench.config;
 
+import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
+import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -16,6 +18,12 @@ public class PublicApiWebMvcConfig extends WebMvcConfigurerAdapter {
   @Autowired
   private CorsInterceptor corsInterceptor;
 
+  @Autowired
+  private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
+
+  @Autowired
+  private SecurityHeadersInterceptor securityHeadersInterceptor;
+
   @Override
   public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
     configurer.defaultContentType(MediaType.APPLICATION_JSON);
@@ -24,6 +32,8 @@ public class PublicApiWebMvcConfig extends WebMvcConfigurerAdapter {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
+    registry.addInterceptor(clearCdrVersionInterceptor);
+    registry.addInterceptor(securityHeadersInterceptor);
   }
 
 }

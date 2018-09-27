@@ -1,0 +1,37 @@
+.card-area {
+    margin-left: 2.3rem;
+    margin-top: -1rem;
+    display: inline-block;
+    width: 17rem;
+}
+
+.card {
+    height: 9.2rem;
+    border-radius: .3125rem;
+    box-shadow: 0 0 0 0;
+    width: 5.5rem;
+    display: inline-block;
+    margin-left: .45rem;
+    margin-top: 1rem;
+    position: relative;
+}
+
+.scroll-indicator {
+    height: 2rem;
+    width: 2rem;
+    position: absolute;
+    top: 3rem;
+}
+
+.title {
+    left: 2.7rem;
+    margin-top: -1.7rem;
+    color: #FFFFFF;
+    width: 100%;
+    position: relative
+}
+
+.recent-work {
+    top: 2.1rem;
+    position: relative;
+}

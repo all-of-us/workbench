@@ -1,0 +1,161 @@
+# Swagger definitions for API objects common to both api and public-api.
+
+swagger: '2.0'
+info:
+  version: "0.1.0"
+  title: "AllOfUs Common API"
+  description: "API objects common to both api and public-api"
+  termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
+  contact:
+    name: "developer_help@pmi-ops.org"
+  license:
+    name: "BSD"
+host: "api.pmi-ops.org"
+schemes:
+  - "https"
+produces:
+  - "application/json"
+
+paths:
+
+  # CDR versions #########################################################################
+
+  /v1/cdrVersions:
+    get:
+      tags:
+        - cdrVersions
+      description: Returns all curated data repository (CDR) versions that the user has access to
+      operationId: getCdrVersions
+      responses:
+        200:
+          description: A list of CDR versions.
+          schema:
+            $ref: "#/definitions/CdrVersionListResponse"
+
+definitions:
+  DataAccessLevel:
+    type: string
+    description: levels of access to data in the curated data repository
+    enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected, revoked]
+
+  Domain:
+    type: string
+    description: a domain for concepts corresponding to a table in the OMOP schema
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT]
+
+  CdrVersionListResponse:
+    type: object
+    required:
+      - items
+      - defaultCdrVersionId
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CdrVersion"
+      defaultCdrVersionId:
+        type: "string"
+        description: ID of the CDR versions that should be used by the user by default
+
+  CdrVersion:
+    type: object
+    required:
+      - cdrVersionId
+      - name
+      - dataAccessLevel
+      - creationTime
+    properties:
+      cdrVersionId:
+        type: string
+      name:
+        type: string
+      dataAccessLevel:
+        $ref: "#/definitions/DataAccessLevel"
+      creationTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
+
+  DomainInfo:
+    type: object
+    required:
+      - domain
+      - name
+      - description
+      - standardConceptCount
+      - allConceptCount
+      - participantCount
+    properties:
+      domain:
+        description: the domain ID
+        $ref: "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      description:
+        description: description of the domain
+        type: string
+      standardConceptCount:
+        description: number of standard concepts in this domain
+        type: integer
+        format: int64
+      allConceptCount:
+        description: number of concepts in this domain (standard or non-standard)
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for a concept in this domain
+        type: integer
+        format: int64
+
+  SurveyModule:
+    type: object
+    required:
+      - conceptId
+      - name
+      - description
+      - questionCount
+      - participantCount
+    properties:
+      conceptId:
+        description: the concept ID for the survey module
+        type: integer
+        format: int64
+      name:
+        description: display name of the module
+        type: string
+      description:
+        description: description of the module
+        type: string
+      questionCount:
+        description: number of questions in the module
+        type: integer
+        format: int64
+      participantCount:
+        description: number of participants with data in the CDR for questions in this module
+        type: integer
+        format: int64
+
+  ErrorResponse:
+    type: object
+    properties:
+      message:
+        description: General error message for the response.
+        type: string
+      statusCode:
+        type: integer
+        description: HTTP status code
+      errorClassName:
+        type: string
+      errorCode:
+        description: Short description of the type of error
+        $ref: "#/definitions/ErrorCode"
+      # TODO: add list of field-level error messages with field names.
+
+  ErrorCode:
+    type: string
+    description: Short parsable error descriptions
+    enum: [
+      PARSE_ERROR,
+      USER_DISABLED
+    ]

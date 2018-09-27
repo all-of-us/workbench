@@ -37,8 +37,15 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "code, " +
     "@curType \\:= name as name, " +
     "concept_id " +
-    "from (select * from criteria where type = upper(:type) and " +
-    "(upper(code) like upper(concat('%',:value,'%')) or upper(name) like upper(concat('%',:value,'%'))) ) a, " +
+    "from (select * from criteria " +
+    "where type = upper(:type) " +
+    "and (upper(code) like upper(concat('%',:value,'%')) " +
+    "     or upper(name) like upper(concat('%',:value,'%')) " +
+    "     or concept_id in " +
+    "      (select concept_id " +
+    "         from concept_synonym " +
+    "        where upper(concept_synonym_name) like upper(concat('%',:value,'%'))) " +
+    "    ) ) a, " +
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
@@ -57,8 +64,15 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "code, " +
     "@curType \\:= name as name, " +
     "concept_id " +
-    "from (select * from criteria where type = upper(:type) and subtype = upper(:subtype) and " +
-    "(upper(code) like upper(concat('%',:value,'%')) or upper(name) like upper(concat('%',:value,'%'))) ) a, " +
+    "from (select * from criteria where type = upper(:type) " +
+    "and subtype = upper(:subtype) " +
+    "and (upper(code) like upper(concat('%',:value,'%')) " +
+    "     or upper(name) like upper(concat('%',:value,'%')) " +
+    "     or concept_id in " +
+    "      (select concept_id " +
+    "         from concept_synonym " +
+    "        where upper(concept_synonym_name) like upper(concat('%',:value,'%'))) " +
+    "    ) ) a, " +
     "(select @curRow \\:= 0, @curType \\:= '') r " +
     "order by name, id) as x " +
     "where rank = 1) " +
@@ -79,10 +93,11 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "where c.type = 'DRUG' " +
     "and c.subtype in ('ATC', 'BRAND') " +
     "and c.is_selectable = 1 " +
-    "and upper(c.name) like upper(concat('%',:name,'%')) " +
+    "and (upper(c.name) like upper(concat('%',:value,'%')) " +
+    "or upper(c.code) like upper(concat('%',:value,'%'))) " +
     "order by c.name asc " +
     "limit :limit", nativeQuery = true)
-  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name,
+  List<Criteria> findDrugBrandOrIngredientByValue(@Param("value") String value,
                                                  @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
@@ -97,7 +112,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "from criteria " +
     "where is_group = 0 " +
     "and is_selectable = 1 " +
-    "and path = ( " +
+    "and (path = ( " +
     "select concat( path, '.', id) as path " +
     "from criteria " +
     "where type = :type " +
@@ -112,7 +127,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and subtype = :subtype " +
     "and code = :code " +
     "and is_group = 1 " +
-    "and is_selectable = 1)", nativeQuery = true)
+    "and is_selectable = 1))", nativeQuery = true)
   List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
 
   @Query(value = "select * from criteria c " +

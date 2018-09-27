@@ -17,47 +17,12 @@
     <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
   </div>
 
-  <div class="card item-card notebook-card" *ngFor="let notebook of notebookList">
-    <div class="header-area">
-      <clr-dropdown [clrCloseMenuOnItemClick]="false">
-        <button type="button" class="notebook-menu" [disabled]="actionsDisabled" clrDropdownTrigger>
-          <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical" [class.disabled]="actionsDisabled"></clr-icon>
-        </button>
-        <clr-dropdown-menu *clrIfOpen>
-          <button class="action-item"
-                  id="rename-{{notebook.name.replace('.ipynb', '')}}"
-                  (click)="renameThis(notebook)"
-                  [class.disabled]="actionsDisabled"
-                  [disabled]="actionsDisabled">
-            <clr-icon shape="pencil"></clr-icon>
-            Rename
-          </button>
-          <button class="action-item"
-                  id="clone-{{notebook.name.replace('.ipynb', '')}}"
-                  (click)="cloneThis(notebook.name)"
-                  [class.disabled]="actionsDisabled"
-                  [disabled]="actionsDisabled">
-            <clr-icon shape="copy"></clr-icon>
-            Clone
-          </button>
-          <button class="action-item"
-                  id="delete-{{notebook.name.replace('.ipynb', '')}}"
-                  (click)="confirmDelete(notebook)"
-                  [class.disabled]="actionsDisabled"
-                  [disabled]="actionsDisabled">
-            <clr-icon shape="trash"></clr-icon>
-            Delete
-          </button>
-        </clr-dropdown-menu>
-      </clr-dropdown>
-      <div class="name" [class.disabled]="actionsDisabled" (click)="actionsDisabled || openNotebook(notebook)">{{notebook.name}}</div>
-    </div>
-    <div class="footer">
-      <div class="last-modified">
-        <div>Last Update<br/>{{notebook.lastModifiedTime | date}}</div>
-      </div>
-      <div class="item-type notebook"><div>NB</div></div>
-    </div>
+  <div *ngFor="let notebook of resourceList">
+    <app-resource-card [resourceCard]="notebook" [cssClass]="'for-list'"
+                       (onUpdate)="updateList($event)"
+                       (duplicateNameError)="duplicateNameError($event)"
+                       (invalidNameError)="invalidNameError($event)">
+    </app-resource-card>
   </div>
 </div>
 
@@ -88,5 +53,4 @@
 </clr-modal>
 <app-bug-report></app-bug-report>
 
-<app-rename-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveRename)="receiveRename($event)"></app-rename-modal>
-<app-confirm-delete-modal [resourceType]="'notebook'" [resource]="notebookInFocus" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
+<app-new-notebook-modal [workspace]="workspace" [existingNotebooks]="notebookList"></app-new-notebook-modal>

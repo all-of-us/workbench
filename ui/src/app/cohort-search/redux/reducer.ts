@@ -1,3 +1,4 @@
+import {TreeSubType} from 'generated';
 import {fromJS, List, Map, Set} from 'immutable';
 import {Reducer} from 'redux';
 
@@ -15,9 +16,11 @@ import {
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
+  LOAD_CRITERIA_SUBTYPE_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
   LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
@@ -33,6 +36,7 @@ import {
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  CHANGE_CODE_OPTION,
   SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
@@ -87,6 +91,11 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
           .setIn(['criteria', 'requests', action.kind, action.parentId], true);
 
+      case BEGIN_SUBTYPE_CRITERIA_REQUEST:
+        return state
+          .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
+          .setIn(['criteria', 'requests', action.kind, action.parentId], true);
+
       case BEGIN_ALL_CRITERIA_REQUEST:
         return state
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
@@ -102,12 +111,23 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['criteria', 'tree', action.kind, action.parentId], fromJS(action.results))
           .deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
+      case LOAD_CRITERIA_SUBTYPE_RESULTS:
+        return state
+          .setIn(
+            ['criteria', 'tree', action.kind, action.subtype, action.parentId],
+            fromJS(action.results)
+          )
+          .deleteIn(['criteria', 'requests', action.kind, action.parentId]);
+
       case LOAD_DEMO_CRITERIA_RESULTS:
         return state
           .setIn(['criteria', 'tree', action.kind, action.subtype], action.results)
           .deleteIn(['criteria', 'requests', action.kind, action.subtype]);
 
       case LOAD_CRITERIA_SUBTREE:
+        if (action.subtype !== TreeSubType[TreeSubType.BRAND]) {
+          state = state.deleteIn(['criteria', 'search', 'ingredients']);
+        }
         return state
           .setIn(['criteria', 'subtree', action.kind], fromJS(action.path))
           .setIn(['criteria', 'subtree', 'selected'], action.ids)
@@ -198,6 +218,12 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['criteria', 'errors', List([action.kind, action.parentId])],
             fromJS({error: action.error})
           );
+
+      case CHANGE_CODE_OPTION:
+        return state
+          .deleteIn(['criteria', 'subtree'])
+          .deleteIn(['criteria', 'search']);
+
 
       case SET_SCROLL_ID:
         return state.setIn(['criteria', 'tree', 'scroll'], action.nodeId);
@@ -390,7 +416,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           open: true,
           item: {
             id: action.itemId,
-            type: action.context.criteriaType,
+            type: action.itemType,
             fullTree: action.context.fullTree,
             searchParameters: [],
             modifiers: [],
@@ -402,12 +428,14 @@ export const rootReducer: Reducer<CohortSearchState> =
         }));
 
       case REOPEN_WIZARD:
+        const selections = state.getIn(['entities', 'parameters'], Map()).filter(
+          (_, key) => action.item.get('searchParameters', List()).includes(key)
+        );
         return state.mergeIn(['wizard'], Map({
           open: true,
           item: action.item,
-          selections: state.getIn(['entities', 'parameters'], Map()).filter(
-            (_, key) => action.item.get('searchParameters', List()).includes(key)
-          ),
+          selections: selections,
+
           ...action.context
         }));
 

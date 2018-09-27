@@ -4,6 +4,7 @@ import {TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {
+  activeCriteriaSubtype,
   autocompleteError,
   autocompleteOptions,
   CohortSearchActions,
@@ -21,6 +22,7 @@ import {highlightMatches} from '../utils';
   styleUrls: ['./search-bar.component.css']
 })
 export class SearchBarComponent implements OnInit, OnDestroy {
+  @select(activeCriteriaSubtype) subtype$: Observable<string>;
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() _type;
   searchTerm = '';
@@ -35,6 +37,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   numMatches: number;
   ingredientList = [];
   highlightedOption: number;
+  subtype: string;
+  codes: any;
 
   @ViewChild('searchBar') searchBar;
   @HostListener('document:mouseup', ['$event.target'])
@@ -51,6 +55,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.codes = this.ngRedux.getState().getIn(['wizard', 'codes']);
     const errorSub = this.ngRedux
       .select(autocompleteError())
       .map(err => !(err === null || err === undefined))
@@ -83,9 +88,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               }
             });
           }
-          this.noResults = (this._type === TreeType[TreeType.DRUG]
-              || this._type === TreeType[TreeType.MEAS])
-            && !this.optionSelected
+          this.noResults = !this.optionSelected
             && !this.options.length;
         }
       });
@@ -105,7 +108,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         });
         if (this.ingredientList.length) {
           this.actions.setCriteriaSearchTerms(this.ingredientList);
-          this.actions.loadCriteriaSubtree(this._type, ids, path);
+          this.actions.loadCriteriaSubtree(this._type, TreeSubType[TreeSubType.BRAND], ids, path);
         }
       });
 
@@ -113,11 +116,18 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .filter(selectedIds => !!selectedIds)
       .subscribe(selectedIds => this.numMatches = selectedIds.length);
 
+    const subtypeSub = this.subtype$
+      .subscribe(subtype => {
+        this.searchTerm = '';
+        this.subtype = subtype;
+      });
+
     this.subscription = errorSub;
     this.subscription.add(loadingSub);
     this.subscription.add(optionsSub);
     this.subscription.add(ingredientSub);
     this.subscription.add(subtreeSelectSub);
+    this.subscription.add(subtypeSub);
   }
 
   ngOnDestroy() {
@@ -139,7 +149,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.numMatches = 0;
       this.noResults = false;
       if (newVal.length >= 4) {
-        this.actions.fetchAutocompleteOptions(this._type, newVal);
+        const subtype = this.codes ? this.subtype : null;
+        this.actions.fetchAutocompleteOptions(this._type, subtype, newVal);
       } else {
         this.actions.setCriteriaSearchTerms([]);
         this.options = [];
@@ -162,7 +173,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           path = path.concat(multiple.path.split('.'));
         });
       }
-      this.actions.loadCriteriaSubtree(this._type, ids, path);
+      this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
     }
     this.actions.clearAutocompleteOptions();
   }

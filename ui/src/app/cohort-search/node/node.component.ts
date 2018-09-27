@@ -13,6 +13,7 @@ import {
   criteriaError,
   criteriaSearchTerms,
   criteriaSubtree,
+  ingredientsForBrand,
   isCriteriaLoading,
   subtreeSelected,
 } from '../redux';
@@ -51,9 +52,12 @@ export class NodeComponent implements OnInit, OnDestroy {
   modifiedTree = false;
   searchTerms: Array<string>;
   numMatches = 0;
+  subMatches = 0;
   loading = false;
   error = false;
   fullTree: boolean;
+  codes: any;
+  ingredients = [];
   subscription: Subscription;
   @select(subtreeSelected) selected$: Observable<any>;
 
@@ -64,8 +68,10 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.fullTree = this.ngRedux.getState().getIn(['wizard', 'fullTree']);
+    this.codes = this.ngRedux.getState().getIn(['wizard', 'codes']);
     if (!this.fullTree || this.node.get('id') === 0) {
       const _type = this.node.get('type');
+      const subtype = this.codes ? this.node.get('subtype') : null;
       const parentId = this.node.get('id');
       const errorSub = this.ngRedux
         .select(criteriaError(_type, parentId))
@@ -77,7 +83,7 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(loading => this.loading = loading);
 
       const childSub = this.ngRedux
-        .select(criteriaChildren(_type, parentId))
+        .select(criteriaChildren(_type, subtype, parentId))
         .subscribe(children => {
           if (this.fullTree) {
             let criteriaList = [];
@@ -114,12 +120,26 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(nodeIds => this.expanded = nodeIds.includes(parentId.toString()));
 
       const subtreeSelectSub = this.selected$
-        .filter(selectedIds => !!selectedIds && parentId !== 0)
+        .filter(selectedIds => !!selectedIds)
         .subscribe(selectedIds => {
-          const displayName = selectedIds.includes(parentId)
-            ? highlightMatches(this.searchTerms, this.node.get('name'))
-            : stripHtml(this.node.get('name'));
-          this.node = this.node.set('name', displayName);
+          this.subMatches = selectedIds.length;
+          if (parentId !== 0) {
+            const displayName = selectedIds.includes(parentId)
+              ? highlightMatches(this.searchTerms, this.node.get('name'))
+              : stripHtml(this.node.get('name'));
+            this.node = this.node.set('name', displayName);
+          }
+        });
+
+      const ingredientSub = this.ngRedux
+        .select(ingredientsForBrand())
+        .subscribe(ingredients => {
+          this.ingredients = [];
+          ingredients.forEach(item => {
+            if (!this.ingredients.includes(item.name)) {
+              this.ingredients.push(item.name);
+            }
+          });
         });
 
       this.subscription = errorSub;
@@ -128,6 +148,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.subscription.add(searchSub);
       this.subscription.add(subtreeSub);
       this.subscription.add(subtreeSelectSub);
+      this.subscription.add(ingredientSub);
     }
     if (this.fullTree) {
       this.expanded = this.node.get('expanded', false);
@@ -174,6 +195,8 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchDrugCriteria(_type, parentId, TreeSubType[TreeSubType.ATC]);
     } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
+    } else if (this.codes && this.node.get('subtype')) {
+      this.actions.fetchCriteriaBySubtype(_type, this.node.get('subtype'), parentId);
     } else {
       this.actions.fetchCriteria(_type, parentId);
     }
@@ -252,5 +275,9 @@ export class NodeComponent implements OnInit, OnDestroy {
       }
     });
     return filtered;
+  }
+
+  get multipleMatches() {
+    return this.ingredients.length > 0 || this.subMatches > 1;
   }
 }

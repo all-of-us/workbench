@@ -103,10 +103,10 @@ public class CohortBuilderControllerTest {
       createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true)
     );
     drugBrandCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_BRAND, 0L, "LP12345", "brandName", DomainType.DRUG.name(), "1235", true)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_BRAND, 0L, "LP6789", "brandName", DomainType.DRUG.name(), "1235", true)
     );
     drugATCCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "differentName", DomainType.DRUG.name(), "12345", false)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false)
     );
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
@@ -228,7 +228,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(drugATCCriteria),
       controller
-        .getDrugBrandOrIngredientByName(1L, "drugN", null)
+        .getDrugBrandOrIngredientByValue(1L, "drugN", null)
         .getBody()
         .getItems()
         .get(0)
@@ -237,7 +237,16 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(drugBrandCriteria),
       controller
-        .getDrugBrandOrIngredientByName(1L, "brandN", null)
+        .getDrugBrandOrIngredientByValue(1L, "brandN", null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+
+    assertEquals(
+      createResponseCriteria(drugBrandCriteria),
+      controller
+        .getDrugBrandOrIngredientByValue(1L, "LP6789", null)
         .getBody()
         .getItems()
         .get(0)

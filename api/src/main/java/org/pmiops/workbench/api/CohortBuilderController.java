@@ -121,12 +121,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId,
-                                                                             String drugName,
+  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByValue(Long cdrVersionId,
+                                                                             String value,
                                                                              Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName, resultLimit);
+    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -163,17 +163,17 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ChartInfoListResponse> getChartInfo(Long cdrVersionId, SearchRequest request) {
+  public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    ChartInfoListResponse response = new ChartInfoListResponse();
+    DemoChartInfoListResponse response = new DemoChartInfoListResponse();
 
-    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildChartInfoCounterQuery(
+    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildDemoChartInfoCounterQuery(
       new ParticipantCriteria(request)));
     QueryResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     for (List<FieldValue> row : result.iterateAll()) {
-      response.addItemsItem(new ChartInfo()
+      response.addItemsItem(new DemoChartInfo()
         .gender(bigQueryService.getString(row, rm.get("gender")))
         .race(bigQueryService.getString(row, rm.get("race")))
         .ageRange(bigQueryService.getString(row, rm.get("ageRange")))

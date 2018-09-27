@@ -6,7 +6,6 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
@@ -52,28 +51,6 @@ public final class StorageEnums {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
   }
 
-  // RACE, GENDER, and ETHNICITY are explicitly not mapped here as they are not valid domains
-  // for concept sets.
-  private static final BiMap<Domain, Short> CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN =
-      ImmutableBiMap.<Domain, Short>builder()
-      .put(Domain.CONDITION, (short) 0)
-      .put(Domain.DEATH, (short) 1)
-      .put(Domain.DEVICE, (short) 2)
-      .put(Domain.DRUG, (short) 3)
-      .put(Domain.MEASUREMENT, (short) 4)
-      .put(Domain.OBSERVATION, (short) 5)
-      .put(Domain.PROCEDURE, (short) 6)
-      .put(Domain.VISIT, (short) 7)
-      .build();
-
-  public static Domain conceptSetDomainFromStorage(Short domain) {
-    return CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN.inverse().get(domain);
-  }
-
-  public static Short conceptSetDomainToStorage(Domain domain) {
-    return CLIENT_TO_STORAGE_CONCEPT_SET_DOMAIN.get(domain);
-  }
-
   private static final BiMap<BillingProjectStatus, Short> CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS =
       ImmutableBiMap.<BillingProjectStatus, Short>builder()
       .put(BillingProjectStatus.NONE, (short) 0)
@@ -88,22 +65,6 @@ public final class StorageEnums {
 
   public static Short billingProjectStatusToStorage(BillingProjectStatus s) {
     return CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS.get(s);
-  }
-
-  private static final BiMap<DataAccessLevel, Short> CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL =
-      ImmutableBiMap.<DataAccessLevel, Short>builder()
-      .put(DataAccessLevel.UNREGISTERED, (short) 0)
-      .put(DataAccessLevel.REGISTERED, (short) 1)
-      .put(DataAccessLevel.PROTECTED, (short) 2)
-      .put(DataAccessLevel.REVOKED, (short) 3)
-      .build();
-
-  public static DataAccessLevel dataAccessLevelFromStorage(Short level) {
-    return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.inverse().get(level);
-  }
-
-  public static Short dataAccessLevelToStorage(DataAccessLevel level) {
-    return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
   }
 
   private static final BiMap<EmailVerificationStatus, Short>

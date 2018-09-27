@@ -85,11 +85,11 @@ public class ConceptSet {
 
   @Transient
   public Domain getDomainEnum() {
-    return StorageEnums.conceptSetDomainFromStorage(domain);
+    return CommonStorageEnums.domainFromStorage(domain);
   }
 
   public void setDomainEnum(Domain domain) {
-    this.domain = StorageEnums.conceptSetDomainToStorage(domain);
+    this.domain = CommonStorageEnums.domainToStorage(domain);
   }
 
   @Column(name = "description")

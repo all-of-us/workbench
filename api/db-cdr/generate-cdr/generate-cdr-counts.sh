@@ -86,18 +86,7 @@ PUBLIC_DATASET=public$CDR_VERSION
 startDate=$(date)
 echo $(date) " Starting generate-cdr-counts $startDate"
 
-## Make BigQuery denormalized tables
-echo "Making BigQuery denormalized tables"
-if ./generate-cdr/make-bq-denormalized-tables.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET
-then
-    echo "BigQuery denormalized tables generated"
-else
-    echo "FAILED To generate BigQuery denormalized tables for cdr $CDR_VERSION"
-    exit 1
-fi
-
-
-## Make BigQuery cdr
+## Make workbench cdr count data
 echo "Making BigQuery cdr dataset"
 if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT \
  --workbench-dataset $WORKBENCH_DATASET --cdr-version "$CDR_VERSION"
@@ -108,7 +97,7 @@ else
     exit 1
 fi
 
-## Dump workbench cdr counts
+## Dump workbench cdr count data
 echo "Dumping BigQuery cdr dataset to .csv"
 if ./generate-cdr/make-bq-data-dump.sh --dataset $WORKBENCH_DATASET --project $WORKBENCH_PROJECT --bucket $BUCKET
 then
@@ -118,7 +107,7 @@ else
     exit 1
 fi
 
-## Make BigQuery public
+## Make public cdr count data
 echo "Making BigQuery public dataset"
 if ./generate-cdr/make-bq-public-data.sh --workbench-project $WORKBENCH_PROJECT --workbench-dataset $WORKBENCH_DATASET \
   --public-project $PUBLIC_PROJECT --public-dataset $PUBLIC_DATASET --bin-size $BIN_SIZE
@@ -130,7 +119,7 @@ else
 fi
 
 
-## Dump public counts
+## Dump public cdr count data
 echo "Dumping public dataset to .csv"
 if ./generate-cdr/make-bq-data-dump.sh --dataset $PUBLIC_DATASET --project $PUBLIC_PROJECT --bucket $BUCKET
 then
@@ -143,3 +132,4 @@ fi
 stopDate=$(date)
 echo "Start $startDate Stop: $stopDate"
 echo $(date) " Finished generate-cdr-counts "
+

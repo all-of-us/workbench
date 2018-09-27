@@ -1,9 +1,11 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
   LOAD_CRITERIA_RESULTS,
+  LOAD_CRITERIA_SUBTYPE_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
   LOAD_CRITERIA_SUBTREE,
   CANCEL_CRITERIA_REQUEST,
@@ -20,6 +22,7 @@ import {
   AUTOCOMPLETE_REQUEST_ERROR,
   ATTRIBUTE_REQUEST_ERROR,
   CRITERIA_REQUEST_ERROR,
+  CHANGE_CODE_OPTION,
   SET_SCROLL_ID,
 
   BEGIN_COUNT_REQUEST,
@@ -62,7 +65,7 @@ import {
 } from './types';
 /* tslint:enable:ordered-imports */
 
-import {ChartInfo, Criteria, SearchRequest} from 'generated';
+import {Criteria, DemoChartInfo, SearchRequest} from 'generated';
 
 /**
  * Criteria loading mgmt
@@ -71,6 +74,11 @@ export const requestCriteria =
   (cdrVersionId: number, kind: string, parentId: number
   ): ActionTypes[typeof BEGIN_CRITERIA_REQUEST] =>
   ({type: BEGIN_CRITERIA_REQUEST, cdrVersionId, kind, parentId});
+
+export const requestCriteriaBySubtype =
+  (cdrVersionId: number, kind: string, subtype: string, parentId: number
+  ): ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST] =>
+  ({type: BEGIN_SUBTYPE_CRITERIA_REQUEST, cdrVersionId, kind, subtype, parentId});
 
 export const requestAllCriteria =
   (cdrVersionId: number, kind: string, parentId: number
@@ -87,10 +95,15 @@ export const loadCriteriaRequestResults =
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
   ({type: LOAD_CRITERIA_RESULTS, kind, parentId, results});
 
+export const loadCriteriaSubtypeRequestResults =
+  (kind: string, subtype: string, parentId: number, results: Criteria[]
+  ): ActionTypes[typeof LOAD_CRITERIA_SUBTYPE_RESULTS] =>
+  ({type: LOAD_CRITERIA_SUBTYPE_RESULTS, kind, subtype, parentId, results});
+
 export const loadCriteriaSubtree =
-  (kind: string, ids: Array<number>, path: Array<string>
+  (kind: string, subtype: string, ids: Array<number>, path: Array<string>
   ): ActionTypes[typeof LOAD_CRITERIA_SUBTREE] =>
-  ({type: LOAD_CRITERIA_SUBTREE, kind, ids, path});
+  ({type: LOAD_CRITERIA_SUBTREE, kind, subtype, ids, path});
 
 export const loadDemoCriteriaRequestResults =
   (kind: string, subtype: string, results: any
@@ -108,9 +121,9 @@ export const setCriteriaSearchTerms =
   ({type: SET_CRITERIA_SEARCH, searchTerms});
 
 export const requestAutocompleteOptions =
-  (cdrVersionId: number, kind: string, searchTerms: string
+  (cdrVersionId: number, kind: string, subtype: string, searchTerms: string
   ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
-  ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, searchTerms});
+  ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, subtype, searchTerms});
 
 export const requestIngredientsForBrand =
   (cdrVersionId: number, conceptId: number
@@ -171,6 +184,10 @@ export const setScrollId =
   ): ActionTypes[typeof SET_SCROLL_ID] =>
   ({type: SET_SCROLL_ID, nodeId});
 
+export const changeCodeOption =
+  (): ActionTypes[typeof CHANGE_CODE_OPTION] =>
+  ({type: CHANGE_CODE_OPTION});
+
 
 /**
  * Count loading mgmt
@@ -228,7 +245,7 @@ export const requestCharts =
   ({type: BEGIN_CHARTS_REQUEST, cdrVersionId, entityType, entityId, request});
 
 export const loadChartsRequestResults =
-  (entityType: string, entityId: string, chartData: ChartInfo[]
+  (entityType: string, entityId: string, chartData: DemoChartInfo[]
   ): ActionTypes[typeof LOAD_CHARTS_RESULTS] =>
   ({type: LOAD_CHARTS_RESULTS, entityType, entityId, chartData});
 
@@ -302,9 +319,9 @@ export const hideAttributesPage =
  * Context mgmt
  */
 export const openWizard =
-  (itemId: string, context: object
+  (itemId: string, itemType: string, context: object
   ): ActionTypes[typeof OPEN_WIZARD] =>
-  ({type: OPEN_WIZARD, itemId, context});
+  ({type: OPEN_WIZARD, itemId, itemType, context});
 
 export const reOpenWizard =
   (item: any, context: object

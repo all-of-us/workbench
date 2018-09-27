@@ -12,6 +12,7 @@ import {
 
 import {
   attributeDisplay,
+  getCodeOptions,
   nameDisplay,
   typeDisplay,
   typeToTitle,
@@ -90,10 +91,12 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   launchWizard() {
-    const criteriaType = this.item.get('type');
+    const codes = getCodeOptions(this.item.get('type'));
+    const criteriaType = codes ? codes[0].type : this.item.get('type');
+    const criteriaSubtype = codes ? codes[0].subtype : null;
     const fullTree = this.item.get('fullTree', false);
     const {role, groupId, itemId} = this;
-    const context = {criteriaType, role, groupId, itemId, fullTree};
+    const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
     const item = this.item;
     this.actions.reOpenWizard(item, context);
   }

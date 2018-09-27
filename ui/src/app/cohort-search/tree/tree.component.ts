@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnChanges, OnInit} from '@angular/core';
 import {TreeType} from 'generated';
 import {NodeComponent} from '../node/node.component';
 
@@ -12,8 +12,17 @@ import {NodeComponent} from '../node/node.component';
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.css']
 })
-export class TreeComponent extends NodeComponent implements OnInit {
+export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   _type: string;
+  name: string;
+
+  ngOnChanges() {
+    if (this.node.get('type') === TreeType[TreeType.ICD9]
+      || this.node.get('type') === TreeType[TreeType.ICD10]
+      || this.node.get('type') === TreeType[TreeType.CPT]) {
+        super.ngOnInit();
+    }
+  }
 
   ngOnInit() {
     super.ngOnInit();
@@ -21,10 +30,22 @@ export class TreeComponent extends NodeComponent implements OnInit {
     this._type = this.node.get('type', '');
   }
 
-  showSearch() {
-    return this.node.get('type') === TreeType[TreeType.VISIT]
-      || this.node.get('type') === TreeType[TreeType.DRUG]
-      || this.node.get('type') === TreeType[TreeType.MEAS]
-      || this.node.get('type') === TreeType[TreeType.PM];
+  get showSearch() {
+    return !this.isEmpty && this.node.get('type') !== TreeType[TreeType.DEMO];
+  }
+
+  get showDropDown() {
+    return !this.isEmpty && this.codes;
+  }
+
+  get isEmpty() {
+    return !this.loading && (!this.children || !this.children.size || this.error);
+  }
+
+  optionChange(flag) {
+    if (flag) {
+      this._type = flag;
+      setTimeout(() => super.loadChildren(true));
+    }
   }
 }

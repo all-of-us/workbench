@@ -178,5 +178,50 @@
     "concept_id":6,
     "has_attribute":0,
     "path":"1.5.11"
+  },
+  {
+    "id":1428,
+    "parent_id":11,
+    "type":"MEAS",
+    "subtype":"LAB",
+    "code":"A017",
+    "name":"Test",
+    "is_group":0,
+    "is_selectable":1,
+    "est_count":"19",
+    "domain_id":"Condition",
+    "concept_id":3,
+    "has_attribute":0,
+    "path":"1.5.11"
+  },
+  {
+    "id":1429,
+    "parent_id":11,
+    "type":"MEAS",
+    "subtype":"LAB",
+    "code":"A017",
+    "name":"Test",
+    "is_group":0,
+    "is_selectable":1,
+    "est_count":"19",
+    "domain_id":"Condition",
+    "concept_id":9,
+    "has_attribute":0,
+    "path":"1.5.11"
+  },
+  {
+    "id":1430,
+    "parent_id":11,
+    "type":"MEAS",
+    "subtype":"LAB",
+    "code":"A017",
+    "name":"Test",
+    "is_group":0,
+    "is_selectable":1,
+    "est_count":"19",
+    "domain_id":"Condition",
+    "concept_id":10,
+    "has_attribute":0,
+    "path":"1.5.11"
   }
 ]
