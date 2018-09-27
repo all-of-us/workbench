@@ -77,11 +77,9 @@
 
 .card .footer {
   position: absolute;
-  bottom: .7rem;
-  right: .7rem;
+  bottom: .1rem;
 }
 
 .last-modified {
-  position: absolute;
   left: -5rem;
 }

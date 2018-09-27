@@ -55,9 +55,7 @@
 
 .card.item-card .footer {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: -0.75rem;
-  margin-right: -0.75rem;
+  flex-direction: column;
 }
 
 .card.item-card .name {
@@ -68,40 +66,32 @@
 }
 
 .card.item-card .item-type {
-  background-color: #F8C954;
-  height: 42px;
-  width: 42px;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
-  border-radius: 5px 0 4px 0;
-  box-sizing: border-box;
-  border: 2px solid #DCAE3B;
+  height: 22px;
+  width: max-content;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 4px 4px 0 0;
+  background-color: #8BC990;
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .card.item-card .item-type.cohort {
   background-color: #F8C954;
-  border: 2px solid #DCAE3B;
 }
 
 .card.item-card .item-type.notebook {
   background-color: #8BC990;
-  border: 2px solid #6EAF73;
 }
 
 .item-type * {
-  font-size: 22px;
-  font-weight: bold;
+  color: #FFFFFF;
+  font-family: Montserrat;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.item-type.cohort * {
-  color: #FCE6B0;
-}
-
-.item-type.notebook * {
-  color: #CAECCD;
-}
 
 .card.item-card .last-modified {
   color: #4A4A4A;
