@@ -172,7 +172,10 @@ export class CohortSearchActions {
       this.removeId(itemId);
     });
 
-    const hasItems = !group.get('items', List()).isEmpty();
+    const hasItems = !group
+      .get('items', List())
+      .filter(item => item.get('active') === true)
+      .isEmpty();
     if (hasItems) {
       this.requestTotalCount();
     }
