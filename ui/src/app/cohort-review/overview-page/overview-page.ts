@@ -10,8 +10,9 @@ import {
     isChartLoading,
     isDomainNameExits
 } from '../../cohort-search/redux';
-import {ReviewStateService} from '../review-state.service';
 import {typeToTitle} from '../../cohort-search/utils';
+import {ReviewStateService} from '../review-state.service';
+
 
 @Component({
     selector: 'app-overview-charts',
