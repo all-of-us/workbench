@@ -44,16 +44,14 @@ export class WorkspaceShareComponent implements OnInit {
   public sharing = false;
   gsuiteDomain: string;
   userRolesList: UserRole[] = [];
-  noOwner = false;
 
-  // All new stuff to handle autocomplete. TODO: Clean this up before PR
+  // All new stuff to handle autocomplete.
   searchTerm: string;
   searchTermChanged = new Subject<string>();
   userResponse: UserResponse;
   autocompleteUsers: User[] = [];
   autocompleteNoResults = false;
   autocompleteLoading = false;
-  selectedUser: User;
 
   constructor(private userService: UserService,
               private locationService: Location,
@@ -84,21 +82,13 @@ export class WorkspaceShareComponent implements OnInit {
     if (this.usersLoading) {
       return;
     }
-    const ownerList = this.userRolesList.find(
-        userrole => userrole.role === WorkspaceAccessLevel.OWNER);
-
-    if (!ownerList) {
-      this.noOwner = true;
-      return;
-    }
-
     this.usersLoading = true;
     this.workspace.userRoles = this.userRolesList;
     this.workspacesService.shareWorkspace(
         this.workspace.namespace,
         this.workspace.id, {
           workspaceEtag: this.workspace.etag,
-          items: this.userRolesList
+          items: this.workspace.userRoles
         }).subscribe(
         (resp: ShareWorkspaceResponse) => {
           this.workspace.etag = resp.workspaceEtag;
@@ -106,8 +96,6 @@ export class WorkspaceShareComponent implements OnInit {
           this.workspace.userRoles = resp.items;
           this.toShare = '';
           this.input.nativeElement.focus();
-          this.selectedUser = undefined;
-          this.toShare = '';
           this.searchTerm = '';
           this.closeModal();
         },
@@ -124,17 +112,14 @@ export class WorkspaceShareComponent implements OnInit {
   removeCollaborator(user: UserRole): void {
     if (!this.usersLoading) {
       this.usersLoading = true;
-      const updateList = this.userRolesList
-          .map((userRole) => ({email: userRole.email, role: userRole.role}));
-      const position = updateList.findIndex((userRole) => {
+      const position = this.userRolesList.findIndex((userRole) => {
         if (user.email === userRole.email) {
           return true;
         } else {
           return false;
         }
       });
-      updateList.splice(position, 1);
-      this.userRolesList = updateList;
+      this.userRolesList.splice(position, 1);
       this.usersLoading = false;
     }
   }
@@ -158,9 +143,8 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   addCollaborator(user: User): void {
-    this.selectedUser = user;
     this.toShare = user.email;
-    this.searchTerm = user.email;
+    this.searchTerm = '';
     this.autocompleteLoading = false;
     this.autocompleteNoResults = false;
     this.autocompleteUsers = [];
@@ -182,7 +166,6 @@ export class WorkspaceShareComponent implements OnInit {
     this.autocompleteLoading = true;
     this.autocompleteNoResults = false;
     this.autocompleteUsers = [];
-    this.selectedUser = null;
 
     if (!this.searchTerm.trim()) {
       this.autocompleteLoading = false;
@@ -207,19 +190,14 @@ export class WorkspaceShareComponent implements OnInit {
   open(): void {
     this.userRolesList = [];
     this.sharing = true;
-    const cloneList = Object.assign({}, this.workspace.userRoles);
-    if (this.workspace && this.workspace.userRoles) {
-      this.workspace.userRoles.forEach(userR => {
-        this.userRolesList.push(<UserRole>Object.assign({}, userR));
-      });
-    }
+    this.userRolesList = this.workspace.userRoles;
   }
 
   closeModal() {
-    this.selectedUser = undefined;
     this.toShare = '';
     this.searchTerm = '';
     this.sharing = false;
+    this.userRolesList = [];
   }
 
   reloadConflictingWorkspace(): void {

@@ -1,4 +1,4 @@
-import {DebugElement} from '@angular/core';
+import {DebugElement, Type} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
@@ -43,6 +43,7 @@ class WorkspaceSharePage {
   roleNamePairsOnPage: Array<UserRoleRow>;
   emailField: DebugElement;
   permissionsField: DebugElement;
+
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(WorkspaceShareComponent);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
@@ -50,9 +51,9 @@ class WorkspaceSharePage {
     this.fixture.componentRef.instance.sharing = true;
 
     this.workspacesService.getWorkspace(
-      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
-        this.fixture.componentInstance.workspace = response.workspace;
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
+      this.fixture.componentInstance.workspace = response.workspace;
     });
     tick();
     this.readPageData();
@@ -68,17 +69,19 @@ class WorkspaceSharePage {
     const setOfUsers = de.queryAll(By.css('.collaborator'));
     this.roleNamePairsOnPage = [];
     setOfUsers.forEach((user) => {
-      this.roleNamePairsOnPage.push({fullName: user.children[0].nativeElement.innerText,
-          email: user.children[1].nativeElement.innerText,
-          role: user.children[2].nativeElement.innerText});
+      this.roleNamePairsOnPage.push({
+        fullName: user.children[0].nativeElement.innerText,
+        email: user.children[1].nativeElement.innerText,
+        role: user.children[2].queryAll(By.css('.roles'))[0].properties.value
+      });
     });
-    this.emailField = de.query(By.css('.input'));
+    this.emailField = de.query(By.css('.no-border'));
     this.fixture.componentRef.instance.input = this.emailField;
     this.permissionsField = de.query(By.css('.permissions-button'));
   }
 }
 
-const activatedRouteStub  = {
+const activatedRouteStub = {
   snapshot: {
     url: [
       {path: 'workspaces'},
@@ -141,28 +144,32 @@ describe('WorkspaceShareComponent', () => {
         WorkspaceShareComponent
       ],
       providers: [
-        { provide: UserService, useValue: new UserServiceStub() },
-        { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
-        { provide: ActivatedRoute, useValue: activatedRouteStub },
-        { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
+        {provide: UserService, useValue: new UserServiceStub()},
+        {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
+        {provide: ActivatedRoute, useValue: activatedRouteStub},
+        {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
         }
-      ]}).compileComponents().then(() => {
-        workspaceSharePage = new WorkspaceSharePage(TestBed);
-        workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
+      ]
+    }).compileComponents().then(() => {
+      workspaceSharePage = new WorkspaceSharePage(TestBed);
+      workspaceSharePage.fixture.componentRef.instance.accessLevel = WorkspaceAccessLevel.OWNER;
+
+      workspaceSharePage.fixture.componentRef.instance.open();
+      workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
     });
-      tick();
+    tick();
   }));
 
 
   it('displays correct information in default workspace sharing', fakeAsync(() => {
     workspaceSharePage.readPageData();
     const roleNamePairs =
-      convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
+        convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
     expect(workspaceSharePage.roleNamePairsOnPage)
         .toEqual(roleNamePairs);
   }));
@@ -170,14 +177,15 @@ describe('WorkspaceShareComponent', () => {
   it('adds users correctly', fakeAsync(() => {
     workspaceSharePage.readPageData();
     simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField, 'sampleuser4');
-//    workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
-
-
+    tick(1000);
+    workspaceSharePage.fixture.detectChanges();
     simulateClick(workspaceSharePage.fixture,
         workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
-    workspaceSharePage.readPageData();
+    workspaceSharePage.fixture.detectChanges();
+
     const roleNamePairs =
-      convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
+        convertToUserRoleRow(workspaceSharePage.fixture.componentInstance.userRolesList);
+    workspaceSharePage.readPageData();
     expect(workspaceSharePage.roleNamePairsOnPage)
         .toEqual(roleNamePairs);
     expect(workspaceSharePage.roleNamePairsOnPage.length)
@@ -196,7 +204,7 @@ describe('WorkspaceShareComponent', () => {
     });
     workspaceSharePage.readPageData();
     const roleNamePairs =
-      convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
+        convertToUserRoleRow(workspaceSharePage.fixture.componentInstance.userRolesList);
     expect(workspaceSharePage.roleNamePairsOnPage)
         .toEqual(roleNamePairs);
     expect(workspaceSharePage.roleNamePairsOnPage.length)
@@ -205,38 +213,5 @@ describe('WorkspaceShareComponent', () => {
         .toBe('Sample User1');
     expect(workspaceSharePage.roleNamePairsOnPage[0].role)
         .toEqual(WorkspaceAccessLevel.OWNER);
-  }));
-
-  it('validates and allows usernames', fakeAsync(() => {
-    spyOn(TestBed.get(WorkspacesService), 'shareWorkspace')
-      .and.callThrough();
-
-    workspaceSharePage.readPageData();
-    simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField, 'sampleuser4');
-  //  workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
-
-
-    simulateClick(workspaceSharePage.fixture,
-      workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
-    workspaceSharePage.readPageData();
-    expect(TestBed.get(WorkspacesService).shareWorkspace)
-        .toHaveBeenCalledWith('defaultNamespace', '1', userValuesStub);
-  }));
-
-  it('validates and allows email addresses', fakeAsync(() => {
-    spyOn(TestBed.get(WorkspacesService), 'shareWorkspace')
-      .and.callThrough();
-
-    workspaceSharePage.readPageData();
-    simulateInput(workspaceSharePage.fixture, workspaceSharePage.emailField,
-      'sampleuser4@fake-research-aou.org');
-   // workspaceSharePage.fixture.componentRef.instance.setAccess('Writer');
-
-
-    simulateClick(workspaceSharePage.fixture,
-      workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
-    workspaceSharePage.readPageData();
-    expect(TestBed.get(WorkspacesService).shareWorkspace)
-      .toHaveBeenCalledWith('defaultNamespace', '1', userValuesStub);
   }));
 });

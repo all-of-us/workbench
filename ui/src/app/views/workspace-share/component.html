@@ -1,6 +1,6 @@
 <clr-modal [(clrModalOpen)]="sharing">
   <div class="modal-title">
-    <h2 style="height: 3%;	width: 45%;	color: rgba(48,41,115,1);font-weight: 500;font-size: 20px;	line-height: 24px;">
+    <h2 class="header">
       Share {{workspace.name}}
       <clr-tooltip>
         <clr-icon #infoIcon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
@@ -19,7 +19,7 @@
     <div class="dropdown"
          [class.open]="autocompleteUsers.length || autocompleteNoResults">
       <clr-icon class="search-icon" shape="search"></clr-icon>
-      <input class="no-border"
+      <input class="no-border input"
              type="text"
              name="to-share"
              [(ngModel)]="searchTerm"
@@ -43,7 +43,7 @@
             </div>
             <div class="box">
               <div class="collaborator-icon">
-                <clr-icon shape="plus-circle" (click)="addCollaborator(autocompleteUser)"></clr-icon>
+                <clr-icon shape="plus-circle" class="add-button" (click)="addCollaborator(autocompleteUser)"></clr-icon>
               </div>
             </div>
           </div>
@@ -64,26 +64,26 @@
     <!-- Current Collaborators -->
     <div>
       <h3>Current Collaborators</h3>
-      <div *ngIf="noOwner" class="error-message">
-        There has to be atleast one Owner
-      </div>
       <div *ngFor="let collaboratorUser of userRolesList" class="user"
            [ngClass]="{'owner' : (collaboratorUser.email === userEmail || !hasPermission)}">
-        <div class="collaborator">
-          <div class="user-name">
-            {{collaboratorUser.givenName}} {{collaboratorUser.familyName}}
-          </div>
-          <div class="user-email">{{collaboratorUser.email}}</div>
-          <div class="row">
-            <div class="form-group select1">
+        <div class="wrapper">
+          <div class="collaborator box">
+            <h5 class="user-name">
+              {{collaboratorUser.givenName}} {{collaboratorUser.familyName}}
+            </h5>
+            <div class="user-email">{{collaboratorUser.email}}</div>
+            <div class="form-group">
               <label>
-                <select [(ngModel)]="collaboratorUser.role" [disabled]="!hasPermission">
+                <select class="roles" [(ngModel)]="collaboratorUser.role"
+                        [disabled]="collaboratorUser.email === userEmail || !hasPermission">
                   <option value="READER">Reader</option>
                   <option value="WRITER">Writer</option>
                   <option value="OWNER">Owner</option>
                 </select>
               </label>
             </div>
+          </div>
+          <div class="box">
             <div class="collaborator-icon">
               <clr-icon *ngIf="collaboratorUser.email !== userEmail && hasPermission"
                         shape="minus-circle"
@@ -91,10 +91,8 @@
                         (click)="removeCollaborator(collaboratorUser)"></clr-icon>
             </div>
           </div>
-          <div style="border-top: 1px solid black; width: 100%; margin-top: .5rem;">
-
-          </div>
-     </div>
+        </div>
+        <div style="border-top: 1px solid grey; width: 100%; margin-top: .5rem;"></div>
       </div>
       <div style="float: right; clear: both;">
         <button type="button" class="btn btn-default" (click)="closeModal()">Cancel</button>

@@ -12,8 +12,14 @@
 }
 
 .header {
-  height: 24px;	width: 257px;	color: #302973;font-size: 20px;	font-weight: 500;	line-height: 24px;
+  height: 3%;
+  width: 0%;
+  color: rgba(48,41,115,1);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 24px;
 }
+
 clr-icon {
   height: 18px;
   width: 18px;
@@ -51,57 +57,36 @@ clr-icon {
   height: 60px;
 }
 
-.permissions-button {
-  margin-top: 0.5rem;
-  color: #565656;
-  border: 1px solid #565656;
-  font-size: 0.45rem;
-  height: 1.1rem;
-  line-height: 0.5em;
-}
 .info-icon {
   color: #2691D0;
 }
 .user-name .user-email {
-  height: 3.88%;
-  width: 14.69%;
-  color: rgba(74,74,74,1);
-  font-family: "Gotham HTF";
-  font-size: 12px;
-  font-weight: 300;
-  line-height: 14px;
+  margin-top: 0;
+  padding-top: 0;
+  font-size: 0.5rem;
+  height: 4.5%;
+  color: #4A4A4A;
+  font-family: Montserrat;
+  font-size: 14px;
+  line-height: 18px;
 }
 
 .user-role {
   font-weight: 300;
   line-height: 0.8rem;
-  color: rgb(38, 34, 98);
-}
-
-.user-email {
-  margin-top: 0;
-  padding-top: 0;
-  font-size: 0.5rem;
-}
-
-.user-role {
   color: #565656;
   font-weight: 300;
   font-size: 0.4rem
 }
 
-.collaborator {
-  margin-top: 1rem;
-}
-
 .collaborator-icon {
-  margin: 0 0 0 1rem;
+  margin: 0 0 0 4rem;
   color: #2691D0;
   cursor: pointer;
 }
 
-.collaborator, .collaborator-icon {
-  display: block;
+.roles {
+  width:6rem;
 }
 
 clr-dropdown {
@@ -128,13 +113,6 @@ clr-dropdown > button {
   padding: 0.4rem;
 }
 
-.collaborator-label {
-  font-size: 0.65rem;
-  display: block;
-  margin: 0 0 0.5rem 0;
-  color: rgb(38, 34, 98);
-}
-
 .spinner-padded {
   padding-top: 1rem;
 }
@@ -151,15 +129,6 @@ clr-dropdown > button {
   margin-top: 0;
 }
 
-.header {
-  height: 3%;
-  width: 20.08%;
-  color: rgba(48,41,115,1);
-  font-size: 20px;
-  font-weight: 500;
-  line-height: 24px;
-}
-
 :host::ng-deep .modal-dialog {
   width: 18rem;
 }
@@ -171,6 +140,7 @@ clr-dropdown > button {
 
 .info-icon {
   cursor: pointer;
+  margin-left: 0.4rem;
 }
 
 .search-icon {
@@ -180,18 +150,20 @@ clr-dropdown > button {
 .user {
   display: flow-root;
   align-items: center;
+  white-space: nowrap;
 }
 
 .bordered {
   border-bottom: 1px solid lightgray;
 }
 
-.select1 select {
+.roles select {
   height: 25px;
   width: 117px;
   border: 1px solid #CCCCCC;
   border-radius: 3px;
   background-color: #FAFAFA;
+
 }
 
 .wrapper {
@@ -199,13 +171,18 @@ clr-dropdown > button {
   grid-template-columns: 9rem 0.1rem 0.1rem;
   grid-gap: 10px;
   align-items: center;
+  height: 6.38%;
 }
 
 .box {
   border-radius: 5px;
   padding-top: 0.2rem;
   padding-left: 0.2rem;
-  font-size: 150%;
+}
+
+.box.icon {
+  padding-left: 3rem;
+
 }
 
 .row {

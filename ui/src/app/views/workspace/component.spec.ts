@@ -23,6 +23,7 @@ import {
   ClusterService,
   CohortsService,
   ProfileService,
+  UserService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -40,6 +41,7 @@ import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {updateAndTick} from 'testing/test-helpers';
@@ -131,6 +133,7 @@ describe('WorkspaceComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
+        { provide: UserService, useValue: new UserServiceStub() },
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
