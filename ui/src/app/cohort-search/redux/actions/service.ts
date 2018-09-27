@@ -196,7 +196,7 @@ export class CohortSearchActions {
 
     const hasItems = !group
       .get('items', List())
-      .filter(item => item.get('active') === true)
+      // .filter(item => item.get('active') === true)
       .isEmpty();
     if (hasItems) {
       this.requestTotalCount();

@@ -33,6 +33,7 @@ import {TreeComponent} from './tree/tree.component';
 /* Other Objects */
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 import {SafeHtmlPipe} from './safe-html.pipe';
+import { InactiveListComponent } from './inactive-list/inactive-list.component';
 
 
 const routes: Routes = [{
@@ -79,6 +80,7 @@ const routes: Routes = [{
     TreeComponent,
     AttributesPageComponent,
     SafeHtmlPipe,
+    InactiveListComponent,
   ],
   providers: [
     CohortSearchActions,

@@ -1,0 +1,7 @@
+<h3>Inactives</h3>
+<div *ngFor="let group of groups">
+  {{group.get('id')}}
+  <div *ngFor="let item of group.get('items')">
+    {{item.get('id')}}
+  </div>
+</div>
