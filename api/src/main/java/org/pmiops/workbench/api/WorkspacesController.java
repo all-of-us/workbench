@@ -4,7 +4,6 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -18,9 +17,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.inject.Provider;
-
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -264,19 +261,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private void setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
-    if (cdrVersionId != null) {
-      try {
-        CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
-        if (cdrVersion == null) {
-          throw new BadRequestException(
-              String.format("CDR version with ID %s not found", cdrVersionId));
-        }
-        dbWorkspace.setCdrVersion(cdrVersion);
-      } catch (NumberFormatException e) {
-        throw new BadRequestException(String.format(
-            "Invalid cdr version ID: %s", cdrVersionId));
+  private CdrVersion setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
+    if (Strings.isNullOrEmpty(cdrVersionId)) {
+      return null;
+    }
+    try {
+      CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
+      if (cdrVersion == null) {
+        throw new BadRequestException(
+            String.format("CDR version with ID %s not found", cdrVersionId));
       }
+      dbWorkspace.setCdrVersion(cdrVersion);
+      return cdrVersion;
+    } catch (NumberFormatException e) {
+      throw new BadRequestException(String.format(
+          "Invalid cdr version ID: %s", cdrVersionId));
     }
   }
 
@@ -649,15 +648,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
 
-    // Clone the previous description, by default.
+    // Clone description/CDR version from the source, by default.
     if (Strings.isNullOrEmpty(toWorkspace.getDescription())) {
       dbWorkspace.setDescription(fromWorkspace.getDescription());
     } else {
       dbWorkspace.setDescription(toWorkspace.getDescription());
     }
-
-    dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
-    dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
+    String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
+    if (Strings.isNullOrEmpty(reqCdrVersionId) ||
+        reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {
+      dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
+      dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
+    } else {
+      CdrVersion reqCdrVersion = setCdrVersionId(dbWorkspace, reqCdrVersionId);
+      dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
+    }
 
     WorkspaceUserRole ownerRole = new WorkspaceUserRole();
     ownerRole.setRoleEnum(WorkspaceAccessLevel.OWNER);

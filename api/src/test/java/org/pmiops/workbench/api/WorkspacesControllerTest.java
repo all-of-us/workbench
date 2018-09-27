@@ -1035,6 +1035,51 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void testCloneWorkspaceCdrVersion() throws Exception {
+    CdrVersion cdrVersion2 = new CdrVersion();
+    cdrVersion2.setName("2");
+    cdrVersion2.setCdrDbName("");
+    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
+    String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
+
+    Workspace workspace = workspacesController.createWorkspace(createDefaultWorkspace()).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    Workspace modWorkspace = new Workspace()
+      .name("cloned")
+      .namespace("cloned-ns")
+      .researchPurpose(workspace.getResearchPurpose())
+      .cdrVersionId(cdrVersionId2);
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        "cloner@gmail.com", WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest().workspace(modWorkspace);
+    Workspace workspace2 =
+        workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .getBody().getWorkspace();
+
+    assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId2);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCloneWorkspaceBadCdrVersion() throws Exception {
+    Workspace workspace = workspacesController.createWorkspace(createDefaultWorkspace()).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    Workspace modWorkspace = new Workspace()
+      .name("cloned")
+      .namespace("cloned-ns")
+      .researchPurpose(workspace.getResearchPurpose())
+      .cdrVersionId("bad-cdr-version-id");
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        "cloner@gmail.com", WorkspaceAccessLevel.OWNER);
+    workspacesController.cloneWorkspace(
+        workspace.getNamespace(), workspace.getId(),
+        new CloneWorkspaceRequest().workspace(modWorkspace));
+  }
+
+  @Test
   public void testCloneWorkspaceIncludeUserRoles() throws Exception {
     User cloner = createUser("cloner@gmail.com");
     User reader = createUser("reader@gmail.com");
