@@ -36,23 +36,17 @@ const routes: Routes = [{
     },
   }, {
     path: '',
-    redirectTo: 'overview',
+    redirectTo: 'participants',
     pathMatch: 'full',
-  }, {
-    path: 'overview',
-    component: OverviewPage,
-    data: {
-      breadcrumb: 'Overview'
-    }
   }, {
     path: 'participants',
     component: TablePage,
-    resolve: {
-      concepts: DemographicConceptMapsResolver,
-    },
-    data: {
-      breadcrumb: 'Participants'
-    }
+      resolve: {
+          concepts: DemographicConceptMapsResolver,
+      },
+      data: {
+          breadcrumb: 'Participants'
+      }
   }, {
     path: 'participants/:pid',
     component: DetailPage,
