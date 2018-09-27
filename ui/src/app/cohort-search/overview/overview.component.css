@@ -146,7 +146,6 @@ input.alreadyTaken {
 .overview-header .btn.btn-primary {
   line-height: 0.2rem !important;
   padding: 1rem 0.77rem !important;
-  pointer-events: none;
 }
 .card-header {
     border-bottom: none;
