@@ -8,7 +8,7 @@ import {
     CohortSearchActions,
     CohortSearchState,
     isChartLoading,
-    isDomainNameExits
+    isDomainNameExists
 } from '../../cohort-search/redux';
 import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
@@ -94,12 +94,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
   fetchChartsData(name) {
-    const checkedDomainName = this.ngRedux
-      .select(isDomainNameExits(name))
-      .subscribe(itemName => {
-        this.trackClickedDomains = itemName;
-      });
-    this.subscription = checkedDomainName;
+    this.trackClickedDomains = isDomainNameExists(name)(this.ngRedux.getState());
     this.demoGraph = false;
     this.spinner = true;
     this.showTitle = false;
