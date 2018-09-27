@@ -33,7 +33,7 @@
   },
   "admin": {
     "adminIdVerification": "workbench-id-verifications@researchallofus.org",
-    "loginUrl": "http:\/\/all-of-us-rw-prod.appspot.com/login"
+    "loginUrl": "http:\/\/workbench.researchallofus.org/login"
   },
   "jira": {
     "projectKey": "RW"
