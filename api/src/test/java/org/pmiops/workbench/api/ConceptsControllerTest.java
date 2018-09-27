@@ -249,7 +249,7 @@ public class ConceptsControllerTest {
         .thenReturn(fcResponse);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testSearchConceptsBlankQuery() throws Exception {
     assertResults(
         conceptsController.searchConcepts("ns", "name",
