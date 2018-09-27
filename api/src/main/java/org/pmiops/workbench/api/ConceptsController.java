@@ -90,7 +90,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response,
-                               String matchExp, StandardConceptFilter standardConceptFilter) {
+                               String matchExp, Long conceptId, StandardConceptFilter standardConceptFilter) {
     if (request.getIncludeDomainCounts() != null && request.getIncludeDomainCounts()) {
       List<DomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
       List<DomainInfo> domainInfos = null;
@@ -98,9 +98,9 @@ public class ConceptsController implements ConceptsApiDelegate {
         domainInfos = allDomainInfos;
       } else {
         if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
-          domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp, request.getQuery());
+          domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp, request.getQuery(), conceptId);
         } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
-          domainInfos = domainInfoDao.findStandardConceptCounts(matchExp, request.getQuery());
+          domainInfos = domainInfoDao.findStandardConceptCounts(matchExp, request.getQuery(), conceptId);
         } else {
           return;
         }
@@ -118,23 +118,18 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   private void addVocabularyCounts(SearchConceptsRequest request, ConceptListResponse response,
-                                   String matchExp, StandardConceptFilter standardConceptFilter) {
+                                   String matchExp, Long conceptId, StandardConceptFilter standardConceptFilter) {
     if (request.getDomain() == null) {
       return;
     }
     String domainId = CommonStorageEnums.domainToDomainId(request.getDomain());
     List<org.pmiops.workbench.cdr.model.VocabularyCount> vocabularyCounts;
-    Long queryId = null;
-    try {
-      queryId = Long.parseLong(request.getQuery());
-    } catch (NumberFormatException e) {
-    }
     if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
       vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, request.getQuery(),
-          queryId, domainId);
+          conceptId, domainId);
     } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
       vocabularyCounts = conceptDao.findVocabularyStandardConceptCounts(matchExp, request.getQuery(),
-          queryId, domainId);
+          conceptId, domainId);
     } else {
       return;
     }
@@ -163,11 +158,17 @@ public class ConceptsController implements ConceptsApiDelegate {
     if (standardConceptFilter == null) {
       standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
     }
+    Long conceptId = null;
+    try {
+      conceptId = Long.parseLong(request.getQuery());
+    } catch (NumberFormatException e) {
+    }
+
     String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
     // TODO: consider doing these queries in parallel
     ConceptListResponse response = new ConceptListResponse();
-    addDomainCounts(request, response, matchExp, standardConceptFilter);
-    addVocabularyCounts(request, response, matchExp, standardConceptFilter);
+    addDomainCounts(request, response, matchExp, conceptId, standardConceptFilter);
+    addVocabularyCounts(request, response, matchExp, conceptId, standardConceptFilter);
 
     List<String> domainIds = null;
     if (request.getDomain() != null) {
