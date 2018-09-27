@@ -32,7 +32,7 @@ interface ConceptCacheSet {
 export class ConceptHomepageComponent implements OnInit {
   loadingDomains = true;
   searchTerm: string;
-  standardConceptsOnly = false;
+  standardConceptsOnly = true;
   searching = false;
   currentSearchString: string;
   searchLoading = false;
