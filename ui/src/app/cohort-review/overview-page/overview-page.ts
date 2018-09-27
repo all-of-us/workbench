@@ -43,6 +43,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
     private chartAPI: CohortBuilderService,
+    private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
     private actions: CohortSearchActions,
@@ -60,7 +61,6 @@ export class OverviewPage implements OnInit, OnDestroy {
               this.data = fromJS(data);
                this.spinner = false;
           });
-
       this.subscription = this.state.review$.subscribe(review => {
           this.review = review;
           this.totalParticipantCount = review.matchedParticipantCount;
