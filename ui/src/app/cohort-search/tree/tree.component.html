@@ -1,7 +1,3 @@
-<div *ngIf="loading" class="spinner root-spinner">
-  Loading...
-</div>
-
 <div *ngIf="isEmpty" class="alert alert-warning">
   <div class="alert-items">
     <div class="alert-item static">
@@ -25,9 +21,14 @@
     <app-search-bar *ngIf="showSearch" [_type]="_type"></app-search-bar>
   </div>
 </div>
+
 <div class="tree-container" [class.multiple]="multipleMatches">
   <div *ngIf="numMatches > 1">
     <b>Note:</b> There are {{numMatches}} matches for your search
   </div>
   <crit-node *ngFor="let item of children" [node]="item"></crit-node>
+</div>
+
+<div *ngIf="loading" class="spinner root-spinner">
+  Loading...
 </div>
