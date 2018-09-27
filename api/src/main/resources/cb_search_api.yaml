@@ -484,7 +484,6 @@ definitions:
     required:
       - parameterId
       - name
-      - value
       - type
       - subtype
       - group
@@ -593,7 +592,7 @@ definitions:
   TreeSubType:
       type: string
       description: possible subtypes of trees
-      enum: [CM, PROC, ICD10CM, ICD10PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR, HR-DETAIL, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC, BRAND, CLIN, LAB]
+      enum: [CM, PROC, ICD10CM, ICD10PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR, HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC, BRAND, CLIN, LAB]
 
   DemoChartInfoListResponse:
     type: object
