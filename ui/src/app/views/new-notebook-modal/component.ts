@@ -86,6 +86,7 @@ export class NewNotebookModalComponent implements OnDestroy {
     };
     window.addEventListener('message', authHandler);
     this.notebookAuthListeners.push(authHandler);
+    this.close();
   }
 
   get newNotebookDisabled(): boolean {
