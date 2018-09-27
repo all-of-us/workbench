@@ -10,7 +10,7 @@ info:
   contact:
     name: "developer_help@pmi-ops.org"
   license:
-    name: "MIT"
+    name: "BSD"
 host: "public-api.pmi-ops.org"
 schemes:
   - "https"

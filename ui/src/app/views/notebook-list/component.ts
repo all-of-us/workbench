@@ -145,4 +145,9 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.bugReportComponent.reportBug();
     this.bugReportComponent.bugReport.shortDescription = 'Could not localize notebook.';
   }
+
+  get writePermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER
+      || this.accessLevel === WorkspaceAccessLevel.WRITER;
+  }
 }

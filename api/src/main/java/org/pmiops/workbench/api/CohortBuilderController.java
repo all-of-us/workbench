@@ -121,12 +121,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId,
-                                                                             String drugName,
+  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByValue(Long cdrVersionId,
+                                                                             String value,
                                                                              Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName, resultLimit);
+    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
@@ -199,18 +199,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                             Long parentId,
                                                             Boolean allChildren) {
     Optional.ofNullable(type)
-      .orElseThrow(() -> new BadRequestException(String.format("Criteria type: %s is not valid.", type )));
+      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
     Arrays
       .stream(TreeType.values())
       .filter(treeType -> treeType.name().equalsIgnoreCase(type))
       .findFirst()
-      .orElseThrow(() -> new BadRequestException(String.format("Criteria type: %s is not valid.", type )));
+      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
     Optional.ofNullable(subtype)
       .ifPresent(st -> Arrays
       .stream(TreeSubType.values())
       .filter(treeSubType -> treeSubType.name().equalsIgnoreCase(st))
       .findFirst()
-      .orElseThrow(() -> new BadRequestException(String.format("Criteria subtype: %s is not valid.", st ))));
+      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria subtype. %s is not valid.", st ))));
 
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     List<Criteria> criteriaList;
