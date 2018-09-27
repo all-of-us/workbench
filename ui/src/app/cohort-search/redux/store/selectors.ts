@@ -187,9 +187,5 @@ export const isChartLoading =
     (state): any =>
     state.getIn(['reviewChartData', 'domainCharts', domain]);
 
-
-export const isDomainNameExits = (domain: string) => (state: any) => {
-  const domainCharts = state.getIn(['reviewChartData', 'domainCharts']).toJS();
-  const availableKeys = Object.keys(domainCharts);
-  return availableKeys.some((item) => item === domain);
-};
+export const isDomainNameExists = domain => (state): boolean =>
+  state.getIn(['reviewChartData', 'domainCharts']).has(domain);
