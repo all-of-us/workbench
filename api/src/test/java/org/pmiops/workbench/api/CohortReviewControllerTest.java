@@ -68,6 +68,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -410,6 +412,49 @@ public class CohortReviewControllerTest {
     assertThat(cohortReview.getReviewSize()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus()).isEqualTo(CohortStatus.NOT_REVIEWED);
+  }
+
+  @Test
+  public void createCohortReviewNoCohortException() throws Exception {
+    long cohortId = 99;
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    stubBigQueryCohortCalls();
+
+    try {
+      cohortReviewController.createCohortReview(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME,
+        cohortId,
+        cdrVersion.getCdrVersionId(),
+        new CreateReviewRequest()
+          .size(1)).getBody();
+      fail("Should have thrown NotFoundException!");
+    } catch (NotFoundException nfe) {
+      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, nfe.getMessage());
+    }
+  }
+
+  @Test
+  public void createCohortReviewNoMatchingWorkspaceException() throws Exception {
+    String badWorkspaceName = WORKSPACE_NAME + "bad";
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    stubBigQueryCohortCalls();
+
+    try {
+      cohortReviewController.createCohortReview(WORKSPACE_NAMESPACE,
+        badWorkspaceName,
+        cohortWithoutReview.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        new CreateReviewRequest()
+          .size(1)).getBody();
+      fail("Should have thrown NotFoundException!");
+    } catch (NotFoundException nfe) {
+      assertEquals("Not Found: No workspace matching workspaceNamespace: " +
+        WORKSPACE_NAMESPACE + ", workspaceId: " + badWorkspaceName, nfe.getMessage());
+    }
   }
 
   @Test
@@ -768,6 +813,26 @@ public class CohortReviewControllerTest {
       new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")).getBody();
 
     assertThat(participantCohortAnnotation.getAnnotationValueString()).isEqualTo("test1");
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotationNoAnnotationForIdException() throws Exception {
+    long badAnnotationId = 99;
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    try {
+      cohortReviewController.updateParticipantCohortAnnotation(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        participantCohortStatus1.getParticipantKey().getParticipantId(),
+        badAnnotationId,
+        new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")).getBody();
+    } catch (NotFoundException nfe) {
+      assertEquals("Not Found: Participant Cohort Annotation does not exist for annotationId: " + badAnnotationId + ", cohortReviewId: "
+        + cohortReview.getCohortReviewId() + ", participantId: " + participantCohortStatus1.getParticipantKey().getParticipantId(), nfe.getMessage());
+    }
   }
 
   @Test

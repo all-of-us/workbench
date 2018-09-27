@@ -76,7 +76,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
       Workspace workspace =
           workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace,
                 workspaceName, accessRequired);
-      if (workspace.getWorkspaceId() != workspaceId) {
+      if (workspace == null || workspace.getWorkspaceId() != workspaceId) {
           throw new NotFoundException(
                   String.format("Not Found: No workspace matching workspaceNamespace: %s, workspaceId: %s",
                           workspaceNamespace, workspaceName));
