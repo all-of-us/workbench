@@ -32,6 +32,7 @@ import {TreeComponent} from './tree/tree.component';
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 import {SafeHtmlPipe} from './safe-html.pipe';
 import {SearchBarComponent} from './search-bar/search-bar.component';
+import { InactiveListComponent } from './inactive-list/inactive-list.component';
 
 
 const routes: Routes = [{
@@ -77,6 +78,7 @@ const routes: Routes = [{
     AttributesPageComponent,
     SafeHtmlPipe,
     SearchBarComponent,
+    InactiveListComponent,
   ],
   providers: [
     CohortSearchActions,
