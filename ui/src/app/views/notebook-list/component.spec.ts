@@ -24,6 +24,7 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {
   BugReportService,
   CohortsService,
+  ConceptSetsService,
   ProfileService,
   WorkspaceAccessLevel,
   WorkspacesService
@@ -109,6 +110,7 @@ describe('NotebookListComponent', () => {
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: CohortsService },
+        { provide: ConceptSetsService },
         { provide: SignInService, useValue: SignInService },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: ProfileService, useValue: new ProfileServiceStub() },

@@ -27,6 +27,7 @@ import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {
   Cohort,
   CohortsService,
+  ConceptSetsService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -90,6 +91,7 @@ describe('CohortListComponent', () => {
       providers: [
         { provide: ActivatedRoute, useValue: activatedRouteStub},
         { provide: CohortsService, useValue: new CohortsServiceStub()},
+        { provide: ConceptSetsService },
         { provide: SignInService, useValue: new SignInServiceStub()},
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub()}
       ] }).compileComponents().then(() => {

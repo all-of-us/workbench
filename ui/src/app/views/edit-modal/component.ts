@@ -28,10 +28,9 @@ export class EditModalComponent {
   @Input() cohort: any;
   @Output() updateFinished = new EventEmitter<any>();
   editing = false;
-  rType: string = this.resource.cohort ? 'Cohort' : 'Concept Set';
-  rName: string = this.resource.cohort ? this.resource.cohort.name : this.resource.conceptSet.name;
-  rDescription: string = this.resource.cohort ?
-    this.resource.cohort.description : this.resource.conceptSet.description;
+  rType: string;
+  rName: string;
+  rDescription: string;
 
   /* Convenience property aliases */
   get name(): FormControl         { return this.form.get('name') as FormControl; }
@@ -53,6 +52,10 @@ export class EditModalComponent {
   open(): void {
     this.editing = true;
     this.loading = false;
+    this.rType = this.resource.cohort ? 'Cohort' : 'Concept Set';
+    this.rName = this.resource.cohort ? this.resource.cohort.name : this.resource.conceptSet.name;
+    this.rDescription = this.resource.cohort ?
+      this.resource.cohort.description : this.resource.conceptSet.description;
     this.form.setValue({ name: this.rName, description: this.rDescription });
     if (this.resource.cohort) {
       this.form.setValue({name: this.resource.cohort.name,
@@ -73,7 +76,7 @@ export class EditModalComponent {
 
     if (this.resource.cohort) {
       const newCohort = <Cohort>{
-        ...this.cohort,
+        ...this.resource.cohort,
         name: this.name.value,
         description: this.description.value,
       };
