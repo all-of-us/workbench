@@ -33,7 +33,7 @@
     "projectId": "all-of-us-workbench-test"
   },
   "admin": {
-    "loginUrl": "http:\/\/all-of-us-workbench-test.appspot.com/login",
+    "loginUrl": "https:\/\/all-of-us-workbench-test.appspot.com/login",
     "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
   },
   "jira": {

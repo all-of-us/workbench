@@ -226,7 +226,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                     CreateReviewRequest request) {
     if (request.getSize() <= 0 || request.getSize() > MAX_REVIEW_SIZE) {
       throw new BadRequestException(
-        String.format("Invalid Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
+        String.format("Bad Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
     }
 
     Cohort cohort = cohortReviewService.findCohort(cohortId);
@@ -244,7 +244,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
     if (cohortReview.getReviewSize() > 0) {
       throw new BadRequestException(
-        String.format("Invalid Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
+        String.format("Bad Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
           cohortId, cdrVersionId));
     }
 
@@ -292,13 +292,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                        ParticipantCohortAnnotation request) {
 
     if (request.getCohortAnnotationDefinitionId() == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+      throw new BadRequestException("Bad Request: Please provide a valid cohort annotation definition id.");
     }
     if (request.getCohortReviewId() == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid cohort review id.");
+      throw new BadRequestException("Bad Request: Please provide a valid cohort review id.");
     }
     if (request.getParticipantId() == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
+      throw new BadRequestException("Bad Request: Please provide a valid participant id.");
     }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
@@ -321,10 +321,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                          Long annotationId) {
 
     if (annotationId == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+      throw new BadRequestException("Bad Request: Please provide a valid cohort annotation definition id.");
     }
     if (participantId == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
+      throw new BadRequestException("Bad Request: Please provide a valid participant id.");
     }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
@@ -349,7 +349,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(
-        String.format("Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
+        String.format("Bad Request: Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
     }
     Cohort cohort = cohortReviewService.findCohort(cohortId);
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
@@ -384,7 +384,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(
-        String.format("Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
+        String.format("Bad Request: Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
     }
     validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
