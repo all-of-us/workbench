@@ -4,19 +4,21 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 /**
  * DemoQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -25,8 +27,6 @@ import java.util.Optional;
  */
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
-
-  private static final String DECEASED = "Deceased";
 
   private static final String SELECT = "select person_id\n" +
     "from `${projectId}.${dataSetId}.person` p\n" +
@@ -58,12 +58,11 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
   @Override
   public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
+    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+    from(containsAgeAndDec()).test(parameters.getParameters()).throwException(AGE_DEC_MESSAGE);
     ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(parameters.getParameters());
     Map<String, QueryParameterValue> queryParams = new HashMap<>();
     List<String> queryParts = new ArrayList<>();
-    if (paramMap.keySet().contains(TreeSubType.AGE) && paramMap.keySet().contains(TreeSubType.DEC)) {
-      throw new BadRequestException("Cannot select age and deceased in the same context.");
-    }
 
     for (TreeSubType key : paramMap.keySet()) {
       String namedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
@@ -80,27 +79,19 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
           queryParams.put(namedParameter, QueryParameterValue.array(raceIds, Long.class));
           break;
         case AGE:
-          Optional<Attribute> attribute = Optional.ofNullable((Attribute) paramMap.get(key).get(0));
-          if (attribute.isPresent() && !CollectionUtils.isEmpty(attribute.get().getOperands())) {
-            List<String> operandParts = new ArrayList<>();
-            for (String operand : attribute.get().getOperands()) {
-              String ageNamedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
-              operandParts.add("@" + ageNamedParameter);
-              queryParams.put(ageNamedParameter, QueryParameterValue.int64(new Long(operand)));
-            }
-            queryParts.add(DEMO_AGE.replace("${operator}", OperatorUtils.getSqlOperator(attribute.get().getOperator()))
-              + String.join(" and ", operandParts) + "\n");
-            queryParts.add(AGE_NOT_EXISTS_DEATH);
-          } else {
-            throw new BadRequestException("Age must provide an operator and operands.");
+          Attribute attribute = (Attribute) paramMap.get(key).get(0);
+          List<String> operandParts = new ArrayList<>();
+          for (String operand : attribute.getOperands()) {
+            String ageNamedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
+            operandParts.add("@" + ageNamedParameter);
+            queryParams.put(ageNamedParameter, QueryParameterValue.int64(new Long(operand)));
           }
+          queryParts.add(DEMO_AGE.replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
+            + String.join(" and ", operandParts) + "\n");
+          queryParts.add(AGE_NOT_EXISTS_DEATH);
           break;
         case DEC:
-          if (DECEASED.equals(paramMap.get(key).get(0))) {
-            queryParts.add(DEMO_DEC);
-          } else {
-            throw new BadRequestException("Dec must provide a value of: " + DECEASED);
-          }
+          queryParts.add(DEMO_DEC);
           break;
         case ETH:
           queryParts.add(DEMO_ETH.replace("${eth}", "@" + namedParameter));
@@ -126,17 +117,38 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     return FactoryKey.DEMO;
   }
 
+  private void validateSearchParameter(SearchParameter param) {
+    from(typeBlank().or(demoTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
+    from(subtypeBlank().or(demoSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, param.getSubtype());
+    from(subTypeGenRaceEth().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
+  }
+
+  private void validateAttributes(SearchParameter param) {
+    from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
+    param.getAttributes().forEach(attr -> {
+      String name = attr.getName();
+      String oper = operatorText.get(attr.getOperator());
+      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
+      from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+      from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
+    });
+  }
+
   protected ListMultimap<TreeSubType, Object> getMappedParameters(List<SearchParameter> searchParameters) {
     ListMultimap<TreeSubType, Object> mappedParameters = ArrayListMultimap.create();
-    for (SearchParameter parameter : searchParameters)
+    for (SearchParameter parameter : searchParameters) {
+      validateSearchParameter(parameter);
       if (parameter.getSubtype().equals(TreeSubType.AGE.name())) {
+        validateAttributes(parameter);
         mappedParameters.put(TreeSubType.AGE, parameter.getAttributes().isEmpty() ? null : parameter.getAttributes().get(0));
       } else if (parameter.getSubtype().equals(TreeSubType.DEC.name())) {
         mappedParameters.put(TreeSubType.DEC, parameter.getValue());
       } else {
         mappedParameters.put(TreeSubType.fromValue(parameter.getSubtype()), parameter.getConceptId());
       }
-
+    }
     return mappedParameters;
   }
 }

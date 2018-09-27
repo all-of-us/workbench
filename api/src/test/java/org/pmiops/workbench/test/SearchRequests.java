@@ -25,8 +25,11 @@ public class SearchRequests {
   public static SearchRequest genderRequest(long... conceptIds) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(DEMO_TYPE);
     for (long conceptId: conceptIds) {
-      SearchParameter parameter = new SearchParameter().domain(DEMO_DOMAIN).subtype(GENDER_SUBTYPE)
-          .conceptId(conceptId);
+      SearchParameter parameter = new SearchParameter()
+        .type(DEMO_DOMAIN)
+        .subtype(GENDER_SUBTYPE)
+        .domain(DEMO_DOMAIN)
+        .conceptId(conceptId);
       searchGroupItem.addSearchParametersItem(parameter);
     }
     return searchRequest(searchGroupItem);
