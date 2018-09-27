@@ -3,6 +3,10 @@
           [routerLinkActiveOptions]="{exact: true}">
     About
   </clr-button>
+  <clr-button class="btn btn-primary btn-top" [routerLink]="['/workspaces', wsNamespace, wsId, 'concepts']" routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: true}">
+    Concepts
+  </clr-button>
   <clr-button class="btn btn-primary btn-top" [routerLink]="['/workspaces', wsNamespace, wsId, 'notebooks']" routerLinkActive="active"
               [routerLinkActiveOptions]="{exact: true}">
     Notebooks
