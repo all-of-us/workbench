@@ -78,6 +78,9 @@ export function typeToTitle(_type: string): string {
     case DomainType[DomainType.LAB]:
       _type = 'Labs';
       break;
+    case DomainType[DomainType.MEASUREMENT]:
+      _type = 'Measurements';
+      break;
   }
   return _type;
 }
