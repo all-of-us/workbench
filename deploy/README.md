@@ -51,3 +51,25 @@ up volume file permissions for the circleci UID (specified in our Dockerfile).
 **Note**: Local changes to deploy.rb or devstart.rb are **not** currently picked
 up by the deployment process; it uses the tools code from the commit version
 specified for deployment.
+
+# Manual testing
+
+Note: See above for an explanation of why this process is special right now.
+This could be improved in the future by supporting builds via dirty clients.
+
+- To test changes without deploying, use the --dry-run flag
+- To run a full manual test deployment, use --project all-of-us-workbench-test
+  --app-version *username* --no-promote.
+
+To ensure your local changes are picked up during the deploy process, follow
+this process:
+
+1. Commit your changes to the deploy scripts
+1. Push your branch to GitHub, e.g. 'ch/deploy-fix'
+1. Use --dry-run and --git-version to build using your branch:
+
+  ```
+  ./project.rb deploy --dry-run --no-promote --project all-of-us-workbench-test \
+    --git-version origin/ch/deploy-fix --app-version calbach \
+    --account circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com
+  ```

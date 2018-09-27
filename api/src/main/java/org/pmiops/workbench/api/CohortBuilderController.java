@@ -121,12 +121,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByName(Long cdrVersionId,
-                                                                             String drugName,
+  public ResponseEntity<CriteriaListResponse> getDrugBrandOrIngredientByValue(Long cdrVersionId,
+                                                                             String value,
                                                                              Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByName(drugName, resultLimit);
+    final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));

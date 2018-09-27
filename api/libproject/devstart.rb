@@ -23,6 +23,7 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
               compute.googleapis.com admin.googleapis.com appengine.googleapis.com
               cloudbilling.googleapis.com sqladmin.googleapis.com sql-component.googleapis.com
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
+DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 ENVIRONMENTS = {
   TEST_PROJECT => {
@@ -46,6 +47,11 @@ ENVIRONMENTS = {
     :cdr_versions_json => "cdr_versions_prod.json"
   }
 }
+
+def run_inline_or_log(dry_run, args)
+  cmd_prefix = dry_run ? DRY_RUN_CMD : []
+  Common.new.run_inline(cmd_prefix + args)
+end
 
 def get_config(project)
   unless ENVIRONMENTS.fetch(project, {}).has_key?(:config_json)
@@ -1120,14 +1126,26 @@ def deploy_gcs_artifacts(cmd_name, args)
 
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
+  op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually push, just log the command lines which would be " +
+    "executed on a real invocation."
+  )
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
-  common.run_inline %W{gsutil cp scripts/setup_notebook_cluster.sh gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
+  run_inline_or_log(op.opts.dry_run, %W{
+    gsutil cp scripts/setup_notebook_cluster.sh
+    gs://#{gcc.project}-scripts/setup_notebook_cluster.sh
+  })
   # This file must be readable by all AoU researchers and the Leonardo service
   # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make it
   # public since the script's source is public anyways.
-  common.run_inline %W{gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh}
+  run_inline_or_log(op.opts.dry_run, %W{
+    gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh
+  })
 end
 
 Common.register_command({
@@ -1141,12 +1159,20 @@ def deploy_gcs_demos(cmd_name, args)
 
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
+  op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually push, just log the command lines which would be " +
+    "executed on a real invocation."
+  )
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
+  cmd_prefix = op.opts.dry_run ? DRY_RUN_CMD : []
   # Run but ignore failure statuses, as these files may not exist.
-  Process.wait spawn("gsutil", "rm", "gs://#{gcc.project}-demos/**")
-  common.run_inline %W{gsutil cp demos/* gs://#{gcc.project}-demos/}
+  Process.wait spawn(*cmd_prefix, "gsutil", "rm", "gs://#{gcc.project}-demos/**")
+  run_inline_or_log(op.opts.dry_run, %W{gsutil cp demos/* gs://#{gcc.project}-demos/})
 end
 
 Common.register_command({
@@ -1159,6 +1185,7 @@ Common.register_command({
 def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
   op.add_option(
     "--version [version]",
     ->(opts, v) { opts.version = v},
@@ -1173,6 +1200,12 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     "--no-promote",
     ->(opts, _) { opts.promote = false},
     "Do not promote this deploy to make it available at the root URL"
+  )
+  op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually deploy, just log the command lines which would be " +
+    "executed on a real invocation."
   )
   op.add_option(
     "--quiet",
@@ -1202,13 +1235,13 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     promote = op.opts.version ? "--no-promote" : "--promote"
   end
 
-  common.run_inline %W{
+  run_inline_or_log(op.opts.dry_run, %W{
     gcloud app deploy
       build/staged-app/app.yaml
   } + (with_cron ? %W{build/staged-app/WEB-INF/appengine-generated/cron.yaml} : []) +
     %W{--project #{gcc.project} #{promote}} +
     (op.opts.quiet ? %W{--quiet} : []) +
-    (op.opts.version ? %W{--version #{op.opts.version}} : [])
+    (op.opts.version ? %W{--version #{op.opts.version}} : []))
 end
 
 def deploy_api(cmd_name, args)
@@ -1257,11 +1290,11 @@ def grant_permissions()
   )
 end
 
-def migrate_database()
+def migrate_database(dry_run = false)
   common = Common.new
   common.status "Migrating main database..."
   Dir.chdir("db") do
-    common.run_inline(%W{gradle --info update -PrunList=main})
+    run_inline_or_log(dry_run, %W{gradle --info update -PrunList=main})
   end
 end
 
@@ -1283,7 +1316,7 @@ def get_auth_domain(project)
   return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["registeredDomainName"]
 end
 
-def load_config(project)
+def load_config(project, dry_run = false)
   config_json = get_config(project)
   unless config_json
     raise("unknown project #{project}, expected one of #{configs.keys}")
@@ -1292,8 +1325,8 @@ def load_config(project)
   common = Common.new
   common.status "Loading #{config_json} into database..."
   Dir.chdir("tools") do
-    common.run_inline %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}}
-    common.run_inline %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
+    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}})
+    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json})
   end
 end
 
@@ -1319,6 +1352,7 @@ def deploy(cmd_name, args)
   ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
   op.add_option(
     "--account [account]",
     ->(opts, v) { opts.account = v},
@@ -1337,6 +1371,12 @@ def deploy(cmd_name, args)
     "Service account key file to use for deployment authorization"
   )
   op.add_option(
+    "--dry-run",
+    ->(opts, _) { opts.dry_run = true},
+    "Don't actually deploy, just log the command lines which would be " +
+    "executed on a real invocation."
+  )
+  op.add_option(
     "--promote",
     ->(opts, _) { opts.promote = true},
     "Promote this version to immediately begin serving API traffic"
@@ -1347,6 +1387,13 @@ def deploy(cmd_name, args)
     "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
   )
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
+  # TODO(DB-89): Remove this flag and always push public-api.
+  op.opts.skip_public_api = false
+  op.add_option(
+    "--skip-public-api",
+    ->(opts, _) { opts.skip_public_api = true},
+    "Whether to skip deployment of the public API service, pushed by default"
+  )
 
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1355,15 +1402,16 @@ def deploy(cmd_name, args)
   common = Common.new
   common.status "Running database migrations..."
   with_cloud_proxy_and_db(gcc, op.opts.account, op.opts.key_file) do |ctx|
-    migrate_database
-    load_config(ctx.project)
+    migrate_database(op.opts.dry_run)
+    load_config(ctx.project, op.opts.dry_run)
     versions_file = get_cdr_versions_file(ctx.project)
-    update_cdr_versions_for_project("../config/#{versions_file}", false)
+    update_cdr_versions_for_project("../config/#{versions_file}", op.opts.dry_run)
 
     common.status "Pushing GCS artifacts..."
-    deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}})
+    dry_flag = op.opts.dry_run ? %W{--dry-run} : []
+    deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}} + dry_flag)
 
-    deploy_gcs_demos(cmd_name, %W{--project #{ctx.project}})
+    deploy_gcs_demos(cmd_name, %W{--project #{ctx.project}} + dry_flag)
 
     # Keep the cloud proxy context open for the service account credentials.
     deploy_args = %W{
@@ -1371,9 +1419,11 @@ def deploy(cmd_name, args)
       --version #{op.opts.version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
       --quiet
-    }
+    } + dry_flag
     deploy_api(cmd_name, deploy_args)
-    deploy_public_api(cmd_name, deploy_args)
+    unless op.opts.skip_public_api
+      deploy_public_api(cmd_name, deploy_args)
+    end
   end
 end
 
