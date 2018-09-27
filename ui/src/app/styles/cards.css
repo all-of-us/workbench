@@ -71,8 +71,6 @@
   padding-left: 10px;
   padding-right: 10px;
   border-radius: 4px 4px 0 0;
-  background-color: #8BC990;
-  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
   display: flex;
   justify-content: center;
 }
