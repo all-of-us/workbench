@@ -30,16 +30,18 @@
         <div class="row" [ngClass]="showTitle?'button-padding-zero' :'button-padding'">
           <div class="col-sm-2 col-lg-2 col-xl-2" >
             <div>
-              <div (click)="getDemoCharts()" >
+              <div>
                 <button type="button"
                         [ngClass]="[ demoGraph? 'btn-outline': 'btn-primary']"
+                        (click)="getDemoCharts()"
                         class="overview-buttons btn">
                   Demographics
                 </button>
               </div>
-              <div *ngFor = "let name of typesList" (click)="getDifferentCharts(name)">
+              <div *ngFor = "let name of typesList" >
                 <button type="button"
-                        [ngClass]="[ name === title ?'btn-outline': 'btn-primary']"
+                        (click)="getDifferentCharts(name)"
+                        [ngClass]="[ name === domainTitle ?'btn-outline': 'btn-primary']"
                         class="overview-buttons btn">
                   {{name}}
                 </button>
