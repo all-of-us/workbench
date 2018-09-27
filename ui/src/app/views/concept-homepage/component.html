@@ -70,7 +70,7 @@
           <!--ICD10 (2112)-->
         <!--</clr-checkbox>-->
       <!--</div>-->
-      <app-concept-table [concepts]="concepts" [selectedDomain]="selectedDomain" [loading]="searchLoading"></app-concept-table>
+      <app-concept-table [concepts]="concepts" [selectedDomain]="selectedDomain" [loading]="searchLoading" [searchTerm]="currentSearchString"></app-concept-table>
       <div (mouseenter)="addTextHovering=true" (mouseleave)="addTextHovering=false" (click)="openAddModal()" class="add-section">
         <div class="add-text" [class.hovering]="addTextHovering">Add to set</div>
         <clr-icon class="add-icon" shape="plus"></clr-icon>

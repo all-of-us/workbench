@@ -21,3 +21,9 @@ clr-datagrid {
 clr-dg-row {
   background-color: white;
 }
+
+:host::ng-deep mark {
+  background-color: rgba(101,159,61,0.2);
+  color: #659F3D;
+  font-weight: bolder;
+}

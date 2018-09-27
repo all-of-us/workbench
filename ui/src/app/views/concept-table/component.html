@@ -6,8 +6,8 @@
   <clr-dg-column>Count</clr-dg-column>
   <div class="break"></div>
   <clr-dg-row *ngFor="let concept of concepts" [clrDgItem]="concept">
-    <clr-dg-cell>{{concept.conceptName}}</clr-dg-cell>
-    <clr-dg-cell>{{concept.conceptSynonyms.join(', ')}}</clr-dg-cell>
+    <clr-dg-cell [innerHtml]="concept.conceptName | highlightSearch : searchTerm"></clr-dg-cell>
+    <clr-dg-cell [innerHtml]="concept.conceptSynonyms.join(', ') | highlightSearch : searchTerm"></clr-dg-cell>
     <clr-dg-cell>{{concept.conceptCode}}</clr-dg-cell>
     <clr-dg-cell>{{concept.vocabularyId}}</clr-dg-cell>
     <clr-dg-cell>{{concept.countValue}}</clr-dg-cell>

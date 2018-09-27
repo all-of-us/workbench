@@ -12,6 +12,7 @@ export class ConceptTableComponent {
   @Input() concepts: Object[];
   @Input() selectedDomain: Domain;
   @Input() loading: boolean;
+  @Input() searchTerm: string;
 
 
   selectedConcepts: Array<any> = [];

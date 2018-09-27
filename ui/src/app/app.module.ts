@@ -19,6 +19,7 @@ import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {WINDOW_REF} from './utils';
+import {HighlightSearchPipe} from './utils/highlight-search.pipe';
 
 import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
@@ -136,7 +137,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptTableComponent,
     ConfirmDeleteModalComponent,
     ErrorHandlerComponent,
-    WorkspaceListComponent,
+    HighlightSearchPipe,
     InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
@@ -156,6 +157,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     UnregisteredComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
+    WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
     HomepageComponent
