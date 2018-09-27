@@ -65,6 +65,7 @@ export class ConceptHomepageComponent implements OnInit {
     this.loadingDomains = true;
     this.conceptsService.getDomainInfo(this.wsNamespace, this.wsId).subscribe((response) => {
       this.conceptDomainList = response.items;
+      console.log(this.conceptDomainList);
       this.conceptDomainList.forEach((domain) => {
         this.conceptsCache.push({
           domain: domain.domain,
@@ -144,9 +145,5 @@ export class ConceptHomepageComponent implements OnInit {
 
   get searchTermNotLongEnough() {
     return this.searchTerm === undefined || this.searchTerm.length < 3;
-  }
-
-  setStandardOnly() {
-    this.standardConceptsOnly = !this.standardConceptsOnly;
   }
 }
