@@ -322,6 +322,7 @@ describe('CohortSearchActions', () => {
       subtype: 'GEN',
       group: false,
       conceptId: 12345,
+      domain: null,
       attributes: DEMO_crit.get('attributes'),
     });
   });

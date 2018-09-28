@@ -1,6 +1,9 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
+  BEGIN_CHART_DATA_REQUEST,
+  REVIEW_CHART_REQUEST_ERROR,
+  LOAD_CHART_RESULTS,
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
@@ -89,6 +92,20 @@ export const requestDrugCriteria =
   (cdrVersionId: number, kind: string, parentId: number, subtype: string
   ): ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST] =>
   ({type: BEGIN_DRUG_CRITERIA_REQUEST, cdrVersionId, kind, parentId, subtype});
+
+
+/**
+ * Cohort Review Charts
+ */
+export const requestChartData =
+    (ns: string, wsid: string, cid: number, cdrid: number, domain: string, limit: number,
+    ): ActionTypes[typeof BEGIN_CHART_DATA_REQUEST] =>
+        ({type: BEGIN_CHART_DATA_REQUEST, ns, wsid, cid, cdrid, domain, limit});
+
+export const loadChartRequestResults =
+    (ns: string, wsid: string, cid: number, cdrid: number, domain: string, limit: number,
+     results: any): ActionTypes[typeof LOAD_CHART_RESULTS] =>
+    ({type: LOAD_CHART_RESULTS, ns, wsid, cid, cdrid, domain, limit, results});
 
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
@@ -238,6 +255,10 @@ export const loadPreviewRequestResults =
 export const previewRequestError =
   (error?: any): ActionTypes[typeof PREVIEW_REQUEST_ERROR] =>
   ({type: PREVIEW_REQUEST_ERROR, error});
+export const reviewChartsRequestError =
+    (ns: any, wsid: any, cid: any, cdrid: any, domain: any, limit: any, error: any):
+    ActionTypes[typeof REVIEW_CHART_REQUEST_ERROR] =>
+    ({type: REVIEW_CHART_REQUEST_ERROR, ns, wsid, cid, cdrid, domain, limit, error});
 
 export const requestCharts =
   (cdrVersionId: number, entityType: string, entityId: string, request: SearchRequest

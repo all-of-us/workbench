@@ -153,7 +153,7 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Criteria type: null is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid criteria type. null is not valid.", bre.getMessage());
     }
 
     try {
@@ -162,7 +162,7 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Criteria type: blah is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid criteria type. blah is not valid.", bre.getMessage());
     }
 
     try {
@@ -171,7 +171,7 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //success
-      assertEquals("Criteria subtype: blah is not valid.", bre.getMessage());
+      assertEquals("Bad Request: Please provide a valid criteria subtype. blah is not valid.", bre.getMessage());
     }
   }
 

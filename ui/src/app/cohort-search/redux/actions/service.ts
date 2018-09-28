@@ -17,6 +17,7 @@ import {
   includeGroups,
   isAttributeLoading,
   isAutocompleteLoading,
+  isChartLoading,
   isCriteriaLoading,
   isRequesting,
   SR_ID,
@@ -54,6 +55,7 @@ export class CohortSearchActions {
   @dispatch() requestCriteriaBySubtype = ActionFuncs.requestCriteriaBySubtype;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
+  @dispatch() requestChartData = ActionFuncs.requestChartData;
   @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
@@ -471,29 +473,14 @@ export class CohortSearchActions {
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
-      attributes: immParam.get('attributes')
+      attributes: immParam.get('attributes'),
+      conceptId: immParam.get('conceptId'),
+      domain: immParam.get('domainId')
     };
-
-    if (param.type === TreeType[TreeType.DEMO]
-      || param.type === TreeType[TreeType.VISIT]
-      || param.type === TreeType[TreeType.PM]
-      || param.type === TreeType[TreeType.MEAS]
-      || param.type === TreeType[TreeType.DRUG]
-      || param.type === TreeType[TreeType.ICD9]
-      || param.type === TreeType[TreeType.ICD10]
-      || param.type === TreeType[TreeType.CPT]
-      || param.type === TreeType[TreeType.CONDITION]) {
-        param.conceptId = immParam.get('conceptId');
-    }
-    if (param.type === TreeType[TreeType.ICD9]
-      || param.type === TreeType[TreeType.ICD10]
-      || param.type === TreeType[TreeType.CPT]
-      || param.type === TreeType[TreeType.CONDITION]) {
-        param.domain = immParam.get('domainId');
-    }
 
     return param;
   }
+
 
   /*
    * Deserializes a JSONified SearchRequest into an entities object
@@ -554,5 +541,10 @@ export class CohortSearchActions {
   resetStore(): void {
     this.idsInUse = Set<string>();
     this._resetStore();
+  }
+
+  fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
+                        domain: string, limit: number): void {
+      this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
   }
 }
