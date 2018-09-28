@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
@@ -10,7 +9,6 @@ import { Observable } from 'rxjs/Rx';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/model/domainInfosAndSurveyModulesResponse';
-
 
 @Component({
   selector: 'app-quick-search',
@@ -69,7 +67,8 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
         // Set title based on datatype
         if (this.dataType === this.EHR_DATATYPE) {
             this.title = 'Electronic Health Data';
-            this.subTitle = 'Enter a keyword or data standards code (eg ICD, SNOMED) in the search bar ' +
+            this.subTitle = 'Enter a keyword or data standards code (eg ICD, SNOMED)' +
+                ' in the search bar ' +
                 'to search across Electronic Health Record (EHR) data.';
         }
         if (this.dataType === this.SURVEY_DATATYPE) {
