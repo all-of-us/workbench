@@ -101,19 +101,23 @@ const userValuesStub = {
   items: [
     {
       email: 'sampleuser1@fake-research-aou.org',
-      role: 'OWNER'
+      role: 'OWNER',
+      name: 'Sample User1'
     },
     {
       email: 'sampleuser2@fake-research-aou.org',
-      role: 'WRITER'
+      role: 'WRITER',
+      name: 'Sample User2'
     },
     {
       email: 'sampleuser3@fake-research-aou.org',
-      role: 'READER'
+      role: 'READER',
+      name: 'Sample User3'
     },
     {
       email: 'sampleuser4@fake-research-aou.org',
-      role: 'WRITER'
+      role: 'WRITER',
+      name: 'Sample User4'
     }
   ]
 };
@@ -168,10 +172,19 @@ describe('WorkspaceShareComponent', () => {
 
   it('displays correct information in default workspace sharing', fakeAsync(() => {
     workspaceSharePage.readPageData();
-    const roleNamePairs =
-      convertToUserRoleRow(workspaceSharePage.fixture.componentRef.instance.workspace.userRoles);
-    expect(workspaceSharePage.roleNamePairsOnPage)
-        .toEqual(roleNamePairs);
+    expect(workspaceSharePage.roleNamePairsOnPage.length).toEqual(3);
+    expect(workspaceSharePage.roleNamePairsOnPage[0].email).toBe(userValuesStub.items[0].email);
+    expect(workspaceSharePage.roleNamePairsOnPage[0].role).toBe(userValuesStub.items[0].role);
+    expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe(userValuesStub.items[0].name);
+
+    expect(workspaceSharePage.roleNamePairsOnPage[1].email).toBe(userValuesStub.items[1].email);
+    expect(workspaceSharePage.roleNamePairsOnPage[1].role).toBe(userValuesStub.items[1].role);
+    expect(workspaceSharePage.roleNamePairsOnPage[1].fullName).toBe(userValuesStub.items[1].name);
+
+
+    expect(workspaceSharePage.roleNamePairsOnPage[2].email).toBe(userValuesStub.items[2].email);
+    expect(workspaceSharePage.roleNamePairsOnPage[2].role).toBe(userValuesStub.items[2].role);
+    expect(workspaceSharePage.roleNamePairsOnPage[2].fullName).toBe(userValuesStub.items[2].name);
   }));
 
   it('adds users correctly', fakeAsync(() => {
@@ -183,11 +196,11 @@ describe('WorkspaceShareComponent', () => {
         workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
     workspaceSharePage.fixture.detectChanges();
 
-    const roleNamePairs =
-      convertToUserRoleRow(workspaceSharePage.fixture.componentInstance.userRolesList);
     workspaceSharePage.readPageData();
-    expect(workspaceSharePage.roleNamePairsOnPage).toEqual(roleNamePairs);
     expect(workspaceSharePage.roleNamePairsOnPage.length).toBe(4);
+    const addedUserRole = workspaceSharePage.roleNamePairsOnPage[0];
+    expect(addedUserRole.email).toBe(userValuesStub.items[3].email);
+    expect(addedUserRole.fullName).toBe(userValuesStub.items[3].name);
   }));
 
   it('removes users correctly and does not allow self removal', fakeAsync(() => {
@@ -200,9 +213,6 @@ describe('WorkspaceShareComponent', () => {
       simulateClick(workspaceSharePage.fixture, removeButton);
     });
     workspaceSharePage.readPageData();
-    const roleNamePairs =
-        convertToUserRoleRow(workspaceSharePage.fixture.componentInstance.userRolesList);
-    expect(workspaceSharePage.roleNamePairsOnPage).toEqual(roleNamePairs);
     expect(workspaceSharePage.roleNamePairsOnPage.length).toBe(1);
     expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe('Sample User1');
     expect(workspaceSharePage.roleNamePairsOnPage[0].role).toEqual(WorkspaceAccessLevel.OWNER);

@@ -98,13 +98,13 @@ export class WorkspacesServiceStub {
         {
           email: 'sampleuser2@fake-research-aou.org',
           givenName: 'Sample',
-          familyName: 'User1',
+          familyName: 'User2',
           role: WorkspaceAccessLevel.WRITER
         },
         {
           email: 'sampleuser3@fake-research-aou.org',
           givenName: 'Sample',
-          familyName: 'User1',
+          familyName: 'User3',
           role: WorkspaceAccessLevel.READER
         },
       ]

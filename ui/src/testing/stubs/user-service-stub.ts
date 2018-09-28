@@ -11,9 +11,9 @@ export class UserServiceStub {
       setTimeout(() => {
         const roleNamePairs: User[] = [];
         roleNamePairs.push(<User>{
-          familyName: 'Family',
+          familyName: 'User4',
           email: 'sampleuser4@fake-research-aou.org',
-          givenName: 'GIVEN'
+          givenName: 'Sample'
         });
         const userResponse: UserResponse = {
           users: roleNamePairs
