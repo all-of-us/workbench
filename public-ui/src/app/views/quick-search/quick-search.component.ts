@@ -2,22 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/distinctUntilChanged';
-import 'rxjs/add/operator/switchMap';
-import { Observable } from 'rxjs/Rx';
-import { ISubscription } from 'rxjs/Subscription';
-import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
-import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/model/domainInfosAndSurveyModulesResponse';
-@Component({
-  selector: 'app-quick-search',
-  templateUrl: './quick-search.component.html',
-  styleUrls: ['../../styles/template.css', '../../styles/cards.css', './quick-search.component.css']
-})
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { Router } from '@angular/router';
 
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
