@@ -189,3 +189,8 @@ export const isChartLoading =
 
 export const isDomainNameExists = domain => (state): boolean =>
   state.getIn(['reviewChartData', 'domainCharts']).has(domain);
+
+export const getParticipantData =
+  (domain: string) =>
+    (state): any =>
+      state.getIn(['individualChartData', 'chartsData', domain]);

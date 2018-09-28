@@ -18,6 +18,7 @@ import {
   isAttributeLoading,
   isAutocompleteLoading,
   isChartLoading,
+  getParticipantData,
   isCriteriaLoading,
   isRequesting,
   SR_ID,
@@ -56,6 +57,7 @@ export class CohortSearchActions {
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
   @dispatch() requestChartData = ActionFuncs.requestChartData;
+  @dispatch() requestIndividualParticipantsData = ActionFuncs.requestIndividualParticipantsData;
   @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
@@ -544,7 +546,12 @@ export class CohortSearchActions {
   }
 
   fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
-                        domain: string, limit: number): void {
-      this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
+                          domain: string, limit: number): void {
+    this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
+  }
+
+  fetchIndividualParticipantsData(ns: any, wsid: any, cid: any, cdrid: any,
+                       participantsId:any, domain: string,  limit: number): void {
+     this.requestIndividualParticipantsData(ns, wsid, cid, cdrid, participantsId, domain, limit);
   }
 }
