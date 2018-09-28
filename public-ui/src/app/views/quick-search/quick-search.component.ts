@@ -9,7 +9,6 @@ import { Observable } from 'rxjs/Rx';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/model/domainInfosAndSurveyModulesResponse';
-
 @Component({
   selector: 'app-quick-search',
   templateUrl: './quick-search.component.html',
