@@ -33,6 +33,7 @@ import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
+import {IndividualParticipantsCharts} from './individual-participants-charts/individual-participants-charts'
 /* tslint:enable:max-line-length */
 
 
@@ -79,6 +80,7 @@ import {TablePage} from './table-page/table-page';
     DetailTabsComponent,
     DetailTabTableComponent,
     DetailAllEventsComponent,
+    IndividualParticipantsCharts,
   ],
   providers: [ReviewStateService,
               CohortSearchActions,
