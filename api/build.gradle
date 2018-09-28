@@ -178,6 +178,8 @@ configurations {
   bigquerytestRuntime.extendsFrom testRuntime
 }
 
+// Required for the swagger plugin's `validateSwagger` task
+// See https://github.com/int128/gradle-swagger-generator-plugin
 sourceSets {
   generated {
     compileClasspath = configurations.generatedCompile
