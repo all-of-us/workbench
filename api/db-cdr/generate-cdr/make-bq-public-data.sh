@@ -151,23 +151,23 @@ set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     source_count_value =
     case when source_count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     prevalence =
     case when count_value  > 0 and count_value < ${BIN_SIZE}
-            then ROUND(${BIN_SIZE} / ${person_count},2)
+            then CEIL(${BIN_SIZE} / ${person_count},2)
         when count_value  > 0 and count_value >= ${BIN_SIZE}
-            then ROUND(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+            then CEIL(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
         when source_count_value  > 0 and source_count_value < ${BIN_SIZE}
-            then ROUND(${BIN_SIZE} / ${person_count},2)
+            then CEIL(${BIN_SIZE} / ${person_count},2)
         when source_count_value  > 0 and source_count_value >= ${BIN_SIZE}
-            then ROUND(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+            then CEIL(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
         else
             0.00
     end
@@ -191,7 +191,7 @@ set participant_count =
     case when participant_count < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"
 
@@ -202,6 +202,6 @@ set participant_count =
     case when participant_count < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"
