@@ -263,7 +263,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private CdrVersion setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
-      return null;
+      throw new BadRequestException("missing cdrVersionId");
     }
     try {
       CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
@@ -556,7 +556,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setName(workspace.getName());
     }
     // TODO: handle research purpose
-    setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
