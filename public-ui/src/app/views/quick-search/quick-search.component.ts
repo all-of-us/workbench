@@ -44,7 +44,6 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
     // Set title based on datatype
     if (this.dataType === this.EHR_DATATYPE) {
       this.title = 'Electronic Health Data';
@@ -135,7 +134,6 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
       });
       return resultsObservable;
     }
-
     return this.api.getDomainSearchResults(query);
   }
 
