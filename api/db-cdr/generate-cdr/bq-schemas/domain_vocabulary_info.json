@@ -1,0 +1,23 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "vocabulary_id",
+    "type": "STRING"
+  },
+  {
+    "mode":"REQUIRED",
+    "name": "all_concept_count",
+    "type": "INTEGER"
+  },
+  {
+    "mode":"REQUIRED",
+    "name": "standard_concept_count",
+    "type": "INTEGER"
+  }
+]
+

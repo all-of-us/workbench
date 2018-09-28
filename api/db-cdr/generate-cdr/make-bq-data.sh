@@ -195,7 +195,6 @@ from \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.achilles_results\` r
 where r.analysis_id in (3000,2,4,5) and CAST(r.stratum_1 as int64) > "0" group by r.stratum_1) as r
 where r.concept_id = c.concept_id"
 
-
 #Concept prevalence (based on count value and not on source count value)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "Update  \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\`
@@ -303,7 +302,32 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT 0, c.concept_id, c.concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
 
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"Update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c
+set c.synonyms = concat(cast(c1.concept_id as string),'|',c1.concept_code,'|',c1.concept_name,'|',group_concat(cs.concept_synonym_name,'|'))
+from \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c1 join  \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\` cs
+on c1.concept_id=cs.concept_id
+where c1.concept_id = c.concept_id"
 
+###########################
+# Domain_Vocabulary_Info #
+###########################
+echo "Updating all concept count in domain_vocabulary_info"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_vocabulary_info\`
+(concept_id,vocabulary_id,all_concept_count,standard_concept_count)
+with all_concept_count as
+(select d.domain_concept_id as concept_id,c.vocabulary_id as vocabulary_id,count(distinct c.concept_id) as all_concept_count
+from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain\` d on c.domain_id=d.domain_id
+where (c.count_value > 0 or c.source_count_value > 0)
+group by d.domain_concept_id,c.vocabulary_id),
+standard_concept_count as
+(select d.domain_concept_id as concept_id,c.vocabulary_id as vocabulary_id,count(distinct c.concept_id) as standard_concept_count
+from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain\` d on c.domain_id=d.domain_id
+where (c.count_value > 0 and c.standard_concept='S')
+group by d.domain_concept_id,c.vocabulary_id)
+select a.concept_id,a.vocabulary_id,a.all_concept_count,b.standard_concept_count from all_concept_count a join
+standard_concept_count b on a.concept_id=b.concept_id and a.vocabulary_id=b.vocabulary_id"
 
 
 
