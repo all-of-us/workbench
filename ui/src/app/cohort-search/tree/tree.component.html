@@ -26,7 +26,7 @@
   </div>
 </div>
 <div class="tree-container" [class.multiple]="multipleMatches">
-  <div *ngIf="numMatches > 1">
+  <div *ngIf="numMatches > 1" class="match-container">
     <b>Note:</b> There are {{numMatches}} matches for your search
   </div>
   <crit-node *ngFor="let item of children" [node]="item"></crit-node>
