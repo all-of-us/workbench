@@ -183,7 +183,7 @@ describe('WorkspaceShareComponent', () => {
 
 
     expect(workspaceSharePage.roleNamePairsOnPage[2].email).toBe(userValuesStub.items[2].email);
-    expect(workspaceSharePage.roleNamePairsOnPage[2].role).toBe(userValuesStub.items[2].role);
+    expect(workspaceSharePage.roleNamePairsOnPage[2].role.toString).toBe(userValuesStub.items[2].role.toString);
     expect(workspaceSharePage.roleNamePairsOnPage[2].fullName).toBe(userValuesStub.items[2].name);
   }));
 
