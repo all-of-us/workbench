@@ -174,19 +174,19 @@ describe('WorkspaceShareComponent', () => {
     workspaceSharePage.readPageData();
     expect(workspaceSharePage.roleNamePairsOnPage.length).toEqual(3);
     expect(workspaceSharePage.roleNamePairsOnPage[0].email).toBe(userValuesStub.items[0].email);
-    expect(workspaceSharePage.roleNamePairsOnPage[0].role.toString)
-        .toBe(userValuesStub.items[0].role.toString);
+    expect(workspaceSharePage.roleNamePairsOnPage[0].role)
+        .toBe(userValuesStub.items[0].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe(userValuesStub.items[0].name);
 
     expect(workspaceSharePage.roleNamePairsOnPage[1].email).toBe(userValuesStub.items[1].email);
-    expect(workspaceSharePage.roleNamePairsOnPage[1].role.toString)
-        .toBe(userValuesStub.items[1].role.toString);
+    expect(workspaceSharePage.roleNamePairsOnPage[1].role)
+        .toBe(userValuesStub.items[1].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[1].fullName).toBe(userValuesStub.items[1].name);
 
 
     expect(workspaceSharePage.roleNamePairsOnPage[2].email).toBe(userValuesStub.items[2].email);
-    expect(workspaceSharePage.roleNamePairsOnPage[2].role.toString)
-        .toBe(userValuesStub.items[2].role.toString);
+    expect(workspaceSharePage.roleNamePairsOnPage[2].role)
+        .toBe(userValuesStub.items[2].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[2].fullName).toBe(userValuesStub.items[2].name);
   }));
 
@@ -218,7 +218,7 @@ describe('WorkspaceShareComponent', () => {
     workspaceSharePage.readPageData();
     expect(workspaceSharePage.roleNamePairsOnPage.length).toBe(1);
     expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe('Sample User1');
-    expect(workspaceSharePage.roleNamePairsOnPage[0].role.toString)
+    expect(workspaceSharePage.roleNamePairsOnPage[0].role)
         .toEqual(WorkspaceAccessLevel.OWNER);
   }));
 });
