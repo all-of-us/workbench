@@ -1,0 +1,234 @@
+:host::ng-deep .nav {
+  padding-left: 1rem;
+  padding-top: 1rem;
+  box-shadow: none;
+}
+
+.btn.btn-link.nav-link.nav-item {
+  color: #2691D0;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 24px;
+}
+
+.btn.btn-link.nav-link.nav-item.active {
+  font-weight: bolder;
+}
+
+#concept-search-input {
+  margin-left: 1%;
+  border: none;
+  box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+  height: 3rem;
+  width: 64.3%;
+  background-color: #A3D3F232;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 19px;
+  color: #000000;
+  padding-left: 2rem;
+}
+
+.btn.btn-secondary {
+  height: 26.6px;
+  width: 100%;
+  border: 0.7px solid #216FB4;
+  border-radius: 3.5px;
+  color: #216FB4;
+  font-size: 9.8px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.btn-search-container {
+  position: relative;
+  right: 9%;
+  width: 6.56%;
+}
+
+.standard-concepts-checkbox {
+  right: 4rem;
+}
+
+.domain-box {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.lower-box {
+  margin-top: 1rem;
+  margin-left: 1%;
+  margin-right: 1%;
+}
+
+.card.item-card {
+  width: 11rem;
+  align-items: flex-start;
+}
+
+.card .footer {
+  position: absolute;
+  bottom: .7rem;
+}
+
+.concept-name {
+  color: #2691D0;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 22px;
+  margin-bottom: 0.2rem;
+}
+
+.card .concept-text {
+  margin-top: 0.3rem;
+  font-size: 14px;
+  font-weight: 300;
+  color: #4A4A4A;
+  display: flex;
+  flex-direction: column;
+}
+
+.concept-count-text {
+  font-size: 30px;
+}
+
+.concept-label-text {
+  font-size: 18px;
+}
+
+.participant-count-text {
+  font-weight: bolder;
+}
+
+.btn.btn-link {
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
+  color: #2691D0;
+  text-transform: none;
+}
+
+:host::ng-deep .checkbox input[type=checkbox]:checked+label:before {
+  background-color: #7CC79B;
+}
+
+:host::ng-deep .checkbox input[type=checkbox]:focus+label:before {
+  box-shadow: none;
+}
+
+.chart-selector-tabs .btn.btn-link.nav-link.nav-item {
+  color: #2691D0;
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 18px;
+  text-align: start;
+  box-shadow: none;
+  width: 7rem;
+  height: 2.2rem;
+  padding-left: 0.5rem;
+  margin: 0;
+}
+
+.chart-selector-tabs {
+  height: 2.2rem;
+  padding: 0;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.chart-selector-tabs .btn.btn-link.nav-link.nav-item * {
+  margin-left: auto;
+  margin-right: auto
+}
+
+.chart-selector-tabs .btn.btn-link.nav-link.nav-item.active {
+  background-color: #FAFAFA;
+  border-top: 1px solid #CCCCCC;
+  border-left: 1px solid #CCCCCC;
+  border-right: 1px solid #CCCCCC;
+  border-radius: 3px 3px 0 0;
+}
+
+.chart-selector-tabs .btn.btn-link.nav-link.nav-item .chart-selector-header {
+  font-weight: 500;
+  font-size: 16px;
+  display: flex;
+}
+
+.filter-options {
+  background-color: #FAFAFA;
+  height: 2rem;
+  border: 1px solid #CCCCCC;
+  margin-top: -1px;
+  padding-left: 0.5rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  line-height: 15px;
+  font-weight: 500;
+  font-size: 12px;
+  color: #4A4A4A;
+}
+
+.filter-checkbox {
+  width: 9rem;
+  padding-left: 1rem;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4A4A4A;
+}
+
+.add-section {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  color: white;
+  border-radius: 3rem;
+  background-color: #2691D0;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.add-text {
+  padding: 0;
+  font-weight: 500;
+  max-width: 0;
+  overflow: hidden;
+  white-space: pre;
+  transition: max-width 0.5s ease-out, padding 0.1s linear 0.2s;
+}
+
+.add-text.hovering {
+  padding: 0 0.5rem;
+  max-width: 200px;
+}
+
+.add-icon {
+  fill: white;
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  flex-flow: row wrap;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.spinner.spinner-lg {
+  margin-top: 1rem;
+}
+
+.btn-search {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.domain-selector-button {
+  width: 3rem;
+}
