@@ -7,8 +7,11 @@ import {
     PageFilterType,
     ReviewColumns,
 } from 'generated';
-import {PageFilterRequest, SortOrder} from "../../../generated";
+import {CohortBuilderService, PageFilterRequest, SortOrder} from "../../../generated";
 import {Subscription} from "rxjs/Subscription";
+import {NgRedux} from "@angular-redux/store";
+import {CohortSearchActions, CohortSearchState, getParticipantData} from "../../cohort-search/redux";
+import {ReviewStateService} from "../review-state.service";
 
 /* The most common column types */
 const itemDate = {
@@ -127,39 +130,36 @@ export class DetailTabsComponent implements OnInit{
   subscription: Subscription;
   loading = false;
   data;
+  participantsId: any;
+  constructor(
+    private route: ActivatedRoute,
+    private reviewApi: CohortReviewService,
+    private state: ReviewStateService,
+    private actions: CohortSearchActions,
+    private ngRedux: NgRedux<CohortSearchState>,
+    private chartAPI: CohortBuilderService,
+    private reviewAPI: CohortReviewService,
+  ) {}
+
   ngOnInit(){
-    this.subscription = this.route.data
-      .map(({participant}) => participant)
-      .withLatestFrom(
-        this.route.data.map(({cohort}) => cohort),
-        this.route.data.map(({workspace}) => workspace),
-      )
-      .distinctUntilChanged()
-      .do(_ => this.loading = true)
-      .switchMap(([participant, cohort, workspace]) => {
-        this.data = [];
-        return this.reviewApi.getParticipantChartDataWithHttpInfo(
-          workspace.namespace,
-          workspace.id,
-          cohort.id,
-          workspace.cdrVersionId,
-          participant.participantId,
-          'CONDITION'
-          // <PageFilterRequest>{
-          //   page: 0,
-          //   pageSize: 10000,
-          //   sortOrder: SortOrder.Asc,
-          //   sortColumn: this.columns[0].name,
-          //   pageFilterType: this.filterType,
-          //   domain: this.domain,
-          // }
-        );
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    this.subscription = this.route.data.map(({participant}) => participant)
+      .subscribe(participants =>{
+       this.participantsId = participants.participantId;
       })
-      .subscribe(resp => {
-       console.log(resp);
-        // this.totalCount = resp.count;
-        // this.loading = false;
+    const limit = 5;
+    this.actions.fetchIndividualParticipantsData(ns, wsid, cid, cdrid, this.participantsId,'CONDITION', limit);
+    this.actions.fetchIndividualParticipantsData(ns, wsid, cid, cdrid, this.participantsId,'PROCEDURE', limit);
+    this.actions.fetchIndividualParticipantsData(ns, wsid, cid, cdrid, this.participantsId,'DRUG', limit);
+
+    const getIndividualParticipantsDomainData = this.ngRedux
+      .select(getParticipantData('CONDITION'))
+        .filter(domain => !!domain)
+      .subscribe(loading => {
+        console.log(JSON.parse(loading))
       });
+    this.subscription = getIndividualParticipantsDomainData;
   }
 
   readonly stubs = [
@@ -323,8 +323,5 @@ export class DetailTabsComponent implements OnInit{
     }
   }];
 
-  constructor(
-    private route: ActivatedRoute,
-    private reviewApi: CohortReviewService,
-  ) {}
+
 }
