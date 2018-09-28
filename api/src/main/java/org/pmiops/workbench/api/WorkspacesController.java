@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -260,19 +261,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private void setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
-    if (cdrVersionId != null) {
-      try {
-        CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
-        if (cdrVersion == null) {
-          throw new BadRequestException(
-              String.format("CDR version with ID %s not found", cdrVersionId));
-        }
-        dbWorkspace.setCdrVersion(cdrVersion);
-      } catch (NumberFormatException e) {
-        throw new BadRequestException(String.format(
-            "Invalid cdr version ID: %s", cdrVersionId));
+  private CdrVersion setCdrVersionId(org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
+    if (Strings.isNullOrEmpty(cdrVersionId)) {
+      throw new BadRequestException("missing cdrVersionId");
+    }
+    try {
+      CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
+      if (cdrVersion == null) {
+        throw new BadRequestException(
+            String.format("CDR version with ID %s not found", cdrVersionId));
       }
+      dbWorkspace.setCdrVersion(cdrVersion);
+      return cdrVersion;
+    } catch (NumberFormatException e) {
+      throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
     }
   }
 
@@ -554,7 +556,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setName(workspace.getName());
     }
     // TODO: handle research purpose
-    setCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
@@ -584,8 +585,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .getWorkspace()
           .getBucketName();
 
-    org.pmiops.workbench.db.model.Workspace fromWorkspace = workspaceService.getRequiredWithCohorts(
-        workspaceNamespace, workspaceId);
+    org.pmiops.workbench.db.model.Workspace fromWorkspace =
+        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     if (fromWorkspace == null) {
       throw new NotFoundException(String.format(
           "Workspace %s/%s not found", workspaceNamespace, workspaceId));
@@ -645,27 +646,47 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
 
-    // Clone the previous description, by default.
+    // Clone description/CDR version from the source, by default.
     if (Strings.isNullOrEmpty(toWorkspace.getDescription())) {
       dbWorkspace.setDescription(fromWorkspace.getDescription());
     } else {
       dbWorkspace.setDescription(toWorkspace.getDescription());
     }
+    String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
+    if (Strings.isNullOrEmpty(reqCdrVersionId) ||
+        reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {
+      dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
+      dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
+    } else {
+      CdrVersion reqCdrVersion = setCdrVersionId(dbWorkspace, reqCdrVersionId);
+      dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
+    }
 
-    dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
-    dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
+    WorkspaceUserRole ownerRole = new WorkspaceUserRole();
+    ownerRole.setRoleEnum(WorkspaceAccessLevel.OWNER);
+    ownerRole.setWorkspace(dbWorkspace);
+    ownerRole.setUser(user);
 
-    WorkspaceUserRole permissions = new WorkspaceUserRole();
-    permissions.setRoleEnum(WorkspaceAccessLevel.OWNER);
-    permissions.setWorkspace(dbWorkspace);
-    permissions.setUser(user);
+    dbWorkspace.addWorkspaceUserRole(ownerRole);
+    org.pmiops.workbench.db.model.Workspace savedWorkspace =
+        workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
 
-    dbWorkspace.addWorkspaceUserRole(permissions);
-
-    dbWorkspace = workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
-    CloneWorkspaceResponse resp = new CloneWorkspaceResponse();
-    resp.setWorkspace(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, toFcWorkspace));
-    return ResponseEntity.ok(resp);
+    if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
+      Set<WorkspaceUserRole> clonedRoles = fromWorkspace.getWorkspaceUserRoles().stream()
+          .filter((role) -> role.getUser().getUserId() != user.getUserId())
+          .map((role) -> {
+            WorkspaceUserRole to = new WorkspaceUserRole();
+            to.setUser(role.getUser());
+            to.setWorkspace(dbWorkspace);
+            to.setRole(role.getRole());
+            return to;
+          })
+          .collect(Collectors.toSet());
+      clonedRoles.add(ownerRole);
+      savedWorkspace = workspaceService.updateUserRoles(savedWorkspace, clonedRoles);
+    }
+    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(
+        TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(savedWorkspace, toFcWorkspace)));
   }
 
   @Override
