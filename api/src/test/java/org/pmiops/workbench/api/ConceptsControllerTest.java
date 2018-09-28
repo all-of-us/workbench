@@ -16,6 +16,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
+import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.VocabularyCount;
@@ -399,10 +401,8 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsNameOneMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("xyz"));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(0);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("xyz")));
   }
 
   @Test
@@ -416,19 +416,15 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsCodeMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("conceptA"));
-    Concept concept = response.getBody().getItems().get(0);
-    assertThat(concept.getConceptId()).isEqualTo(123);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptA")), CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsConceptIdMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("123"));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts).contains(CLIENT_CONCEPT_1);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("123")), CLIENT_CONCEPT_1);
   }
 
   @Test
@@ -543,8 +539,6 @@ public class ConceptsControllerTest {
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3, CLIENT_CONCEPT_1));
   }
 
-
-  /*
   @Test
   public void testSearchConceptsNonStandard() throws Exception{
     saveConcepts();
@@ -558,11 +552,10 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsStandardConcept() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
+    assertResults(conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query("conceptA")
-                    .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
-    Concept concept = response.getBody().getItems().get(0);
-    assertThat(concept.getConceptId()).isEqualTo(123);
+                    .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)),
+        CLIENT_CONCEPT_1);
   }
 
   @Test
@@ -578,37 +571,30 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsVocabularyIdNoMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con").vocabularyIds(ImmutableList.of("x", "v")));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(0);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").vocabularyIds(ImmutableList.of("x", "v"))));
   }
 
   @Test
   public void testSearchConceptsVocabularyIdMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("conceptB").vocabularyIds(ImmutableList.of("V3", "V2")));
-    Concept concept = response.getBody().getItems().get(0);
-    assertThat(concept.getConceptId()).isEqualTo(456);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptB").vocabularyIds(ImmutableList.of("V3", "V2"))),
+        CLIENT_CONCEPT_2);
   }
 
   @Test
   public void testSearchConceptsDomainIdNoMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("zzz").domain(Domain.OBSERVATION));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(0);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("zzz").domain(Domain.OBSERVATION)));
   }
 
   @Test
   public void testSearchConceptsDomainIdMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-    new SearchConceptsRequest().query("conceptA").domain(Domain.CONDITION));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts).contains(CLIENT_CONCEPT_1);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("conceptA").domain(Domain.CONDITION)), CLIENT_CONCEPT_1);
   }
 
   @Test
@@ -625,23 +611,18 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsMultipleNoMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response =
-        conceptsController.searchConcepts("ns", "name",
+    assertResults(conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query("con")
                 .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS)
                 .vocabularyIds(ImmutableList.of("V1"))
-                .domain(Domain.CONDITION));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(0);
+                .domain(Domain.CONDITION)));
   }
 
   public void testSearchConceptsOneResult() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response =
-        conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("conceptC").maxResults(1));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(1);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptC").maxResults(1)),
+        CLIENT_CONCEPT_3);
   }
 
   @Test
