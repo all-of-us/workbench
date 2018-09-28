@@ -34,8 +34,9 @@
   width: 100%;
 }
 
-.name-area {
+.name-area, .cdr-version-dropdown {
   margin-right: 20px;
+  margin-bottom: 5px;
 }
 
 .checkbox-group {
