@@ -4,10 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -27,7 +25,6 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
@@ -579,7 +576,7 @@ public class ConceptsControllerTest {
 
   private void assertResults(ResponseEntity<ConceptListResponse> response,
       Concept... expectedConcepts) {
-    assertThat(response.getBody().getItems()).isEqualTo(ImmutableList.of(expectedConcepts));
+    assertThat(response.getBody().getItems()).isEqualTo(ImmutableList.copyOf(expectedConcepts));
     assertThat(response.getBody().getDomainCounts()).isNull();
     assertThat(response.getBody().getVocabularyCounts()).isNull();
   }
