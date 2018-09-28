@@ -194,3 +194,8 @@ export const isDomainNameExists = (cid: any, domain: string) => (state): boolean
   return domainExists ?
     state.getIn(['reviewChartData', 'domainCharts', cid]).has(domain) : false;
 };
+
+export const getParticipantData =
+  (domain: string) =>
+    (state): any =>
+      state.getIn(['individualChartData', 'chartsData', domain]);
