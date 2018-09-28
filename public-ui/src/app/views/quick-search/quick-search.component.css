@@ -17,6 +17,7 @@
     margin-top: 1rem;
     margin-bottom: 1rem;
     padding: .5rem 1rem;
+    display: block;
 }
 
 .card-text.bottom {
@@ -26,4 +27,8 @@
 .bolder {
     font-weight: bold;
     font-size: 16px;
+}
+
+.card-stat.wrap-text{
+    overflow-wrap: break-word;
 }

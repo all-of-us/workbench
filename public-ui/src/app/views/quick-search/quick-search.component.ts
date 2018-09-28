@@ -26,8 +26,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     searchResults = [];
     domainResults = [];
     surveyResults = [];
-    totalDomainResults = [];
-    totalSurveyResults = [];
+    totalResults: DomainInfosAndSurveyModulesResponse;
     searchText: FormControl = new FormControl();
     prevSearchText = '';
     totalParticipants;
@@ -83,8 +82,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.api.getDomainTotals().subscribe(
                 (data: DomainInfosAndSurveyModulesResponse) => {
-                    this.totalDomainResults = data.domainInfos;
-                    this.totalSurveyResults = data.surveyModules;
+                    this.totalResults = data;
                     // Only set results to the totals if we don't have a searchText
                     if (!this.prevSearchText) {
                         this.searchCallback(data);
@@ -130,8 +128,8 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
         if (query.length === 0) {
             const resultsObservable = new Observable((observer) => {
                 const domains: DomainInfosAndSurveyModulesResponse = {
-                    domainInfos: this.totalDomainResults,
-                    surveyModules: this.totalSurveyResults
+                    domainInfos: this.totalResults.domainInfos,
+                    surveyModules: this.totalResults.surveyModules
                 };
                 observer.next(domains);
                 observer.complete();

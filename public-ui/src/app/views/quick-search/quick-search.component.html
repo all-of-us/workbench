@@ -34,11 +34,11 @@
             <h5 class="box-title">
               {{r.name}}
             </h5>
-            <div class="card-stat" *ngIf="searchText.value; else standard_count">
+            <div class="card-stat wrap-text" *ngIf="searchText.value; else standard_count">
               {{r.allConceptCount | number}}
             </div>
             <ng-template #standard_count>
-              <div class="card-stat">
+              <div class="card-stat wrap-text">
                 {{r.standardConceptCount | number}}
               </div>
             </ng-template>
@@ -69,10 +69,10 @@
           <h5 class="box-title">
             {{r.name}}
           </h5>
-          <div class="card-stat">
+          <div class="card-stat wrap-text">
             {{r.questionCount | number}}
           </div>
-          <p class="card-text bigger">
+          <p class="card-text bigger wrap-text">
              matching survey questions <br>
             <span>{{r.description}}</span>
           </p>
