@@ -10,13 +10,18 @@
     padding-bottom: .5rem;
 }
 
+/* put some space between the cards when they go to the next line in the row */
+.row.card-boxes .col {
+    margin-bottom: .5rem;
+    margin-top: .5rem;
+}
 /* result card */
 .white-card-box.search-result {
     height: 100%;
     width: 100%;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    padding: .5rem 1rem;
+    padding: .5rem 2rem;
     display: block;
 }
 
