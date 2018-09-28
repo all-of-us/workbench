@@ -39,6 +39,7 @@ input {
 }
 .dropdown-menu {
     display: block;
+    max-width: none;
     max-height: 15rem;
     min-height: 30px;
     overflow-y: auto;
