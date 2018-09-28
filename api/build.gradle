@@ -5,9 +5,9 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 def swaggerTemplateDir = 'src/main/resources'
 def mergedApiSourceFile = 'src/main/resources/merged.yaml'
-def clientApiSourceFile = 'src/main/resources/client_api.yaml'
-def cbReviewApiSourceFile = 'src/main/resources/cb_review_api.yaml'
-def cbSearchApiSourceFile = 'src/main/resources/cb_search_api.yaml'
+//def clientApiSourceFile = 'src/main/resources/client_api.yaml'
+//def cbReviewApiSourceFile = 'src/main/resources/cb_review_api.yaml'
+//def cbSearchApiSourceFile = 'src/main/resources/cb_search_api.yaml'
 def swaggerTargetFolder = 'src/generated/java'
 
 task generateMergedSwagger(type: Exec) {
@@ -309,29 +309,29 @@ dependencies {
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
 }
 
-swaggerSources {
-  workbench {
-    inputFile = file("$projectDir/$mergedApiSourceFile")
-  }
-  client {
-    inputFile = file("$projectDir/$clientApiSourceFile")
-  }
-  cbReview {
-    inputFile = file("$projectDir/$cbReviewApiSourceFile")
-  }
-  cbSearch {
-    inputFile = file("$projectDir/$cbSearchApiSourceFile")
-  }
-  firecloud {
-    inputFile = file("$projectDir/$fireCloudApiFile")
-  }
-  notebooks {
-    inputFile = file("$projectDir/$notebooksApiFile")
-  }
-  jira {
-    inputFile = file("$projectDir/$jiraApiFile")
-  }
-}
+//swaggerSources {
+//  workbench {
+//    inputFile = file("$projectDir/$mergedApiSourceFile")
+//  }
+//  client {
+//    inputFile = file("$projectDir/$clientApiSourceFile")
+//  }
+//  cbReview {
+//    inputFile = file("$projectDir/$cbReviewApiSourceFile")
+//  }
+//  cbSearch {
+//    inputFile = file("$projectDir/$cbSearchApiSourceFile")
+//  }
+//  firecloud {
+//    inputFile = file("$projectDir/$fireCloudApiFile")
+//  }
+//  notebooks {
+//    inputFile = file("$projectDir/$notebooksApiFile")
+//  }
+//  jira {
+//    inputFile = file("$projectDir/$jiraApiFile")
+//  }
+//}
 
 compileJava {
   options.compilerArgs << '-Xlint:unchecked'
