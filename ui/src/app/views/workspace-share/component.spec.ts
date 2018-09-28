@@ -32,7 +32,7 @@ import {UserServiceStub} from '../../../testing/stubs/user-service-stub';
 interface UserRoleRow {
   fullName: string;
   email: string;
-  role: WorkspaceAccessLevel;
+  role: string;
 }
 
 class WorkspaceSharePage {
@@ -128,7 +128,7 @@ function convertToUserRoleRow(userRoles: UserRole[]): UserRoleRow[] {
     roleNamePairs.push({
       fullName: userRole.givenName + ' ' + userRole.familyName,
       email: userRole.email,
-      role: userRole.role
+      role: userRole.role.toString()
     });
   });
 
@@ -218,7 +218,6 @@ describe('WorkspaceShareComponent', () => {
     workspaceSharePage.readPageData();
     expect(workspaceSharePage.roleNamePairsOnPage.length).toBe(1);
     expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe('Sample User1');
-    expect(workspaceSharePage.roleNamePairsOnPage[0].role)
-        .toEqual(WorkspaceAccessLevel.OWNER);
+    expect(workspaceSharePage.roleNamePairsOnPage[0].role).toEqual('OWNER');
   }));
 });
