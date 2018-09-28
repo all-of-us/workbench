@@ -17,6 +17,7 @@ import {updateAndTick} from 'testing/test-helpers';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
+import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
@@ -51,6 +52,7 @@ describe('HomepageComponent', () => {
       providers: [
         {provide: ProfileService, useValue: new ProfileServiceStub()},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
+        {provide: WorkspacesService },
         {provide: UserMetricsService, useValue: new UserMetricsServiceStub()},
         {
           provide: ServerConfigService,
