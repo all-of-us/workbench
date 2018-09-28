@@ -177,9 +177,13 @@ echo "Inserting concept table data ... "
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\`
 (concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept,
-concept_code, count_value, prevalence, source_count_value)
+concept_code, count_value, prevalence, source_count_value, synonyms)
+with concept_synonyms as
+(select c.concept_id as concept, concat(cast(c.concept_id as string),'|',c.concept_code,'|',c.concept_name,'|',string_agg(cs.concept_synonym_name,'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\`` cs
+on c.concept_id=cs.concept_id group by c.concept_id,c.concept_code,c.concept_name)
 SELECT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
-0 as count_value , 0.0 as prevalence, 0 as source_count_value
+0 as count_value , 0.0 as prevalence, 0 as source_count_value,(select synonyms from concept_synonyms where concept=c.concept_id)
 from \`$BQ_PROJECT.$BQ_DATASET.concept\` c"
 
 # Update counts and prevalence in concept
@@ -301,13 +305,6 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  (id, concept_id, concept_synonym_name)
 SELECT 0, c.concept_id, c.concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
-
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"Update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c
-set c.synonyms = concat(cast(c1.concept_id as string),'|',c1.concept_code,'|',c1.concept_name,'|',group_concat(cs.concept_synonym_name,'|'))
-from \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c1 join  \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\` cs
-on c1.concept_id=cs.concept_id
-where c1.concept_id = c.concept_id"
 
 ###########################
 # Domain_Vocabulary_Info #
