@@ -65,7 +65,6 @@ export class ConceptHomepageComponent implements OnInit {
     this.loadingDomains = true;
     this.conceptsService.getDomainInfo(this.wsNamespace, this.wsId).subscribe((response) => {
       this.conceptDomainList = response.items;
-      console.log(this.conceptDomainList);
       this.conceptDomainList.forEach((domain) => {
         this.conceptsCache.push({
           domain: domain.domain,
@@ -98,7 +97,6 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   searchConcepts() {
-    console.log(this.standardConceptsOnly);
     this.searching = true;
     this.searchLoading = true;
     let standardConceptFilter: StandardConceptFilter;
