@@ -8,6 +8,7 @@
 .search-result p.card-text {
     min-height: 2rem;
     padding-bottom: .5rem;
+    margin-top: 0;
 }
 
 /* put some space between the cards when they go to the next line in the row */
@@ -21,7 +22,7 @@
     width: 100%;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    padding: .5rem 2rem;
+    padding: .5rem 1rem;
     display: block;
 }
 

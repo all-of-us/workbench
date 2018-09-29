@@ -1,6 +1,6 @@
 <div class="row">
 
-  <div class="col-xs-12 col-sm-12 col-md-9">
+  <div class="col-xs-12 col-sm-12 col-md-10">
 
     <div class="page-header">
       <h2> {{title}} </h2>
@@ -29,23 +29,23 @@
 
     <h5 class="box-heading" style="display:block" *ngIf="showDataType(EHR_DATATYPE)" > EHR Domains: </h5>
     <div class="row card-boxes" *ngIf="showDataType(EHR_DATATYPE)" >
-      <div class="col col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
+      <div class="col col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
           <div class="white-card-box search-result">
             <h5 class="box-title">
               {{r.name}}
             </h5>
-            <div class="card-stat wrap-text" *ngIf="searchText.value; else standard_count">
+            <div class="card-stat" *ngIf="searchText.value; else standard_count">
               {{r.allConceptCount | number}}
             </div>
             <ng-template #standard_count>
-              <div class="card-stat wrap-text">
+              <div class="card-stat">
                 {{r.standardConceptCount | number}}
               </div>
             </ng-template>
             <p class="card-text bigger">
               <span *ngIf="searchText.value; else no_search_value">matching medical concepts</span>
               <ng-template #no_search_value><span>medical concepts</span></ng-template>
-              <br>
+              <br><br>
               <span *ngIf="r.participantCount">
                 <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
               </span>
@@ -64,16 +64,18 @@
 
     <h5 class="box-heading" *ngIf="showDataType(SURVEY_DATATYPE)"> Surveys:  </h5>
     <div class="row card-boxes" *ngIf="showDataType(SURVEY_DATATYPE)">
-      <div class="col col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
+      <div class="col col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
         <div class="white-card-box search-result">
           <h5 class="box-title">
             {{r.name}}
           </h5>
-          <div class="card-stat wrap-text">
+          <div class="card-stat">
             {{r.questionCount | number}}
           </div>
-          <p class="card-text bigger wrap-text">
-             matching survey questions <br>
+          <p class="card-text bigger">
+            <span *ngIf="searchText.value; else no_search_value">matching survey questions</span>
+            <ng-template #no_search_value><span>survey questions</span></ng-template>
+            <br><br>
             <span>{{r.description}}</span>
           </p>
 
@@ -91,7 +93,7 @@
 
   </div>
 
-  <div class="col-xs-12 col-sm-12 col-md-3">
+  <div class="hidden-sm-down  col-md-2">
     <img [src]="pageImage" />
   </div>
 
