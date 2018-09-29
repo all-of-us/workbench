@@ -94,7 +94,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym)
+create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym domain_vocabulary_info)
 
 for t in "${create_tables[@]}"
 do
@@ -180,7 +180,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 concept_code, count_value, prevalence, source_count_value, synonyms)
 with concept_synonyms as
 (select c.concept_id as concept, concat(cast(c.concept_id as string),'|',c.concept_code,'|',c.concept_name,'|',string_agg(cs.concept_synonym_name,'|')) as synonyms
-from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\`` cs
+from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
 on c.concept_id=cs.concept_id group by c.concept_id,c.concept_code,c.concept_name)
 SELECT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
 0 as count_value , 0.0 as prevalence, 0 as source_count_value,(select synonyms from concept_synonyms where concept=c.concept_id)
@@ -311,7 +311,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
 ###########################
 echo "Updating all concept count in domain_vocabulary_info"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain_vocabulary_info\`
+"insert into \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain_vocabulary_info\`
 (concept_id,vocabulary_id,all_concept_count,standard_concept_count)
 with all_concept_count as
 (select d.domain_concept_id as concept_id,c.vocabulary_id as vocabulary_id,count(distinct c.concept_id) as all_concept_count

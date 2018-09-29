@@ -86,7 +86,7 @@ else
 fi
 
 
-copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_synonym)
+copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_synonym domain_vocabulary_info)
 
 for t in "${copy_tables[@]}"
 do
@@ -161,13 +161,13 @@ set count_value =
     end,
     prevalence =
     case when count_value  > 0 and count_value < ${BIN_SIZE}
-            then CEIL(${BIN_SIZE} / ${person_count},2)
+            then ROUND(CEIL(${BIN_SIZE} / ${person_count}),2)
         when count_value  > 0 and count_value >= ${BIN_SIZE}
-            then CEIL(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+            then ROUND(CEIL(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}), 2)
         when source_count_value  > 0 and source_count_value < ${BIN_SIZE}
-            then CEIL(${BIN_SIZE} / ${person_count},2)
+            then ROUND(CEIL(${BIN_SIZE} / ${person_count}),2)
         when source_count_value  > 0 and source_count_value >= ${BIN_SIZE}
-            then CEIL(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+            then ROUND(CEIL(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}), 2)
         else
             0.00
     end
