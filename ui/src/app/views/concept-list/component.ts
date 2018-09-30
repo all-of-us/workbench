@@ -1,9 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ConceptsService} from '../../../generated';
-import {ConceptAddModalComponent} from '../concept-add-modal/component';
-import {CreateConceptModalComponent} from '../concept-create-modal/component';
-import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
 import {ActivatedRoute} from '@angular/router';
+import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
+import {CreateConceptModalComponent} from '../concept-create-modal/component';
 
 @Component({
   styleUrls: [
