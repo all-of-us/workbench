@@ -29,10 +29,10 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
-import {CreateConceptModalComponent} from './views/concept-create-modal/component';
 import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptAddModalComponent} from './views/concept-add-modal/component';
+import {CreateConceptModalComponent} from './views/concept-create-modal/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptTableComponent} from './views/concept-table/component';
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
