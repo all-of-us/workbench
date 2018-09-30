@@ -1,0 +1,17 @@
+<clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'">
+  <div class="modal-body">
+   <h4>Create a Concept Sets</h4>
+    <input type="text" [(ngModel)]="name" placeholder="name">
+    <input type="text" [(ngModel)]="description" placeholder="description">
+    <select [(ngModel)]="domain">
+        <option *ngFor="let concept of conceptDomainList" [ngValue]="concept">
+          {{ concept.name}}
+        </option>
+    </select>
+    <div style="display:flex; flex-direction: row;float:right">
+      <button>Cancel</button>
+      <button (click)="saveConcept()">Save</button>
+
+    </div>
+  </div>
+</clr-modal>

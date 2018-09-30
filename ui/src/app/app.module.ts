@@ -29,6 +29,7 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
+import {CreateConceptModalComponent} from './views/concept-create-modal/component';
 import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptAddModalComponent} from './views/concept-add-modal/component';
@@ -75,6 +76,7 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
+import {ConceptsListComponent} from './views/concept-list/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -130,10 +132,12 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
+    CreateConceptModalComponent,
     CohortEditModalComponent,
     CohortListComponent,
     ConceptAddModalComponent,
     ConceptHomepageComponent,
+    ConceptsListComponent,
     ConceptTableComponent,
     ConfirmDeleteModalComponent,
     ErrorHandlerComponent,
