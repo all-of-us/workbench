@@ -35,8 +35,8 @@ import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
 import {IndividualParticipantsCharts} from './individual-participants-charts/individual-participants-charts'
 /* tslint:enable:max-line-length */
-
-
+import { ChartModule } from 'angular2-highcharts';
+import * as highcharts from 'Highcharts';
 @NgModule({
   imports: [
     // Angular
@@ -51,6 +51,7 @@ import {IndividualParticipantsCharts} from './individual-participants-charts/ind
     NgxPopperModule,
     // Ours
     CohortCommonModule,
+    ChartModule.forRoot(highcharts)
   ],
   declarations: [
     /* Scaffolding and Pages */
