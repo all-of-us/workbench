@@ -84,7 +84,7 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
         zoomType: 'xy'
       },
       title: {
-        text: 'Top' + ' ' + this.chartHeader + ' ' +'over Time'
+        text: 'Top' + ' ' + this.chartHeader + ' ' + 'over Time'
       },
       xAxis: {
         title: {
