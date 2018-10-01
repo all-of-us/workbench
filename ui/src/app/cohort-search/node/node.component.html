@@ -9,9 +9,21 @@
     <ng-container [clrLoading]="loading">
       <div class="node-list">
         <!-- TODO: This error handling is a stub until we can get a designer to look at it -->
-        <div *ngIf="error" class="error">
-          <clr-icon shape="error-standard"></clr-icon>
-          <em>Failed to Load Criteria</em>
+        <!--<div *ngIf="error || empty" class="error">-->
+          <!--<clr-icon shape="error-standard"></clr-icon>-->
+          <!--<em>Failed to Load Criteria</em>-->
+        <!--</div>-->
+        <div *ngIf="error || empty" class="alert alert-warning">
+          <div class="alert-items">
+            <div class="alert-item static">
+              <div class="alert-icon-wrapper">
+                <clr-icon class="alert-icon" shape="exclamation-triangle"></clr-icon>
+              </div>
+              <span class="alert-text">
+                A problem occurred and we were not able to retrieve the requested data
+              </span>
+            </div>
+          </div>
         </div>
 
         <crit-node *ngFor="let item of children" [node]="item"></crit-node>

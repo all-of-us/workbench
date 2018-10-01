@@ -81,7 +81,7 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(err => this.error = err);
 
       const emptySub = this.ngRedux
-        .select(isEmpty(_type))
+        .select(isEmpty(_type, parentId))
         .subscribe(empty => this.empty = empty);
 
       const loadingSub = this.ngRedux
