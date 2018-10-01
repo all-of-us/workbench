@@ -63,14 +63,14 @@ class FakeNotebooksComponent {}
 class FakeCohortsComponent {}
 
 describe('WorkspaceNavBarComponent', () => {
-  let fixture: ComponentFixture<WorkspaceNavBarComponent>;
+  let fixture: ComponentFixture<FakeAppComponent>;
   let router: Router;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
         ClarityModule.forRoot(),
-        RouterTestingModule.withRoutes({
+        RouterTestingModule.withRoutes([{
           path: 'workspaces/:ns/:wsid',
           component: WorkspaceNavBarComponent,
           data: {
@@ -97,7 +97,7 @@ describe('WorkspaceNavBarComponent', () => {
               component: FakeCohortsComponent,
             },
           ]
-        })
+        }])
       ],
       declarations: [
         BugReportComponent,
@@ -140,7 +140,7 @@ describe('WorkspaceNavBarComponent', () => {
     expect(fixture).toBeTruthy();
   }));
 
-  fit('should highlight the active tab', fakeAsync(() => {
+  it('should highlight the active tab', fakeAsync(() => {
     const de = fixture.debugElement;
     const cohortsBtn = de.queryAll(By.css('.btn-top'))
       .find(btn => btn.nativeElement.textContent.includes('Cohorts'));
@@ -152,7 +152,7 @@ describe('WorkspaceNavBarComponent', () => {
     expect(cohortsBtn.query(By.css('.selected-tab-inner'))).toBeTruthy();
   }));
 
-  fit('should navigate on tab click', fakeAsync(() => {
+  it('should navigate on tab click', fakeAsync(() => {
     const de = fixture.debugElement;
     expect(de.query(By.css('app-fake-notebooks'))).toBeFalsy();
 
