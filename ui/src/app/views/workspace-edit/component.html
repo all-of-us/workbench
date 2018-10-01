@@ -43,6 +43,21 @@
         </ng-container>
       </clr-dropdown-menu>
     </clr-dropdown>
+    <div *ngIf="mode == Mode.Clone" class="clone-collab"
+         style="display: inline-block; vertical-align: middle;">
+      <clr-checkbox
+        name="clone-user-roles"
+        id="clone-user-roles"
+        style="display: inline-block; vertical-align: top;"
+        [(ngModel)]="cloneUserRoles">
+      </clr-checkbox>
+      <div style="display: inline-block;">
+        <label class="checkbox-label" for="clr-checkbox-clone-user-roles">
+          <h3 class="section-header">Copy original workspace collaborators</h3>
+          <span class="section-text">Share cloned workspace with same collaborators</span>
+        </label>
+      </div>
+    </div>
   </div>
   <div>
 
