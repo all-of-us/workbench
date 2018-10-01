@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -21,7 +21,7 @@ import {
               './component.css'],
   templateUrl: './component.html',
 })
-export class WorkspaceNavBarComponent implements OnInit {
+export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
 
