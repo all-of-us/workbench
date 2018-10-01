@@ -120,7 +120,7 @@ describe('ConceptHomepageComponent', () => {
     expect(fixture.debugElement.query(By.css('clr-datagrid'))).toBeTruthy();
     expect(fixture.debugElement.queryAll(By.css('.concept-row')).length).toBe(1);
     const firstDomainRowName =
-      fixture.debugElement.queryAll(By.css('.concept-name'))[0].properties.innerHTML;
+      fixture.debugElement.queryAll(By.css('.concept-name'))[0].nativeNode.textContent;
 
     // Tests that it changes the table when a new domain is selected.
     simulateClick(fixture, fixture.debugElement.queryAll(By.css('.domain-selector-button'))[1]);
