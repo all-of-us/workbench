@@ -89,12 +89,8 @@ export class OverviewPage implements OnInit, OnDestroy {
     this.demoGraph = false;
     this.domainTitle = names;
     this.fetchChartsData(names);
-    if (DomainType[DomainType.DRUG] === names) {
-      return this.title = 'Drugs';
-    } else {
-      this.title = typeToTitle(names);
-      return this.title;
-    }
+    this.title = typeToTitle(names);
+    return this.title;
 
   }
 
