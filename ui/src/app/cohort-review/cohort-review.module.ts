@@ -38,10 +38,6 @@ import {SidebarContentComponent} from './sidebar-content/sidebar-content.compone
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
 /* tslint:enable:max-line-length */
-// declare var require: any;
-// export function highchartsFactory() {
-//   return require('highcharts');
-// }
 
 @NgModule({
   imports: [
