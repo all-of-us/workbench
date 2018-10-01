@@ -17,8 +17,6 @@ import {
   includeGroups,
   isAttributeLoading,
   isAutocompleteLoading,
-  isChartLoading,
-  getParticipantData,
   isCriteriaLoading,
   isRequesting,
   SR_ID,
@@ -551,7 +549,8 @@ export class CohortSearchActions {
   }
 
   fetchIndividualParticipantsData(ns: any, wsid: any, cid: any, cdrid: any,
-                       participantsId:any, domain: string,  limit: number): void {
-     this.requestIndividualParticipantsData(ns, wsid, cid, cdrid, participantsId, domain, limit);
+        participantsId: any, domain: string, limit: number): void {
+        this.requestIndividualParticipantsData(ns, wsid,
+        cid, cdrid, participantsId, domain, limit);
   }
 }

@@ -1,23 +1,11 @@
-import {Component, Input, OnInit, ElementRef, ViewChild, OnChanges} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Subscription} from 'rxjs/Subscription';
-
-import {ReviewStatus} from 'generated';
-import {ReviewStateService} from '../review-state.service';
-import {Set} from "immutable";
-import {CohortSearchActions, CohortSearchState, getParticipantData} from "../../cohort-search/redux";
-import {NgRedux} from "@angular-redux/store";
-// declare var jQuery:any;
-const Highcharts = require('highcharts/highcharts.src');
-import 'highcharts/adapters/standalone-framework.src';
-import {DomainType} from "../../../generated";
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import * as moment from 'moment';
 @Component({
   selector: 'app-individual-participants-charts',
   templateUrl: './individual-participants-charts.html',
   styleUrls: ['./individual-participants-charts.css']
 })
-export class IndividualParticipantsCharts implements OnInit, OnChanges{
+export class IndividualParticipantsChartsComponent implements OnInit, OnChanges {
   chartOptions = {};
   @Input() chartData;
   private _chart: any;
@@ -26,7 +14,7 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
   yAxisNames = [''];
   constructor(
   ) {}
-  ngOnChanges(){
+  ngOnChanges() {
     this.yAxisNames = [''];
     if (this.chartData) {
       this.setYaxisValue();
@@ -40,19 +28,20 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
 
   setYaxisValue() {
     this.yAxisNames = [''];
-    let yAxisValue = 1
-    this.chartData.map(items=> { // find standardName in duplicate items
-     const duplicateFound = this.duplicateItems.find(findName => findName.name === items.standardName);
+    let yAxisValue = 1;
+    this.chartData.map(items => { // find standardName in duplicate items
+     const duplicateFound = this.duplicateItems.find(
+       findName => findName.name === items.standardName);
       // duplicate items found return true otherwise push the the item in duplicateItems array
       if (duplicateFound) {
-        Object.assign(items,{
+        Object.assign(items, {
           yAxisValue: duplicateFound.yAxisValue,
           startDate: moment(items.startDate, 'YYYY-MM-DD').unix() // format date to unix timestamp
         });
         return true;
       }
-      this.duplicateItems.push({name:items.standardName, yAxisValue});
-      Object.assign(items,{
+      this.duplicateItems.push({name: items.standardName, yAxisValue});
+      Object.assign(items, {
         yAxisValue,
         startDate: moment(items.startDate, 'YYYY-MM-DD').unix() // format date to unix timestamp
       });
@@ -68,20 +57,19 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
         rank: i.rank,
         startDate: moment.unix(i.startDate).format('MM-DD-YYYY'),
         standardVocabulary: i.standardVocabulary,
-
-      }
+      };
       this.trimmedData.push(temp);
       this.trimmedData.reverse();
-    })
+    });
     this.duplicateItems.map(d => {
       this.yAxisNames.push(d.name.substring(0, 13));
     });
 
-    if(this.trimmedData.length){
+    if (this.trimmedData.length) {
       this.getchartsData();
     }
 
-    console.log(this.yAxisNames)
+    // console.log(this.yAxisNames);
   }
 
 
@@ -147,7 +135,7 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
       },
       tooltip: {
         pointFormat: '<div>' +
-          'Details<br/>'+
+          'Details<br/>' +
           'Date:<b>{point.startDate}</b><br/>' +
           'Standard Vocab:<b>{point.standardVocabulary}</b><br/>' +
           'Standard Name: <b>{point.standardName}</b><br/>' +
@@ -159,7 +147,7 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
       series: [{
         type: 'scatter',
         data: this.trimmedData,
-        turboThreshold:5000,
+        turboThreshold: 5000,
         clip: false,
       }],
 

@@ -5,6 +5,8 @@ import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import { ChartModule } from 'angular2-highcharts';
+import * as highCharts from 'Highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Pages */
@@ -21,6 +23,7 @@ import {DetailHeaderComponent} from './detail-header/detail-header.component';
 import {DetailPage} from './detail-page/detail-page';
 import {DetailTabTableComponent} from './detail-tab-table/detail-tab-table.component';
 import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
+import {IndividualParticipantsChartsComponent} from './individual-participants-charts/individual-participants-charts';
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
@@ -33,10 +36,8 @@ import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
-import {IndividualParticipantsCharts} from './individual-participants-charts/individual-participants-charts'
 /* tslint:enable:max-line-length */
-import { ChartModule } from 'angular2-highcharts';
-import * as highcharts from 'Highcharts';
+
 @NgModule({
   imports: [
     // Angular
@@ -51,7 +52,7 @@ import * as highcharts from 'Highcharts';
     NgxPopperModule,
     // Ours
     CohortCommonModule,
-    ChartModule.forRoot(highcharts)
+    ChartModule.forRoot(highCharts)
   ],
   declarations: [
     /* Scaffolding and Pages */
@@ -81,7 +82,7 @@ import * as highcharts from 'Highcharts';
     DetailTabsComponent,
     DetailTabTableComponent,
     DetailAllEventsComponent,
-    IndividualParticipantsCharts,
+    IndividualParticipantsChartsComponent,
   ],
   providers: [ReviewStateService,
               CohortSearchActions,
