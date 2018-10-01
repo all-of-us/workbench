@@ -1,5 +1,7 @@
 // Gradle targets for tools, used by Ruby commands and docker-compose.
 
+ext['hibernate.version'] = '5.2.10.Final'
+
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
@@ -143,6 +145,7 @@ dependencies {
   compile 'org.hibernate:hibernate-validator:5.3.5.Final'
   compile 'com.squareup.okhttp:okhttp:2.7.5'
   compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
+  compile 'org.hibernate:hibernate-core:5.2.10.Final'
 }
 
 
