@@ -525,6 +525,12 @@ definitions:
         type: integer
         format: int32
         description: Determines the concepts to be fetched. Gets all the concepts if 0 or gets concepts with counts if 1.
+      includeDomainCounts:
+        type: boolean
+        description: True if per-domain counts of concepts matching the criteria should be included in the response
+      includeVocabularyCounts:
+        type: boolean
+        description: True if per-vocabulary counts of concepts matching the criteria in the specified domain should be included in the response
 
   ConceptListResponse:
     type: object
