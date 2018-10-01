@@ -8,6 +8,7 @@ import * as moment from 'moment';
 export class IndividualParticipantsChartsComponent implements OnInit, OnChanges {
   chartOptions = {};
   @Input() chartData;
+  @Input() chartHeader: string;
   private _chart: any;
   trimmedData = [];
   duplicateItems = [];
@@ -75,6 +76,7 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
 
   getchartsData() {
     // console.log(this.duplicateItems.length);
+    console.log(this.chartHeader);
     const test = this.yAxisNames;
     this.chartOptions = {
       chart: {
@@ -82,7 +84,7 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
         zoomType: 'xy'
       },
       title: {
-        text: 'Top Conditions over Time'
+        text: 'Top' + ' ' + this.chartHeader + ' ' +'over Time'
       },
       xAxis: {
         title: {
@@ -103,7 +105,7 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
       yAxis: {
         title: {
           enabled: true,
-          text: 'foo'
+          text: this.chartHeader,
         },
         labels: {
           formatter: function () {

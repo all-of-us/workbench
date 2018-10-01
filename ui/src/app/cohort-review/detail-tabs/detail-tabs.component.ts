@@ -10,6 +10,7 @@ import {
 import {Subscription} from 'rxjs/Subscription';
 import {CohortSearchActions, CohortSearchState, getParticipantData} from '../../cohort-search/redux';
 import {ReviewStateService} from '../review-state.service';
+import {typeToTitle} from "../../cohort-search/utils";
 
 
 /* The most common column types */
@@ -136,6 +137,9 @@ export class DetailTabsComponent implements OnInit {
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
+  conditionTitle: string;
+  procedureTitle: string;
+  drugTitle: string;
   readonly stubs = [
     'survey',
   ];
@@ -320,10 +324,13 @@ export class DetailTabsComponent implements OnInit {
         .subscribe(loading => {
           const data = JSON.parse(loading);
           if (domainName === DomainType[DomainType.CONDITION]) {
+            this.conditionTitle = typeToTitle(domainName);
             this.conditionData = data.items;
           } else if (domainName === DomainType[DomainType.PROCEDURE]) {
+            this.procedureTitle = typeToTitle(domainName);
             this.procedureData = data.items;
           } else {
+            this.drugTitle = 'Drugs';
             this.drugData = data.items;
           }
         });
