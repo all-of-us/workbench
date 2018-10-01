@@ -7,6 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {CohortsService} from 'generated';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
@@ -41,6 +42,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   constructor(
     private actions: CohortSearchActions,
+    private api: CohortsService,
     private route: ActivatedRoute,
   ) {}
 
@@ -54,12 +56,18 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
       this.actions.resetStore();
       this.actions.cdrVersionId = data.workspace.cdrVersionId;
 
-      /* If a criteria string is given in the route, we initialize state with
+      /* If a cohort id is given in the route, we initialize state with
        * it */
-      const criteria = params.criteria;
-      if (criteria) {
-        this.actions.loadFromJSON(criteria);
-        this.actions.runAllRequests();
+      const cohortId = params.cohortId;
+      if (cohortId) {
+        this.api.getCohort(data.workspace.namespace, data.workspace.id, cohortId)
+          .subscribe(cohort => {
+            console.log(cohort);
+            if (cohort.criteria) {
+              this.actions.loadFromJSON(cohort.criteria);
+              this.actions.runAllRequests();
+            }
+          });
       }
     });
     this.updateWrapperDimensions();
