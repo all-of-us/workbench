@@ -199,3 +199,6 @@ export const getParticipantData =
   (domain: string) =>
     (state): any =>
       state.getIn(['individualChartData', 'chartsData', domain]);
+
+// export const isParticipantIdExists = participantId => (state): boolean =>
+//   state.getIn(['individualChartData', 'individualChartData']).has(participantId);
