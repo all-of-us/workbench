@@ -8,11 +8,6 @@
     (clrIfExpandedChange)="loadChildren($event)">
     <ng-container [clrLoading]="loading">
       <div class="node-list">
-        <!-- TODO: This error handling is a stub until we can get a designer to look at it -->
-        <!--<div *ngIf="error || empty" class="error">-->
-          <!--<clr-icon shape="error-standard"></clr-icon>-->
-          <!--<em>Failed to Load Criteria</em>-->
-        <!--</div>-->
         <div *ngIf="error || empty" class="alert alert-warning">
           <div class="alert-items">
             <div class="alert-item static">
@@ -25,7 +20,6 @@
             </div>
           </div>
         </div>
-
         <crit-node *ngFor="let item of children" [node]="item"></crit-node>
       </div>
     </ng-container>
@@ -36,11 +30,6 @@
     [clrIfExpanded]="expanded">
     <ng-container>
       <div class="node-list">
-        <!-- TODO: This error handling is a stub until we can get a designer to look at it -->
-        <div *ngIf="error" class="error">
-          <clr-icon shape="error-standard"></clr-icon>
-          <em>Failed to Load Criteria</em>
-        </div>
         <crit-node *ngFor="let item of node.get('children')" [node]="item"></crit-node>
       </div>
     </ng-container>
