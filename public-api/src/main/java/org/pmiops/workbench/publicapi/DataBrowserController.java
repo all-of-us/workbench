@@ -68,11 +68,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private AchillesResultDistDao achillesResultDistDao;
     @PersistenceContext(unitName = "cdr")
     private EntityManager entityManager;
-
     @Autowired
     @Qualifier("defaultCdr")
     private Provider<CdrVersion> defaultCdrVersionProvider;
-
     @Autowired
     private ConceptService conceptService;
 
@@ -351,22 +349,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         for(Concept con : concepts.getContent()){
             String conceptCode = con.getConceptCode();
             String conceptId = String.valueOf(con.getConceptId());
-
-            ArrayList<String> conceptSynonymNames = new ArrayList<>();
-
-            for(ConceptSynonym conceptSynonym:con.getSynonyms()){
-                if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
-                    conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
-                    }
-            }
-
-
-            this.conceptSynonymNames.put(con.getConceptId(),conceptSynonymNames);
+            this.conceptSynonymNames.put(con.getConceptId(),new ArrayList<String>(con.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList())));
 
             if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
                 response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
 
                 List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
+                std_concepts = conceptService.fetchConceptSynonyms(std_concepts);
+                for(Concept concept: std_concepts){
+                    this.conceptSynonymNames.put(concept.getConceptId(),new ArrayList<String>(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList())));
+                }
                 response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
             }
 
@@ -375,7 +367,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         if(response.getMatchType() == null && response.getStandardConcepts() == null){
             response.setMatchType(MatchType.NAME);
         }
-
         response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
