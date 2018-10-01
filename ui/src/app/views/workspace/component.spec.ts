@@ -1,6 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Http} from '@angular/http';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -13,7 +13,11 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {RecentWorkComponent} from 'app/views/recent-work/component';
+import {RenameModalComponent} from 'app/views/rename-modal/component';
+import {ResourceCardComponent} from 'app/views/resource-card/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -24,6 +28,7 @@ import {
   CohortsService,
   ProfileService,
   UserService,
+  UserMetricsService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -42,6 +47,7 @@ import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
+import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {updateAndTick} from 'testing/test-helpers';
@@ -112,11 +118,16 @@ describe('WorkspaceComponent', () => {
         RouterTestingModule,
         BrowserAnimationsModule,
         IconsModule,
+        ReactiveFormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
         BugReportComponent,
+        CohortEditModalComponent,
         ConfirmDeleteModalComponent,
+        RecentWorkComponent,
+        RenameModalComponent,
+        ResourceCardComponent,
         WorkspaceComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
@@ -131,6 +142,7 @@ describe('WorkspaceComponent', () => {
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
+        { provide: UserMetricsService, useValue: new UserMetricsServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: UserService, useValue: new UserServiceStub() },
