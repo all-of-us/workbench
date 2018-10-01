@@ -178,6 +178,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   selectOption(option: any) {
+    console.log(option);
     this.optionSelected = true;
     this.searchTerm.setValue(option.name, {emitEvent: false});
     if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
