@@ -3,7 +3,9 @@
     <button clrTabLink id="detail-summary-tab">Summary</button>
     <clr-tab-content id="detail-summary-content" *clrIfActive>
       <em>Charts go here</em>
-      <app-individual-participants-charts ></app-individual-participants-charts>
+      <app-individual-participants-charts [chartData] ="conditionData" ></app-individual-participants-charts>
+      <app-individual-participants-charts [chartData] ="drugData" ></app-individual-participants-charts>
+      <!--<app-individual-participants-charts [chartData] ="conditionData" ></app-individual-participants-charts>-->
     </clr-tab-content>
   </clr-tab>
 
