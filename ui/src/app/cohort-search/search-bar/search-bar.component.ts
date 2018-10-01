@@ -1,5 +1,12 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  Component,
+  HostListener,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -14,7 +21,7 @@ import {
   subtreeSelected,
 } from '../redux';
 
-import {highlightMatches} from '../utils';
+import {highlightMatches, stripHtml} from '../utils';
 
 @Component({
   selector: 'app-search-bar',
@@ -41,6 +48,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   codes: any;
 
   @ViewChild('searchBar') searchBar;
+
   @HostListener('document:mouseup', ['$event.target'])
   onClick(targetElement) {
     const clickedInside = this.searchBar.nativeElement.contains(targetElement);
