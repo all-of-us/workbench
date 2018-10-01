@@ -505,7 +505,6 @@ export class CohortSearchActions {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
             param.code = param.value;
-            param.domain = param.domain;
             if (param.attributes) {
               param.hasAttributes = param.attributes.length > 0;
             }
