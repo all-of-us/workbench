@@ -5,8 +5,8 @@
     <div class="col-xs-12">
       <div class="page-header">
         <div *ngIf="survey && survey.conceptId">
-          <h2> {{survey.domainDisplay}} Survey Module </h2>
-          <h4 class="view-sub-title">{{survey.domainDesc}}. </h4>
+          <h2> {{survey.name}} Survey Module </h2>
+          <h4 class="view-sub-title">{{survey.description}} </h4>
         </div>
       </div>
     </div>
@@ -23,7 +23,7 @@
               Number Completed
             </h5>
             <div class="card-stat" *ngIf="!loading">
-              {{survey.countValue | number }}
+              {{survey.participantCount | number }}
             </div>
             <div class="card-text">
               partipants completed this survey
@@ -127,7 +127,7 @@
           <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
             <div  class="row"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
               <div class="answer-text col-sm-6 col-xs-12" >
-                <label innerHtml="{{a.stratum4 | highlightSearch : searchText.value }}"> {{a.stratum4}} </label>
+                <label innerHtml="{{a.stratum4 | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
               </div>
               <div class="answer-text col-sm-2 col-xs-12"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
                 <label class="participant-count">{{a.countValue | number}}  </label>
@@ -135,7 +135,7 @@
               <div class="col-sm-4 col-xs-12 percent-bar"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
                 <div class="progress labeled">
                   <progress max="100" value="{{a.countPercent}}" data-displayval="0%"></progress>
-                  <span>{{a.countPercent}}%</span>
+                  <span>{{a.countPercent.toFixed(2)}}%</span>
                 </div>
               </div>
             </div>
