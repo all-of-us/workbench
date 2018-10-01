@@ -125,7 +125,7 @@ describe('ConceptHomepageComponent', () => {
     // Tests that it changes the table when a new domain is selected.
     simulateClick(fixture, fixture.debugElement.queryAll(By.css('.domain-selector-button'))[1]);
     updateAndTick(fixture);
-    expect(fixture.debugElement.queryAll(By.css('.concept-name'))[0].properties.innerHTML)
+    expect(fixture.debugElement.queryAll(By.css('.concept-name'))[0].nativeNode.textContent)
       .not.toBe(firstDomainRowName);
   }));
 
@@ -142,16 +142,15 @@ describe('ConceptHomepageComponent', () => {
     updateAndTick(fixture);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
-      const expectedRequest = {
-        query: searchTerm,
-        // Tests that it searches all concepts.
-        standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
-        domain: domain.domain
-      };
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-        expectedRequest);
+        {
+          query: searchTerm,
+          // Tests that it searches all concepts.
+          standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
+          domain: domain.domain
+        });
     });
 
     // Test that it pulls back more concepts when all concepts allowed.

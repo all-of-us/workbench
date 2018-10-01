@@ -118,30 +118,28 @@ export class ConceptsServiceStub {
             items: [],
             standardConcepts: [],
           };
-          let foundDomain: DomainInfo;
-          DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
-            if (domain.domain === request.domain) {
-              foundDomain = domain;
-            }
-          });
+          const foundDomain =
+            DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
           ConceptStubVariables.STUB_CONCEPTS.forEach((concept) => {
-            if (concept.domainId === foundDomain.name) {
-              if (request.standardConceptFilter === StandardConceptFilter.ALLCONCEPTS) {
-                response.items.push(concept);
-                if (concept.standardConcept) {
-                  response.standardConcepts.push(concept);
-                }
-              } else if (request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
+            if (concept.domainId !== foundDomain.name) {
+              return;
+            }
+            if (request.standardConceptFilter === StandardConceptFilter.ALLCONCEPTS) {
+              response.items.push(concept);
+              if (concept.standardConcept) {
+                response.standardConcepts.push(concept);
+              }
+            } else if (
+              request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
                 if (concept.standardConcept) {
                   response.items.push(concept);
                   response.standardConcepts.push(concept);
                 }
-              } else if (request.standardConceptFilter
-                === StandardConceptFilter.NONSTANDARDCONCEPTS) {
-                  if (!concept.standardConcept) {
-                    response.items.push(concept);
-                  }
-              }
+            } else if (request.standardConceptFilter
+              === StandardConceptFilter.NONSTANDARDCONCEPTS) {
+                if (!concept.standardConcept) {
+                  response.items.push(concept);
+                }
             }
           });
           observer.next(response);
