@@ -178,13 +178,10 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\`
 (concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept,
 concept_code, count_value, prevalence, source_count_value, synonyms)
-with concept_synonyms as
-(select c.concept_id as concept, concat(cast(c.concept_id as string),'|',c.concept_code,'|',c.concept_name,'|',string_agg(cs.concept_synonym_name,'|')) as synonyms
+select c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
+0 as count_value , 0.0 as prevalence, 0 as source_count_value,concat(cast(c.concept_id as string),'\\|',c.vocabulary_id,':',c.concept_code,'\\|',c.concept_name,'\\|',string_agg(cs.concept_synonym_name,'\\|')) as synonyms
 from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
-on c.concept_id=cs.concept_id group by c.concept_id,c.concept_code,c.concept_name)
-SELECT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
-0 as count_value , 0.0 as prevalence, 0 as source_count_value,(select synonyms from concept_synonyms where concept=c.concept_id)
-from \`$BQ_PROJECT.$BQ_DATASET.concept\` c"
+on c.concept_id=cs.concept_id group by c.concept_id,c.concept_name,c.domain_id,c.vocabulary_id,c.concept_class_id, c.standard_concept, c.concept_code"
 
 # Update counts and prevalence in concept
 q="select count_value from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` a where a.analysis_id = 1"
@@ -313,18 +310,13 @@ echo "Updating all concept count in domain_vocabulary_info"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain_vocabulary_info\`
 (concept_id,vocabulary_id,all_concept_count,standard_concept_count)
-with all_concept_count as
-(select d.domain_concept_id as concept_id,c.vocabulary_id as vocabulary_id,count(distinct c.concept_id) as all_concept_count
-from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain\` d on c.domain_id=d.domain_id
-where (c.count_value > 0 or c.source_count_value > 0)
-group by d.domain_concept_id,c.vocabulary_id),
-standard_concept_count as
-(select d.domain_concept_id as concept_id,c.vocabulary_id as vocabulary_id,count(distinct c.concept_id) as standard_concept_count
-from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.concept\` c join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.domain\` d on c.domain_id=d.domain_id
-where (c.count_value > 0 and c.standard_concept='S')
-group by d.domain_concept_id,c.vocabulary_id)
-select a.concept_id,a.vocabulary_id,a.all_concept_count,b.standard_concept_count from all_concept_count a join
-standard_concept_count b on a.concept_id=b.concept_id and a.vocabulary_id=b.vocabulary_id"
+select d2.domain_concept_id as concept_id,c.vocabulary_id as vocabulary_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
+SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
+\`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c
+join \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain\` d2
+on d2.domain_id = c.domain_id
+and (c.count_value > 0 or c.source_count_value > 0)
+group by d2.domain_concept_id,c.vocabulary_id"
 
 
 

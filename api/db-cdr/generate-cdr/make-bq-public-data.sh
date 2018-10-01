@@ -94,7 +94,7 @@ do
   bq --project=$WORKBENCH_PROJECT --nosync cp $WORKBENCH_PROJECT:$WORKBENCH_DATASET.$t $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
 done
 
-# Round counts for public dataset
+# Round counts for public dataset (The counts are rounded up using ceil. For example 4 to 20, 21 to 40, 43 to 60)
 # 1. Set any count > 0 and < BIN_SIZE  to BIN_SIZE,
 # 2. Round any above BIN_SIZE to multiple of BIN_SIZE
 
@@ -205,3 +205,20 @@ set participant_count =
         cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"
+
+# domain_vocabulary_info
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.domain_vocabulary_info\`
+set all_concept_count =
+    case when all_concept_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(CEIL(all_concept_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end,
+    standard_concept_count =
+    case when standard_concept_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(CEIL(standard_concept_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where all_concept_count > 0 or standard_concept_count > 0"
