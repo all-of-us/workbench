@@ -118,7 +118,8 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
         },
         tickInterval: 1,
         lineWidth: 1,
-      },{
+      },
+        {
         title: {
           enabled: false,
         },
