@@ -30,9 +30,11 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
   setYaxisValue() {
     this.yAxisNames = [''];
     let yAxisValue = 1;
-    this.chartData.map(items => { // find standardName in duplicate items
+    this.chartData.reverse().map(items => { // find standardName in duplicate items
      const duplicateFound = this.duplicateItems.find(
-       findName => findName.name === items.standardName);
+       findName =>
+         findName.name === items.standardName
+       );
       // duplicate items found return true otherwise push the the item in duplicateItems array
       if (duplicateFound) {
         Object.assign(items, {
@@ -48,7 +50,6 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
       });
       yAxisValue ++;
     });
-
     this.chartData.map(i => {
       const temp = {
         x: i.startDate,
@@ -69,19 +70,19 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
     if (this.trimmedData.length) {
       this.getchartsData();
     }
-
-    // console.log(this.yAxisNames);
   }
 
 
   getchartsData() {
-    // console.log(this.duplicateItems.length);
-    console.log(this.chartHeader);
     const test = this.yAxisNames;
     this.chartOptions = {
       chart: {
         type: 'scatter',
-        zoomType: 'xy'
+        zoomType: 'xy',
+        width: 420
+      },
+      credits: {
+        enabled: false
       },
       title: {
         text: 'Top' + ' ' + this.chartHeader + ' ' + 'over Time'
@@ -99,10 +100,13 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
         },
         startOnTick: true,
         endOnTick: true,
-        showLastLabel: true,
-
+        // max: 2020,
+        // min:2004,
+        // tickPositions: [],
+        // showLastLabel: true,
+        // tickInterval: 1,
       },
-      yAxis: {
+      yAxis: [{
         title: {
           enabled: true,
           text: this.chartHeader,
@@ -112,8 +116,15 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
             return test[this.value];
           }
         },
-        tickInterval: 1
-      },
+        tickInterval: 1,
+        lineWidth: 1,
+      },{
+        title: {
+          enabled: false,
+        },
+        opposite: true,
+        lineWidth: 1,
+      }],
       plotOptions: {
         scatter: {
           marker: {
@@ -137,7 +148,6 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
       },
       tooltip: {
         pointFormat: '<div>' +
-          'Details<br/>' +
           'Date:<b>{point.startDate}</b><br/>' +
           'Standard Vocab:<b>{point.standardVocabulary}</b><br/>' +
           'Standard Name: <b>{point.standardName}</b><br/>' +
@@ -148,9 +158,10 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
       },
       series: [{
         type: 'scatter',
+        name: 'Details',
         data: this.trimmedData,
         turboThreshold: 5000,
-        clip: false,
+        showInLegend: false,
       }],
 
     };
