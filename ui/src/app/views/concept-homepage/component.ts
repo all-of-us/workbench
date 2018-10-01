@@ -19,7 +19,7 @@ import {
 interface ConceptCacheSet {
   domain: Domain;
 
-  vocabularyList: Array<VocabularyCount>
+  vocabularyList: Array<VocabularyCount>;
 
   items: Array<Concept>;
 }
@@ -66,6 +66,9 @@ export class ConceptHomepageComponent implements OnInit {
   wsNamespace: string;
   wsId: string;
 
+  // For some reason clr checkboxes trigger click events twice on click. This
+  // is a workaround to not allow multiple filter events to get triggered.
+  blockMultipleSearchFromFilter = true;
 
 
   constructor(
@@ -85,6 +88,11 @@ export class ConceptHomepageComponent implements OnInit {
           domain: domain.domain,
           items: [],
           vocabularyList: []
+        });
+        this.conceptDomainCounts.push({
+          domain: domain.domain,
+          name: domain.name,
+          conceptCount: 0
         });
       });
       this.loadingDomains = false;
@@ -145,8 +153,6 @@ export class ConceptHomepageComponent implements OnInit {
           numCalls += 1;
           numCallsSubject.next(conceptDomain.domain);
           conceptDomain.items = response.items;
-          console.log('Search from search click');
-          console.log(response);
           conceptDomain.vocabularyList = response.vocabularyCounts;
           if (activeTabSearch) {
             this.searchLoading = false;
@@ -178,9 +184,7 @@ export class ConceptHomepageComponent implements OnInit {
     return this.searchTerm === undefined || this.searchTerm.length < 3;
   }
 
-  // For some reason clr checkboxes trigger click events twice on click. This
-  // is a workaround to not allow multiple filter events to get triggered.
-  blockMultipleSearchFromFilter = true;
+
 
   filterList() {
     if (this.blockMultipleSearchFromFilter) {
@@ -204,8 +208,6 @@ export class ConceptHomepageComponent implements OnInit {
     };
     this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
       .subscribe((response) => {
-        console.log('Search from filter');
-        console.log(response);
         this.searchLoading = false;
         this.concepts = response.items;
       });
