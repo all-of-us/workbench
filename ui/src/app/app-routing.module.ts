@@ -8,7 +8,7 @@ import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verifi
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
-import {ConceptSetListComponent} from "./views/concept-set-list/component";
+import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
 import {NotebookListComponent} from './views/notebook-list/component';
@@ -146,12 +146,15 @@ const routes: Routes = [
             },
             {
               path: 'concepts',
-              component: ConceptHomepageComponent,
-              data: {
-                title: 'Search Concepts',
-                breadcrumb: 'Concepts'
-              },
               children: [
+                {
+                  path: '',
+                  component: ConceptHomepageComponent,
+                  data: {
+                    title: 'Search Concepts',
+                    breadcrumb: 'Concepts'
+                  }
+                },
                 {
                   path: 'sets',
                   component: ConceptSetListComponent,

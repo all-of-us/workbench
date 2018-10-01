@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {
@@ -8,6 +8,8 @@ RecentResource,
 Workspace,
 WorkspaceAccessLevel,
 } from 'generated';
+
+import {CreateConceptModalComponent} from 'app/views/concept-create-modal/component';
 
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 
@@ -39,6 +41,9 @@ export class ConceptSetListComponent implements OnInit {
     this.accessLevel = wsData.accessLevel;
   }
 
+  @ViewChild(CreateConceptModalComponent)
+  conceptCreateModal: CreateConceptModalComponent;
+
   ngOnInit(): void {
       this.wsNamespace = this.route.snapshot.params['ns'];
       this.wsId = this.route.snapshot.params['wsid'];
@@ -57,8 +62,7 @@ export class ConceptSetListComponent implements OnInit {
   }
 
   newConceptSet(): void {
-    // Need new concept set modal implemented
-    // this.newConceptSetModal.open();
+    this.conceptCreateModal.open();
   }
 
   duplicateNameError(dupName: string) {
