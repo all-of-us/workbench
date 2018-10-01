@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import {
     CohortReviewService,
@@ -8,6 +8,9 @@ import {
     ReviewColumns,
 } from 'generated';
 import {Subscription} from "rxjs/Subscription";
+import {CohortSearchActions, CohortSearchState, getParticipantData} from "../../cohort-search/redux";
+import {ReviewStateService} from "../review-state.service";
+import {NgRedux} from "@angular-redux/store";
 
 /* The most common column types */
 const itemDate = {
@@ -122,11 +125,73 @@ const labRefRange = {
   templateUrl: './detail-tabs.component.html',
   styleUrls: ['./detail-tabs.component.css']
 })
-export class DetailTabsComponent {
+export class DetailTabsComponent implements OnInit{
   subscription: Subscription;
   loading = false;
   data;
-  constructor() {}
+  participantsId: any;
+  procedureData;
+  drugData;
+  conditionData
+  domainList = [DomainType[DomainType.CONDITION],
+    DomainType[DomainType.PROCEDURE],
+    DomainType[DomainType.DRUG]];
+  constructor(
+    private state: ReviewStateService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private actions: CohortSearchActions,
+    private ngRedux: NgRedux<CohortSearchState>,
+  ) {
+
+  }
+
+
+  ngOnInit() {
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    this.subscription = this.route.data.map(({participant}) => participant)
+      .subscribe(participants =>{
+        this.participantsId = participants.participantId;
+      })
+    const limit = 5;
+    this.domainList.map(domain=>
+    {
+      this.actions.fetchIndividualParticipantsData(ns, wsid, cid, cdrid, this.participantsId, domain, limit);
+    })
+
+    const getConditionsParticipantsDomainData = this.ngRedux
+      .select(getParticipantData('CONDITION'))
+      .filter(domain => !!domain)
+      .subscribe(loading => {
+        let count = 1
+        const data = JSON.parse(loading);
+        this.conditionData = data.items;
+        // console.log(this.conditionData)
+        // this.conditionData.forEach(item => {
+        //   Object.assign(item, {count: count});
+        // })
+      });
+    this.subscription = getConditionsParticipantsDomainData;
+
+    const getProcedureParticipantsDomainData = this.ngRedux
+      .select(getParticipantData('PROCEDURE'))
+      .filter(domain => !!domain)
+      .subscribe(loading => {
+        this.procedureData = loading
+      });
+    this.subscription = getProcedureParticipantsDomainData;
+
+    const getDrugParticipantsDomainData = this.ngRedux
+      .select(getParticipantData('DRUG'))
+      .filter(domain => !!domain)
+      .subscribe(loading => {
+        const data = JSON.parse(loading);
+        this.drugData = data.items
+      });
+    this.subscription = getDrugParticipantsDomainData;
+    // this.ngAfterViewInit();
+  }
 
   readonly stubs = [
     'survey',
