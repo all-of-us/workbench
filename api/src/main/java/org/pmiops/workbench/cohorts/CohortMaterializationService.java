@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -20,8 +19,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
@@ -52,7 +49,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CohortMaterializationService {
 
-  private static final String DOMAIN_CONCEPT_STANDARD = "standard";
   private static final String DOMAIN_CONCEPT_SOURCE = "source";
 
   @VisibleForTesting
@@ -178,74 +174,33 @@ public class CohortMaterializationService {
     }
   }
 
+
   private void addFilterOnConcepts(TableQuery tableQuery, Set<Long> conceptIds,
       TableConfig tableConfig) {
-    String standardConceptColumn = null;
     String sourceConceptColumn = null;
     for (ColumnConfig columnConfig : tableConfig.columns) {
-      if (DOMAIN_CONCEPT_STANDARD.equals(columnConfig.domainConcept)) {
-        standardConceptColumn = columnConfig.name;
-        if (sourceConceptColumn != null) {
-          break;
-        }
-      } else if (DOMAIN_CONCEPT_SOURCE.equals(columnConfig.domainConcept)) {
+      if (DOMAIN_CONCEPT_SOURCE.equals(columnConfig.domainConcept)) {
         sourceConceptColumn = columnConfig.name;
-        if (standardConceptColumn != null) {
-          break;
-        }
+        break;
       }
     }
-    if (standardConceptColumn == null || sourceConceptColumn == null) {
-      throw new ServerErrorException("Couldn't find standard and source concept columns for " +
+    if (sourceConceptColumn == null) {
+      throw new ServerErrorException("Couldn't find source concept column for " +
           tableQuery.getTableName());
     }
 
-    Iterable<Concept> concepts = conceptDao.findAll(conceptIds);
-    List<Long> standardConceptIds = Lists.newArrayList();
-    List<Long> sourceConceptIds = Lists.newArrayList();
-    for (Concept concept : concepts) {
-      if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())) {
-        standardConceptIds.add(concept.getConceptId());
-      } else {
-        // We may need to handle classification / concept hierarchy here eventually...
-        sourceConceptIds.add(concept.getConceptId());
-      }
-    }
-    if (standardConceptIds.isEmpty() && sourceConceptIds.isEmpty()) {
-      throw new BadRequestException("Concept set contains no valid concepts");
-    }
-
-    ResultFilters conceptFilters = null;
-    if (!standardConceptIds.isEmpty()) {
-      ColumnFilter standardConceptFilter =
-          new ColumnFilter().columnName(standardConceptColumn)
-              .operator(Operator.IN)
-              .valueNumbers(standardConceptIds.stream().map(id -> new BigDecimal(id))
-                  .collect(Collectors.toList()));
-      conceptFilters = new ResultFilters().columnFilter(standardConceptFilter);
-    }
-    if (!sourceConceptIds.isEmpty()) {
-      ColumnFilter sourceConceptFilter =
-          new ColumnFilter().columnName(sourceConceptColumn)
-              .operator(Operator.IN)
-              .valueNumbers(sourceConceptIds.stream().map(id -> new BigDecimal(id))
-                  .collect(Collectors.toList()));
-      ResultFilters sourceResultFilters = new ResultFilters().columnFilter(sourceConceptFilter);
-      if (conceptFilters == null) {
-        conceptFilters = sourceResultFilters;
-      } else {
-        // If both source and standard concepts are present, match either.
-        conceptFilters = new ResultFilters().anyOf(ImmutableList.of(conceptFilters, sourceResultFilters));
-      }
-    }
-    if (conceptFilters != null) {
-      if (tableQuery.getFilters() == null) {
-        tableQuery.setFilters(conceptFilters);
-      } else {
-        // If both concept filters and other filters are requested, require results to match both.
-        tableQuery.setFilters(new ResultFilters().allOf(
-            ImmutableList.of(tableQuery.getFilters(), conceptFilters)));
-      }
+    ColumnFilter sourceConceptFilter =
+        new ColumnFilter().columnName(sourceConceptColumn)
+            .operator(Operator.IN)
+            .valueNumbers(conceptIds.stream().map(id -> new BigDecimal(id))
+                .collect(Collectors.toList()));
+    ResultFilters sourceResultFilters = new ResultFilters().columnFilter(sourceConceptFilter);
+    if (tableQuery.getFilters() == null) {
+      tableQuery.setFilters(sourceResultFilters);
+    } else {
+      // If both concept filters and other filters are requested, require results to match both.
+      tableQuery.setFilters(new ResultFilters().allOf(
+          ImmutableList.of(tableQuery.getFilters(), sourceResultFilters)));
     }
   }
 

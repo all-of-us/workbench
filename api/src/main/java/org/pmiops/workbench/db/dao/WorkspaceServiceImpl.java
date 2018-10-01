@@ -197,11 +197,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to) {
     // Save the workspace first to allocate an ID.
     Workspace saved = workspaceDao.save(to);
+    boolean cdrVersionChanged = from.getCdrVersion().getCdrVersionId() !=
+        to.getCdrVersion().getCdrVersionId();
     for (Cohort fromCohort : from.getCohorts()) {
       cohortService.cloneCohortAndReviews(fromCohort, to);
     }
     for (ConceptSet conceptSet : conceptSetService.getConceptSets(from)) {
-      conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to);
+      conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to, cdrVersionChanged);
     }
     return saved;
   }
