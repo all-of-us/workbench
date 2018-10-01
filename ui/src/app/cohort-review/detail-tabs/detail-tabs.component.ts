@@ -158,39 +158,23 @@ export class DetailTabsComponent implements OnInit{
     this.domainList.map(domain=>
     {
       this.actions.fetchIndividualParticipantsData(ns, wsid, cid, cdrid, this.participantsId, domain, limit);
+      const getConditionsParticipantsDomainData = this.ngRedux
+        .select(getParticipantData(domain))
+        .filter(domain => !!domain)
+        .subscribe(loading => {
+          const data = JSON.parse(loading);
+          if(domain === DomainType[DomainType.CONDITION]){
+            this.conditionData = data.items;
+          } else if(domain === DomainType[DomainType.PROCEDURE]){
+            this.procedureData = data.items;
+          } else {
+            this.drugData = data.items;
+          }
+
+        });
+      this.subscription = getConditionsParticipantsDomainData;
     })
 
-    const getConditionsParticipantsDomainData = this.ngRedux
-      .select(getParticipantData('CONDITION'))
-      .filter(domain => !!domain)
-      .subscribe(loading => {
-        let count = 1
-        const data = JSON.parse(loading);
-        this.conditionData = data.items;
-        // console.log(this.conditionData)
-        // this.conditionData.forEach(item => {
-        //   Object.assign(item, {count: count});
-        // })
-      });
-    this.subscription = getConditionsParticipantsDomainData;
-
-    const getProcedureParticipantsDomainData = this.ngRedux
-      .select(getParticipantData('PROCEDURE'))
-      .filter(domain => !!domain)
-      .subscribe(loading => {
-        this.procedureData = loading
-      });
-    this.subscription = getProcedureParticipantsDomainData;
-
-    const getDrugParticipantsDomainData = this.ngRedux
-      .select(getParticipantData('DRUG'))
-      .filter(domain => !!domain)
-      .subscribe(loading => {
-        const data = JSON.parse(loading);
-        this.drugData = data.items
-      });
-    this.subscription = getDrugParticipantsDomainData;
-    // this.ngAfterViewInit();
   }
 
   readonly stubs = [

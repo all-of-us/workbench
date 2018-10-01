@@ -36,13 +36,9 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
     this.trimmedData = [];
     this.chartOptions = {};
     this.duplicateItems = [];
-    // this.yAxisNames = [''];
-
-
   }
 
   setYaxisValue() {
-    console.log(this.chartData)
     this.yAxisNames = [''];
     let yAxisValue = 1
     this.chartData.map(items=> { // find standardName in duplicate items
@@ -67,9 +63,15 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
       const temp = {
         x: i.startDate,
         y: i.yAxisValue,
-        standardName: i.standardName
+        standardName: i.standardName,
+        ageAtEvent: i.ageAtEvent,
+        rank: i.rank,
+        startDate: moment.unix(i.startDate).format('MM-DD-YYYY'),
+        standardVocabulary: i.standardVocabulary,
+
       }
-      this.trimmedData.push(temp)
+      this.trimmedData.push(temp);
+      this.trimmedData.reverse();
     })
     this.duplicateItems.map(d => {
       this.yAxisNames.push(d.name.substring(0, 13));
@@ -92,16 +94,12 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
         zoomType: 'xy'
       },
       title: {
-        text: 'Height Versus Weight of 507 Individuals by Gender'
-      },
-      subtitle: {
-        text: 'Source: Heinz  2003'
+        text: 'Top Conditions over Time'
       },
       xAxis: {
-        // categories: xcategories,
         title: {
           enabled: true,
-          text: 'Years(YYYY)'
+          text: 'Entry Date'
         },
 
         labels: {
@@ -115,7 +113,6 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
 
       },
       yAxis: {
-        // categories: this.yAxisNames,
         title: {
           enabled: true,
           text: 'foo'
@@ -125,23 +122,7 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
             return test[this.value];
           }
         },
-        // startOnTick: true,
-        // endOnTick: true,
-        // showLastLabel: true,
-        // showFirstLabel: true,
-        // min: 0,
         tickInterval: 1
-        // max: 5
-      },
-      legend: {
-        layout: 'vertical',
-        align: 'left',
-        verticalAlign: 'top',
-        x: 100,
-        y: 70,
-        floating: true,
-        backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
-        borderWidth: 1
       },
       plotOptions: {
         scatter: {
@@ -165,15 +146,21 @@ export class IndividualParticipantsCharts implements OnInit, OnChanges{
         }
       },
       tooltip: {
-        formatter: function () {
-          return this.point.standardName
-        },
+        pointFormat: '<div>' +
+          'Details<br/>'+
+          'Date:<b>{point.startDate}</b><br/>' +
+          'Standard Vocab:<b>{point.standardVocabulary}</b><br/>' +
+          'Standard Name: <b>{point.standardName}</b><br/>' +
+          'Age at Event:<b>{point.ageAtEvent}</b><br/>' +
+          'rank:<b>{point.rank}</b><br/>' +
+          '</div>',
         shared: true
       },
       series: [{
         type: 'scatter',
-        name:'Details',
-        data: this.trimmedData
+        data: this.trimmedData,
+        turboThreshold:5000,
+        clip: false,
       }],
 
     };
