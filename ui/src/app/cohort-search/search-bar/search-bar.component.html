@@ -21,13 +21,11 @@
     {{searchTerm.value}} exists {{numMatches}} times in the tree below
   </div>
   <div *ngIf="options.length" class="dropdown-menu">
-    <button
+    <app-option-info
       *ngFor="let option of options; let i = index"
-      class="dropdown-item"
-      type="button"
-      [class.active]="i === highlightedOption"
-      (click)="selectOption(option)"
-      [innerHTML]="option.displayName | safeHtml">
-    </button>
+      [option]="option"
+      [highlighted]="i === highlightedOption"
+      (click)="selectOption(option)">
+    </app-option-info>
   </div>
 </div>

@@ -1,0 +1,10 @@
+.dropdown-item {
+  height: 25px;
+  line-height: 0px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+popper-content {
+
+}

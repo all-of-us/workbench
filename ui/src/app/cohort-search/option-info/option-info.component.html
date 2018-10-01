@@ -1,0 +1,10 @@
+<button #button
+  class="dropdown-item"
+  type="button"
+  [class.active]="highlighted"
+  [innerHTML]="option.displayName | safeHtml"
+  [popper]="popperName"
+  [popperTrigger]="'hover'"
+  [popperPlacement]="'bottom'"
+  [popperDisabled]="!isTruncated">
+</button>
