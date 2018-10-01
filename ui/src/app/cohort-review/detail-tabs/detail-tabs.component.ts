@@ -9,8 +9,9 @@ import {
 } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
 import {CohortSearchActions, CohortSearchState, getParticipantData} from '../../cohort-search/redux';
+import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
-import {typeToTitle} from "../../cohort-search/utils";
+
 
 
 /* The most common column types */
