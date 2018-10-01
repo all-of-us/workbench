@@ -1,19 +1,19 @@
 package org.pmiops.workbench.cdr;
 
-import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.dialect.MySQL57InnoDBDialect;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
 import org.hibernate.type.StandardBasicTypes;
 
-public class CommonTestDialect extends MySQLDialect {
+public class CommonTestDialect extends MySQL57InnoDBDialect {
 
     public CommonTestDialect() {
         super();
-        // For in-memory tests, use LIKE for full text searches.
-        // For some weird reason, we need to have this function use DOUBLE; see
-        // https://pavelmakhov.com/2016/09/jpa-custom-function
+        // For in-memory tests, use LOCATE for full text searches, replacing the "+" chars we
+        // added with nothing; this will work for single-word query patterns only.
+        // Because LOCATE / MATCH returns a number, we need to have this function use DOUBLE.
 
         registerFunction("match", new SQLFunctionTemplate(StandardBasicTypes.DOUBLE,
-                "?1 LIKE ?2"));
+                "LOCATE(REPLACE(?2, '+'), ?1)"));
     }
 
     @Override
