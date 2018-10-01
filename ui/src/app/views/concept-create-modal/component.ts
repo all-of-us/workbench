@@ -4,7 +4,7 @@ import {ConceptSet, ConceptsService, DomainInfo} from '../../../generated';
 import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
 import {ConceptAddModalComponent} from '../concept-add-modal/component';
 @Component({
-  selector: 'app-concept-list-modal',
+  selector: 'app-create-concept-modal',
   styleUrls: [
     './component.css',
     '../../styles/buttons.css',

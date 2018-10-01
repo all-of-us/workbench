@@ -64,7 +64,7 @@ export class EditModalComponent {
       this.form.setValue({name: this.resource.conceptSet.name,
         description: this.resource.conceptSet.description});
     }
-    this.form.setValue({ name:this.rName, description: this.rDescription });
+    this.form.setValue({ name: this.rName, description: this.rDescription });
   }
 
   close(): void {
@@ -108,8 +108,6 @@ export class EditModalComponent {
 
   get canSave(): boolean {
     if (this.editing) {
-      const nameHasChanged = this.name.value !== this.rName;
-      const descHasChanged = this.description.value !== this.rDescription;
       const nameHasChanged = this.name.value !== this.resource.cohort.name ||
         this.name.value !== this.resource.conceptSet.name;
       const descHasChanged = this.description.value !== this.resource.cohort.description ||

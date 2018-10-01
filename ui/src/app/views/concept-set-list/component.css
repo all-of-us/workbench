@@ -1,3 +1,16 @@
+.btn.btn-link.nav-link.nav-item {
+    color: #2691D0;
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 24px;
+    margin-top: .2rem;
+}
+
+.btn.btn-link.nav-link.nav-item.active {
+    font-weight: bolder;
+    border-bottom: solid 3px;
+}
+
 .spinner {
     margin-top: 1rem;
 }
@@ -24,4 +37,8 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
+}
+
+.add-card {
+    margin-left: 2%;
 }
