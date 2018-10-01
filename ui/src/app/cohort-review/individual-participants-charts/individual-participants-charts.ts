@@ -9,7 +9,6 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
   chartOptions = {};
   @Input() chartData;
   @Input() chartHeader: string;
-  private _chart: any;
   trimmedData = [];
   duplicateItems = [];
   yAxisNames = [''];
@@ -68,12 +67,12 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
     });
 
     if (this.trimmedData.length) {
-      this.getchartsData();
+      this.getChartsData();
     }
   }
 
 
-  getchartsData() {
+  getChartsData() {
     const test = this.yAxisNames;
     this.chartOptions = {
       chart: {
@@ -96,10 +95,11 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
         labels: {
           formatter: function () {
             return moment.unix(this.value).format('YYYY');
-          }
+          },
+           step: 1,
         },
         startOnTick: true,
-        endOnTick: true,
+        // endOnTick: true,
         // max: 2020,
         // min:2004,
         // tickPositions: [],
