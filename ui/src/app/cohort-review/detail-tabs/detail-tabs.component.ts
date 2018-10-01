@@ -1,16 +1,16 @@
+import {NgRedux} from '@angular-redux/store';
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-
 import {
     CohortReviewService,
     DomainType,
     PageFilterType,
     ReviewColumns,
 } from 'generated';
-import {Subscription} from "rxjs/Subscription";
-import {CohortSearchActions, CohortSearchState, getParticipantData} from "../../cohort-search/redux";
-import {ReviewStateService} from "../review-state.service";
-import {NgRedux} from "@angular-redux/store";
+import {Subscription} from 'rxjs/Subscription';
+import {CohortSearchActions, CohortSearchState, getParticipantData} from '../../cohort-search/redux';
+import {ReviewStateService} from '../review-state.service';
+
 
 /* The most common column types */
 const itemDate = {
@@ -125,69 +125,27 @@ const labRefRange = {
   templateUrl: './detail-tabs.component.html',
   styleUrls: ['./detail-tabs.component.css']
 })
-export class DetailTabsComponent implements OnInit{
+export class DetailTabsComponent implements OnInit {
   subscription: Subscription;
   loading = false;
   data;
   participantsId: any;
   procedureData;
   drugData;
-  conditionData
+  conditionData;
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
-  constructor(
-    private state: ReviewStateService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private actions: CohortSearchActions,
-    private ngRedux: NgRedux<CohortSearchState>,
-  ) {
-
-  }
-
-
-  ngOnInit() {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-    this.subscription = this.route.data.map(({participant}) => participant)
-      .subscribe(participants =>{
-        this.participantsId = participants.participantId;
-      })
-    const limit = 5;
-    this.domainList.map(domain=>
-    {
-      this.actions.fetchIndividualParticipantsData(ns, wsid, cid, cdrid, this.participantsId, domain, limit);
-      const getConditionsParticipantsDomainData = this.ngRedux
-        .select(getParticipantData(domain))
-        .filter(domain => !!domain)
-        .subscribe(loading => {
-          const data = JSON.parse(loading);
-          if(domain === DomainType[DomainType.CONDITION]){
-            this.conditionData = data.items;
-          } else if(domain === DomainType[DomainType.PROCEDURE]){
-            this.procedureData = data.items;
-          } else {
-            this.drugData = data.items;
-          }
-
-        });
-      this.subscription = getConditionsParticipantsDomainData;
-    })
-
-  }
-
   readonly stubs = [
     'survey',
   ];
-
   readonly allEvents = {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, ageAtEvent, visitType, numMentions,
-        firstMention, lastMention, valueSource, sourceName, sourceCode, sourceVocabulary
+      firstMention, lastMention, valueSource, sourceName, sourceCode, sourceVocabulary
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -204,7 +162,6 @@ export class DetailTabsComponent implements OnInit{
       sourceVocabulary: sourceVocabulary,
     }
   };
-
   readonly tabs = [{
     name: 'Conditions',
     domain: DomainType.CONDITION,
@@ -255,8 +212,8 @@ export class DetailTabsComponent implements OnInit{
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, ageAtEvent, numMentions, firstMention,
-        lastMention, quantity, refills, strength, dataRoute, sourceName, sourceCode,
-        sourceVocabulary, visitId
+      lastMention, quantity, refills, strength, dataRoute, sourceName, sourceCode,
+      sourceVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -304,7 +261,7 @@ export class DetailTabsComponent implements OnInit{
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, sourceName,
-        sourceCode, sourceVocabulary, visitId
+      sourceCode, sourceVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -337,6 +294,40 @@ export class DetailTabsComponent implements OnInit{
       age: ageAtEvent,
     }
   }];
+  constructor(
+    private state: ReviewStateService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private actions: CohortSearchActions,
+    private ngRedux: NgRedux<CohortSearchState>,
+  ) {}
 
 
+  ngOnInit() {
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    this.subscription = this.route.data.map(({participant}) => participant)
+      .subscribe(participants => {
+        this.participantsId = participants.participantId;
+      });
+    const limit = 5;
+    this.domainList.map(domainName => {
+      this.actions.fetchIndividualParticipantsData(ns, wsid, cid,
+      cdrid, this.participantsId, domainName, limit);
+      const getConditionsParticipantsDomainData = this.ngRedux
+        .select(getParticipantData(domainName))
+        .filter(loading => !!loading)
+        .subscribe(loading => {
+          const data = JSON.parse(loading);
+          if (domainName === DomainType[DomainType.CONDITION]) {
+            this.conditionData = data.items;
+          } else if (domainName === DomainType[DomainType.PROCEDURE]) {
+            this.procedureData = data.items;
+          } else {
+            this.drugData = data.items;
+          }
+        });
+      this.subscription = getConditionsParticipantsDomainData;
+    });
+  }
 }
