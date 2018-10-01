@@ -48,15 +48,20 @@
   <ng-template #chartBox>
     <div class="chart-box lower-box">
       <div class="chart-selector-tabs">
-        <div *ngFor="let domain of conceptDomainList" class="chart-selector-tab">
-          <button (click)="selectDomain(domain.domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain" [disabled]="searchLoading">
+        <div *ngFor="let domain of conceptDomainCounts" class="chart-selector-tab">
+          <button (click)="selectDomain(domain.domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain" [disabled]="searchLoading || !completedDomainSearches.includes(domain.domain)">
             <div class="chart-selector-header">
               {{domain.name}}
             </div>
-            <!-- TODO (RW-1277): Make this the counts returned from search. -->
-            <div>{{domain.allConceptCount}}</div>
+            <div>{{domain.concept_count}}</div>
           </button>
         </div>
+      </div>
+      <div class="filter-options">
+        Filter by vocabulary:
+        <clr-checkbox class="filter-checkbox" *ngFor="let vocabulary of vocabularies" (click)="filterList()" [(clrChecked)]="vocabulary.selected">
+          {{vocabulary.vocabularyId}} ({{vocabulary.concept_count}})
+        </clr-checkbox>
       </div>
       <app-concept-table [concepts]="concepts" [selectedDomain]="selectedDomain" [loading]="searchLoading" [searchTerm]="currentSearchString"></app-concept-table>
       <div (mouseenter)="addTextHovering=true" (mouseleave)="addTextHovering=false" (click)="openAddModal()" class="add-section">

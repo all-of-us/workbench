@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {Subject} from 'rxjs/Subject';
 
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
@@ -10,14 +10,22 @@ import {
   Concept,
   ConceptsService,
   Domain,
+  DomainCount,
   DomainInfo,
   StandardConceptFilter,
+  VocabularyCount,
 } from 'generated';
 
 interface ConceptCacheSet {
   domain: Domain;
 
+  vocabularyList: Array<VocabularyCount>
+
   items: Array<Concept>;
+}
+
+interface VocabularyCountSelected extends VocabularyCount {
+  selected: boolean;
 }
 
 @Component({
@@ -46,12 +54,19 @@ export class ConceptHomepageComponent implements OnInit {
   conceptAddModal: ConceptAddModalComponent;
 
   conceptDomainList: Array<DomainInfo> = [];
+  conceptDomainCounts: Array<DomainCount> = [];
 
   concepts: Array<Concept> = [];
   conceptsCache: Array<ConceptCacheSet> = [];
 
+  completedDomainSearches: Array<Domain> = [];
+
+  vocabularies: Array<VocabularyCountSelected> = [];
+
   wsNamespace: string;
   wsId: string;
+
+
 
   constructor(
     private conceptsService: ConceptsService,
@@ -68,7 +83,8 @@ export class ConceptHomepageComponent implements OnInit {
       this.conceptDomainList.forEach((domain) => {
         this.conceptsCache.push({
           domain: domain.domain,
-          items: []
+          items: [],
+          vocabularyList: []
         });
       });
       this.loadingDomains = false;
@@ -82,7 +98,7 @@ export class ConceptHomepageComponent implements OnInit {
 
   selectDomain(domain: Domain) {
     this.selectedDomain = domain;
-    this.setConcepts();
+    this.setConceptsAndVocabularies();
   }
 
   searchButton() {
@@ -105,36 +121,53 @@ export class ConceptHomepageComponent implements OnInit {
     } else {
       standardConceptFilter = StandardConceptFilter.ALLCONCEPTS;
     }
+    this.completedDomainSearches = [];
 
     let numCalls = 0;
-    const numCallsSubject = new BehaviorSubject<number>(0);
+    const numCallsSubject = new Subject<Domain>();
     const numCallsSubject$ = numCallsSubject.asObservable();
 
-    numCallsSubject$.subscribe((finishedCalls) => {
-      if (finishedCalls === this.conceptsCache.length) {
-        this.searchLoading = false;
-        this.setConcepts();
-      }
+    numCallsSubject$.subscribe((finishedCall) => {
+      this.completedDomainSearches.push(finishedCall);
     });
 
     this.conceptsCache.forEach((conceptDomain) => {
+      const activeTabSearch = conceptDomain.domain === this.selectedDomain;
       const request = {
         query: this.currentSearchString,
         standardConceptFilter: standardConceptFilter,
-        domain: conceptDomain.domain
+        domain: conceptDomain.domain,
+        includeDomainCounts: activeTabSearch,
+        includeVocabularyCounts: true
       };
       this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
         .subscribe((response) => {
           numCalls += 1;
-          numCallsSubject.next(numCalls);
+          numCallsSubject.next(conceptDomain.domain);
           conceptDomain.items = response.items;
+          console.log('Search from search click');
+          console.log(response);
+          conceptDomain.vocabularyList = response.vocabularyCounts;
+          if (activeTabSearch) {
+            this.searchLoading = false;
+            this.conceptDomainCounts = response.domainCounts;
+            this.setConceptsAndVocabularies();
+          }
       });
     });
   }
 
-  setConcepts() {
-    this.concepts = this.conceptsCache.find(
-      conceptDomain => conceptDomain.domain === this.selectedDomain).items;
+  setConceptsAndVocabularies() {
+    const cacheItem = this.conceptsCache.find(
+      conceptDomain => conceptDomain.domain === this.selectedDomain);
+    this.concepts = cacheItem.items;
+    this.vocabularies = [];
+    cacheItem.vocabularyList.forEach((vocabulary) => {
+      this.vocabularies.push({
+        ...vocabulary,
+        selected: true
+      });
+    });
   }
 
   get getSearchDisabled() {
@@ -143,5 +176,38 @@ export class ConceptHomepageComponent implements OnInit {
 
   get searchTermNotLongEnough() {
     return this.searchTerm === undefined || this.searchTerm.length < 3;
+  }
+
+  // For some reason clr checkboxes trigger click events twice on click. This
+  // is a workaround to not allow multiple filter events to get triggered.
+  blockMultipleSearchFromFilter = true;
+
+  filterList() {
+    if (this.blockMultipleSearchFromFilter) {
+      this.blockMultipleSearchFromFilter = false;
+      return;
+    }
+    this.blockMultipleSearchFromFilter = true;
+    let standardConceptFilter: StandardConceptFilter;
+    if (this.standardConceptsOnly) {
+      standardConceptFilter = StandardConceptFilter.STANDARDCONCEPTS;
+    } else {
+      standardConceptFilter = StandardConceptFilter.ALLCONCEPTS;
+    }
+    this.searchLoading = true;
+    const request = {
+      query: this.currentSearchString,
+      standardConceptFilter: standardConceptFilter,
+      domain: this.selectedDomain,
+      vocabularyIds: this.vocabularies
+        .filter(vocabulary => vocabulary.selected).map(vocabulary => vocabulary.vocabularyId),
+    };
+    this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
+      .subscribe((response) => {
+        console.log('Search from filter');
+        console.log(response);
+        this.searchLoading = false;
+        this.concepts = response.items;
+      });
   }
 }
