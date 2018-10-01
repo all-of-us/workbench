@@ -39,7 +39,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
-  private subscription: Subscription;
+  private subscriptions = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -48,21 +48,33 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
-    this.workspace = wsData;
-    this.accessLevel = wsData.accessLevel;
-    const {approved, reviewRequested} = this.workspace.researchPurpose;
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
+    const handleData = (data) => {
+      const workspace = <WorkspaceData> data.workspace;
+      this.workspace = workspace;
+      this.accessLevel = workspace.accessLevel;
+    };
+    handleData(this.route.snapshot.data);
+    this.subscriptions.push(this.route.data.subscribe(handleData));
+
+    const handleParams = (params) => {
+      this.wsNamespace = params['ns'];
+      this.wsId = params['wsid'];
+    };
+    handleParams(this.route.snapshot.params);
+    this.subscriptions.push(this.route.params.subscribe(handleParams));
+
     this.tabPath = this.getTabPath();
-    this.subscription = this.router.events.filter(event => event instanceof NavigationEnd)
-      .subscribe(event => {
-        this.tabPath = this.getTabPath();
-      });
+    this.subscriptions.push(
+      this.router.events.filter(event => event instanceof NavigationEnd)
+        .subscribe(event => {
+          this.tabPath = this.getTabPath();
+        }));
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
   }
 
   private getTabPath(): string {
