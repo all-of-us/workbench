@@ -67,7 +67,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
               .description(conceptSet.getDescription())
               .id(conceptSet.getConceptSetId())
               .name(conceptSet.getName())
-              .domain(conceptSet.getDomainEnum());
+              .domain(conceptSet.getDomainEnum())
+              .participantCount(conceptSet.getParticipantCount());
           if (conceptSet.getCreator() != null) {
             result.creator(conceptSet.getCreator().getEmail());
           }
