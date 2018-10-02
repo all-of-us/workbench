@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ConceptBigQueryService {
-
-  private static final String DOMAIN_CONCEPT_SOURCE = "source";
-
+  
   private final BigQueryService bigQueryService;
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final ConceptService conceptService;
@@ -29,7 +27,7 @@ public class ConceptBigQueryService {
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.conceptService = conceptService;
   }
-  
+
   public int getParticipantCountForConcepts(String omopTable, Set<Long> conceptIds) {
     ConceptColumns conceptColumns = cdrBigQuerySchemaConfigService.getConceptColumns(omopTable);
     ConceptIds classifiedConceptIds = conceptService.classifyConceptIds(conceptIds);
