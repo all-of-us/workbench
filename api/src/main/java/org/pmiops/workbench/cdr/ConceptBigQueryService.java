@@ -1,23 +1,17 @@
 package org.pmiops.workbench.cdr;
 
-import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryResult;
-
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import java.util.HashMap;
 import java.util.Set;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
-import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +31,6 @@ public class ConceptBigQueryService {
   }
 
   private String getSourceConceptIdColumn(TableConfig tableConfig, String tableName) {
-    String sourceConceptColumn = null;
     for (ColumnConfig columnConfig : tableConfig.columns) {
       if (DOMAIN_CONCEPT_SOURCE.equals(columnConfig.domainConcept)) {
         return columnConfig.name;
