@@ -190,11 +190,11 @@ describe('WorkspaceListComponent', () => {
         .fixture.debugElement.queryAll(By.css('.permission-box'));
     for (let i = 0; i < workspaceList.length; i++) {
       if (workspaceList[i].isOwner) {
-        expect (permissionsOnPage[i].classes).toContain('owner-permission');
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('owner-permission');
       } else if (workspaceList[i].isReadOnly) {
-        expect (permissionsOnPage[i].classes).toContain('reader-permission');
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('reader-permission');
       } else {
-        expect (permissionsOnPage[i].classes).toContain('writer-permission');
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('writer-permission');
       }
     }
   }));
