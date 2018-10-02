@@ -1,6 +1,6 @@
 <clr-tabs>
   <clr-tab>
-    <button clrTabLink id="detail-summary-tab">Summary</button>
+    <button clrTabLink id="detail-summary-tab"(click) = "getDomainsParticipantsData()">Summary</button>
     <clr-tab-content id="detail-summary-content" *clrIfActive>
       <div class="container summary-container">
         <div class="row">
