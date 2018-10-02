@@ -87,6 +87,9 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       }
       if (label === 'Param: Concept Sets Name') {
         label = child.snapshot.data['workspace'].name + ' Concepts';
+        if (breadcrumbs.length > 2) {
+          breadcrumbs = breadcrumbs.filter(b => !b.url.endsWith('/concepts'));
+        }
       }
       // Prevent processing children with duplicate urls
       if (!breadcrumbs.some(b => b.url === url)) {

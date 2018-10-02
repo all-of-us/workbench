@@ -1,17 +1,19 @@
 <clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'">
   <div class="modal-body">
-   <h4>Create a Concept Sets</h4>
-    <input type="text" [(ngModel)]="name" placeholder="name">
-    <input type="text" [(ngModel)]="description" placeholder="description">
-    <select [(ngModel)]="domain">
+   <h2 class="title">Create a Concept Sets</h2>
+    <div class="error" *ngIf="required">Name is a required field</div>
+    <div class="error" *ngIf="alreadyExist">Concept '{{name}}' already exist. Please enter a different name</div>
+
+    <input class="input-name input" type="text" [(ngModel)]="name" placeholder="Name">
+    <input class="input-description input" type="text" [(ngModel)]="description" placeholder="Description">
+    <select class="concept-select" [(ngModel)]="domain">
         <option *ngFor="let concept of conceptDomainList" [ngValue]="concept">
           {{ concept.name}}
         </option>
     </select>
-    <div style="display:flex; flex-direction: row;float:right">
-      <button>Cancel</button>
-      <button (click)="saveConcept()">Save</button>
-
+    <div class="actions">
+      <button class="btn btn-secondary" (click)="close()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveConcept()">Save</button>
     </div>
   </div>
 </clr-modal>

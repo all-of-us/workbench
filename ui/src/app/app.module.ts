@@ -77,7 +77,6 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import {ConceptsListComponent} from './views/concept-list/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -137,7 +136,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CohortListComponent,
     ConceptAddModalComponent,
     ConceptHomepageComponent,
-    ConceptsListComponent,
     ConceptTableComponent,
     ConceptSetListComponent,
     ConfirmDeleteModalComponent,
