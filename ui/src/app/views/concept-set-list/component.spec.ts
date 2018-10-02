@@ -8,8 +8,8 @@ import {ClarityModule} from '@clr/angular';
 
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetListComponent} from 'app/views/concept-set-list/component';
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {CreateConceptModalComponent} from 'app/views/conceptset-create-modal/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
@@ -101,7 +101,7 @@ describe('ConceptSetListComponent', () => {
 
   it('displays correct concept sets', fakeAsync(() => {
     const de = fixture.debugElement;
-    let conceptCards = de.queryAll(By.css('.item-card'));
+    const conceptCards = de.queryAll(By.css('.item-card'));
     expect(conceptCards.length).toEqual(1);
     expect(conceptCards[0].nativeElement.innerText).toMatch('Mock Concept Set');
     expect(conceptCards[0].nativeElement.innerText).toMatch('Mocked for tests');

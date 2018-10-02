@@ -22,7 +22,7 @@ export class ConceptSetsServiceStub {
         'description': 'Mocked for tests',
         'domain': Domain.CONDITION
       }
-    ]
+    ];
   }
 
   public getConceptSetsInWorkspace(
@@ -53,7 +53,7 @@ export class ConceptSetsServiceStub {
         observer.next();
         this.conceptList = [];
         observer.complete();
-      })
-    })
+      });
+    });
   }
 }
