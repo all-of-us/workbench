@@ -125,7 +125,7 @@ export class ConceptsServiceStub {
               return {
                 domain: domainInfo.domain,
                 name: domainInfo.name,
-                concept_count: domainInfo.allConceptCount
+                conceptCount: domainInfo.allConceptCount
               };
             });
           }

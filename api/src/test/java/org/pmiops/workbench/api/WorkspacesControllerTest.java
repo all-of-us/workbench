@@ -46,6 +46,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
@@ -181,6 +182,7 @@ public class WorkspacesControllerTest {
     ConceptSetsController.class
   })
   @MockBean({
+          ConceptBigQueryService.class,
           FireCloudService.class,
           CohortMaterializationService.class,
           CloudStorageService.class,

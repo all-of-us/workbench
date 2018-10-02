@@ -53,14 +53,14 @@
             <div class="chart-selector-header">
               {{domain.name}}
             </div>
-            <div>{{domain.concept_count}}</div>
+            <div>{{domain.conceptCount}}</div>
           </button>
         </div>
       </div>
       <div class="filter-options">
         Filter by vocabulary:
         <clr-checkbox class="filter-checkbox" *ngFor="let vocabulary of vocabularies" (click)="filterList($event)" [(clrChecked)]="vocabulary.selected">
-          {{vocabulary.vocabularyId}} ({{vocabulary.concept_count}})
+          {{vocabulary.vocabularyId}} ({{vocabulary.conceptCount}})
         </clr-checkbox>
       </div>
       <app-concept-table [concepts]="concepts" [selectedDomain]="selectedDomain" [loading]="searchLoading" [searchTerm]="currentSearchString"></app-concept-table>

@@ -178,7 +178,7 @@ public class ConceptSetsControllerTest {
   @Autowired
   UserRecentResourceService userRecentResourceService;
 
-  @Mock
+  @Autowired
   ConceptBigQueryService conceptBigQueryService;
 
   @Mock
@@ -188,7 +188,8 @@ public class ConceptSetsControllerTest {
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
-  @MockBean({FireCloudService.class, CloudStorageService.class, ConceptService.class, ConceptSetService.class, UserRecentResourceService.class})
+  @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
+      ConceptService.class, ConceptSetService.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {
