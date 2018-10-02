@@ -67,7 +67,7 @@ export function typeToTitle(_type: string): string {
       _type = 'Visit';
       break;
     case TreeType[TreeType.DRUG]:
-      _type = 'Drug';
+      _type = 'Drugs';
       break;
     case TreeType[TreeType.CONDITION]:
       _type = 'Conditions';
@@ -77,9 +77,6 @@ export function typeToTitle(_type: string): string {
       break;
     case DomainType[DomainType.LAB]:
       _type = 'Labs';
-      break;
-    case DomainType[DomainType.MEASUREMENT]:
-      _type = 'Measurements';
       break;
   }
   return _type;

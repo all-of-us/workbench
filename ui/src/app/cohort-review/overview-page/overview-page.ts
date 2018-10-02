@@ -26,7 +26,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   data = List();
   typesList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
-    DomainType[DomainType.MEASUREMENT],
+    DomainType[DomainType.DRUG],
     DomainType[DomainType.LAB]];
   title: string;
   showTitle = false;
@@ -91,6 +91,7 @@ export class OverviewPage implements OnInit, OnDestroy {
     this.fetchChartsData(names);
     this.title = typeToTitle(names);
     return this.title;
+
   }
 
   fetchChartsData(name) {
