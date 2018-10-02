@@ -18,13 +18,14 @@ export class DetailPage implements OnInit, OnDestroy {
   sidebarOpen = true;
   participant: Participant;
   subscription: Subscription;
-
+  participantId: number;
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.subscription = this.route.data.subscribe(({participant, annotations}) => {
       participant.annotations = annotations;
       this.participant = participant;
+      console.log(participant)
     });
   }
 
@@ -38,5 +39,12 @@ export class DetailPage implements OnInit, OnDestroy {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+  getNavigatedParticipantId(id){
+    if (id) {
+      this.participantId = id;
+
+    }
+
   }
 }

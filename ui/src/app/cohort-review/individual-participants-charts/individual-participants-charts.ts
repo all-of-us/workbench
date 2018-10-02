@@ -5,7 +5,7 @@ import * as moment from 'moment';
   templateUrl: './individual-participants-charts.html',
   styleUrls: ['./individual-participants-charts.css']
 })
-export class IndividualParticipantsChartsComponent implements OnInit, OnChanges {
+export class IndividualParticipantsChartsComponent implements OnChanges {
   chartOptions = {};
   @Input() chartData;
   @Input() chartHeader: string;
@@ -17,16 +17,21 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
   ngOnChanges() {
     this.yAxisNames = [''];
     if (this.chartData) {
+      console.log('here');
+      console.log(this.chartData);
       this.setYaxisValue();
     }
   }
-  ngOnInit() {
+  // ngOnInit() {
+  //   this.trimmedData = [];
+  //   this.chartOptions = {};
+  //   this.duplicateItems = [];
+  // }
+
+  setYaxisValue() {
     this.trimmedData = [];
     this.chartOptions = {};
     this.duplicateItems = [];
-  }
-
-  setYaxisValue() {
     this.yAxisNames = [''];
     let yAxisValue = 1;
     this.chartData.reverse().map(items => { // find standardName in duplicate items
@@ -78,7 +83,8 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
       chart: {
         type: 'scatter',
         zoomType: 'xy',
-        width: 420
+        width: 420,
+        paddingRight:12
       },
       credits: {
         enabled: false
@@ -96,15 +102,10 @@ export class IndividualParticipantsChartsComponent implements OnInit, OnChanges 
           formatter: function () {
             return moment.unix(this.value).format('YYYY');
           },
-           step: 1,
         },
         startOnTick: true,
-        // endOnTick: true,
-        // max: 2020,
-        // min:2004,
-        // tickPositions: [],
-        // showLastLabel: true,
-        // tickInterval: 1,
+        endOnTick: true,
+        tickInterval:  40 * 3600 * 1000,
       },
       yAxis: [{
         title: {
