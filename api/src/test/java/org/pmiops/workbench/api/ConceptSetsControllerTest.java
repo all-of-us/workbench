@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
@@ -178,6 +179,9 @@ public class ConceptSetsControllerTest {
   UserRecentResourceService userRecentResourceService;
 
   @Mock
+  ConceptBigQueryService conceptBigQueryService;
+
+  @Mock
   Provider<User> userProvider;
 
 
@@ -196,8 +200,11 @@ public class ConceptSetsControllerTest {
   public void setUp() throws Exception {
 
     ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
-    conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao, conceptSynonymDao, conceptService, userProvider, CLOCK);
-    WorkspacesController workspacesController = new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);
+    conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
+        conceptSynonymDao, conceptService, conceptBigQueryService, userProvider, CLOCK);
+    WorkspacesController workspacesController =
+        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider,
+            fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);
 
     User user = new User();
     user.setEmail(USER_EMAIL);
