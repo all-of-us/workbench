@@ -100,20 +100,16 @@
                 Rejected
               </div>
             </ng-template>
-
           </div>
-
           <div style="display:flex; flex-direction:row; justify-content:space-between; align-items:center">
             <div class="date-text">
               Last Changed:<br>
               {{workspacePermissions.workspace.lastModifiedTime | date:'short'}}
             </div>
-
             <div class="permission-box {{workspacePermissions.accessLevel | lowercase}}-permission">
               {{workspacePermissions.accessLevel}}
             </div>
           </div>
-
           <!-- TODO: Add collaborator pictures. -->
           <!-- TODO: Add view of locked workspace when that functionality exists. -->
         </div>

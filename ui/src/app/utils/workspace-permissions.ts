@@ -38,8 +38,4 @@ export class WorkspacePermissions {
       this.workspace.researchPurpose.approved === false;
   }
 
-  get isReadWrite() {
-    return this.accessLevel === WorkspaceAccessLevel.WRITER &&
-        this.isOwner === false;
-  }
 }
