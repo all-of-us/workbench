@@ -37,4 +37,9 @@ export class WorkspacePermissions {
     return this.workspace.researchPurpose.reviewRequested === true &&
       this.workspace.researchPurpose.approved === false;
   }
+
+  get isReadWrite() {
+    return this.accessLevel === WorkspaceAccessLevel.WRITER &&
+        this.isOwner == false;
+  }
 }

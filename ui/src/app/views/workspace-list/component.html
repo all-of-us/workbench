@@ -100,17 +100,26 @@
                 Rejected
               </div>
             </ng-template>
-            <ng-template #permissions>
-              <div style="color: #8bc990" *ngIf="workspacePermissions.isReadOnly">
-                <clr-icon shape="search" style="fill: #8bc990"></clr-icon>
-                Read Only
-              </div>
-            </ng-template>
+
           </div>
-          <div class="date-text">
-            Last Changed:<br>
-            {{workspacePermissions.workspace.lastModifiedTime | date:'short'}}
+
+          <div style="display:flex; flex-direction:row; justify-content:space-between; align-items:center">
+            <div class="date-text">
+              Last Changed:<br>
+              {{workspacePermissions.workspace.lastModifiedTime | date:'short'}}
+            </div>
+
+            <div class="owner-permission" *ngIf="workspacePermissions.isOwner">
+              {{workspacePermissions.accessLevel}}
+            </div>
+            <div class="reader-permission" *ngIf="workspacePermissions.isReadOnly">
+            {{workspacePermissions.accessLevel}}
+            </div>
+            <div class="writer-permission" *ngIf="workspacePermissions.isReadWrite">
+              {{workspacePermissions.accessLevel}}
+            </div>
           </div>
+
           <!-- TODO: Add collaborator pictures. -->
           <!-- TODO: Add view of locked workspace when that functionality exists. -->
         </div>
