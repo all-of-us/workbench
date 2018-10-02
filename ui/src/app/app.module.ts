@@ -31,7 +31,7 @@ import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptAddModalComponent} from './views/concept-add-modal/component';
-import {CreateConceptModalComponent} from './views/concept-create-modal/component';
+import {CreateConceptModalComponent} from './views/conceptset-create-modal/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {ConceptTableComponent} from './views/concept-table/component';

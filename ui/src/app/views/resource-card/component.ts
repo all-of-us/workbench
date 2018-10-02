@@ -165,7 +165,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.conceptSet.id)
+        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
           .subscribe(() => this.onUpdate.emit());
       }
     }
@@ -222,8 +222,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     setTimeout(_ => this.editModal.open(), 0);
   }
 
-  editResource(): void {
-
+  editConceptSet(): void {
+    this.editModal.open();
   }
 
   reviewCohort(resource: RecentResource): void {

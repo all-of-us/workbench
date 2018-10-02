@@ -1,8 +1,9 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ConceptSet, ConceptsService, DomainInfo} from '../../../generated';
 import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
 import {ConceptAddModalComponent} from '../concept-add-modal/component';
+
 @Component({
   selector: 'app-create-concept-modal',
   styleUrls: [
@@ -14,6 +15,7 @@ import {ConceptAddModalComponent} from '../concept-add-modal/component';
   templateUrl: './component.html',
 })
 export class CreateConceptModalComponent {
+  @Output() onUpdate: EventEmitter<void> = new EventEmitter();
   public modalOpen  = false;
   wsNamespace: string;
   wsId: string;
@@ -66,11 +68,10 @@ export class CreateConceptModalComponent {
       domain: this.domain
     };
     console.log(concept);
-    console.log(this.wsNamespace + " " + this.wsId);
     this.conceptSetService.createConceptSet(this.wsNamespace, this.wsId, concept)
         .subscribe(() => {
-      console.log("in create");
       this.modalOpen = false;
+      this.onUpdate.emit();
     });
   }
 }

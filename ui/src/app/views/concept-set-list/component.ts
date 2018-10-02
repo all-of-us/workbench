@@ -9,7 +9,7 @@ Workspace,
 WorkspaceAccessLevel,
 } from 'generated';
 
-import {CreateConceptModalComponent} from 'app/views/concept-create-modal/component';
+import {CreateConceptModalComponent} from 'app/views/conceptset-create-modal/component';
 
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 

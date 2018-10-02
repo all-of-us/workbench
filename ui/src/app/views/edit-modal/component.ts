@@ -98,15 +98,8 @@ export class EditModalComponent {
 
   get canSave(): boolean {
     if (this.editing) {
-<<<<<<< HEAD
       const nameHasChanged = this.name.value !== this.rName;
       const descHasChanged = this.description.value !== this.rDescription;
-=======
-      const nameHasChanged = this.name.value !== this.resource.cohort.name ||
-        this.name.value !== this.resource.conceptSet.name;
-      const descHasChanged = this.description.value !== this.resource.cohort.description ||
-        this.description.value !== this.resource.conceptSet.description;
->>>>>>> 11109423... incorporating branches and more changes
       return this.form.valid && (nameHasChanged || descHasChanged) && !this.loading;
     } else {
       return false;
