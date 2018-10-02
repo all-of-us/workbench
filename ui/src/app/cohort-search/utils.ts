@@ -110,7 +110,9 @@ export function highlightMatches(terms: Array<string>, name: string) {
     if (start > -1) {
       const end = start + term.length;
       name = name.slice(0, start)
-        + '<span style="color: #659F3D;'
+        + '<span #match '
+        + 'id="match" '
+        + 'style="color: #659F3D;'
         + 'font-weight: bolder;'
         + 'background-color: rgba(101,159,61,0.2);'
         + 'padding: 2px 0;">'
