@@ -3,8 +3,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 
 import {
   Cohort,
@@ -32,14 +32,10 @@ export class CohortListComponent implements OnInit, OnDestroy {
   cohortsError = false;
   wsNamespace: string;
   wsId: string;
-  cohortInFocus: Cohort;
 
 
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
-
-  @ViewChild(CohortEditModalComponent)
-  editModal: CohortEditModalComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -103,8 +99,4 @@ export class CohortListComponent implements OnInit, OnDestroy {
     return !this.writePermission;
   }
 
-  updateFinished(): void {
-    this.editModal.close();
-    this.reloadCohorts();
-  }
 }
