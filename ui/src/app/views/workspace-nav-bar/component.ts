@@ -1,5 +1,6 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 
@@ -20,10 +21,9 @@ import {
               './component.css'],
   templateUrl: './component.html',
 })
-export class WorkspaceNavBarComponent implements OnInit {
+export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
-
 
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
@@ -34,9 +34,12 @@ export class WorkspaceNavBarComponent implements OnInit {
   accessLevel: WorkspaceAccessLevel;
   deleting = false;
   workspaceDeletionError = false;
+  tabPath: string;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
+
+  private subscription: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -51,6 +54,27 @@ export class WorkspaceNavBarComponent implements OnInit {
     const {approved, reviewRequested} = this.workspace.researchPurpose;
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    this.tabPath = this.getTabPath();
+    this.subscription = this.router.events.filter(event => event instanceof NavigationEnd)
+      .subscribe(event => {
+        this.tabPath = this.getTabPath();
+      });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  private getTabPath(): string {
+    const child = this.route.firstChild;
+    if (!child) {
+      return '';
+    }
+    const path = child.routeConfig.path;
+    if (!path.includes('/')) {
+      return path;
+    }
+    return path.slice(0, path.indexOf('/'));
   }
 
   delete(workspace: Workspace): void {
