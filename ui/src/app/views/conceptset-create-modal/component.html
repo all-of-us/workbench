@@ -7,8 +7,8 @@
     <input class="input-name input" type="text" [(ngModel)]="name" placeholder="Name">
     <input class="input-description input" type="text" [(ngModel)]="description" placeholder="Description">
     <select class="concept-select" [(ngModel)]="domain">
-        <option *ngFor="let concept of conceptDomainList" [ngValue]="concept">
-          {{ concept.name}}
+        <option *ngFor="let concept of conceptDomainList" [ngValue]="concept.domain">
+          {{ concept.domain}}
         </option>
     </select>
     <div class="actions">

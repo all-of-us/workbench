@@ -122,7 +122,7 @@ describe('ConceptSetComponent', () => {
     conceptSetCreatePage.readPageData();
     const conceptNameList = [];
     DomainStubVariables.STUB_DOMAINS.forEach((list) => {
-      conceptNameList.push(list.name);
+      conceptNameList.push(list.domain);
     });
     expect(conceptNameList.length).toBe(conceptSetCreatePage.conceptList.length);
     expect(conceptNameList[0]).toBe(conceptSetCreatePage.conceptList[0]);
@@ -136,17 +136,11 @@ describe('ConceptSetComponent', () => {
     simulateInput(conceptSetCreatePage.fixture, conceptSetCreatePage.name, 'Concept Name');
     simulateInput(conceptSetCreatePage.fixture, conceptSetCreatePage.description, 'Description');
     simulateClick(conceptSetCreatePage.fixture, conceptSetCreatePage.save);
+    tick();
     const concepts: ConceptSet = <ConceptSet>{
       name: 'Concept Name',
       description: 'Description',
-      domain: Domain = {
-        domain: Domain.CONDITION,
-        name: 'Conditions',
-        description: 'The Conditions Stub',
-        standardConceptCount: 1,
-        allConceptCount: 2,
-        participantCount: 30
-      }
+      domain: Domain.CONDITION
     };
     expect(spyObj).toHaveBeenCalledWith(WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, concepts);

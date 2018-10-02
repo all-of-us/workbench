@@ -56,4 +56,14 @@ export class ConceptSetsServiceStub {
       });
     });
   }
+
+  public createConceptSet(workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
+                          extraHttpRequestParams?: any): Observable<ConceptSet> {
+    return new Observable<ConceptSet>(observer => {
+      setTimeout(() => {
+        observer.next(this.conceptList[0]);
+        observer.complete();
+      });
+    });
+  }
 }

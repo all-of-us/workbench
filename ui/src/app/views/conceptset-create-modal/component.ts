@@ -3,6 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ConceptSet, ConceptsService, DomainInfo} from '../../../generated';
 import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
 import {ConceptAddModalComponent} from '../concept-add-modal/component';
+import {Domain} from '../../../generated/model/domain';
 
 @Component({
   selector: 'app-create-concept-modal',
@@ -21,7 +22,7 @@ export class CreateConceptSetModalComponent {
   wsId: string;
   name: string;
   description: string;
-  domain: any;
+  domain: Domain;
   conceptDomainList: Array<DomainInfo> = [];
   required = false;
   alreadyExist = false;
@@ -39,7 +40,7 @@ export class CreateConceptSetModalComponent {
     this.reset();
     this.conceptsService.getDomainInfo(this.wsNamespace, this.wsId).subscribe((response) => {
       this.conceptDomainList = response.items;
-      this.domain = this.conceptDomainList[0];
+      this.domain = this.conceptDomainList[0].domain;
     });
       this.modalOpen = true;
   }
@@ -51,7 +52,6 @@ export class CreateConceptSetModalComponent {
   reset(): void {
     this.name = '';
     this.description = '';
-    this.domain = '';
   }
 
   saveConcept(): void {
