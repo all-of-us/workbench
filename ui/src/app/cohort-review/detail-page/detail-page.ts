@@ -25,7 +25,6 @@ export class DetailPage implements OnInit, OnDestroy {
     this.subscription = this.route.data.subscribe(({participant, annotations}) => {
       participant.annotations = annotations;
       this.participant = participant;
-      console.log(participant)
     });
   }
 
@@ -40,10 +39,9 @@ export class DetailPage implements OnInit, OnDestroy {
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
   }
-  getNavigatedParticipantId(id){
+  getNavigatedParticipantId(id) {
     if (id) {
       this.participantId = id;
-
     }
 
   }

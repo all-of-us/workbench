@@ -84,7 +84,7 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
         type: 'scatter',
         zoomType: 'xy',
         width: 420,
-        paddingRight:12
+        paddingRight: 12
       },
       credits: {
         enabled: false
