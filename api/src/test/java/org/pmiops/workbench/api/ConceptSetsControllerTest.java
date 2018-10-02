@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -292,6 +293,7 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
     assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getName()).isEqualTo("concept set 1");
+    assertThat(conceptSet.getParticipantCount()).isEqualTo(0);
 
     assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         conceptSet.getId()).getBody()).isEqualTo(conceptSet);
@@ -336,6 +338,7 @@ public class ConceptSetsControllerTest {
     assertThat(updatedConceptSet.getDomain()).isEqualTo(Domain.CONDITION);
     assertThat(updatedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(2));
     assertThat(updatedConceptSet.getLastModifiedTime()).isEqualTo(newInstant.toEpochMilli());
+    assertThat(updatedConceptSet.getParticipantCount()).isEqualTo(0);
     assertThat(conceptSet.getName()).isEqualTo("new name");
 
     assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -369,6 +372,8 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddAndRemove() {
     saveConcepts();
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId()))).thenReturn(123);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -376,6 +381,7 @@ public class ConceptSetsControllerTest {
                 CLIENT_CONCEPT_1.getConceptId())).getBody();
     assertThat(updated.getConcepts()).contains(CLIENT_CONCEPT_1);
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
+    assertThat(updated.getParticipantCount()).isEqualTo(123);
 
     ConceptSet removed =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -384,11 +390,15 @@ public class ConceptSetsControllerTest {
     assertThat(removed.getConcepts()).isNull();
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
+    assertThat(removed.getParticipantCount()).isEqualTo(0);
   }
 
   @Test
   public void testUpdateConceptSetConceptsAddMany() {
     saveConcepts();
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId(),
+            CLIENT_CONCEPT_4.getConceptId()))).thenReturn(456);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -399,7 +409,10 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getConcepts()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_4,
         CLIENT_CONCEPT_3);
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
+    assertThat(updated.getParticipantCount()).isEqualTo(456);
 
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId()))).thenReturn(123);
     ConceptSet removed =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
             conceptSet.getId(), removeConceptsRequest(updated.getEtag(),
@@ -408,6 +421,7 @@ public class ConceptSetsControllerTest {
     assertThat(removed.getConcepts()).containsExactly(CLIENT_CONCEPT_1);
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
+    assertThat(removed.getParticipantCount()).isEqualTo(123);
   }
 
   @Test(expected = BadRequestException.class)

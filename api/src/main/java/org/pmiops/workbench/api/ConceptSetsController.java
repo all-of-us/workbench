@@ -258,10 +258,14 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
       throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
     }
-    String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domainEnum);
-    dbConceptSet.setParticipantCount(
-        conceptBigQueryService.getParticipantCountForConcepts(omopTable,
-            dbConceptSet.getConceptIds()));
+    if (dbConceptSet.getConceptIds().isEmpty()) {
+      dbConceptSet.setParticipantCount(0);
+    } else {
+      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domainEnum);
+      dbConceptSet.setParticipantCount(
+          conceptBigQueryService.getParticipantCountForConcepts(omopTable,
+              dbConceptSet.getConceptIds()));
+    }
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setLastModifiedTime(now);
