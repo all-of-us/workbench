@@ -2,7 +2,6 @@ import {Component, EventEmitter, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ConceptSet, ConceptsService, DomainInfo} from '../../../generated';
 import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
-import {ConceptAddModalComponent} from '../concept-add-modal/component';
 import {Domain} from '../../../generated/model/domain';
 
 @Component({
