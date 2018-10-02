@@ -57,14 +57,6 @@ export class EditModalComponent {
     this.rDescription = this.resource.cohort ?
       this.resource.cohort.description : this.resource.conceptSet.description;
     this.form.setValue({ name: this.rName, description: this.rDescription });
-    if (this.resource.cohort) {
-      this.form.setValue({name: this.resource.cohort.name,
-        description: this.resource.cohort.description});
-    } else if (this.resource.conceptSet) {
-      this.form.setValue({name: this.resource.conceptSet.name,
-        description: this.resource.conceptSet.description});
-    }
-    this.form.setValue({ name: this.rName, description: this.rDescription });
   }
 
   close(): void {
@@ -108,10 +100,8 @@ export class EditModalComponent {
 
   get canSave(): boolean {
     if (this.editing) {
-      const nameHasChanged = this.name.value !== this.resource.cohort.name ||
-        this.name.value !== this.resource.conceptSet.name;
-      const descHasChanged = this.description.value !== this.resource.cohort.description ||
-        this.description.value !== this.resource.conceptSet.description;
+      const nameHasChanged = this.name.value !== this.rName;
+      const descHasChanged = this.description.value !== this.rDescription;
       return this.form.valid && (nameHasChanged || descHasChanged) && !this.loading;
     } else {
       return false;

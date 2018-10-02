@@ -20,10 +20,12 @@
     <div class="name" [class.disabled]="actionsDisabled" (click)="actionsDisabled || openResource(this.resourceCard)">
       {{resourceCard.notebook?.name}}
       {{resourceCard.cohort?.name}}
+      {{resourceCard.conceptSet?.name}}
     </div>
   </div>
   <div>
     {{resourceCard.cohort?.description}}
+    {{resourceCard.conceptSet?.description}}
   </div>
   <div class="footer">
     <div class="last-modified">Last Modified: {{resourceCard.modifiedTime | date}}</div>
