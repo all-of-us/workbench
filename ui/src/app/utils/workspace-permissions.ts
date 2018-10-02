@@ -40,6 +40,6 @@ export class WorkspacePermissions {
 
   get isReadWrite() {
     return this.accessLevel === WorkspaceAccessLevel.WRITER &&
-        this.isOwner == false;
+        this.isOwner === false;
   }
 }

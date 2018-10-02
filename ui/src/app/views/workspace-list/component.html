@@ -109,13 +109,13 @@
               {{workspacePermissions.workspace.lastModifiedTime | date:'short'}}
             </div>
 
-            <div class="owner-permission" *ngIf="workspacePermissions.isOwner">
+            <div class="permission-box owner-permission" *ngIf="workspacePermissions.isOwner">
               {{workspacePermissions.accessLevel}}
             </div>
-            <div class="reader-permission" *ngIf="workspacePermissions.isReadOnly">
-            {{workspacePermissions.accessLevel}}
+            <div class="permission-box reader-permission" *ngIf="workspacePermissions.isReadOnly">
+              {{workspacePermissions.accessLevel}}
             </div>
-            <div class="writer-permission" *ngIf="workspacePermissions.isReadWrite">
+            <div class="permission-box writer-permission" *ngIf="workspacePermissions.isReadWrite">
               {{workspacePermissions.accessLevel}}
             </div>
           </div>

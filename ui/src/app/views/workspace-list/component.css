@@ -108,32 +108,26 @@
   color: #216FB4;
 }
 
-.card .owner-permission {
+.card .permission-box {
   color: #FFFFFF;
+  height: 1rem;
+  width: 3.2rem;
+  text-align: center;
+  border-radius: 0.2rem;
+  padding: 0;
+  box-shadow: none;
+}
+
+.card .permission-box.owner-permission {
   background-color: #4996A2;
-  height: 1rem;
-  width: 3.2rem;
-  text-align: center;
-  border-radius: 0.2rem;
 }
 
-.card .writer-permission {
-  color: #FFFFFF;
+.card .permission-box.writer-permission {
   background-color: #92B572;
-  height: 1rem;
-  width: 3.2rem;
-  text-align: center;
-  border-radius: 0.2rem;
-  justify-content:center;
 }
 
-.card .reader-permission {
-  color: #FFFFFF;
+.card .permission-box.reader-permission {
   background-color: #8F8E8F;
-  height: 1rem;
-  width: 3.2rem;
-  text-align: center;
-  border-radius: 0.2rem;
 }
 
 .header-area {
