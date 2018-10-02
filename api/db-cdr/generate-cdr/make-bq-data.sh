@@ -179,7 +179,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 (concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept,
 concept_code, count_value, prevalence, source_count_value, synonyms)
 select c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
-0 as count_value , 0.0 as prevalence, 0 as source_count_value,concat(cast(c.concept_id as string),'\|',string_agg(cs.concept_synonym_name,'\|')) as synonyms
+0 as count_value , 0.0 as prevalence, 0 as source_count_value,concat(cast(c.concept_id as string),'\\|',string_agg(cs.concept_synonym_name,'\\|')) as synonyms
 from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
 on c.concept_id=cs.concept_id group by c.concept_id,c.concept_name,c.domain_id,c.vocabulary_id,c.concept_class_id, c.standard_concept, c.concept_code"
 
