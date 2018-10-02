@@ -8,11 +8,8 @@ import java.util.Set;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,17 +29,7 @@ public class ConceptBigQueryService {
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.conceptService = conceptService;
   }
-
-  private String getSourceConceptIdColumn(TableConfig tableConfig, String tableName) {
-    for (ColumnConfig columnConfig : tableConfig.columns) {
-      if (DOMAIN_CONCEPT_SOURCE.equals(columnConfig.domainConcept)) {
-        return columnConfig.name;
-      }
-    }
-    throw new ServerErrorException("Couldn't find source concept column for " + tableName);
-  }
-
-
+  
   public int getParticipantCountForConcepts(String omopTable, Set<Long> conceptIds) {
     ConceptColumns conceptColumns = cdrBigQuerySchemaConfigService.getConceptColumns(omopTable);
     ConceptIds classifiedConceptIds = conceptService.classifyConceptIds(conceptIds);
