@@ -34,6 +34,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.ConceptCacheConfiguration;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -71,7 +72,7 @@ import org.springframework.context.annotation.Import;
         BigQueryService.class, ParticipantCounter.class, DomainLookupService.class,
         CohortQueryBuilder.class, FieldSetQueryBuilder.class, QueryBuilderFactory.class,
         TestJpaConfig.class, ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class,
-        AnnotationQueryBuilder.class})
+        AnnotationQueryBuilder.class, CdrBigQuerySchemaConfigService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 

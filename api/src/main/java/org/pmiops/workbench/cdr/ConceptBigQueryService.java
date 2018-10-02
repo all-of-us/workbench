@@ -5,12 +5,13 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.QueryResult;
 import com.google.common.collect.ImmutableMap;
 import java.util.Set;
-import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
+import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
-import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,13 +22,15 @@ public class ConceptBigQueryService {
   private static final String DOMAIN_CONCEPT_SOURCE = "source";
 
   private final BigQueryService bigQueryService;
-  private final Provider<CdrBigQuerySchemaConfig> bigQuerySchemaConfigProvider;
+  private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  private final ConceptService conceptService;
 
   @Autowired
   public ConceptBigQueryService(BigQueryService bigQueryService,
-      Provider<CdrBigQuerySchemaConfig> bigQuerySchemaConfigProvider) {
+      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService, ConceptService conceptService) {
     this.bigQueryService = bigQueryService;
-    this.bigQuerySchemaConfigProvider = bigQuerySchemaConfigProvider;
+    this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
+    this.conceptService = conceptService;
   }
 
   private String getSourceConceptIdColumn(TableConfig tableConfig, String tableName) {
@@ -39,24 +42,37 @@ public class ConceptBigQueryService {
     throw new ServerErrorException("Couldn't find source concept column for " + tableName);
   }
 
-  public int getParticipantCountForConcepts(String omopTable, Set<Long> conceptIds) {
-    TableConfig tableConfig = bigQuerySchemaConfigProvider.get().cohortTables.get(omopTable);
-    if (tableConfig == null) {
-      throw new BadRequestException("Invalid OMOP table: " + omopTable);
-    }
-    String sourceConceptIdColumn = getSourceConceptIdColumn(tableConfig, omopTable);
 
+  public int getParticipantCountForConcepts(String omopTable, Set<Long> conceptIds) {
+    ConceptColumns conceptColumns = cdrBigQuerySchemaConfigService.getConceptColumns(omopTable);
+    ConceptIds classifiedConceptIds = conceptService.classifyConceptIds(conceptIds);
+    if (classifiedConceptIds.getSourceConceptIds().isEmpty()
+        && classifiedConceptIds.getStandardConceptIds().isEmpty()) {
+      return 0;
+    }
     StringBuilder innerSql = new StringBuilder("select count(distinct person_id) person_count\n");
     innerSql.append("from ");
     innerSql.append(String.format("`${projectId}.${dataSetId}.%s`", omopTable));
     innerSql.append(" where ");
-    innerSql.append(sourceConceptIdColumn);
-    innerSql.append(" in unnest(@conceptIds)");
-
+    ImmutableMap.Builder<String, QueryParameterValue> paramMap = ImmutableMap.builder();
+    if (!classifiedConceptIds.getStandardConceptIds().isEmpty()) {
+      innerSql.append(conceptColumns.getStandardConceptColumn().name);
+      innerSql.append(" in unnest(@standardConceptIds)");
+      paramMap.put("standardConceptIds", QueryParameterValue.array(
+          classifiedConceptIds.getStandardConceptIds().toArray(new Long[0]), Long.class));
+      if (!classifiedConceptIds.getSourceConceptIds().isEmpty()) {
+        innerSql.append(" or ");
+      }
+    }
+    if (!classifiedConceptIds.getSourceConceptIds().isEmpty()) {
+      innerSql.append(conceptColumns.getSourceConceptColumn().name);
+      innerSql.append(" in unnest(@sourceConceptIds)");
+      paramMap.put("sourceConceptIds", QueryParameterValue.array(
+          classifiedConceptIds.getSourceConceptIds().toArray(new Long[0]), Long.class));
+    }
     QueryJobConfiguration jobConfiguration = QueryJobConfiguration
         .newBuilder(innerSql.toString())
-        .setNamedParameters(ImmutableMap.of("conceptIds",
-            QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class)))
+        .setNamedParameters(paramMap.build())
         .setUseLegacySql(false)
         .build();
     QueryResult result = bigQueryService.executeQuery(

@@ -201,7 +201,7 @@ public class ConceptSetsControllerTest {
   @Before
   public void setUp() throws Exception {
 
-    ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
         conceptSynonymDao, conceptService, conceptBigQueryService, userProvider, CLOCK);
     WorkspacesController workspacesController =

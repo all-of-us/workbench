@@ -5,12 +5,18 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
 import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -20,13 +26,27 @@ import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({BigQueryService.class, TestBigQueryCdrSchemaConfig.class, TestJpaConfig.class,
-    ConceptBigQueryService.class})
+    CdrBigQuerySchemaConfigService.class})
 public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired
   private TestWorkbenchConfig testWorkbenchConfig;
 
+  @PersistenceContext
+  private EntityManager entityManager;
+
   @Autowired
+  private ConceptSynonymDao conceptSynonymDao;
+
+  @Autowired
+  private ConceptDao conceptDao;
+
+  @Autowired
+  private BigQueryService bigQueryService;
+
+  @Autowired
+  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+
   private ConceptBigQueryService conceptBigQueryService;
 
   @Before
@@ -35,12 +55,16 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
+    conceptBigQueryService = new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService,
+        conceptService);
   }
 
   @Test
   public void testGetConceptCount() {
     assertThat(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
-        ImmutableSet.of(1L, 6L, 13L, 44829697L))).isEqualTo(2);
+        ImmutableSet.of(1L, 6L, 13L, 192819L))).isEqualTo(2);
   }
 
   @Override
