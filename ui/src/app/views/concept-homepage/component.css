@@ -178,33 +178,6 @@
   color: #4A4A4A;
 }
 
-.add-section {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  color: white;
-  border-radius: 3rem;
-  background-color: #2691D0;
-  height: 1.5rem;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.add-text {
-  padding: 0;
-  font-weight: 500;
-  max-width: 0;
-  overflow: hidden;
-  white-space: pre;
-  transition: max-width 0.5s ease-out, padding 0.1s linear 0.2s;
-}
-
-.add-text.hovering {
-  padding: 0 0.5rem;
-  max-width: 200px;
-}
-
 .add-icon {
   fill: white;
   height: 1.5rem;

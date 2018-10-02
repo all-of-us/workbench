@@ -51,6 +51,7 @@ import {ResourceCardComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {SlidingFabComponent} from './views/sliding-fab/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
 import {TopBoxComponent} from './views/top-box/component';
 import {UnregisteredComponent} from './views/unregistered/component';
@@ -152,6 +153,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
+    SlidingFabComponent,
     StigmatizationPageComponent,
     TopBoxComponent,
     UnregisteredComponent,
