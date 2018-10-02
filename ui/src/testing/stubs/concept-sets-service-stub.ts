@@ -39,7 +39,7 @@ export class ConceptSetsServiceStub {
                           conceptSet: ConceptSet): Observable<ConceptSet> {
     return new Observable<ConceptSet>(observer => {
       setTimeout(() => {
-        observer.next([conceptSet]);
+        observer.next(conceptSet);
         this.conceptList = [conceptSet];
         observer.complete();
       }, 0);
