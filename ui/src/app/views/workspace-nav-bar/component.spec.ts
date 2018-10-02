@@ -38,6 +38,12 @@ import {WorkspaceShareComponent} from '../workspace-share/component';
 class FakeAppComponent {}
 
 @Component({
+  selector: 'app-fake-clone',
+  template: 'clone'
+})
+class FakeCloneComponent {}
+
+@Component({
   selector: 'app-fake-about',
   template: 'about'
 })
@@ -85,6 +91,10 @@ describe('WorkspaceNavBarComponent', () => {
               component: FakeAboutComponent,
             },
             {
+              path: 'clone',
+              component: FakeCloneComponent,
+            },
+            {
               path: 'concepts',
               component: FakeConceptsComponent,
             },
@@ -104,6 +114,7 @@ describe('WorkspaceNavBarComponent', () => {
         ConfirmDeleteModalComponent,
         FakeAboutComponent,
         FakeAppComponent,
+        FakeCloneComponent,
         FakeConceptsComponent,
         FakeNotebooksComponent,
         FakeCohortsComponent,
@@ -162,5 +173,26 @@ describe('WorkspaceNavBarComponent', () => {
 
     updateAndTick(fixture);
     expect(de.query(By.css('app-fake-notebooks'))).toBeTruthy();
+  }));
+
+
+  it('should update on workspace navigate', fakeAsync(() => {
+    const newId = 'my-new-wsid';
+    router.navigateByUrl(`/workspaces/namespace/${newId}`);
+
+    // Clarity needs several ticks/redraw cycles to render its button group.
+    tick();
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
+
+    const cloneBtn = de.queryAll(By.css('clr-dropdown-menu button'))
+      .find(b => b.nativeElement.textContent.includes('Clone'));
+    simulateClick(fixture, cloneBtn);
+
+    expect(de.query(By.css('app-fake-clone'))).toBeTruthy();
+    expect(router.routerState.snapshot.url).toContain(newId);
   }));
 });
