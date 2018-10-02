@@ -9,7 +9,7 @@ Workspace,
 WorkspaceAccessLevel,
 } from 'generated';
 
-import {CreateConceptModalComponent} from 'app/views/conceptset-create-modal/component';
+import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
 
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 
@@ -41,8 +41,8 @@ export class ConceptSetListComponent implements OnInit {
     this.accessLevel = wsData.accessLevel;
   }
 
-  @ViewChild(CreateConceptModalComponent)
-  conceptCreateModal: CreateConceptModalComponent;
+  @ViewChild(CreateConceptSetModalComponent)
+  conceptCreateModal: CreateConceptSetModalComponent;
 
   ngOnInit(): void {
       this.wsNamespace = this.route.snapshot.params['ns'];

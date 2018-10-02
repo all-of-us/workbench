@@ -14,7 +14,7 @@ import {ConceptAddModalComponent} from '../concept-add-modal/component';
   ],
   templateUrl: './component.html',
 })
-export class CreateConceptModalComponent {
+export class CreateConceptSetModalComponent {
   @Output() onUpdate: EventEmitter<void> = new EventEmitter();
   public modalOpen  = false;
   wsNamespace: string;
@@ -67,7 +67,6 @@ export class CreateConceptModalComponent {
       description: this.description,
       domain: this.domain
     };
-    console.log(concept);
     this.conceptSetService.createConceptSet(this.wsNamespace, this.wsId, concept)
         .subscribe(() => {
       this.modalOpen = false;
