@@ -11,14 +11,8 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
   @Input() option: any;
   @Input() highlighted: boolean;
 
-  isTruncated = false;
-
-  @ViewChild('match') match;
-  checkMatch() {
-    console.log(this.match.nativeElement);
-  }
-
   @ViewChild('button') button;
+  isTruncated = false;
 
   constructor() { }
 
@@ -27,18 +21,28 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    setTimeout(() => this.checkTruncation(), 1000);
+    setTimeout(() => this.checkTruncation());
   }
 
   checkTruncation() {
     const elem = this.button.nativeElement;
-    const highlight = document.getElementById('match');
-    if (highlight) {
-      console.log(this.option.name);
-      console.log(elem);
-      console.log(highlight);
+    this.isTruncated = (elem.offsetWidth - 20) < elem.scrollWidth;
+    if (this.isTruncated) {
+      this.checkPosition(elem);
     }
-    this.isTruncated = elem.offsetWidth < elem.scrollWidth;
+  }
+
+  checkPosition(elem: any) {
+    const id = 'match' + this.option.id.toString();
+    const highlight = document.getElementById(id);
+    const eCoords = elem.getBoundingClientRect();
+    const hCoords = highlight.getBoundingClientRect();
+    const padding = parseFloat(window.getComputedStyle(elem).getPropertyValue('padding-left'))
+      + parseFloat(window.getComputedStyle(elem).getPropertyValue('padding-right'));
+    const diff = (hCoords.left + hCoords.width) - eCoords.left;
+    if (diff > (eCoords.width - padding))  {
+      highlight.style.background = 'none';
+    }
   }
 
   get popperName() {

@@ -85,7 +85,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               this.highlightedOption = null;
               if (optionNames.indexOf(option.name) === -1) {
                 optionNames.push(option.name);
-                option.displayName = highlightMatches([this.searchTerm], option.name);
+                option.displayName = highlightMatches([this.searchTerm], option.name, option.id.toString());
                 this.options.push(option);
               } else {
                 if (this.multiples[option.name]) {
