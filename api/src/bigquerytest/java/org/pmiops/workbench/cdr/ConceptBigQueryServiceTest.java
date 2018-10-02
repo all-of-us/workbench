@@ -16,6 +16,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
+import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
@@ -59,12 +60,36 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
     conceptBigQueryService = new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService,
         conceptService);
+
+    conceptDao.deleteAll();
   }
 
   @Test
-  public void testGetConceptCount() {
+  public void testGetConceptCountNoConceptsSaved() {
+    assertThat(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(1L, 6L, 13L, 192819L))).isEqualTo(0);
+  }
+
+  @Test
+  public void testGetConceptCountConceptsSaved() {
+    saveConcept(1L, "S");
+    saveConcept(6L, null);
+    saveConcept(13L, null);
+    saveConcept(192819L, "C");
+
     assertThat(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
         ImmutableSet.of(1L, 6L, 13L, 192819L))).isEqualTo(2);
+  }
+
+  private void saveConcept(long conceptId, String standardConceptValue) {
+    Concept concept = new Concept();
+    concept.setConceptId(conceptId);
+    concept.setStandardConcept(standardConceptValue);
+    concept.setConceptCode("concept" + conceptId);
+    concept.setConceptName("concept " + conceptId);
+    concept.setVocabularyId("V");
+    concept.setDomainId("D");
+    conceptDao.save(concept);
   }
 
   @Override
