@@ -240,6 +240,8 @@ public class WorkspacesControllerTest {
   UserRecentResourceService userRecentResourceService;
   @Autowired
   CohortReviewController cohortReviewController;
+  @Autowired
+  ConceptBigQueryService conceptBigQueryService;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
@@ -817,6 +819,9 @@ public class WorkspacesControllerTest {
                             .participantId(participantId)
                             .cohortReviewId(cr1.getCohortReviewId())).getBody();
 
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+        .thenReturn(123);
     ConceptSet conceptSet1 = conceptSetsController.createConceptSet(workspace.getNamespace(),
         workspace.getId(), new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
             .getBody();
@@ -906,8 +911,8 @@ public class WorkspacesControllerTest {
     List<ConceptSet> conceptSets = conceptSetsController.getConceptSetsInWorkspace(cloned.getNamespace(),
         cloned.getId()).getBody().getItems();
     assertThat(conceptSets.size()).isEqualTo(2);
-    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned);
-    assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned);
+    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 123);
+    assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned, 0);
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId());
     try {
@@ -918,8 +923,63 @@ public class WorkspacesControllerTest {
     }
   }
 
-  private void assertConceptSetClone(ConceptSet clonedConceptSet, ConceptSet originalConceptSet,
-      Workspace clonedWorkspace) {
+  @Test
+  public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() throws Exception {
+    Long participantId = 1L;
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    CdrVersion cdrVersion2 = new CdrVersion();
+    cdrVersion2.setName("2");
+    //set the db name to be empty since test cases currently
+    //run in the workbench schema only.
+    cdrVersion2.setCdrDbName("");
+    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
+
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+        .thenReturn(123);
+    ConceptSet conceptSet1 = conceptSetsController.createConceptSet(workspace.getNamespace(),
+        workspace.getId(), new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+        .getBody();
+    conceptSet1 =
+        conceptSetsController.updateConceptSetConcepts(workspace.getNamespace(), workspace.getId(),
+            conceptSet1.getId(), new UpdateConceptSetRequest().etag(conceptSet1.getEtag())
+                .addedIds(ImmutableList.of(CLIENT_CONCEPT_1.getConceptId(),
+                    CLIENT_CONCEPT_2.getConceptId()))).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
+
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+        .thenReturn(456);
+
+    Workspace cloned = workspacesController.cloneWorkspace(workspace.getNamespace(),
+        workspace.getId(), req).getBody().getWorkspace();
+    List<ConceptSet> conceptSets = conceptSetsController.getConceptSetsInWorkspace(cloned.getNamespace(),
+        cloned.getId()).getBody().getItems();
+    assertThat(conceptSets.size()).isEqualTo(1);
+    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 456);
+  }
+
+
+    private void assertConceptSetClone(ConceptSet clonedConceptSet, ConceptSet originalConceptSet,
+      Workspace clonedWorkspace, long participantCount) {
     // Get the full concept set in order to retrieve the concepts.
     clonedConceptSet = conceptSetsController.getConceptSet(clonedWorkspace.getNamespace(),
         clonedWorkspace.getId(), clonedConceptSet.getId()).getBody();
@@ -931,6 +991,7 @@ public class WorkspacesControllerTest {
     assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
     assertThat(clonedConceptSet.getLastModifiedTime()).isEqualTo(clonedWorkspace.getLastModifiedTime());
     assertThat(clonedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
+    assertThat(clonedConceptSet.getParticipantCount()).isEqualTo(participantCount);
   }
 
   private void assertCohortAnnotationDefinitions(CohortAnnotationDefinitionListResponse responseList,
