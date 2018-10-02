@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Input, OnChanges} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
     CohortReviewService,
@@ -127,20 +127,21 @@ const labRefRange = {
   templateUrl: './detail-tabs.component.html',
   styleUrls: ['./detail-tabs.component.css']
 })
-export class DetailTabsComponent implements OnInit {
+export class DetailTabsComponent implements OnChanges, OnInit {
   subscription: Subscription;
   loading = false;
   data;
   participantsId: any;
-  procedureData;
-  drugData;
-  conditionData;
+  procedureData =[];
+  drugData = [];
+  conditionData = [];
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
   conditionTitle: string;
   procedureTitle: string;
   drugTitle: string;
+  @Input() clickedParticipantId: number;
   readonly stubs = [
     'survey',
   ];
@@ -308,18 +309,33 @@ export class DetailTabsComponent implements OnInit {
   ) {}
 
 
+  ngOnChanges() {
+    if (this.clickedParticipantId) {
+      this.participantsId = this.clickedParticipantId
+      this.getDomainsParticipantsData();
+    }
+  }
+
   ngOnInit() {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     this.subscription = this.route.data.map(({participant}) => participant)
       .subscribe(participants => {
         this.participantsId = participants.participantId;
       });
-    const limit = 5;
+    this.getDomainsParticipantsData();
+  }
+
+  getDomainsParticipantsData() {
+    this.procedureData = [];
+    this.drugData = [];
+    this.conditionData = [];
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    const limit = 10;
+    console.log(this.participantsId);
     this.domainList.map(domainName => {
       this.actions.fetchIndividualParticipantsData(ns, wsid, cid,
       cdrid, this.participantsId, domainName, limit);
-      const getConditionsParticipantsDomainData = this.ngRedux
+      const getParticipantsDomainData = this.ngRedux
         .select(getParticipantData(domainName))
         .filter(loading => !!loading)
         .subscribe(loading => {
@@ -327,6 +343,7 @@ export class DetailTabsComponent implements OnInit {
           if (domainName === DomainType[DomainType.CONDITION]) {
             this.conditionTitle = typeToTitle(domainName);
             this.conditionData = data.items;
+            console.log(this.conditionData);
           } else if (domainName === DomainType[DomainType.PROCEDURE]) {
             this.procedureTitle = typeToTitle(domainName);
             this.procedureData = data.items;
@@ -335,7 +352,7 @@ export class DetailTabsComponent implements OnInit {
             this.drugData = data.items;
           }
         });
-      this.subscription = getConditionsParticipantsDomainData;
+      this.subscription = getParticipantsDomainData;
     });
   }
 }
