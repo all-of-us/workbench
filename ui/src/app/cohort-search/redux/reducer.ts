@@ -121,11 +121,11 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(
             ['criteria', 'tree', action.kind, action.subtype, action.parentId],
-            fromJS([])
+            fromJS(action.results)
           )
           .setIn(
             ['criteria', 'tree', 'empty', action.kind, action.parentId],
-            [].length === 0
+            action.results.length === 0
           )
           .deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
