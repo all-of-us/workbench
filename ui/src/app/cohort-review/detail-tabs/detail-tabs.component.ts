@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, OnInit, Input, OnChanges} from '@angular/core';
+import {Component, Input, OnInit, OnChanges} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
     CohortReviewService,
@@ -132,7 +132,7 @@ export class DetailTabsComponent implements OnChanges, OnInit {
   loading = false;
   data;
   participantsId: any;
-  procedureData =[];
+  procedureData = [];
   drugData = [];
   conditionData = [];
   domainList = [DomainType[DomainType.CONDITION],
@@ -311,7 +311,7 @@ export class DetailTabsComponent implements OnChanges, OnInit {
 
   ngOnChanges() {
     if (this.clickedParticipantId) {
-      this.participantsId = this.clickedParticipantId
+      this.participantsId = this.clickedParticipantId;
       this.getDomainsParticipantsData();
     }
   }
