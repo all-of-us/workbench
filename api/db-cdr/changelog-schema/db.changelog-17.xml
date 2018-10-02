@@ -9,13 +9,13 @@
         <validCheckSum>ANY</validCheckSum>
         <createTable tableName="domain_info">
             <column name="concept_id" type="INTEGER">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints nullable="false"/>
             </column>
             <column name="domain" type="tinyint">
                 <constraints nullable="false"/>
             </column>
             <column name="domain_id" type="VARCHAR(20)">
-                <constraints nullable="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(30)">
                 <constraints nullable="false"/>

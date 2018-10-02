@@ -642,30 +642,32 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 (id, analysis_id, stratum_1,stratum_2,stratum_3,stratum_4,count_value,source_count_value)
 SELECT 0,1900 as analysis_id,
 cast(m1.measurement_concept_id as string) as stratum_1,CAST(p1.gender_concept_id AS STRING) as stratum_2,'Measurement' as stratum_3,
-m1.value_source_value as stratum_4,
+c2.concept_name as stratum_4,
 count(distinct p1.person_id) as count_value,
 0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on m1.measurement_concept_id = c.concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on cast(m1.measurement_concept_id as string)=ar.stratum_1
-where m1.value_as_number is null and m1.value_source_value is not null
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+where m1.value_as_number is null and m1.value_as_concept_id != 0
 and m1.measurement_concept_id > 0 and m1.measurement_concept_id not in (4091452,4065279,3027018)
 and ar.analysis_id = 3000 and ar.stratum_3='Measurement' and ar.stratum_4 != 'unknown'
-group by m1.measurement_concept_id,m1.value_source_value,p1.gender_concept_id
+group by m1.measurement_concept_id,c2.concept_name,p1.gender_concept_id
 union all
 SELECT 0,1900 as analysis_id,
 cast(m1.measurement_source_concept_id as string) as stratum_1,CAST(p1.gender_concept_id AS STRING) as stratum_2,'Measurement' as stratum_3,
-m1.value_source_value as stratum_4,
+c2.concept_name as stratum_4,
 count(distinct p1.person_id) as count_value,
 count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on cast(m1.measurement_source_concept_id as string)=ar.stratum_1
-where m1.value_as_number is null and m1.value_source_value is not null
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on m1.value_as_concept_id=c2.concept_id
+where m1.value_as_number is null and m1.value_as_concept_id != 0
 and ar.analysis_id = 3000 and ar.stratum_3='Measurement' and ar.stratum_4 != 'unknown'
 and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id != m1.measurement_concept_id
-group by m1.measurement_source_concept_id,m1.value_source_value,p1.gender_concept_id"
+group by m1.measurement_source_concept_id,c2.concept_name,p1.gender_concept_id"
 
 # 1901 Measurement response, age decile histogram data (age decile > 2)
 # We do not yet generate the binned source counts of standard concepts
