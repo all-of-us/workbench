@@ -27,7 +27,6 @@ export class ConfirmDeleteModalComponent {
   emitDelete(resource: any): void {
     if (!this.loading) {
       this.loading = true;
-       console.log(resource);
       this.receiveDelete.emit(resource);
     }
   }
