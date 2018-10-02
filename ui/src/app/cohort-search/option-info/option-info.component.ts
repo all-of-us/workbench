@@ -11,8 +11,14 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
   @Input() option: any;
   @Input() highlighted: boolean;
 
-  @ViewChild('button') button;
   isTruncated = false;
+
+  @ViewChild('match') match;
+  checkMatch() {
+    console.log(this.match.nativeElement);
+  }
+
+  @ViewChild('button') button;
 
   constructor() { }
 
@@ -21,11 +27,17 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    setTimeout(() => this.checkTruncation(), 1);
+    setTimeout(() => this.checkTruncation(), 1000);
   }
 
   checkTruncation() {
     const elem = this.button.nativeElement;
+    const highlight = document.getElementById('match');
+    if (highlight) {
+      console.log(this.option.name);
+      console.log(elem);
+      console.log(highlight);
+    }
     this.isTruncated = elem.offsetWidth < elem.scrollWidth;
   }
 
