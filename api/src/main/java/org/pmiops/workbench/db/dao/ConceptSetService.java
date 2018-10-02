@@ -11,15 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConceptSetService {
 
-  private final ConceptBigQueryService conceptBigQueryService;
-
-  public ConceptSetService(ConceptBigQueryService conceptBigQueryService) {
-    this.conceptBigQueryService = conceptBigQueryService;
-  }
-
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
   @Autowired private ConceptSetDao conceptSetDao;
+
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
 
   @Transactional
   public ConceptSet cloneConceptSetAndConceptIds(ConceptSet conceptSet, Workspace targetWorkspace,
@@ -30,7 +26,6 @@ public class ConceptSetService {
       c.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(omopTable,
               conceptSet.getConceptIds()));
-      c.setParticipantCount(conceptBigQueryService.getParticipantCountForConcepts());
     }
     c.setWorkspaceId(targetWorkspace.getWorkspaceId());
     c.setCreator(targetWorkspace.getCreator());
