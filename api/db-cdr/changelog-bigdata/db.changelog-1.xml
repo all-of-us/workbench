@@ -118,6 +118,18 @@
             ADD FULLTEXT INDEX concept_code_index
             (concept_code);
         </sql>
+    </changeSet><changeSet id="add concept_code_index full_text" author="biopete" runAlways="true">
+        <validCheckSum>ANY</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="concept_code_index"/>
+            </not>
+        </preConditions>
+        <sql dbms="mysql">
+            ALTER TABLE concept
+            ADD FULLTEXT INDEX concept_code_index
+            (concept_code);
+        </sql>
     </changeSet>
 
     <changeSet id="add idx_concept_1" author="biopete" runAlways="true">

@@ -179,7 +179,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 (concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept,
 concept_code, count_value, prevalence, source_count_value, synonyms)
 select c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
-0 as count_value , 0.0 as prevalence, 0 as source_count_value,concat(cast(c.concept_id as string),'\\|',c.vocabulary_id,':',c.concept_code,'\\|',c.concept_name,'\\|',string_agg(cs.concept_synonym_name,'\\|')) as synonyms
+0 as count_value , 0.0 as prevalence, 0 as source_count_value,concat(cast(c.concept_id as string),'\|',string_agg(cs.concept_synonym_name,'\|')) as synonyms
 from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
 on c.concept_id=cs.concept_id group by c.concept_id,c.concept_name,c.domain_id,c.vocabulary_id,c.concept_class_id, c.standard_concept, c.concept_code"
 
@@ -300,7 +300,7 @@ echo "Inserting concept_synonym"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\`
  (id, concept_id, concept_synonym_name)
-SELECT 0, c.concept_id, c.concept_synonym_name
+SELECT 0, c.concept_id, REPLACE(c.concept_synonym_name,"|","||") as concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
 
 ###########################
@@ -309,8 +309,8 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
 echo "Updating all concept count in domain_vocabulary_info"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain_vocabulary_info\`
-(concept_id,vocabulary_id,all_concept_count,standard_concept_count)
-select d2.domain_concept_id as concept_id,c.vocabulary_id as vocabulary_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
+(domain_id,vocabulary_id,all_concept_count,standard_concept_count)
+select d2.domain_id as domain_id,c.vocabulary_id as vocabulary_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
 SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
 \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c
 join \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain\` d2
