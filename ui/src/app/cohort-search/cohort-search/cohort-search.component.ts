@@ -62,7 +62,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
       if (cohortId) {
         this.api.getCohort(data.workspace.namespace, data.workspace.id, cohortId)
           .subscribe(cohort => {
-            console.log(cohort);
             if (cohort.criteria) {
               this.actions.loadFromJSON(cohort.criteria);
               this.actions.runAllRequests();
