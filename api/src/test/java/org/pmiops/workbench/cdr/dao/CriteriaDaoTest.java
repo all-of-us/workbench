@@ -63,6 +63,7 @@ public class CriteriaDaoTest {
   private Criteria drugCriteriaIngredient1;
   private Criteria drugCriteriaBrand;
   private Criteria labCriteria;
+  private Criteria ppiCriteria;
 
   @Before
   public void setUp() {
@@ -83,6 +84,7 @@ public class CriteriaDaoTest {
     drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
     drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "3", "BLAH", 0, false, true, "");
     labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
+    ppiCriteria = createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), "1586135", "USA", 0, false, true, "324836.324837").conceptId("1586136");
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
@@ -105,6 +107,7 @@ public class CriteriaDaoTest {
     criteriaDao.save(drugCriteriaIngredient1);
     criteriaDao.save(drugCriteriaBrand);
     criteriaDao.save(labCriteria);
+    criteriaDao.save(ppiCriteria);
 
     conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
@@ -113,7 +116,9 @@ public class CriteriaDaoTest {
       )
     );
     conceptDao.save(new Concept().conceptId(123L));
+    conceptDao.save(new Concept().conceptId(1586136L));
     conceptSynonymDao.save(new ConceptSynonym().conceptId(123).conceptSynonymName("test1mywordTest"));
+    conceptSynonymDao.save(new ConceptSynonym().conceptId(1586136).conceptSynonymName("ppiwordTest"));
   }
 
   @After
@@ -137,6 +142,7 @@ public class CriteriaDaoTest {
     criteriaDao.delete(drugCriteriaIngredient1);
     criteriaDao.delete(drugCriteriaBrand);
     criteriaDao.delete(labCriteria);
+    criteriaDao.delete(ppiCriteria);
   }
 
   @Test
@@ -183,6 +189,19 @@ public class CriteriaDaoTest {
       criteriaDao.findCriteriaByType(TreeType.ICD9.name());
     final Set<String> typeList = icd9List.stream().map(Criteria::getType).collect(Collectors.toSet());
     assertEquals(1, typeList.size());
+  }
+
+  @Test
+  public void findCriteriaByTypeForName() throws Exception {
+    //match on name
+    List<Criteria> ppi = criteriaDao.findCriteriaByTypeForName(TreeType.PPI.name(), "USA", null);
+    assertEquals(1, ppi.size());
+    assertEquals(ppiCriteria, ppi.get(0));
+
+    //match on synonym
+    ppi = criteriaDao.findCriteriaByTypeForName(TreeType.PPI.name(), "piword", null);
+    assertEquals(1, ppi.size());
+    assertEquals(ppiCriteria, ppi.get(0));
   }
 
   @Test
