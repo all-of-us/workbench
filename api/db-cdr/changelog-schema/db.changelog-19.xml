@@ -15,8 +15,15 @@
     </preConditions>
     <sql dbms="mysql">
       ALTER TABLE concept
-      ADD FULLTEXT INDEX vocabulary_id_index
-      (vocabulary_id);
+      DROP INDEX idx_concept_name;
+    </sql>
+    <sql dbms="mysql">
+      ALTER TABLE concept
+      DROP INDEX idx_concept_code;
+    </sql>
+    <sql dbms="mysql">
+      ALTER TABLE concept
+      DROP INDEX idx_vocabulary_id;
     </sql>
   </changeSet>
 
@@ -29,8 +36,8 @@
     </preConditions>
     <sql dbms="mysql">
       ALTER TABLE concept
-      ADD FULLTEXT INDEX synonyms_index
-      (synonyms);
+      ADD FULLTEXT INDEX search_index
+      (concept_name,concept_code,vocabulary_id,synonyms);
     </sql>
   </changeSet>
 

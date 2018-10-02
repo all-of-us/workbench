@@ -300,7 +300,7 @@ echo "Inserting concept_synonym"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept_synonym\`
  (id, concept_id, concept_synonym_name)
-SELECT 0, c.concept_id, REPLACE(c.concept_synonym_name,"|","||") as concept_synonym_name
+SELECT 0, c.concept_id, c.concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
 
 ###########################
