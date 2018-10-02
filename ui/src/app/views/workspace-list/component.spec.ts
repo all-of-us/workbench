@@ -191,13 +191,11 @@ describe('WorkspaceListComponent', () => {
     for (let i = 0; i < workspaceList.length; i++) {
       if (workspaceList[i].isOwner) {
         expect (permissionsOnPage[i].classes).toContain('owner-permission');
-      }
-      else if (workspaceList[i].isReadOnly) {
+      } else if (workspaceList[i].isReadOnly) {
         expect (permissionsOnPage[i].classes).toContain('reader-permission');
-      }
-      else {
+      } else {
         expect (permissionsOnPage[i].classes).toContain('writer-permission');
       }
     }
-  }))
+  }));
 });
