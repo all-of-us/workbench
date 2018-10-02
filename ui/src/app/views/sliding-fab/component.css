@@ -1,12 +1,13 @@
 .sliding-button {
+	box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
   position: fixed;
   bottom: 1rem;
   right: 1rem;
   color: white;
   border-radius: 3rem;
   background-color: #2691D0;
-  height: 1.5rem;
-  min-width: 1.5rem;
+  height: 1.8rem;
+  min-width: 1.8rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
