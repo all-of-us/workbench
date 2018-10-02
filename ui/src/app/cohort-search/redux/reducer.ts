@@ -111,7 +111,10 @@ export const rootReducer: Reducer<CohortSearchState> =
       case LOAD_CRITERIA_RESULTS:
         return state
           .setIn(['criteria', 'tree', action.kind, action.parentId], fromJS(action.results))
-          .setIn(['criteria', 'tree', action.kind, 'empty'], action.results.length === 0)
+          .setIn(
+            ['criteria', 'tree', 'empty', action.kind, action.parentId],
+            action.results.length === 0
+          )
           .deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
       case LOAD_CRITERIA_SUBTYPE_RESULTS:
@@ -120,7 +123,10 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['criteria', 'tree', action.kind, action.subtype, action.parentId],
             fromJS(action.results)
           )
-          .setIn(['criteria', 'tree', action.kind, 'empty'], action.results.length === 0)
+          .setIn(
+            ['criteria', 'tree', 'empty', action.kind, action.parentId],
+            action.results.length === 0
+          )
           .deleteIn(['criteria', 'requests', action.kind, action.parentId]);
 
       case LOAD_DEMO_CRITERIA_RESULTS:

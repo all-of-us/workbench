@@ -476,6 +476,7 @@ export class CohortSearchActions {
       attributes: immParam.get('attributes'),
       conceptId: immParam.get('conceptId'),
       domain: immParam.get('domainId')
+          ? immParam.get('domainId') : immParam.get('domain')
     };
 
     return param;
@@ -504,7 +505,9 @@ export class CohortSearchActions {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
             param.code = param.value;
-            param.hasAttributes = param.attributes.length > 0;
+            if (param.attributes) {
+              param.hasAttributes = param.attributes.length > 0;
+            }
             entities.parameters[param.parameterId] = param;
             this.addId(param.parameterId);
             return param.parameterId;

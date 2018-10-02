@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeType;
@@ -47,6 +48,11 @@ public class DomainLookupService {
                   parameter.getType(),
                   parameter.getSubtype(),
                   parameter.getValue());
+              if (domainLookups.isEmpty()) {
+                throw new NotFoundException("Not Found: No domain found for criteria type: " +
+                  parameter.getType() + ", subtype: " + parameter.getSubtype() + " and code: " +
+                  parameter.getValue());
+              }
 
               for (String row : domainLookups) {
                 paramsWithDomains.add(new SearchParameter()
