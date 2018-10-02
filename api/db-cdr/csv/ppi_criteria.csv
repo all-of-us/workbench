@@ -280,18 +280,18 @@
 325114,325111,"PPI","OverallHealth",1585741,"3 = Moderately",0,1,0,"Observation",1585744,0,325062.325111
 325115,325111,"PPI","OverallHealth",1585741,"2 = A little",0,1,0,"Observation",1585745,0,325062.325111
 325116,325111,"PPI","OverallHealth",1585741,"1 = Not at all",0,1,0,"Observation",1585746,0,325062.325111
-325117,325062,"PPI","OverallHealth","","In the past 7 days, how would you rate your pain on average?",1,0,"","Observation",1585747,0,325062
-325118,325117,"PPI","OverallHealth",0,"0 = No pain",0,1,0,"Observation",1585747,0,325062.325117
-325119,325117,"PPI","OverallHealth",1,1,0,1,0,"Observation",1585747,0,325062.325117
-325120,325117,"PPI","OverallHealth",2,2,0,1,0,"Observation",1585747,0,325062.325117
-325121,325117,"PPI","OverallHealth",3,3,0,1,0,"Observation",1585747,0,325062.325117
-325122,325117,"PPI","OverallHealth",4,4,0,1,0,"Observation",1585747,0,325062.325117
-325123,325117,"PPI","OverallHealth",5,5,0,1,0,"Observation",1585747,0,325062.325117
-325124,325117,"PPI","OverallHealth",6,6,0,1,0,"Observation",1585747,0,325062.325117
-325125,325117,"PPI","OverallHealth",7,7,0,1,0,"Observation",1585747,0,325062.325117
-325126,325117,"PPI","OverallHealth",8,8,0,1,0,"Observation",1585747,0,325062.325117
-325127,325117,"PPI","OverallHealth",9,9,0,1,0,"Observation",1585747,0,325062.325117
-325128,325117,"PPI","OverallHealth",10,"10 = Worst pain imaginable",0,1,0,"Observation",1585747,0,325062.325117
+325117,325062,"PPI","OverallHealth","","In the past 7 days, how would you rate your pain on average (0=No pain, 10=Worst pain imaginable)?",1,0,"","Observation",1585747,0,325062
+325118,325117,"PPI","OverallHealth","","0",0,1,0,"Observation",1585747,0,325062.325117
+325119,325117,"PPI","OverallHealth","",1,0,1,0,"Observation",1585747,0,325062.325117
+325120,325117,"PPI","OverallHealth","",2,0,1,0,"Observation",1585747,0,325062.325117
+325121,325117,"PPI","OverallHealth","",3,0,1,0,"Observation",1585747,0,325062.325117
+325122,325117,"PPI","OverallHealth","",4,0,1,0,"Observation",1585747,0,325062.325117
+325123,325117,"PPI","OverallHealth","",5,0,1,0,"Observation",1585747,0,325062.325117
+325124,325117,"PPI","OverallHealth","",6,0,1,0,"Observation",1585747,0,325062.325117
+325125,325117,"PPI","OverallHealth","",7,0,1,0,"Observation",1585747,0,325062.325117
+325126,325117,"PPI","OverallHealth","",8,0,1,0,"Observation",1585747,0,325062.325117
+325127,325117,"PPI","OverallHealth","",9,0,1,0,"Observation",1585747,0,325062.325117
+325128,325117,"PPI","OverallHealth","","10",0,1,0,"Observation",1585747,0,325062.325117
 325129,325062,"PPI","OverallHealth","","In the past 7 days, how would you rate your fatigue?",1,0,"","Observation",1585748,0,325062
 325130,325129,"PPI","OverallHealth",1585748,"5 = None",0,1,0,"Observation",1585749,0,325062.325129
 325131,325129,"PPI","OverallHealth",1585748,"4 = Mild",0,1,0,"Observation",1585750,0,325062.325129
