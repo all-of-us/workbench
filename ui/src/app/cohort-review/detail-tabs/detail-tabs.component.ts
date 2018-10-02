@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, Input, OnInit, OnChanges} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
     CohortReviewService,
