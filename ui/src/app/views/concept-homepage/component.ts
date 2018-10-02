@@ -168,11 +168,11 @@ export class ConceptHomepageComponent implements OnInit {
       conceptDomain => conceptDomain.domain === this.selectedDomain);
     this.concepts = cacheItem.items;
     this.vocabularies = [];
-    cacheItem.vocabularyList.forEach((vocabulary) => {
-      this.vocabularies.push({
+    this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
+      return {
         ...vocabulary,
         selected: true
-      });
+      };
     });
   }
 
@@ -183,8 +183,6 @@ export class ConceptHomepageComponent implements OnInit {
   get searchTermNotLongEnough() {
     return this.searchTerm === undefined || this.searchTerm.length < 3;
   }
-
-
 
   filterList() {
     if (this.blockMultipleSearchFromFilter) {

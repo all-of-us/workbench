@@ -59,7 +59,7 @@
       </div>
       <div class="filter-options">
         Filter by vocabulary:
-        <clr-checkbox class="filter-checkbox" *ngFor="let vocabulary of vocabularies" (click)="filterList()" [(clrChecked)]="vocabulary.selected">
+        <clr-checkbox class="filter-checkbox" *ngFor="let vocabulary of vocabularies" (click)="filterList($event)" [(clrChecked)]="vocabulary.selected">
           {{vocabulary.vocabularyId}} ({{vocabulary.concept_count}})
         </clr-checkbox>
       </div>
