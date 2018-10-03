@@ -8,7 +8,13 @@ import {
     ReviewColumns,
 } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-import {CohortSearchActions, CohortSearchState, getParticipantData} from '../../cohort-search/redux';
+import {
+  CohortSearchActions,
+  CohortSearchState,
+  getParticipantData,
+  isDomainNameExists,
+  isParticipantIdExists
+} from '../../cohort-search/redux';
 import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
 
@@ -141,7 +147,9 @@ export class DetailTabsComponent implements OnChanges, OnInit {
   conditionTitle: string;
   procedureTitle: string;
   drugTitle: string;
+  chartLoadedSpinner = false;
   @Input() clickedParticipantId: number;
+  trackClickedDomains = false;
   readonly stubs = [
     'survey',
   ];
@@ -311,8 +319,9 @@ export class DetailTabsComponent implements OnChanges, OnInit {
 
   ngOnChanges() {
     if (this.clickedParticipantId) {
+      this.chartLoadedSpinner = true;
       this.participantsId = this.clickedParticipantId;
-      this.getDomainsParticipantsData();
+        this.getDomainsParticipantsData();
     }
   }
 
@@ -325,21 +334,24 @@ export class DetailTabsComponent implements OnChanges, OnInit {
   }
 
   getDomainsParticipantsData() {
+    this.chartLoadedSpinner = true;
     this.procedureData = [];
     this.drugData = [];
     this.conditionData = [];
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const limit = 10;
-    console.log(this.participantsId);
+    this.trackClickedDomains = isParticipantIdExists(this.participantsId)(this.ngRedux.getState());
+    console.log( this.trackClickedDomains);
     this.domainList.map(domainName => {
       this.actions.fetchIndividualParticipantsData(ns, wsid, cid,
       cdrid, this.participantsId, domainName, limit);
       const getParticipantsDomainData = this.ngRedux
-        .select(getParticipantData(domainName))
+        .select(getParticipantData(this.participantsId, domainName))
         .filter(loading => !!loading)
         .subscribe(loading => {
           const data = JSON.parse(loading);
+          this.chartLoadedSpinner = false;
           if (domainName === DomainType[DomainType.CONDITION]) {
             this.conditionTitle = typeToTitle(domainName);
             this.conditionData = data.items;

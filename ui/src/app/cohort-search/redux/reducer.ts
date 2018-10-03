@@ -520,7 +520,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(
             ['reviewChartData', 'domainCharts', action.domain]
-            , fromJS(action.results))
+            , fromJS(action.results ))
           .deleteIn(
             ['reviewChartData', 'request', action.ns,
               action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
@@ -537,7 +537,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       case LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS:
         return state
           .setIn(
-            ['individualChartData', 'chartsData', action.domain]
+            ['individualChartData', 'chartsData', action.participantsId, action.domain]
             , fromJS(action.results._body))
           .deleteIn(
             ['individualChartData', 'request', action.ns,
