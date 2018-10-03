@@ -125,6 +125,10 @@ export const criteriaChildren =
     }
   };
 
+export const isEmpty =
+  (kind: string, id: number) => (state): boolean =>
+    state.getIn(['criteria', 'tree', 'empty', kind, id], false);
+
 export const demoCriteriaChildren =
   (kind: string, subtype: string) =>
   (state): List<any> =>
@@ -177,3 +181,15 @@ export const subtreeSelected = (state) =>
 export const chartData =
   (state): List<any> =>
   state.get('chartData', List());
+
+/**
+ * Cohort Review Charts selectors start
+ */
+
+export const isChartLoading =
+  (domain: string) =>
+    (state): any =>
+    state.getIn(['reviewChartData', 'domainCharts', domain]);
+
+export const isDomainNameExists = domain => (state): boolean =>
+  state.getIn(['reviewChartData', 'domainCharts']).has(domain);

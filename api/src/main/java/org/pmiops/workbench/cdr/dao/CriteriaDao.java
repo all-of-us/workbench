@@ -93,10 +93,11 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "where c.type = 'DRUG' " +
     "and c.subtype in ('ATC', 'BRAND') " +
     "and c.is_selectable = 1 " +
-    "and upper(c.name) like upper(concat('%',:name,'%')) " +
+    "and (upper(c.name) like upper(concat('%',:value,'%')) " +
+    "or upper(c.code) like upper(concat('%',:value,'%'))) " +
     "order by c.name asc " +
     "limit :limit", nativeQuery = true)
-  List<Criteria> findDrugBrandOrIngredientByName(@Param("name") String name,
+  List<Criteria> findDrugBrandOrIngredientByValue(@Param("value") String value,
                                                  @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +

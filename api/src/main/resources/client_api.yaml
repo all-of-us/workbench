@@ -12,7 +12,7 @@ info:
   contact:
     name: "developer_help@pmi-ops.org"
   license:
-    name: "MIT"
+    name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
   # Establish the fact that *some endpoints* are OAuth protected
@@ -493,14 +493,13 @@ definitions:
 
   SearchConceptsRequest:
     type: object
-    required:
-      - query
     properties:
       query:
         type: string
         description: >
           A query string that can be used to match a subset of the name (case-insensitively),
-          the entire code value (case-insensitively), or the concept ID.
+          the entire code value (case-insensitively), or the concept ID. If not specified, all
+          concepts are returned.
       standardConceptFilter:
         description: >
           STANDARD_CONCEPTS if only standard concepts should be returned,
@@ -526,6 +525,12 @@ definitions:
         type: integer
         format: int32
         description: Determines the concepts to be fetched. Gets all the concepts if 0 or gets concepts with counts if 1.
+      includeDomainCounts:
+        type: boolean
+        description: True if per-domain counts of concepts matching the criteria should be included in the response
+      includeVocabularyCounts:
+        type: boolean
+        description: True if per-vocabulary counts of concepts matching the criteria in the specified domain should be included in the response
 
   ConceptListResponse:
     type: object
@@ -536,11 +541,45 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Concept"
-      matchType:
-        description: match column type on which concept search was successful
-        $ref: "#/definitions/MatchType"
-      standardConcepts:
+      domainCounts:
         type: "array"
         items:
-          $ref: "#/definitions/Concept"
-        description: standard concepts associated with the matched concept
+          $ref: "#/definitions/DomainCount"
+      vocabularyCounts:
+        type: "array"
+        items:
+          $ref: "#/definitions/VocabularyCount"
+
+  DomainCount:
+    type: object
+    required:
+      - domain
+      - name
+      - conceptCount
+    properties:
+      domain:
+        description: the domain ID
+        $ref: "#/definitions/Domain"
+      name:
+        description: display name of the domain
+        type: string
+      conceptCount:
+        description: number of concepts matching the search query in this domain
+        type: integer
+        format: int64
+
+  VocabularyCount:
+    type: object
+    required:
+      - vocabularyId
+      - conceptCount
+    properties:
+      vocabularyId:
+        description: ID / display name of the vocabulary
+        type: string
+      conceptCount:
+        description: number of concepts matching the search query in this vocabulary
+        type: integer
+        format: int64
+
+

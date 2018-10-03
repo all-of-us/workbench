@@ -108,10 +108,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const noCode = (this.isDrug && this.node.get('group'))
-      || this.isPM;
     const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
-    return (noCode || nameIsCode) ? '' : this.node.get('name', '');
+    return nameIsCode ? '' : this.node.get('name', '');
   }
 
   get popperName() {
@@ -119,9 +117,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayCode() {
-    if ((this.isDrug && this.node.get('group'))
-      || this.isPM) {
-      return this.node.get('name', '');
+    if ((this.isDrug && this.node.get('group')) || this.isPM) {
+      return '';
     }
     return this.node.get('code', '');
   }
@@ -183,7 +180,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       const attributes = this.node.get('subtype') === TreeSubType[TreeSubType.BP]
         ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
         : [{
-          name: '',
+          name: this.node.get('subtype'),
           operator: null,
           operands: [null],
           conceptId: this.node.get('conceptId', null),

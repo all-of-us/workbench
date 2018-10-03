@@ -2,46 +2,25 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.utils.OperatorUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 /**
  * AbstractQueryBuilder is an object that builds {@link QueryJobConfiguration}
  * for BigQuery.
  */
 public abstract class AbstractQueryBuilder {
-
-  ImmutableMap<ModifierType, String> exceptionText = ImmutableMap.<ModifierType, String>builder()
-    .put(ModifierType.AGE_AT_EVENT, "age at event")
-    .put(ModifierType.EVENT_DATE, "event date")
-    .put(ModifierType.NUM_OF_OCCURRENCES, "number of occurrences")
-    .put(ModifierType.ENCOUNTERS, "visit type")
-    .build();
-  private static final List<Operator> OPERATOR_ANY_EQUALS =
-    Arrays.asList(Operator.LESS_THAN_OR_EQUAL_TO,
-      Operator.GREATER_THAN_OR_EQUAL_TO, Operator.GREATER_THAN,
-      Operator.LESS_THAN, Operator.EQUAL, Operator.NOT_EQUAL);
-
-  public static final String AGE_AT_EVENT_PREFIX = "age";
-  public static final String EVENT_DATE_PREFIX = "event";
-  public static final String OCCURRENCES_PREFIX = "occ";
-  public static final String ENCOUNTER_PREFIX = "enc";
-  public static final String ANY = "ANY";
 
   public static final String WHERE = " where ";
   public static final String AND = " and ";
@@ -72,48 +51,16 @@ public abstract class AbstractQueryBuilder {
   public abstract FactoryKey getType();
 
   public String buildModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
-    String modifierSql = "";
-    String encounterSql = "";
-    if (!modifiers.isEmpty()) {
-      Modifier ageAtEvent = getModifier(modifiers, ModifierType.AGE_AT_EVENT);
-      Modifier eventDate = getModifier(modifiers, ModifierType.EVENT_DATE);
-      Modifier occurrences = getModifier(modifiers, ModifierType.NUM_OF_OCCURRENCES);
-      Modifier encounters = getModifier(modifiers, ModifierType.ENCOUNTERS);
-      encounterSql = buildEncountersSql(queryParams, encounters);
-      modifierSql = buildAgeAtEventAndEventDateModifierSql(queryParams, Arrays.asList(ageAtEvent, eventDate));
-      //Number of Occurrences has to be last because of the group by
-      modifierSql = modifierSql + buildNumOfOccurrencesModifierSql(queryParams, occurrences);
-    }
-    return MODIFIER_SQL_TEMPLATE.replace("${innerSql}", baseSql).replace("${encounterSql}", encounterSql) + modifierSql;
-  }
-
-  protected static boolean isNameAny(Attribute attribute) {
-    return attribute.getName() != null
-      && attribute.getName().equals(ANY);
-  }
-
-  protected static boolean isOperatorBetween(Attribute attribute) {
-    return attribute.getOperator() != null
-      && attribute.getOperator().equals(Operator.BETWEEN)
-      && attribute.getOperands().size() == 2
-      && NumberUtils.isNumber(attribute.getOperands().get(0))
-      && NumberUtils.isNumber(attribute.getOperands().get(1));
-  }
-
-  protected static boolean isOperatorAnyEquals(Attribute attribute) {
-    return attribute.getOperator() != null
-      && OPERATOR_ANY_EQUALS.contains(attribute.getOperator())
-      && attribute.getOperands().size() == 1
-      && NumberUtils.isNumber(attribute.getOperands().get(0));
-  }
-
-  protected static boolean isOperatorIn(Attribute attribute) {
-    return attribute.getOperator() != null
-      && attribute.getOperator().equals(Operator.IN)
-      && attribute.getOperands().size() >= 0
-      && attribute.getOperands().stream()
-      .filter(o -> NumberUtils.isNumber(o))
-      .collect(Collectors.toList()).size() > 0;
+    List<Modifier> ageAndEventModifiers = new ArrayList<>();
+    ageAndEventModifiers.add(getModifier(modifiers, ModifierType.AGE_AT_EVENT));
+    ageAndEventModifiers.add(getModifier(modifiers, ModifierType.EVENT_DATE));
+    String encounterSql = buildEncountersSql(queryParams, getModifier(modifiers, ModifierType.ENCOUNTERS));
+    String modifierSql = buildAgeAndEventSql(queryParams, ageAndEventModifiers);
+    //Number of Occurrences has to be last because of the group by
+    modifierSql = modifierSql + buildOccurrencesSql(queryParams, getModifier(modifiers, ModifierType.NUM_OF_OCCURRENCES));
+    return MODIFIER_SQL_TEMPLATE
+      .replace("${innerSql}", baseSql)
+      .replace("${encounterSql}", encounterSql) + modifierSql;
   }
 
   protected String getUniqueNamedParameterPostfix() {
@@ -121,23 +68,22 @@ public abstract class AbstractQueryBuilder {
   }
 
   private Modifier getModifier(List<Modifier> modifiers, ModifierType modifierType) {
-    List<Modifier> modifierList =  modifiers.stream()
+    List<Modifier> modifierList = modifiers
+      .stream()
       .filter(modifier -> modifier.getName().equals(modifierType))
       .collect(Collectors.toList());
     if (modifierList.isEmpty()) {
       return null;
-    } else if (modifierList.size() == 1){
-      return modifierList.get(0);
     }
-    throw new BadRequestException(String.format("Please provide one %s modifier.",
-      exceptionText.get(modifierType)));
+    from(notOneModifier()).test(modifierList).throwException(ONE_MODIFIER_MESSAGE, modifierText.get(modifierType));
+    return modifierList.get(0);
   }
 
-  private String buildAgeAtEventAndEventDateModifierSql(Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
+  private String buildAgeAndEventSql(Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
     String modifierSql = "";
     for (Modifier modifier : modifiers) {
       if (modifier != null) {
-        validateOperands(modifier);
+        validateModifier(modifier);
         boolean isAgeAtEvent = modifier.getName().equals(ModifierType.AGE_AT_EVENT);
         List<String> modifierParamList = new ArrayList<>();
         for (String operand : modifier.getOperands()) {
@@ -168,11 +114,11 @@ public abstract class AbstractQueryBuilder {
     return modifierSql;
   }
 
-  private  String buildNumOfOccurrencesModifierSql(Map<String, QueryParameterValue> queryParams, Modifier occurrences) {
+  private  String buildOccurrencesSql(Map<String, QueryParameterValue> queryParams, Modifier occurrences) {
     String modifierSql = "";
     if (occurrences != null) {
       List<String> modifierParamList = new ArrayList<>();
-      validateOperands(occurrences);
+      validateModifier(occurrences);
       for (String operand : occurrences.getOperands()) {
         String modifierParameter = OCCURRENCES_PREFIX + getUniqueNamedParameterPostfix();
         modifierParamList.add("@" + modifierParameter);
@@ -188,21 +134,8 @@ public abstract class AbstractQueryBuilder {
   private String buildEncountersSql(Map<String, QueryParameterValue> queryParams, Modifier modifier) {
     if (modifier == null) {
       return "";
-    } else if (modifier.getName().equals(ModifierType.ENCOUNTERS)) {
-      if (!modifier.getOperator().equals(Operator.IN)) {
-        throw new BadRequestException(String.format(
-          "Please provide IN operator for %s.",
-          exceptionText.get(modifier.getName())));
-      }
-      try {
-        modifier.getOperands().stream()
-          .map(Long::new).collect(Collectors.toList());
-      } catch (NumberFormatException nfe) {
-        throw new BadRequestException(String.format(
-          "Please provide valid conceptId for %s.",
-          exceptionText.get(modifier.getName())));
-      }
     }
+    validateEncounctersModifier(modifier);
     String modifierParameter = ENCOUNTER_PREFIX + getUniqueNamedParameterPostfix();
     Long[] operands = modifier.getOperands().stream().map(Long::new).toArray(Long[]::new);
     queryParams.put(modifierParameter, QueryParameterValue.array(operands, Long.class));
@@ -211,41 +144,26 @@ public abstract class AbstractQueryBuilder {
       .replace( "${encounterConceptId}", "@" + modifierParameter);
   }
 
-  private void validateOperands(Modifier modifier) {
-    if (modifier.getOperator().equals(Operator.BETWEEN) &&
-      modifier.getOperands().size() != 2) {
-      throw new BadRequestException(String.format(
-        "Modifier: %s can only have 2 operands when using the %s operator",
-        exceptionText.get(modifier.getName()),
-        modifier.getOperator().name()));
-    } else if (!modifier.getOperator().equals(Operator.BETWEEN) &&
-      modifier.getOperands().size() != 1) {
-      throw new BadRequestException(String.format(
-        "Modifier: %s can only have 1 operand when using the %s operator",
-        exceptionText.get(modifier.getName()),
-        modifier.getOperator().name()));
-    } else if (modifier.getName().equals(ModifierType.AGE_AT_EVENT)
-      || modifier.getName().equals(ModifierType.NUM_OF_OCCURRENCES)) {
-      try {
-        modifier.getOperands().stream()
-          .map(Long::new).collect(Collectors.toList());
-      } catch (NumberFormatException nfe) {
-        throw new BadRequestException(String.format(
-          "Please provide valid number for %s.",
-          exceptionText.get(modifier.getName())));
-      }
-    } else if (modifier.getName().equals(ModifierType.EVENT_DATE)) {
-      modifier.getOperands().stream()
-        .map(date -> {
-          try {
-            return new SimpleDateFormat("yyyy-MM-dd").parse(date);
-          } catch (ParseException pe) {
-            throw new BadRequestException(String.format(
-              "Please provide valid date for %s.",
-              exceptionText.get(modifier.getName())));
-          }
-        }).collect(Collectors.toList());
+  private void validateModifier(Modifier modifier) {
+    String name = modifierText.get(modifier.getName());
+    String oper = operatorText.get(modifier.getOperator());
+    from(operatorNull()).test(modifier).throwException(NOT_VALID_MESSAGE, MODIFIER, OPERATOR, oper);
+    from(operandsEmpty()).test(modifier).throwException(EMPTY_MESSAGE, OPERANDS);
+    from(betweenOperator().and(operandsNotTwo())).test(modifier).throwException(TWO_OPERAND_MESSAGE, MODIFIER, name, oper);
+    from(notBetweenOperator().and(operandsNotOne())).test(modifier).throwException(ONE_OPERAND_MESSAGE, MODIFIER, name, oper);
+    if (ModifierType.AGE_AT_EVENT.equals(modifier.getName()) || ModifierType.NUM_OF_OCCURRENCES.equals(modifier.getName())) {
+      from(operandsNotNumbers()).test(modifier).throwException(OPERANDS_NUMERIC_MESSAGE, MODIFIER, name);
     }
+    if (ModifierType.EVENT_DATE.equals(modifier.getName())) {
+      from(operandsNotDates()).test(modifier).throwException(DATE_MODIFIER_MESSAGE, MODIFIER, name);
+    }
+  }
+
+  private void validateEncounctersModifier(Modifier modifier) {
+    String name = modifierText.get(modifier.getName());
+    String oper = operatorText.get(Operator.IN);
+    from(operatorNotIn()).test(modifier).throwException(NOT_IN_MODIFIER_MESSAGE, name, oper);
+    from(operandsNotNumbers()).test(modifier).throwException(OPERANDS_NUMERIC_MESSAGE, MODIFIER, name);
   }
 
 }

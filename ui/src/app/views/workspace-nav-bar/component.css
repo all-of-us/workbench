@@ -6,11 +6,9 @@
   height: 100%;
   width: 8rem;
   background-color: transparent;
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border: none;
   border-radius: 0;
-  border-top: none;
-  border-bottom: none;
+  padding: 0;
 }
 
 ::ng-deep #workspace-top-nav-bar .btn.btn-primary.btn-top:hover {
@@ -95,6 +93,18 @@
   top: 55px !important;
 }
 
+.tab-inner {
+  height: 100%;
+  line-height: 55px;
+  width: 100%;
+}
+
+.selected-tab-inner {
+  background-color: rgba(255,255,255,0.15);
+  border-bottom: 8px solid #2691D0;
+  font-weight: bold;
+}
+
 label.dropdown-header {
   font-size: 14px;
   color: #262262;
@@ -119,4 +129,3 @@ label.dropdown-header {
   display: inline-grid;
   margin-left: -0.4rem;
 }
-

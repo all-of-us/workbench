@@ -7,6 +7,8 @@ require_relative "../aou-utils/swagger"
 require_relative "../aou-utils/utils/common"
 require_relative "../aou-utils/workbench"
 
+DRY_RUN_CMD = %W{echo [DRY_RUN]}
+
 class Options < OpenStruct
 end
 
@@ -225,6 +227,11 @@ class DeployUI
                    "default service account.") do |account|
       @opts.account = account
     end
+    @parser.on("--dry-run",
+               "Don't actually deploy, just log the command lines which would be " +
+               "executed on a real invocation.") do
+      @opts.dry_run = true
+    end
     @parser.on("--version [VERSION]",
                "The name of the version to deploy. Required.") do |version|
       @opts.version = version
@@ -271,10 +278,11 @@ class DeployUI
     swagger_regen(@cmd_name)
     build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
-      common.run_inline %W{gcloud app deploy
+      cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []
+      common.run_inline(cmd_prefix + %W{gcloud app deploy
        --project #{@opts.project}
        --version #{@opts.version}
-       #{opts.promote ? "--promote" : "--no-promote"}} + (@opts.quiet ? %W{--quiet} : [])
+       #{opts.promote ? "--promote" : "--no-promote"}} + (@opts.quiet ? %W{--quiet} : []))
     end
   end
 end

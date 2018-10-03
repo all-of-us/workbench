@@ -68,6 +68,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -231,7 +233,7 @@ public class CohortReviewControllerTest {
     cohortWithoutReview = new Cohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     cohortWithoutReview.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"ICD10\",\"searchParameters\":[{\"parameterId\":\"param25164\"," +
-      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":true,\"domain\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":false,\"domain\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
     cohortDao.save(cohortWithoutReview);
 
     Timestamp today = new Timestamp(new Date().getTime());
@@ -347,7 +349,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Cohort Review size must be between 0 and 10000");
+        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
     }
   }
 
@@ -364,7 +366,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Cohort Review size must be between 0 and 10000");
+        .isEqualTo("Bad Request: Cohort Review size must be between 0 and 10000");
     }
   }
 
@@ -386,7 +388,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Cohort Review already created for cohortId: " +
+        .isEqualTo("Bad Request: Cohort Review already created for cohortId: " +
           cohort.getCohortId() + ", cdrVersionId: " + cdrVersion.getCdrVersionId());
     }
   }
@@ -413,6 +415,49 @@ public class CohortReviewControllerTest {
   }
 
   @Test
+  public void createCohortReviewNoCohortException() throws Exception {
+    long cohortId = 99;
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    stubBigQueryCohortCalls();
+
+    try {
+      cohortReviewController.createCohortReview(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME,
+        cohortId,
+        cdrVersion.getCdrVersionId(),
+        new CreateReviewRequest()
+          .size(1)).getBody();
+      fail("Should have thrown NotFoundException!");
+    } catch (NotFoundException nfe) {
+      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, nfe.getMessage());
+    }
+  }
+
+  @Test
+  public void createCohortReviewNoMatchingWorkspaceException() throws Exception {
+    String badWorkspaceName = WORKSPACE_NAME + "bad";
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    stubBigQueryCohortCalls();
+
+    try {
+      cohortReviewController.createCohortReview(WORKSPACE_NAMESPACE,
+        badWorkspaceName,
+        cohortWithoutReview.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        new CreateReviewRequest()
+          .size(1)).getBody();
+      fail("Should have thrown NotFoundException!");
+    } catch (NotFoundException nfe) {
+      assertEquals("Not Found: No workspace matching workspaceNamespace: " +
+        WORKSPACE_NAMESPACE + ", workspaceId: " + badWorkspaceName, nfe.getMessage());
+    }
+  }
+
+  @Test
   public void createParticipantCohortAnnotationNoAnnotationDefinitionId() throws Exception {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
 
@@ -427,7 +472,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid cohort annotation definition id.");
+        .isEqualTo("Bad Request: Please provide a valid cohort annotation definition id.");
     }
 
   }
@@ -479,7 +524,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid participant id.");
+        .isEqualTo("Bad Request: Please provide a valid participant id.");
     }
   }
 
@@ -504,7 +549,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid cohort review id.");
+        .isEqualTo("Bad Request: Please provide a valid cohort review id.");
     }
   }
 
@@ -601,7 +646,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid cohort annotation definition id.");
+        .isEqualTo("Bad Request: Please provide a valid cohort annotation definition id.");
     }
   }
 
@@ -644,7 +689,7 @@ public class CohortReviewControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       //Success
-      assertThat(bre.getMessage()).isEqualTo("Invalid Request: Please provide a valid participant id.");
+      assertThat(bre.getMessage()).isEqualTo("Bad Request: Please provide a valid participant id.");
     }
   }
 
@@ -768,6 +813,26 @@ public class CohortReviewControllerTest {
       new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")).getBody();
 
     assertThat(participantCohortAnnotation.getAnnotationValueString()).isEqualTo("test1");
+  }
+
+  @Test
+  public void updateParticipantCohortAnnotationNoAnnotationForIdException() throws Exception {
+    long badAnnotationId = 99;
+    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(WORKSPACE_NAMESPACE,
+      WORKSPACE_NAME, WorkspaceAccessLevel.WRITER)).thenReturn(workspace);
+
+    try {
+      cohortReviewController.updateParticipantCohortAnnotation(WORKSPACE_NAMESPACE,
+        WORKSPACE_NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        participantCohortStatus1.getParticipantKey().getParticipantId(),
+        badAnnotationId,
+        new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1")).getBody();
+    } catch (NotFoundException nfe) {
+      assertEquals("Not Found: Participant Cohort Annotation does not exist for annotationId: " + badAnnotationId + ", cohortReviewId: "
+        + cohortReview.getCohortReviewId() + ", participantId: " + participantCohortStatus1.getParticipantKey().getParticipantId(), nfe.getMessage());
+    }
   }
 
   @Test

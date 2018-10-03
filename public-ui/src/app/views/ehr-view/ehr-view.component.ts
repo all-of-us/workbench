@@ -26,7 +26,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   domainId: string;
   title: string ;
   subTitle: string;
-  dbDomain: any;
+  ehrDomain: any;
   searchText: FormControl = new FormControl();
   prevSearchText = '';
   searchResult: ConceptListResponse;
@@ -71,18 +71,18 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.prevSearchText = '';
     }
     this.searchText.setValue(this.prevSearchText);
-    const obj = localStorage.getItem('dbDomain');
+    const obj = localStorage.getItem('ehrDomain');
     if (obj) {
-      this.dbDomain = JSON.parse(obj);
+      this.ehrDomain = JSON.parse(obj);
       this.subTitle = 'Keyword: ' + this.searchText;
-      this.title = 'Domain Search Results: ' + this.dbDomain.domainDisplay;
+      this.title = 'Domain Search Results: ' + this.ehrDomain.name;
     } else {
       /* Error. We need a db Domain object. */
       this.title   = 'Keyword: ' + this.searchText;
       this.title = 'Domain Search Results: ' + 'Error - no result for domain selected';
     }
 
-    if (this.dbDomain) {
+    if (this.ehrDomain) {
       // Set the graphs we want to show for this domain
       this.setGraphsToDisplay();
       // Run search initially to filter to domain,
@@ -118,7 +118,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   }
 
   private setGraphsToDisplay() {
-    if (this.dbDomain.domainId === 'Measurement') {
+    if (this.ehrDomain.name === 'Measurements') {
       this.showGender = false;
       this.showMeasurementGenderBins = true;
     }
@@ -144,7 +144,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
     this.searchRequest = {
         query: query,
-        domain: this.dbDomain.domainId.toUpperCase(),
+        domain: this.ehrDomain.domain.toUpperCase(),
         standardConceptFilter: StandardConceptFilter.STANDARDORCODEIDMATCH,
         maxResults: maxResults,
         minCount: 1
