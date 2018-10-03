@@ -1,9 +1,11 @@
 package org.pmiops.workbench.cdr.dao;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,6 +27,26 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConceptService {
 
+    public static class ConceptIds {
+
+      private final List<Long> standardConceptIds;
+      private final List<Long> sourceConceptIds;
+
+      public ConceptIds(List<Long> standardConceptIds, List<Long> sourceConceptIds) {
+        this.standardConceptIds = standardConceptIds;
+        this.sourceConceptIds = sourceConceptIds;
+      }
+
+      public List<Long> getStandardConceptIds() {
+        return standardConceptIds;
+      }
+
+      public List<Long> getSourceConceptIds() {
+        return sourceConceptIds;
+      }
+
+    }
+
     public enum StandardConceptFilter {
         ALL_CONCEPTS,
         STANDARD_CONCEPTS,
@@ -36,14 +58,19 @@ public class ConceptService {
     private EntityManager entityManager;
 
     @Autowired
+    private ConceptDao conceptDao;
+
+    @Autowired
     private ConceptSynonymDao conceptSynonymDao;
 
     public ConceptService() {
     }
 
     // Used for tests
-    public ConceptService(EntityManager entityManager, ConceptSynonymDao conceptSynonymDao) {
+    public ConceptService(EntityManager entityManager, ConceptDao conceptDao,
+        ConceptSynonymDao conceptSynonymDao) {
         this.entityManager = entityManager;
+        this.conceptDao = conceptDao;
         this.conceptSynonymDao = conceptSynonymDao;
     }
 
@@ -242,5 +269,22 @@ public class ConceptService {
             synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
       }
       return concepts;
+    }
+
+    public ConceptIds classifyConceptIds(Set<Long> conceptIds) {
+      ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
+      ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
+
+      Iterable<Concept> concepts = conceptDao.findAll(conceptIds);
+      for (Concept concept : concepts) {
+        if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())
+            || ConceptService.CLASSIFICATION_CONCEPT_CODE.equals(concept.getStandardConcept())) {
+          standardConceptIds.add(concept.getConceptId());
+        } else {
+          // We may need to handle classification / concept hierarchy here eventually...
+          sourceConceptIds.add(concept.getConceptId());
+        }
+      }
+      return new ConceptIds(standardConceptIds.build(), sourceConceptIds.build());
     }
 }
