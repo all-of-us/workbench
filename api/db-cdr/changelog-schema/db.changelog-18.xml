@@ -6,7 +6,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
   <changeSet author="danrodney" id="changelog-18">
-
+    <validCheckSum>ANY</validCheckSum>
     <addColumn tableName="concept">
       <!-- Contains the concept ID, concept code, concept name, and all concept_synonym_name values
            from concept_synonym -->
