@@ -8,7 +8,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetListComponent} from 'app/views/concept-set-list/component';
-import {CreateConceptModalComponent} from 'app/views/conceptset-create-modal/component';
+import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
@@ -69,7 +69,7 @@ describe('ConceptSetListComponent', () => {
         ConceptAddModalComponent,
         ConceptSetListComponent,
         ConfirmDeleteModalComponent,
-        CreateConceptModalComponent,
+        CreateConceptSetModalComponent,
         EditModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
