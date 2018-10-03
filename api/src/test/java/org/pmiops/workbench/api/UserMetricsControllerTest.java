@@ -62,6 +62,7 @@ public class UserMetricsControllerTest {
   private static final String WORKSPACE_NAMESPACE = "workspaceNamespace";
   private static final String FIRECLOUD_WORKSPACE_ID = "Firecloudname";
 
+  // TODO: Refactor the setup here so tests can be run more independently.
   @Before
   public void setUp() {
     User user = new User();
@@ -153,6 +154,83 @@ public class UserMetricsControllerTest {
         clock);
     userMetricsController.setDistinctWorkspaceLimit(5);
 
+  }
+
+  @Test
+  public void testGetUserRecentResourceFromRawBucket() {
+    List<UserRecentResource> userRecentResources = new ArrayList<>();
+    UserRecentResource resource1 = new UserRecentResource();
+    resource1.setNotebookName("gs://bucketFile/notebook.ipynb");
+    resource1.setCohort(null);
+    resource1.setLastAccessDate(new Timestamp(clock.millis()));
+    resource1.setUserId(USER_ID);
+    resource1.setWorkspaceId(WORKSPACE_1_ID);
+    userRecentResources.add(resource1);
+    when(userRecentResourceService.findAllResourcesByUser(USER_ID))
+        .thenReturn(userRecentResources);
+    userMetricsController = new UserMetricsController(
+        userProvider,
+        userRecentResourceService,
+        workspaceService,
+        fireCloudService,
+        clock);
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "notebook.ipynb");
+  }
+
+  @Test
+  public void testGetUserRecentResourceWithDuplicatedNameInPath() {
+    List<UserRecentResource> userRecentResources = new ArrayList<>();
+    UserRecentResource resource1 = new UserRecentResource();
+    resource1.setNotebookName("gs://bucketFile/nb.ipynb/intermediate/nb.ipynb");
+    resource1.setCohort(null);
+    resource1.setLastAccessDate(new Timestamp(clock.millis()));
+    resource1.setUserId(USER_ID);
+    resource1.setWorkspaceId(WORKSPACE_1_ID);
+    userRecentResources.add(resource1);
+    when(userRecentResourceService.findAllResourcesByUser(USER_ID))
+        .thenReturn(userRecentResources);
+    userMetricsController = new UserMetricsController(
+        userProvider,
+        userRecentResourceService,
+        workspaceService,
+        fireCloudService,
+        clock);
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/nb.ipynb/intermediate/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "nb.ipynb");
+  }
+
+  @Test
+  public void testGetUserRecentResourceInvalidURINotebookPath() {
+    List<UserRecentResource> userRecentResources = new ArrayList<>();
+    UserRecentResource resource1 = new UserRecentResource();
+    resource1.setNotebookName("my local notebook directory: notebook.ipynb");
+    resource1.setCohort(null);
+    resource1.setLastAccessDate(new Timestamp(clock.millis()));
+    resource1.setUserId(USER_ID);
+    resource1.setWorkspaceId(WORKSPACE_1_ID);
+    userRecentResources.add(resource1);
+    when(userRecentResourceService.findAllResourcesByUser(USER_ID))
+        .thenReturn(userRecentResources);
+    userMetricsController = new UserMetricsController(
+        userProvider,
+        userRecentResourceService,
+        workspaceService,
+        fireCloudService,
+        clock);
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertNull(recentResources.get(0).getNotebook());
   }
 
   @Test

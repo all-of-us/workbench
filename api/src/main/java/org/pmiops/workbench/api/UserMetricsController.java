@@ -19,20 +19,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
+  private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
   private Provider<User> userProvider;
   private UserRecentResourceService userRecentResourceService;
   private WorkspaceService workspaceService;
   private FireCloudService fireCloudService;
-  private static final String NOTEBOOKS_WORKSPACE_DIRECTORY = "notebooks/";
   private int distinctWorkspacelimit = 5;
   private Clock clock;
 
@@ -41,12 +48,19 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       userRecentResource -> {
         RecentResource resource = new RecentResource();
         resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
-        if (userRecentResource.getNotebookName() != null) {
-          FileDetail fileDetail = new FileDetail();
-          String[] notebookDetails = userRecentResource.getNotebookName().split(NOTEBOOKS_WORKSPACE_DIRECTORY);
-          fileDetail.setPath(notebookDetails[0] + NOTEBOOKS_WORKSPACE_DIRECTORY);
-          fileDetail.setName(notebookDetails[1]);
-          resource.setNotebook(fileDetail);
+        String notebookName = userRecentResource.getNotebookName();
+        if (notebookName != null && !notebookName.isEmpty()) {
+          try {
+            URI notebookUri = new URI(notebookName);
+            Path path = Paths.get(notebookUri.getPath());
+            String fileName = path.getFileName().toString();
+            String filePath = notebookName.replaceFirst(fileName + "$", "");
+            FileDetail fileDetail = new FileDetail().name(fileName).path(filePath);
+            resource.setNotebook(fileDetail);
+          } catch (InvalidPathException | URISyntaxException e) {
+            log.log(Level.SEVERE,
+                String.format("Invalid notebook file path found: %s", notebookName));
+          }
         }
         resource.setModifiedTime(userRecentResource.getLastAccessDate().toString());
         resource.setWorkspaceId(userRecentResource.getWorkspaceId());
