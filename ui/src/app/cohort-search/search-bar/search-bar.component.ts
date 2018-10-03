@@ -68,7 +68,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const optionsSub = this.ngRedux
       .select(autocompleteOptions())
       .subscribe(options => {
-        if (this.searchTerm.length >= 4) {
+        if (this.searchTerm.length >= 2) {
           this.options = [];
           this.multiples = {};
           const optionNames = [];
@@ -148,7 +148,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.ingredientList = [];
       this.numMatches = 0;
       this.noResults = false;
-      if (newVal.length >= 4) {
+      if (newVal.length >= 2) {
         const subtype = this.codes ? this.subtype : null;
         this.actions.fetchAutocompleteOptions(this._type, subtype, newVal);
       } else {
