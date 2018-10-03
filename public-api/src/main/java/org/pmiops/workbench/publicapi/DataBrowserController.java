@@ -2,6 +2,19 @@ package org.pmiops.workbench.publicapi;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
 import org.pmiops.workbench.cdr.dao.AchillesResultDao;
@@ -35,20 +48,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 @RestController
 public class DataBrowserController implements DataBrowserApiDelegate {
 
@@ -68,11 +67,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     private AchillesResultDistDao achillesResultDistDao;
     @PersistenceContext(unitName = "cdr")
     private EntityManager entityManager;
-
     @Autowired
     @Qualifier("defaultCdr")
     private Provider<CdrVersion> defaultCdrVersionProvider;
-
     @Autowired
     private ConceptService conceptService;
 
@@ -295,8 +292,15 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public ResponseEntity<DomainInfosAndSurveyModulesResponse> getDomainSearchResults(String query){
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         String keyword = ConceptService.modifyMultipleMatchKeyword(query);
+        Long conceptId = null;
+        try {
+            conceptId = Long.parseLong(query);
+        } catch (NumberFormatException e) {
+            // expected
+        }
         // TODO: consider parallelizing these lookups
-        List<DomainInfo> domains = domainInfoDao.findStandardOrCodeMatchConceptCounts(keyword, query);
+
+        List<DomainInfo> domains = domainInfoDao.findStandardOrCodeMatchConceptCounts(keyword, query, conceptId);
         List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(keyword, query);
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
         response.setDomainInfos(domains.stream()
@@ -351,22 +355,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         for(Concept con : concepts.getContent()){
             String conceptCode = con.getConceptCode();
             String conceptId = String.valueOf(con.getConceptId());
-
-            ArrayList<String> conceptSynonymNames = new ArrayList<>();
-
-            for(ConceptSynonym conceptSynonym:con.getSynonyms()){
-                if(!conceptSynonymNames.contains(conceptSynonym.getConceptSynonymName()) && !con.getConceptName().equals(conceptSynonym.getConceptSynonymName())){
-                    conceptSynonymNames.add(conceptSynonym.getConceptSynonymName());
-                    }
-            }
-
-
-            this.conceptSynonymNames.put(con.getConceptId(),conceptSynonymNames);
+            this.conceptSynonymNames.put(con.getConceptId(),new ArrayList<String>(con.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList())));
 
             if((con.getStandardConcept() == null || !con.getStandardConcept().equals("S") ) && (searchConceptsRequest.getQuery().equals(conceptCode) || searchConceptsRequest.getQuery().equals(conceptId))){
                 response.setMatchType(conceptCode.equals(searchConceptsRequest.getQuery()) ? MatchType.CODE : MatchType.ID );
 
                 List<Concept> std_concepts = conceptDao.findStandardConcepts(con.getConceptId());
+                std_concepts = conceptService.fetchConceptSynonyms(std_concepts);
+                for(Concept concept: std_concepts){
+                    this.conceptSynonymNames.put(concept.getConceptId(),new ArrayList<String>(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList())));
+                }
                 response.setStandardConcepts(std_concepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
             }
 
@@ -375,7 +373,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         if(response.getMatchType() == null && response.getStandardConcepts() == null){
             response.setMatchType(MatchType.NAME);
         }
-
         response.setItems(concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
@@ -632,7 +629,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         Float female_bin_min = null;
         Float female_bin_max = null;
 
-        if(!("unknown".equals(unitName))){
+        if(!("unknown".equals(unitName)) && !("no_unit".equals(unitName))){
             for(AchillesResult achillesResult: aa.getResults()){
                 if(Long.valueOf(achillesResult.getStratum2()) == MALE && !Strings.isNullOrEmpty(achillesResult.getStratum3()) && !Strings.isNullOrEmpty(achillesResult.getStratum5())){
                     male_bin_min = Float.valueOf(achillesResult.getStratum3());
@@ -642,6 +639,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     female_bin_max = Float.valueOf(achillesResult.getStratum5());
                 }
             }
+        }else{
+            return;
         }
 
 

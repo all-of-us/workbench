@@ -1288,9 +1288,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       DomainType.LAB.name(),
       10).getBody();
     assertEquals(3, response.getItems().size());
-    assertEquals(new CohortChartData().name("name9").conceptId(9L).count(11L), response.getItems().get(0));
-    assertEquals(new CohortChartData().name("name10").conceptId(10L).count(3L), response.getItems().get(1));
-    assertEquals(new CohortChartData().name("name3").conceptId(3L).count(1L), response.getItems().get(2));
+    assertEquals(new CohortChartData().name("name10").conceptId(10L).count(1L), response.getItems().get(0));
+    assertEquals(new CohortChartData().name("name3").conceptId(3L).count(1L), response.getItems().get(1));
+    assertEquals(new CohortChartData().name("name9").conceptId(9L).count(1L), response.getItems().get(2));
   }
 
   @Test

@@ -1400,6 +1400,14 @@ definitions:
     required:
      - workspace
     properties:
+      includeUserRoles:
+        type: boolean
+        description: >
+          Whether to clone the user roles (sharing settings) on the workspace.
+          By default, clone follows the behavior of CreateWorkspace - it is
+          shared solely with the creator as an OWNER. If true, all user roles
+          are also copied onto the new workspace in addition to the caller
+          becoming an OWNER.
       workspace:
         $ref: "#/definitions/Workspace"
         description: >
@@ -1409,6 +1417,7 @@ definitions:
             - namespace (required)
             - researchPurpose (required)
             - description: defaults to the cloned workspace description
+            - cdrVersionId defaults to the cloned workspace CDR version
 
           All other fields will be ignored and are generated server-side or are copied from the
           cloned workspace.
@@ -1733,6 +1742,12 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      participantCount:
+        type: integer
+        format: int32
+        description: >
+          Count of participants in the CDR version for the workspace containing this
+          concept set that match the specified concept set
       concepts:
         description: "Concepts in the concept set, in conceptName order."
         type: array

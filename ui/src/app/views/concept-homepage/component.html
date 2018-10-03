@@ -48,28 +48,21 @@
   <ng-template #chartBox>
     <div class="chart-box lower-box">
       <div class="chart-selector-tabs">
-        <div *ngFor="let domain of conceptDomainList" class="chart-selector-tab">
-          <button (click)="selectDomain(domain.domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain" [disabled]="searchLoading">
+        <div *ngFor="let domain of conceptDomainCounts" class="chart-selector-tab">
+          <button (click)="selectDomain(domain.domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain" [disabled]="searchLoading || !completedDomainSearches.includes(domain.domain)">
             <div class="chart-selector-header">
               {{domain.name}}
             </div>
-            <!-- TODO (RW-1277): Make this the counts returned from search. -->
-            <div>{{domain.allConceptCount}}</div>
+            <div>{{domain.conceptCount}}</div>
           </button>
         </div>
       </div>
-      <!--<div class="filter-options">-->
-        <!--Filter by vocabulary:-->
-        <!--<clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">-->
-          <!--SNOMED (4011)-->
-        <!--</clr-checkbox>-->
-        <!--<clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">-->
-          <!--CPT (2951)-->
-        <!--</clr-checkbox>-->
-        <!--<clr-checkbox class="filter-checkbox" [clrChecked]="standardConceptsOnly">-->
-          <!--ICD10 (2112)-->
-        <!--</clr-checkbox>-->
-      <!--</div>-->
+      <div class="filter-options">
+        Filter by vocabulary:
+        <clr-checkbox class="filter-checkbox" *ngFor="let vocabulary of vocabularies" (click)="filterList($event)" [(clrChecked)]="vocabulary.selected">
+          {{vocabulary.vocabularyId}} ({{vocabulary.conceptCount}})
+        </clr-checkbox>
+      </div>
       <app-concept-table [concepts]="concepts" [selectedDomain]="selectedDomain" [loading]="searchLoading" [searchTerm]="currentSearchString"></app-concept-table>
       <div (mouseenter)="addTextHovering=true" (mouseleave)="addTextHovering=false" (click)="openAddModal()" class="add-section">
         <div class="add-text" [class.hovering]="addTextHovering">Add to set</div>

@@ -7,6 +7,7 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -45,6 +46,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
@@ -180,6 +182,7 @@ public class WorkspacesControllerTest {
     ConceptSetsController.class
   })
   @MockBean({
+          ConceptBigQueryService.class,
           FireCloudService.class,
           CohortMaterializationService.class,
           CloudStorageService.class,
@@ -237,19 +240,15 @@ public class WorkspacesControllerTest {
   UserRecentResourceService userRecentResourceService;
   @Autowired
   CohortReviewController cohortReviewController;
+  @Autowired
+  ConceptBigQueryService conceptBigQueryService;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
 
   @Before
   public void setUp() {
-    User user = new User();
-    user.setEmail(LOGGED_IN_USER_EMAIL);
-    user.setUserId(123L);
-    user.setFreeTierBillingProjectName("TestBillingProject1");
-    user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    user = userDao.save(user);
+    User user = createUser(LOGGED_IN_USER_EMAIL);
     when(userProvider.get()).thenReturn(user);
     workspacesController.setUserProvider(userProvider);
     cohortsController.setUserProvider(userProvider);
@@ -277,6 +276,15 @@ public class WorkspacesControllerTest {
     CLOCK.setInstant(NOW);
   }
 
+  private User createUser(String email) {
+    User user = new User();
+    user.setEmail(email);
+    user.setFreeTierBillingProjectName("TestBillingProject1");
+    user.setDisabled(false);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    return userDao.save(user);
+  }
+
   private JSONObject createDemoCriteria() {
     JSONObject criteria = new JSONObject();
     criteria.append("includes", new JSONArray());
@@ -302,6 +310,12 @@ public class WorkspacesControllerTest {
     fcWorkspace.setCreatedBy(creator);
     fcWorkspace.setBucketName(BUCKET_NAME);
     return fcWorkspace;
+  }
+
+  private void stubFcUpdateWorkspaceACL() {
+    when(fireCloudService.updateWorkspaceACL(
+        anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(
+            new WorkspaceACLUpdateResponseList());
   }
 
   private void stubGetWorkspace(String ns, String name, String creator,
@@ -350,6 +364,7 @@ public class WorkspacesControllerTest {
     when(bigQueryService.getLong(null, 5)).thenReturn(0L);
   }
 
+  // TODO(calbach): Clean up this test file to make better use of chained builders.
   public Workspace createDefaultWorkspace() throws Exception {
     ResearchPurpose researchPurpose = new ResearchPurpose();
     researchPurpose.setDiseaseFocusedResearch(true);
@@ -656,8 +671,7 @@ public class WorkspacesControllerTest {
     writer.setRole(WorkspaceAccessLevel.WRITER);
     shareWorkspaceRequest.addItemsItem(writer);
 
-    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(),
-        anyListOf(WorkspaceACLUpdate.class))).thenReturn(new WorkspaceACLUpdateResponseList());
+    stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
@@ -805,6 +819,9 @@ public class WorkspacesControllerTest {
                             .participantId(participantId)
                             .cohortReviewId(cr1.getCohortReviewId())).getBody();
 
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+        .thenReturn(123);
     ConceptSet conceptSet1 = conceptSetsController.createConceptSet(workspace.getNamespace(),
         workspace.getId(), new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
             .getBody();
@@ -894,8 +911,8 @@ public class WorkspacesControllerTest {
     List<ConceptSet> conceptSets = conceptSetsController.getConceptSetsInWorkspace(cloned.getNamespace(),
         cloned.getId()).getBody().getItems();
     assertThat(conceptSets.size()).isEqualTo(2);
-    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned);
-    assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned);
+    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 123);
+    assertConceptSetClone(conceptSets.get(1), conceptSet2, cloned, 0);
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getId());
     try {
@@ -906,8 +923,62 @@ public class WorkspacesControllerTest {
     }
   }
 
-  private void assertConceptSetClone(ConceptSet clonedConceptSet, ConceptSet originalConceptSet,
-      Workspace clonedWorkspace) {
+  @Test
+  public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() throws Exception {
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    Workspace workspace = createDefaultWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    CdrVersion cdrVersion2 = new CdrVersion();
+    cdrVersion2.setName("2");
+    //set the db name to be empty since test cases currently
+    //run in the workbench schema only.
+    cdrVersion2.setCdrDbName("");
+    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
+
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+        .thenReturn(123);
+    ConceptSet conceptSet1 = conceptSetsController.createConceptSet(workspace.getNamespace(),
+        workspace.getId(), new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+        .getBody();
+    conceptSet1 =
+        conceptSetsController.updateConceptSetConcepts(workspace.getNamespace(), workspace.getId(),
+            conceptSet1.getId(), new UpdateConceptSetRequest().etag(conceptSet1.getEtag())
+                .addedIds(ImmutableList.of(CLIENT_CONCEPT_1.getConceptId(),
+                    CLIENT_CONCEPT_2.getConceptId()))).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
+
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+        .thenReturn(456);
+
+    Workspace cloned = workspacesController.cloneWorkspace(workspace.getNamespace(),
+        workspace.getId(), req).getBody().getWorkspace();
+    List<ConceptSet> conceptSets = conceptSetsController.getConceptSetsInWorkspace(cloned.getNamespace(),
+        cloned.getId()).getBody().getItems();
+    assertThat(conceptSets.size()).isEqualTo(1);
+    assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 456);
+  }
+
+
+    private void assertConceptSetClone(ConceptSet clonedConceptSet, ConceptSet originalConceptSet,
+      Workspace clonedWorkspace, long participantCount) {
     // Get the full concept set in order to retrieve the concepts.
     clonedConceptSet = conceptSetsController.getConceptSet(clonedWorkspace.getNamespace(),
         clonedWorkspace.getId(), clonedConceptSet.getId()).getBody();
@@ -919,6 +990,7 @@ public class WorkspacesControllerTest {
     assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
     assertThat(clonedConceptSet.getLastModifiedTime()).isEqualTo(clonedWorkspace.getLastModifiedTime());
     assertThat(clonedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
+    assertThat(clonedConceptSet.getParticipantCount()).isEqualTo(participantCount);
   }
 
   private void assertCohortAnnotationDefinitions(CohortAnnotationDefinitionListResponse responseList,
@@ -1022,6 +1094,96 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getUserRoles().size()).isEqualTo(1);
     assertThat(workspace2.getUserRoles().get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
     assertThat(workspace2.getUserRoles().get(0).getEmail()).isEqualTo(cloner.getEmail());
+  }
+
+  @Test
+  public void testCloneWorkspaceCdrVersion() throws Exception {
+    CdrVersion cdrVersion2 = new CdrVersion();
+    cdrVersion2.setName("2");
+    cdrVersion2.setCdrDbName("");
+    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
+    String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
+
+    Workspace workspace = workspacesController.createWorkspace(createDefaultWorkspace()).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    Workspace modWorkspace = new Workspace()
+      .name("cloned")
+      .namespace("cloned-ns")
+      .researchPurpose(workspace.getResearchPurpose())
+      .cdrVersionId(cdrVersionId2);
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        "cloner@gmail.com", WorkspaceAccessLevel.OWNER);
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest().workspace(modWorkspace);
+    Workspace workspace2 =
+        workspacesController.cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .getBody().getWorkspace();
+
+    assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId2);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCloneWorkspaceBadCdrVersion() throws Exception {
+    Workspace workspace = workspacesController.createWorkspace(createDefaultWorkspace()).getBody();
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    Workspace modWorkspace = new Workspace()
+      .name("cloned")
+      .namespace("cloned-ns")
+      .researchPurpose(workspace.getResearchPurpose())
+      .cdrVersionId("bad-cdr-version-id");
+    stubGetWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(),
+        "cloner@gmail.com", WorkspaceAccessLevel.OWNER);
+    workspacesController.cloneWorkspace(
+        workspace.getNamespace(), workspace.getId(),
+        new CloneWorkspaceRequest().workspace(modWorkspace));
+  }
+
+  @Test
+  public void testCloneWorkspaceIncludeUserRoles() throws Exception {
+    User cloner = createUser("cloner@gmail.com");
+    User reader = createUser("reader@gmail.com");
+    User writer = createUser("writer@gmail.com");
+
+    Workspace workspace = workspacesController.createWorkspace(createDefaultWorkspace()).getBody();
+    stubFcUpdateWorkspaceACL();
+    workspacesController.shareWorkspace(
+        workspace.getNamespace(), workspace.getId(),
+        new ShareWorkspaceRequest()
+          .workspaceEtag(workspace.getEtag())
+          .items(ImmutableList.of(
+              new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
+              new UserRole().email(cloner.getEmail()).role(WorkspaceAccessLevel.READER),
+              new UserRole().email(reader.getEmail()).role(WorkspaceAccessLevel.READER),
+              new UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER))));
+
+    when(userProvider.get()).thenReturn(cloner);
+
+    Workspace modWorkspace = new Workspace()
+      .namespace("cloned-ns")
+      .name("cloned")
+      .researchPurpose(workspace.getResearchPurpose());
+
+    stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
+        cloner.getEmail(), WorkspaceAccessLevel.READER);
+    stubGetWorkspace("cloned-ns", "cloned",
+        cloner.getEmail(), WorkspaceAccessLevel.OWNER);
+    Workspace workspace2 = workspacesController.cloneWorkspace(
+        workspace.getNamespace(), workspace.getId(),
+        new CloneWorkspaceRequest().includeUserRoles(true).workspace(modWorkspace))
+        .getBody().getWorkspace();
+
+    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
+    assertThat(workspace2.getUserRoles().size()).isEqualTo(4);
+    List<UserRole> clonerRoles = workspace2.getUserRoles().stream()
+      .filter((role) -> cloner.getEmail().equals(role.getEmail()))
+      .collect(Collectors.toList());
+    assertThat(clonerRoles.size()).isEqualTo(1);
+    assertThat(clonerRoles.get(0).getRole()).isEqualTo(WorkspaceAccessLevel.OWNER);
+
+    verify(fireCloudService).updateWorkspaceACL(eq("cloned-ns"), eq("cloned"), any());
   }
 
   @Test(expected = BadRequestException.class)
@@ -1130,8 +1292,7 @@ public class WorkspacesControllerTest {
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
-    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    stubFcUpdateWorkspaceACL();
     ShareWorkspaceResponse shareResp = workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest).getBody();
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(), LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     Workspace workspace2 =
@@ -1184,8 +1345,7 @@ public class WorkspacesControllerTest {
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
-    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    stubFcUpdateWorkspaceACL();
     try {
       workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
       fail("expected bad request exception for no role");
@@ -1285,8 +1445,7 @@ public class WorkspacesControllerTest {
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
-    WorkspaceACLUpdateResponseList responseValue = new WorkspaceACLUpdateResponseList();
-    when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyListOf(WorkspaceACLUpdate.class))).thenReturn(responseValue);
+    stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
 
