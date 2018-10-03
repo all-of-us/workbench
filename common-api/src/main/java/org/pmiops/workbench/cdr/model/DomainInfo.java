@@ -49,7 +49,6 @@ public class DomainInfo {
     this.participantCount = participantCount;
   }
 
-  @Id
   @Column(name = "concept_id")
   public Long getConceptId() {
     return conceptId;
@@ -88,6 +87,7 @@ public class DomainInfo {
     return this;
   }
 
+  @Id
   @Column(name = "domain_id")
   public String getDomainId() {
     return domainId;

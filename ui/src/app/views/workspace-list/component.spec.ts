@@ -19,6 +19,7 @@ import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   simulateClick, updateAndTick
@@ -26,6 +27,7 @@ import {
 
 import {
   BugReportService,
+  UserService,
   WorkspacesService
 } from 'generated';
 
@@ -91,6 +93,7 @@ describe('WorkspaceListComponent', () => {
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
+        { provide: UserService, useValue: new UserServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },

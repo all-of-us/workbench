@@ -65,6 +65,11 @@ public class UserController implements UserApiDelegate {
     List<List<User>> pagedUsers = Lists.partition(users, pageSize);
 
     int pageOffset = Long.valueOf(paginationToken.getOffset()).intValue();
+
+    if (pagedUsers.size() == 0) {
+      return ResponseEntity.ok(response);
+    }
+
     if (pageOffset < pagedUsers.size()) {
       boolean hasNext = pageOffset < pagedUsers.size() - 1;
       if (hasNext) {
