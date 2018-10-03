@@ -341,30 +341,33 @@ export class DetailTabsComponent implements OnChanges, OnInit {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const limit = 10;
-    this.trackClickedDomains = isParticipantIdExists(this.participantsId)(this.ngRedux.getState());
-    console.log( this.trackClickedDomains);
-    this.domainList.map(domainName => {
-      this.actions.fetchIndividualParticipantsData(ns, wsid, cid,
-      cdrid, this.participantsId, domainName, limit);
-      const getParticipantsDomainData = this.ngRedux
-        .select(getParticipantData(this.participantsId, domainName))
-        .filter(loading => !!loading)
-        .subscribe(loading => {
-          const data = JSON.parse(loading);
-          this.chartLoadedSpinner = false;
-          if (domainName === DomainType[DomainType.CONDITION]) {
-            this.conditionTitle = typeToTitle(domainName);
-            this.conditionData = data.items;
-            console.log(this.conditionData);
-          } else if (domainName === DomainType[DomainType.PROCEDURE]) {
-            this.procedureTitle = typeToTitle(domainName);
-            this.procedureData = data.items;
-          } else {
-            this.drugTitle = 'Drugs';
-            this.drugData = data.items;
-          }
-        });
-      this.subscription = getParticipantsDomainData;
-    });
+    const cohortId = cid
+     this.trackClickedDomains = isParticipantIdExists(cohortId, this.participantsId)(this.ngRedux.getState());
+      this.domainList.map(domainName => {
+        if (!this.trackClickedDomains) {
+          this.actions.fetchIndividualParticipantsData(ns, wsid, cid,
+            cdrid, this.participantsId, domainName, limit);
+        }
+        const getParticipantsDomainData = this.ngRedux
+          .select(getParticipantData(cohortId, this.participantsId, domainName))
+          .filter(loading => !!loading)
+          .subscribe(loading => {
+            const data = JSON.parse(loading);
+            this.chartLoadedSpinner = false;
+            if (domainName === DomainType[DomainType.CONDITION]) {
+              this.conditionTitle = typeToTitle(domainName);
+              this.conditionData = data.items;
+            } else if (domainName === DomainType[DomainType.PROCEDURE]) {
+              this.procedureTitle = typeToTitle(domainName);
+              this.procedureData = data.items;
+            } else {
+              this.drugTitle = 'Drugs';
+              this.drugData = data.items;
+            }
+          });
+        this.subscription = getParticipantsDomainData;
+      });
+
+
   }
 }
