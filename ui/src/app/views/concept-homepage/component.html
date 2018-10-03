@@ -63,7 +63,7 @@
           {{vocabulary.vocabularyId}} ({{vocabulary.conceptCount}})
         </clr-checkbox>
       </div>
-      <app-concept-table [concepts]="concepts" [selectedDomain]="selectedDomain" [loading]="searchLoading" [searchTerm]="currentSearchString"></app-concept-table>
+      <app-concept-table [concepts]="concepts" [loading]="searchLoading" [searchTerm]="currentSearchString"></app-concept-table>
       <app-sliding-fab [expanded]="'Add to set'" (submit)="openAddModal()">
         <clr-icon class="add-icon" shape="plus"></clr-icon>
       </app-sliding-fab>
