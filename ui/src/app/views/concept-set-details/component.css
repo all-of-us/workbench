@@ -7,8 +7,10 @@
 }
 
 .concept-set-details {
-  margin-right: 10%;
+  /* Expand the details to take as much of the header as possible. */
+  margin-right: auto;
   padding-bottom: 1.5rem;
+  padding-right: 10%;
 }
 
 .action-menu-dropdown {
