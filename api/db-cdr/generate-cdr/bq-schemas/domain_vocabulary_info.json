@@ -2,7 +2,7 @@
   {
     "mode": "REQUIRED",
     "name": "domain_id",
-    "type": "INTEGER"
+    "type": "STRING"
   },
   {
     "mode": "REQUIRED",

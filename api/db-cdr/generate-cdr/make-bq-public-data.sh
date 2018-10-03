@@ -205,20 +205,3 @@ set participant_count =
         cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"
-
-# domain_vocabulary_info
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.domain_vocabulary_info\`
-set all_concept_count =
-    case when all_concept_count < ${BIN_SIZE}
-        then ${BIN_SIZE}
-    else
-        cast(CEIL(all_concept_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
-    end,
-    standard_concept_count =
-    case when standard_concept_count < ${BIN_SIZE}
-        then ${BIN_SIZE}
-    else
-        cast(CEIL(standard_concept_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
-    end
-where all_concept_count > 0 or standard_concept_count > 0"

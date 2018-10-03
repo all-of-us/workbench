@@ -10,11 +10,13 @@
     <addColumn tableName="concept">
       <!-- Contains the concept ID, concept code, concept name, and all concept_synonym_name values
            from concept_synonym -->
-      <column name="synonyms" type="clob"/>
+      <column name="synonyms" type="clob">
+        <constraints nullable="false"/>
+      </column>
     </addColumn>
 
     <createTable tableName="domain_vocabulary_info">
-      <column name="domain_id" type="INTEGER">
+      <column name="domain_id" type="VARCHAR(20)">
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="vocabulary_id" type="VARCHAR(20)">
