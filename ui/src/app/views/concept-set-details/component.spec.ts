@@ -16,9 +16,7 @@ import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {HighlightSearchPipe} from 'app/utils/highlight-search.pipe';
 
-
 import {
-  ConceptsService,
   ConceptSet,
   ConceptSetsService,
   Domain,
@@ -27,9 +25,9 @@ import {
 } from 'generated';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
-import {ConceptsServiceStub, ConceptStubVariables, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
+import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
+import {updateAndTick} from 'testing/test-helpers';
 
 describe('ConceptSetDetailsComponent', () => {
   let fixture: ComponentFixture<ConceptSetDetailsComponent>;
@@ -76,7 +74,6 @@ describe('ConceptSetDetailsComponent', () => {
         TopBoxComponent,
       ],
       providers: [
-        { provide: ConceptsService, useValue: new ConceptsServiceStub() },
         { provide: ConceptSetsService, useValue: new ConceptSetsServiceStub() },
         { provide: ActivatedRoute, useFactory: () => routeStub }
       ]}).compileComponents().then(() => {
@@ -93,7 +90,7 @@ describe('ConceptSetDetailsComponent', () => {
       creationTime: 0,
       lastModifiedTime: 0,
       concepts: ConceptStubVariables.STUB_CONCEPTS
-    }
+    };
   }
 
   function setUpComponent(conceptSet?: ConceptSet) {
@@ -116,14 +113,14 @@ describe('ConceptSetDetailsComponent', () => {
       .filter(b => b.nativeElement.textContent.includes('Add concepts'));
   }
 
-  fit('should render concept table', fakeAsync(() => {
+  it('should render concept table', fakeAsync(() => {
     setUpComponent();
     const de = fixture.debugElement;
     expect(de.queryAll(By.css('app-concept-table')).length).toEqual(1);
     expect(findAddConceptsButtons(de).length).toEqual(1);
   }));
 
-  fit('should render empty concepts state', fakeAsync(() => {
+  it('should render empty concepts state', fakeAsync(() => {
     setUpComponent({
       ...newConceptSet(),
       concepts: []
