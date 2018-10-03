@@ -18,7 +18,7 @@
     </sql>
   </changeSet>
 
-  <changeSet id="add synonyms_index full_text" author="srushtigangireddy" runAlways="true">
+  <changeSet id="add synonyms_index full_text" author="srushtigangireddy" runAlways="true" onValidationFail="MARK_RAN">
     <validCheckSum>ANY</validCheckSum>
     <sql dbms="mysql">
       ALTER TABLE concept
@@ -39,7 +39,7 @@
     <addPrimaryKey tableName="domain_info" columnNames="domain_id"/>
   </changeSet>
 
-  <changeSet author="srushtigangireddy" id="drop db_domain table" runAlways="true">
+  <changeSet author="srushtigangireddy" id="drop db_domain table" runAlways="true" onValidationFail="MARK_RAN">
     <validCheckSum>ANY</validCheckSum> <preConditions onFail="MARK_RAN">
     <tableExists tableName="db_domain"/> </preConditions>
     <dropTable tableName="db_domain"/>
