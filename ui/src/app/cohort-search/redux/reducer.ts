@@ -536,16 +536,16 @@ export const rootReducer: Reducer<CohortSearchState> =
       case BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST:
         return state
           .deleteIn(
-            ['individualChartData', 'request', action.domain])
+            ['individualChartData', 'request', action.cid ,action.participantsId, action.domain])
           .setIn(
-            ['individualChartData', 'request', action.ns,
-              action.wsid, action.cid, action.cdrid, action.domain, action.limit],
+            ['individualChartData', 'request', action.ns, action.cid, action.participantsId, action.domain,
+              action.wsid,  action.cdrid,  action.limit],
             true);
 
       case LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS:
         return state
           .setIn(
-            ['individualChartData', 'chartsData', action.participantsId, action.domain]
+            ['individualChartData', 'chartsData', action.cid ,action.participantsId, action.domain]
             , fromJS(action.results._body))
           .deleteIn(
             ['individualChartData', 'request', action.ns,

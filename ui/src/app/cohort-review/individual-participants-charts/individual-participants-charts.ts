@@ -17,10 +17,9 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
   ngOnChanges() {
     this.yAxisNames = [''];
     if (this.chartData) {
-      console.log('here');
-      console.log(this.chartData);
       this.setYaxisValue();
     }
+
   }
   // ngOnInit() {
   //   this.trimmedData = [];
@@ -79,96 +78,115 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
 
   getChartsData() {
     const test = this.yAxisNames;
+    // responsive: {
+    //   rules: [{
+    //     condition: {
+    //       maxWidth: 500
+    //     },
     this.chartOptions = {
-      chart: {
-        type: 'scatter',
-        zoomType: 'xy',
-        width: 420,
-        paddingRight: 12
-      },
-      credits: {
-        enabled: false
-      },
-      title: {
-        text: 'Top' + ' ' + this.chartHeader + ' ' + 'over Time'
-      },
-      xAxis: {
-        title: {
-          enabled: true,
-          text: 'Entry Date'
-        },
+       // responsive: {
+       //   rules: [{
+       //     condition: {
+       //       maxWidth: 2000,
+       //     },
+           chart: {
+             type: 'scatter',
+             zoomType: 'xy',
+             // width: 350,
+             // paddingRight: 12
+           },
+           credits: {
+             enabled: false
+           },
+           title: {
+             text: 'Top' + ' ' + this.chartHeader + ' ' + 'over Time',
+           },
 
-        labels: {
-          formatter: function () {
-            return moment.unix(this.value).format('YYYY');
-          },
-        },
-        startOnTick: true,
-        endOnTick: true,
-        tickInterval:  40 * 3600 * 1000,
-      },
-      yAxis: [{
-        title: {
-          enabled: true,
-          text: this.chartHeader,
-        },
-        labels: {
-          formatter: function () {
-            return test[this.value];
-          }
-        },
-        tickInterval: 1,
-        lineWidth: 1,
-      },
-        {
-        title: {
-          enabled: false,
-        },
-        opposite: true,
-        lineWidth: 1,
-      }],
-      plotOptions: {
-        scatter: {
-          marker: {
-            radius: 5,
-            states: {
-              hover: {
-                enabled: true,
-                lineColor: 'rgb(100,100,100)'
-              }
-            }
-          },
-          states: {
-            hover: {
-              marker: {
-                enabled: false
-              }
-            }
-          },
 
-        }
-      },
-      tooltip: {
-        pointFormat: '<div>' +
-          'Date:<b>{point.startDate}</b><br/>' +
-          'Standard Vocab:<b>{point.standardVocabulary}</b><br/>' +
-          'Standard Name: <b>{point.standardName}</b><br/>' +
-          'Age at Event:<b>{point.ageAtEvent}</b><br/>' +
-          'rank:<b>{point.rank}</b><br/>' +
-          '</div>',
-        shared: true
-      },
-      series: [{
-        type: 'scatter',
-        name: 'Details',
-        data: this.trimmedData,
-        turboThreshold: 5000,
-        showInLegend: false,
-      }],
+           xAxis: {
+             title: {
+               enabled: true,
+               text: 'Entry Date',
+             },
+
+             labels: {
+               formatter: function () {
+                 return moment.unix(this.value).format('YYYY');
+               },
+             },
+             startOnTick: true,
+             endOnTick: true,
+             tickInterval: 40 * 3600 * 1000,
+           },
+           yAxis: [{
+             title: {
+               enabled: true,
+               text: this.chartHeader,
+             },
+             labels: {
+               formatter: function () {
+                 return test[this.value];
+               }
+             },
+             tickInterval: 1,
+             lineWidth: 1,
+           },
+
+
+             {
+               title: {
+                 enabled: false,
+               },
+               opposite: true,
+               lineWidth: 1,
+             }],
+           plotOptions: {
+             scatter: {
+               marker: {
+                 radius: 5,
+                 states: {
+                   hover: {
+                     enabled: true,
+                     lineColor: 'rgb(100,100,100)'
+                   }
+                 }
+               },
+               states: {
+                 hover: {
+                   marker: {
+                     enabled: false
+                   }
+                 }
+               },
+
+             }
+           },
+
+           tooltip: {
+             pointFormat: '<div>' +
+               'Date:<b>{point.startDate}</b><br/>' +
+               'Standard Vocab:<b>{point.standardVocabulary}</b><br/>' +
+               'Standard Name: <b>{point.standardName}</b><br/>' +
+               'Age at Event:<b>{point.ageAtEvent}</b><br/>' +
+               'rank:<b>{point.rank}</b><br/>' +
+               '</div>',
+             shared: true
+           },
+           series: [{
+             type: 'scatter',
+             name: 'Details',
+             data: this.trimmedData,
+             turboThreshold: 5000,
+             showInLegend: false,
+           }],
+       //   }],
+       // }
 
     };
 
   }
-
+getStyle(){
+    // this.chartOptions.set
+}
   }
 
