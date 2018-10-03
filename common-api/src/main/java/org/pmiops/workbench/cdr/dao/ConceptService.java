@@ -1,24 +1,51 @@
 package org.pmiops.workbench.cdr.dao;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class ConceptService {
+
+    public static class ConceptIds {
+
+      private final List<Long> standardConceptIds;
+      private final List<Long> sourceConceptIds;
+
+      public ConceptIds(List<Long> standardConceptIds, List<Long> sourceConceptIds) {
+        this.standardConceptIds = standardConceptIds;
+        this.sourceConceptIds = sourceConceptIds;
+      }
+
+      public List<Long> getStandardConceptIds() {
+        return standardConceptIds;
+      }
+
+      public List<Long> getSourceConceptIds() {
+        return sourceConceptIds;
+      }
+
+    }
 
     public enum StandardConceptFilter {
         ALL_CONCEPTS,
@@ -31,20 +58,25 @@ public class ConceptService {
     private EntityManager entityManager;
 
     @Autowired
+    private ConceptDao conceptDao;
+
+    @Autowired
     private ConceptSynonymDao conceptSynonymDao;
 
     public ConceptService() {
     }
 
     // Used for tests
-    public ConceptService(EntityManager entityManager, ConceptSynonymDao conceptSynonymDao) {
+    public ConceptService(EntityManager entityManager, ConceptDao conceptDao,
+        ConceptSynonymDao conceptSynonymDao) {
         this.entityManager = entityManager;
+        this.conceptDao = conceptDao;
         this.conceptSynonymDao = conceptSynonymDao;
     }
 
     public static String modifyMultipleMatchKeyword(String query){
         // This function modifies the keyword to match all the words if multiple words are present(by adding + before each word to indicate match that matching each word is essential)
-        if(query == null || query.isEmpty()){
+        if(query == null || query.trim().isEmpty()){
             return null;
         }
         String[] keywords = query.split("[,+\\s+]");
@@ -228,12 +260,31 @@ public class ConceptService {
     }
 
     public List<Concept> fetchConceptSynonyms(List<Concept> concepts) {
-        List<Long> conceptIds = concepts.stream().map(Concept::getConceptId).collect(Collectors.toList());
-        Multimap<Long,ConceptSynonym> synonymMap = Multimaps.index(conceptSynonymDao.findByConceptIdIn(conceptIds),ConceptSynonym::getConceptId);
-        for(Concept concept: concepts) {
-            concept.setSynonyms(synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
-        }
-        return concepts;
+      List<Long> conceptIds = concepts.stream().map(Concept::getConceptId)
+          .collect(Collectors.toList());
+      Multimap<Long, ConceptSynonym> synonymMap = Multimaps
+          .index(conceptSynonymDao.findByConceptIdIn(conceptIds), ConceptSynonym::getConceptId);
+      for (Concept concept : concepts) {
+        concept.setSynonyms(
+            synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
+      }
+      return concepts;
     }
 
+    public ConceptIds classifyConceptIds(Set<Long> conceptIds) {
+      ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
+      ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
+
+      Iterable<Concept> concepts = conceptDao.findAll(conceptIds);
+      for (Concept concept : concepts) {
+        if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())
+            || ConceptService.CLASSIFICATION_CONCEPT_CODE.equals(concept.getStandardConcept())) {
+          standardConceptIds.add(concept.getConceptId());
+        } else {
+          // We may need to handle classification / concept hierarchy here eventually...
+          sourceConceptIds.add(concept.getConceptId());
+        }
+      }
+      return new ConceptIds(standardConceptIds.build(), sourceConceptIds.build());
+    }
 }

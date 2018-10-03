@@ -185,4 +185,20 @@ describe('WorkspaceListComponent', () => {
       .toEqual(firstWorkspace);
     // Further tests in the workspace share component
   }));
+
+  it('has the correct permissions classes', fakeAsync(() => {
+    // Testing the CSS classes applied, rather than actual logic on the component
+    const workspaceList = workspaceListPage.fixture.componentInstance.workspaceList;
+    const permissionsOnPage = workspaceListPage
+        .fixture.debugElement.queryAll(By.css('.permission-box'));
+    for (let i = 0; i < workspaceList.length; i++) {
+      if (workspaceList[i].isOwner) {
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('owner-permission');
+      } else if (workspaceList[i].isReadOnly) {
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('reader-permission');
+      } else {
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('writer-permission');
+      }
+    }
+  }));
 });

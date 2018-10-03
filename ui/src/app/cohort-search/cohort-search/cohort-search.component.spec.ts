@@ -5,7 +5,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {CohortBuilderService} from 'generated';
+import {CohortBuilderService, CohortsService} from 'generated';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
@@ -92,6 +92,7 @@ describe('CohortSearchComponent', () => {
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
         {provide: CohortBuilderService, useValue: {}},
+        {provide: CohortsService, useValue: {}},
         {provide: CohortSearchActions, useValue: new MockActions()},
         {
           provide: ActivatedRoute,

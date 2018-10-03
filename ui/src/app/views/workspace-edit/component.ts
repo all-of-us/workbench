@@ -189,6 +189,7 @@ export class WorkspaceEditComponent implements OnInit {
   };
 
   researchPurposeItems = ResearchPurposeItems;
+  cloneUserRoles = false;
   fillDetailsLater = false;
   hideDetailsLaterOption = false;
   canEditResearchPurpose = true;
@@ -368,6 +369,7 @@ export class WorkspaceEditComponent implements OnInit {
     this.workspacesService.cloneWorkspace(
       this.oldWorkspaceNamespace,
       this.oldWorkspaceName, {
+        includeUserRoles: this.cloneUserRoles,
         workspace: this.workspace,
       }).subscribe(
         (r: CloneWorkspaceResponse) => {
