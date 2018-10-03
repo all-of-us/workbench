@@ -5,58 +5,58 @@
 4,0,"ICD9","CM","E000-E999.9","EXTERNAL CAUSES OF INJURY AND POISONING",1,0,"","","",0,""
 5,1,"ICD9","CM","001-139.99","Infectious and parasitic diseases",1,0,"","","",0,1
 6,5,"ICD9","CM","001","Cholera",1,1,19,"","",0,1.5
-7,5,"ICD9","CM","002","Typhoid and paratyphoid fevers",1,1,36,"","",0,1.5
-8,5,"ICD9","CM","003","Other salmonella infections",1,1,153,"","",0,1.5
-9,5,"ICD9","CM","004","Shigellosis",1,1,46,"","",0,1.5
-10,5,"ICD9","CM","005","Other food poisoning (bacterial)",1,1,176,"","",0,1.5
-11,5,"ICD9","CM","006","Amebiasis",1,1,33,"","",0,1.5
+7,5,"ICD9","CM","002","Typhoid and paratyphoid fevers",1,1,34,"","",0,1.5
+8,5,"ICD9","CM","003","Other salmonella infections",1,1,116,"","",0,1.5
+9,5,"ICD9","CM","004","Shigellosis",1,1,38,"","",0,1.5
+10,5,"ICD9","CM","005","Other food poisoning (bacterial)",1,1,175,"","",0,1.5
+11,5,"ICD9","CM","006","Amebiasis",1,1,32,"","",0,1.5
 12,5,"ICD9","CM","007","Other protozoal intestinal diseases",1,1,120,"","",0,1.5
-13,5,"ICD9","CM","008","Intestinal infections due to other organisms",1,1,7181,"","",0,1.5
-14,5,"ICD9","CM","009","Ill-defined intestinal infections",1,1,3362,"","",0,1.5
-15,5,"ICD9","CM","010","Primary tuberculous infection",1,1,85,"","",0,1.5
-16,5,"ICD9","CM","011","Pulmonary tuberculosis",1,1,582,"","",0,1.5
-17,5,"ICD9","CM","012","Other respiratory tuberculosis",1,1,69,"","",0,1.5
-18,5,"ICD9","CM","013","Tuberculosis of meninges and central nervous system",1,1,38,"","",0,1.5
-19,5,"ICD9","CM","014","Tuberculosis of intestines, peritoneum, and mesenteric glands",1,1,20,"","",0,1.5
-20,5,"ICD9","CM","015","Tuberculosis of bones and joints",1,1,72,"","",0,1.5
-21,5,"ICD9","CM","016","Tuberculosis of genitourinary system",1,1,9,"","",0,1.5
-22,5,"ICD9","CM","017","Tuberculosis of other organs",1,1,167,"","",0,1.5
-23,5,"ICD9","CM","018","Miliary tuberculosis",1,1,34,"","",0,1.5
+13,5,"ICD9","CM","008","Intestinal infections due to other organisms",1,1,6896,"","",0,1.5
+14,5,"ICD9","CM","009","Ill-defined intestinal infections",1,1,3309,"","",0,1.5
+15,5,"ICD9","CM","010","Primary tuberculous infection",1,1,81,"","",0,1.5
+16,5,"ICD9","CM","011","Pulmonary tuberculosis",1,1,453,"","",0,1.5
+17,5,"ICD9","CM","012","Other respiratory tuberculosis",1,1,60,"","",0,1.5
+18,5,"ICD9","CM","013","Tuberculosis of meninges and central nervous system",1,1,27,"","",0,1.5
+19,5,"ICD9","CM","014","Tuberculosis of intestines, peritoneum, and mesenteric glands",1,1,15,"","",0,1.5
+20,5,"ICD9","CM","015","Tuberculosis of bones and joints",1,1,60,"","",0,1.5
+21,5,"ICD9","CM","016","Tuberculosis of genitourinary system",1,1,8,"","",0,1.5
+22,5,"ICD9","CM","017","Tuberculosis of other organs",1,1,161,"","",0,1.5
+23,5,"ICD9","CM","018","Miliary tuberculosis",1,1,22,"","",0,1.5
 24,5,"ICD9","CM","020","Plague",1,1,22,"","",0,1.5
-25,5,"ICD9","CM","021","Tularemia",1,1,16,"","",0,1.5
+25,5,"ICD9","CM","021","Tularemia",1,1,14,"","",0,1.5
 26,5,"ICD9","CM","022","Anthrax",1,1,38,"","",0,1.5
-27,5,"ICD9","CM","023","Brucellosis",1,1,17,"","",0,1.5
+27,5,"ICD9","CM","023","Brucellosis",1,1,16,"","",0,1.5
 28,5,"ICD9","CM","024","Glanders",1,1,7,"","",0,1.5
 29,5,"ICD9","CM","025","Melioidosis",1,1,5,"","",0,1.5
-30,5,"ICD9","CM","026","Rat-bite fever",1,1,12,"","",0,1.5
+30,5,"ICD9","CM","026","Rat-bite fever",1,1,10,"","",0,1.5
 31,5,"ICD9","CM","027","Other zoonotic bacterial diseases",1,1,52,"","",0,1.5
-32,5,"ICD9","CM","030","Leprosy",1,1,11,"","",0,1.5
-33,5,"ICD9","CM","031","Diseases due to other mycobacteria",1,1,1068,"","",0,1.5
-34,5,"ICD9","CM","032","Diphtheria",1,1,41,"","",0,1.5
-35,5,"ICD9","CM","033","Whooping cough",1,1,69,"","",0,1.5
-36,5,"ICD9","CM","034","Streptococcal sore throat and scarlet fever",1,1,20423,"","",0,1.5
+32,5,"ICD9","CM","030","Leprosy",1,1,10,"","",0,1.5
+33,5,"ICD9","CM","031","Diseases due to other mycobacteria",1,1,747,"","",0,1.5
+34,5,"ICD9","CM","032","Diphtheria",1,1,39,"","",0,1.5
+35,5,"ICD9","CM","033","Whooping cough",1,1,66,"","",0,1.5
+36,5,"ICD9","CM","034","Streptococcal sore throat and scarlet fever",1,1,20354,"","",0,1.5
 37,5,"ICD9","CM","035","Erysipelas",1,1,135,"","",0,1.5
-38,5,"ICD9","CM","036","Meningococcal infection",1,1,48,"","",0,1.5
+38,5,"ICD9","CM","036","Meningococcal infection",1,1,41,"","",0,1.5
 39,5,"ICD9","CM","037","Tetanus",1,1,11,"","",0,1.5
-40,5,"ICD9","CM","038","Septicemia",1,1,21011,"","",0,1.5
-41,5,"ICD9","CM","039","Actinomycotic infections",1,1,391,"","",0,1.5
-42,5,"ICD9","CM","040","Other bacterial diseases",1,1,234,"","",0,1.5
-43,5,"ICD9","CM","041","Bacterial infection in conditions classified elsewhere and of unspecified site",1,1,44441,"","",0,1.5
+40,5,"ICD9","CM","038","Septicemia",1,1,14664,"","",0,1.5
+41,5,"ICD9","CM","039","Actinomycotic infections",1,1,281,"","",0,1.5
+42,5,"ICD9","CM","040","Other bacterial diseases",1,1,233,"","",0,1.5
+43,5,"ICD9","CM","041","Bacterial infection in conditions classified elsewhere and of unspecified site",1,1,26611,"","",0,1.5
 44,5,"ICD9","CM","042","Human immunodeficiency virus [HIV] disease",1,1,5281,"","",0,1.5
-47,5,"ICD9","CM","045","Acute poliomyelitis",1,1,35,"","",0,1.5
-48,5,"ICD9","CM","046","Slow virus infections and prion diseases of central nervous system",1,1,104,"","",0,1.5
-49,5,"ICD9","CM","047","Meningitis due to enterovirus",1,1,755,"","",0,1.5
+47,5,"ICD9","CM","045","Acute poliomyelitis",1,1,33,"","",0,1.5
+48,5,"ICD9","CM","046","Slow virus infections and prion diseases of central nervous system",1,1,96,"","",0,1.5
+49,5,"ICD9","CM","047","Meningitis due to enterovirus",1,1,697,"","",0,1.5
 50,5,"ICD9","CM","048","Other enterovirus diseases of central nervous system",1,1,49,"","",0,1.5
-51,5,"ICD9","CM","049","Other non-arthropod-borne viral diseases of central nervous system",1,1,151,"","",0,1.5
+51,5,"ICD9","CM","049","Other non-arthropod-borne viral diseases of central nervous system",1,1,146,"","",0,1.5
 52,5,"ICD9","CM","050","Smallpox",1,1,13,"","",0,1.5
 53,5,"ICD9","CM","051","Cowpox and paravaccinia",1,1,9,"","",0,1.5
-54,5,"ICD9","CM","052","Chickenpox",1,1,509,"","",0,1.5
-55,5,"ICD9","CM","053","Herpes zoster",1,1,8269,"","",0,1.5
-56,5,"ICD9","CM","054","Herpes simplex",1,1,9936,"","",0,1.5
+54,5,"ICD9","CM","052","Chickenpox",1,1,468,"","",0,1.5
+55,5,"ICD9","CM","053","Herpes zoster",1,1,7028,"","",0,1.5
+56,5,"ICD9","CM","054","Herpes simplex",1,1,8516,"","",0,1.5
 57,5,"ICD9","CM","055","Measles",1,1,23,"","",0,1.5
 58,5,"ICD9","CM","056","Rubella",1,1,12,"","",0,1.5
-59,5,"ICD9","CM","057","Other viral exanthemata",1,1,433,"","",0,1.5
-60,5,"ICD9","CM","058","Other human herpesvirus",1,1,57,"","",0,1.5
+59,5,"ICD9","CM","057","Other viral exanthemata",1,1,430,"","",0,1.5
+60,5,"ICD9","CM","058","Other human herpesvirus",1,1,54,"","",0,1.5
 61,5,"ICD9","CM","059","Other poxvirus infections",1,1,13,"","",0,1.5
 62,5,"ICD9","CM","060","Yellow fever",1,1,20,"","",0,1.5
 63,5,"ICD9","CM","061","Dengue",1,1,24,"","",0,1.5
@@ -64,168 +64,168 @@
 65,5,"ICD9","CM","063","Tick-borne viral encephalitis",1,1,8,"","",0,1.5
 66,5,"ICD9","CM","064","Viral encephalitis transmitted by other and unspecified arthropods",1,1,11,"","",0,1.5
 67,5,"ICD9","CM","065","Arthropod-borne hemorrhagic fever",1,1,6,"","",0,1.5
-68,5,"ICD9","CM","066","Other arthropod-borne viral diseases",1,1,588,"","",0,1.5
-69,5,"ICD9","CM","070","Viral hepatitis",1,1,19484,"","",0,1.5
+68,5,"ICD9","CM","066","Other arthropod-borne viral diseases",1,1,587,"","",0,1.5
+69,5,"ICD9","CM","070","Viral hepatitis",1,1,12519,"","",0,1.5
 70,5,"ICD9","CM","071","Rabies",1,1,12,"","",0,1.5
-71,5,"ICD9","CM","072","Mumps",1,1,34,"","",0,1.5
+71,5,"ICD9","CM","072","Mumps",1,1,33,"","",0,1.5
 72,5,"ICD9","CM","073","Ornithosis",1,1,10,"","",0,1.5
 73,5,"ICD9","CM","074","Specific diseases due to Coxsackie virus",1,1,264,"","",0,1.5
 74,5,"ICD9","CM","075","Infectious mononucleosis",1,1,2585,"","",0,1.5
 75,5,"ICD9","CM","076","Trachoma",1,1,7,"","",0,1.5
-76,5,"ICD9","CM","077","Other diseases of conjunctiva due to viruses and Chlamydiae",1,1,1291,"","",0,1.5
-77,5,"ICD9","CM","078","Other diseases due to viruses and Chlamydiae",1,1,17538,"","",0,1.5
-78,5,"ICD9","CM","079","Viral and chlamydial infection in conditions classified elsewhere and of unspecified site",1,1,18942,"","",0,1.5
+76,5,"ICD9","CM","077","Other diseases of conjunctiva due to viruses and Chlamydiae",1,1,1267,"","",0,1.5
+77,5,"ICD9","CM","078","Other diseases due to viruses and Chlamydiae",1,1,15739,"","",0,1.5
+78,5,"ICD9","CM","079","Viral and chlamydial infection in conditions classified elsewhere and of unspecified site",1,1,18381,"","",0,1.5
 79,5,"ICD9","CM","080","Louse-borne (epidemic) typhus",1,1,1,"","",0,1.5
 80,5,"ICD9","CM","081","Other typhus",1,1,9,"","",0,1.5
-81,5,"ICD9","CM","082","Tick-borne rickettsioses",1,1,607,"","",0,1.5
-82,5,"ICD9","CM","083","Other rickettsioses",1,1,91,"","",0,1.5
-83,5,"ICD9","CM","084","Malaria",1,1,142,"","",0,1.5
-84,5,"ICD9","CM","085","Leishmaniasis",1,1,28,"","",0,1.5
+81,5,"ICD9","CM","082","Tick-borne rickettsioses",1,1,541,"","",0,1.5
+82,5,"ICD9","CM","083","Other rickettsioses",1,1,90,"","",0,1.5
+83,5,"ICD9","CM","084","Malaria",1,1,99,"","",0,1.5
+84,5,"ICD9","CM","085","Leishmaniasis",1,1,25,"","",0,1.5
 85,5,"ICD9","CM","086","Trypanosomiasis",1,1,10,"","",0,1.5
 86,5,"ICD9","CM","087","Relapsing fever",1,1,101,"","",0,1.5
-87,5,"ICD9","CM","088","Other arthropod-borne diseases",1,1,345,"","",0,1.5
+87,5,"ICD9","CM","088","Other arthropod-borne diseases",1,1,341,"","",0,1.5
 88,5,"ICD9","CM","090","Congenital syphilis",1,1,53,"","",0,1.5
-89,5,"ICD9","CM","091","Early syphilis, symptomatic",1,1,156,"","",0,1.5
+89,5,"ICD9","CM","091","Early syphilis, symptomatic",1,1,138,"","",0,1.5
 90,5,"ICD9","CM","092","Early syphilis, latent",1,1,25,"","",0,1.5
 91,5,"ICD9","CM","093","Cardiovascular syphilis",1,1,15,"","",0,1.5
-92,5,"ICD9","CM","094","Neurosyphilis",1,1,362,"","",0,1.5
-93,5,"ICD9","CM","095","Other forms of late syphilis, with symptoms",1,1,28,"","",0,1.5
+92,5,"ICD9","CM","094","Neurosyphilis",1,1,334,"","",0,1.5
+93,5,"ICD9","CM","095","Other forms of late syphilis, with symptoms",1,1,27,"","",0,1.5
 94,5,"ICD9","CM","096","Late syphilis, latent",1,1,31,"","",0,1.5
-95,5,"ICD9","CM","097","Other and unspecified syphilis",1,1,801,"","",0,1.5
-96,5,"ICD9","CM","098","Gonococcal infections",1,1,828,"","",0,1.5
-97,5,"ICD9","CM","099","Other venereal diseases",1,1,1543,"","",0,1.5
-98,5,"ICD9","CM",100,"Leptospirosis",1,1,95,"","",0,1.5
+95,5,"ICD9","CM","097","Other and unspecified syphilis",1,1,750,"","",0,1.5
+96,5,"ICD9","CM","098","Gonococcal infections",1,1,772,"","",0,1.5
+97,5,"ICD9","CM","099","Other venereal diseases",1,1,1490,"","",0,1.5
+98,5,"ICD9","CM",100,"Leptospirosis",1,1,94,"","",0,1.5
 99,5,"ICD9","CM",101,"Vincent's angina",1,1,26,"","",0,1.5
 100,5,"ICD9","CM",102,"Yaws",1,1,27,"","",0,1.5
 101,5,"ICD9","CM",103,"Pinta",1,1,12,"","",0,1.5
-102,5,"ICD9","CM",104,"Other spirochetal infection",1,1,34,"","",0,1.5
-103,5,"ICD9","CM",110,"Dermatophytosis",1,1,20805,"","",0,1.5
-104,5,"ICD9","CM",111,"Dermatomycosis, other and unspecified",1,1,2627,"","",0,1.5
-105,5,"ICD9","CM",112,"Candidiasis",1,1,24830,"","",0,1.5
-106,5,"ICD9","CM",114,"Coccidioidomycosis",1,1,100,"","",0,1.5
-107,5,"ICD9","CM",115,"Histoplasmosis",1,1,2117,"","",0,1.5
-108,5,"ICD9","CM",116,"Blastomycotic infection",1,1,212,"","",0,1.5
-109,5,"ICD9","CM",117,"Other mycoses",1,1,2723,"","",0,1.5
+102,5,"ICD9","CM",104,"Other spirochetal infection",1,1,32,"","",0,1.5
+103,5,"ICD9","CM",110,"Dermatophytosis",1,1,17750,"","",0,1.5
+104,5,"ICD9","CM",111,"Dermatomycosis, other and unspecified",1,1,2590,"","",0,1.5
+105,5,"ICD9","CM",112,"Candidiasis",1,1,21527,"","",0,1.5
+106,5,"ICD9","CM",114,"Coccidioidomycosis",1,1,73,"","",0,1.5
+107,5,"ICD9","CM",115,"Histoplasmosis",1,1,1253,"","",0,1.5
+108,5,"ICD9","CM",116,"Blastomycotic infection",1,1,206,"","",0,1.5
+109,5,"ICD9","CM",117,"Other mycoses",1,1,2400,"","",0,1.5
 110,5,"ICD9","CM",118,"Opportunistic mycoses",1,1,129,"","",0,1.5
-111,5,"ICD9","CM",120,"Schistosomiasis [bilharziasis]",1,1,32,"","",0,1.5
+111,5,"ICD9","CM",120,"Schistosomiasis [bilharziasis]",1,1,29,"","",0,1.5
 112,5,"ICD9","CM",121,"Other trematode infections",1,1,23,"","",0,1.5
-113,5,"ICD9","CM",122,"Echinococcosis",1,1,61,"","",0,1.5
-114,5,"ICD9","CM",123,"Other cestode infection",1,1,107,"","",0,1.5
+113,5,"ICD9","CM",122,"Echinococcosis",1,1,56,"","",0,1.5
+114,5,"ICD9","CM",123,"Other cestode infection",1,1,101,"","",0,1.5
 115,5,"ICD9","CM",124,"Trichinosis",1,1,8,"","",0,1.5
 116,5,"ICD9","CM",125,"Filarial infection and dracontiasis",1,1,31,"","",0,1.5
 117,5,"ICD9","CM",126,"Ancylostomiasis and necatoriasis",1,1,33,"","",0,1.5
-118,5,"ICD9","CM",127,"Other intestinal helminthiases",1,1,341,"","",0,1.5
+118,5,"ICD9","CM",127,"Other intestinal helminthiases",1,1,331,"","",0,1.5
 119,5,"ICD9","CM",128,"Other and unspecified helminthiases",1,1,31,"","",0,1.5
 120,5,"ICD9","CM",129,"Intestinal parasitism, unspecified",1,1,51,"","",0,1.5
-121,5,"ICD9","CM",130,"Toxoplasmosis",1,1,356,"","",0,1.5
-122,5,"ICD9","CM",131,"Trichomoniasis",1,1,2387,"","",0,1.5
-123,5,"ICD9","CM",132,"Pediculosis and phthirus infestation",1,1,423,"","",0,1.5
-124,5,"ICD9","CM",133,"Acariasis",1,1,1617,"","",0,1.5
-125,5,"ICD9","CM",134,"Other infestation",1,1,120,"","",0,1.5
+121,5,"ICD9","CM",130,"Toxoplasmosis",1,1,231,"","",0,1.5
+122,5,"ICD9","CM",131,"Trichomoniasis",1,1,2161,"","",0,1.5
+123,5,"ICD9","CM",132,"Pediculosis and phthirus infestation",1,1,406,"","",0,1.5
+124,5,"ICD9","CM",133,"Acariasis",1,1,1604,"","",0,1.5
+125,5,"ICD9","CM",134,"Other infestation",1,1,119,"","",0,1.5
 126,5,"ICD9","CM",135,"Sarcoidosis",1,1,2287,"","",0,1.5
-127,5,"ICD9","CM",136,"Other and unspecified infectious and parasitic diseases",1,1,2504,"","",0,1.5
-128,5,"ICD9","CM",137,"Late effects of tuberculosis",1,1,98,"","",0,1.5
+127,5,"ICD9","CM",136,"Other and unspecified infectious and parasitic diseases",1,1,2395,"","",0,1.5
+128,5,"ICD9","CM",137,"Late effects of tuberculosis",1,1,96,"","",0,1.5
 129,5,"ICD9","CM",138,"Late effects of acute poliomyelitis",1,1,222,"","",0,1.5
-130,5,"ICD9","CM",139,"Late effects of other infectious and parasitic diseases",1,1,128,"","",0,1.5
+130,5,"ICD9","CM",139,"Late effects of other infectious and parasitic diseases",1,1,125,"","",0,1.5
 131,1,"ICD9","CM","140-239.99","Neoplasms",1,0,"","","",0,1
-132,131,"ICD9","CM",140,"Malignant neoplasm of lip",1,1,169,"","",0,1.131
-133,131,"ICD9","CM",141,"Malignant neoplasm of tongue",1,1,2762,"","",0,1.131
-134,131,"ICD9","CM",142,"Malignant neoplasm of major salivary glands",1,1,902,"","",0,1.131
-135,131,"ICD9","CM",143,"Malignant neoplasm of gum",1,1,373,"","",0,1.131
-136,131,"ICD9","CM",144,"Malignant neoplasm of floor of mouth",1,1,457,"","",0,1.131
-137,131,"ICD9","CM",145,"Malignant neoplasm of other and unspecified parts of mouth",1,1,2197,"","",0,1.131
-138,131,"ICD9","CM",146,"Malignant neoplasm of oropharynx",1,1,3131,"","",0,1.131
-139,131,"ICD9","CM",147,"Malignant neoplasm of nasopharynx",1,1,751,"","",0,1.131
-140,131,"ICD9","CM",148,"Malignant neoplasm of hypopharynx",1,1,478,"","",0,1.131
-141,131,"ICD9","CM",149,"Malignant neoplasm of other and ill-defined sites within the lip, oral cavity, and pharynx",1,1,702,"","",0,1.131
-142,131,"ICD9","CM",150,"Malignant neoplasm of esophagus",1,1,2473,"","",0,1.131
-143,131,"ICD9","CM",151,"Malignant neoplasm of stomach",1,1,2604,"","",0,1.131
-144,131,"ICD9","CM",152,"Malignant neoplasm of small intestine, including duodenum",1,1,944,"","",0,1.131
-145,131,"ICD9","CM",153,"Malignant neoplasm of colon",1,1,7451,"","",0,1.131
-146,131,"ICD9","CM",154,"Malignant neoplasm of rectum, rectosigmoid junction, and anus",1,1,4632,"","",0,1.131
-147,131,"ICD9","CM",155,"Malignant neoplasm of liver and intrahepatic bile ducts",1,1,4124,"","",0,1.131
-148,131,"ICD9","CM",156,"Malignant neoplasm of gallbladder and extrahepatic bile ducts",1,1,1350,"","",0,1.131
-149,131,"ICD9","CM",157,"Malignant neoplasm of pancreas",1,1,4820,"","",0,1.131
-150,131,"ICD9","CM",158,"Malignant neoplasm of retroperitoneum and peritoneum",1,1,1162,"","",0,1.131
-151,131,"ICD9","CM",159,"Malignant neoplasm of other and ill-defined sites within the digestive organs and peritoneum",1,1,262,"","",0,1.131
-152,131,"ICD9","CM",160,"Malignant neoplasm of nasal cavities, middle ear, and accessory sinuses",1,1,1006,"","",0,1.131
-153,131,"ICD9","CM",161,"Malignant neoplasm of larynx",1,1,2834,"","",0,1.131
-154,131,"ICD9","CM",162,"Malignant neoplasm of trachea, bronchus, and lung",1,1,14107,"","",0,1.131
-155,131,"ICD9","CM",163,"Malignant neoplasm of pleura",1,1,1018,"","",0,1.131
-156,131,"ICD9","CM",164,"Malignant neoplasm of thymus, heart, and mediastinum",1,1,527,"","",0,1.131
+132,131,"ICD9","CM",140,"Malignant neoplasm of lip",1,1,123,"","",0,1.131
+133,131,"ICD9","CM",141,"Malignant neoplasm of tongue",1,1,1445,"","",0,1.131
+134,131,"ICD9","CM",142,"Malignant neoplasm of major salivary glands",1,1,683,"","",0,1.131
+135,131,"ICD9","CM",143,"Malignant neoplasm of gum",1,1,310,"","",0,1.131
+136,131,"ICD9","CM",144,"Malignant neoplasm of floor of mouth",1,1,303,"","",0,1.131
+137,131,"ICD9","CM",145,"Malignant neoplasm of other and unspecified parts of mouth",1,1,1620,"","",0,1.131
+138,131,"ICD9","CM",146,"Malignant neoplasm of oropharynx",1,1,1950,"","",0,1.131
+139,131,"ICD9","CM",147,"Malignant neoplasm of nasopharynx",1,1,589,"","",0,1.131
+140,131,"ICD9","CM",148,"Malignant neoplasm of hypopharynx",1,1,362,"","",0,1.131
+141,131,"ICD9","CM",149,"Malignant neoplasm of other and ill-defined sites within the lip, oral cavity, and pharynx",1,1,630,"","",0,1.131
+142,131,"ICD9","CM",150,"Malignant neoplasm of esophagus",1,1,1227,"","",0,1.131
+143,131,"ICD9","CM",151,"Malignant neoplasm of stomach",1,1,1502,"","",0,1.131
+144,131,"ICD9","CM",152,"Malignant neoplasm of small intestine, including duodenum",1,1,717,"","",0,1.131
+145,131,"ICD9","CM",153,"Malignant neoplasm of colon",1,1,4296,"","",0,1.131
+146,131,"ICD9","CM",154,"Malignant neoplasm of rectum, rectosigmoid junction, and anus",1,1,3030,"","",0,1.131
+147,131,"ICD9","CM",155,"Malignant neoplasm of liver and intrahepatic bile ducts",1,1,3041,"","",0,1.131
+148,131,"ICD9","CM",156,"Malignant neoplasm of gallbladder and extrahepatic bile ducts",1,1,876,"","",0,1.131
+149,131,"ICD9","CM",157,"Malignant neoplasm of pancreas",1,1,2449,"","",0,1.131
+150,131,"ICD9","CM",158,"Malignant neoplasm of retroperitoneum and peritoneum",1,1,934,"","",0,1.131
+151,131,"ICD9","CM",159,"Malignant neoplasm of other and ill-defined sites within the digestive organs and peritoneum",1,1,252,"","",0,1.131
+152,131,"ICD9","CM",160,"Malignant neoplasm of nasal cavities, middle ear, and accessory sinuses",1,1,587,"","",0,1.131
+153,131,"ICD9","CM",161,"Malignant neoplasm of larynx",1,1,1577,"","",0,1.131
+154,131,"ICD9","CM",162,"Malignant neoplasm of trachea, bronchus, and lung",1,1,7638,"","",0,1.131
+155,131,"ICD9","CM",163,"Malignant neoplasm of pleura",1,1,935,"","",0,1.131
+156,131,"ICD9","CM",164,"Malignant neoplasm of thymus, heart, and mediastinum",1,1,416,"","",0,1.131
 157,131,"ICD9","CM",165,"Malignant neoplasm of other and ill-defined sites within the respiratory system and intrathoracic organs",1,1,48,"","",0,1.131
-158,131,"ICD9","CM",170,"Malignant neoplasm of bone and articular cartilage",1,1,3648,"","",0,1.131
-159,131,"ICD9","CM",171,"Malignant neoplasm of connective and other soft tissue",1,1,6328,"","",0,1.131
-160,131,"ICD9","CM",172,"Malignant melanoma of skin",1,1,8791,"","",0,1.131
-161,131,"ICD9","CM",173,"Other and unspecified malignant neoplasm of skin",1,1,29297,"","",0,1.131
-162,131,"ICD9","CM",174,"Malignant neoplasm of female breast",1,1,16581,"","",0,1.131
-163,131,"ICD9","CM",175,"Malignant neoplasm of male breast",1,1,1804,"","",0,1.131
-164,131,"ICD9","CM",176,"Kaposi's sarcoma",1,1,206,"","",0,1.131
+158,131,"ICD9","CM",170,"Malignant neoplasm of bone and articular cartilage",1,1,2662,"","",0,1.131
+159,131,"ICD9","CM",171,"Malignant neoplasm of connective and other soft tissue",1,1,3833,"","",0,1.131
+160,131,"ICD9","CM",172,"Malignant melanoma of skin",1,1,5156,"","",0,1.131
+161,131,"ICD9","CM",173,"Other and unspecified malignant neoplasm of skin",1,1,16263,"","",0,1.131
+162,131,"ICD9","CM",174,"Malignant neoplasm of female breast",1,1,9300,"","",0,1.131
+163,131,"ICD9","CM",175,"Malignant neoplasm of male breast",1,1,1749,"","",0,1.131
+164,131,"ICD9","CM",176,"Kaposi's sarcoma",1,1,155,"","",0,1.131
 165,131,"ICD9","CM",179,"Malignant neoplasm of uterus, part unspecified",1,1,379,"","",0,1.131
-166,131,"ICD9","CM",180,"Malignant neoplasm of cervix uteri",1,1,1678,"","",0,1.131
+166,131,"ICD9","CM",180,"Malignant neoplasm of cervix uteri",1,1,936,"","",0,1.131
 167,131,"ICD9","CM",181,"Malignant neoplasm of placenta",1,1,65,"","",0,1.131
-168,131,"ICD9","CM",182,"Malignant neoplasm of body of uterus",1,1,1745,"","",0,1.131
-169,131,"ICD9","CM",183,"Malignant neoplasm of ovary and other uterine adnexa",1,1,1915,"","",0,1.131
-170,131,"ICD9","CM",184,"Malignant neoplasm of other and unspecified female genital organs",1,1,612,"","",0,1.131
+168,131,"ICD9","CM",182,"Malignant neoplasm of body of uterus",1,1,1380,"","",0,1.131
+169,131,"ICD9","CM",183,"Malignant neoplasm of ovary and other uterine adnexa",1,1,1486,"","",0,1.131
+170,131,"ICD9","CM",184,"Malignant neoplasm of other and unspecified female genital organs",1,1,469,"","",0,1.131
 171,131,"ICD9","CM",185,"Malignant neoplasm of prostate",1,1,11050,"","",0,1.131
-172,131,"ICD9","CM",186,"Malignant neoplasm of testis",1,1,1078,"","",0,1.131
-173,131,"ICD9","CM",187,"Malignant neoplasm of penis and other male genital organs",1,1,614,"","",0,1.131
-174,131,"ICD9","CM",188,"Malignant neoplasm of bladder",1,1,8382,"","",0,1.131
-175,131,"ICD9","CM",189,"Malignant neoplasm of kidney and other and unspecified urinary organs",1,1,7564,"","",0,1.131
-176,131,"ICD9","CM",190,"Malignant neoplasm of eye",1,1,1108,"","",0,1.131
-177,131,"ICD9","CM",191,"Malignant neoplasm of brain",1,1,5838,"","",0,1.131
-178,131,"ICD9","CM",192,"Malignant neoplasm of other and unspecified parts of nervous system",1,1,1270,"","",0,1.131
+172,131,"ICD9","CM",186,"Malignant neoplasm of testis",1,1,977,"","",0,1.131
+173,131,"ICD9","CM",187,"Malignant neoplasm of penis and other male genital organs",1,1,380,"","",0,1.131
+174,131,"ICD9","CM",188,"Malignant neoplasm of bladder",1,1,3142,"","",0,1.131
+175,131,"ICD9","CM",189,"Malignant neoplasm of kidney and other and unspecified urinary organs",1,1,5241,"","",0,1.131
+176,131,"ICD9","CM",190,"Malignant neoplasm of eye",1,1,737,"","",0,1.131
+177,131,"ICD9","CM",191,"Malignant neoplasm of brain",1,1,3109,"","",0,1.131
+178,131,"ICD9","CM",192,"Malignant neoplasm of other and unspecified parts of nervous system",1,1,1108,"","",0,1.131
 179,131,"ICD9","CM",193,"Malignant neoplasm of thyroid gland",1,1,3402,"","",0,1.131
-180,131,"ICD9","CM",194,"Malignant neoplasm of other endocrine glands and related structures",1,1,708,"","",0,1.131
-181,131,"ICD9","CM",195,"Malignant neoplasm of other and ill-defined sites",1,1,6681,"","",0,1.131
-182,131,"ICD9","CM",196,"Secondary and unspecified malignant neoplasm of lymph nodes",1,1,18901,"","",0,1.131
-183,131,"ICD9","CM",197,"Secondary malignant neoplasm of respiratory and digestive systems",1,1,22422,"","",0,1.131
-184,131,"ICD9","CM",198,"Secondary malignant neoplasm of other specified sites",1,1,21258,"","",0,1.131
-185,131,"ICD9","CM",199,"Malignant neoplasm without specification of site",1,1,5843,"","",0,1.131
-186,131,"ICD9","CM",200,"Lymphosarcoma and reticulosarcoma and other specified malignant tumors of lymphatic tissue",1,1,9188,"","",0,1.131
-187,131,"ICD9","CM",201,"Hodgkin's disease",1,1,4183,"","",0,1.131
-188,131,"ICD9","CM",202,"Other malignant neoplasms of lymphoid and histiocytic tissue",1,1,14228,"","",0,1.131
-189,131,"ICD9","CM",203,"Multiple myeloma and immunoproliferative neoplasms",1,1,7518,"","",0,1.131
-190,131,"ICD9","CM",204,"Lymphoid leukemia",1,1,6214,"","",0,1.131
-191,131,"ICD9","CM",205,"Myeloid leukemia",1,1,8818,"","",0,1.131
-192,131,"ICD9","CM",206,"Monocytic leukemia",1,1,719,"","",0,1.131
-193,131,"ICD9","CM",207,"Other specified leukemia",1,1,296,"","",0,1.131
-194,131,"ICD9","CM",208,"Leukemia of unspecified cell type",1,1,2279,"","",0,1.131
-195,131,"ICD9","CM",209,"Neuroendocrine tumors",1,1,5038,"","",0,1.131
-196,131,"ICD9","CM",210,"Benign neoplasm of lip, oral cavity, and pharynx",1,1,2961,"","",0,1.131
-197,131,"ICD9","CM",211,"Benign neoplasm of other parts of digestive system",1,1,31849,"","",0,1.131
-198,131,"ICD9","CM",212,"Benign neoplasm of respiratory and intrathoracic organs",1,1,2704,"","",0,1.131
-199,131,"ICD9","CM",213,"Benign neoplasm of bone and articular cartilage",1,1,4488,"","",0,1.131
-200,131,"ICD9","CM",214,"Lipoma",1,1,7266,"","",0,1.131
-201,131,"ICD9","CM",215,"Other benign neoplasm of connective and other soft tissue",1,1,3667,"","",0,1.131
-202,131,"ICD9","CM",216,"Benign neoplasm of skin",1,1,38780,"","",0,1.131
+180,131,"ICD9","CM",194,"Malignant neoplasm of other endocrine glands and related structures",1,1,599,"","",0,1.131
+181,131,"ICD9","CM",195,"Malignant neoplasm of other and ill-defined sites",1,1,5306,"","",0,1.131
+182,131,"ICD9","CM",196,"Secondary and unspecified malignant neoplasm of lymph nodes",1,1,12236,"","",0,1.131
+183,131,"ICD9","CM",197,"Secondary malignant neoplasm of respiratory and digestive systems",1,1,13381,"","",0,1.131
+184,131,"ICD9","CM",198,"Secondary malignant neoplasm of other specified sites",1,1,13274,"","",0,1.131
+185,131,"ICD9","CM",199,"Malignant neoplasm without specification of site",1,1,4905,"","",0,1.131
+186,131,"ICD9","CM",200,"Lymphosarcoma and reticulosarcoma and other specified malignant tumors of lymphatic tissue",1,1,3847,"","",0,1.131
+187,131,"ICD9","CM",201,"Hodgkin's disease",1,1,1906,"","",0,1.131
+188,131,"ICD9","CM",202,"Other malignant neoplasms of lymphoid and histiocytic tissue",1,1,6709,"","",0,1.131
+189,131,"ICD9","CM",203,"Multiple myeloma and immunoproliferative neoplasms",1,1,3660,"","",0,1.131
+190,131,"ICD9","CM",204,"Lymphoid leukemia",1,1,3077,"","",0,1.131
+191,131,"ICD9","CM",205,"Myeloid leukemia",1,1,3678,"","",0,1.131
+192,131,"ICD9","CM",206,"Monocytic leukemia",1,1,577,"","",0,1.131
+193,131,"ICD9","CM",207,"Other specified leukemia",1,1,243,"","",0,1.131
+194,131,"ICD9","CM",208,"Leukemia of unspecified cell type",1,1,1557,"","",0,1.131
+195,131,"ICD9","CM",209,"Neuroendocrine tumors",1,1,1938,"","",0,1.131
+196,131,"ICD9","CM",210,"Benign neoplasm of lip, oral cavity, and pharynx",1,1,2548,"","",0,1.131
+197,131,"ICD9","CM",211,"Benign neoplasm of other parts of digestive system",1,1,28177,"","",0,1.131
+198,131,"ICD9","CM",212,"Benign neoplasm of respiratory and intrathoracic organs",1,1,2461,"","",0,1.131
+199,131,"ICD9","CM",213,"Benign neoplasm of bone and articular cartilage",1,1,3728,"","",0,1.131
+200,131,"ICD9","CM",214,"Lipoma",1,1,5761,"","",0,1.131
+201,131,"ICD9","CM",215,"Other benign neoplasm of connective and other soft tissue",1,1,3262,"","",0,1.131
+202,131,"ICD9","CM",216,"Benign neoplasm of skin",1,1,29506,"","",0,1.131
 203,131,"ICD9","CM",217,"Benign neoplasm of breast",1,1,3730,"","",0,1.131
-204,131,"ICD9","CM",218,"Uterine leiomyoma",1,1,18543,"","",0,1.131
-205,131,"ICD9","CM",219,"Other benign neoplasm of uterus",1,1,1979,"","",0,1.131
+204,131,"ICD9","CM",218,"Uterine leiomyoma",1,1,11847,"","",0,1.131
+205,131,"ICD9","CM",219,"Other benign neoplasm of uterus",1,1,1851,"","",0,1.131
 206,131,"ICD9","CM",220,"Benign neoplasm of ovary",1,1,2479,"","",0,1.131
-207,131,"ICD9","CM",221,"Benign neoplasm of other female genital organs",1,1,2192,"","",0,1.131
-208,131,"ICD9","CM",222,"Benign neoplasm of male genital organs",1,1,280,"","",0,1.131
-209,131,"ICD9","CM",223,"Benign neoplasm of kidney and other urinary organs",1,1,738,"","",0,1.131
-210,131,"ICD9","CM",224,"Benign neoplasm of eye",1,1,2329,"","",0,1.131
-211,131,"ICD9","CM",225,"Benign neoplasm of brain and other parts of nervous system",1,1,5450,"","",0,1.131
+207,131,"ICD9","CM",221,"Benign neoplasm of other female genital organs",1,1,2135,"","",0,1.131
+208,131,"ICD9","CM",222,"Benign neoplasm of male genital organs",1,1,265,"","",0,1.131
+209,131,"ICD9","CM",223,"Benign neoplasm of kidney and other urinary organs",1,1,683,"","",0,1.131
+210,131,"ICD9","CM",224,"Benign neoplasm of eye",1,1,2008,"","",0,1.131
+211,131,"ICD9","CM",225,"Benign neoplasm of brain and other parts of nervous system",1,1,3999,"","",0,1.131
 212,131,"ICD9","CM",226,"Benign neoplasm of thyroid glands",1,1,2292,"","",0,1.131
-213,131,"ICD9","CM",227,"Benign neoplasm of other endocrine glands and related structures",1,1,5529,"","",0,1.131
-214,131,"ICD9","CM",228,"Hemangioma and lymphangioma, any site",1,1,6894,"","",0,1.131
-215,131,"ICD9","CM",229,"Benign neoplasm of other and unspecified sites",1,1,2204,"","",0,1.131
-216,131,"ICD9","CM",230,"Carcinoma in situ of digestive organs",1,1,729,"","",0,1.131
-217,131,"ICD9","CM",231,"Carcinoma in situ of respiratory system",1,1,259,"","",0,1.131
-218,131,"ICD9","CM",232,"Carcinoma in situ of skin",1,1,2276,"","",0,1.131
-219,131,"ICD9","CM",233,"Carcinoma in situ of breast and genitourinary system",1,1,5257,"","",0,1.131
+213,131,"ICD9","CM",227,"Benign neoplasm of other endocrine glands and related structures",1,1,4911,"","",0,1.131
+214,131,"ICD9","CM",228,"Hemangioma and lymphangioma, any site",1,1,6253,"","",0,1.131
+215,131,"ICD9","CM",229,"Benign neoplasm of other and unspecified sites",1,1,2171,"","",0,1.131
+216,131,"ICD9","CM",230,"Carcinoma in situ of digestive organs",1,1,651,"","",0,1.131
+217,131,"ICD9","CM",231,"Carcinoma in situ of respiratory system",1,1,251,"","",0,1.131
+218,131,"ICD9","CM",232,"Carcinoma in situ of skin",1,1,1773,"","",0,1.131
+219,131,"ICD9","CM",233,"Carcinoma in situ of breast and genitourinary system",1,1,4659,"","",0,1.131
 220,131,"ICD9","CM",234,"Carcinoma in situ of other and unspecified sites",1,1,103,"","",0,1.131
-221,131,"ICD9","CM",235,"Neoplasm of uncertain behavior of digestive and respiratory systems",1,1,5201,"","",0,1.131
-222,131,"ICD9","CM",236,"Neoplasm of uncertain behavior of genitourinary organs",1,1,1391,"","",0,1.131
-223,131,"ICD9","CM",237,"Neoplasm of uncertain behavior of endocrine glands and nervous system",1,1,7451,"","",0,1.131
-224,131,"ICD9","CM",238,"Neoplasm of uncertain behavior of other and unspecified sites and tissues",1,1,44351,"","",0,1.131
-225,131,"ICD9","CM",239,"Neoplasms of unspecified nature",1,1,18114,"","",0,1.131
+221,131,"ICD9","CM",235,"Neoplasm of uncertain behavior of digestive and respiratory systems",1,1,4668,"","",0,1.131
+222,131,"ICD9","CM",236,"Neoplasm of uncertain behavior of genitourinary organs",1,1,1321,"","",0,1.131
+223,131,"ICD9","CM",237,"Neoplasm of uncertain behavior of endocrine glands and nervous system",1,1,6031,"","",0,1.131
+224,131,"ICD9","CM",238,"Neoplasm of uncertain behavior of other and unspecified sites and tissues",1,1,39156,"","",0,1.131
+225,131,"ICD9","CM",239,"Neoplasms of unspecified nature",1,1,16257,"","",0,1.131
 226,1,"ICD9","CM","240-279.99","Endocrine, nutritional and metabolic diseases, and immunity disorders",1,0,"","","",0,1
-227,226,"ICD9","CM",240,"Simple and unspecified goiter",1,1,7039,"","",0,1.226
-228,226,"ICD9","CM",241,"Nontoxic nodular goiter",1,1,22531,"","",0,1.226
-229,226,"ICD9","CM",242,"Thyrotoxicosis with or without goiter",1,1,13437,"","",0,1.226
+227,226,"ICD9","CM",240,"Simple and unspecified goiter",1,1,6581,"","",0,1.226
+228,226,"ICD9","CM",241,"Nontoxic nodular goiter",1,1,16227,"","",0,1.226
+229,226,"ICD9","CM",242,"Thyrotoxicosis with or without goiter",1,1,8235,"","",0,1.226
 230,226,"ICD9","CM",243,"Congenital hypothyroidism",1,1,655,"","",0,1.226
 231,226,"ICD9","CM",244,"Acquired hypothyroidism",1,1,59273,"","",0,1.226
 232,226,"ICD9","CM",245,"Thyroiditis",1,1,11936,"","",0,1.226
