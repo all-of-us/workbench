@@ -555,7 +555,7 @@ definitions:
     required:
       - domain
       - name
-      - concept_count
+      - conceptCount
     properties:
       domain:
         description: the domain ID
@@ -563,7 +563,7 @@ definitions:
       name:
         description: display name of the domain
         type: string
-      concept_count:
+      conceptCount:
         description: number of concepts matching the search query in this domain
         type: integer
         format: int64
@@ -572,12 +572,12 @@ definitions:
     type: object
     required:
       - vocabularyId
-      - concept_count
+      - conceptCount
     properties:
       vocabularyId:
         description: ID / display name of the vocabulary
         type: string
-      concept_count:
+      conceptCount:
         description: number of concepts matching the search query in this vocabulary
         type: integer
         format: int64
