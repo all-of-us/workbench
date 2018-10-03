@@ -19,6 +19,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class PPIQueryBuilder extends AbstractQueryBuilder {
 
+  private static final String UNION_ALL = " union all\n";
   private static final String PPI_SQL_TEMPLATE =
     "select person_id from `${projectId}.${dataSetId}.${tableName}`\n" +
       "where ${tableConceptId} = ${conceptId}\n";
@@ -55,7 +56,7 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
       queryParams.put(namedParameter, QueryParameterValue.int64(new Long(value)));
     }
 
-    String finalSql = String.join("union all\n", queryParts);
+    String finalSql = String.join(UNION_ALL, queryParts);
     return QueryJobConfiguration
       .newBuilder(finalSql)
       .setNamedParameters(queryParams)
