@@ -341,8 +341,9 @@ export class DetailTabsComponent implements OnChanges, OnInit {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const limit = 10;
-    const cohortId = cid
-     this.trackClickedDomains = isParticipantIdExists(cohortId, this.participantsId)(this.ngRedux.getState());
+    const cohortId = cid;
+     this.trackClickedDomains =
+       isParticipantIdExists(cohortId, this.participantsId)(this.ngRedux.getState());
       this.domainList.map(domainName => {
         if (!this.trackClickedDomains) {
           this.actions.fetchIndividualParticipantsData(ns, wsid, cid,

@@ -185,8 +185,6 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
     };
 
   }
-getStyle(){
-    // this.chartOptions.set
-}
+
   }
 
