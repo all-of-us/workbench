@@ -195,12 +195,13 @@ export const isDomainNameExists = domain => (state): boolean =>
   state.getIn(['reviewChartData', 'domainCharts']).has(domain);
 
 export const getParticipantData =
-  (cid:any, participantsId:any, domain: string) =>
+  (cid: any, participantsId: any, domain: string) =>
     (state): any =>
-      state.getIn(['individualChartData', 'chartsData',cid, participantsId, domain]);
+      state.getIn(['individualChartData', 'chartsData', cid, participantsId, domain]);
 
 
-export const isParticipantIdExists = (cid, participantId) => (state): boolean =>{
-  const isDomainNameExists = state.getIn(['individualChartData', 'chartsData']).has(cid);
-  return isDomainNameExists ? state.getIn(['individualChartData', 'chartsData', cid]).has(participantId) : false;
-}
+export const isParticipantIdExists = (cid, participantId) => (state): boolean => {
+  const participantExists = state.getIn(['individualChartData', 'chartsData']).has(cid);
+  return participantExists ?
+    state.getIn(['individualChartData', 'chartsData', cid]).has(participantId) : false;
+};
