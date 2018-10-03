@@ -1,7 +1,7 @@
 import { Operator, TreeSubType, TreeType } from 'generated';
 
 export const PROGRAM_TYPES = [
-  { name: 'Surveys',    type: TreeType.SURVEY, children: [], disabled: true },
+  { name: 'Surveys',    type: TreeType.PPI },
   { name: 'Physical Measurements',    type: TreeType.PM, fullTree: true },
 ];
 
@@ -20,8 +20,6 @@ export const DOMAIN_TYPES = [
     { name: 'Drugs',    type: TreeType.DRUG },
     { name: 'Measurements',    type: TreeType.MEAS },
     { name: 'Visits',    type: TreeType.VISIT, fullTree: true },
-    // { name: 'PheCodes',     type: 'phecode' },
-    // { name: 'Temporal',     type: 'temporal' }
 ];
 
 export const PM_UNITS = {
