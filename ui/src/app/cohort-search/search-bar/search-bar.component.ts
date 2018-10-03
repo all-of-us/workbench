@@ -138,7 +138,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   inputChange(newVal: string) {
     this.typedTerm = newVal;
     if (this._type === TreeType[TreeType.VISIT] || this._type === TreeType[TreeType.PM]) {
-      if (newVal.length > 2) {
+      if (newVal.length >= 2) {
         this.actions.setCriteriaSearchTerms([newVal]);
       } else {
         this.actions.setCriteriaSearchTerms([]);
