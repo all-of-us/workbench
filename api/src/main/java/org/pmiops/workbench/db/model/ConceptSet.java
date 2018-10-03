@@ -32,7 +32,6 @@ public class ConceptSet {
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private int participantCount;
   private Set<Long> conceptIds = new HashSet<Long>();
 
   public ConceptSet() {}
@@ -45,7 +44,6 @@ public class ConceptSet {
     setWorkspaceId(cs.getWorkspaceId());
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());
-    setParticipantCount(cs.getParticipantCount());
   }
 
   @Id
@@ -138,15 +136,6 @@ public class ConceptSet {
 
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
-  }
-
-  @Column(name = "participant_count")
-  public int getParticipantCount() {
-    return participantCount;
-  }
-
-  public void setParticipantCount(int participantCount) {
-    this.participantCount = participantCount;
   }
 
   @ElementCollection(fetch = FetchType.EAGER)

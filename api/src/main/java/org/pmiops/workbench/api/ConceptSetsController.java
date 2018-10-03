@@ -14,7 +14,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
@@ -48,7 +47,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final ConceptDao conceptDao;
   private final ConceptService conceptService;
   private final ConceptSynonymDao conceptSynonymDao;
-  private final ConceptBigQueryService conceptBigQueryService;
   private final Clock clock;
 
   private Provider<User> userProvider;
@@ -67,8 +65,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
               .description(conceptSet.getDescription())
               .id(conceptSet.getConceptSetId())
               .name(conceptSet.getName())
-              .domain(conceptSet.getDomainEnum())
-              .participantCount(conceptSet.getParticipantCount());
+              .domain(conceptSet.getDomainEnum());
           if (conceptSet.getCreator() != null) {
             result.creator(conceptSet.getCreator().getEmail());
           }
@@ -98,14 +95,12 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @Autowired
   ConceptSetsController(WorkspaceService workspaceService, ConceptSetDao conceptSetDao,
-      ConceptDao conceptDao, ConceptSynonymDao conceptSynonymDao, ConceptService conceptService,
-      ConceptBigQueryService conceptBigQueryService, Provider<User> userProvider, Clock clock) {
+      ConceptDao conceptDao, ConceptSynonymDao conceptSynonymDao, ConceptService conceptService, Provider<User> userProvider, Clock clock) {
     this.workspaceService = workspaceService;
     this.conceptSetDao = conceptSetDao;
     this.conceptDao = conceptDao;
     this.conceptService = conceptService;
     this.conceptSynonymDao = conceptSynonymDao;
-    this.conceptBigQueryService = conceptBigQueryService;
     this.userProvider = userProvider;
     this.clock = clock;
     this.maxConceptsPerSet = MAX_CONCEPTS_PER_SET;
@@ -128,7 +123,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setCreationTime(now);
     dbConceptSet.setLastModifiedTime(now);
     dbConceptSet.setVersion(1);
-    dbConceptSet.setParticipantCount(0);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
       // TODO: add recent resource entry for concept sets [RW-1129]
@@ -234,8 +228,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new ConflictException("Attempted to modify outdated concept set version");
     }
 
-    final Domain domainEnum = dbConceptSet.getDomainEnum();
     if (request.getAddedIds() != null) {
+      final Domain domainEnum = dbConceptSet.getDomainEnum();
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(request.getAddedIds());
       conceptService.fetchConceptSynonyms(Lists.newArrayList(concepts));
       List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
@@ -257,14 +251,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     }
     if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
       throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
-    }
-    if (dbConceptSet.getConceptIds().isEmpty()) {
-      dbConceptSet.setParticipantCount(0);
-    } else {
-      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domainEnum);
-      dbConceptSet.setParticipantCount(
-          conceptBigQueryService.getParticipantCountForConcepts(omopTable,
-              dbConceptSet.getConceptIds()));
     }
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());

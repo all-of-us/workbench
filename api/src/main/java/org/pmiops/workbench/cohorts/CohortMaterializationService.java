@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -17,8 +18,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import javax.inject.Provider;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
+import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
@@ -26,14 +29,13 @@ import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.FieldSet;
@@ -65,21 +67,21 @@ public class CohortMaterializationService {
   private final FieldSetQueryBuilder fieldSetQueryBuilder;
   private final AnnotationQueryBuilder annotationQueryBuilder;
   private final ParticipantCohortStatusDao participantCohortStatusDao;
-  private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-  private final ConceptService conceptService;
+  private final Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider;
+  private final ConceptDao conceptDao;
 
   @Autowired
   public CohortMaterializationService(
       FieldSetQueryBuilder fieldSetQueryBuilder,
       AnnotationQueryBuilder annotationQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao,
-      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
-      ConceptService conceptService) {
+      Provider<CdrBigQuerySchemaConfig> cdrSchemaConfigProvider,
+      ConceptDao conceptDao) {
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
     this.annotationQueryBuilder = annotationQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;
-    this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
-    this.conceptService = conceptService;
+    this.cdrSchemaConfigProvider = cdrSchemaConfigProvider;
+    this.conceptDao = conceptDao;
   }
 
   private Set<Long> getParticipantIdsWithStatus(@Nullable CohortReview cohortReview, List<CohortStatus> statusFilter) {
@@ -125,7 +127,7 @@ public class CohortMaterializationService {
         throw new BadRequestException("Table name must be specified in field sets");
       }
     }
-    CdrBigQuerySchemaConfig cdrSchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
+    CdrBigQuerySchemaConfig cdrSchemaConfig = cdrSchemaConfigProvider.get();
     TableConfig tableConfig = cdrSchemaConfig.cohortTables.get(tableQuery.getTableName());
     if (tableConfig == null) {
       throw new BadRequestException("Table " + tableQuery.getTableName() + " is not a valid "
@@ -176,33 +178,57 @@ public class CohortMaterializationService {
     }
   }
 
-
   private void addFilterOnConcepts(TableQuery tableQuery, Set<Long> conceptIds,
       TableConfig tableConfig) {
-    ConceptColumns conceptColumns = cdrBigQuerySchemaConfigService.getConceptColumns(tableConfig,
-        tableQuery.getTableName());
-    ConceptIds classifiedConceptIds = conceptService.classifyConceptIds(conceptIds);
+    String standardConceptColumn = null;
+    String sourceConceptColumn = null;
+    for (ColumnConfig columnConfig : tableConfig.columns) {
+      if (DOMAIN_CONCEPT_STANDARD.equals(columnConfig.domainConcept)) {
+        standardConceptColumn = columnConfig.name;
+        if (sourceConceptColumn != null) {
+          break;
+        }
+      } else if (DOMAIN_CONCEPT_SOURCE.equals(columnConfig.domainConcept)) {
+        sourceConceptColumn = columnConfig.name;
+        if (standardConceptColumn != null) {
+          break;
+        }
+      }
+    }
+    if (standardConceptColumn == null || sourceConceptColumn == null) {
+      throw new ServerErrorException("Couldn't find standard and source concept columns for " +
+          tableQuery.getTableName());
+    }
 
-    if (classifiedConceptIds.getSourceConceptIds().isEmpty() &&
-        classifiedConceptIds.getStandardConceptIds().isEmpty()) {
+    Iterable<Concept> concepts = conceptDao.findAll(conceptIds);
+    List<Long> standardConceptIds = Lists.newArrayList();
+    List<Long> sourceConceptIds = Lists.newArrayList();
+    for (Concept concept : concepts) {
+      if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())) {
+        standardConceptIds.add(concept.getConceptId());
+      } else {
+        // We may need to handle classification / concept hierarchy here eventually...
+        sourceConceptIds.add(concept.getConceptId());
+      }
+    }
+    if (standardConceptIds.isEmpty() && sourceConceptIds.isEmpty()) {
       throw new BadRequestException("Concept set contains no valid concepts");
     }
+
     ResultFilters conceptFilters = null;
-    if (!classifiedConceptIds.getStandardConceptIds().isEmpty()) {
+    if (!standardConceptIds.isEmpty()) {
       ColumnFilter standardConceptFilter =
-          new ColumnFilter().columnName(conceptColumns.getStandardConceptColumn().name)
+          new ColumnFilter().columnName(standardConceptColumn)
               .operator(Operator.IN)
-              .valueNumbers(classifiedConceptIds.getStandardConceptIds().stream()
-                  .map(id -> new BigDecimal(id))
+              .valueNumbers(standardConceptIds.stream().map(id -> new BigDecimal(id))
                   .collect(Collectors.toList()));
       conceptFilters = new ResultFilters().columnFilter(standardConceptFilter);
     }
-    if (!classifiedConceptIds.getSourceConceptIds().isEmpty()) {
+    if (!sourceConceptIds.isEmpty()) {
       ColumnFilter sourceConceptFilter =
-          new ColumnFilter().columnName(conceptColumns.getSourceConceptColumn().name)
+          new ColumnFilter().columnName(sourceConceptColumn)
               .operator(Operator.IN)
-              .valueNumbers(classifiedConceptIds.getSourceConceptIds().stream()
-                  .map(id -> new BigDecimal(id))
+              .valueNumbers(sourceConceptIds.stream().map(id -> new BigDecimal(id))
                   .collect(Collectors.toList()));
       ResultFilters sourceResultFilters = new ResultFilters().columnFilter(sourceConceptFilter);
       if (conceptFilters == null) {
