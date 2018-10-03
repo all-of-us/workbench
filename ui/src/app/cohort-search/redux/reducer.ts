@@ -532,6 +532,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(
             ['reviewChartData', 'request', action.ns,
               action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
+
       case BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST:
         return state
           .deleteIn(
@@ -544,7 +545,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       case LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS:
         return state
           .setIn(
-            ['individualChartData', 'chartsData', action.domain]
+            ['individualChartData', 'chartsData', action.participantsId, action.domain]
             , fromJS(action.results._body))
           .deleteIn(
             ['individualChartData', 'request', action.ns,

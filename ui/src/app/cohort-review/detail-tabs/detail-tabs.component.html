@@ -3,8 +3,12 @@
     <button clrTabLink id="detail-summary-tab"(click) = "getDomainsParticipantsData()">Summary</button>
     <clr-tab-content id="detail-summary-content" *clrIfActive>
       <div class="container summary-container">
-        <div class="row">
+        <div *ngIf="chartLoadedSpinner" class="loading-spinner spinner spinner-lg spin-in-overlay">
+          Loading...
+        </div>
+        <div class="row"  *ngIf="!chartLoadedSpinner">
           <div class="col-sm-4">
+
             <app-individual-participants-charts [chartData] ="conditionData" [chartHeader]="conditionTitle" ></app-individual-participants-charts>
           </div>
           <div class="col-sm-4">
