@@ -120,7 +120,8 @@ describe('ConceptHomepageComponent', () => {
         standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
         domain: domain.domain,
         includeDomainCounts: includeDomainCounts,
-        includeVocabularyCounts: true
+        includeVocabularyCounts: true,
+        maxResults: fixture.componentInstance.maxConceptFetch
       };
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -166,7 +167,8 @@ describe('ConceptHomepageComponent', () => {
           standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
           domain: domain.domain,
           includeDomainCounts: includeDomainCounts,
-          includeVocabularyCounts: true
+          includeVocabularyCounts: true,
+          maxResults: fixture.componentInstance.maxConceptFetch
         });
     });
 

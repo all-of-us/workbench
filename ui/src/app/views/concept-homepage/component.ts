@@ -70,6 +70,7 @@ export class ConceptHomepageComponent implements OnInit {
   // is a workaround to not allow multiple filter events to get triggered.
   blockMultipleSearchFromFilter = true;
 
+  maxConceptFetch = 100;
 
   constructor(
     private conceptsService: ConceptsService,
@@ -146,7 +147,8 @@ export class ConceptHomepageComponent implements OnInit {
         standardConceptFilter: standardConceptFilter,
         domain: conceptDomain.domain,
         includeDomainCounts: activeTabSearch,
-        includeVocabularyCounts: true
+        includeVocabularyCounts: true,
+        maxResults: this.maxConceptFetch
       };
       this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
         .subscribe((response) => {
@@ -203,6 +205,7 @@ export class ConceptHomepageComponent implements OnInit {
       domain: this.selectedDomain,
       vocabularyIds: this.vocabularies
         .filter(vocabulary => vocabulary.selected).map(vocabulary => vocabulary.vocabularyId),
+      maxResults: this.maxConceptFetch
     };
     this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
       .subscribe((response) => {
