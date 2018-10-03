@@ -26,8 +26,9 @@ import {
 export class ConceptSetDetailsComponent {
   wsNamespace: string;
   wsId: string;
-
   conceptSet: ConceptSet;
+
+  editHover = false;
 
   constructor(
     private conceptSetsService: ConceptSetsService,
