@@ -59,8 +59,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             resource.setNotebook(fileDetail);
           } catch (InvalidPathException | URISyntaxException e) {
             log.log(Level.WARNING,
-                String.format("Invalid notebook file path found: %s",
-                    userRecentResource.getNotebookName()));
+                String.format("Invalid notebook file path found: %s", notebookName));
           }
         }
         resource.setModifiedTime(userRecentResource.getLastAccessDate().toString());
