@@ -26,22 +26,28 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
 
   checkTruncation() {
     const elem = this.button.nativeElement;
-    this.isTruncated = (elem.offsetWidth - 20) < elem.scrollWidth;
-    if (this.isTruncated) {
-      this.checkPosition(elem);
+    this.isTruncated = (elem.offsetWidth - 15) < elem.scrollWidth;
+    const id = 'match' + this.option.id.toString();
+    const highlight = document.getElementById(id);
+    if (this.isTruncated && highlight) {
+      this.checkPosition(elem, highlight);
     }
   }
 
-  checkPosition(elem: any) {
-    const id = 'match' + this.option.id.toString();
-    const highlight = document.getElementById(id);
+  checkPosition(elem: any, highlight: any) {
     const eCoords = elem.getBoundingClientRect();
     const hCoords = highlight.getBoundingClientRect();
-    const padding = parseFloat(window.getComputedStyle(elem).getPropertyValue('padding-left'))
-      + parseFloat(window.getComputedStyle(elem).getPropertyValue('padding-right'));
-    const diff = (hCoords.left + hCoords.width) - eCoords.left;
-    if (diff > (eCoords.width - padding))  {
-      highlight.style.background = 'none';
+    const padding = parseFloat(window.getComputedStyle(elem).getPropertyValue('padding-right'));
+    if (hCoords.right > (eCoords.right - padding)) {
+      const diff = hCoords.right - (eCoords.right - padding - 15);
+      if (diff > hCoords.width) {
+        highlight.style.background = 'none';
+      } else {
+        console.log(this.option.name);
+        console.log(diff);
+        console.log(hCoords);
+        highlight.style.width = (hCoords.width - diff).toString() + 'px';
+      }
     }
   }
 
