@@ -54,11 +54,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             URI notebookUri = new URI(notebookName);
             Path path = Paths.get(notebookUri.getPath());
             String fileName = path.getFileName().toString();
-            String filePath = notebookName.replace(fileName, "");
+            String filePath = notebookName.replaceFirst(fileName + "$", "");
             FileDetail fileDetail = new FileDetail().name(fileName).path(filePath);
             resource.setNotebook(fileDetail);
           } catch (InvalidPathException | URISyntaxException e) {
-            log.log(Level.WARNING,
+            log.log(Level.SEVERE,
                 String.format("Invalid notebook file path found: %s", notebookName));
           }
         }
