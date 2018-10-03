@@ -629,7 +629,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         Float female_bin_min = null;
         Float female_bin_max = null;
 
-        if(!("unknown".equals(unitName))){
+        if(!("unknown".equals(unitName)) && !("no_unit".equals(unitName))){
             for(AchillesResult achillesResult: aa.getResults()){
                 if(Long.valueOf(achillesResult.getStratum2()) == MALE && !Strings.isNullOrEmpty(achillesResult.getStratum3()) && !Strings.isNullOrEmpty(achillesResult.getStratum5())){
                     male_bin_min = Float.valueOf(achillesResult.getStratum3());
@@ -639,6 +639,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     female_bin_max = Float.valueOf(achillesResult.getStratum5());
                 }
             }
+        }else{
+            return;
         }
 
 

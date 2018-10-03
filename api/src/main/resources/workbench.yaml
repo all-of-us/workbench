@@ -1742,6 +1742,12 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      participantCount:
+        type: integer
+        format: int32
+        description: >
+          Count of participants in the CDR version for the workspace containing this
+          concept set that match the specified concept set
       concepts:
         description: "Concepts in the concept set, in conceptName order."
         type: array

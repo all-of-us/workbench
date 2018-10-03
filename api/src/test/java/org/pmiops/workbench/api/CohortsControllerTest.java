@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
@@ -164,9 +165,9 @@ public class CohortsControllerTest {
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class, UserService.class,
       WorkspacesController.class, CohortsController.class, ConceptSetsController.class,})
-  @MockBean({FireCloudService.class, NotebooksService.class, CloudStorageService.class,
-      ConceptSetService.class, UserRecentResourceService.class, CohortMaterializationService.class,
-      CdrVersionService.class, ConceptService.class})
+  @MockBean({ConceptBigQueryService.class, FireCloudService.class, NotebooksService.class,
+      CloudStorageService.class, ConceptSetService.class, UserRecentResourceService.class,
+      CohortMaterializationService.class, CdrVersionService.class, ConceptService.class})
   static class Configuration {
     @Bean
     Clock clock() {

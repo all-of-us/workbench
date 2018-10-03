@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +27,7 @@ import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.Criteria;
@@ -34,6 +37,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.ConceptCacheConfiguration;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -67,15 +71,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({DemoQueryBuilder.class, QueryBuilderFactory.class, CohortMaterializationService.class,
+@Import({DemoQueryBuilder.class, QueryBuilderFactory.class,
         BigQueryService.class, ParticipantCounter.class, DomainLookupService.class,
         CohortQueryBuilder.class, FieldSetQueryBuilder.class, QueryBuilderFactory.class,
         TestJpaConfig.class, ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class,
-        AnnotationQueryBuilder.class})
+        AnnotationQueryBuilder.class, CdrBigQuerySchemaConfigService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
-  @Autowired
   private CohortMaterializationService cohortMaterializationService;
   private CohortReview cohortReview;
 
@@ -101,7 +104,22 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
   private ConceptDao conceptDao;
 
   @Autowired
+  private ConceptSynonymDao conceptSynonymDao;
+
+  @PersistenceContext
+  private EntityManager entityManager;
+
+  @Autowired
   private ParticipantCohortStatusDao participantCohortStatusDao;
+
+  @Autowired
+  private FieldSetQueryBuilder fieldSetQueryBuilder;
+
+  @Autowired
+  private AnnotationQueryBuilder annotationQueryBuilder;
+
+  @Autowired
+  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 
   private ParticipantCohortStatus makeStatus(long cohortReviewId, long participantId, CohortStatus status) {
     ParticipantCohortStatusKey key = new ParticipantCohortStatusKey();
@@ -152,7 +170,14 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
 
     participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
     participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
+
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
+
+    this.cohortMaterializationService = new CohortMaterializationService(fieldSetQueryBuilder,
+        annotationQueryBuilder, participantCohortStatusDao, cdrBigQuerySchemaConfigService, conceptService);
   }
+
+
 
   @Override
   public List<String> getTableNames() {
