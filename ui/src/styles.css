@@ -24,7 +24,7 @@ body, input[text] {
   /*
    * Need to include elsewhere as well to override clarity's font styles.
    */
-  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 300;
 }
 
@@ -103,7 +103,7 @@ body, html, .login,
 .sidenav .sidenav-content > .nav-link,
 .sidenav .nav-group label,
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Gotham SSm A", "Gotham SSm B", sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 
