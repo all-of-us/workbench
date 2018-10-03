@@ -13,11 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.valueNotNumber;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETER;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 @Service
