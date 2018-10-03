@@ -162,9 +162,9 @@ describe('WorkspaceShareComponent', () => {
       ]
     }).compileComponents().then(() => {
       workspaceSharePage = new WorkspaceSharePage(TestBed);
-      workspaceSharePage.fixture.componentRef.instance.accessLevel = WorkspaceAccessLevel.OWNER;
-      workspaceSharePage.fixture.componentRef.instance.open();
-      workspaceSharePage.fixture.componentRef.instance.profileStorageService.reload();
+      workspaceSharePage.fixture.componentInstance.accessLevel = WorkspaceAccessLevel.OWNER;
+      workspaceSharePage.fixture.componentInstance.open();
+      workspaceSharePage.fixture.componentInstance.profileStorageService.reload();
     });
     tick();
   }));
@@ -217,7 +217,7 @@ describe('WorkspaceShareComponent', () => {
     });
     workspaceSharePage.readPageData();
     expect(workspaceSharePage.roleNamePairsOnPage.length).toBe(1);
-    expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe('Sample User1');
-    expect(workspaceSharePage.roleNamePairsOnPage[0].role).toEqual('OWNER');
+    expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe(userValuesStub.items[0].name);
+    expect(workspaceSharePage.roleNamePairsOnPage[0].role).toEqual(userValuesStub.items[0].role);
   }));
 });
