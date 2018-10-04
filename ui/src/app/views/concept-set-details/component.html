@@ -1,0 +1,50 @@
+<app-top-box>
+  <div class="concept-set-header">
+    <!-- TODO(calbach): Implement the action menu. -->
+    <clr-dropdown class="action-menu-dropdown">
+      <button type="button" class="resource-menu" [disabled]="true" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen></clr-dropdown-menu>
+    </clr-dropdown>
+    <div class="concept-set-details">
+      <div class="concept-set-name">
+        <h2>{{conceptSet.name}}</h2>
+        <!-- TODO(calbach): Implement edit. -->
+        <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
+            class="btn btn-icon edit-button" [disabled]="true">
+          <app-edit-icon [editHover]="editHover"></app-edit-icon>
+        </button>
+      </div>
+      <p>{{conceptSet.description}}</p>
+      <div class="concept-set-tags">
+        <span>Participant count: {{conceptSet.participantCount}}</span>
+        <span>Domain: {{conceptSet.domain | titlecase}}</span>
+      </div>
+      <!-- The empty state. -->
+      <button *ngIf="!conceptSet.concepts?.length" class="btn nav-button"
+              routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/concepts" routerLinkActive="active">
+        <clr-icon shape="search" class="icon search-icon"></clr-icon>
+        Add concepts to set
+      </button>
+    </div>
+    <div class="concept-set-navigation" style="display: inline-block;">
+      <button class="btn nav-button" routerLinkActive="active"
+          routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/concepts">
+        <clr-icon shape="search" class="icon search-icon"></clr-icon>
+        Add concepts to set
+      </button>
+      <!-- TODO(calbach): Provide a link once this view exists. -->
+      <button class="btn nav-button">
+        <clr-icon shape="grid-view" class="icon search-icon"></clr-icon>
+        Return to concept sets
+      </button>
+    </div>
+  </div>
+  <div *ngIf="conceptSet.concepts?.length" class="concept-table-wrap">
+    <app-concept-table [concepts]="conceptSet.concepts"></app-concept-table>
+  </div>
+  <app-sliding-fab [expanded]="'Remove from set'" (submit)="openRemoveModal()">
+    <clr-icon shape="trash" class="remove-icon"></clr-icon>
+  </app-sliding-fab>
+</app-top-box>
