@@ -27,7 +27,7 @@
   cursor: pointer;
   padding: 0px;
   height: 105px;
-  color: #216FB4;
+  color: #2691D0;
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
 }
 
@@ -62,7 +62,7 @@
   font-size: 18px;
   font-weight: 500;
   line-height: 22px;
-  color: #216FB4;
+  color: #2691D0;
 }
 
 .card.item-card .item-type {

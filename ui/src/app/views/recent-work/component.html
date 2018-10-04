@@ -1,13 +1,16 @@
-<div *ngIf="elementVisible()" class="recent-work" style="display: inline-block">
+<div class="recent-work" style="display: inline-block">
   <div *ngIf="leftScrollVisible()" class="scroll-indicator" id="left-scroll"
        (click)="scrollLeft()">
     <app-left-scroll-icon></app-left-scroll-icon>
   </div>
-  <div class="title" style="margin-bottom: 1rem;">
+  <div class="title" style="margin-bottom: 0.5rem;">
       {{headerText}}
   </div>
   <div class="card-area">
     <div style="display: flex">
+      <div *ngIf="resourcesLoading" class="spinner-container">
+        <span class="spinner spinner-lg"></span>
+      </div>
       <div *ngFor="let resource of resourceList">
         <app-resource-card [resourceCard]="resource" (onUpdate)="updateList($event)"></app-resource-card>
       </div>

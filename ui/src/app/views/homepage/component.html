@@ -1,7 +1,7 @@
 <div class="background-image">
   <div class="row" style="display:flex; justify-content:center">
     <div class="card single">
-      <div class="row" style="flex-direction: row; height: 17.47%">
+      <div class="row" style="flex-direction: row; height: 17.47%; margin-bottom: 0.5rem">
         <div class="col main-heading">Researcher Workbench</div>
         <div class="col heading-links" style="display: flex;">
           <div class="row">
@@ -13,57 +13,59 @@
         </div>
       </div>
       <div class="row" style="flex-direction: row; align-items: flex-start;">
-        <div class="card add-card" style="height: 12.5rem; flex-grow:0" (click)="addWorkspace()">
+        <div class="card add-card" (click)="addWorkspace()">
           <div class="card-text">
             Create a <br/> New Workspace <br/>
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
           </div>
         </div>
-        <div style="margin-left: 3rem; margin-top:1%">
-          <app-recent-work [headerText]="'Your Last Accessed Items'"></app-recent-work>
+        <div style="margin-left: 3rem">
+          <app-recent-work [headerText]="'Your Last Accessed Items'" style="display:flex"></app-recent-work>
         </div>
       </div>
     </div>
   </div>
-</div>
-<div class="footer">
-  <div class="row">
-    <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
-  </div>
-  <div class="footerRtLink">
-    <div class="tooltip">
-      <a href="#" class="footerLink">
-        See all documentation</a>
-      <span class="tooltiptext">Coming Soon</span>
+  <div class="footer">
+    <div class="row">
+      <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
     </div>
-  </div>
-  <div class="row" style="margin-left:12%">
-    <div *ngFor="let footer of footerLinks" class="row textGroup">
-      <div class="footerText">
-        <div class="title">{{footer.title}}</div>
-        <ul class="bullets">
-          <div *ngFor="let link of footer.links">
-            <div class="tooltip">
-              <li>
-                <a href="#" class="bullets">{{link}}</a>
-              </li>
-              <span class="tooltiptext">Coming Soon</span>
+    <div class="footerRtLink">
+      <div class="tooltip">
+        <a href="#" class="footerLink">
+          See all documentation</a>
+        <span class="tooltiptext">Coming Soon</span>
+      </div>
+    </div>
+    <div class="row" style="margin-left:12%">
+      <div *ngFor="let footer of footerLinks" class="row textGroup">
+        <div class="footerText">
+          <div class="title">{{footer.title}}</div>
+          <ul class="bullets">
+            <div *ngFor="let link of footer.links">
+              <div class="tooltip">
+                <li>
+                  <a href="#" class="bullets">{{link}}</a>
+                </li>
+                <span class="tooltiptext">Coming Soon</span>
+              </div>
             </div>
-          </div>
-        </ul>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
+  <div class="bottom-banner">
+    <div class="logo">
+      <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
+    </div>
+    <div class="bottom-links">
+      Privacy Policy
+    </div>
+    <div class="bottom-links">
+      Terms of Service
+    </div>
+  </div>
 </div>
-<div class="bottom-banner">
-  <div class="logo">
-    <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
-  </div>
-  <div class="bottom-links">
-    Privacy Policy
-  </div>
-  <div class="bottom-links">
-    Terms of Service
-  </div>
-  </div>
+
+
 

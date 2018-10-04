@@ -220,12 +220,12 @@
 }
 
 .card.add-card {
-  height: 63.89%;
+  height: 223px;
   width: 26.83%;
   background-color: #FFFFFF;
   align-content: left;
   margin-left: 25px;
-  margin-top: 1.3rem;
+  margin-top: 1.9rem;
   cursor: pointer;
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
   border-radius: 5px;
@@ -234,7 +234,7 @@
 .card-text {
   height: 56px;
   width: 284px;
-  color: #216FB4;
+  color: #2691D0;
   font-size: 20px;
   font-weight: 500;
   line-height: 28px;

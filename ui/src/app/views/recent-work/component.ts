@@ -14,6 +14,7 @@ import {
 
 export class RecentWorkComponent implements OnInit {
   resourceList: RecentResource[];
+  resourcesLoading: boolean;
   fullList: RecentResource[] = [];
   @Input('headerText')
   headerText: string = "Your Recent Work";
@@ -24,13 +25,16 @@ export class RecentWorkComponent implements OnInit {
   index: Number;
   size = 3;
   ngOnInit(): void {
+    this.resourcesLoading = true;
     this.updateList();
   }
 
   updateList(): void {
+    console.log(this.resourcesLoading);
     this.userMetricsService.getUserRecentResources().subscribe((resources) => {
       this.fullList = resources;
       this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + this.size);
+      this.resourcesLoading = false;
     });
   }
 

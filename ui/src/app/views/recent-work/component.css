@@ -35,3 +35,15 @@
     top: 2.1rem;
     position: relative;
 }
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    flex-flow: row wrap;
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+.spinner {
+    margin-top: 1rem;
+}
