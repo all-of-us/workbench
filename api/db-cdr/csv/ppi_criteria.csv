@@ -98,7 +98,7 @@
 324932,324924,"PPI","LIFESTYLE","","In the past, have you ever made a serious attempt to quit smoking? That is, have you stopped smoking for at least one day or longer because you were trying to quit?",1,0,"","Observation",1585867,0,324923.324924
 324933,324932,"PPI","LIFESTYLE",1585867,"Yes",0,1,0,"Observation",1585868,0,"324923.324924.324932"
 324934,324932,"PPI","LIFESTYLE",1585867,"No",0,1,0,"Observation",1585869,0,"324923.324924.324932"
-324935,324924,"PPI","LIFESTYLE","","Electronic Smoking",1,0,"","Observation",1586165,0,324923.324924
+324935,324923,"PPI","LIFESTYLE","","Electronic Smoking",1,0,"","Observation",1586165,0,324923.324924
 324936,324935,"PPI","LIFESTYLE","","Have you ever used an electronic nicotine product, even one or two times? (Electronic nicotine products include e- cigarettes, vape pens, hookah pens, personal vaporizers and mods, e-cigars, e-pipes, and e-hookahs.)",1,0,"","Observation",1586166,0,"324923.324924.324935"
 324937,324936,"PPI","LIFESTYLE",1586166,"Yes",0,1,0,"Observation",1586167,0,"324923.324924.324935.324936"
 324938,324936,"PPI","LIFESTYLE",1586166,"No",0,1,0,"Observation",1586168,0,"324923.324924.324935.324936"
@@ -106,7 +106,7 @@
 324940,324939,"PPI","LIFESTYLE",1586169,"Every day",0,1,0,"Observation",1586170,0,"324923.324924.324935.324939"
 324941,324939,"PPI","LIFESTYLE",1586169,"Some Days",0,1,0,"Observation",1586171,0,"324923.324924.324935.324939"
 324942,324939,"PPI","LIFESTYLE",1586169,"Not at all",0,1,0,"Observation",1586172,0,"324923.324924.324935.324939"
-324943,324924,"PPI","LIFESTYLE","","Cigar Smoking",1,0,"","Observation",1586173,0,324923.324924
+324943,324923,"PPI","LIFESTYLE","","Cigar Smoking",1,0,"","Observation",1586173,0,324923.324924
 324944,324943,"PPI","LIFESTYLE","","Have you ever smoked a traditional cigar, cigarillo, or filtered cigar, even one of two puffs?",1,0,"","Observation",1586174,0,"324923.324924.324943"
 324945,324944,"PPI","LIFESTYLE",1586174,"Yes",0,1,0,"Observation",1586175,0,"324923.324924.324943.324944"
 324946,324944,"PPI","LIFESTYLE",1586174,"No",0,1,0,"Observation",1586176,0,"324923.324924.324943.324944"
@@ -114,7 +114,7 @@
 324948,324947,"PPI","LIFESTYLE",1586177,"Every day",0,1,0,"Observation",1586178,0,"324923.324924.324943.324947"
 324949,324947,"PPI","LIFESTYLE",1586177,"Some Days",0,1,0,"Observation",1586179,0,"324923.324924.324943.324947"
 324950,324947,"PPI","LIFESTYLE",1586177,"Not at all",0,1,0,"Observation",1586180,0,"324923.324924.324943.324947"
-324951,324924,"PPI","LIFESTYLE","","Hookah Smoking",1,0,"","Observation",1586181,0,324923.324924
+324951,324923,"PPI","LIFESTYLE","","Hookah Smoking",1,0,"","Observation",1586181,0,324923.324924
 324952,324951,"PPI","LIFESTYLE","","Have you ever smoked tobacco in a hookah, even one or two puffs?",1,0,"","Observation",1586182,0,"324923.324924.324951"
 324953,324952,"PPI","LIFESTYLE",1586182,"Yes",0,1,0,"Observation",1586183,0,"324923.324924.324951.324952"
 324954,324952,"PPI","LIFESTYLE",1586182,"No",0,1,0,"Observation",1586184,0,"324923.324924.324951.324952"
@@ -122,7 +122,7 @@
 324956,324955,"PPI","LIFESTYLE",1586185,"Every day",0,1,0,"Observation",1586186,0,"324923.324924.324951.324955"
 324957,324955,"PPI","LIFESTYLE",1586185,"Some Days",0,1,0,"Observation",1586187,0,"324923.324924.324951.324955"
 324958,324955,"PPI","LIFESTYLE",1586185,"Not at all",0,1,0,"Observation",1586188,0,"324923.324924.324951.324955"
-324959,324924,"PPI","LIFESTYLE","","Smokeless Tobacco",1,0,"","Observation",1586189,0,324923.324924
+324959,324923,"PPI","LIFESTYLE","","Smokeless Tobacco",1,0,"","Observation",1586189,0,324923.324924
 324960,324959,"PPI","LIFESTYLE","","Have you ever used smokeless tobacco products, even one or two times? (Smokeless tobacco products include snus pouches, Skoal Bandits, loose snus, moist snuff, dip, spit, and chewing tobacco.)",1,0,"","Observation",1586190,0,"324923.324924.324959"
 324961,324960,"PPI","LIFESTYLE",1586190,"Yes",0,1,0,"Observation",1586191,0,"324923.324924.324959.324960"
 324962,324960,"PPI","LIFESTYLE",1586190,"No",0,1,0,"Observation",1586192,0,"324923.324924.324959.324960"
@@ -130,7 +130,7 @@
 324964,324963,"PPI","LIFESTYLE",1586193,"Every day",0,1,0,"Observation",1586194,0,"324923.324924.324959.324963"
 324965,324963,"PPI","LIFESTYLE",1586193,"Some Days",0,1,0,"Observation",1586195,0,"324923.324924.324959.324963"
 324966,324963,"PPI","LIFESTYLE",1586193,"Not at all",0,1,0,"Observation",1586196,0,"324923.324924.324959.324963"
-324967,324924,"PPI","LIFESTYLE","","Alcohol",1,0,"","Observation",1586197,0,324923.324924
+324967,324923,"PPI","LIFESTYLE","","Alcohol",1,0,"","Observation",1586197,0,324923.324924
 324968,324967,"PPI","LIFESTYLE","","In your entire life, have you had at least 1 drink of any kind of alcohol, not counting small tastes or sips? (By a drink, we mean a can or bottle of beer, a glass of wine or a wine cooler, a shot of liquor, or a mixed drink with liquor in it.)",1,0,"","Observation",1586198,0,"324923.324924.324967"
 324969,324968,"PPI","LIFESTYLE",1586198,"Yes",0,1,0,"Observation",1586199,0,"324923.324924.324967.324968"
 324970,324968,"PPI","LIFESTYLE",1586198,"No",0,1,0,"Observation",1586200,0,"324923.324924.324967.324968"
@@ -152,7 +152,7 @@
 324986,324983,"PPI","LIFESTYLE",1586213,"Weekly",0,1,0,"Observation",1586216,0,"324923.324924.324967.324983"
 324987,324983,"PPI","LIFESTYLE",1586213,"Daily or almost daily",0,1,0,"Observation",1586217,0,"324923.324924.324967.324983"
 324988,324983,"PPI","LIFESTYLE",1586213,"Never in the last year",0,1,0,"Observation",1585634,0,"324923.324924.324967.324983"
-324989,324924,"PPI","LIFESTYLE","","Recreational Drug Use",1,0,"","Observation",1585635,0,324923.324924
+324989,324923,"PPI","LIFESTYLE","","Recreational Drug Use",1,0,"","Observation",1585635,0,324923.324924
 324990,324989,"PPI","LIFESTYLE","","In your LIFETIME, which of the following substances have you ever used?",1,0,"","Observation",1585636,0,"324923.324924.324989"
 324991,324990,"PPI","LIFESTYLE",1585636,"Marijuana (cannabis, pot, grass, hash, weed, etc.)",0,1,0,"Observation",1585637,0,"324923.324924.324989.324990"
 324992,324990,"PPI","LIFESTYLE",1585636,"Cocaine (coke, crack, etc.)",0,1,0,"Observation",1585638,0,"324923.324924.324989.324990"
