@@ -95,29 +95,32 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
   fetchChartsData(name) {
-    this.trackClickedDomains = isDomainNameExists(name)(this.ngRedux.getState());
+
     this.demoGraph = false;
     this.spinner = true;
     this.showTitle = false;
     const domain = name;
     const limit = 10;
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    console.log(cid);
+    this.trackClickedDomains = isDomainNameExists(cid, name)(this.ngRedux.getState());
+    console.log(this.trackClickedDomains);
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     if (this.trackClickedDomains) {
       setTimeout(() => {
         this.spinner = false;
-        this.getCharts(name);
+        this.getCharts(name, cid);
       }, 2000);
     } else {
       this.actions.fetchReviewChartsData(ns, wsid, cid, cdrid, domain, limit);
-      this.getCharts(name);
+      this.getCharts(name, cid);
     }
 
   }
 
-  getCharts(name) {
+  getCharts(name, cid) {
     const loadingReviewCohortData = this.ngRedux
-      .select(isChartLoading(name))
+      .select(isChartLoading(name, cid))
       .filter(domain => !!domain)
       .subscribe(loading => {
         this.loading = loading;
