@@ -159,6 +159,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //visit no search parameters
     searchRequest = createSearchRequests(TreeType.VISIT.name(), new ArrayList<>(), new ArrayList<>());
     assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //ppi no search parameters
+    searchRequest = createSearchRequests(TreeType.PPI.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
   }
 
   @Test
@@ -407,6 +411,38 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, visitParam.getConceptId());
+
+    //ppi no type
+    Criteria ppi =
+      createCriteriaChild(null, null, 0, null, null, null);
+    SearchParameter ppiParam = createSearchParameter(ppi, null);
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, ppiParam.getType());
+
+    //ppi bad type
+    ppiParam.type("blah");
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, ppiParam.getType());
+
+    //ppi no domain
+    ppiParam.type(TreeType.PPI.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, ppiParam.getDomain());
+
+    //ppi bad domain
+    ppiParam.domain(DomainType.CONDITION.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, ppiParam.getDomain());
+
+    //ppi no concept id
+    ppiParam.domain(DomainType.OBSERVATION.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
   }
 
   @Test

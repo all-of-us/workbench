@@ -63,7 +63,6 @@ public class CriteriaDaoTest {
   private Criteria drugCriteriaIngredient1;
   private Criteria drugCriteriaBrand;
   private Criteria labCriteria;
-  private Criteria ppiCriteria;
 
   @Before
   public void setUp() {
@@ -84,7 +83,6 @@ public class CriteriaDaoTest {
     drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
     drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "3", "BLAH", 0, false, true, "");
     labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
-    ppiCriteria = createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), "1586135", "USA", 0, false, true, "324836.324837").conceptId("1586136");
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
@@ -107,7 +105,6 @@ public class CriteriaDaoTest {
     criteriaDao.save(drugCriteriaIngredient1);
     criteriaDao.save(drugCriteriaBrand);
     criteriaDao.save(labCriteria);
-    criteriaDao.save(ppiCriteria);
 
     conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
@@ -116,33 +113,30 @@ public class CriteriaDaoTest {
       )
     );
     conceptDao.save(new Concept().conceptId(123L));
-    conceptDao.save(new Concept().conceptId(1586136L));
     conceptSynonymDao.save(new ConceptSynonym().conceptId(123).conceptSynonymName("test1mywordTest"));
-    conceptSynonymDao.save(new ConceptSynonym().conceptId(1586136).conceptSynonymName("ppiwordTest"));
   }
 
   @After
   public void tearDown() {
-    criteriaDao.delete(icd9Criteria1);
-    criteriaDao.delete(icd9Criteria2);
-    criteriaDao.delete(demoCriteria1);
-    criteriaDao.delete(demoCriteria1a);
-    criteriaDao.delete(demoCriteria2);
-    criteriaDao.delete(icd10Criteria1);
-    criteriaDao.delete(icd10Criteria2);
-    criteriaDao.delete(cptCriteria1);
-    criteriaDao.delete(cptCriteria2);
-    criteriaDao.delete(parentIcd9);
-    criteriaDao.delete(childIcd9);
-    criteriaDao.delete(parentDemo);
-    criteriaDao.delete(parentIcd10);
-    criteriaDao.delete(childIcd10);
-    criteriaDao.delete(pmCriteria);
-    criteriaDao.delete(drugCriteriaIngredient);
-    criteriaDao.delete(drugCriteriaIngredient1);
-    criteriaDao.delete(drugCriteriaBrand);
-    criteriaDao.delete(labCriteria);
-    criteriaDao.delete(ppiCriteria);
+//    criteriaDao.delete(icd9Criteria1);
+//    criteriaDao.delete(icd9Criteria2);
+//    criteriaDao.delete(demoCriteria1);
+//    criteriaDao.delete(demoCriteria1a);
+//    criteriaDao.delete(demoCriteria2);
+//    criteriaDao.delete(icd10Criteria1);
+//    criteriaDao.delete(icd10Criteria2);
+//    criteriaDao.delete(cptCriteria1);
+//    criteriaDao.delete(cptCriteria2);
+//    criteriaDao.delete(parentIcd9);
+//    criteriaDao.delete(childIcd9);
+//    criteriaDao.delete(parentDemo);
+//    criteriaDao.delete(parentIcd10);
+//    criteriaDao.delete(childIcd10);
+//    criteriaDao.delete(pmCriteria);
+//    criteriaDao.delete(drugCriteriaIngredient);
+//    criteriaDao.delete(drugCriteriaIngredient1);
+//    criteriaDao.delete(drugCriteriaBrand);
+//    criteriaDao.delete(labCriteria);
   }
 
   @Test
@@ -189,19 +183,6 @@ public class CriteriaDaoTest {
       criteriaDao.findCriteriaByType(TreeType.ICD9.name());
     final Set<String> typeList = icd9List.stream().map(Criteria::getType).collect(Collectors.toSet());
     assertEquals(1, typeList.size());
-  }
-
-  @Test
-  public void findCriteriaByTypeForName() throws Exception {
-    //match on name
-    List<Criteria> ppi = criteriaDao.findCriteriaByTypeForName(TreeType.PPI.name(), "USA", null);
-    assertEquals(1, ppi.size());
-    assertEquals(ppiCriteria, ppi.get(0));
-
-    //match on synonym
-    ppi = criteriaDao.findCriteriaByTypeForName(TreeType.PPI.name(), "piword", null);
-    assertEquals(1, ppi.size());
-    assertEquals(ppiCriteria, ppi.get(0));
   }
 
   @Test
