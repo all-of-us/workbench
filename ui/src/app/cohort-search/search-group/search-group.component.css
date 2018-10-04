@@ -1,5 +1,6 @@
 .card {
   border-radius: 0.2rem;
+  border-top-color: #f1f2f2;
   box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
   margin: 0.6rem 0;
 }
@@ -22,12 +23,19 @@
 }
 
 #close-button {
-  color: rgb(245, 135, 113);
-  margin: 0 !important;
+  float: right;
+  border: 1px solid #d7d7d7;
+  background: #FFFFFF;
+  color: #2691D0;
+  margin-top: -20px;
+  margin-right: 0;
+  border-bottom: 0;
+  font-size: 10px;
+  letter-spacing: 0;
 }
 
 #close-button:hover {
-  color: rgb(255, 186, 164);
+  /*color: rgb(255, 186, 164);*/
 }
 
 .selection-button {
