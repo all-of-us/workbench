@@ -37,19 +37,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
-  cardDetails = [
-    {
-      title: 'Browse All of Us Data',
-      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-      'dolore. Mirum est notare, quam littera gothica quam nunc.',
-      icon: '/assets/icons/browse-data.svg'
-    },
-    {
-      title: 'Explore Public Work',
-      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-      'dolore. Mirum est notare, quam littera gothica quam nunc.',
-      icon: '/assets/icons/explore.svg'
-    }];
   footerLinks = [
     {
       title: 'Working Within Researcher Workbench',
@@ -76,7 +63,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
   @ViewChild(RecentWorkComponent)
-  recentWorkComponent: RecentWorkComponent;
 
   constructor(
     private profileService: ProfileService,
