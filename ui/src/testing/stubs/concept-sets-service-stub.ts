@@ -70,7 +70,7 @@ export class ConceptSetsServiceStub {
 
   public deleteConceptSet(
       workspaceNamespace: string, workspaceId: string,
-      conceptSetId: number): Observable<ConceptSet> {
+      conceptSetId: number): Observable<void> {
     return new Observable<void>(obs => {
       setTimeout(() => {
         const index = this.conceptSets.findIndex(cs => cs.id === conceptSetId);
