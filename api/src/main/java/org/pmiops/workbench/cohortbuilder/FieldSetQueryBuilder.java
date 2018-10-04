@@ -262,7 +262,7 @@ public class FieldSetQueryBuilder {
         SelectedColumn selectedColumn = new SelectedColumn();
         selectedColumn.columnInfo = new ColumnInfo(columnName, columnConfig);
         selectedColumn.tableAlias = tableNameAndAlias.alias;
-        selectedColumn.columnAlias = String.format("%s_%s", tableNameAndAlias.alias, columnEnd);
+        selectedColumn.columnAlias = String.format("%s__%s", tableNameAndAlias.alias, columnEnd);
         selectColumns.add(selectedColumn);
       }
     }
