@@ -16,6 +16,7 @@ import {
   WorkspaceResponse,
   WorkspaceResponseListResponse,
 } from 'generated';
+import {UserServiceStub} from './user-service-stub';
 
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
@@ -27,6 +28,7 @@ export class WorkspaceStubVariables {
 
 export class WorkspacesServiceStub {
   workspaces: Workspace[];
+  userService: UserServiceStub;
   // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
   workspacesForReview: Workspace[];
@@ -59,7 +61,7 @@ export class WorkspacesServiceStub {
   notebookList: FileDetail[];
 
   constructor() {
-
+    this.userService = new UserServiceStub();
     this.workspaces = [WorkspacesServiceStub.stubWorkspace()];
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.workspacesForReview = WorkspacesServiceStub.stubWorkspacesForReview();
@@ -96,13 +98,13 @@ export class WorkspacesServiceStub {
         {
           email: 'sampleuser2@fake-research-aou.org',
           givenName: 'Sample',
-          familyName: 'User1',
+          familyName: 'User2',
           role: WorkspaceAccessLevel.WRITER
         },
         {
           email: 'sampleuser3@fake-research-aou.org',
           givenName: 'Sample',
-          familyName: 'User1',
+          familyName: 'User3',
           role: WorkspaceAccessLevel.READER
         },
       ]

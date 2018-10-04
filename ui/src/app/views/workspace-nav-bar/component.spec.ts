@@ -9,6 +9,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {
   BugReportService,
+  UserService,
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
@@ -16,6 +17,7 @@ import {
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {
@@ -124,6 +126,7 @@ describe('WorkspaceNavBarComponent', () => {
       providers: [
         {provide: BugReportService, useValue: new BugReportServiceStub()},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
+        {provide: UserService, useValue: new UserServiceStub()},
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({

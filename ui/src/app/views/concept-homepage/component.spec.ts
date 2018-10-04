@@ -9,6 +9,7 @@ import {ClarityModule} from '@clr/angular';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptHomepageComponent} from 'app/views/concept-homepage/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
+import {SlidingFabComponent} from 'app/views/sliding-fab/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {HighlightSearchPipe} from 'app/utils/highlight-search.pipe';
@@ -75,6 +76,7 @@ describe('ConceptHomepageComponent', () => {
         ConceptHomepageComponent,
         ConceptTableComponent,
         HighlightSearchPipe,
+        SlidingFabComponent,
         TopBoxComponent,
       ],
       providers: [
@@ -120,7 +122,8 @@ describe('ConceptHomepageComponent', () => {
         standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
         domain: domain.domain,
         includeDomainCounts: includeDomainCounts,
-        includeVocabularyCounts: true
+        includeVocabularyCounts: true,
+        maxResults: fixture.componentInstance.maxConceptFetch
       };
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -166,7 +169,8 @@ describe('ConceptHomepageComponent', () => {
           standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
           domain: domain.domain,
           includeDomainCounts: includeDomainCounts,
-          includeVocabularyCounts: true
+          includeVocabularyCounts: true,
+          maxResults: fixture.componentInstance.maxConceptFetch
         });
     });
 
