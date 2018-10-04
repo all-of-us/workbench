@@ -550,7 +550,7 @@ export class CohortSearchActions {
    */
 
   fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
-                          domain: string, limit: number): void {
+    domain: string, limit: number): void {
     this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
   }
 
@@ -559,8 +559,8 @@ export class CohortSearchActions {
    */
 
   fetchIndividualParticipantsData(ns: any, wsid: any, cid: any, cdrid: any,
-        participantsId: any, domain: string, limit: number): void {
-        this.requestIndividualParticipantsData(ns, wsid,
-        cid, cdrid, participantsId, domain, limit);
+    participantsId: any, domain: string, limit: number): void {
+    this.requestIndividualParticipantsData(ns, wsid,
+    cid, cdrid, participantsId, domain, limit);
   }
 }

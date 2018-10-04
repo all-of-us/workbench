@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import * as moment from 'moment';
 @Component({
   selector: 'app-individual-participants-charts',
@@ -7,13 +7,14 @@ import * as moment from 'moment';
 })
 export class IndividualParticipantsChartsComponent implements OnChanges {
   chartOptions = {};
-  @Input() chartData;
+  @Input() chartData = [];
   @Input() chartHeader: string;
   trimmedData = [];
   duplicateItems = [];
   yAxisNames = [''];
-  constructor(
-  ) {}
+
+  constructor() {}
+
   ngOnChanges() {
     this.yAxisNames = [''];
     if (this.chartData) {
@@ -72,7 +73,7 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
 
 
   getChartsData() {
-    const test = this.yAxisNames;
+    const names = this.yAxisNames;
     this.chartOptions = {
            chart: {
              type: 'scatter',
@@ -108,7 +109,7 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
              },
              labels: {
                formatter: function () {
-                 return test[this.value];
+                 return names[this.value];
                }
              },
              tickInterval: 1,
@@ -147,12 +148,15 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
 
            tooltip: {
              pointFormat: '<div>' +
-               'Date:<b>{point.startDate}</b><br/>' +
-               'Standard Vocab:<b>{point.standardVocabulary}</b><br/>' +
-               'Standard Name: <b>{point.standardName}</b><br/>' +
-               'Age at Event:<b>{point.ageAtEvent}</b><br/>' +
-               'rank:<b>{point.rank}</b><br/>' +
+               '<b>Date:</b>{point.startDate}<br/>' +
+               '<b>Standard Vocab:</b>{point.standardVocabulary}<br/>' +
+               '<b>Standard Name:</b>{point.standardName}<br/>' +
+               '<b>Age at Event:</b>{point.ageAtEvent}<br/>' +
                '</div>',
+             style: {
+               color: '#565656',
+               fontSize: 12
+             },
              shared: true
            },
            series: [{

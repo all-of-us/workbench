@@ -127,6 +127,4 @@ export class DetailHeaderComponent implements OnChanges {
     this.router.navigate(['..', id], {relativeTo: this.route});
     this.navigationClicked.emit(id);
   }
-
-
 }
