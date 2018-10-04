@@ -128,9 +128,11 @@ export const loadIndividualParticipantsData =
     ns, wsid, cid, cdrid, participantsId, domain, limit, results});
 
 export const participantsChartsRequestError =
-  (ns: any, wsid: any, cid: any, cdrid: any, participantsId:any, domain: any, limit: any, error: any):
+  (ns: any, wsid: any, cid: any, cdrid: any,
+   participantsId: any, domain: any, limit: any, error: any):
   ActionTypes[typeof PARTICIPANTS_CHART_REQUEST_ERROR] =>
-  ({type: PARTICIPANTS_CHART_REQUEST_ERROR, ns, wsid, cid, cdrid, participantsId, domain, limit, error});
+  ({type: PARTICIPANTS_CHART_REQUEST_ERROR, ns, wsid, cid,
+  cdrid, participantsId, domain, limit, error});
 
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
