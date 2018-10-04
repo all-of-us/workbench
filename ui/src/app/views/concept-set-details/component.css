@@ -62,12 +62,18 @@
 }
 
 .nav-button {
+  background-color: #FFFFFF;
+  border-color: #2691D0;
+  color: #2691D0;
   text-align: left;
   text-transform: none;
+}
+
+.concept-set-navigation * {
   width: 10rem;
 }
 
-.concept-set-navigation .icon {
+.nav-button .icon {
   display: inline-block;
   height: .8rem;
   width: .8rem;
