@@ -56,8 +56,7 @@ import static org.mockito.Mockito.when;
 import static org.junit.Assert.fail;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class,QueryBuilderFactory.class, BigQueryService.class,
-  ParticipantCounter.class, DomainLookupService.class, CohortQueryBuilder.class})
+@Import({TestJpaConfig.class})
 @ComponentScan(basePackages = {"org.pmiops.workbench.cohortreview.*","org.pmiops.workbench.cohortbuilder.*"})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
@@ -122,14 +121,17 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     BigQueryService.class,
     ReviewQueryBuilder.class,
     CohortService.class,
-    ConceptSetService.class,
     ParticipantCounter.class,
     DomainLookupService.class,
-    CohortQueryBuilder.class
+    CohortQueryBuilder.class,
+    QueryBuilderFactory.class,
+    ParticipantCounter.class,
+    DomainLookupService.class
   })
   @MockBean({
     FireCloudService.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    ConceptSetService.class
   })
   static class Configuration {
     @Bean
