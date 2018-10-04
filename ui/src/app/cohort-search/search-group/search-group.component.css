@@ -1,6 +1,6 @@
 .card {
   border-radius: 0.2rem;
-  border-top-color: #f1f2f2;
+  border-color: rgba(215, 215, 215, 0.5);
   box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
   margin: 0.6rem 0;
 }
@@ -24,7 +24,7 @@
 
 #close-button {
   float: right;
-  border: 1px solid #d7d7d7;
+  border: 1px solid rgba(215, 215, 215, 0.5);
   background: #FFFFFF;
   color: #2691D0;
   margin-top: -20px;
