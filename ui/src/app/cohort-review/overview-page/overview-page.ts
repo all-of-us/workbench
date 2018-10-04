@@ -102,9 +102,7 @@ export class OverviewPage implements OnInit, OnDestroy {
     const domain = name;
     const limit = 10;
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    console.log(cid);
     this.trackClickedDomains = isDomainNameExists(cid, name)(this.ngRedux.getState());
-    console.log(this.trackClickedDomains);
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     if (this.trackClickedDomains) {
       setTimeout(() => {
