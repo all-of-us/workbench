@@ -30,7 +30,6 @@ export class RecentWorkComponent implements OnInit {
   }
 
   updateList(): void {
-    console.log(this.resourcesLoading);
     this.userMetricsService.getUserRecentResources().subscribe((resources) => {
       this.fullList = resources;
       this.resourceList = this.fullList.slice(this.startIndex, this.startIndex + this.size);
