@@ -6,7 +6,7 @@ import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ChartModule} from 'angular2-highcharts';
 import {CohortReviewService} from 'generated';
-import * as highCharts from 'Highcharts';
+// import * as highCharts from 'Highcharts';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
@@ -62,7 +62,7 @@ describe('DetailTabsComponent', () => {
    store.has(activatedRouteStub.parent.snapshot.params.cid);
     TestBed.configureTestingModule({
       declarations: [DetailTabsComponent, IndividualParticipantsChartsComponent],
-      imports: [ChartModule.forRoot(highCharts), RouterTestingModule],
+      imports: [ChartModule, RouterTestingModule],
        schemas: [NO_ERRORS_SCHEMA],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
