@@ -1,21 +1,23 @@
+import {NgRedux} from '@angular-redux/store';
+import {MockNgRedux} from '@angular-redux/store/testing';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
+import {RouterTestingModule} from '@angular/router/testing';
+import {ChartModule} from 'angular2-highcharts';
 import {CohortReviewService} from 'generated';
-import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
-import {DetailTabsComponent} from './detail-tabs.component';
-import { ChartModule } from 'angular2-highcharts';
 import * as highCharts from 'Highcharts';
-import {NgRedux} from '@angular-redux/store';
-import {ReviewStateService} from '../review-state.service';
-import {ReviewStateServiceStub} from "../../../testing/stubs/review-state-service-stub";
-import {Observable} from "rxjs/Observable";
-import { RouterTestingModule } from '@angular/router/testing';
-import {MockNgRedux} from "@angular-redux/store/testing";
-import {fromJS, has} from "immutable";
-import {initialState} from "../../cohort-search/redux/store";
-import {CohortSearchActions} from "../../cohort-search/redux";
+import {fromJS} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
+import {ReviewStateServiceStub} from '../../../testing/stubs/review-state-service-stub';
+import {CohortSearchActions} from '../../cohort-search/redux';
+import {initialState} from '../../cohort-search/redux/store';
+import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
+import {ReviewStateService} from '../review-state.service';
+import {DetailTabsComponent} from './detail-tabs.component';
+
+
 describe('DetailTabsComponent', () => {
   let component: DetailTabsComponent;
   let fixture: ComponentFixture<DetailTabsComponent>;
