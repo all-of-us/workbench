@@ -5,6 +5,7 @@ import {
   ActivatedRoute,
   Event as RouterEvent,
   NavigationEnd,
+  NavigationError,
   Router,
 } from '@angular/router';
 
@@ -75,9 +76,10 @@ export class AppComponent implements OnInit {
       this.titleService.setTitle(this.baseTitle);
     }
 
-    this.router.events.subscribe((event: RouterEvent) => {
-      this.setTitleFromRoute(event);
-      if (event instanceof NavigationEnd) {
+    this.router.events.subscribe((e: RouterEvent) => {
+      this.setTitleFromRoute(e);
+      if (e instanceof NavigationEnd || e instanceof NavigationError) {
+        // Terminal navigation events.
         this.initialSpinner = false;
       }
     });
