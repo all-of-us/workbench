@@ -86,7 +86,7 @@ else
 fi
 
 
-copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_synonym)
+copy_tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_synonym domain_vocabulary_info)
 
 for t in "${copy_tables[@]}"
 do
@@ -94,7 +94,7 @@ do
   bq --project=$WORKBENCH_PROJECT --nosync cp $WORKBENCH_PROJECT:$WORKBENCH_DATASET.$t $PUBLIC_PROJECT:$PUBLIC_DATASET.$t
 done
 
-# Round counts for public dataset
+# Round counts for public dataset (The counts are rounded up using ceil. For example 4 to 20, 21 to 40, 43 to 60)
 # 1. Set any count > 0 and < BIN_SIZE  to BIN_SIZE,
 # 2. Round any above BIN_SIZE to multiple of BIN_SIZE
 
@@ -109,13 +109,24 @@ set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     source_count_value =
     case when source_count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end
+where count_value >= 0"
+
+# achilles_results_dist
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results_dist\`
+set count_value =
+    case when count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where count_value >= 0"
 
@@ -140,23 +151,23 @@ set count_value =
     case when count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     source_count_value =
     case when source_count_value < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     prevalence =
     case when count_value  > 0 and count_value < ${BIN_SIZE}
-            then ROUND(${BIN_SIZE} / ${person_count},2)
+            then ROUND(CEIL(${BIN_SIZE} / ${person_count}),2)
         when count_value  > 0 and count_value >= ${BIN_SIZE}
-            then ROUND(ROUND(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+            then ROUND(CEIL(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}), 2)
         when source_count_value  > 0 and source_count_value < ${BIN_SIZE}
-            then ROUND(${BIN_SIZE} / ${person_count},2)
+            then ROUND(CEIL(${BIN_SIZE} / ${person_count}),2)
         when source_count_value  > 0 and source_count_value >= ${BIN_SIZE}
-            then ROUND(ROUND(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}, 2)
+            then ROUND(CEIL(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}), 2)
         else
             0.00
     end
@@ -180,7 +191,7 @@ set participant_count =
     case when participant_count < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"
 
@@ -191,6 +202,6 @@ set participant_count =
     case when participant_count < ${BIN_SIZE}
         then ${BIN_SIZE}
     else
-        cast(ROUND(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"

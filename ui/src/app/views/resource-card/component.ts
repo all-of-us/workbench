@@ -122,8 +122,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       }
       case ResourceType.COHORT: {
         const url =
-          '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?criteria=';
-        this.route.navigateByUrl(url + resource.cohort.criteria);
+          '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?cohortId=';
+        this.route.navigateByUrl(url + resource.cohort.id);
         this.onUpdate.emit();
         break;
       }

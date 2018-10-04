@@ -50,7 +50,7 @@ echo "Running measurement queries..."
 # 3000 Measurements that have numeric values - Number of persons with at least one measurement occurrence by measurement_concept_id, bin size of the measurement value for 10 bins, maximum and minimum from measurement value. Added value for measurement rows
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, count_value, source_count_value)
+(id, analysis_id, stratum_1, stratum_3, stratum_4, count_value, source_count_value)
 with distinct_concepts as
 (select distinct measurement_concept_id as m_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where measurement_concept_id != 0),
 distinct_source_concepts as
@@ -98,14 +98,8 @@ select m_s_concept_id as concept,
 as unit
 from distinct_source_concepts dsc join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m on dsc.m_s_concept_id=m.measurement_source_concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on c.concept_id=m.unit_concept_id
-group by m_s_concept_id,unit),
-value_measurements as
-(select distinct measurement_concept_id as concept from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where value_as_number is not null
-union all
-select distinct measurement_source_concept_id as concept from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` where value_as_number is not null)
+group by m_s_concept_id,unit)
 select 0,3000 as analysis_id,CAST(co1.measurement_concept_id  AS STRING) as stratum_1,
-(case when co1.measurement_concept_id in (select distinct concept from value_measurements) then cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) as string)
-      else '0' end) as stratum_2,
 'Measurement' as stratum_3,unit as stratum_4,
 COUNT(distinct co1.PERSON_ID) as count_value,
 (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2
@@ -115,8 +109,6 @@ where co1.measurement_concept_id > 0
 group by  co1.measurement_concept_id,unit
 union all
 select 0, 3000 as analysis_id, CAST(co1.measurement_source_concept_id  AS STRING) as stratum_1,
-(case when co1.measurement_source_concept_id in (select distinct concept from value_measurements) then cast(ceil((ceil(max(co1.value_as_number))-floor(min(co1.value_as_number)))/10) as string)
-      else '0' end) as stratum_2,
 'Measurement' as stratum_3,unit as stratum_4,
 COUNT(distinct co1.PERSON_ID) as count_value,COUNT(distinct co1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co1 join measurement_units on co1.measurement_source_concept_id=concept
@@ -639,33 +631,37 @@ group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4,stratum_
 echo "Getting measurements unbinned gender value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1,stratum_2,stratum_3,stratum_4,count_value,source_count_value)
+(id, analysis_id, stratum_1,stratum_2,stratum_3,stratum_4,stratum_5,count_value,source_count_value)
 SELECT 0,1900 as analysis_id,
 cast(m1.measurement_concept_id as string) as stratum_1,CAST(p1.gender_concept_id AS STRING) as stratum_2,'Measurement' as stratum_3,
-m1.value_source_value as stratum_4,
+c2.concept_name as stratum_4,
+cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
 0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on m1.measurement_concept_id = c.concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on cast(m1.measurement_concept_id as string)=ar.stratum_1
-where m1.value_as_number is null and m1.value_source_value is not null
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+where m1.value_as_concept_id != 0
 and m1.measurement_concept_id > 0 and m1.measurement_concept_id not in (4091452,4065279,3027018)
 and ar.analysis_id = 3000 and ar.stratum_3='Measurement' and ar.stratum_4 != 'unknown'
-group by m1.measurement_concept_id,m1.value_source_value,p1.gender_concept_id
+group by m1.measurement_concept_id,c2.concept_name,p1.gender_concept_id
 union all
 SELECT 0,1900 as analysis_id,
 cast(m1.measurement_source_concept_id as string) as stratum_1,CAST(p1.gender_concept_id AS STRING) as stratum_2,'Measurement' as stratum_3,
-m1.value_source_value as stratum_4,
+c2.concept_name as stratum_4,
+cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
 count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on cast(m1.measurement_source_concept_id as string)=ar.stratum_1
-where m1.value_as_number is null and m1.value_source_value is not null
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on m1.value_as_concept_id=c2.concept_id
+where m1.value_as_concept_id != 0
 and ar.analysis_id = 3000 and ar.stratum_3='Measurement' and ar.stratum_4 != 'unknown'
 and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id != m1.measurement_concept_id
-group by m1.measurement_source_concept_id,m1.value_source_value,p1.gender_concept_id"
+group by m1.measurement_source_concept_id,c2.concept_name,p1.gender_concept_id"
 
 # 1901 Measurement response, age decile histogram data (age decile > 2)
 # We do not yet generate the binned source counts of standard concepts
@@ -905,70 +901,78 @@ group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4,stratum_
 echo "Getting measurement response, age decile histogram data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, count_value,source_count_value)
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, stratum_5, count_value,source_count_value)
 SELECT 0,1901 as analysis_id,
 cast(m1.measurement_concept_id as string) as stratum_1,CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'Measurement' as stratum_3,
-m1.value_source_value as stratum_4,
+c2.concept_name as stratum_4,
+m1.value_as_concept_id as stratum_5,
 count(distinct p1.person_id) as count_value,
 0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on m1.measurement_concept_id = c.concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on cast(m1.measurement_concept_id as string)=ar.stratum_1
-where m1.value_as_number is null and m1.value_source_value is not null
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+where m1.value_as_concept_id != 0
 and m1.measurement_concept_id > 0 and m1.measurement_concept_id not in (4091452,4065279,3027018)
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
 and ar.analysis_id = 3000 and ar.stratum_3 = 'Measurement' and ar.stratum_4 != 'unknown'
-group by m1.measurement_concept_id,m1.value_source_value,stratum_2
+group by m1.measurement_concept_id,c2.concept_name,m1.value_as_concept_id,stratum_2
 union all
 SELECT 0,1901 as analysis_id,
 cast(m1.measurement_source_concept_id as string) as stratum_1,CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'Measurement' as stratum_3,
-m1.value_source_value as stratum_4,
+c2.concept_name as stratum_4,
+m1.value_as_concept_id as stratum_5,
 count(distinct p1.person_id) as count_value,
 count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on cast(m1.measurement_source_concept_id as string)=ar.stratum_1
-where m1.value_as_number is null and m1.value_source_value is not null
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+where m1.value_as_concept_id != 0
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
 and ar.analysis_id = 3000 and ar.stratum_3 = 'Measurement' and ar.stratum_4 != 'unknown'
 and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id != m1.measurement_concept_id
-group by m1.measurement_source_concept_id,m1.value_source_value,stratum_2"
+group by m1.measurement_source_concept_id,c2.concept_name,m1.value_as_concept_id,stratum_2"
 
 #1901 Measurement string value counts (This query generates counts, source counts of the value and age decile 2. It gets bin size from joining the achilles_results)
 # We do not yet generate the binned source counts of standard concepts
 echo "Getting measurements unbinned age decile 2 value counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, count_value,source_count_value)
+(id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, stratum_5,count_value,source_count_value)
 SELECT 0,1901 as analysis_id,
 cast(m1.measurement_concept_id as string) as stratum_1,'2' as stratum_2,'Measurement' as stratum_3,
-m1.value_source_value as stratum_4,
+c2.concept_name as stratum_4,
+m1.value_as_concept_id as stratum_5,
 count(distinct p1.person_id) as count_value,
 0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on m1.measurement_concept_id = c.concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on cast(m1.measurement_concept_id as string)=ar.stratum_1
-where m1.value_as_number is null and m1.value_source_value is not null
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+where m1.value_as_concept_id != 0
 and m1.measurement_concept_id > 0 and m1.measurement_concept_id not in (4091452,4065279,3027018)
 and ar.analysis_id = 3000 and ar.stratum_3 = 'Measurement' and ar.stratum_4 != 'unknown'
 and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
-group by m1.measurement_concept_id,m1.value_source_value,stratum_2
+group by m1.measurement_concept_id,c2.concept_name,m1.value_as_concept_id,stratum_2
 union all
 SELECT 0,1901 as analysis_id,
 cast(m1.measurement_source_concept_id as string) as stratum_1,'2' as stratum_2,'Measurement' as stratum_3,
-m1.value_source_value as stratum_4,
+c2.concept_name as stratum_4,
+m1.value_as_concept_id as stratum_5,
 count(distinct p1.person_id) as count_value,
 count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar on cast(m1.measurement_source_concept_id as string)=ar.stratum_1
-where m1.value_as_number is null and m1.value_source_value is not null
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+where m1.value_as_concept_id != 0
 and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
 and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id != m1.measurement_concept_id
 and ar.analysis_id = 3000 and ar.stratum_3 = 'Measurement' and ar.stratum_4 != 'unknown'
-group by m1.measurement_source_concept_id,m1.value_source_value,stratum_2"
+group by m1.measurement_source_concept_id,c2.concept_name,m1.value_as_concept_id,stratum_2"
 
 
 # Set the counts > 0 and < 20 to 20
