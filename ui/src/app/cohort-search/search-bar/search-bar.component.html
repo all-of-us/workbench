@@ -10,7 +10,7 @@
      (keyup.arrowup)="moveUp()"
      (keyup.arrowdown)="moveDown()"
      [(ngModel)]="searchTerm"
-     (input)="inputChange($event.target.value)"/>
+     (input)="inputChange()"/>
   </div>
   <div *ngIf="noResults" class="dropdown-menu">
     <button class="dropdown-item disabled">
