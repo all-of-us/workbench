@@ -16,6 +16,8 @@ import {
 
 import {highlightMatches} from '../utils';
 
+const trigger = 2;
+
 @Component({
   selector: 'app-search-bar',
   templateUrl: './search-bar.component.html',
@@ -68,7 +70,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const optionsSub = this.ngRedux
       .select(autocompleteOptions())
       .subscribe(options => {
-        if (this.searchTerm.length >= 2) {
+        if (this.triggerSearch) {
           this.options = [];
           this.multiples = {};
           const optionNames = [];
@@ -135,11 +137,11 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  inputChange(newVal: string) {
-    this.typedTerm = newVal;
+  inputChange() {
+    this.typedTerm = this.searchTerm;
     if (this._type === TreeType[TreeType.VISIT] || this._type === TreeType[TreeType.PM]) {
-      if (newVal.length >= 2) {
-        this.actions.setCriteriaSearchTerms([newVal]);
+      if (this.triggerSearch) {
+        this.actions.setCriteriaSearchTerms([this.searchTerm]);
       } else {
         this.actions.setCriteriaSearchTerms([]);
       }
@@ -148,14 +150,18 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.ingredientList = [];
       this.numMatches = 0;
       this.noResults = false;
-      if (newVal.length >= 2) {
+      if (this.triggerSearch) {
         const subtype = this.codes ? this.subtype : null;
-        this.actions.fetchAutocompleteOptions(this._type, subtype, newVal);
+        this.actions.fetchAutocompleteOptions(this._type, subtype, this.searchTerm);
       } else {
         this.actions.setCriteriaSearchTerms([]);
         this.options = [];
       }
     }
+  }
+
+  get triggerSearch() {
+    return this.searchTerm.length >= trigger;
   }
 
   selectOption(option: any) {
