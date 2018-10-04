@@ -23,11 +23,13 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: calc(100vw - calc(19rem + 60px));
+  height:   calc(100vh - 60px);
   background-color: white;
   border-radius: 4px;
   display: flex;
   flex-flow: column nowrap;
   justify-content: space-between;
+  overflow: hidden;
 }
 
 .title-bar {
@@ -157,6 +159,7 @@ button.tab.active {
 }
 .panel-right-container{
   width: 100%;
+  min-height: calc(100vh - 60px);
   padding-left: 1rem;
   padding-top: 0.5rem;
   background-color: rgb(241, 242, 242) ;
@@ -169,9 +172,8 @@ button.tab.active {
   border-radius: 5px;
   overflow-y: auto;
   overflow-x: hidden;
-  min-height: 27.5rem;
+  min-height: calc(70vh - 60px);
   max-height: 27.5rem;
-  overflow-y: auto;
   background-color: white;
 }
 
