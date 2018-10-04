@@ -14,3 +14,9 @@
   margin: 2rem 0rem;
   min-width: 100%;
 }
+
+.loading-spinner {
+  margin-left: 20rem;
+  margin-top: 4rem;
+
+}
