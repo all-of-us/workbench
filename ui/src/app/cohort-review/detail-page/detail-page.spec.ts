@@ -6,8 +6,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import { ChartModule } from 'angular2-highcharts';
-import {CohortReviewService} from 'generated';
-import * as highCharts from 'Highcharts';
+ import {CohortReviewService} from 'generated';
+// import * as highCharts from 'Highcharts';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
@@ -86,7 +86,7 @@ describe('DetailPage', () => {
       imports: [ClarityModule,
                 NgxPopperModule,
                 ReactiveFormsModule,
-                ChartModule.forRoot(highCharts),
+                ChartModule,
                 RouterTestingModule],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
