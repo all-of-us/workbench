@@ -6,12 +6,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -122,14 +125,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     BigQueryService.class,
     ReviewQueryBuilder.class,
     CohortService.class,
-    ConceptSetService.class,
     ParticipantCounter.class,
     DomainLookupService.class,
     CohortQueryBuilder.class
   })
   @MockBean({
     FireCloudService.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    ConceptSetService.class
   })
   static class Configuration {
     @Bean
