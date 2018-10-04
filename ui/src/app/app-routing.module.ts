@@ -8,6 +8,7 @@ import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verifi
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
+import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
 import {NotebookListComponent} from './views/notebook-list/component';
@@ -23,6 +24,7 @@ import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
+import {ConceptSetResolver} from './resolvers/concept-set';
 import {WorkspaceResolver} from './resolvers/workspace';
 
 declare let gtag: Function;
@@ -145,11 +147,26 @@ const routes: Routes = [
             },
             {
               path: 'concepts',
-              component: ConceptHomepageComponent,
               data: {
-                title: 'Search Concepts',
                 breadcrumb: 'Concepts'
-              }
+              },
+              children: [{
+                path: '',
+                component: ConceptHomepageComponent,
+                data: {
+                  title: 'Search Concepts',
+                }
+              }, {
+                path: 'sets/:csid',
+                component: ConceptSetDetailsComponent,
+                data: {
+                  title: 'Concept Set',
+                  breadcrumb: 'Param: Concept Set Name'
+                },
+                resolve: {
+                  conceptSet: ConceptSetResolver,
+                }
+              }]
             }]
           }
         ]
@@ -201,6 +218,7 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
+    ConceptSetResolver,
     RegistrationGuard,
     SignInGuard,
     WorkspaceResolver,
