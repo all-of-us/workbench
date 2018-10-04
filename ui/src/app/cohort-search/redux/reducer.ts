@@ -532,6 +532,9 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(
             ['reviewChartData', 'request', action.ns,
               action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
+      /**
+       * Cohort Individual Participants Charts
+       */
 
       case BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST:
         return state
