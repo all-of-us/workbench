@@ -1,4 +1,4 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 
 import {
@@ -17,7 +17,7 @@ export class RecentWorkComponent implements OnInit {
   resourcesLoading: boolean;
   fullList: RecentResource[] = [];
   @Input('headerText')
-  headerText: string = "Your Recent Work";
+  headerText = 'Your Recent Work';
   startIndex = 0;
   constructor(
     private userMetricsService: UserMetricsService
