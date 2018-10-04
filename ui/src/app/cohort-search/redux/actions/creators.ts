@@ -6,6 +6,7 @@ import {
   LOAD_CHART_RESULTS,
   BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
   LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS,
+  PARTICIPANTS_CHART_REQUEST_ERROR,
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
@@ -109,6 +110,9 @@ export const loadChartRequestResults =
      results: any): ActionTypes[typeof LOAD_CHART_RESULTS] =>
     ({type: LOAD_CHART_RESULTS, ns, wsid, cid, cdrid, domain, limit, results});
 
+/**
+ * Cohort Individual Participants Charts
+ */
 export const requestIndividualParticipantsData =
     (ns: string, wsid: string, cid: number, cdrid: number,
     participantsId: any, domain: string, limit: number):
@@ -276,6 +280,10 @@ export const reviewChartsRequestError =
     ActionTypes[typeof REVIEW_CHART_REQUEST_ERROR] =>
     ({type: REVIEW_CHART_REQUEST_ERROR, ns, wsid, cid, cdrid, domain, limit, error});
 
+export const participantsChartsRequestError =
+  (ns: any, wsid: any, cid: any, cdrid: any, participantsId:any, domain: any, limit: any, error: any):
+    ActionTypes[typeof PARTICIPANTS_CHART_REQUEST_ERROR] =>
+    ({type: PARTICIPANTS_CHART_REQUEST_ERROR, ns, wsid, cid, cdrid, participantsId, domain, limit, error});
 export const requestCharts =
   (cdrVersionId: number, entityType: string, entityId: string, request: SearchRequest
   ): ActionTypes[typeof BEGIN_CHARTS_REQUEST] =>

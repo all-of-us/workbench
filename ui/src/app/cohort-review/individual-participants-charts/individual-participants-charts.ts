@@ -21,11 +21,6 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
     }
 
   }
-  // ngOnInit() {
-  //   this.trimmedData = [];
-  //   this.chartOptions = {};
-  //   this.duplicateItems = [];
-  // }
 
   setYaxisValue() {
     this.trimmedData = [];
@@ -78,22 +73,10 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
 
   getChartsData() {
     const test = this.yAxisNames;
-    // responsive: {
-    //   rules: [{
-    //     condition: {
-    //       maxWidth: 500
-    //     },
     this.chartOptions = {
-       // responsive: {
-       //   rules: [{
-       //     condition: {
-       //       maxWidth: 2000,
-       //     },
            chart: {
              type: 'scatter',
              zoomType: 'xy',
-             // width: 350,
-             // paddingRight: 12
            },
            credits: {
              enabled: false
@@ -179,9 +162,6 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
              turboThreshold: 5000,
              showInLegend: false,
            }],
-       //   }],
-       // }
-
     };
 
   }
