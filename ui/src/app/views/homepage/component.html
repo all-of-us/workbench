@@ -6,21 +6,21 @@
         <div class="col heading-links" style="display: flex;">
           <div class="row">
             <a class="links" (click)="addWorkspace()">Create a
-              workspace</a>
+              Workspace</a>
             <a class="links" (click)="listWorkspaces()">See All
               Workspaces</a>
           </div>
         </div>
       </div>
-      <div class="row" style="flex-direction: row; flex-grow: 1;">
-        <div class="card add-card" style="height: 12.5rem" (click)="addWorkspace()">
+      <div class="row" style="flex-direction: row; align-items: flex-start;">
+        <div class="card add-card" style="height: 12.5rem; flex-grow:0" (click)="addWorkspace()">
           <div class="card-text">
             Create a <br/> New Workspace <br/>
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
           </div>
         </div>
-        <div style="margin-left: 2.4375rem;">
-          <app-recent-work></app-recent-work>
+        <div style="margin-left: 3rem; margin-top:1%">
+          <app-recent-work [headerText]="'Your Last Accessed Items'"></app-recent-work>
         </div>
       </div>
     </div>

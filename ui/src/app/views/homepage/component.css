@@ -72,6 +72,20 @@
   letter-spacing: normal;
 }
 
+.minor-heading {
+  opacity: 0.87;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 34px;
+  width: 25.86%;
+  display: flex;
+  min-width: 21rem;
+  margin-left: 1.56%;
+  margin-top: 2.58%;
+  letter-spacing: normal;
+}
+
 .heading-links {
   right: -4.9%;
   margin-top: 2.74%;
@@ -80,6 +94,7 @@
   position: absolute;
   min-width: 18rem;
   font-size: 14px;
+  color: #FFFFFF;
 }
 
 .text {
