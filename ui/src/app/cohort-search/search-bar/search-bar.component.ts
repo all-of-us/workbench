@@ -199,7 +199,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.searchTerm.setValue(this.typedTerm, {emitEvent: false});
     } else if (this.highlightedOption > 0) {
       this.highlightedOption--;
-      this.searchTerm = this.options[this.highlightedOption].name;
+      this.searchTerm.setValue(this.options[this.highlightedOption].name, {emitEvent: false});
     }
   }
 
