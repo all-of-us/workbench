@@ -380,7 +380,6 @@ export interface ActionTypes {
     domain: string;
     limit: number;
   };
-
   LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS: {
     type: typeof LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS;
     ns: any;
@@ -392,7 +391,7 @@ export interface ActionTypes {
     limit: number;
     results: any;
   };
-  PARTICIPANTS_CHART_REQUEST_ERROR:{
+  PARTICIPANTS_CHART_REQUEST_ERROR: {
     type: typeof PARTICIPANTS_CHART_REQUEST_ERROR;
     ns: any;
     wsid: any;
@@ -402,7 +401,7 @@ export interface ActionTypes {
     domain: string;
     limit: number;
     error?: any;
-  }
+  };
   BEGIN_CHART_DATA_REQUEST: {
       type: typeof BEGIN_CHART_DATA_REQUEST;
       ns: any;

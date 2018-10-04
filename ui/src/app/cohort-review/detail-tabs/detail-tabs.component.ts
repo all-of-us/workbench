@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
     DomainType,
@@ -130,7 +130,7 @@ const labRefRange = {
   templateUrl: './detail-tabs.component.html',
   styleUrls: ['./detail-tabs.component.css']
 })
-export class DetailTabsComponent implements OnChanges, OnInit {
+export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   subscription: Subscription;
   loading = false;
   data;

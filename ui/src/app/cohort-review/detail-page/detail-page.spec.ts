@@ -1,41 +1,31 @@
-import {dispatch, NgRedux} from '@angular-redux/store';
+import { NgRedux} from '@angular-redux/store';
+import {MockNgRedux} from '@angular-redux/store/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
-import {AnnotationType, CohortAnnotationDefinition, CohortReviewService} from 'generated';
+import { ChartModule } from 'angular2-highcharts';
+import {CohortReviewService} from 'generated';
+import * as highCharts from 'Highcharts';
+import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
+import {CohortSearchActions} from '../../cohort-search/redux';
 import {AnnotationItemComponent} from '../annotation-item/annotation-item.component';
 import {AnnotationListComponent} from '../annotation-list/annotation-list.component';
 import {DetailAllEventsComponent} from '../detail-all-events/detail-all-events.component';
 import {DetailHeaderComponent} from '../detail-header/detail-header.component';
 import {DetailTabTableComponent} from '../detail-tab-table/detail-tab-table.component';
 import {DetailTabsComponent} from '../detail-tabs/detail-tabs.component';
+import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
 import {ParticipantStatusComponent} from '../participant-status/participant-status.component';
 import {ReviewStateService} from '../review-state.service';
 import {SidebarContentComponent} from '../sidebar-content/sidebar-content.component';
 import {DetailPage} from './detail-page';
-import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
-import { ChartModule } from 'angular2-highcharts';
-import * as highCharts from 'Highcharts';
-import {
-  addAttributeForPreview, addParameter,
-  CohortSearchActions,
-  CohortSearchState,
-  getParticipantData, hideAttributesPage,
-  isParticipantIdExists, requestAttributePreview
-} from '../../cohort-search/redux';
-import {MockNgRedux} from "@angular-redux/store/testing";
-import {fromJS, List, has, getIn} from "immutable";
-import {initialState, SR_ID, } from "../../cohort-search/redux/store";
-import { RouterTestingModule } from '@angular/router/testing';
-import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 
-  // @dispatch() addParameter = addParameter;
-  // @dispatch() hideAttributesPage = hideAttributesPage;
-  // @dispatch() requestAttributePreview = requestAttributePreview;
 describe('DetailPage', () => {
   let component: DetailPage;
   let fixture: ComponentFixture<DetailPage>;
@@ -80,8 +70,6 @@ describe('DetailPage', () => {
      const _old = mockReduxInst.getState;
     const _wrapped = () => fromJS(_old());
     mockReduxInst.getState = _wrapped;
-    // store.has(activatedRouteStub.parent.snapshot.params.cid);
-    // mockReduxInst.getState.getIn(['individualChartData', 'chartsData', SR_ID]).has(activatedRouteStub.parent.snapshot.params.cid)
     TestBed.configureTestingModule({
       declarations: [
         AnnotationItemComponent,
@@ -95,7 +83,11 @@ describe('DetailPage', () => {
         ParticipantStatusComponent,
         SidebarContentComponent,
       ],
-      imports: [ClarityModule, NgxPopperModule, ReactiveFormsModule, ChartModule.forRoot(highCharts), RouterTestingModule],
+      imports: [ClarityModule,
+                NgxPopperModule,
+                ReactiveFormsModule,
+                ChartModule.forRoot(highCharts),
+                RouterTestingModule],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
