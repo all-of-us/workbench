@@ -71,7 +71,7 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
     if (StringUtils.isBlank(param.getValue())) {
       from(nameNotNumber()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, NAME, param.getName());
     } else {
-      from(valueNull().or(valueNotNumber())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, VALUE, param.getValue());
+      from(valueNotNumber()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, VALUE, param.getValue());
     }
   }
 
