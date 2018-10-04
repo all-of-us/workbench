@@ -53,6 +53,7 @@ input {
     background-color: rgba(101,159,61,0.2);
 }
 .match-container {
+    color: #565656;
     font-weight: bold;
     padding-top: 0.3rem;
 }
