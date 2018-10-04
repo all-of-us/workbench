@@ -7,7 +7,7 @@ import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import { ChartModule } from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
-import * as highCharts from 'Highcharts';
+import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Pages */
