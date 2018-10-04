@@ -11,7 +11,7 @@ export class ConfirmDeleteModalComponent {
 
   @Input() resourceType: string;
   @Output() receiveDelete = new EventEmitter<any>();
-  @Input() resource: any;
+  @Input() resource: {name: string};
 
   loading = false;
 

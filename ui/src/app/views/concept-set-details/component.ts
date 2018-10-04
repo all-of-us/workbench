@@ -1,10 +1,9 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
-import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
-
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 
 import {
   ConceptSet,
@@ -25,6 +24,8 @@ import {
   templateUrl: './component.html',
 })
 export class ConceptSetDetailsComponent {
+  @ViewChild(ConfirmDeleteModalComponent) deleteModal;
+
   wsNamespace: string;
   wsId: string;
   accessLevel: WorkspaceAccessLevel;
@@ -38,6 +39,7 @@ export class ConceptSetDetailsComponent {
 
   constructor(
     private conceptSetsService: ConceptSetsService,
+    private router: Router,
     private route: ActivatedRoute,
   ) {
     this.wsNamespace = this.route.snapshot.params['ns'];
@@ -69,6 +71,14 @@ export class ConceptSetDetailsComponent {
       // TODO(calbach): Handle errors.
       this.editSubmitting = false;
     });
+  }
+
+  receiveDelete() {
+    this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, this.conceptSet.id)
+      .subscribe(() => {
+        this.router.navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts']);
+        this.deleteModal.close();
+      });
   }
 
   openRemoveModal() {
