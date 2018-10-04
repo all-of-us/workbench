@@ -1,7 +1,7 @@
 <form [formGroup]="form">
   <section class="form-block">
     <div class="modifier-header">
-      The Following Modifiers are Optional and Apply to All Selected Criteria
+      The following modifiers are optional and apply to all selected criteria
     </div>
     <div *ngFor="let mod of modifiers; let i = index" [formGroupName]="mod.name">
       <div class="label-flex">
