@@ -7,7 +7,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ChartModule} from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import {CohortReviewService} from 'generated';
-// import * as highCharts from 'Highcharts';
+import * as highCharts from 'highcharts';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
@@ -17,7 +17,7 @@ import {initialState} from '../../cohort-search/redux/store';
 import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
 import {ReviewStateService} from '../review-state.service';
 // import {highchartsFactory} from "../cohort-review.module";
-import * as highCharts from 'highcharts';
+
 
 
 describe('IndividualParticipantsChartsComponent', () => {
