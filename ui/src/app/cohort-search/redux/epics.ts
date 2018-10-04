@@ -59,6 +59,7 @@ import {
 
   loadChartRequestResults,
   reviewChartsRequestError,
+  participantsChartsRequestError,
   loadIndividualParticipantsData
 } from './actions/creators';
 
@@ -266,7 +267,9 @@ export class CohortSearchEpics {
         }
     )
  )
-
+  /**
+   * Cohort Individual Participants Charts
+   */
   fetchIndividualParticipantsData: CSEpic = (action$) => (
     action$.ofType(BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST).mergeMap(
       ({ns, wsid, cid, cdrid, participantsId, domain, limit}:
@@ -276,9 +279,9 @@ export class CohortSearchEpics {
             participantsId, domain, limit, null)
             .map(results =>
             loadIndividualParticipantsData(ns, wsid, cid, cdrid,
-              participantsId, domain, limit, results));
-          // .catch(e => Observable.of(reviewChartsRequestError
-          // (ns, wsid, cid, cdrid, domain, limit, e)));
+              participantsId, domain, limit, results))
+          .catch(e => Observable.of(participantsChartsRequestError
+          (ns, wsid, cid, cdrid, participantsId, domain, limit, e)));
       }
     )
   )
