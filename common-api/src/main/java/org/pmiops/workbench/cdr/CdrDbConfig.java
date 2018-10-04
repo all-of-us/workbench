@@ -97,6 +97,13 @@ public class CdrDbConfig {
           cdrPool.setUsername(dbUser);
           cdrPool.setPassword(dbPassword);
           cdrPool.setUrl(dbUrl);
+          cdrPool.setTestOnBorrow(basePoolConfig.isTestOnBorrow());
+          cdrPool.setTestWhileIdle(basePoolConfig.isTestWhileIdle());
+          cdrPool.setTimeBetweenEvictionRunsMillis(basePoolConfig.getTimeBetweenEvictionRunsMillis());
+          cdrPool.setValidationQuery(basePoolConfig.getValidationQuery());
+          cdrPool.setInitialSize(basePoolConfig.getInitialSize());
+          cdrPool.setMaxIdle(basePoolConfig.getMaxIdle());
+          cdrPool.setMinIdle(basePoolConfig.getMinIdle());
           tomcatSource.setPoolProperties(cdrPool);
 
           // The Spring autowiring is a bit of a maze here, log something concrete which will allow
