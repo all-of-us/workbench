@@ -1,0 +1,7 @@
+<div class="sliding-button"
+    (mouseenter)="hovering=true"
+    (mouseleave)="hovering=false"
+    (click)="submit.emit()">
+  <div class="text" [class.hovering]="hovering">{{expanded}}</div>
+  <ng-content></ng-content>
+</div>

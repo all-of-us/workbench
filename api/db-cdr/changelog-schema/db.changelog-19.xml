@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+  <changeSet id="drop fulltext concept_name index" author="srushtigangireddy" runAlways="true" onValidationFail="MARK_RAN">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="concept_name_index" tableName="concept"></indexExists>
+    </preConditions>
+    <dropIndex tableName="concept" indexName="concept_name_index"></dropIndex>
+  </changeSet>
+
+  <changeSet id="drop fulltext concept_code index" author="srushtigangireddy" runAlways="true" onValidationFail="MARK_RAN">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="concept_code_index" tableName="concept"></indexExists>
+    </preConditions>
+    <dropIndex tableName="concept" indexName="concept_code_index"></dropIndex>
+  </changeSet>
+
+  <changeSet id="add synonyms_index full_text" author="srushtigangireddy" runAlways="true" onValidationFail="MARK_RAN">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+      <indexExists tableName="concept" indexName="search_index"></indexExists>
+      </not>
+    </preConditions>
+    <sql dbms="mysql">
+      ALTER TABLE concept
+      ADD FULLTEXT INDEX search_index
+      (concept_name,concept_code,vocabulary_id,synonyms);
+    </sql>
+  </changeSet>
+
+  <changeSet author="srushtigangireddy" id="drop domain_info pk" runAlways="true">
+    <validCheckSum>ANY</validCheckSum> <preConditions onFail="MARK_RAN">
+    <primaryKeyExists tableName="domain_info"/> </preConditions>
+    <dropPrimaryKey tableName="domain_info"/>
+  </changeSet>
+
+  <changeSet author="srushtigangireddy" id="add domain_id pk" runAlways="true">
+    <validCheckSum>ANY</validCheckSum> <preConditions onFail="MARK_RAN"> <not>
+    <primaryKeyExists /> </not> </preConditions>
+    <addPrimaryKey tableName="domain_info" columnNames="domain_id"/>
+  </changeSet>
+
+  <changeSet author="srushtigangireddy" id="drop db_domain table" runAlways="true" onValidationFail="MARK_RAN">
+    <validCheckSum>ANY</validCheckSum> <preConditions onFail="MARK_RAN">
+    <tableExists tableName="db_domain"/> </preConditions>
+    <dropTable tableName="db_domain"/>
+  </changeSet>
+
+</databaseChangeLog>

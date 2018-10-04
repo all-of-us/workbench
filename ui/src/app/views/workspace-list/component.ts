@@ -152,6 +152,8 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   share(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
     this.selectedWorkspace = workspace;
     this.accessLevel = accessLevel;
+    this.shareModal.workspace = workspace;
+    this.shareModal.accessLevel = accessLevel;
     this.shareModal.open();
   }
 
