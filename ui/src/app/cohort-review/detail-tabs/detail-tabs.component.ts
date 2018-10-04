@@ -2,17 +2,14 @@ import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
-    CohortReviewService,
     DomainType,
     PageFilterType,
-    ReviewColumns,
 } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
 import {
   CohortSearchActions,
   CohortSearchState,
   getParticipantData,
-  isDomainNameExists,
   isParticipantIdExists
 } from '../../cohort-search/redux';
 import {typeToTitle} from '../../cohort-search/utils';
@@ -149,7 +146,7 @@ export class DetailTabsComponent implements OnChanges, OnInit {
   drugTitle: string;
   chartLoadedSpinner = false;
   @Input() clickedParticipantId: number;
-  trackClickedDomains = false;
+  trackClickedParticipants = false;
   readonly stubs = [
     'survey',
   ];
@@ -176,6 +173,7 @@ export class DetailTabsComponent implements OnChanges, OnInit {
       sourceVocabulary: sourceVocabulary,
     }
   };
+
   readonly tabs = [{
     name: 'Conditions',
     domain: DomainType.CONDITION,
@@ -330,7 +328,7 @@ export class DetailTabsComponent implements OnChanges, OnInit {
       .subscribe(participants => {
         this.participantsId = participants.participantId;
       });
-    this.getDomainsParticipantsData();
+     this.getDomainsParticipantsData();
   }
 
   getDomainsParticipantsData() {
@@ -342,10 +340,10 @@ export class DetailTabsComponent implements OnChanges, OnInit {
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const limit = 10;
     const cohortId = cid;
-     this.trackClickedDomains =
+     this.trackClickedParticipants =
        isParticipantIdExists(cohortId, this.participantsId)(this.ngRedux.getState());
       this.domainList.map(domainName => {
-        if (!this.trackClickedDomains) {
+        if (!this.trackClickedParticipants) {
           this.actions.fetchIndividualParticipantsData(ns, wsid, cid,
             cdrid, this.participantsId, domainName, limit);
         }
@@ -362,13 +360,15 @@ export class DetailTabsComponent implements OnChanges, OnInit {
               this.procedureTitle = typeToTitle(domainName);
               this.procedureData = data.items;
             } else {
-              this.drugTitle = 'Drugs';
+              this.drugTitle = typeToTitle(domainName);
               this.drugData = data.items;
             }
           });
         this.subscription = getParticipantsDomainData;
       });
+  }
 
-
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

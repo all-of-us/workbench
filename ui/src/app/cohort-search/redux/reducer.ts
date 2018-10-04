@@ -554,8 +554,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(
             ['individualChartData', 'request', action.ns,
               action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
-      default:
-        return state;
+      default: return state;
     }
 
   };

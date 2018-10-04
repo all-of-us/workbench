@@ -43,6 +43,5 @@ export class DetailPage implements OnInit, OnDestroy {
     if (id) {
       this.participantId = id;
     }
-
   }
 }

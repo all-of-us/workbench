@@ -50,9 +50,10 @@ import {TablePage} from './table-page/table-page';
     ClarityModule,
     NgxChartsModule,
     NgxPopperModule,
+    ChartModule.forRoot(highCharts),
     // Ours
     CohortCommonModule,
-    ChartModule.forRoot(highCharts)
+
   ],
   declarations: [
     /* Scaffolding and Pages */
@@ -73,16 +74,15 @@ import {TablePage} from './table-page/table-page';
     /* Participant Table */
     ChoiceFilterComponent,
     StatusFilterComponent,
-
+    IndividualParticipantsChartsComponent,
     /* Participant Detail */
     ParticipantStatusComponent,
     SidebarContentComponent,
     DetailHeaderComponent,
-
     DetailTabsComponent,
     DetailTabTableComponent,
     DetailAllEventsComponent,
-    IndividualParticipantsChartsComponent,
+
   ],
   providers: [ReviewStateService,
               CohortSearchActions,
