@@ -516,7 +516,7 @@ export const rootReducer: Reducer<CohortSearchState> =
     case BEGIN_CHART_DATA_REQUEST:
       return state
         .deleteIn(
-          ['reviewChartData', 'request',action.cid, action.domain])
+          ['reviewChartData', 'request', action.cid, action.domain])
         .setIn(
           ['reviewChartData', 'request', action.ns,
             action.wsid, action.cid, action.cdrid, action.domain, action.limit],
