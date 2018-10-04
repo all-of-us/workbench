@@ -5,8 +5,9 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ChartModule} from 'angular2-highcharts';
+import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import {CohortReviewService} from 'generated';
-import * as highCharts from 'Highcharts';
+// import * as highCharts from 'Highcharts';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
@@ -15,6 +16,8 @@ import {CohortSearchActions} from '../../cohort-search/redux';
 import {initialState} from '../../cohort-search/redux/store';
 import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
 import {ReviewStateService} from '../review-state.service';
+// import {highchartsFactory} from "../cohort-review.module";
+import * as highCharts from 'highcharts';
 
 
 describe('IndividualParticipantsChartsComponent', () => {
@@ -61,9 +64,13 @@ describe('IndividualParticipantsChartsComponent', () => {
     store.has(activatedRouteStub.parent.snapshot.params.cid);
     TestBed.configureTestingModule({
       declarations: [IndividualParticipantsChartsComponent],
-      imports: [ChartModule.forRoot(highCharts), RouterTestingModule],
+      imports: [ChartModule, RouterTestingModule],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
+        {
+          provide: HighchartsStatic,
+          useValue: highCharts
+        },
         {provide: NgRedux, useValue: mockReduxInst},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: CohortReviewService, useValue: {}},

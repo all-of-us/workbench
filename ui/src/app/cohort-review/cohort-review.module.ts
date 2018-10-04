@@ -6,6 +6,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import { ChartModule } from 'angular2-highcharts';
+import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import * as highCharts from 'Highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 
@@ -37,6 +38,10 @@ import {SidebarContentComponent} from './sidebar-content/sidebar-content.compone
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
 /* tslint:enable:max-line-length */
+// declare var require: any;
+// export function highchartsFactory() {
+//   return require('highcharts');
+// }
 
 @NgModule({
   imports: [
@@ -50,7 +55,7 @@ import {TablePage} from './table-page/table-page';
     ClarityModule,
     NgxChartsModule,
     NgxPopperModule,
-    ChartModule.forRoot(highCharts),
+    ChartModule,
     // Ours
     CohortCommonModule,
 
@@ -87,7 +92,12 @@ import {TablePage} from './table-page/table-page';
   providers: [ReviewStateService,
               CohortSearchActions,
               CohortSearchEpics,
-              ConfigureStore]
+              ConfigureStore,
+    {
+      provide: HighchartsStatic,
+      useValue: highCharts
+    },
+  ]
 })
 export class CohortReviewModule {
     constructor(store: ConfigureStore) {}
