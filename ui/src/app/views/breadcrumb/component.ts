@@ -90,6 +90,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
         if (breadcrumbs.length > 2) {
           breadcrumbs = breadcrumbs.filter(b => !b.url.endsWith('/concepts'));
         }
+      }
       if (label === 'Param: Concept Set Name') {
         label = child.snapshot.data['conceptSet'].name;
       }
