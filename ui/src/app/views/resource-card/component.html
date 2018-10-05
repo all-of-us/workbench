@@ -36,9 +36,9 @@
   </div>
 </div>
 
-<app-confirm-delete-modal [resourceType]=resourceType
-                          [resource]=resource
-                          (receiveDelete)=receiveDelete($event)></app-confirm-delete-modal>
+<app-confirm-delete-modal [resourceType]="resourceType"
+                          [resource]="resource"
+                          (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
 
 
 <app-rename-modal [resource]="resourceCard.notebook"
