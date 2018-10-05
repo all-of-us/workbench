@@ -107,6 +107,10 @@ public class ParameterPredicates {
     return sp -> !DomainType.MEASUREMENT.toString().equalsIgnoreCase(sp.getDomain());
   }
 
+  public static Predicate<SearchParameter> domainNotObservation() {
+    return sp -> !DomainType.OBSERVATION.toString().equalsIgnoreCase(sp.getDomain());
+  }
+
   public static Predicate<SearchParameter> domainBlank() {
     return sp -> StringUtils.isBlank(sp.getDomain());
   }
@@ -139,6 +143,10 @@ public class ParameterPredicates {
     return sp -> !TreeType.VISIT.toString().equalsIgnoreCase(sp.getType());
   }
 
+  public static Predicate<SearchParameter> ppiTypeInvalid() {
+    return sp -> !TreeType.PPI.toString().equalsIgnoreCase(sp.getType());
+  }
+
   public static Predicate<SearchParameter> typeICD() {
     return sp -> ICD_TYPES.stream().anyMatch(sp.getType()::equalsIgnoreCase);
   }
@@ -169,6 +177,10 @@ public class ParameterPredicates {
 
   public static Predicate<SearchParameter> valueNotNumber() {
     return sp -> !NumberUtils.isNumber(sp.getValue());
+  }
+
+  public static Predicate<SearchParameter> nameNotNumber() {
+    return sp -> !NumberUtils.isNumber(sp.getName());
   }
 
   public static Predicate<SearchParameter> notTwoAttributes() {

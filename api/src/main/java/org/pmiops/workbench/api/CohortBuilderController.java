@@ -110,9 +110,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    final List<Criteria> criteriaList = subtype == null ?
-      criteriaDao.findCriteriaByTypeForCodeOrName(type, value, resultLimit) :
-      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value, resultLimit);
+    List<Criteria> criteriaList;
+    if (subtype == null) {
+      criteriaList =  TreeType.PPI.name().equals(type) ?
+        criteriaDao.findCriteriaByTypeForName(type, value, resultLimit) :
+        criteriaDao.findCriteriaByTypeForCodeOrName(type, value, resultLimit);
+    } else {
+      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value, resultLimit);
+    }
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));

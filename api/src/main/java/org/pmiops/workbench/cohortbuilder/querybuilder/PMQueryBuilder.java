@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
@@ -27,15 +28,15 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_NUMBER = "and value_as_number ${operator} ${value}\n";
 
   private static final String BP_INNER_SQL_TEMPLATE =
-    "select person_id, measurement_date from `${projectId}.${dataSetId}.${tableName}`\n" +
-    "   where measurement_source_concept_id = ${conceptId}\n";
+    "select person_id, ${tableDate} from `${projectId}.${dataSetId}.${tableName}`\n" +
+    "   where ${tableConceptId} = ${conceptId}\n";
 
   private static final String BP_SQL_TEMPLATE =
-    "select person_id from( ${bpInnerSqlTemplate} )";
+    "select person_id from( ${bpInnerSqlTemplate} )\n";
 
   private static final String BASE_SQL_TEMPLATE =
     "select person_id from `${projectId}.${dataSetId}.${tableName}`\n" +
-      "where measurement_source_concept_id = ${conceptId}\n";
+      "where ${tableConceptId} = ${conceptId}\n";
 
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
     BASE_SQL_TEMPLATE + VALUE_AS_NUMBER;
@@ -58,11 +59,14 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
           String namedParameterConceptId = CONCEPTID_PREFIX + getUniqueNamedParameterPostfix();
           String namedParameter1 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
           String namedParameter2 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
+          String domain = parameter.getDomain().toLowerCase();
           if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             tempQueryParts.add(tempSql
               .replace("${conceptId}", "@" + namedParameterConceptId)
-              .replace("${tableName}", parameter.getDomain().toLowerCase()));
+              .replace("${tableName}", DomainTableEnum.getTableName(domain))
+              .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain))
+              .replace("${tableDate}", DomainTableEnum.getEntryDate(domain)));
             queryParams.put(namedParameterConceptId, QueryParameterValue.int64(attribute.getConceptId()));
           } else {
             boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
@@ -72,7 +76,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
               .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
               .replace("${value}", isBetween ? "@" + namedParameter1 + " and " + "@" + namedParameter2
                 : "@" + namedParameter1)
-              .replace("${tableName}", parameter.getDomain().toLowerCase()));
+              .replace("${tableName}", DomainTableEnum.getTableName(domain))
+              .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain))
+              .replace("${tableDate}", DomainTableEnum.getEntryDate(domain)));
             queryParams.put(namedParameterConceptId, QueryParameterValue.int64(attribute.getConceptId()));
             queryParams.put(namedParameter1, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
             if (isBetween) {
@@ -88,9 +94,11 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       } else {
         String namedParameterConceptId = CONCEPTID_PREFIX + getUniqueNamedParameterPostfix();
         String namedParameter = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
+        String domain = parameter.getDomain().toLowerCase();
         queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
           .replace("${value}","@" + namedParameter)
-          .replace("${tableName}", parameter.getDomain().toLowerCase()));
+          .replace("${tableName}", DomainTableEnum.getTableName(domain))
+          .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain)));
         queryParams.put(namedParameterConceptId, QueryParameterValue.int64(parameter.getConceptId()));
         queryParams.put(namedParameter, QueryParameterValue.int64(new Long(parameter.getValue())));
       }
