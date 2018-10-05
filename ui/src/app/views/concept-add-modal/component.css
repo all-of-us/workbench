@@ -2,7 +2,7 @@
   height: 19px;
   width: 357px;
   color: #262262;
-  font-family: Montserrat;
+  font-family: Montserrat, sans-serif;
   font-size: 16px;
   font-weight: 500;
   line-height: 19px;
@@ -20,7 +20,11 @@ modal-dialog {
 }
 
 .inputName, .conceptSelect {
-  height: 35px;	width: 406px;	border: 1px solid #979797;	border-radius: 5px;	background-color: #FFFFFF;
+  height: 35px;
+  width: 406px;
+  border: 1px solid #979797;
+  border-radius: 5px;
+  background-color: #FFFFFF;
 }
 
 .inputName {
@@ -35,5 +39,9 @@ modal-dialog {
 }
 
 .description {
-  height: 168px;	width: 406px;	border: 1px solid #979797;	border-radius: 5px;	background-color: #FFFFFF;
+  height: 168px;
+  width: 406px;
+  border: 1px solid #979797;
+  border-radius: 5px;
+  background-color: #FFFFFF;
 }
