@@ -76,7 +76,10 @@
               </div>
             </div>
           </div>
-          <div class="row">
+          <div class="row" style="display: flex; align-items: center; width: 100%">
+            <div style="position: absolute; right: 49%; top: 19%; color: #FFFFFF">
+              Your Recent Work
+            </div>
             <div style="margin-bottom: 2rem;">
               <div class="card add-card" (click)="addWorkspace()">
                 <div class="card-text">
@@ -85,9 +88,9 @@
                 </div>
               </div>
             </div>
-              <div style="margin-left: 2.4375rem;">
-                <app-recent-work></app-recent-work>
-              </div>
+            <div style="margin-bottom: 2rem; padding-left: 4%; margin-left: 0rem">
+              <app-recent-work></app-recent-work>
+            </div>
           </div>
         </div>
       </div>
