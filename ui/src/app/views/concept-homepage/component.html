@@ -1,12 +1,6 @@
 <app-top-box>
-  <clr-tabs>
-    <clr-tab>
-      <button clrTabLink (click)="searching = false;">Concepts</button>
-    </clr-tab>
-    <clr-tab>
-      <button clrTabLink>Concept Sets</button>
-    </clr-tab>
-  </clr-tabs>
+  <button class="btn btn-link nav-link nav-item active" (click)="searching = false;">Concepts</button>
+  <button class="btn btn-link nav-link nav-item" routerLink="sets">Concept Sets</button>
   <div style="display: flex; align-items: center; margin-top: 1.5%;">
     <clr-icon shape="search" style="position: absolute; height: 1rem; width: 1rem; fill: #216FB4; left: 5.3%;"></clr-icon>
     <input type="text" id="concept-search-input" [(ngModel)]="searchTerm" placeholder="Search concepts in domains">
@@ -53,25 +47,26 @@
             <div class="chart-selector-header">
               {{domain.name}}
             </div>
-            <div>{{domain.concept_count}}</div>
+            <div>{{domain.conceptCount}}</div>
           </button>
         </div>
       </div>
       <div class="filter-options">
         Filter by vocabulary:
         <clr-checkbox class="filter-checkbox" *ngFor="let vocabulary of vocabularies" (click)="filterList($event)" [(clrChecked)]="vocabulary.selected">
-          {{vocabulary.vocabularyId}} ({{vocabulary.concept_count}})
+          {{vocabulary.vocabularyId}} ({{vocabulary.conceptCount}})
         </clr-checkbox>
       </div>
-      <app-concept-table [concepts]="concepts" [selectedDomain]="selectedDomain"
+      <app-concept-table [concepts]="concepts"
                          [loading]="searchLoading" [searchTerm]="currentSearchString"
                          (getSelectedConcepts)="selectConcept($event)">
 
       </app-concept-table>
       <div *ngIf="conceptSelected" (mouseenter)="addTextHovering=true" (mouseleave)="addTextHovering=false" (click)="openAddModal()" class="add-section">
         <div class="add-text" [class.hovering]="addTextHovering">Add to set</div>
+      <app-sliding-fab [expanded]="'Add to set'" (submit)="openAddModal()">
         <clr-icon class="add-icon" shape="plus"></clr-icon>
-      </div>
+      </app-sliding-fab>
     </div>
   </ng-template>
 </app-top-box>

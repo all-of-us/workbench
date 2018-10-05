@@ -1,7 +1,7 @@
 import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 
@@ -24,7 +24,7 @@ describe('SearchBarComponent', () => {
       declarations: [ SearchBarComponent, SafeHtmlPipe ],
       imports: [
         ClarityModule,
-        FormsModule],
+        ReactiveFormsModule],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
         CohortSearchActions,

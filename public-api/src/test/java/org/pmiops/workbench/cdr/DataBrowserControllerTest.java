@@ -436,7 +436,7 @@ public class DataBrowserControllerTest {
     @Before
     public void setUp() {
         saveData();
-        ConceptService conceptService = new ConceptService(entityManager, conceptSynonymDao);
+        ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
         dataBrowserController = new DataBrowserController(conceptService, conceptDao, domainInfoDao,
             surveyModuleDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao, entityManager,
             () -> cdrVersion);

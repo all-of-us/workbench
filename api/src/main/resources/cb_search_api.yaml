@@ -587,12 +587,14 @@ definitions:
   TreeType:
     type: string
     description: possible types of trees
-    enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, SURVEY]
+    enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, PPI]
 
   TreeSubType:
       type: string
       description: possible subtypes of trees
-      enum: [CM, PROC, ICD10CM, ICD10PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR, HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC, BRAND, CLIN, LAB]
+      enum: [CM, PROC, ICD10CM, ICD10PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR,
+      HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
+      BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
 
   DemoChartInfoListResponse:
     type: object
