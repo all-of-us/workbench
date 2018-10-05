@@ -117,7 +117,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayCode() {
-    if ((this.isDrug && this.node.get('group')) || this.isPM) {
+    if ((this.isDrug && this.node.get('group')) || this.isPM || this.isPPI) {
       return '';
     }
     return this.node.get('code', '');
@@ -221,6 +221,10 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get isMeas() {
     return this.node.get('type') === TreeType[TreeType.MEAS];
+  }
+
+  get isPPI() {
+    return this.node.get('type') === TreeType[TreeType.PPI];
   }
 
   get hasAttributes() {
