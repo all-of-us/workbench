@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.springframework.data.repository.CrudRepository;
 
