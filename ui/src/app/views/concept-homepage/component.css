@@ -13,6 +13,7 @@
 
 .btn.btn-link.nav-link.nav-item.active {
   font-weight: bolder;
+  border-bottom: solid 3px;
 }
 
 #concept-search-input {

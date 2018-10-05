@@ -18,8 +18,8 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {HomepageComponent} from 'app/views/homepage/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
@@ -46,7 +46,7 @@ describe('HomepageComponent', () => {
         ResourceCardComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
-        CohortEditModalComponent,
+        EditModalComponent,
       ],
       providers: [
         {provide: ProfileService, useValue: new ProfileServiceStub()},

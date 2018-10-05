@@ -1,12 +1,12 @@
 <clr-modal [(clrModalOpen)]="editing" [clrModalSize]="'md'">
   <div class="modal-title">
-    <div class="modal-title-text">Edit Cohort Information</div>
+    <div class="modal-title-text">Edit {{rType}} Information</div>
   </div>
   <div class="modal-body">
     <form [formGroup]="form">
       <!-- Cohort Name -->
       <div class="section">
-        <label for="name" class="required">Cohort Name:</label>
+        <label for="name" class="required">{{rType}} Name:</label>
         <input autofocus
                type="text"
                name="name"

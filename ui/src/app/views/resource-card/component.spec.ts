@@ -13,12 +13,13 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortsService} from 'generated/api/cohorts.service';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {ResourceCardComponent} from './component';
 
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 
 @Component({
@@ -53,11 +54,12 @@ describe('ResourceCardComponent', () => {
         ResourceCardComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
-        CohortEditModalComponent,
+        EditModalComponent,
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         {provide: CohortsService, useValue: new CohortsServiceStub()},
+        {provide: ConceptSetsService },
         {provide: SignInService, useValue: new SignInServiceStub()},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
       ]

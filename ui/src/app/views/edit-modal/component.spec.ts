@@ -3,11 +3,11 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
-import {CohortEditModalComponent} from './component';
+import {EditModalComponent} from './component';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 
-import {CohortsService} from 'generated';
+import {CohortsService, ConceptSetsService} from 'generated';
 
 class RouterStub {
   navigate(...args) {
@@ -25,9 +25,9 @@ class ActivatedRouteStub {
   }
 }
 
-describe('CohortEditModalComponent', () => {
-  let component: CohortEditModalComponent;
-  let fixture: ComponentFixture<CohortEditModalComponent>;
+describe('EditModalComponent', () => {
+  let component: EditModalComponent;
+  let fixture: ComponentFixture<EditModalComponent>;
 
   beforeEach(async(() =>
     TestBed.configureTestingModule({
@@ -35,10 +35,11 @@ describe('CohortEditModalComponent', () => {
         ClarityModule.forRoot(),
         ReactiveFormsModule,
       ],
-      declarations: [CohortEditModalComponent],
+      declarations: [EditModalComponent],
       providers: [
         { provide: Router, useClass: RouterStub },
         { provide: CohortsService, useClass: CohortsServiceStub },
+        { provide: ConceptSetsService },
         {
           provide: ActivatedRoute,
           deps: [CohortsServiceStub],
@@ -50,7 +51,7 @@ describe('CohortEditModalComponent', () => {
   ));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CohortEditModalComponent);
+    fixture = TestBed.createComponent(EditModalComponent);
     component = fixture.componentInstance;
   });
 
