@@ -46,6 +46,8 @@ export class ConceptHomepageComponent implements OnInit {
   searchLoading = false;
   selectedDomain: Domain;
   addTextHovering = false;
+  conceptSelected = false;
+  selectedConcept: Concept[] = [];
 
   @ViewChild(ConceptTableComponent)
   conceptTable: ConceptTableComponent;
@@ -101,6 +103,7 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   openAddModal(): void {
+    this.selectedConcept = this.conceptTable.selectedConcepts;
     this.conceptAddModal.open();
   }
 
@@ -209,5 +212,12 @@ export class ConceptHomepageComponent implements OnInit {
         this.searchLoading = false;
         this.concepts = response.items;
       });
+  }
+
+  selectConcept(selectedConcepts) {
+    this.selectedConcept = selectedConcepts;
+    if (this.selectedConcept && this.selectedConcept.length > 0 ) {
+      this.conceptSelected = true;
+    }
   }
 }

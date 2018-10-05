@@ -1,25 +1,30 @@
 <clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'">
   <div class="modal-body">
-    <div class="form-section">
-      <label>Add to Concept Set</label>
-      <select>
-        <option *ngFor="let conceptSet of conceptSets">{{conceptSet.name}}</option>
+    <label *ngIf="errorSaving" class="error">Error while adding Concept to concept set</label>
+    <div *ngIf="!loading || conceptSets?.length > 0" class="form-section">
+      <div style="display:flex; flex-direction: row;">
+        <input name="selectOptions" type="radio" [(ngModel)]="existingSetSelected" [value]="true" [checked]="reset()"/>
+        <label class="header">Add to Concept Set</label>
+        <input name="selectOptions" type="radio" [(ngModel)]="existingSetSelected" [value]="false" [checked]="reset()"/>
+        <label class="header createHeader">Create a new Concept Set</label>
+      </div>
+      <select *ngIf="existingSetSelected" class="conceptSelect" [(ngModel)]="selectedConceptSet">
+        <option *ngFor="let conceptSet of conceptSets" [ngValue]="conceptSet">{{conceptSet.name}}</option>
       </select>
     </div>
-    <div class="line-break"></div>
     <div class="form-section">
-      <label>Or Create a new Concept Set</label>
-      <input id="new-name" type="text" class="input">
-      <textarea
-        name="description">
-      </textarea>
+      <label class="header" *ngIf="loading && conceptSets?.length == 0">Create a new Concept Set</label>
+      <input *ngIf="!existingSetSelected" id="new-name" type="text" class="inputName" placeholder="Name" [(ngModel)]="name">
+      <textarea *ngIf="!existingSetSelected" name="description" class="description" placeholder="Add a Description"
+                [(ngModel)]="description"></textarea>
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline" (click)="modalOpen=false">Cancel</button>
+    <button type="button" class="btn btn-outline" (click)="close()">Cancel</button>
     <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
             (click)="createConceptSet()" [clrLoading]="loading" [disabled]="loading">
       Save
     </button>
   </div>
+
 </clr-modal>

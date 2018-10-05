@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 import {Domain} from 'generated';
 
@@ -13,7 +13,11 @@ export class ConceptTableComponent {
   @Input() selectedDomain: Domain;
   @Input() loading: boolean;
   @Input() searchTerm: string;
-
+  @Output() getSelectedConcepts = new EventEmitter<any>();
 
   selectedConcepts: Array<any> = [];
+
+  onSelectedChanged($event) {
+    this.getSelectedConcepts.emit($event);
+  }
 }
