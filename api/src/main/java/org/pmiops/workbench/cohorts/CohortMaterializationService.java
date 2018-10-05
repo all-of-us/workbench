@@ -252,7 +252,8 @@ public class CohortMaterializationService {
     }
   }
 
-  public CdrQuery getCdrQuery(@Nullable CohortReview cohortReview, String cohortSpec,
+  @VisibleForTesting
+  CdrQuery getCdrQuery(@Nullable CohortReview cohortReview, SearchRequest searchRequest,
       @Nullable Set<Long> conceptIds, DataTableSpecification dataTableSpecification) {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     CdrQuery cdrQuery = new CdrQuery();
@@ -261,12 +262,6 @@ public class CohortMaterializationService {
     List<CohortStatus> statusFilter = dataTableSpecification.getStatusFilter();
     if (statusFilter == null) {
       statusFilter = NOT_EXCLUDED;
-    }
-    SearchRequest searchRequest;
-    try {
-      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
-    } catch (JsonSyntaxException e) {
-      throw new BadRequestException("Invalid cohort spec");
     }
     ParticipantCriteria criteria = getParticipantCriteria(statusFilter, cohortReview,
         searchRequest);
@@ -289,6 +284,17 @@ public class CohortMaterializationService {
         jobConfiguration.getNamedParameters().entrySet().stream().map(TO_QUERY_PARAMETER_MAP).toArray());
     cdrQuery.setConfiguration(configurationMap);
     return cdrQuery;
+  }
+
+  public CdrQuery getCdrQuery(@Nullable CohortReview cohortReview, String cohortSpec,
+      @Nullable Set<Long> conceptIds, DataTableSpecification dataTableSpecification) {
+    SearchRequest searchRequest;
+    try {
+      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
+    } catch (JsonSyntaxException e) {
+      throw new BadRequestException("Invalid cohort spec");
+    }
+    return getCdrQuery(cohortReview, searchRequest, conceptIds, dataTableSpecification);
   }
 
   /**
