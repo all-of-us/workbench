@@ -1,8 +1,7 @@
 .card-area {
-    margin-left: 2.3rem;
-    margin-top: -1rem;
     display: inline-block;
-    width: 17rem;
+    width: 40%;
+    margin-left: 1%;
 }
 
 .card {
@@ -19,8 +18,12 @@
 .scroll-indicator {
     height: 2rem;
     width: 2rem;
-    position: absolute;
     top: 3rem;
+}
+
+.placeholder {
+    min-width: 2rem;
+    min-height: 2rem;
 }
 
 .title {
@@ -29,9 +32,4 @@
     color: #FFFFFF;
     width: 100%;
     position: relative
-}
-
-.recent-work {
-    top: 2.1rem;
-    position: relative;
 }
