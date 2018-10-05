@@ -6,6 +6,9 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class HighlightSearchPipe implements PipeTransform {
 
   transform(value: any, args?: string): any {
+    if (!args) {
+      return value;
+    }
     let words = args.split(new RegExp(',| '));
     words = words.filter(w => w.length > 0 );
     const reString = words.join('|');

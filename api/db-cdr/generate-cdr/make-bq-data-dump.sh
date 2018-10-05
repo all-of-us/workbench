@@ -49,9 +49,9 @@ echo "Dumping tables to csv from $BUCKET"
 
 if [[ $DATASET == *public* ]] || [[ $DATASET == *PUBLIC* ]];
 then
-    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain_info survey_module domain vocabulary concept_synonym)
+    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria domain_info survey_module domain vocabulary concept_synonym domain_vocabulary_info)
 else
-    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym)
+    tables=(achilles_analysis achilles_results achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym domain_vocabulary_info)
 fi
 
 for table in ${tables[@]}; do
