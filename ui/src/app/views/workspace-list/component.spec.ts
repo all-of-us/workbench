@@ -19,6 +19,7 @@ import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   simulateClick, updateAndTick
@@ -26,6 +27,7 @@ import {
 
 import {
   BugReportService,
+  UserService,
   WorkspacesService
 } from 'generated';
 
@@ -91,6 +93,7 @@ describe('WorkspaceListComponent', () => {
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
+        { provide: UserService, useValue: new UserServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
@@ -181,5 +184,21 @@ describe('WorkspaceListComponent', () => {
     expect(workspaceListPage.fixture.componentInstance.shareModal.workspace)
       .toEqual(firstWorkspace);
     // Further tests in the workspace share component
+  }));
+
+  it('has the correct permissions classes', fakeAsync(() => {
+    // Testing the CSS classes applied, rather than actual logic on the component
+    const workspaceList = workspaceListPage.fixture.componentInstance.workspaceList;
+    const permissionsOnPage = workspaceListPage
+        .fixture.debugElement.queryAll(By.css('.permission-box'));
+    for (let i = 0; i < workspaceList.length; i++) {
+      if (workspaceList[i].isOwner) {
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('owner-permission');
+      } else if (workspaceList[i].isReadOnly) {
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('reader-permission');
+      } else {
+        expect (permissionsOnPage[i].nativeNode.classList).toContain('writer-permission');
+      }
+    }
   }));
 });

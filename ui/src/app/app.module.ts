@@ -29,12 +29,15 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
-import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptAddModalComponent} from './views/concept-add-modal/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
+import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
+import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {ConceptTableComponent} from './views/concept-table/component';
+import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/component';
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
+import {EditModalComponent} from './views/edit-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
@@ -51,6 +54,7 @@ import {ResourceCardComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {SlidingFabComponent} from './views/sliding-fab/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
 import {TopBoxComponent} from './views/top-box/component';
 import {UnregisteredComponent} from './views/unregistered/component';
@@ -130,12 +134,15 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
-    CohortEditModalComponent,
+    CreateConceptSetModalComponent,
     CohortListComponent,
     ConceptAddModalComponent,
+    ConceptSetDetailsComponent,
     ConceptHomepageComponent,
     ConceptTableComponent,
+    ConceptSetListComponent,
     ConfirmDeleteModalComponent,
+    EditModalComponent,
     ErrorHandlerComponent,
     HighlightSearchPipe,
     InitialErrorComponent,
@@ -152,6 +159,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
+    SlidingFabComponent,
     StigmatizationPageComponent,
     TopBoxComponent,
     UnregisteredComponent,

@@ -94,7 +94,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym)
+create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym domain_vocabulary_info)
 
 for t in "${create_tables[@]}"
 do
@@ -177,10 +177,11 @@ echo "Inserting concept table data ... "
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\`
 (concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept,
-concept_code, count_value, prevalence, source_count_value)
-SELECT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
-0 as count_value , 0.0 as prevalence, 0 as source_count_value
-from \`$BQ_PROJECT.$BQ_DATASET.concept\` c"
+concept_code, count_value, prevalence, source_count_value, synonyms)
+select c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
+0 as count_value , 0.0 as prevalence, 0 as source_count_value,concat(cast(c.concept_id as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id group by c.concept_id,c.concept_name,c.domain_id,c.vocabulary_id,c.concept_class_id, c.standard_concept, c.concept_code"
 
 # Update counts and prevalence in concept
 q="select count_value from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` a where a.analysis_id = 1"
@@ -194,7 +195,6 @@ from  (select cast(r.stratum_1 as int64) as concept_id , sum(r.count_value) as c
 from \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.achilles_results\` r
 where r.analysis_id in (3000,2,4,5) and CAST(r.stratum_1 as int64) > "0" group by r.stratum_1) as r
 where r.concept_id = c.concept_id"
-
 
 #Concept prevalence (based on count value and not on source count value)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -303,7 +303,20 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT 0, c.concept_id, c.concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
 
-
+###########################
+# Domain_Vocabulary_Info #
+###########################
+echo "Updating all concept count in domain_vocabulary_info"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain_vocabulary_info\`
+(domain_id,vocabulary_id,all_concept_count,standard_concept_count)
+select d2.domain_id as domain_id,c.vocabulary_id as vocabulary_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
+SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
+\`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c
+join \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain\` d2
+on d2.domain_id = c.domain_id
+and (c.count_value > 0 or c.source_count_value > 0)
+group by d2.domain_concept_id,c.vocabulary_id"
 
 
 

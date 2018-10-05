@@ -587,7 +587,7 @@ definitions:
   TreeType:
     type: string
     description: possible types of trees
-    enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, SURVEY]
+    enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, PPI]
 
   TreeSubType:
       type: string

@@ -108,6 +108,29 @@
   color: #216FB4;
 }
 
+.card .permission-box {
+  color: #FFFFFF;
+  height: 1rem;
+  width: 3rem;
+  font-size: 10px;
+  text-align: center;
+  border-radius: 0.2rem;
+  padding: 0;
+  box-shadow: none;
+}
+
+.card .permission-box.owner-permission {
+  background-color: #4996A2;
+}
+
+.card .permission-box.writer-permission {
+  background-color: #92B572;
+}
+
+.card .permission-box.reader-permission {
+  background-color: #8F8E8F;
+}
+
 .header-area {
   display: flex;
   align-items: flex-start;

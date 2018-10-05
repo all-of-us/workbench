@@ -1,0 +1,32 @@
+<app-top-box>
+  <button class="btn btn-link nav-link nav-item" [routerLink]="['/workspaces', wsNamespace, wsId, 'concepts']">Concepts</button>
+  <button class="btn btn-link nav-link nav-item active" [routerLink]="['/workspaces', wsNamespace, wsId, 'concepts', 'sets']">Concept Sets</button>
+  <div *ngIf="conceptSetsLoading" class="spinner-container">
+    <span class="spinner spinner-lg"></span>
+  </div>
+  <div class="card-area" *ngIf="!conceptSetsLoading">
+    <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
+         [class.disabled]="actionsDisabled" (click)="actionsDisabled || newConceptSet()">
+      <div class="create-text">
+        Create a<br/>Concept Set
+        <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+      </div>
+      <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create concept sets.</span>
+    </div>
+
+    <div style="display: flex; flex-direction: row; margin-left: 1%">
+      <div *ngFor="let conceptSet of resourceList">
+        <app-resource-card [resourceCard]="conceptSet" [cssClass]="'for-list'"
+                           (onUpdate)="loadConceptSets()"
+                           (duplicateNameError)="duplicateNameError($event)">
+        </app-resource-card>
+      </div>
+    </div>
+  </div>
+</app-top-box>
+
+<app-create-concept-modal (onUpdate)="loadConceptSets()"></app-create-concept-modal>
+<clr-modal [(clrModalOpen)]="nameConflictError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">You already have a concept set named {{duplicateName}}. Please choose another name.</div>
+</clr-modal>

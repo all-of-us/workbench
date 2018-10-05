@@ -9,6 +9,7 @@ import {ClarityModule} from '@clr/angular';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptHomepageComponent} from 'app/views/concept-homepage/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
+import {SlidingFabComponent} from 'app/views/sliding-fab/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {HighlightSearchPipe} from 'app/utils/highlight-search.pipe';
@@ -17,6 +18,7 @@ import {HighlightSearchPipe} from 'app/utils/highlight-search.pipe';
 import {
   ConceptSetsService,
   ConceptsService,
+  DomainInfo,
   StandardConceptFilter,
   WorkspaceAccessLevel,
 } from 'generated';
@@ -48,6 +50,16 @@ const activatedRouteStub  = {
   }
 };
 
+function isSelectedDomain(
+  domain: DomainInfo, fixture: ComponentFixture<ConceptHomepageComponent>): boolean {
+    if (fixture.debugElement.query(
+      By.css('.domain-selector-button.active'))
+      .children[0].nativeNode.textContent.trim() === domain.name) {
+        return true;
+    }
+    return false;
+}
+
 describe('ConceptHomepageComponent', () => {
   let fixture: ComponentFixture<ConceptHomepageComponent>;
   beforeEach(fakeAsync(() => {
@@ -64,6 +76,7 @@ describe('ConceptHomepageComponent', () => {
         ConceptHomepageComponent,
         ConceptTableComponent,
         HighlightSearchPipe,
+        SlidingFabComponent,
         TopBoxComponent,
       ],
       providers: [
@@ -102,11 +115,15 @@ describe('ConceptHomepageComponent', () => {
     updateAndTick(fixture);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
+      const includeDomainCounts = isSelectedDomain(domain, fixture);
       const expectedRequest = {
         query: searchTerm,
         // Tests that it searches only standard concepts.
         standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
-        domain: domain.domain
+        domain: domain.domain,
+        includeDomainCounts: includeDomainCounts,
+        includeVocabularyCounts: true,
+        maxResults: fixture.componentInstance.maxConceptFetch
       };
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -142,6 +159,7 @@ describe('ConceptHomepageComponent', () => {
     updateAndTick(fixture);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
+      const includeDomainCounts = isSelectedDomain(domain, fixture);
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
@@ -149,7 +167,10 @@ describe('ConceptHomepageComponent', () => {
           query: searchTerm,
           // Tests that it searches all concepts.
           standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
-          domain: domain.domain
+          domain: domain.domain,
+          includeDomainCounts: includeDomainCounts,
+          includeVocabularyCounts: true,
+          maxResults: fixture.componentInstance.maxConceptFetch
         });
     });
 
