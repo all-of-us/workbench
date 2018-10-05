@@ -27,8 +27,8 @@ import {
   ClusterService,
   CohortsService,
   ProfileService,
-  UserService,
   UserMetricsService,
+  UserService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -46,8 +46,8 @@ import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
-import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
+import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {updateAndTick} from 'testing/test-helpers';
