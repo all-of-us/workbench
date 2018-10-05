@@ -123,8 +123,8 @@ describe('WorkspaceComponent', () => {
       ],
       declarations: [
         BugReportComponent,
-        CohortEditModalComponent,
         ConfirmDeleteModalComponent,
+        EditModalComponent,
         RecentWorkComponent,
         RenameModalComponent,
         ResourceCardComponent,
