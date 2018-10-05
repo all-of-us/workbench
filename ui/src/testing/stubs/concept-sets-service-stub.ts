@@ -1,12 +1,13 @@
 import {Response, ResponseOptions} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
-import {ConceptsServiceStub} from './concepts-service-stub.ts';
+import {ConceptsServiceStub} from './concepts-service-stub';
 
 import {
   ConceptSet,
   ConceptSetListResponse,
-  Domain
+  Domain,
+  UpdateConceptSetRequest
 } from 'generated';
 
 export class ConceptSetsServiceStub {
@@ -92,7 +93,7 @@ export class ConceptSetsServiceStub {
           }
         }
         for (const id of req.addedIds || []) {
-          const concept = conceptsStub.concepts.find(c => c.conceptId === id);
+          const concept = this.conceptsStub.concepts.find(c => c.conceptId === id);
           if (!concept) {
             throw Error(`concept ${id} not found`);
           }

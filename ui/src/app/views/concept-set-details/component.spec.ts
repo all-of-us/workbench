@@ -230,7 +230,7 @@ describe('ConceptSetDetailsComponent', () => {
     expect(conceptSetsStub.conceptSets).toEqual([]);
   }));
 
-  fit('should remove concepts', fakeAsync(() => {
+  it('should remove concepts', fakeAsync(() => {
     // Start with 3 concepts, delete two.
     const origConcepts = ConceptStubVariables.STUB_CONCEPTS.slice(0, 3);
     setUpComponent({

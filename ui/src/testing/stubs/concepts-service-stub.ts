@@ -94,7 +94,7 @@ export class DomainStubVariables {
 
 export class ConceptsServiceStub {
 
-  constructor(public concepts: Concept[]) {
+  constructor(public concepts?: Concept[]) {
     if (!this.concepts) {
       this.concepts = ConceptStubVariables.STUB_CONCEPTS;
     }
