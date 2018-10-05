@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -58,32 +59,35 @@ import org.springframework.stereotype.Service;
 @Service
 public class CohortMaterializationService {
 
+  // Transforms a name, query parameter value pair into a map that will be converted into a JSON
+  // dictionary representing the named query parameter value, to be used as a part of a BigQuery
+  // job configuration when executing SQL queries on the client.
   // See https://cloud.google.com/bigquery/docs/parameterized-queries for JSON configuration of query parameters
   private static final Function<Map.Entry<String, QueryParameterValue>, Map<String, Object>> TO_QUERY_PARAMETER_MAP =
       (entry) -> {
-        Map<String, Object> result = new HashMap<>();
-        result.put("name", entry.getKey());
         QueryParameterValue value = entry.getValue();
-        Map<String, Object> parameterTypeMap = new HashMap<>();
-        Map<String, Object> parameterValueMap = new HashMap<>();
-        parameterTypeMap.put("type", value.getType().toString());
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.<String, Object>builder()
+            .put("name", entry.getKey())
+            .put("type", value.getType().toString());
+        ImmutableMap.Builder<String, Object> parameterTypeMap = ImmutableMap.builder();
+        ImmutableMap.Builder<String, Object> parameterValueMap = ImmutableMap.builder();
         if (value.getArrayType() == null) {
           parameterValueMap.put("value", value.getValue());
         } else {
-          Map<String, Object> arrayTypeMap = new HashMap<>();
+          ImmutableMap.Builder<String, Object> arrayTypeMap = ImmutableMap.builder();
           arrayTypeMap.put("type", value.getArrayType().toString());
-          parameterTypeMap.put("arrayType", arrayTypeMap);
-          ArrayList<Map<String, Object>> values = new ArrayList<>();
+          parameterTypeMap.put("arrayType", arrayTypeMap.build());
+          ImmutableList.Builder<Map<String, Object>> values = ImmutableList.<Map<String, Object>>builder();
           for (QueryParameterValue arrayValue : value.getArrayValues()) {
-            Map<String, Object> valueMap = new HashMap<>();
+            ImmutableMap.Builder<String, Object> valueMap = ImmutableMap.<String, Object>builder();
             valueMap.put("value", arrayValue.getValue());
-            values.add(valueMap);
+            values.add(valueMap.build());
           }
-          parameterValueMap.put("arrayValues", values.<Map<String, Object>>toArray());
+          parameterValueMap.put("arrayValues", values.build().<Map<String, Object>>toArray());
         }
-        result.put("parameterType", parameterTypeMap);
-        result.put("parameterValue", parameterValueMap);
-        return result;
+        builder.put("parameterType", parameterTypeMap.build());
+        builder.put("parameterValue", parameterValueMap.build());
+        return builder.build();
       };
 
   @VisibleForTesting
@@ -254,9 +258,9 @@ public class CohortMaterializationService {
   CdrQuery getCdrQuery(@Nullable CohortReview cohortReview, SearchRequest searchRequest,
       @Nullable Set<Long> conceptIds, DataTableSpecification dataTableSpecification) {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-    CdrQuery cdrQuery = new CdrQuery();
-    cdrQuery.setBigqueryDataset(cdrVersion.getBigqueryDataset());
-    cdrQuery.setBigqueryProject(cdrVersion.getBigqueryProject());
+    CdrQuery cdrQuery = new CdrQuery()
+        .setBigqueryDataset(cdrVersion.getBigqueryDataset())
+        .setBigqueryProject(cdrVersion.getBigqueryProject());
     List<CohortStatus> statusFilter = dataTableSpecification.getStatusFilter();
     if (statusFilter == null) {
       statusFilter = NOT_EXCLUDED;
@@ -274,13 +278,13 @@ public class CohortMaterializationService {
     QueryJobConfiguration jobConfiguration = fieldSetQueryBuilder.getQueryJobConfiguration(
         criteria, tableQueryAndConfig,  dataTableSpecification.getMaxResults());
     cdrQuery.setSql(jobConfiguration.getQuery());
-    Map<String, Object> configurationMap = new HashMap<>();
-    Map<String, Object> queryConfigurationMap = new HashMap<>();
-    configurationMap.put("query", queryConfigurationMap);
+    ImmutableMap.Builder<String, Object> configurationMap = ImmutableMap.builder();
+    ImmutableMap.Builder<String, Object> queryConfigurationMap = ImmutableMap.builder();
     queryConfigurationMap.put("queryParameters",
         jobConfiguration.getNamedParameters().entrySet().stream().map(TO_QUERY_PARAMETER_MAP)
             .<Map<String, Object>>toArray());
-    cdrQuery.setConfiguration(configurationMap);
+    configurationMap.put("query", queryConfigurationMap.build());
+    cdrQuery.setConfiguration(configurationMap.build());
     return cdrQuery;
   }
 
