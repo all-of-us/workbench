@@ -80,6 +80,7 @@ public final class QueryBuilderConstants {
   public static final String OCCURRENCES_PREFIX = "occ";
   public static final String ENCOUNTER_PREFIX = "enc";
   public static final String CONCEPTID_PREFIX = "conceptId";
+  public static final String VALUE_PREFIX = "value";
   public static final String ANY = "ANY";
 
   private QueryBuilderConstants(){}

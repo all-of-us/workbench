@@ -64,6 +64,32 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "code, " +
     "@curType \\:= name as name, " +
     "concept_id " +
+    "from (select * from criteria " +
+    "where type = upper(:type) " +
+    "and (upper(name) like upper(concat('%',:value,'%')) " +
+    "     or concept_id in " +
+    "      (select concept_id " +
+    "         from concept_synonym " +
+    "        where upper(concept_synonym_name) like upper(concat('%',:value,'%'))) " +
+    "    ) ) a, " +
+    "(select @curRow \\:= 0, @curType \\:= '') r " +
+    "order by name, id) as x " +
+    "where rank = 1) " +
+    "limit :limit", nativeQuery = true)
+  List<Criteria> findCriteriaByTypeForName(@Param("type") String type,
+                                                 @Param("value") String value,
+                                                 @Param("limit") Long limit);
+
+  @Query(value = "select * from criteria where id in ( " +
+    "select id from " +
+    "(select case " +
+    "when @curType = name " +
+    "then @curRow \\:= @curRow + 1 " +
+    "else @curRow \\:= 1 end as rank, " +
+    "id, " +
+    "code, " +
+    "@curType \\:= name as name, " +
+    "concept_id " +
     "from (select * from criteria where type = upper(:type) " +
     "and subtype = upper(:subtype) " +
     "and (upper(code) like upper(concat('%',:value,'%')) " +
