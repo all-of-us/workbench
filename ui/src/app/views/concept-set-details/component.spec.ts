@@ -27,12 +27,14 @@ import {
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {updateAndTick} from 'testing/test-helpers';
+import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
 describe('ConceptSetDetailsComponent', () => {
   let fixture: ComponentFixture<ConceptSetDetailsComponent>;
+  let conceptSetsStub: ConceptSetsServiceStub;
   let routeStub: any;
   beforeEach(fakeAsync(() => {
+    conceptSetsStub = new ConceptSetsServiceStub([]);
     routeStub = {
       snapshot: {
         url: [
@@ -74,10 +76,9 @@ describe('ConceptSetDetailsComponent', () => {
         TopBoxComponent,
       ],
       providers: [
-        { provide: ConceptSetsService, useValue: new ConceptSetsServiceStub() },
+        { provide: ConceptSetsService, useValue: conceptSetsStub },
         { provide: ActivatedRoute, useFactory: () => routeStub }
-      ]}).compileComponents().then(() => {
-      });
+      ]}).compileComponents();
   }));
 
   function newConceptSet(): ConceptSet {
@@ -98,6 +99,9 @@ describe('ConceptSetDetailsComponent', () => {
       conceptSet = newConceptSet();
     }
     routeStub.snapshot.data.conceptSet = conceptSet;
+    if (!conceptSetsStub.conceptSets.length) {
+      conceptSetsStub.conceptSets = [conceptSet];
+    }
 
     fixture = TestBed.createComponent(ConceptSetDetailsComponent);
     // This tick initializes the component.
@@ -128,5 +132,67 @@ describe('ConceptSetDetailsComponent', () => {
     const de = fixture.debugElement;
     expect(de.queryAll(By.css('app-concept-table')).length).toEqual(0);
     expect(findAddConceptsButtons(de).length).toEqual(2);
+  }));
+
+  it('should allow valid edits', fakeAsync(() => {
+    setUpComponent();
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.edit-button')));
+
+    const newName = 'cool new name';
+    const newDesc = 'cool new description';
+    simulateInput(fixture, de.query(By.css('.edit-name')), newName);
+    simulateInput(fixture, de.query(By.css('.edit-description')), newDesc);
+    simulateClick(fixture, de.query(By.css('.submit-edit-button')));
+    updateAndTick(fixture);
+
+    expect(de.query(By.css('.concept-set-name')).nativeElement.textContent)
+      .toContain(newName);
+    expect(de.query(By.css('.concept-set-details')).nativeElement.textContent)
+      .toContain('cool new description');
+
+    expect(conceptSetsStub.conceptSets[0].name).toEqual(newName);
+    expect(conceptSetsStub.conceptSets[0].description).toEqual(newDesc);
+  }));
+
+  it('should disallow empty name edit', fakeAsync(() => {
+    const cs = newConceptSet();
+    setUpComponent(cs);
+    const originalName = cs.name;
+
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.edit-button')));
+
+    simulateInput(fixture, de.query(By.css('.edit-name')), '');
+    simulateClick(fixture, de.query(By.css('.submit-edit-button')));
+    updateAndTick(fixture);
+
+    // Edit button is still shown.
+    expect(de.queryAll(By.css('.submit-edit-button')).length).toEqual(1);
+    expect(de.query(By.css('.edit-buttons')).nativeElement.textContent)
+      .toContain('name is required');
+    // Name didn't change.
+    expect(conceptSetsStub.conceptSets[0].name).toEqual(originalName);
+  }));
+
+  it('should not edit on cancel', fakeAsync(() => {
+    const cs = newConceptSet();
+    setUpComponent(cs);
+    const originalName = cs.name;
+    const originalDesc = cs.description;
+
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.edit-button')));
+
+    simulateInput(fixture, de.query(By.css('.edit-name')), 'falco');
+    simulateInput(fixture, de.query(By.css('.edit-description')), 'lombardi');
+    simulateClick(fixture, de.query(By.css('.cancel-edit-button')));
+    updateAndTick(fixture);
+
+    // Edit button is no longer shown.
+    expect(de.queryAll(By.css('.submit-edit-button')).length).toEqual(0);
+    // Content didn't change.
+    expect(conceptSetsStub.conceptSets[0].name).toEqual(originalName);
+    expect(conceptSetsStub.conceptSets[0].description).toEqual(originalDesc);
   }));
 });
