@@ -7,17 +7,18 @@
       {{headerText}}
   </div>
   <div class="card-area">
-    <div style="display: flex">
-      <div *ngIf="resourcesLoading" class="spinner-container">
-        <span class="spinner spinner-lg"></span>
-      </div>
-      <div *ngFor="let resource of resourceList">
-        <app-resource-card [resourceCard]="resource" (onUpdate)="updateList($event)"></app-resource-card>
-      </div>
+    <div *ngIf="resourcesLoading" class="spinner-container">
+      <span class="spinner spinner-lg"></span>
+    </div>
+    <div *ngFor="let resource of resourceList">
+      <app-resource-card [resourceCard]="resource" (onUpdate)="updateList($event)"></app-resource-card>
     </div>
   </div>
+<!--
+  TODO: make right scroll relative to last card
+-->
   <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
-       style="float: right; top: 3.2rem; right: -9rem" (click)="scrollRight()">
+       style="float: right; top: 3.2rem; right: -10%;" (click)="scrollRight()">
     <app-right-scroll-icon></app-right-scroll-icon>
   </div>
 </div>

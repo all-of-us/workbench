@@ -12,16 +12,14 @@
           </div>
         </div>
       </div>
-      <div class="row" style="flex-direction: row; align-items: flex-start;">
+      <div class="row" #recentWork style="flex-direction: row; align-items: flex-start; flex-wrap: nowrap;">
         <div class="card add-card" (click)="addWorkspace()">
           <div class="card-text">
             Create a <br/> New Workspace <br/>
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
           </div>
         </div>
-        <div style="margin-left: 3rem">
-          <app-recent-work [headerText]="'Your Last Accessed Items'" style="display:flex"></app-recent-work>
-        </div>
+        <app-recent-work [headerText]="'Your Last Accessed Items'" [parentWidth]="width" style="margin-left: 3rem; display:flex; flex: 2;"></app-recent-work>
       </div>
     </div>
   </div>

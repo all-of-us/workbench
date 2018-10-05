@@ -220,8 +220,11 @@
 }
 
 .card.add-card {
+  display: flex;
   height: 223px;
   width: 26.83%;
+  max-width: 300px;
+  align-items: flex-start;
   background-color: #FFFFFF;
   align-content: left;
   margin-left: 25px;

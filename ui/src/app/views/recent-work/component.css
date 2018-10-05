@@ -1,8 +1,9 @@
 .card-area {
     margin-left: 2.3rem;
     margin-top: -1rem;
-    display: inline-block;
-    width: 17rem;
+    display: flex;
+    width: 100%;
+    flex-shrink: 2;
 }
 
 .card {

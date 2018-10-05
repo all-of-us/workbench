@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {hasRegisteredAccess} from 'app/utils';
@@ -63,6 +63,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
   @ViewChild(RecentWorkComponent)
+  @ViewChild('recentWork') eMainFrame : ElementRef;
+  width: number;
 
   constructor(
     private profileService: ProfileService,
@@ -111,6 +113,11 @@ export class HomepageComponent implements OnInit, OnDestroy {
 
   public get completedTasksAsPercentage() {
     return this.completedTasks / this.numberOfTotalTasks * 100;
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+      this.width = this.eMainFrame.nativeElement.offsetWidth;
   }
 
   reloadSpinner(): void {

@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, HostListener, Input, OnInit} from '@angular/core';
 
 
 import {
@@ -12,7 +12,7 @@ import {
   templateUrl: './component.html',
 })
 
-export class RecentWorkComponent implements OnInit {
+export class RecentWorkComponent implements OnInit, HostListener {
   resourceList: RecentResource[];
   resourcesLoading: boolean;
   fullList: RecentResource[] = [];
@@ -24,9 +24,20 @@ export class RecentWorkComponent implements OnInit {
   ) {}
   index: Number;
   size = 3;
+  @Input('parentWidth') parentWidth: number;
   ngOnInit(): void {
     this.resourcesLoading = true;
     this.updateList();
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    if ((this.resourcesLoading === false) && (this.parentWidth)) {
+      console.log(this.parentWidth);
+      console.log(Math.round((this.parentWidth * 2/3) / 200));
+      this.size = Math.floor(((this.parentWidth * 2/3) - 100) / 200);
+      this.updateList();
+    }
   }
 
   updateList(): void {
