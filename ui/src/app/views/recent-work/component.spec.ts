@@ -71,6 +71,21 @@ describe('RecentWorkComponent', () => {
     expect(fixture).toBeTruthy();
   }));
 
+  // test that it displays related resources when handed workspace
+  it('should display related resources when handed workspace', fakeAsync(() => {
+    fixture.debugElement.componentInstance.workspace = WorkspacesServiceStub.stubWorkspace();
+    fixture.debugElement.componentInstance.route.snapshot.data.workspace =
+      WorkspacesServiceStub.stubWorkspaceData();
+    tick();
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    const cardsOnPage = fixture.debugElement.queryAll(By.css('.card'));
+    expect(cardsOnPage.length).toEqual(3);
+    const cardNames = fixture.debugElement.queryAll(By.css('.name'))
+      .map((card) => card.nativeElement.innerText);
+    expect(cardNames).toEqual(['sample name', 'sample name 2', 'mockFile.ipynb']);
+  }));
+
   // test that it displays 3 most recent resources from UserMetrics cache
   it('should display recent work', fakeAsync(() => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(4)));
