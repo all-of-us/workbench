@@ -18,6 +18,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -55,6 +56,7 @@ public class CohortBuilderControllerTest {
   private Criteria drugATCCriteria;
   private Criteria drugATCCriteriaChild;
   private Criteria drugBrandCriteria;
+  private Criteria ppiCriteria;
   private CriteriaAttribute criteriaAttributeMin;
   private CriteriaAttribute criteriaAttributeMax;
 
@@ -107,6 +109,9 @@ public class CohortBuilderControllerTest {
     );
     drugATCCriteriaChild = criteriaDao.save(
       createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false)
+    );
+    ppiCriteria = criteriaDao.save(
+      createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0L, "324836", "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group", DomainType.OBSERVATION.name(), "43529119", true)
     );
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
@@ -204,7 +209,7 @@ public class CohortBuilderControllerTest {
     assertEquals(
       createResponseCriteria(demoCriteria),
       controller
-        .getCriteriaBy(1L, TreeType.DEMO.name(), SUBTYPE_AGE, null, null)
+        .getCriteriaBy(1L, TreeType.DEMO.name(), TreeSubType.AGE.name(), null, null)
         .getBody()
         .getItems()
         .get(0)
@@ -212,11 +217,35 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaByTypeForCodeOrName() throws Exception {
+  public void getCriteriaAutoCompleteNoSubtype() throws Exception {
     assertEquals(
       createResponseCriteria(labMeasurement),
       controller
         .getCriteriaAutoComplete(1L, TreeType.MEAS.name(),"LP12", null, null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void getCriteriaAutoCompleteWithSubtype() throws Exception {
+    assertEquals(
+      createResponseCriteria(drugATCCriteria),
+      controller
+        .getCriteriaAutoComplete(1L, TreeType.DRUG.name(),"drugN", TreeSubType.ATC.name(), null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void getCriteriaAutoCompletePPI() throws Exception {
+    assertEquals(
+      createResponseCriteria(ppiCriteria),
+      controller
+        .getCriteriaAutoComplete(1L, TreeType.PPI.name(),"covered", null, null)
         .getBody()
         .getItems()
         .get(0)

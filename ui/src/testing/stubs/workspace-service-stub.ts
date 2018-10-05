@@ -18,6 +18,8 @@ import {
 } from 'generated';
 import {UserServiceStub} from './user-service-stub';
 
+import {WorkspaceData} from 'app/services/workspace-storage.service';
+
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
   static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
@@ -108,6 +110,13 @@ export class WorkspacesServiceStub {
           role: WorkspaceAccessLevel.READER
         },
       ]
+    };
+  }
+
+  static stubWorkspaceData(): WorkspaceData {
+    return {
+      name: WorkspacesServiceStub.stubWorkspace().name,
+      accessLevel: WorkspaceAccessLevel.OWNER
     };
   }
 

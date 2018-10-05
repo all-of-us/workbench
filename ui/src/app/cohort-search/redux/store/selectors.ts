@@ -186,10 +186,11 @@ export const chartData =
  * Cohort Review Charts selectors start
  */
 
-export const isChartLoading =
-  (domain: string) =>
-    (state): any =>
-    state.getIn(['reviewChartData', 'domainCharts', domain]);
+export const isChartLoading = (domain: string, cid: any) => (state): any =>
+  state.getIn(['reviewChartData', 'domainCharts', cid, domain]);
 
-export const isDomainNameExists = domain => (state): boolean =>
-  state.getIn(['reviewChartData', 'domainCharts']).has(domain);
+export const isDomainNameExists = (cid: any, domain: string) => (state): boolean => {
+  const domainExists = state.getIn(['reviewChartData', 'domainCharts']).has(cid);
+  return domainExists ?
+    state.getIn(['reviewChartData', 'domainCharts', cid]).has(domain) : false;
+};

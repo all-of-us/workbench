@@ -19,7 +19,8 @@ public enum FactoryKey {
     PHECODE,
     PM,
     DRUG,
-    MEAS;
+    MEAS,
+    PPI;
 
     private static final Map<String, Object> typeMap = Collections.unmodifiableMap(initializeMapping());
 
@@ -52,6 +53,7 @@ public enum FactoryKey {
         tMap.put(TreeType.PM.name(), FactoryKey.PM);
         tMap.put(TreeType.DRUG.name(), FactoryKey.DRUG);
         tMap.put(TreeType.MEAS.name(), FactoryKey.MEAS);
+        tMap.put(TreeType.PPI.name(), FactoryKey.PPI);
         return tMap;
     }
 }
