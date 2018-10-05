@@ -95,7 +95,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
   fetchChartsData(name) {
-    this.trackClickedDomains = isDomainNameExists(name)(this.ngRedux.getState());
+
     this.demoGraph = false;
     this.spinner = true;
     this.showTitle = false;
