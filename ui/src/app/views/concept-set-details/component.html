@@ -1,22 +1,48 @@
 <app-top-box>
   <div class="concept-set-header">
-    <!-- TODO(calbach): Implement the action menu. -->
     <clr-dropdown class="action-menu-dropdown">
-      <button type="button" class="resource-menu" [disabled]="true" clrDropdownTrigger>
+      <!-- TODO: Once clone is added to the menu, never disable the dropdown. -->
+      <button type="button" class="resource-menu" [disabled]="!canEdit" clrDropdownTrigger>
         <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
       </button>
-      <clr-dropdown-menu *clrIfOpen></clr-dropdown-menu>
+      <clr-dropdown-menu *clrIfOpen>
+        <button clrDropdownItem class="action-item action-edit"
+            (click)="editing=true"
+            [class.disabled]="!canEdit"
+            [disabled]="!canEdit">
+          <clr-icon shape="pencil"></clr-icon>
+          Edit
+        </button>
+        <button clrDropdownItem class="action-item action-delete"
+            (click)="deleteModal.open()"
+            [class.disabled]="!canEdit"
+            [disabled]="!canEdit">
+          <clr-icon shape="trash"></clr-icon>
+          Delete
+        </button>
+      </clr-dropdown-menu>
     </clr-dropdown>
     <div class="concept-set-details">
       <div class="concept-set-name">
-        <h2>{{conceptSet.name}}</h2>
-        <!-- TODO(calbach): Implement edit. -->
-        <button (mouseover)="editHover=true" (mouseleave)="editHover=false"
-            class="btn btn-icon edit-button" [disabled]="true">
+        <h2 *ngIf="!editing">{{conceptSet.name}}</h2>
+        <input *ngIf="editing" class="edit-name" type="text" autofocus [(ngModel)]="editName">
+        <button *ngIf="!editing" class="btn btn-icon edit-button" [disabled]="!canEdit"
+            (mouseover)="editHover=true" (mouseleave)="editHover=false" (click)="editing=true">
           <app-edit-icon [editHover]="editHover"></app-edit-icon>
         </button>
       </div>
-      <p>{{conceptSet.description}}</p>
+      <p *ngIf="!editing">{{conceptSet.description}}</p>
+      <textarea *ngIf="editing" class="edit-description" type="text" [(ngModel)]="editDescription"></textarea>
+      <div *ngIf="editing" class="edit-buttons">
+        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
+          <button type="button" class="btn btn-primary submit-edit-button"
+              (click)="submitEdits()" [clrLoading]="editSubmitting" [disabled]="!validateEdits()">
+            Save
+          </button>
+          <span *ngIf="!editName" class="tooltip-content">A name is required</span>
+        </span>
+        <button type="button" class="btn btn-outline cancel-edit-button" (click)="editing=false">Cancel</button>
+      </div>
       <div class="concept-set-tags">
         <span>Participant count: {{conceptSet.participantCount}}</span>
         <span>Domain: {{conceptSet.domain | titlecase}}</span>
@@ -44,7 +70,10 @@
   <div *ngIf="conceptSet.concepts?.length" class="concept-table-wrap">
     <app-concept-table [concepts]="conceptSet.concepts"></app-concept-table>
   </div>
-  <app-sliding-fab [expanded]="'Remove from set'" (submit)="openRemoveModal()">
+  <app-sliding-fab *ngIf="canEdit" [expanded]="'Remove from set'" (submit)="openRemoveModal()">
     <clr-icon shape="trash" class="remove-icon"></clr-icon>
   </app-sliding-fab>
 </app-top-box>
+
+<app-confirm-delete-modal [resourceType]="'Concept Set'" [resource]=conceptSet (receiveDelete)=receiveDelete()>
+</app-confirm-delete-modal>
