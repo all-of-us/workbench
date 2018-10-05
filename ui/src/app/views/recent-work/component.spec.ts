@@ -10,6 +10,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortsService} from 'generated/api/cohorts.service';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
@@ -19,8 +20,8 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
@@ -48,10 +49,11 @@ describe('RecentWorkComponent', () => {
         ResourceCardComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
-        CohortEditModalComponent,
+        EditModalComponent,
       ],
       providers: [
         {provide: CohortsService, useValue: new CohortsServiceStub()},
+        {provide: ConceptSetsService },
         {provide: SignInService, useValue: new SignInServiceStub()},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
         {provide: UserMetricsService, useValue: spy},

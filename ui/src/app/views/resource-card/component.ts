@@ -4,15 +4,16 @@ import {Router} from '@angular/router';
 import {resourceActionList, ResourceType} from 'app/utils/resourceActions';
 
 import {
-  CohortsService, NotebookRename,
-  RecentResource, WorkspacesService
+  CohortsService, ConceptSetsService,
+  NotebookRename, RecentResource,
+  WorkspacesService
 } from 'generated';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 
 @Component ({
@@ -48,12 +49,13 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
 
-  @ViewChild(CohortEditModalComponent)
-  editModal: CohortEditModalComponent;
+  @ViewChild(EditModalComponent)
+  editModal: EditModalComponent;
 
   constructor(
       private cohortsService: CohortsService,
       private workspacesService: WorkspacesService,
+      private conceptSetsService: ConceptSetsService,
       private signInService: SignInService,
       private route: Router,
   ) {}
@@ -67,6 +69,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         this.resourceType = ResourceType.NOTEBOOK;
       } else if (this.resourceCard.cohort) {
         this.resourceType = ResourceType.COHORT;
+      } else if (this.resourceCard.conceptSet) {
+        this.resourceType = ResourceType.CONCEPT_SET;
       } else {
         this.resourceType = ResourceType.INVALID;
         this.invalidResourceError = true;
@@ -108,7 +112,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     });
   }
 
-  receiveCohortRename(): void {
+  receiveRename(): void {
     this.onUpdate.emit();
   }
 
@@ -140,6 +144,10 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         this.resource = resource.cohort;
         break;
       }
+      case ResourceType.CONCEPT_SET: {
+        this.resource = resource.conceptSet;
+        break;
+      }
     }
     this.deleteModal.open();
   }
@@ -154,6 +162,11 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       case ResourceType.COHORT: {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
           .subscribe(() => this.onUpdate.emit());
+        break;
+      }
+      case ResourceType.CONCEPT_SET: {
+        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
+          .subscribe(() => this.onUpdate.emit());
       }
     }
     this.deleteModal.close();
@@ -163,6 +176,10 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     switch (this.resourceType) {
       case ResourceType.COHORT: {
         this.reviewCohort(resource);
+        break;
+      }
+      case ResourceType.CONCEPT_SET: {
+        // what do we need to happen here? Is this going to an edit window? What?
         break;
       }
       case ResourceType.NOTEBOOK: {
@@ -203,6 +220,10 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   editCohort(): void {
     // This ensures the cohort binding is picked up before the open resolves.
     setTimeout(_ => this.editModal.open(), 0);
+  }
+
+  editConceptSet(): void {
+    this.editModal.open();
   }
 
   reviewCohort(resource: RecentResource): void {
