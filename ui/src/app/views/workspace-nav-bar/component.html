@@ -32,12 +32,12 @@
       </button>
       <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
         <label class="dropdown-header">Workspace Actions</label>
-        <button class="btn" routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/clone" routerLinkActive="active">
+        <button clrDropdownItem class="btn" routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/clone" routerLinkActive="active">
           <clr-icon shape="copy" class="icons"></clr-icon>
           Clone
         </button>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-          <button class="btn" [disabled]="!writePermission" routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/edit"
+          <button clrDropdownItem class="btn" [disabled]="!writePermission" routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/edit"
                       routerLinkActive="active">
             <clr-icon shape="pencil" class="icons"></clr-icon>
             Edit
@@ -45,7 +45,7 @@
           <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
         </span>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
-          <button class="btn" [disabled]="!ownerPermission" (click)="share()">
+          <button clrDropdownItem class="btn" [disabled]="!ownerPermission" (click)="share()">
             <clr-icon shape="share" class="icons"></clr-icon>
             Share
           </button>
@@ -54,7 +54,7 @@
           </span>
         </span>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-          <button class="btn" [disabled]="!ownerPermission" (click)="confirmDelete()">
+          <button clrDropdownItem class="btn" [disabled]="!ownerPermission" (click)="confirmDelete()">
            <clr-icon shape="trash" class="icons"></clr-icon>
             Delete
           </button>
