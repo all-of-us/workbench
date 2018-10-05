@@ -118,25 +118,25 @@ public class CriteriaDaoTest {
 
   @After
   public void tearDown() {
-//    criteriaDao.delete(icd9Criteria1);
-//    criteriaDao.delete(icd9Criteria2);
-//    criteriaDao.delete(demoCriteria1);
-//    criteriaDao.delete(demoCriteria1a);
-//    criteriaDao.delete(demoCriteria2);
-//    criteriaDao.delete(icd10Criteria1);
-//    criteriaDao.delete(icd10Criteria2);
-//    criteriaDao.delete(cptCriteria1);
-//    criteriaDao.delete(cptCriteria2);
-//    criteriaDao.delete(parentIcd9);
-//    criteriaDao.delete(childIcd9);
-//    criteriaDao.delete(parentDemo);
-//    criteriaDao.delete(parentIcd10);
-//    criteriaDao.delete(childIcd10);
-//    criteriaDao.delete(pmCriteria);
-//    criteriaDao.delete(drugCriteriaIngredient);
-//    criteriaDao.delete(drugCriteriaIngredient1);
-//    criteriaDao.delete(drugCriteriaBrand);
-//    criteriaDao.delete(labCriteria);
+    criteriaDao.delete(icd9Criteria1);
+    criteriaDao.delete(icd9Criteria2);
+    criteriaDao.delete(demoCriteria1);
+    criteriaDao.delete(demoCriteria1a);
+    criteriaDao.delete(demoCriteria2);
+    criteriaDao.delete(icd10Criteria1);
+    criteriaDao.delete(icd10Criteria2);
+    criteriaDao.delete(cptCriteria1);
+    criteriaDao.delete(cptCriteria2);
+    criteriaDao.delete(parentIcd9);
+    criteriaDao.delete(childIcd9);
+    criteriaDao.delete(parentDemo);
+    criteriaDao.delete(parentIcd10);
+    criteriaDao.delete(childIcd10);
+    criteriaDao.delete(pmCriteria);
+    criteriaDao.delete(drugCriteriaIngredient);
+    criteriaDao.delete(drugCriteriaIngredient1);
+    criteriaDao.delete(drugCriteriaBrand);
+    criteriaDao.delete(labCriteria);
   }
 
   @Test
