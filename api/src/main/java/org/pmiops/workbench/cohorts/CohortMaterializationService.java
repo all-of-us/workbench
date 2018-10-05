@@ -10,12 +10,22 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
-import org.pmiops.workbench.cohortbuilder.QueryConfiguration;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
@@ -45,18 +55,6 @@ import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nullable;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 @Service
 public class CohortMaterializationService {
 
@@ -81,7 +79,7 @@ public class CohortMaterializationService {
             valueMap.put("value", arrayValue.getValue());
             values.add(valueMap);
           }
-          parameterValueMap.put("arrayValues", values.toArray());
+          parameterValueMap.put("arrayValues", values.<Map<String, Object>>toArray());
         }
         result.put("parameterType", parameterTypeMap);
         result.put("parameterValue", parameterValueMap);
@@ -273,15 +271,15 @@ public class CohortMaterializationService {
     }
     TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(
         dataTableSpecification.getTableQuery(), conceptIds);
-    QueryConfiguration queryConfiguration = fieldSetQueryBuilder.buildQuery(criteria, tableQueryAndConfig,
-        dataTableSpecification.getMaxResults(),0L);
-    QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
+    QueryJobConfiguration jobConfiguration = fieldSetQueryBuilder.getQueryJobConfiguration(
+        criteria, tableQueryAndConfig,  dataTableSpecification.getMaxResults());
     cdrQuery.setSql(jobConfiguration.getQuery());
     Map<String, Object> configurationMap = new HashMap<>();
     Map<String, Object> queryConfigurationMap = new HashMap<>();
     configurationMap.put("query", queryConfigurationMap);
     queryConfigurationMap.put("queryParameters",
-        jobConfiguration.getNamedParameters().entrySet().stream().map(TO_QUERY_PARAMETER_MAP).toArray());
+        jobConfiguration.getNamedParameters().entrySet().stream().map(TO_QUERY_PARAMETER_MAP)
+            .<Map<String, Object>>toArray());
     cdrQuery.setConfiguration(configurationMap);
     return cdrQuery;
   }

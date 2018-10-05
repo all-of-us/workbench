@@ -619,7 +619,14 @@ public class FieldSetQueryBuilder {
     return outerSql.toString();
   }
 
-  public QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
+  public QueryJobConfiguration getQueryJobConfiguration(ParticipantCriteria participantCriteria,
+      TableQueryAndConfig tableQueryAndConfig, Long resultSize) {
+    QueryConfiguration queryConfiguration = buildQuery(participantCriteria, tableQueryAndConfig,
+        resultSize, 0L);
+    return bigQueryService.filterBigQueryConfig(queryConfiguration.getQueryJobConfiguration());
+  }
+
+  private QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
       TableQueryAndConfig tableQueryAndConfig, Long resultSize, long offset) {
     QueryState queryState = new QueryState();
     queryState.schemaConfig = tableQueryAndConfig.getConfig();

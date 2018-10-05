@@ -3,26 +3,36 @@ package org.pmiops.workbench.cohorts;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.bigquery.BigQuery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.DomainLookupService;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.querybuilder.DemoQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.CdrConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -35,8 +45,10 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.AnnotationQuery;
+import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DataTableSpecification;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -57,11 +69,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
+@Import({LiquibaseAutoConfiguration.class, FieldSetQueryBuilder.class, AnnotationQueryBuilder.class,
+    TestBigQueryCdrSchemaConfig.class, CohortQueryBuilder.class,
+    CdrBigQuerySchemaConfigService.class, DomainLookupService.class,
+    DemoQueryBuilder.class, QueryBuilderFactory.class, BigQueryService.class})
+@MockBean({BigQuery.class})
 public class CohortMaterializationServiceTest {
+
+  private static final String DATA_SET_ID = "data_set_id";
+  private static final String PROJECT_ID = "project_id";
 
   @Autowired
   private FieldSetQueryBuilder fieldSetQueryBuilder;
@@ -96,21 +115,28 @@ public class CohortMaterializationServiceTest {
   @PersistenceContext
   private EntityManager entityManager;
 
+  @TestConfiguration
+  static class Configuration {
+
+    public WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      workbenchConfig.cdr = new CdrConfig();
+      workbenchConfig.cdr.debugQueries = false;
+      return workbenchConfig;
+    }
+  }
+
   private CohortReview cohortReview;
   private CohortMaterializationService cohortMaterializationService;
-
-  @TestConfiguration
-  @Import({FieldSetQueryBuilder.class, AnnotationQueryBuilder.class,
-      TestBigQueryCdrSchemaConfig.class, CohortQueryBuilder.class,
-      CdrBigQuerySchemaConfigService.class, DomainLookupService.class})
-  @MockBean({BigQueryService.class})
-  static class Configuration {
-  }
 
   @Before
   public void setUp() {
     CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setBigqueryDataset(DATA_SET_ID);
+    cdrVersion.setBigqueryProject(PROJECT_ID);
     cdrVersionDao.save(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+
 
     Workspace workspace = new Workspace();
     workspace.setCdrVersion(cdrVersion);
@@ -148,7 +174,41 @@ public class CohortMaterializationServiceTest {
 
     this.cohortMaterializationService = new CohortMaterializationService(fieldSetQueryBuilder,
         annotationQueryBuilder, participantCohortStatusDao, cdrBigQuerySchemaConfigService, conceptService);
+  }
 
+  @Test
+  public void testGetCdrQueryNoTableQuery() {
+    CdrQuery cdrQuery = cohortMaterializationService.getCdrQuery(cohortReview,
+        SearchRequests.allGenders(), null, new DataTableSpecification());
+    assertThat(cdrQuery.getBigqueryDataset()).isEqualTo(DATA_SET_ID);
+    assertThat(cdrQuery.getBigqueryProject()).isEqualTo(PROJECT_ID);
+    // TODO: consider making parameter names deterministic, check the entire query
+    assertThat(cdrQuery.getSql()).startsWith("select person.person_id person_id\n"
+        + "from `project_id.data_set_id.person` person");
+
+    // TODO: use deterministic parameters and GSON for comparison here
+    Map<String, Object> configuration = (Map<String, Object>) cdrQuery.getConfiguration();
+    Object[] queryParameters = (Object[])
+        ((Map<String, Object>) configuration.get("query")).get("queryParameters");
+    Map<String, Object> genderParam = (Map<String, Object>) queryParameters[0];
+    Map<String, Object> personIdBlacklistParam = (Map<String, Object>) queryParameters[1];
+    assertParameterArray(genderParam, 8507, 8532, 2);
+    assertParameterArray(personIdBlacklistParam, 2L);
+  }
+
+  private void assertParameterArray(Map<String, Object> param, long... values) {
+    Map<String, Object> parameterTypeMap = (Map<String, Object>) param.get("parameterType");
+    assertThat(parameterTypeMap.get("type")).isEqualTo("ARRAY");
+    assertThat(((Map<String, Object>) parameterTypeMap.get("arrayType"))
+          .get("type")).isEqualTo("INT64");
+
+    Object[] paramValues = (Object[])
+        ((Map<String, Object>) param.get("parameterValue")).get("arrayValues");
+    assertThat(paramValues.length).isEqualTo(values.length);
+    for (int i = 0; i < values.length; i++) {
+      assertThat(((Map<String, Object>) paramValues[i]).get("value"))
+          .isEqualTo(String.valueOf(values[i]));
+    }
   }
 
   @Test
