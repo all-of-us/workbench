@@ -115,7 +115,7 @@ export function highlightMatches(terms: Array<string>, name: string, id?: string
         + 'id="match' + id + '" '
         + 'style="color: #659F3D;'
         + 'font-weight: bolder;'
-        + 'background-color: rgba(101,159,61,0.2);'
+        + 'background: linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%);'
         + 'padding: 2px 0;">'
         + name.slice(start, end) + '</span>'
         + name.slice(end);

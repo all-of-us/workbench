@@ -46,7 +46,11 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
         console.log(this.option.name);
         console.log(diff);
         console.log(hCoords);
-        highlight.style.width = (hCoords.width - diff).toString() + 'px';
+        // highlight.style.backgroundSize = (hCoords.width - diff).toString() + 'px';
+        const percentage = (((hCoords.width - diff) / hCoords.width) * 100).toString();
+        highlight.style.background =
+          'linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) '
+          + percentage + '%, transparent ' + percentage + '%)';
       }
     }
   }
