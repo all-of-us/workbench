@@ -178,7 +178,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       case LOAD_CHILDREN_LIST:
         action.children.forEach(child => {
           child.parameterId = `param${(child.conceptId ?
-              (child.conceptId + child.code) : child.id)}`;
+            (child.conceptId + child.code) : child.id)}`;
           const path = child.path.split('.');
           const parents = path.slice(path.indexOf(action.parentId.toString()));
           state = state
@@ -199,11 +199,11 @@ export const rootReducer: Reducer<CohortSearchState> =
         const parentId = action.parentId.toString();
         return state
           .updateIn(
-          ['wizard', 'item', 'selectedGroups'],
-          List(),
-          groupIdList => groupIdList.includes(parentId)
-            ? groupIdList
-            : groupIdList.push(parentId));
+            ['wizard', 'item', 'selectedGroups'],
+            List(),
+            groupIdList => groupIdList.includes(parentId)
+              ? groupIdList
+              : groupIdList.push(parentId));
 
       case LOAD_ATTRIBUTE_LIST:
         const node = action.node.set('attributes', action.attributes);
@@ -512,23 +512,23 @@ export const rootReducer: Reducer<CohortSearchState> =
       case RESET_STORE:
         return initialState;
 
-    /**
-     * Cohort Review Charts
-     */
-    case BEGIN_CHART_DATA_REQUEST:
-      return state
-        .deleteIn(
-          ['reviewChartData', 'request', action.cid, action.domain])
-        .setIn(
-          ['reviewChartData', 'request', action.ns,
-            action.wsid, action.cid, action.cdrid, action.domain, action.limit],
-          true);
+      /**
+       * Cohort Review Charts
+       */
+      case BEGIN_CHART_DATA_REQUEST:
+        return state
+          .deleteIn(
+            ['reviewChartData', 'request', action.domain])
+          .setIn(
+            ['reviewChartData', 'request', action.ns,
+              action.wsid, action.cid, action.cdrid, action.domain, action.limit],
+            true);
 
       case LOAD_CHART_RESULTS:
         return state
           .setIn(
-            ['reviewChartData', 'domainCharts', action.cid, action.domain]
-            , fromJS(action.results))
+            ['reviewChartData', 'domainCharts', action.domain]
+            , fromJS(action.results ))
           .deleteIn(
             ['reviewChartData', 'request', action.ns,
               action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
@@ -556,4 +556,5 @@ export const rootReducer: Reducer<CohortSearchState> =
               action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
       default: return state;
     }
-};
+
+  };
