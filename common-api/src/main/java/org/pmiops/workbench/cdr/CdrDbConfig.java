@@ -14,6 +14,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
@@ -94,16 +95,10 @@ public class CdrDbConfig {
           // info, as the autowired PoolConfiguration is initialized from the same set of properties
           // as the workbench DB.
           PoolConfiguration cdrPool = new PoolProperties();
+          BeanUtils.copyProperties(basePoolConfig, cdrPool);
           cdrPool.setUsername(dbUser);
           cdrPool.setPassword(dbPassword);
           cdrPool.setUrl(dbUrl);
-          cdrPool.setTestOnBorrow(basePoolConfig.isTestOnBorrow());
-          cdrPool.setTestWhileIdle(basePoolConfig.isTestWhileIdle());
-          cdrPool.setTimeBetweenEvictionRunsMillis(basePoolConfig.getTimeBetweenEvictionRunsMillis());
-          cdrPool.setValidationQuery(basePoolConfig.getValidationQuery());
-          cdrPool.setInitialSize(basePoolConfig.getInitialSize());
-          cdrPool.setMaxIdle(basePoolConfig.getMaxIdle());
-          cdrPool.setMinIdle(basePoolConfig.getMinIdle());
           tomcatSource.setPoolProperties(cdrPool);
 
           // The Spring autowiring is a bit of a maze here, log something concrete which will allow
