@@ -43,10 +43,6 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
       if (diff > hCoords.width) {
         highlight.style.background = 'none';
       } else {
-        console.log(this.option.name);
-        console.log(diff);
-        console.log(hCoords);
-        // highlight.style.backgroundSize = (hCoords.width - diff).toString() + 'px';
         const percentage = (((hCoords.width - diff) / hCoords.width) * 100).toString();
         highlight.style.background =
           'linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) '
