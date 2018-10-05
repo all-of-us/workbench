@@ -12,6 +12,7 @@ import {
   Domain,
   DomainInfo,
   StandardConceptFilter,
+  WorkspaceAccessLevel,
 } from 'generated';
 
 @Component({
@@ -26,9 +27,14 @@ import {
 export class ConceptSetDetailsComponent {
   wsNamespace: string;
   wsId: string;
+  accessLevel: WorkspaceAccessLevel;
   conceptSet: ConceptSet;
 
+  editing = false;
   editHover = false;
+  editSubmitting = false;
+  editName: string;
+  editDescription: string;
 
   constructor(
     private conceptSetsService: ConceptSetsService,
@@ -36,10 +42,41 @@ export class ConceptSetDetailsComponent {
   ) {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
+    this.accessLevel = this.route.snapshot.data.workspace.accessLevel;
     this.conceptSet = this.route.snapshot.data.conceptSet;
+    this.editName = this.conceptSet.name;
+    this.editDescription = this.conceptSet.description;
+  }
+
+  validateEdits(): boolean {
+    return !!this.editName;
+  }
+
+  submitEdits() {
+    if (!this.validateEdits() || this.editSubmitting) {
+      return;
+    }
+    this.editSubmitting = true;
+    this.conceptSetsService.updateConceptSet(this.wsNamespace, this.wsId, this.conceptSet.id, {
+      ...this.conceptSet,
+      name: this.editName,
+      description: this.editDescription
+    }).subscribe((updated) => {
+      this.conceptSet = updated;
+      this.editSubmitting = false;
+      this.editing = false;
+    }, () => {
+      // TODO(calbach): Handle errors.
+      this.editSubmitting = false;
+    });
   }
 
   openRemoveModal() {
     // TODO(calbach): Implement.
+  }
+
+  get canEdit(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER
+        || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
 }
