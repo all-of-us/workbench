@@ -20,7 +20,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +116,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         criteriaDao.findCriteriaByTypeForName(type, value, resultLimit) :
         criteriaDao.findCriteriaByTypeForCodeOrName(type, value, resultLimit);
     } else {
-      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value, resultLimit);;
+      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value, resultLimit);
     }
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();

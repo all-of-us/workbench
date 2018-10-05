@@ -159,6 +159,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //visit no search parameters
     searchRequest = createSearchRequests(TreeType.VISIT.name(), new ArrayList<>(), new ArrayList<>());
     assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //ppi no search parameters
+    searchRequest = createSearchRequests(TreeType.PPI.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
   }
 
   @Test
@@ -407,6 +411,50 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, visitParam.getConceptId());
+
+    //ppi no type
+    Criteria ppi =
+      createCriteriaChild(null, null, 0, null, null, null);
+    SearchParameter ppiParam = createSearchParameter(ppi, null);
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, ppiParam.getType());
+
+    //ppi bad type
+    ppiParam.type("blah");
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, ppiParam.getType());
+
+    //ppi no domain
+    ppiParam.type(TreeType.PPI.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, ppiParam.getDomain());
+
+    //ppi bad domain
+    ppiParam.domain(DomainType.CONDITION.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, ppiParam.getDomain());
+
+    //ppi no concept id
+    ppiParam.domain(DomainType.OBSERVATION.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
+
+    //ppi no value as number
+    ppiParam.conceptId(1L);
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, NAME, ppiParam.getName());
+
+    //ppi value not a number
+    ppiParam.value("name");
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, VALUE, ppiParam.getValue());
   }
 
   @Test
@@ -1371,6 +1419,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsPPI() throws Exception {
+    //value as concept id
+    Criteria ppiCriteria =
+      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "7", DomainType.OBSERVATION.name(), "5").name(null);
+    SearchParameter ppi = createSearchParameter(ppiCriteria, "7");
+    SearchRequest searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    //value as number
+    ppiCriteria =
+      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, null, DomainType.OBSERVATION.name(), "5").name("7");
+    ppi = createSearchParameter(ppiCriteria, null);
+    searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void getDemoChartInfo() throws Exception {
     SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "Wheel Chair User", "903111", "4023190");
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
@@ -1439,6 +1504,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private SearchParameter createSearchParameter(Criteria criteria, String code) {
     return new SearchParameter()
+      .name(criteria.getName())
       .type(criteria.getType())
       .subtype(criteria.getSubtype())
       .group(criteria.getGroup())
