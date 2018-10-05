@@ -155,17 +155,25 @@ definitions:
             A query specifying how to pull data out of a single table. If tableQuery is not
             specified, just Person.person_id will be extracted.
         $ref: "#/definitions/TableQuery"
+      maxResults:
+        type: integer
+        format: int64
+        description: >
+          The maximum number of results returned in the data table. Defaults to no limit (all
+          matching results are returned.)
+
 
   CdrQuery:
     type: object
     required:
-      - sql
       - bigqueryProject
       - bigqueryDataset
 
     properties:
       sql:
-        description: Google SQL to use when querying the CDR
+        description: >
+          Google SQL to use when querying the CDR. If empty, it means no participants can possibly
+          match the data table specification, and an empty data table should be returned.
         type: string
       parameters:
         description: named query parameters used when executing the above SQL

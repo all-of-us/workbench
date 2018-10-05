@@ -323,6 +323,7 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<CdrQuery> getDataTableQuery(String workspaceNamespace, String workspaceId,
       DataTableSpecification request) {
     // TODO: implement this
+
     return null;
   }
 

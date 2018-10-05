@@ -1,5 +1,8 @@
 package org.pmiops.workbench.cohorts;
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -13,14 +16,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.cohortbuilder.QueryConfiguration;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
@@ -29,13 +36,17 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.CdrQuery;
+import org.pmiops.workbench.model.CdrQueryParameter;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
+import org.pmiops.workbench.model.DataTableSpecification;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -50,8 +61,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class CohortMaterializationService {
 
-  private static final String DOMAIN_CONCEPT_STANDARD = "standard";
-  private static final String DOMAIN_CONCEPT_SOURCE = "source";
+  private static final Function<Entry<String, QueryParameterValue>, CdrQueryParameter> TO_CDR_QUERY_PARAMETER =
+      (entry) -> {
+        CdrQueryParameter parameter = new CdrQueryParameter().name(entry.getKey());
+        QueryParameterValue value = entry.getValue();
+        if (value.getArrayType() != null) {
+          switch (value.getArrayType()) {
+
+          }
+        } else {
+          switch (value.getType()) {
+            case DATE:
+              parameter.setValueDate(value.getValue());
+              break;
+            case DATETIME:
+              parameter.setValueDatetime(value.getValue());
+              break;
+            case INT64:
+              parameter.setValueNumbers(ImmutableList.of(value.get));
+          }
+        }
+        return parameter;
+      };
 
   @VisibleForTesting
   static final String PERSON_ID = "person_id";
@@ -107,19 +138,13 @@ public class CohortMaterializationService {
     throw new IllegalStateException("Table lacks primary key!");
   }
 
-  private TableQueryAndConfig getTableQueryAndConfig(FieldSet fieldSet,
+  private TableQueryAndConfig getTableQueryAndConfig(@Nullable TableQuery tableQuery,
       @Nullable Set<Long> conceptIds) {
-    TableQuery tableQuery;
-    if (fieldSet == null) {
+    if (tableQuery == null) {
       tableQuery = new TableQuery();
       tableQuery.setTableName(PERSON_TABLE);
       tableQuery.setColumns(ImmutableList.of(PERSON_ID));
     } else {
-      tableQuery = fieldSet.getTableQuery();
-      if (tableQuery == null) {
-        // TODO: support other kinds of field sets besides tableQuery
-        throw new BadRequestException("tableQuery must be specified in field sets");
-      }
       String tableName = tableQuery.getTableName();
       if (Strings.isNullOrEmpty(tableName)) {
         throw new BadRequestException("Table name must be specified in field sets");
@@ -223,6 +248,39 @@ public class CohortMaterializationService {
     }
   }
 
+  public CdrQuery getCdrQuery(@Nullable CohortReview cohortReview, String cohortSpec,
+      @Nullable Set<Long> conceptIds, DataTableSpecification dataTableSpecification) {
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    CdrQuery cdrQuery = new CdrQuery();
+    cdrQuery.setBigqueryDataset(cdrVersion.getBigqueryDataset());
+    cdrQuery.setBigqueryProject(cdrVersion.getBigqueryProject());
+    List<CohortStatus> statusFilter = dataTableSpecification.getStatusFilter();
+    if (statusFilter == null) {
+      statusFilter = NOT_EXCLUDED;
+    }
+    SearchRequest searchRequest;
+    try {
+      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
+    } catch (JsonSyntaxException e) {
+      throw new BadRequestException("Invalid cohort spec");
+    }
+    ParticipantCriteria criteria = getParticipantCriteria(statusFilter, cohortReview,
+        searchRequest);
+    if (criteria.getParticipantIdsToInclude() != null
+        && criteria.getParticipantIdsToInclude().isEmpty()) {
+      // There is no cohort review, or no participants matching the status filter;
+      // return an empty response.
+      return cdrQuery;
+    }
+    TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(
+        dataTableSpecification.getTableQuery(), conceptIds);
+    QueryConfiguration queryConfiguration = fieldSetQueryBuilder.buildQuery(criteria, tableQueryAndConfig,
+        dataTableSpecification.getMaxResults(),0L);
+    QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
+    cdrQuery.setSql(jobConfiguration.getQuery());
+    cdrQuery.setParameters(jobConfiguration.getPTO_CDR_QUERY_PARAMETER.transform());
+  }
+
 
   /**
    * Materializes a cohort.
@@ -301,7 +359,8 @@ public class CohortMaterializationService {
         // return an empty response.
         return response;
       }
-      results = fieldSetQueryBuilder.materializeTableQuery(getTableQueryAndConfig(fieldSet,
+      TableQuery tableQuery = fieldSet == null ? null : fieldSet.getTableQuery();
+      results = fieldSetQueryBuilder.materializeTableQuery(getTableQueryAndConfig(tableQuery,
           conceptIds), criteria, limit, offset);
     } else if (fieldSet.getAnnotationQuery() != null) {
       if (cohortReview == null) {

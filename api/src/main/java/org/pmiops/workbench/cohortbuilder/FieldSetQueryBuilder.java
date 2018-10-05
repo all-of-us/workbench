@@ -494,7 +494,7 @@ public class FieldSetQueryBuilder {
 
   private String buildSql(ParticipantCriteria participantCriteria, QueryState queryState,
       ImmutableList<SelectedColumn> selectColumns, String whereSql,
-      ImmutableList<OrderByColumn> orderByColumns, long resultSize, long offset) {
+      ImmutableList<OrderByColumn> orderByColumns, Long resultSize, long offset) {
 
     // Joining to tables after applying the LIMIT performs better in BigQuery than
     // joining to them before. Figure out if there are any tables that can be joined to after
@@ -567,8 +567,13 @@ public class FieldSetQueryBuilder {
         }
       }
     }
-    StringBuilder limitOffsetSql = new StringBuilder("\nlimit ");
-    limitOffsetSql.append(resultSize);
+    StringBuilder limitOffsetSql;
+    if (resultSize == null) {
+      limitOffsetSql = new StringBuilder("\n");
+    } else {
+      limitOffsetSql = new StringBuilder("\nlimit ");
+      limitOffsetSql.append(resultSize);
+    }
     if (offset > 0) {
       limitOffsetSql.append(" offset ");
       limitOffsetSql.append(offset);
@@ -614,8 +619,8 @@ public class FieldSetQueryBuilder {
     return outerSql.toString();
   }
 
-  private QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
-      TableQueryAndConfig tableQueryAndConfig, long resultSize, long offset) {
+  public QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
+      TableQueryAndConfig tableQueryAndConfig, Long resultSize, long offset) {
     QueryState queryState = new QueryState();
     queryState.schemaConfig = tableQueryAndConfig.getConfig();
     TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
