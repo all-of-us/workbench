@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+    <changeSet author="ursas" id="changelog-47">
+        <addColumn tableName="user_recent_resource">
+            <column name="concept_set_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="user_recent_resource"
+                                 baseColumnNames="concept_set_id"
+                                 constraintName="fk_cache_concept_set_id"
+                                 referencedTableName="concept_set"
+                                 referencedColumnNames="concept_set_id" onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

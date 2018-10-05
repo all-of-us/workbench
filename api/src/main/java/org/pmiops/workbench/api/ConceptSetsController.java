@@ -19,6 +19,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
@@ -131,7 +132,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setParticipantCount(0);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
-      // TODO: add recent resource entry for concept sets [RW-1129]
+      userRecentResourceService.updateConceptSetEntry(workspace.getWorkspaceId(), userProvider.get().getUserId(), dbConceptSet.getConceptSetId(), now);
     } catch (DataIntegrityViolationException e) {
       throw new BadRequestException(String.format(
           "Concept set \"/%s/%s/%s\" already exists.",
