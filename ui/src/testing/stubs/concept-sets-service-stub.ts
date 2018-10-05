@@ -58,17 +58,6 @@ export class ConceptSetsServiceStub {
     });
   }
 
-  public deleteConceptSet(workspaceNamespace: string, workspaceId: string, conceptId: number):
-  Observable<void> {
-    return new Observable<void>(observer => {
-      setTimeout(() => {
-        this.conceptSets = [];
-        observer.next();
-        observer.complete();
-      });
-    });
-  }
-
   public createConceptSet(workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
                           extraHttpRequestParams?: any): Observable<ConceptSet> {
     return new Observable<ConceptSet>(observer => {
@@ -76,6 +65,22 @@ export class ConceptSetsServiceStub {
         observer.next(this.conceptSets[0]);
         observer.complete();
       });
+    });
+  }
+
+  public deleteConceptSet(
+      workspaceNamespace: string, workspaceId: string,
+      conceptSetId: number): Observable<void> {
+    return new Observable<void>(obs => {
+      setTimeout(() => {
+        const index = this.conceptSets.findIndex(cs => cs.id === conceptSetId);
+        if (index < 0) {
+          throw Error(`concept set ${conceptSetId} not found`);
+        }
+        this.conceptSets.splice(index, 1);
+        obs.next();
+        obs.complete();
+      }, 0);
     });
   }
 }

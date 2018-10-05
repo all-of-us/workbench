@@ -20,6 +20,19 @@
   margin-top: .5rem;
 }
 
+.action-item {
+  text-align: left;
+  color: #4A4A4A;
+  background-color: white;
+  fill: none;
+  cursor: pointer;
+  border: none;
+}
+
+.action-item:hover {
+  background-color: #E0EAF1;
+}
+
 .ellipsis-vertical {
   fill: #2691D0;
 }

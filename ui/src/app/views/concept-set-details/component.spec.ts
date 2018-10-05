@@ -3,7 +3,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
@@ -11,6 +11,7 @@ import {EditComponent} from 'app/icons/edit/component';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetDetailsComponent} from 'app/views/concept-set-details/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {SlidingFabComponent} from 'app/views/sliding-fab/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
@@ -70,6 +71,7 @@ describe('ConceptSetDetailsComponent', () => {
         ConceptAddModalComponent,
         ConceptSetDetailsComponent,
         ConceptTableComponent,
+        ConfirmDeleteModalComponent,
         EditComponent,
         HighlightSearchPipe,
         SlidingFabComponent,
@@ -149,7 +151,7 @@ describe('ConceptSetDetailsComponent', () => {
     expect(de.query(By.css('.concept-set-name')).nativeElement.textContent)
       .toContain(newName);
     expect(de.query(By.css('.concept-set-details')).nativeElement.textContent)
-      .toContain('cool new description');
+      .toContain(newDesc);
 
     expect(conceptSetsStub.conceptSets[0].name).toEqual(newName);
     expect(conceptSetsStub.conceptSets[0].description).toEqual(newDesc);
@@ -194,5 +196,37 @@ describe('ConceptSetDetailsComponent', () => {
     // Content didn't change.
     expect(conceptSetsStub.conceptSets[0].name).toEqual(originalName);
     expect(conceptSetsStub.conceptSets[0].description).toEqual(originalDesc);
+  }));
+
+  it('should allow edits via the action menu', fakeAsync(() => {
+    setUpComponent();
+
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
+    simulateClick(fixture, de.query(By.css('.action-edit')));
+
+    const newName = 'cool new name';
+    simulateInput(fixture, de.query(By.css('.edit-name')), newName);
+    simulateClick(fixture, de.query(By.css('.submit-edit-button')));
+    updateAndTick(fixture);
+
+    expect(de.query(By.css('.concept-set-name')).nativeElement.textContent)
+      .toContain(newName);
+
+    expect(conceptSetsStub.conceptSets[0].name).toEqual(newName);
+  }));
+
+  it('should delete via action menu', fakeAsync(() => {
+    const router = TestBed.get(Router);
+    spyOn(router, 'navigate');
+    setUpComponent();
+
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
+    simulateClick(fixture, de.query(By.css('.action-delete')));
+    simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
+
+    expect(router.navigate).toHaveBeenCalled();
+    expect(conceptSetsStub.conceptSets).toEqual([]);
   }));
 });
