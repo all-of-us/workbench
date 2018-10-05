@@ -34,8 +34,8 @@ export class RecentWorkComponent implements OnInit, HostListener {
   onResize() {
     if ((this.resourcesLoading === false) && (this.parentWidth)) {
       console.log(this.parentWidth);
-      console.log(Math.round((this.parentWidth * 2/3) / 200));
-      this.size = Math.floor(((this.parentWidth * 2/3) - 100) / 200);
+      console.log(Math.round((this.parentWidth * 2 / 3) / 200));
+      this.size = Math.floor(((this.parentWidth * 2 / 3) - 100) / 200);
       this.updateList();
     }
   }

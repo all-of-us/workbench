@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild, ElementRef, HostListener} from '@angular/core';
+import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {hasRegisteredAccess} from 'app/utils';
@@ -63,7 +63,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
   @ViewChild(RecentWorkComponent)
-  @ViewChild('recentWork') eMainFrame : ElementRef;
+  @ViewChild('recentWork')
+  eMainFrame: ElementRef;
   width: number;
 
   constructor(
