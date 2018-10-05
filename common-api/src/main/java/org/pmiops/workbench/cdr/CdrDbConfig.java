@@ -14,6 +14,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
@@ -93,15 +94,17 @@ public class CdrDbConfig {
           // explicitly initialize the pool parameters here. We override the primary connection
           // info, as the autowired PoolConfiguration is initialized from the same set of properties
           // as the workbench DB.
-          basePoolConfig.setUsername(dbUser);
-          basePoolConfig.setPassword(dbPassword);
-          basePoolConfig.setUrl(dbUrl);
-          tomcatSource.setPoolProperties(basePoolConfig);
+          PoolConfiguration cdrPool = new PoolProperties();
+          BeanUtils.copyProperties(basePoolConfig, cdrPool);
+          cdrPool.setUsername(dbUser);
+          cdrPool.setPassword(dbPassword);
+          cdrPool.setUrl(dbUrl);
+          tomcatSource.setPoolProperties(cdrPool);
 
           // The Spring autowiring is a bit of a maze here, log something concrete which will allow
           // verification that the DB settings in application.properties are actually being loaded.
           log.info("using Tomcat pool for CDR data source, with minIdle: " +
-              basePoolConfig.getMinIdle());
+            cdrPool.getMinIdle());
         } else {
           log.warn("not using Tomcat pool or initializing pool configuration; " +
               "this should only happen within tests");
