@@ -229,4 +229,27 @@ describe('ConceptSetDetailsComponent', () => {
     expect(router.navigate).toHaveBeenCalled();
     expect(conceptSetsStub.conceptSets).toEqual([]);
   }));
+
+  fit('should remove concepts', fakeAsync(() => {
+    // Start with 3 concepts, delete two.
+    const origConcepts = ConceptStubVariables.STUB_CONCEPTS.slice(0, 3);
+    setUpComponent({
+      ...newConceptSet(),
+      concepts: origConcepts.slice()
+    });
+
+    const de = fixture.debugElement;
+    const checkboxes = de.queryAll(
+      By.css('app-concept-table .datagrid-body input[type="checkbox"]'));
+    simulateClick(fixture, checkboxes[0]);
+    simulateClick(fixture, checkboxes[2]);
+    simulateClick(fixture, de.query(By.css('.sliding-button')));
+    simulateClick(fixture, de.query(By.css('.confirm-remove-btn')));
+    updateAndTick(fixture);
+
+    expect(de.queryAll(By.css('app-concept-table .datagrid-body .datagrid-row')).length).toEqual(1);
+    // Just the middle concept should remain.
+    const wantConcepts = [origConcepts[1]];
+    expect(conceptSetsStub.conceptSets[0].concepts).toEqual(wantConcepts);
+  }));
 });

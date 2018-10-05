@@ -1,6 +1,8 @@
 import {Response, ResponseOptions} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
+import {ConceptsServiceStub} from './concepts-service-stub.ts';
+
 import {
   ConceptSet,
   ConceptSetListResponse,
@@ -9,9 +11,15 @@ import {
 
 export class ConceptSetsServiceStub {
 
-  constructor(public conceptSets?: ConceptSet[]) {
+  constructor(
+    public conceptSets?: ConceptSet[],
+    public conceptsStub?: ConceptsServiceStub
+  ) {
     if (!this.conceptSets) {
       this.conceptSets = ConceptSetsServiceStub.stubConceptSets();
+    }
+    if (!conceptsStub) {
+      this.conceptsStub = new ConceptsServiceStub();
     }
   }
 
@@ -65,6 +73,34 @@ export class ConceptSetsServiceStub {
         observer.next(this.conceptSets[0]);
         observer.complete();
       });
+    });
+  }
+
+  public updateConceptSetConcepts(
+      workspaceNamespace: string, workspaceId: string, conceptSetId: number,
+      req: UpdateConceptSetRequest): Observable<ConceptSet> {
+    return new Observable<ConceptSet>(obs => {
+      setTimeout(() => {
+        const target = this.conceptSets.find(cs => cs.id === conceptSetId);
+        if (!target) {
+          throw Error(`concept set ${conceptSetId} not found`);
+        }
+        for (const id of req.removedIds || []) {
+          const index = target.concepts.findIndex(c => c.conceptId === id);
+          if (index >= 0) {
+            target.concepts.splice(index, 1);
+          }
+        }
+        for (const id of req.addedIds || []) {
+          const concept = conceptsStub.concepts.find(c => c.conceptId === id);
+          if (!concept) {
+            throw Error(`concept ${id} not found`);
+          }
+          target.concepts.push(concept);
+        }
+        obs.next(target);
+        obs.complete();
+      }, 0);
     });
   }
 

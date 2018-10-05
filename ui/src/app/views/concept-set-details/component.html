@@ -70,10 +70,20 @@
   <div *ngIf="conceptSet.concepts?.length" class="concept-table-wrap">
     <app-concept-table [concepts]="conceptSet.concepts"></app-concept-table>
   </div>
-  <app-sliding-fab *ngIf="canEdit" [expanded]="'Remove from set'" (submit)="openRemoveModal()">
+  <app-sliding-fab *ngIf="showRemoveFab" [expanded]="'Remove from set'" (submit)="removing=true">
     <clr-icon shape="trash" class="remove-icon"></clr-icon>
   </app-sliding-fab>
 </app-top-box>
 
 <app-confirm-delete-modal [resourceType]="'Concept Set'" [resource]=conceptSet (receiveDelete)=receiveDelete()>
 </app-confirm-delete-modal>
+
+<clr-modal [(clrModalOpen)]="removing" [clrModalSize]="'md'">
+  <div class="modal-title">
+    <div *ngIf="removing" class="modal-title-text">Are you sure you want to remove {{selectedConceptsCount}} concepts from this set?</div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="removing=false">Cancel</button>
+    <button type="button" class="btn btn-primary confirm-remove-btn" (click)="removeConcepts()" [clrLoading]="removeSubmitting" [disabled]="removeSubmitting">Remove Concepts</button>
+  </div>
+</clr-modal>
