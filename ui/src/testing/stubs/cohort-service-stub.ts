@@ -1,7 +1,15 @@
 import {Observable} from 'rxjs/Observable';
 
-import {Cohort, CohortListResponse, EmptyResponse, Workspace} from 'generated';
+import {
+  Cohort,
+  CohortListResponse,
+  EmptyResponse,
+  RecentResource,
+  Workspace,
+  WorkspaceAccessLevel
+} from 'generated';
 
+import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = 1;
@@ -44,6 +52,7 @@ class CohortStub implements Cohort {
 export class CohortsServiceStub {
   public workspaces: Workspace[];
   public cohorts: CohortStub[];
+  public resourceList: RecentResource[];
 
   constructor() {
     const stubWorkspace: Workspace = {
@@ -75,6 +84,8 @@ export class CohortsServiceStub {
     };
     this.cohorts = [exampleCohort, exampleCohortTwo];
     this.workspaces = [stubWorkspace];
+    this.resourceList = convertToResources(this.cohorts, stubWorkspace.namespace,
+      stubWorkspace.id, WorkspaceAccessLevel.OWNER, ResourceType.COHORT);
   }
 
   getCohort(_: string, wsid: string, cid: number): Observable<Cohort> {
