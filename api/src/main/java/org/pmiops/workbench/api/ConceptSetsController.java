@@ -101,13 +101,15 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Autowired
   ConceptSetsController(WorkspaceService workspaceService, ConceptSetDao conceptSetDao,
       ConceptDao conceptDao, ConceptSynonymDao conceptSynonymDao, ConceptService conceptService,
-      ConceptBigQueryService conceptBigQueryService, Provider<User> userProvider, Clock clock) {
+      ConceptBigQueryService conceptBigQueryService, UserRecentResourceService userRecentResourceService,
+                        Provider<User> userProvider, Clock clock) {
     this.workspaceService = workspaceService;
     this.conceptSetDao = conceptSetDao;
     this.conceptDao = conceptDao;
     this.conceptService = conceptService;
     this.conceptSynonymDao = conceptSynonymDao;
     this.conceptBigQueryService = conceptBigQueryService;
+    this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.clock = clock;
     this.maxConceptsPerSet = MAX_CONCEPTS_PER_SET;
