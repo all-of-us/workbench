@@ -1,11 +1,26 @@
 <app-top-box>
   <div class="concept-set-header">
-    <!-- TODO(calbach): Implement the action menu. -->
     <clr-dropdown class="action-menu-dropdown">
-      <button type="button" class="resource-menu" [disabled]="true" clrDropdownTrigger>
+      <!-- TODO: Once clone is added to the menu, never disable the dropdown. -->
+      <button type="button" class="resource-menu" [disabled]="!canEdit" clrDropdownTrigger>
         <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
       </button>
-      <clr-dropdown-menu *clrIfOpen></clr-dropdown-menu>
+      <clr-dropdown-menu *clrIfOpen>
+        <button clrDropdownItem class="action-item action-edit"
+            (click)="editing=true"
+            [class.disabled]="!canEdit"
+            [disabled]="!canEdit">
+          <clr-icon shape="pencil"></clr-icon>
+          Edit
+        </button>
+        <button clrDropdownItem class="action-item action-delete"
+            (click)="deleteModal.open()"
+            [class.disabled]="!canEdit"
+            [disabled]="!canEdit">
+          <clr-icon shape="trash"></clr-icon>
+          Delete
+        </button>
+      </clr-dropdown-menu>
     </clr-dropdown>
     <div class="concept-set-details">
       <div class="concept-set-name">
@@ -59,3 +74,6 @@
     <clr-icon shape="trash" class="remove-icon"></clr-icon>
   </app-sliding-fab>
 </app-top-box>
+
+<app-confirm-delete-modal [resourceType]="'Concept Set'" [resource]=conceptSet (receiveDelete)=receiveDelete()>
+</app-confirm-delete-modal>
