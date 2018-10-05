@@ -688,7 +688,7 @@ public class FieldSetQueryBuilder {
    */
   public Iterable<Map<String, Object>> materializeTableQuery(TableQueryAndConfig tableQueryAndConfig,
       ParticipantCriteria criteria, int limit, long offset) {
-    QueryConfiguration queryConfiguration = buildQuery(criteria, tableQueryAndConfig, limit, offset);
+    QueryConfiguration queryConfiguration = buildQuery(criteria, tableQueryAndConfig, (long) limit, offset);
     QueryResult result;
     QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
     result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));

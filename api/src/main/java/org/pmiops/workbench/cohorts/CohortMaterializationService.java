@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohorts;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -11,17 +10,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
@@ -43,7 +31,6 @@ import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CdrQuery;
-import org.pmiops.workbench.model.CdrQueryParameter;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.DataTableSpecification;
@@ -58,30 +45,47 @@ import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Service
 public class CohortMaterializationService {
 
-  private static final Function<Entry<String, QueryParameterValue>, CdrQueryParameter> TO_CDR_QUERY_PARAMETER =
+  // See https://cloud.google.com/bigquery/docs/parameterized-queries for JSON configuration of query parameters
+  private static final Function<Map.Entry<String, QueryParameterValue>, Map<String, Object>> TO_QUERY_PARAMETER_MAP =
       (entry) -> {
-        CdrQueryParameter parameter = new CdrQueryParameter().name(entry.getKey());
+        Map<String, Object> result = new HashMap<>();
+        result.put("name", entry.getKey());
         QueryParameterValue value = entry.getValue();
-        if (value.getArrayType() != null) {
-          switch (value.getArrayType()) {
-
-          }
+        Map<String, Object> parameterTypeMap = new HashMap<>();
+        Map<String, Object> parameterValueMap = new HashMap<>();
+        parameterTypeMap.put("type", value.getType().toString());
+        if (value.getArrayType() == null) {
+          parameterValueMap.put("value", value.getValue());
         } else {
-          switch (value.getType()) {
-            case DATE:
-              parameter.setValueDate(value.getValue());
-              break;
-            case DATETIME:
-              parameter.setValueDatetime(value.getValue());
-              break;
-            case INT64:
-              parameter.setValueNumbers(ImmutableList.of(value.get));
+          Map<String, Object> arrayTypeMap = new HashMap<>();
+          arrayTypeMap.put("type", value.getArrayType().toString());
+          parameterTypeMap.put("arrayType", arrayTypeMap);
+          ArrayList<Map<String, Object>> values = new ArrayList<>();
+          for (QueryParameterValue arrayValue : value.getArrayValues()) {
+            Map<String, Object> valueMap = new HashMap<>();
+            valueMap.put("value", arrayValue.getValue());
+            values.add(valueMap);
           }
+          parameterValueMap.put("arrayValues", values.toArray());
         }
-        return parameter;
+        result.put("parameterType", parameterTypeMap);
+        result.put("parameterValue", parameterValueMap);
+        return result;
       };
 
   @VisibleForTesting
@@ -269,7 +273,7 @@ public class CohortMaterializationService {
     if (criteria.getParticipantIdsToInclude() != null
         && criteria.getParticipantIdsToInclude().isEmpty()) {
       // There is no cohort review, or no participants matching the status filter;
-      // return an empty response.
+      // return a query with no SQL, indicating there should be no results.
       return cdrQuery;
     }
     TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(
@@ -278,9 +282,14 @@ public class CohortMaterializationService {
         dataTableSpecification.getMaxResults(),0L);
     QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
     cdrQuery.setSql(jobConfiguration.getQuery());
-    cdrQuery.setParameters(jobConfiguration.getPTO_CDR_QUERY_PARAMETER.transform());
+    Map<String, Object> configurationMap = new HashMap<>();
+    Map<String, Object> queryConfigurationMap = new HashMap<>();
+    configurationMap.put("query", queryConfigurationMap);
+    queryConfigurationMap.put("queryParameters",
+        jobConfiguration.getNamedParameters().entrySet().stream().map(TO_QUERY_PARAMETER_MAP).toArray());
+    cdrQuery.setConfiguration(configurationMap);
+    return cdrQuery;
   }
-
 
   /**
    * Materializes a cohort.

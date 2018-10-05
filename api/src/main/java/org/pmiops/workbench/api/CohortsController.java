@@ -2,16 +2,6 @@ package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -38,11 +28,23 @@ import org.pmiops.workbench.model.DataTableSpecification;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
 public class CohortsController implements CohortsApiDelegate {
@@ -240,6 +242,32 @@ public class CohortsController implements CohortsApiDelegate {
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
+  private Set<Long> getConceptIds(Workspace workspace, TableQuery tableQuery) {
+    String conceptSetName = tableQuery.getConceptSetName();
+    if (conceptSetName != null) {
+      ConceptSet conceptSet = conceptSetDao.findConceptSetByNameAndWorkspaceId(conceptSetName,
+          workspace.getWorkspaceId());
+      if (conceptSet == null) {
+        throw new NotFoundException(
+            String.format("Couldn't find concept set with name %s in workspace %s/%s",
+                conceptSetName, workspace.getWorkspaceNamespace(), workspace.getWorkspaceId()));
+      }
+      String tableName = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
+      if (tableName == null) {
+        throw new ServerErrorException("Couldn't find table for domain: " +
+            conceptSet.getDomainEnum());
+      }
+      if (tableName != tableQuery.getTableName()) {
+        throw new BadRequestException(
+            String.format("Can't use concept set for domain %s with table %s",
+                conceptSet.getDomainEnum(),
+                tableQuery.getTableName()));
+      }
+      return conceptSet.getConceptIds();
+    }
+    return null;
+  }
+
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
       String workspaceId, MaterializeCohortRequest request) {
@@ -279,28 +307,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
     Set<Long> conceptIds = null;
     if (request.getFieldSet() != null && request.getFieldSet().getTableQuery() != null) {
-      String conceptSetName = request.getFieldSet().getTableQuery().getConceptSetName();
-      if (conceptSetName != null) {
-        ConceptSet conceptSet = conceptSetDao.findConceptSetByNameAndWorkspaceId(conceptSetName,
-            workspace.getWorkspaceId());
-        if (conceptSet == null) {
-          throw new NotFoundException(
-              String.format("Couldn't find concept set with name %s in workspace %s/%s",
-                 conceptSetName, workspaceNamespace, workspaceId));
-        }
-        String tableName = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
-        if (tableName == null) {
-          throw new ServerErrorException("Couldn't find table for domain: " +
-              conceptSet.getDomainEnum());
-        }
-        if (tableName != request.getFieldSet().getTableQuery().getTableName()) {
-          throw new BadRequestException(
-              String.format("Can't use concept set for domain %s with table %s",
-                  conceptSet.getDomainEnum(),
-                  request.getFieldSet().getTableQuery().getTableName()));
-        }
-        conceptIds = conceptSet.getConceptIds();
-      }
+      conceptIds = getConceptIds(workspace, request.getFieldSet().getTableQuery());
     }
 
     Integer pageSize = request.getPageSize();
@@ -322,9 +329,42 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CdrQuery> getDataTableQuery(String workspaceNamespace, String workspaceId,
       DataTableSpecification request) {
-    // TODO: implement this
+    Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    CdrVersion cdrVersion = workspace.getCdrVersion();
 
-    return null;
+    if (request.getCdrVersionName() != null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
+        throw new NotFoundException(String.format("Couldn't find CDR version with name %s",
+            request.getCdrVersionName()));
+      }
+      cdrVersionService.setCdrVersion(cdrVersion);
+    }
+    String cohortSpec;
+    CohortReview cohortReview = null;
+    if (request.getCohortName() != null) {
+      org.pmiops.workbench.db.model.Cohort cohort =
+          cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
+      if (cohort == null) {
+        throw new NotFoundException(
+            String.format("Couldn't find cohort with name %s in workspace %s/%s",
+                request.getCohortName(), workspaceNamespace, workspaceId));
+      }
+      cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohort.getCohortId(),
+          cdrVersion.getCdrVersionId());
+      cohortSpec = cohort.getCriteria();
+    } else if (request.getCohortSpec() != null) {
+      cohortSpec = request.getCohortSpec();
+      if (request.getStatusFilter() != null) {
+        throw new BadRequestException("statusFilter cannot be used with cohortSpec");
+      }
+    } else {
+      throw new BadRequestException("Must specify either cohortName or cohortSpec");
+    }
+    Set<Long> conceptIds = getConceptIds(workspace, request.getTableQuery());;
+    CdrQuery query = cohortMaterializationService.getCdrQuery(cohortReview, cohortSpec, conceptIds, request);
+    return ResponseEntity.ok(query);
   }
 
   @Override
