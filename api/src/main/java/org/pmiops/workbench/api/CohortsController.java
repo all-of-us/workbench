@@ -362,7 +362,7 @@ public class CohortsController implements CohortsApiDelegate {
     } else {
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
-    Set<Long> conceptIds = getConceptIds(workspace, request.getTableQuery());;
+    Set<Long> conceptIds = getConceptIds(workspace, request.getTableQuery());
     CdrQuery query = cohortMaterializationService.getCdrQuery(cohortReview, cohortSpec, conceptIds, request);
     return ResponseEntity.ok(query);
   }
