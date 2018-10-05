@@ -1,6 +1,8 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {NgxPopperModule} from 'ngx-popper';
 
-import { OptionInfoComponent } from './option-info.component';
+import {SafeHtmlPipe} from '../safe-html.pipe';
+import {OptionInfoComponent} from './option-info.component';
 
 describe('OptionInfoComponent', () => {
   let component: OptionInfoComponent;
@@ -8,7 +10,8 @@ describe('OptionInfoComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ OptionInfoComponent ]
+      declarations: [ OptionInfoComponent, SafeHtmlPipe ],
+      imports: [ NgxPopperModule]
     })
     .compileComponents();
   }));
@@ -16,6 +19,22 @@ describe('OptionInfoComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(OptionInfoComponent);
     component = fixture.componentInstance;
+    component.option = {
+      code: '385321',
+      conceptId: 19101117,
+      count: null,
+      displayName: 'Bioplex brand of carbenoxolone sodium',
+      domainId: '',
+      group: false,
+      hasAttributes: false,
+      id: 332800,
+      name: 'Bioplex brand of carbenoxolone sodium',
+      parentId: 0,
+      path: '',
+      selectable: true,
+      subtype: 'BRAND',
+      type: 'DRUG',
+    };
     fixture.detectChanges();
   });
 

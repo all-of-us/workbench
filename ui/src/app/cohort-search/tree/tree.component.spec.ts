@@ -9,6 +9,7 @@ import {NgxPopperModule} from 'ngx-popper';
 import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
 import {NodeInfoComponent} from '../node-info/node-info.component';
 import {NodeComponent} from '../node/node.component';
+import {OptionInfoComponent} from '../option-info/option-info.component';
 import {
 activeCriteriaTreeType,
 CohortSearchActions,
@@ -48,6 +49,7 @@ describe('TreeComponent', () => {
         TreeComponent,
         NodeComponent,
         NodeInfoComponent,
+        OptionInfoComponent,
         SafeHtmlPipe,
         SearchBarComponent,
       ],
