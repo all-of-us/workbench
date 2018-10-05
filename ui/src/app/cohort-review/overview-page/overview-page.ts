@@ -39,6 +39,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   isCancelTimerInitiated: any = false;
   domainTitle: '';
   trackClickedDomains = false;
+  test = false;
   private subscription: Subscription;
 
   constructor(
@@ -86,6 +87,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
   getDifferentCharts(names) {
+    this.test = true;
     this.demoGraph = false;
     this.domainTitle = names;
     this.fetchChartsData(names);
@@ -121,6 +123,7 @@ export class OverviewPage implements OnInit, OnDestroy {
       .select(isChartLoading(name, cid))
       .filter(domain => !!domain)
       .subscribe(loading => {
+        this.test = false;
         this.loading = loading;
         const totalCount = this.loading.toJS().count;
         if (name === this.domainTitle) {

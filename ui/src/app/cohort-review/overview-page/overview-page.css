@@ -155,6 +155,7 @@
 }
 .btn-disable {
     pointer-events: none;
+    opacity: 0.5;
 }
 .btn-outline {
     pointer-events: none;
