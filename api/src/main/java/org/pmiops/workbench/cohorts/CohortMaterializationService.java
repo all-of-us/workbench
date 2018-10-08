@@ -14,7 +14,6 @@ import com.google.gson.JsonSyntaxException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,9 +66,9 @@ public class CohortMaterializationService {
       (entry) -> {
         QueryParameterValue value = entry.getValue();
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.<String, Object>builder()
-            .put("name", entry.getKey())
-            .put("type", value.getType().toString());
+            .put("name", entry.getKey());
         ImmutableMap.Builder<String, Object> parameterTypeMap = ImmutableMap.builder();
+        parameterTypeMap.put("type", value.getType().toString());
         ImmutableMap.Builder<String, Object> parameterValueMap = ImmutableMap.builder();
         if (value.getArrayType() == null) {
           parameterValueMap.put("value", value.getValue());
@@ -255,12 +254,12 @@ public class CohortMaterializationService {
   }
 
   @VisibleForTesting
-  CdrQuery getCdrQuery(@Nullable CohortReview cohortReview, SearchRequest searchRequest,
-      @Nullable Set<Long> conceptIds, DataTableSpecification dataTableSpecification) {
+  CdrQuery getCdrQuery(SearchRequest searchRequest, DataTableSpecification dataTableSpecification,
+      @Nullable CohortReview cohortReview, @Nullable Set<Long> conceptIds) {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     CdrQuery cdrQuery = new CdrQuery()
-        .setBigqueryDataset(cdrVersion.getBigqueryDataset())
-        .setBigqueryProject(cdrVersion.getBigqueryProject());
+        .bigqueryDataset(cdrVersion.getBigqueryDataset())
+        .bigqueryProject(cdrVersion.getBigqueryProject());
     List<CohortStatus> statusFilter = dataTableSpecification.getStatusFilter();
     if (statusFilter == null) {
       statusFilter = NOT_EXCLUDED;
@@ -288,15 +287,15 @@ public class CohortMaterializationService {
     return cdrQuery;
   }
 
-  public CdrQuery getCdrQuery(@Nullable CohortReview cohortReview, String cohortSpec,
-      @Nullable Set<Long> conceptIds, DataTableSpecification dataTableSpecification) {
+  public CdrQuery getCdrQuery(String cohortSpec, DataTableSpecification dataTableSpecification,
+      @Nullable CohortReview cohortReview, @Nullable Set<Long> conceptIds) {
     SearchRequest searchRequest;
     try {
       searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
     } catch (JsonSyntaxException e) {
       throw new BadRequestException("Invalid cohort spec");
     }
-    return getCdrQuery(cohortReview, searchRequest, conceptIds, dataTableSpecification);
+    return getCdrQuery(searchRequest, dataTableSpecification, cohortReview, conceptIds);
   }
 
   /**

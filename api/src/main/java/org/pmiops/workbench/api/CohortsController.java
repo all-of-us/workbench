@@ -2,6 +2,16 @@ package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
+import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -34,17 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import javax.persistence.OptimisticLockException;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @RestController
 public class CohortsController implements CohortsApiDelegate {
@@ -363,7 +362,7 @@ public class CohortsController implements CohortsApiDelegate {
       throw new BadRequestException("Must specify either cohortName or cohortSpec");
     }
     Set<Long> conceptIds = getConceptIds(workspace, request.getTableQuery());
-    CdrQuery query = cohortMaterializationService.getCdrQuery(cohortReview, cohortSpec, conceptIds, request);
+    CdrQuery query = cohortMaterializationService.getCdrQuery(cohortSpec, request, cohortReview, conceptIds);
     return ResponseEntity.ok(query);
   }
 

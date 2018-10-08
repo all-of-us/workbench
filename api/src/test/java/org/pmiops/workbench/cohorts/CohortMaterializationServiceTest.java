@@ -3,19 +3,15 @@ package org.pmiops.workbench.cohorts;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -178,8 +174,8 @@ public class CohortMaterializationServiceTest {
 
   @Test
   public void testGetCdrQueryNoTableQuery() {
-    CdrQuery cdrQuery = cohortMaterializationService.getCdrQuery(cohortReview,
-        SearchRequests.allGenders(), null, new DataTableSpecification());
+    CdrQuery cdrQuery = cohortMaterializationService.getCdrQuery(
+        SearchRequests.allGenders(), new DataTableSpecification(), cohortReview, null);
     assertThat(cdrQuery.getBigqueryDataset()).isEqualTo(DATA_SET_ID);
     assertThat(cdrQuery.getBigqueryProject()).isEqualTo(PROJECT_ID);
     // TODO: consider making parameter names deterministic, check the entire query
@@ -213,8 +209,7 @@ public class CohortMaterializationServiceTest {
 
   @Test
   public void testMaterializeAnnotationQueryNoPagination() {
-    FieldSet fieldSet = new FieldSet();
-    fieldSet.setAnnotationQuery(new AnnotationQuery());
+    FieldSet fieldSet = new FieldSet().annotationQuery(new AnnotationQuery());
     MaterializeCohortResponse response =
         cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(),
             null, 0, makeRequest(fieldSet, 1000));
@@ -225,10 +220,9 @@ public class CohortMaterializationServiceTest {
 
   @Test
   public void testMaterializeAnnotationQueryWithPagination() {
-    FieldSet fieldSet = new FieldSet();
-    fieldSet.setAnnotationQuery(new AnnotationQuery());
-    MaterializeCohortRequest request = makeRequest(fieldSet, 1);
-    request.setStatusFilter(ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED));
+    FieldSet fieldSet = new FieldSet().annotationQuery(new AnnotationQuery());
+    MaterializeCohortRequest request = makeRequest(fieldSet, 1)
+        .statusFilter(ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED));
     MaterializeCohortResponse response =
         cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), null, 0, request);
     ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
@@ -244,35 +238,33 @@ public class CohortMaterializationServiceTest {
   }
 
   private MaterializeCohortRequest makeRequest(int pageSize) {
-    MaterializeCohortRequest request = new MaterializeCohortRequest();
-    request.setPageSize(pageSize);
-    return request;
+    return new MaterializeCohortRequest().pageSize(pageSize);
   }
 
   private MaterializeCohortRequest makeRequest(FieldSet fieldSet, int pageSize) {
-    MaterializeCohortRequest request = makeRequest(pageSize);
-    request.setFieldSet(fieldSet);
-    return request;
+    return makeRequest(pageSize).fieldSet(fieldSet);
   }
 
   private ParticipantCohortStatus makeStatus(long cohortReviewId, long participantId, CohortStatus status) {
-    ParticipantCohortStatusKey key = new ParticipantCohortStatusKey();
-    key.setCohortReviewId(cohortReviewId);
-    key.setParticipantId(participantId);
-    ParticipantCohortStatus result = new ParticipantCohortStatus();
-    result.setStatusEnum(status);
-    result.setParticipantKey(key);
+    ParticipantCohortStatusKey key = new ParticipantCohortStatusKey()
+        .cohortReviewId(cohortReviewId)
+        .participantId(participantId);
+    ParticipantCohortStatus result = new ParticipantCohortStatus()
+        .statusEnum(status)
+        .participantKey(key);
     return result;
   }
 
-  private void assertResults(MaterializeCohortResponse response, ImmutableMap<String, Object>... results) {
-    if (response.getResults().size() != results.length) {
-      fail("Expected " + results.length + ", got " + response.getResults().size() + "; actual results: " +
-          response.getResults());
+  private void assertResults(MaterializeCohortResponse actualResponse,
+      ImmutableMap<String, Object>... expectedResults) {
+    if (actualResponse.getResults().size() != expectedResults.length) {
+      fail("Expected " + expectedResults.length + ", got " + actualResponse.getResults().size()
+          + "; actual results: " + actualResponse.getResults());
     }
-    for (int i = 0; i < response.getResults().size(); i++) {
+    for (int i = 0; i < actualResponse.getResults().size(); i++) {
       MapDifference<String, Object> difference =
-          Maps.difference((Map<String, Object>) response.getResults().get(i), results[i]);
+          Maps.difference((Map<String, Object>) actualResponse.getResults().get(i),
+              expectedResults[i]);
       if (!difference.areEqual()) {
         fail("Result " + i + " had difference: " + difference.entriesDiffering()
             + "; unexpected entries: " + difference.entriesOnlyOnLeft()
