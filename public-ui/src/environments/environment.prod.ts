@@ -1,5 +1,5 @@
 export const environment = {
   displayTag: '',
-  publicApiUrl: 'https://public-api-dot-all-of-us-rw-prod.appspot.com',
+  publicApiUrl: 'https://public.api.researchallofus.org',
   debug: false,
 };
