@@ -14,21 +14,21 @@
                [genderId]="dbc.FEMALE_GENDER_ID"
                [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                [chartType]="'histogram'"
-               [analysis]="analyses.measurementValueGenderAnalysis"
+               [analysis]="analyses.measurementValueGenderAnalysis[0]"
                [backgroundColor]="backgroundColor"></app-chart>
 
     <app-chart *ngIf="gender.stratum2 === dbc.MALE_GENDER_ID"
                [genderId]="dbc.MALE_GENDER_ID"
                [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                [chartType]="'histogram'"
-               [analysis]="analyses.measurementValueGenderAnalysis"
+               [analysis]="analyses.measurementValueGenderAnalysis[0]"
                [backgroundColor]="backgroundColor"></app-chart>
 
     <app-chart *ngIf="gender.stratum2 === dbc.OTHER_GENDER_ID"
                [genderId]="dbc.OTHER_GENDER_ID_GENDER_ID"
                [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                [chartType]="'histogram'"
-               [analysis]="analyses.measurementValueGenderAnalysis"
+               [analysis]="analyses.measurementValueGenderAnalysis[0]"
                [backgroundColor]="backgroundColor"></app-chart>
 
   </div>

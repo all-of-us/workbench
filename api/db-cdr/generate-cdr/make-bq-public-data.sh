@@ -130,19 +130,6 @@ set count_value =
     end
 where count_value >= 0"
 
-#delete concepts with 0 count / source count value
-
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
-where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit') and concept_code not in ('OMOP generated') "
-
-#delete concepts from concept_relationship that are not in concepts
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept_relationship\`
-where (concept_id_1 not in (select concept_id from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`)) or (concept_id_2 not in (select concept_id from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`))"
-
-
-
 # concept bin size :
 #Aggregate bin size will be set at 20. Counts lower than 20 will be displayed as 20; Counts higher than 20 will be rounded up to the closest multiple of 20. Eg: A count of 1245 will be displayed as 1260 .
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -171,7 +158,47 @@ set count_value =
         else
             0.00
     end
-where count_value >= 0"
+where count_value > 0 and vocabulary_id != 'ppi' "
+
+# Updating counts of 0 to 20 for only ppi concepts
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
+set count_value =
+    case when count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end,
+    source_count_value =
+    case when source_count_value < ${BIN_SIZE}
+        then ${BIN_SIZE}
+    else
+        cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+    end,
+    prevalence =
+    case when count_value  > 0 and count_value < ${BIN_SIZE}
+            then ROUND(CEIL(${BIN_SIZE} / ${person_count}),2)
+        when count_value  > 0 and count_value >= ${BIN_SIZE}
+            then ROUND(CEIL(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}), 2)
+        when source_count_value  > 0 and source_count_value < ${BIN_SIZE}
+            then ROUND(CEIL(${BIN_SIZE} / ${person_count}),2)
+        when source_count_value  > 0 and source_count_value >= ${BIN_SIZE}
+            then ROUND(CEIL(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}), 2)
+        else
+            0.00
+    end
+where count_value >= 0 and vocabulary_id = 'ppi' "
+
+#delete concepts with 0 count / source count value
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
+where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit') and concept_code not in ('OMOP generated') "
+
+#delete concepts from concept_relationship that are not in concepts
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept_relationship\`
+where (concept_id_1 not in (select concept_id from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`)) or (concept_id_2 not in (select concept_id from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`))"
+
 
 # criteria
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \

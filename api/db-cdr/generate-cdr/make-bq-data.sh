@@ -316,7 +316,7 @@ SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_co
 join \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
-group by d2.domain_concept_id,c.vocabulary_id"
+group by d2.domain_id,c.vocabulary_id"
 
 
 

@@ -50,7 +50,7 @@ echo "Running measurement queries..."
 # 3000 Measurements that have numeric values - Number of persons with at least one measurement occurrence by measurement_concept_id, bin size of the measurement value for 10 bins, maximum and minimum from measurement value. Added value for measurement rows
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id, analysis_id, stratum_1, stratum_3, stratum_4, count_value, source_count_value)
+(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
 select 0, 3000 as analysis_id,
 	CAST(co1.measurement_concept_id AS STRING) as stratum_1,
   'Measurement' as stratum_3,
@@ -138,7 +138,7 @@ group by o.stratum1_id, o.stratum2_id, o.stratum3_id, o.total, o.min_value, o.ma
 echo "Getting measurement response distribution"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
-(id,analysis_id,stratum_1,count_value,min_value,max_value,avg_value,stdev_value,median_value,p10_value,p25_value,p75_value,p90_value)
+(id,analysis_id,stratum_1,stratum_2,count_value,min_value,max_value,avg_value,stdev_value,median_value,p10_value,p25_value,p75_value,p90_value)
 with rawdata_1814 as
 (select measurement_concept_id as subject_id, cast(unit_concept_id as string) as unit,cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
@@ -806,7 +806,7 @@ group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4"
 echo "Getting measurement response, age decile histogram data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,stratum_5,count_value,source_count_value)
+(id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,count_value,source_count_value)
 with measurement_quartile_data as
 (
 select cast(stratum_1 as int64) as concept,stratum_2 as unit,cast(stratum_3 as int64)as age_decile,cast(stratum_4 as float64) as iqr_min,cast(stratum_5 as float64) as iqr_max,min_value,max_value,p10_value,p25_value,p75_value,p90_value,
@@ -906,7 +906,7 @@ where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.mea
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
 and (cast(m1.unit_concept_id as string)=unit or lower(m1.unit_source_value)=unit)
 and m1.value_as_number is not null
-and (extract(year from co1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from co1.measurement_date) - p1.year_of_birth) < 30
+and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
 group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4"
 
 # 1901 Measurement response, age decile histogram data (For concepts that have text values)
@@ -918,7 +918,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT 0,1901 as analysis_id,
 cast(m1.measurement_concept_id as string) as stratum_1,CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'' as stratum_3,
 c2.concept_name as stratum_4,
-m1.value_as_concept_id as stratum_5,
+cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
 0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
@@ -932,7 +932,7 @@ union all
 SELECT 0,1901 as analysis_id,
 cast(m1.measurement_source_concept_id as string) as stratum_1,CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_2,'' as stratum_3,
 c2.concept_name as stratum_4,
-m1.value_as_concept_id as stratum_5,
+cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
 count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
@@ -952,7 +952,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT 0,1901 as analysis_id,
 cast(m1.measurement_concept_id as string) as stratum_1,'2' as stratum_2,'' as stratum_3,
 c2.concept_name as stratum_4,
-m1.value_as_concept_id as stratum_5,
+cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
 0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
@@ -966,7 +966,7 @@ union all
 SELECT 0,1901 as analysis_id,
 cast(m1.measurement_source_concept_id as string) as stratum_1,'2' as stratum_2,'' as stratum_3,
 c2.concept_name as stratum_4,
-m1.value_as_concept_id as stratum_5,
+cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
 count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
@@ -984,10 +984,3 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 set count_value = 20, source_count_value = 20 where analysis_id in (1900,1901) and ((count_value>0 and count_value<20) or (source_count_value>0 and source_count_value<20))"
 
-# Set the concept_id in place of concept units
-echo "setting concept name in place of unit concept ids"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` a
-SET a.stratum_3 = c.concept_name
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c
-WHERE a.stratum_3 = cast(c.concept_id as string) and a.analysis_id in (1900,1901)"
