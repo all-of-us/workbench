@@ -1,6 +1,6 @@
 [
   {
-    "name": "Test Registered CDR",
+    "name": "Synthetic Dataset v1",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
     "bigqueryDataset": "test_merge_dec26",
@@ -11,7 +11,7 @@
     "publicDbName": "public20180920"
   },
   {
-    "name": "New Test Registered CDR",
+    "name": "Synthetic Dataset v2",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
     "bigqueryDataset": "test_merge_dec26",
