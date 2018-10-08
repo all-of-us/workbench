@@ -80,7 +80,9 @@
 
 <clr-modal [(clrModalOpen)]="removing" [clrModalSize]="'md'">
   <div class="modal-title">
-    <div *ngIf="removing" class="modal-title-text">Are you sure you want to remove {{selectedConceptsCount}} concepts from this set?</div>
+    <div *ngIf="removing" class="modal-title-text">
+      Are you sure you want to remove {{selectedConceptsCount}} {{selectedConceptsCount > 1 ? 'concepts' : 'concept'}} from this set?
+    </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="removing=false">Cancel</button>
