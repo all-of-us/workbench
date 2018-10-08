@@ -113,6 +113,7 @@ export function highlightMatches(terms: Array<string>, name: string, id?: string
       name = name.slice(0, start)
         + '<span #match '
         + 'id="match' + id + '" '
+        + 'class="search-keyword" '
         + 'style="color: #659F3D;'
         + 'font-weight: bolder;'
         + 'background: linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%);'
