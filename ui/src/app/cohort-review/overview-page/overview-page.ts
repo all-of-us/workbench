@@ -39,7 +39,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   isCancelTimerInitiated: any = false;
   domainTitle: '';
   trackClickedDomains = false;
-  test = false;
+  buttonsDisableFlag = false;
   private subscription: Subscription;
 
   constructor(
@@ -52,6 +52,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // this.buttonsDisableFlag = true;
     this.selectedCohortName = this.route.parent.snapshot.data.cohort.name;
     this.spinner = true;
     const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
@@ -62,6 +63,7 @@ export class OverviewPage implements OnInit, OnDestroy {
       .subscribe(data => {
         this.data = fromJS(data);
         this.spinner = false;
+        this.buttonsDisableFlag = false;
       });
     this.subscription = this.state.review$.subscribe(review => {
       this.review = review;
@@ -75,10 +77,12 @@ export class OverviewPage implements OnInit, OnDestroy {
 
   getDemoCharts () {
     this.spinner = true;
+    this.buttonsDisableFlag = true;
     setTimeout(() => {
-      this.demoGraph = true;
+       this.demoGraph = true;
       if (this.data.size) {
         this.spinner = false;
+        this.buttonsDisableFlag = false;
       }
     }, 1000);
     this.showTitle = false;
@@ -87,7 +91,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
   getDifferentCharts(names) {
-    this.test = true;
+    this.buttonsDisableFlag = true;
     this.demoGraph = false;
     this.domainTitle = names;
     this.fetchChartsData(names);
@@ -123,7 +127,7 @@ export class OverviewPage implements OnInit, OnDestroy {
       .select(isChartLoading(name, cid))
       .filter(domain => !!domain)
       .subscribe(loading => {
-        this.test = false;
+        this.buttonsDisableFlag = false;
         this.loading = loading;
         const totalCount = this.loading.toJS().count;
         if (name === this.domainTitle) {
