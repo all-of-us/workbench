@@ -46,6 +46,7 @@ import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
+import org.pmiops.workbench.testconfig.CdrJpaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -69,7 +70,7 @@ import org.springframework.transaction.annotation.Transactional;
     TestBigQueryCdrSchemaConfig.class, CohortQueryBuilder.class,
     CdrBigQuerySchemaConfigService.class, DomainLookupService.class,
     DemoQueryBuilder.class, QueryBuilderFactory.class, BigQueryService.class,
-    CohortMaterializationService.class, ConceptService.class, TestJpaConfig.class})
+    CohortMaterializationService.class, ConceptService.class, TestJpaConfig.class, CdrJpaConfig.class})
 @MockBean({BigQuery.class})
 public class CohortMaterializationServiceTest {
 
