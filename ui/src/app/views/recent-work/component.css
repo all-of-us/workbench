@@ -1,35 +1,36 @@
 .card-area {
-    display: inline-block;
-    width: 40%;
-    margin-left: 1%;
+  display: inline-block;
+  width: 40%;
+  margin-left: 1%;
 }
 
 .card {
-    height: 9.2rem;
-    border-radius: .3125rem;
-    box-shadow: 0 0 0 0;
-    width: 5.5rem;
-    display: inline-block;
-    margin-left: .45rem;
-    margin-top: 1rem;
-    position: relative;
+  height: 9.2rem;
+  border-radius: .3125rem;
+  box-shadow: 0 0 0 0;
+  width: 5.5rem;
+  display: inline-block;
+  margin-left: .45rem;
+  margin-top: 1rem;
+  position: relative;
 }
 
 .scroll-indicator {
-    height: 2rem;
-    width: 2rem;
-    top: 3rem;
+  cursor: pointer;
+  height: 2rem;
+  width: 2rem;
+  top: 3rem;
 }
 
 .placeholder {
-    min-width: 2rem;
-    min-height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
 }
 
 .title {
-    left: 2.7rem;
-    margin-top: -1.7rem;
-    color: #FFFFFF;
-    width: 100%;
-    position: relative
+  left: 2.7rem;
+  margin-top: -1.7rem;
+  color: #FFFFFF;
+  width: 100%;
+  position: relative
 }

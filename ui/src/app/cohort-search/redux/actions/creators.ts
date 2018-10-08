@@ -4,6 +4,9 @@ import {
   BEGIN_CHART_DATA_REQUEST,
   REVIEW_CHART_REQUEST_ERROR,
   LOAD_CHART_RESULTS,
+  BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
+  LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS,
+  PARTICIPANTS_CHART_REQUEST_ERROR,
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
@@ -106,6 +109,30 @@ export const loadChartRequestResults =
     (ns: string, wsid: string, cid: number, cdrid: number, domain: string, limit: number,
      results: any): ActionTypes[typeof LOAD_CHART_RESULTS] =>
     ({type: LOAD_CHART_RESULTS, ns, wsid, cid, cdrid, domain, limit, results});
+
+/**
+ * Cohort Individual Participants Charts
+ */
+export const requestIndividualParticipantsData =
+    (ns: string, wsid: string, cid: number, cdrid: number,
+    participantsId: any, domain: string, limit: number):
+    ActionTypes[typeof BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST] =>
+    ({type: BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
+    ns, wsid, cid, cdrid, participantsId, domain, limit});
+
+export const loadIndividualParticipantsData =
+    (ns: string, wsid: string, cid: number, cdrid: number,
+    participantsId: any, domain: string, limit: number, results: any):
+    ActionTypes[typeof LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS] =>
+    ({type: LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS,
+    ns, wsid, cid, cdrid, participantsId, domain, limit, results});
+
+export const participantsChartsRequestError =
+  (ns: any, wsid: any, cid: any, cdrid: any,
+   participantsId: any, domain: any, limit: any, error: any):
+  ActionTypes[typeof PARTICIPANTS_CHART_REQUEST_ERROR] =>
+  ({type: PARTICIPANTS_CHART_REQUEST_ERROR, ns, wsid, cid,
+  cdrid, participantsId, domain, limit, error});
 
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]

@@ -4374,11 +4374,11 @@ ng2-nouislider@^1.7.7:
   version "1.7.7"
   resolved "https://registry.yarnpkg.com/ng2-nouislider/-/ng2-nouislider-1.7.7.tgz#b841f4b313c8c9c8a763c80f3a59d5aa4c3a70c8"
 
-ngx-popper@^1.9.9:
-  version "1.9.9"
-  resolved "https://registry.yarnpkg.com/ngx-popper/-/ngx-popper-1.9.9.tgz#7c640c0e43cea817cdc46c2e26b79c9f064dfd05"
+ngx-popper@^5.1.7:
+  version "5.1.7"
+  resolved "https://registry.yarnpkg.com/ngx-popper/-/ngx-popper-5.1.7.tgz#36c7924875a28a65f2a7cdb0504145af97cf3a05"
   dependencies:
-    popper.js "1.13.0-next.1"
+    tslib "^1.7.1"
 
 no-case@^2.2.0:
   version "2.3.2"
@@ -4879,10 +4879,6 @@ pkg-dir@^2.0.0:
   resolved "https://registry.yarnpkg.com/pkg-dir/-/pkg-dir-2.0.0.tgz#f6d5d1109e19d63edf428e0bd57e12777615334b"
   dependencies:
     find-up "^2.1.0"
-
-popper.js@1.13.0-next.1:
-  version "1.13.0-next.1"
-  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.13.0-next.1.tgz#307f72d22a506545968ff7662439c2ae4ee98b29"
 
 popper.js@^1.13.0:
   version "1.13.0"

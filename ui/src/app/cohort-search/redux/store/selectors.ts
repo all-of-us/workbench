@@ -185,12 +185,24 @@ export const chartData =
 /**
  * Cohort Review Charts selectors start
  */
-
 export const isChartLoading = (domain: string, cid: any) => (state): any =>
   state.getIn(['reviewChartData', 'domainCharts', cid, domain]);
+
 
 export const isDomainNameExists = (cid: any, domain: string) => (state): boolean => {
   const domainExists = state.getIn(['reviewChartData', 'domainCharts']).has(cid);
   return domainExists ?
     state.getIn(['reviewChartData', 'domainCharts', cid]).has(domain) : false;
+};
+
+export const getParticipantData =
+  (cid: any, participantsId: any, domain: string) =>
+  (state): any =>
+  state.getIn(['individualChartData', 'chartsData', cid, participantsId, domain]);
+
+
+export const isParticipantIdExists = (cid, participantId) => (state): boolean => {
+  const participantExists = state.getIn(['individualChartData', 'chartsData'], List()).has(cid);
+  return participantExists ?
+  state.getIn(['individualChartData', 'chartsData', cid]).has(participantId) : false;
 };
