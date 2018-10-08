@@ -352,16 +352,18 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
           .filter(loading => !!loading)
           .subscribe(loading => {
             const data = JSON.parse(loading);
-            this.chartLoadedSpinner = false;
             if (domainName === DomainType[DomainType.CONDITION]) {
               this.conditionTitle = typeToTitle(domainName);
               this.conditionData = data.items;
+              this.chartLoadedSpinner = false;
             } else if (domainName === DomainType[DomainType.PROCEDURE]) {
               this.procedureTitle = typeToTitle(domainName);
               this.procedureData = data.items;
+              this.chartLoadedSpinner = false;
             } else {
               this.drugTitle = typeToTitle(domainName);
               this.drugData = data.items;
+              this.chartLoadedSpinner = false;
             }
           });
         this.subscription = getParticipantsDomainData;
