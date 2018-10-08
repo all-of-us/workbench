@@ -546,6 +546,7 @@ export const rootReducer: Reducer<CohortSearchState> =
               action.wsid,  action.cdrid,  action.limit],
             true);
 
+
       case LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS:
         return state
           .setIn(
