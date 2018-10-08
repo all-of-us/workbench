@@ -30,7 +30,7 @@
         <div class="row" [ngClass]="showTitle?'button-padding-zero' :'button-padding'">
           <div class="col-sm-2 col-lg-2 col-xl-2" >
             <div>
-              <div [ngClass]="{'btn-disable': test}">
+              <div [ngClass]="{'btn-disable': buttonsDisableFlag}">
                 <button type="button"
                         [ngClass]="[ demoGraph? 'btn-outline': 'btn-primary']"
                         (click)="getDemoCharts()"
@@ -39,7 +39,7 @@
                 </button>
               </div>
               <ng-container *ngFor = "let name of typesList" >
-              <div [ngClass]="{'btn-disable': test}" >
+              <div [ngClass]="{'btn-disable': buttonsDisableFlag}" >
                   <button type="button"
                           (click)="getDifferentCharts(name)"
                           [ngClass]="[ name === domainTitle ?'btn-outline': 'btn-primary']"
