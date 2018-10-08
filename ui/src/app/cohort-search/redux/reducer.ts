@@ -520,8 +520,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(
             ['reviewChartData', 'request', action.cid, action.domain])
           .setIn(
-            ['reviewChartData', 'request', action.ns,
-              action.wsid, action.cid, action.cdrid, action.domain, action.limit],
+            ['reviewChartData', 'request', action.cid, action.domain],
             true);
 
       case LOAD_CHART_RESULTS:
@@ -530,8 +529,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['reviewChartData', 'domainCharts', action.cid, action.domain]
             , fromJS(action.results))
           .deleteIn(
-            ['reviewChartData', 'request', action.ns,
-              action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
+            ['reviewChartData', 'request', action.cid, action.domain]);
       /**
        * Cohort Individual Participants Charts
        */
@@ -541,9 +539,8 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(
             ['individualChartData', 'request', action.cid , action.participantsId, action.domain])
           .setIn(
-            ['individualChartData', 'request', action.ns,
-              action.cid, action.participantsId, action.domain,
-              action.wsid,  action.cdrid,  action.limit],
+            ['individualChartData', 'request',
+              action.cid, action.participantsId, action.domain],
             true);
 
 

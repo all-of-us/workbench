@@ -276,7 +276,7 @@ export class CohortSearchEpics {
          IndividualParticipantsChartRequestAction) => {
           return this.reviewservice
           .getParticipantChartDataWithHttpInfo(ns, wsid, cid, cdrid,
-            participantsId, domain, limit, null)
+            participantsId, domain, limit)
             .map(results =>
             loadIndividualParticipantsData(ns, wsid, cid, cdrid,
               participantsId, domain, limit, results))
