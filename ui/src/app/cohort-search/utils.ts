@@ -104,20 +104,25 @@ export function subtypeToTitle(subtype: string): string {
   return title;
 }
 
-export function highlightMatches(terms: Array<string>, name: string, id?: string) {
+export function highlightMatches(terms: Array<string>, name: string, id?: string, width?: number) {
   terms.forEach(term => {
     id = id || '';
+    if (width) {
+      console.log(width);
+      console.log(name);
+    }
+    const percentage = width ? width.toString() + '%' : '100%';
     const start = name.toLowerCase().indexOf(term.toLowerCase());
     if (start > -1) {
       const end = start + term.length;
       name = name.slice(0, start)
-        + '<span #match '
-        + 'id="match' + id + '" '
-        + 'class="search-keyword" '
+        + '<span '
+        + (id !== '' ? 'id="match' + id + '" '
         + 'style="color: #659F3D;'
         + 'font-weight: bolder;'
-        + 'background: linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%);'
-        + 'padding: 2px 0;">'
+        + 'background: transparent;'
+        + 'padding: 2px 0;"' : '')
+        + 'class="search-keyword">'
         + name.slice(start, end) + '</span>'
         + name.slice(end);
     }

@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
-import {stripHtml} from '../utils';
+import {highlightMatches, stripHtml} from '../utils';
 
 @Component({
   selector: 'app-option-info',
@@ -9,6 +9,7 @@ import {stripHtml} from '../utils';
 export class OptionInfoComponent implements AfterViewInit, OnInit {
 
   @Input() option: any;
+  @Input() searchTerm: string;
   @Input() highlighted: boolean;
 
   @ViewChild('button') button;
@@ -17,20 +18,28 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
   constructor() { }
 
   ngOnInit() {
-
+    this.option.displayName =
+      highlightMatches([this.searchTerm], this.option.name, this.option.id.toString());
   }
 
   ngAfterViewInit() {
-    setTimeout(() => this.checkTruncation());
+    setTimeout(() => {
+      this.checkTruncation();
+    });
   }
 
   checkTruncation() {
     const elem = this.button.nativeElement;
-    this.isTruncated = (elem.offsetWidth - 15) < elem.scrollWidth;
     const id = 'match' + this.option.id.toString();
     const highlight = document.getElementById(id);
+    this.isTruncated = (elem.offsetWidth - 15) < elem.scrollWidth;
     if (this.isTruncated && highlight) {
       this.checkPosition(elem, highlight);
+    } else if (highlight !== null) {
+      console.log(highlight);
+      highlight.style.background =
+        'linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%)';
+    } else {
     }
   }
 
@@ -41,9 +50,14 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
     if (hCoords.right > (eCoords.right - padding)) {
       const diff = hCoords.right - (eCoords.right - padding - 15);
       if (diff > hCoords.width) {
+        console.log(this.option.name);
         highlight.style.background = 'none';
       } else {
-        const percentage = (((hCoords.width - diff) / hCoords.width) * 100).toString();
+        const percentage = (((hCoords.width - diff) / hCoords.width) * 100);
+        // this.option.displayName =
+        //   highlightMatches(
+        //     [this.searchTerm], this.option.name, this.option.id.toString(), percentage
+        //   );
         highlight.style.background =
           'linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) '
           + percentage + '%, transparent ' + percentage + '%)';

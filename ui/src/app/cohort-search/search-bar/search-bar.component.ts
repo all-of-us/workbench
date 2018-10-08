@@ -1,12 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {
-  Component,
-  HostListener,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
@@ -51,7 +44,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   codes: any;
 
   @ViewChild('searchBar') searchBar;
-
   @HostListener('document:mouseup', ['$event.target'])
   onClick(targetElement) {
     const clickedInside = this.searchBar.nativeElement.contains(targetElement);
@@ -88,7 +80,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               this.highlightedOption = null;
               if (optionNames.indexOf(option.name) === -1) {
                 optionNames.push(option.name);
-                option.displayName = highlightMatches([this.searchTerm], option.name, option.id.toString());
                 this.options.push(option);
               } else {
                 if (this.multiples[option.name]) {
@@ -178,7 +169,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   selectOption(option: any) {
-    console.log(option);
     this.optionSelected = true;
     this.searchTerm.setValue(option.name, {emitEvent: false});
     if (option.subtype === TreeSubType[TreeSubType.BRAND]) {

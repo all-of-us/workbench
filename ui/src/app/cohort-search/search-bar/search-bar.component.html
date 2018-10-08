@@ -25,6 +25,7 @@
       *ngFor="let option of options; let i = index"
       [option]="option"
       [highlighted]="i === highlightedOption"
+      [searchTerm]="searchTerm.value"
       (click)="selectOption(option)">
     </app-option-info>
   </div>
