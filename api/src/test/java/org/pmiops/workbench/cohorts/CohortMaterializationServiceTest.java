@@ -1,15 +1,11 @@
 package org.pmiops.workbench.cohorts;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
-
 import com.google.cloud.bigquery.BigQuery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +56,12 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -158,17 +160,34 @@ public class CohortMaterializationServiceTest {
     assertThat(cdrQuery.getBigqueryDataset()).isEqualTo(DATA_SET_ID);
     assertThat(cdrQuery.getBigqueryProject()).isEqualTo(PROJECT_ID);
     // TODO: consider making parameter names deterministic, check the entire query
-    assertThat(cdrQuery.getSql()).startsWith("select person.person_id person_id\n"
-        + "from `project_id.data_set_id.person` person");
+    assertThat(cdrQuery.getSql()).isEqualTo(
+        "select person.person_id person_id\n"
+        + "from `project_id.data_set_id.person` person\n"
+        + "where\n"
+        + "person.person_id in (select person_id\n"
+        + "from `project_id.data_set_id.person` p\n"
+        + "where\n"
+        + "p.gender_concept_id in unnest(@p0)\n"
+        + ")\n"
+        + "and person.person_id not in unnest(@person_id_blacklist)\n\n"
+        + "order by person.person_id\n");
+    Map<String, Map<String, Object>> params = getParameters(cdrQuery);
+    Map<String, Object> genderParam = params.get("p0");
+    Map<String, Object> personIdBlacklistParam = params.get("person_id_blacklist");
+    assertParameterArray(genderParam, 8507, 8532, 2);
+    assertParameterArray(personIdBlacklistParam, 2L);
+  }
 
-    // TODO: use deterministic parameters and GSON for comparison here
+  private Map<String, Map<String, Object>> getParameters(CdrQuery cdrQuery) {
     Map<String, Object> configuration = (Map<String, Object>) cdrQuery.getConfiguration();
     Object[] queryParameters = (Object[])
         ((Map<String, Object>) configuration.get("query")).get("queryParameters");
-    Map<String, Object> genderParam = (Map<String, Object>) queryParameters[1];
-    Map<String, Object> personIdBlacklistParam = (Map<String, Object>) queryParameters[0];
-    assertParameterArray(genderParam, 8507, 8532, 2);
-    assertParameterArray(personIdBlacklistParam, 2L);
+    Map<String, Map<String, Object>> result = new HashMap<>();
+    for (Object obj : queryParameters) {
+      Map<String, Object> param = (Map<String, Object>) obj;
+      result.put((String) param.get("name"), param);
+    }
+    return result;
   }
 
   private void assertParameterArray(Map<String, Object> param, long... values) {
