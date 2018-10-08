@@ -41,20 +41,20 @@
                          selectedConcept.analyses.measurementValueGenderAnalysis" [genderId]="dbc.FEMALE_GENDER_ID"
                      [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                      [chartType]="selectedConcept.chartType"
-                     [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis[0]"></app-chart>
+                     [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis"></app-chart>
 
               <app-chart *ngIf="gender.stratum2 === dbc.MALE_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueGenderAnalysis" [genderId]="dbc.MALE_GENDER_ID"
                          [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                          [chartType]="selectedConcept.chartType"
-                         [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis[0]"></app-chart>
+                         [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis"></app-chart>
 
               <app-chart *ngIf="gender.stratum2 === dbc.OTHER_GENDER_ID && selectedConcept.analyses &&
                          selectedConcept.analyses.measurementValueGenderAnalysis"
                          [genderId]="dbc.OTHER_GENDER_ID_GENDER_ID"
                          [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                          [chartType]="selectedConcept.chartType"
-                         [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis[0]"></app-chart>
+                         [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis"></app-chart>
 
         </div>
 
