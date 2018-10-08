@@ -159,7 +159,6 @@ public class CohortMaterializationServiceTest {
         SearchRequests.allGenders(), new DataTableSpecification(), cohortReview, null);
     assertThat(cdrQuery.getBigqueryDataset()).isEqualTo(DATA_SET_ID);
     assertThat(cdrQuery.getBigqueryProject()).isEqualTo(PROJECT_ID);
-    // TODO: consider making parameter names deterministic, check the entire query
     assertThat(cdrQuery.getSql()).isEqualTo(
         "select person.person_id person_id\n"
         + "from `project_id.data_set_id.person` person\n"
