@@ -3,9 +3,10 @@
   type="button"
   [class.active]="highlighted"
   [innerHTML]="option.displayName | safeHtml"
-  [popper]="popperContent"
+  popper="{{option.displayName}}"
   [popperTrigger]="'hover'"
   [popperPlacement]="'auto'"
-  [popperDisabled]="!isTruncated">
+  [popperDisabled]="!isTruncated"
+  [popperApplyClass]="'popper-content'">
 </button>
 <popper-content #popperContent class="popper-content">{{option.displayName}}</popper-content>
