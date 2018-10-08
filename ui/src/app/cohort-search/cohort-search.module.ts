@@ -20,7 +20,9 @@ import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {MultiSelectComponent} from './multi-select/multi-select.component';
 import {NodeInfoComponent} from './node-info/node-info.component';
 import {NodeComponent} from './node/node.component';
+import {OptionInfoComponent} from './option-info/option-info.component';
 import {OverviewComponent} from './overview/overview.component';
+import {SearchBarComponent} from './search-bar/search-bar.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {SearchGroupSelectComponent} from './search-group-select/search-group-select.component';
@@ -31,8 +33,6 @@ import {TreeComponent} from './tree/tree.component';
 /* Other Objects */
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 import {SafeHtmlPipe} from './safe-html.pipe';
-import {SearchBarComponent} from './search-bar/search-bar.component';
-import { OptionInfoComponent } from './option-info/option-info.component';
 
 
 const routes: Routes = [{
@@ -68,7 +68,9 @@ const routes: Routes = [{
     MultiSelectComponent,
     NodeComponent,
     NodeInfoComponent,
+    OptionInfoComponent,
     OverviewComponent,
+    SearchBarComponent,
     SearchGroupComponent,
     SearchGroupItemComponent,
     SearchGroupListComponent,
@@ -77,8 +79,6 @@ const routes: Routes = [{
     TreeComponent,
     AttributesPageComponent,
     SafeHtmlPipe,
-    SearchBarComponent,
-    OptionInfoComponent,
   ],
   providers: [
     CohortSearchActions,
