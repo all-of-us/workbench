@@ -10,17 +10,13 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.util.Map;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
@@ -50,6 +46,7 @@ import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
+import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -71,7 +68,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Import({LiquibaseAutoConfiguration.class, FieldSetQueryBuilder.class, AnnotationQueryBuilder.class,
     TestBigQueryCdrSchemaConfig.class, CohortQueryBuilder.class,
     CdrBigQuerySchemaConfigService.class, DomainLookupService.class,
-    DemoQueryBuilder.class, QueryBuilderFactory.class, BigQueryService.class})
+    DemoQueryBuilder.class, QueryBuilderFactory.class, BigQueryService.class,
+    CohortMaterializationService.class, ConceptService.class, TestJpaConfig.class})
 @MockBean({BigQuery.class})
 public class CohortMaterializationServiceTest {
 
@@ -103,13 +101,7 @@ public class CohortMaterializationServiceTest {
   private CohortReviewDao cohortReviewDao;
 
   @Autowired
-  private ConceptDao conceptDao;
-
-  @Autowired
-  private ConceptSynonymDao conceptSynonymDao;
-
-  @PersistenceContext
-  private EntityManager entityManager;
+  CohortMaterializationService cohortMaterializationService;
 
   @TestConfiguration
   static class Configuration {
@@ -123,7 +115,7 @@ public class CohortMaterializationServiceTest {
   }
 
   private CohortReview cohortReview;
-  private CohortMaterializationService cohortMaterializationService;
+
 
   @Before
   public void setUp() {
@@ -165,11 +157,6 @@ public class CohortMaterializationServiceTest {
 
     participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
     participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
-
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
-
-    this.cohortMaterializationService = new CohortMaterializationService(fieldSetQueryBuilder,
-        annotationQueryBuilder, participantCohortStatusDao, cdrBigQuerySchemaConfigService, conceptService);
   }
 
   @Test
@@ -186,8 +173,8 @@ public class CohortMaterializationServiceTest {
     Map<String, Object> configuration = (Map<String, Object>) cdrQuery.getConfiguration();
     Object[] queryParameters = (Object[])
         ((Map<String, Object>) configuration.get("query")).get("queryParameters");
-    Map<String, Object> genderParam = (Map<String, Object>) queryParameters[0];
-    Map<String, Object> personIdBlacklistParam = (Map<String, Object>) queryParameters[1];
+    Map<String, Object> genderParam = (Map<String, Object>) queryParameters[1];
+    Map<String, Object> personIdBlacklistParam = (Map<String, Object>) queryParameters[0];
     assertParameterArray(genderParam, 8507, 8532, 2);
     assertParameterArray(personIdBlacklistParam, 2L);
   }
