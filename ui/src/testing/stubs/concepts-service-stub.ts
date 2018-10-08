@@ -94,7 +94,11 @@ export class DomainStubVariables {
 
 export class ConceptsServiceStub {
 
-  constructor() {}
+  constructor(public concepts?: Concept[]) {
+    if (!this.concepts) {
+      this.concepts = ConceptStubVariables.STUB_CONCEPTS;
+    }
+  }
 
   public getDomainInfo(
     workspaceNamespace: string, workspaceId: string): Observable<DomainInfoResponse> {
@@ -131,7 +135,7 @@ export class ConceptsServiceStub {
           }
           const foundDomain =
             DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
-          ConceptStubVariables.STUB_CONCEPTS.forEach((concept) => {
+          this.concepts.forEach((concept) => {
             if (concept.domainId !== foundDomain.name) {
               return;
             }
