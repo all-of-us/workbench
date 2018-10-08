@@ -9,7 +9,7 @@
           "id":"includes_on29vorqv",
           "items":[{
               "id":"items_0p2emxdpa",
-              "type":"ICD10",
+              "type":"CONDITION",
               "searchParameters":[{
                   "parameterId":"param86081",
                   "name":"Dislocation and sprain of joints and ligaments of knee",
@@ -17,7 +17,7 @@
                   "type":"ICD10",
                   "subtype":"ICD10CM",
                   "group":true,
-                  "domain":""
+                  "domainId":""
               }],
               "modifiers":[{
                   "name":"AGE_AT_EVENT",

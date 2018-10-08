@@ -100,19 +100,19 @@ public class ParameterPredicates {
   }
 
   public static Predicate<SearchParameter> domainInvalid() {
-    return sp -> !VALID_DOMAINS.stream().anyMatch(sp.getDomain()::equalsIgnoreCase);
+    return sp -> !VALID_DOMAINS.stream().anyMatch(sp.getDomainId()::equalsIgnoreCase);
   }
 
   public static Predicate<SearchParameter> domainNotMeasurement() {
-    return sp -> !DomainType.MEASUREMENT.toString().equalsIgnoreCase(sp.getDomain());
+    return sp -> !DomainType.MEASUREMENT.toString().equalsIgnoreCase(sp.getDomainId());
   }
 
   public static Predicate<SearchParameter> domainNotObservation() {
-    return sp -> !DomainType.OBSERVATION.toString().equalsIgnoreCase(sp.getDomain());
+    return sp -> !DomainType.OBSERVATION.toString().equalsIgnoreCase(sp.getDomainId());
   }
 
   public static Predicate<SearchParameter> domainBlank() {
-    return sp -> StringUtils.isBlank(sp.getDomain());
+    return sp -> StringUtils.isBlank(sp.getDomainId());
   }
 
   public static Predicate<SearchParameter> typeBlank() {

@@ -227,13 +227,13 @@ public class CohortReviewControllerTest {
     cohort = new Cohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"CONDITION\",\"searchParameters\":[{\"parameterId\":\"param25164\"," +
-      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":true,\"domain\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":true,\"domainId\":\"\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
     cohortDao.save(cohort);
 
     cohortWithoutReview = new Cohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     cohortWithoutReview.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"CONDITION\",\"searchParameters\":[{\"parameterId\":\"param25164\"," +
-      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":false,\"domain\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"ICD10CM\",\"group\":false,\"domainId\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
     cohortDao.save(cohortWithoutReview);
 
     Timestamp today = new Timestamp(new Date().getTime());

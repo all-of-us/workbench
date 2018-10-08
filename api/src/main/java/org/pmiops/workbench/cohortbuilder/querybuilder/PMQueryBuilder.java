@@ -59,7 +59,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
           String namedParameterConceptId = CONCEPTID_PREFIX + getUniqueNamedParameterPostfix();
           String namedParameter1 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
           String namedParameter2 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
-          String domain = parameter.getDomain().toLowerCase();
+          String domain = parameter.getDomainId().toLowerCase();
           if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             tempQueryParts.add(tempSql
@@ -94,7 +94,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       } else {
         String namedParameterConceptId = CONCEPTID_PREFIX + getUniqueNamedParameterPostfix();
         String namedParameter = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
-        String domain = parameter.getDomain().toLowerCase();
+        String domain = parameter.getDomainId().toLowerCase();
         queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
           .replace("${value}","@" + namedParameter)
           .replace("${tableName}", DomainTableEnum.getTableName(domain))
@@ -132,7 +132,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
         from(notAnyAttr().and(notSystolicAndDiastolic())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
       }
     } else {
-      String domain = param.getDomain();
+      String domain = param.getDomainId();
       String value = param.getValue();
       Long conceptId = param.getConceptId();
       from(domainBlank().or(domainNotMeasurement())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, domain);

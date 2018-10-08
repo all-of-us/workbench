@@ -9,7 +9,7 @@
           "id":"includes_laksnttbw",
           "items":[{
               "id":"items_2669as58j",
-              "type":"ICD10",
+              "type":"CONDITION",
               "searchParameters":[{
                   "parameterId":"param29136",
                   "name":"Bipolar disorder, current episode depressed, mild or moderate severity, unspecified",
@@ -17,7 +17,7 @@
                   "type":"ICD10",
                   "subtype":"ICD10CM",
                   "group":false,
-                  "domain":"Condition",
+                  "domainId":"Condition",
                   "conceptId":45571756
               }],
               "modifiers":[]

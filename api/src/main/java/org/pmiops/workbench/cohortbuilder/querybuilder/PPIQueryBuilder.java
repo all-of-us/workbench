@@ -40,7 +40,7 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
       validateSearchParameter(parameter);
       String namedParameterConceptId = CONCEPTID_PREFIX + getUniqueNamedParameterPostfix();
       String namedParameter = VALUE_PREFIX + getUniqueNamedParameterPostfix();
-      String domain = parameter.getDomain().toLowerCase();
+      String domain = parameter.getDomainId().toLowerCase();
       boolean isValueAsNum = StringUtils.isBlank(parameter.getValue());
       String value = isValueAsNum ? parameter.getName() : parameter.getValue();
       String sqlTemplate = isValueAsNum ?
@@ -66,7 +66,7 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
 
   private void validateSearchParameter(SearchParameter param) {
     from(typeBlank().or(ppiTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
-    from(domainBlank().or(domainNotObservation())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomain());
+    from(domainBlank().or(domainNotObservation())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomainId());
     from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
     if (StringUtils.isBlank(param.getValue())) {
       from(nameNotNumber()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, NAME, param.getName());

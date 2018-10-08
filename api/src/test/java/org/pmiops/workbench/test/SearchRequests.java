@@ -29,7 +29,7 @@ public class SearchRequests {
       SearchParameter parameter = new SearchParameter()
         .type(DEMO_DOMAIN)
         .subtype(GENDER_SUBTYPE)
-        .domain(DEMO_DOMAIN)
+        .domainId(DEMO_DOMAIN)
         .conceptId(conceptId);
       searchGroupItem.addSearchParametersItem(parameter);
     }

@@ -197,16 +197,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     icd9.subtype(TreeSubType.CM.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, icd9.getDomain());
+      PARAMETER, DOMAIN, icd9.getDomainId());
 
     //icd9 bad domain
-    icd9.domain("baddomain");
+    icd9.domainId("baddomain");
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, icd9.getDomain());
+      PARAMETER, DOMAIN, icd9.getDomainId());
 
     //icd9 child no concept id
-    icd9.domain(DomainType.CONDITION.name());
+    icd9.domainId(DomainType.CONDITION.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, icd9.getConceptId());
@@ -345,16 +345,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     pmParam.subtype(TreeSubType.PREG.name());
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, pmParam.getDomain());
+      PARAMETER, DOMAIN, pmParam.getDomainId());
 
     //pm bad domain
-    pmParam.domain("blah");
+    pmParam.domainId("blah");
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, pmParam.getDomain());
+      PARAMETER, DOMAIN, pmParam.getDomainId());
 
     //pm no value
-    pmParam.domain(DomainType.MEASUREMENT.toString());
+    pmParam.domainId(DomainType.MEASUREMENT.toString());
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, VALUE, pmParam.getValue());
@@ -430,16 +430,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     ppiParam.type(TreeType.PPI.name());
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, ppiParam.getDomain());
+      PARAMETER, DOMAIN, ppiParam.getDomainId());
 
     //ppi bad domain
-    ppiParam.domain(DomainType.CONDITION.name());
+    ppiParam.domainId(DomainType.CONDITION.name());
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, ppiParam.getDomain());
+      PARAMETER, DOMAIN, ppiParam.getDomainId());
 
     //ppi no concept id
-    ppiParam.domain(DomainType.OBSERVATION.name());
+    ppiParam.domainId(DomainType.OBSERVATION.name());
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
@@ -1509,7 +1509,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .subtype(criteria.getSubtype())
       .group(criteria.getGroup())
       .value(code)
-      .domain(criteria.getDomainId())
+      .domainId(criteria.getDomainId())
       .conceptId(criteria.getConceptId() == null ? null : new Long(criteria.getConceptId()));
   }
 

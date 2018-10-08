@@ -475,8 +475,7 @@ export class CohortSearchActions {
       group: immParam.get('group'),
       attributes: immParam.get('attributes'),
       conceptId: immParam.get('conceptId'),
-      domain: immParam.get('domainId')
-          ? immParam.get('domainId') : immParam.get('domain')
+      domainId: immParam.get('domainId')
     };
 
     return param;
