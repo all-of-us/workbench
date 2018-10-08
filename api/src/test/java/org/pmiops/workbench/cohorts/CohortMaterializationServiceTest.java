@@ -76,16 +76,7 @@ public class CohortMaterializationServiceTest {
 
   private static final String DATA_SET_ID = "data_set_id";
   private static final String PROJECT_ID = "project_id";
-
-  @Autowired
-  private FieldSetQueryBuilder fieldSetQueryBuilder;
-
-  @Autowired
-  private AnnotationQueryBuilder annotationQueryBuilder;
-
-  @Autowired
-  private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-
+  
   @Autowired
   private ParticipantCohortStatusDao participantCohortStatusDao;
 

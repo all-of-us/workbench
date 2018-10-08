@@ -262,6 +262,9 @@ public class FieldSetQueryBuilder {
         SelectedColumn selectedColumn = new SelectedColumn();
         selectedColumn.columnInfo = new ColumnInfo(columnName, columnConfig);
         selectedColumn.tableAlias = tableNameAndAlias.alias;
+        // Separate table aliases from column aliases with "__" in the results. These can be
+        // replaced with "." to produce dot notation column names in the output. (BigQuery does not
+        // allow column aliases to contain dots, so we can't do that here directly.)
         selectedColumn.columnAlias = String.format("%s__%s", tableNameAndAlias.alias, columnEnd);
         selectColumns.add(selectedColumn);
       }
