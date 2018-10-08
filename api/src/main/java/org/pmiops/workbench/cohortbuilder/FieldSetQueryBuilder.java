@@ -262,7 +262,10 @@ public class FieldSetQueryBuilder {
         SelectedColumn selectedColumn = new SelectedColumn();
         selectedColumn.columnInfo = new ColumnInfo(columnName, columnConfig);
         selectedColumn.tableAlias = tableNameAndAlias.alias;
-        selectedColumn.columnAlias = String.format("%s_%s", tableNameAndAlias.alias, columnEnd);
+        // Separate table aliases from column aliases with "__" in the results. These can be
+        // replaced with "." to produce dot notation column names in the output. (BigQuery does not
+        // allow column aliases to contain dots, so we can't do that here directly.)
+        selectedColumn.columnAlias = String.format("%s__%s", tableNameAndAlias.alias, columnEnd);
         selectColumns.add(selectedColumn);
       }
     }
@@ -494,7 +497,7 @@ public class FieldSetQueryBuilder {
 
   private String buildSql(ParticipantCriteria participantCriteria, QueryState queryState,
       ImmutableList<SelectedColumn> selectColumns, String whereSql,
-      ImmutableList<OrderByColumn> orderByColumns, long resultSize, long offset) {
+      ImmutableList<OrderByColumn> orderByColumns, Long resultSize, long offset) {
 
     // Joining to tables after applying the LIMIT performs better in BigQuery than
     // joining to them before. Figure out if there are any tables that can be joined to after
@@ -567,8 +570,13 @@ public class FieldSetQueryBuilder {
         }
       }
     }
-    StringBuilder limitOffsetSql = new StringBuilder("\nlimit ");
-    limitOffsetSql.append(resultSize);
+    StringBuilder limitOffsetSql;
+    if (resultSize == null) {
+      limitOffsetSql = new StringBuilder("\n");
+    } else {
+      limitOffsetSql = new StringBuilder("\nlimit ");
+      limitOffsetSql.append(resultSize);
+    }
     if (offset > 0) {
       limitOffsetSql.append(" offset ");
       limitOffsetSql.append(offset);
@@ -614,8 +622,15 @@ public class FieldSetQueryBuilder {
     return outerSql.toString();
   }
 
+  public QueryJobConfiguration getQueryJobConfiguration(ParticipantCriteria participantCriteria,
+      TableQueryAndConfig tableQueryAndConfig, Long resultSize) {
+    QueryConfiguration queryConfiguration = buildQuery(participantCriteria, tableQueryAndConfig,
+        resultSize, 0L);
+    return bigQueryService.filterBigQueryConfig(queryConfiguration.getQueryJobConfiguration());
+  }
+
   private QueryConfiguration buildQuery(ParticipantCriteria participantCriteria,
-      TableQueryAndConfig tableQueryAndConfig, long resultSize, long offset) {
+      TableQueryAndConfig tableQueryAndConfig, Long resultSize, long offset) {
     QueryState queryState = new QueryState();
     queryState.schemaConfig = tableQueryAndConfig.getConfig();
     TableQuery tableQuery = tableQueryAndConfig.getTableQuery();
@@ -683,7 +698,7 @@ public class FieldSetQueryBuilder {
    */
   public Iterable<Map<String, Object>> materializeTableQuery(TableQueryAndConfig tableQueryAndConfig,
       ParticipantCriteria criteria, int limit, long offset) {
-    QueryConfiguration queryConfiguration = buildQuery(criteria, tableQueryAndConfig, limit, offset);
+    QueryConfiguration queryConfiguration = buildQuery(criteria, tableQueryAndConfig, (long) limit, offset);
     QueryResult result;
     QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
     result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));

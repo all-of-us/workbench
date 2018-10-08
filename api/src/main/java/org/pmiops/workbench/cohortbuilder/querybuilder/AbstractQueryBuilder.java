@@ -10,12 +10,32 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.betweenOperator;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.notBetweenOperator;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.notOneModifier;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.operandsEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.operandsNotDates;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.operandsNotNumbers;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.operandsNotOne;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.operandsNotTwo;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.operatorNotIn;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.operatorNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.DATE_MODIFIER_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.MODIFIER;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_IN_MODIFIER_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ONE_MODIFIER_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ONE_OPERAND_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS_NUMERIC_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERATOR;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TWO_OPERAND_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.modifierText;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.operatorText;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 /**
  * AbstractQueryBuilder is an object that builds {@link QueryJobConfiguration}
  * for BigQuery.
@@ -46,7 +66,7 @@ public abstract class AbstractQueryBuilder {
    * @param parameters
    * @return
    */
-  public abstract QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters);
+  public abstract String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters);
 
   public abstract FactoryKey getType();
 
@@ -63,8 +83,11 @@ public abstract class AbstractQueryBuilder {
       .replace("${encounterSql}", encounterSql) + modifierSql;
   }
 
-  protected String getUniqueNamedParameterPostfix() {
-    return UUID.randomUUID().toString().replaceAll("-", "");
+  protected String addQueryParameterValue(Map<String, QueryParameterValue> queryParameterValueMap,
+                                          QueryParameterValue queryParameterValue) {
+    String parameterName = "p" + queryParameterValueMap.size();
+    queryParameterValueMap.put(parameterName, queryParameterValue);
+    return parameterName;
   }
 
   private Modifier getModifier(List<Modifier> modifiers, ModifierType modifierType) {
@@ -87,11 +110,9 @@ public abstract class AbstractQueryBuilder {
         boolean isAgeAtEvent = modifier.getName().equals(ModifierType.AGE_AT_EVENT);
         List<String> modifierParamList = new ArrayList<>();
         for (String operand : modifier.getOperands()) {
-          String modifierParameter = isAgeAtEvent ? AGE_AT_EVENT_PREFIX : EVENT_DATE_PREFIX +
-            getUniqueNamedParameterPostfix();
+          String modifierParameter = addQueryParameterValue(queryParams, isAgeAtEvent ?
+              QueryParameterValue.int64(new Long(operand)) : QueryParameterValue.date(operand));
           modifierParamList.add("@" + modifierParameter);
-          queryParams.put(modifierParameter, isAgeAtEvent ?
-            QueryParameterValue.int64(new Long(operand)) : QueryParameterValue.date(operand));
         }
         if (isAgeAtEvent) {
           if (modifierSql.isEmpty()) {
@@ -120,9 +141,8 @@ public abstract class AbstractQueryBuilder {
       List<String> modifierParamList = new ArrayList<>();
       validateModifier(occurrences);
       for (String operand : occurrences.getOperands()) {
-        String modifierParameter = OCCURRENCES_PREFIX + getUniqueNamedParameterPostfix();
+        String modifierParameter = addQueryParameterValue(queryParams, QueryParameterValue.int64(new Long(operand)));
         modifierParamList.add("@" + modifierParameter);
-        queryParams.put(modifierParameter, QueryParameterValue.int64(new Long(operand)));
       }
       modifierSql = OCCURRENCES_SQL_TEMPLATE +
         OperatorUtils.getSqlOperator(occurrences.getOperator()) + " " +
@@ -136,9 +156,8 @@ public abstract class AbstractQueryBuilder {
       return "";
     }
     validateEncounctersModifier(modifier);
-    String modifierParameter = ENCOUNTER_PREFIX + getUniqueNamedParameterPostfix();
     Long[] operands = modifier.getOperands().stream().map(Long::new).toArray(Long[]::new);
-    queryParams.put(modifierParameter, QueryParameterValue.array(operands, Long.class));
+    String modifierParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(operands, Long.class));
     return ENCOUNTERS_SQL_TEMPLATE
       .replace("${encounterOperator}", OperatorUtils.getSqlOperator(modifier.getOperator()))
       .replace( "${encounterConceptId}", "@" + modifierParameter);
