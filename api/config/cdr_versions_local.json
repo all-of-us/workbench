@@ -1,5 +1,6 @@
 [
   {
+    "cdrVersionId": 1,
     "name": "Synthetic Dataset v1",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",

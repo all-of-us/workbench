@@ -1,5 +1,6 @@
 [
   {
+    "cdrVersionId": 1,
     "name": "Synthetic Dataset v1",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
@@ -11,6 +12,7 @@
     "publicDbName": "public20180920"
   },
   {
+    "cdrVersionId": 2,
     "name": "Synthetic Dataset v2",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
