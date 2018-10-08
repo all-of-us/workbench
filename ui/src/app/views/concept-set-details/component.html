@@ -60,8 +60,8 @@
         <clr-icon shape="search" class="icon search-icon"></clr-icon>
         Add concepts to set
       </button>
-      <!-- TODO(calbach): Provide a link once this view exists. -->
-      <button class="btn nav-button">
+      <button class="btn nav-button" routerLinkActive="active"
+          routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/concepts/sets">
         <clr-icon shape="grid-view" class="icon search-icon"></clr-icon>
         Return to concept sets
       </button>
