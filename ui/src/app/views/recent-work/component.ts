@@ -23,13 +23,13 @@ export class RecentWorkComponent implements OnInit {
     private userMetricsService: UserMetricsService
   ) {}
   index: Number;
-  size = 3;
   @ViewChild('recentWork')
   eMainFrame: ElementRef;
-  width: number;
+  size: number;
 
   ngOnInit(): void {
     this.resourcesLoading = true;
+    this.size = this.calculateSize(this.eMainFrame);
     this.updateList();
   }
 
@@ -37,9 +37,14 @@ export class RecentWorkComponent implements OnInit {
   onResize() {
     const width = this.eMainFrame.nativeElement.offsetWidth;
     if ((this.resourcesLoading === false) && (width)) {
-      this.size = Math.floor((width - 100) / 200) || 1;
+      this.size = this.calculateSize(this.eMainFrame);
       this.updateList();
     }
+  }
+
+  calculateSize(el: ElementRef): number {
+    const width = el.nativeElement.offsetWidth;
+    return Math.floor((width - 100) / 200) || 1
   }
 
   updateList(): void {
