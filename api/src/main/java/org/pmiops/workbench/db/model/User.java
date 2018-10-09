@@ -51,6 +51,7 @@ public class User {
   private boolean disabled;
   private Short emailVerificationStatus;
   private Boolean requestedIdVerification;
+  private Timestamp idVerificationRequestTime;
   private Set<PageVisit> pageVisits = new HashSet<PageVisit>();
 
   private List<InstitutionalAffiliation> institutionalAffiliations =
@@ -368,5 +369,14 @@ public class User {
 
   public void setBillingProjectRetries(Integer billingProjectRetries) {
     this.billingProjectRetries = billingProjectRetries;
+  }
+
+  @Column(name = "id_verification_request_time")
+  public Timestamp getIdVerificationRequestTime() {
+    return idVerificationRequestTime;
+  }
+
+  public void setIdVerificationRequestTime(Timestamp idVerificationRequestTime) {
+    this.idVerificationRequestTime = idVerificationRequestTime;
   }
 }
