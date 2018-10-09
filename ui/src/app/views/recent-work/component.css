@@ -2,6 +2,7 @@
     margin-left: 2.3rem;
     margin-top: -1rem;
     display: flex;
+    justify-content: flex-end;
     width: calc(100% - 2.3rem);
 }
 
@@ -38,7 +39,6 @@
 .recent-work {
     top: 2.1rem;
     position: relative;
-    flex-grow: 1;
 }
 
 .spinner-container {
