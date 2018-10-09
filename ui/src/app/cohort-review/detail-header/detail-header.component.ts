@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -23,7 +23,7 @@ import {
 })
 export class DetailHeaderComponent implements OnChanges {
   @Input() participant: Participant;
-
+  @Output() navigationClicked = new EventEmitter<any>();
   isFirstParticipant: boolean;
   isLastParticipant: boolean;
   priorId: number;
@@ -105,6 +105,7 @@ export class DetailHeaderComponent implements OnChanges {
           this.state.review.next(review);
           const stat = statusGetter(review.participantCohortStatuses);
           this.navigateById(stat.participantId);
+
         });
     }
   }
@@ -124,5 +125,6 @@ export class DetailHeaderComponent implements OnChanges {
 
   private navigateById = (id: number): void => {
     this.router.navigate(['..', id], {relativeTo: this.route});
+    this.navigationClicked.emit(id);
   }
 }

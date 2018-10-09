@@ -37,11 +37,8 @@ public class PhecodesQueryBuilder extends AbstractQueryBuilder {
                     "where o.observation_source_concept_id in (${innerSql})\n";
 
     @Override
-    public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
-        Map<String, QueryParameterValue> queryParams = new HashMap<>();
-
-        String namedParameter = "PheCodes" + getUniqueNamedParameterPostfix();
-        queryParams.put(namedParameter,
+    public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
+        String namedParameter = addQueryParameterValue(queryParams,
                 QueryParameterValue.array(
                         parameters
                                 .getParameters()
@@ -49,13 +46,7 @@ public class PhecodesQueryBuilder extends AbstractQueryBuilder {
                                 .map(SearchParameter::getValue)
                                 .toArray(String[]::new), String.class));
         String innerSql = INNER_SQL_TEMPLATE.replace("${pheCodes}", "@" + namedParameter);
-        String finalSql = OUTER_SQL_TEMPLATE.replace("${innerSql}", innerSql);
-
-        return QueryJobConfiguration
-                .newBuilder(finalSql)
-                .setNamedParameters(queryParams)
-                .setUseLegacySql(false)
-                .build();
+        return OUTER_SQL_TEMPLATE.replace("${innerSql}", innerSql);
     }
 
     @Override

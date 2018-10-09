@@ -8,12 +8,26 @@ import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainNotObservation;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.nameNotNumber;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.ppiTypeInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.valueNotNumber;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.DOMAIN;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NAME;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETER;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETERS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TYPE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.VALUE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 @Service
@@ -31,18 +45,18 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
     "and value_as_concept_id = ${value}\n";
 
   @Override
-  public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
+  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
     from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
-    Map<String, QueryParameterValue> queryParams = new HashMap<>();
-
     for (SearchParameter parameter : parameters.getParameters()) {
       validateSearchParameter(parameter);
-      String namedParameterConceptId = CONCEPTID_PREFIX + getUniqueNamedParameterPostfix();
-      String namedParameter = VALUE_PREFIX + getUniqueNamedParameterPostfix();
-      String domain = parameter.getDomainId().toLowerCase();
+      String namedParameterConceptId = addQueryParameterValue(queryParams,
+          QueryParameterValue.int64(parameter.getConceptId()));
       boolean isValueAsNum = StringUtils.isBlank(parameter.getValue());
       String value = isValueAsNum ? parameter.getName() : parameter.getValue();
+      String namedParameter = addQueryParameterValue(queryParams,
+          QueryParameterValue.int64(new Long(value)));
+      String domain = parameter.getDomainId().toLowerCase();
       String sqlTemplate = isValueAsNum ?
         PPI_SQL_TEMPLATE + VALUE_AS_NUMBER_SQL_TEMPLATE :
         PPI_SQL_TEMPLATE + VALUE_AS_CONCEPT_ID_SQL_TEMPLATE;
@@ -52,16 +66,8 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
         .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain))
         .replace("${conceptId}", "@" + namedParameterConceptId)
         .replace("${value}","@" + namedParameter));
-      queryParams.put(namedParameterConceptId, QueryParameterValue.int64(parameter.getConceptId()));
-      queryParams.put(namedParameter, QueryParameterValue.int64(new Long(value)));
     }
-
-    String finalSql = String.join(UNION_ALL, queryParts);
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(queryParams)
-      .setUseLegacySql(false)
-      .build();
+    return String.join(UNION_ALL, queryParts);
   }
 
   private void validateSearchParameter(SearchParameter param) {
