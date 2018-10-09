@@ -12,9 +12,11 @@ import {
 
 
 @Component({
+  selector: 'app-create-review-page',
   templateUrl: './create-review-page.html',
 })
 export class CreateReviewPage implements OnInit {
+  create = true;
   creating = false;
   cohort: Cohort;
   review: CohortReview;
@@ -38,15 +40,26 @@ export class CreateReviewPage implements OnInit {
   }
 
   ngOnInit() {
-    const {review, cohort} = this.route.parent.snapshot.data;
+    const {review, cohort} = this.route.snapshot.data;
     this.review = review;
     this.cohort = cohort;
+    console.log(review);
+    console.log(cohort);
 
     this.numParticipants.setValidators([
       Validators.required,
       Validators.min(1),
       Validators.max(this.maxParticipants),
     ]);
+  }
+
+  open(): void {
+    this.create = true;
+  }
+
+  close(): void {
+    console.log('close');
+    this.cancelReview();
   }
 
   cancelReview() {
