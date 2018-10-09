@@ -198,4 +198,15 @@ describe('WorkspaceNavBarComponent', () => {
     expect(de.query(By.css('app-fake-clone'))).toBeTruthy();
     expect(router.routerState.snapshot.url).toContain(newId);
   }));
+
+  it('should close menu on action', fakeAsync(() => {
+    const de = fixture.debugElement;
+    simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
+
+    const cloneBtn = de.queryAll(By.css('clr-dropdown-menu button'))
+      .find(b => b.nativeElement.textContent.includes('Clone'));
+    simulateClick(fixture, cloneBtn);
+
+    expect(de.queryAll(By.css('clr-dropdown-menu button')).length).toEqual(0);
+  }));
 });

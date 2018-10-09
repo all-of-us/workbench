@@ -1,8 +1,7 @@
+import {select} from '@angular-redux/store';
 import {Component, Input} from '@angular/core';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
-
-import {CohortSearchActions} from '../redux';
 
 import {SearchRequest} from 'generated';
 
@@ -16,6 +15,8 @@ import {SearchRequest} from 'generated';
 export class SearchGroupListComponent {
   @Input() role: keyof SearchRequest;
   @Input() groups$: Observable<List<any>>;
+
+  @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
 
   get title() {
     const prefix = this.role === 'excludes' ? 'And ' : '';

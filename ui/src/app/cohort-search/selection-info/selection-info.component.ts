@@ -30,5 +30,10 @@ export class SelectionInfoComponent {
     get _type()     { return typeDisplay(this.parameter); }
     get name()      { return nameDisplay(this.parameter); }
     get attribute() { return attributeDisplay(this.parameter); }
+    get showType() {
+        return this.parameter.get('type') !== TreeType.PM
+          && this.parameter.get('type') !== TreeType.DRUG
+          && this.parameter.get('type') !== TreeType.PPI;
+    }
 }
 

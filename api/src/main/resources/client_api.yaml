@@ -155,55 +155,37 @@ definitions:
             A query specifying how to pull data out of a single table. If tableQuery is not
             specified, just Person.person_id will be extracted.
         $ref: "#/definitions/TableQuery"
+      maxResults:
+        type: integer
+        format: int64
+        description: >
+          The maximum number of results returned in the data table. Defaults to no limit (all
+          matching results are returned.)
+
 
   CdrQuery:
     type: object
     required:
-      - sql
       - bigqueryProject
       - bigqueryDataset
 
     properties:
       sql:
-        description: Google SQL to use when querying the CDR
+        description: >
+          Google SQL to use when querying the CDR. If empty, it means no participants can possibly
+          match the data table specification, and an empty data table should be returned.
         type: string
-      parameters:
-        description: named query parameters used when executing the above SQL
-        type: array
-        items:
-          $ref: "#/definitions/CdrQueryParameter"
+      configuration:
+        description: >
+          configuration for the BigQuery job (includes named parameters); you can pass this JSON
+          dictionary in for the configuration when calling methods like pandas.read_gbq().
+        type: object
       bigqueryProject:
         description: name of the Google Cloud project containing the CDR dataset
         type: string
       bigqueryDataset:
         description: name of the CDR BigQuery dataset
         type: string
-
-  CdrQueryParameter:
-    type: object
-    required:
-      - name
-    description: A query parameter and value. One (and only one) of the value fields should be set.
-    properties:
-      name:
-        description: the name of the parameter
-        type: string
-      values:
-        description: An array of string values for this parameter. (It may contain just one value.)
-        type: array
-        items:
-          type: string
-      valueDate:
-        description: A date (yyyy-MM-dd) value for this parameter
-        type: string
-      valueDatetime:
-        description: A datetime (yyyy-MM-dd HH:mm:ss zzz) value for this parameter
-        type: string
-      valueNumbers:
-        description: An array of number values for this parameter. (It may contain just one value.)
-        type: array
-        items:
-          type: number
 
   CohortAnnotationsRequest:
     type: object

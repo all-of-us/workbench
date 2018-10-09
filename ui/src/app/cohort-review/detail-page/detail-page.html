@@ -1,10 +1,10 @@
 <div class="detail-page" [class.sidebar-open]="sidebarOpen">
 
-  <app-detail-header [participant]="participant">
+  <app-detail-header [participant]="participant" (navigationClicked)="getNavigatedParticipantId($event)">
   </app-detail-header>
 
   <!-- Tab data stubbed in detail-tabs class -->
-  <app-detail-tabs>
+  <app-detail-tabs [clickedParticipantId]="participantId">
   </app-detail-tabs>
 </div>
 <!--<div class="sidebar-handle" (click)="toggleSidebar()">-->

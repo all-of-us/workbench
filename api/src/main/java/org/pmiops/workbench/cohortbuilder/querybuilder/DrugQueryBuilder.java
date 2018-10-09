@@ -1,15 +1,21 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.drugTypeInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETER;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETERS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TYPE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 @Service
 public class DrugQueryBuilder extends AbstractQueryBuilder {
@@ -21,10 +27,8 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
       "${encounterSql}";
 
   @Override
-  public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
+  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
     from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
-    Map<String, QueryParameterValue> queryParams = new HashMap<>();
-    String namedParameter = "drug" + getUniqueNamedParameterPostfix();
     Long[] conceptIds = parameters.getParameters()
       .stream()
       .map(param -> {
@@ -33,15 +37,9 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
         return param.getConceptId();
       })
       .toArray(Long[]::new);
-    queryParams.put(namedParameter, QueryParameterValue.array(conceptIds, Long.class));
+    String namedParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds, Long.class));
     String drugSql = DRUG_SQL_TEMPLATE.replace("${conceptIds}", "@" + namedParameter);
-    String finalSql = buildModifierSql(drugSql, queryParams, parameters.getModifiers());
-
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(queryParams)
-      .setUseLegacySql(false)
-      .build();
+    return buildModifierSql(drugSql, queryParams, parameters.getModifiers());
   }
 
   @Override
