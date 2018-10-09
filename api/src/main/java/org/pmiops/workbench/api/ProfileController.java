@@ -401,14 +401,17 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> submitIdVerification() {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     User user = userProvider.get();
     if (user.getRequestedIdVerification() == null || !user.getRequestedIdVerification()) {
+      log.log(Level.INFO, "Sending id verification request email.");
       try {
         mailServiceProvider.get().sendIdVerificationRequestEmail(user.getEmail());
       } catch (MessagingException e) {
         throw new EmailException("Error submitting id verification", e);
       }
       user.setRequestedIdVerification(true);
+      user.setIdVerificationRequestTime(now);
       user = saveUserWithConflictHandling(user);
     }
 

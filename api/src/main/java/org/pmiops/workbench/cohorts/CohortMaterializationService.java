@@ -41,6 +41,8 @@ import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CdrQuery;
+import org.pmiops.workbench.model.CohortAnnotationsRequest;
+import org.pmiops.workbench.model.CohortAnnotationsResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.DataTableSpecification;
@@ -404,5 +406,17 @@ public class CohortMaterializationService {
       response.setNextPageToken(nextToken);
     }
     return response;
+  }
+
+  public CohortAnnotationsResponse getAnnotations(CohortReview cohortReview,
+      CohortAnnotationsRequest request) {
+    List<CohortStatus> statusFilter = request.getStatusFilter();
+    if (statusFilter == null) {
+      statusFilter = NOT_EXCLUDED;
+    }
+    Iterable<Map<String, Object>> results =
+        annotationQueryBuilder.materializeAnnotationQuery(cohortReview, statusFilter,
+            request.getAnnotationQuery(), null, 0L);
+    return new CohortAnnotationsResponse().results(ImmutableList.copyOf(results));
   }
 }
