@@ -633,6 +633,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
+    dbWorkspace.setFirecloudUuid(toFcWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);
