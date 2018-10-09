@@ -2,10 +2,7 @@
     margin-left: 2.3rem;
     margin-top: -1rem;
     display: flex;
-    width: 100%;
-    flex-shrink: 2;
-    /*justify-content:space-between;*/
-    /*flex-direction:row;*/
+    width: calc(100% - 2.3rem);
 }
 
 .card {
@@ -22,21 +19,26 @@
 .scroll-indicator {
     height: 2rem;
     width: 2rem;
+    align-self: center;
+}
+
+.scroll-indicator#left-scroll {
     position: absolute;
-    top: 3rem;
+    left: 0;
 }
 
 .title {
     left: 2.7rem;
     margin-top: -1.7rem;
     color: #FFFFFF;
-    width: 100%;
+    width: calc(100% - 2.7rem);
     position: relative
 }
 
 .recent-work {
     top: 2.1rem;
     position: relative;
+    flex-grow: 1;
 }
 
 .spinner-container {
