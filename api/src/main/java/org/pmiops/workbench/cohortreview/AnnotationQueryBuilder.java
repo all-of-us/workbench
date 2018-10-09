@@ -4,14 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -25,6 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 @Service
 // TODO(RW-499): use a library to construct the SQL below, rather than concatenating strings
@@ -239,7 +240,7 @@ public class AnnotationQueryBuilder {
           if (obj != null) {
             String column = columns.get(i);
             if (column.equals(REVIEW_STATUS_COLUMN)) {
-              result.put(column, StorageEnums.cohortStatusFromStorage((Short) obj).name());
+              result.put(column, StorageEnums.cohortStatusFromStorage(((Number) obj).shortValue()).name());
             } else if (obj instanceof java.sql.Date) {
               result.put(column, DATE_FORMAT.format((java.sql.Date) obj));
             } else {
