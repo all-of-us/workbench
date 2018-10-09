@@ -265,14 +265,7 @@ export class CohortSearchActions {
   fetchAllChildren(node: any): void {
     const kind = node.get('type');
     const id = node.get('id');
-    if (kind === TreeType[TreeType.DRUG]) {
-      this.requestAllChildren(this.cdrVersionId, kind, id);
-    } else {
-      const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`;
-      const param = node.set('parameterId', paramId);
-      this.addParameter(param);
-      this.selectChildren(kind, id);
-    }
+    this.requestAllChildren(this.cdrVersionId, kind, id);
   }
 
   fetchAttributes(node: any): void {
