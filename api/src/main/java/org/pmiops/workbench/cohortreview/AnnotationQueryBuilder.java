@@ -170,9 +170,14 @@ public class AnnotationQueryBuilder {
     return orderByBuilder.toString();
   }
 
-  private String getLimitAndOffsetSql(int limit, long offset, ImmutableMap.Builder<String, Object> params) {
-    StringBuilder endSqlBuilder = new StringBuilder("\nLIMIT :limit");
-    params.put("limit", limit);
+  private String getLimitAndOffsetSql(Integer limit, long offset, ImmutableMap.Builder<String, Object> params) {
+    StringBuilder endSqlBuilder;
+    if (limit == null) {
+      endSqlBuilder = new StringBuilder("\n");
+    } else {
+      endSqlBuilder = new StringBuilder("\nLIMIT :limit");
+      params.put("limit", limit);
+    }
     if (offset != 0L) {
       // TODO: consider pagination based on values rather than offsets
       endSqlBuilder.append(" OFFSET :offset");
@@ -182,7 +187,7 @@ public class AnnotationQueryBuilder {
   }
 
   private String getSql(CohortReview cohortReview, List<CohortStatus> statusFilter,
-      AnnotationQuery annotationQuery, int limit, long offset,
+      AnnotationQuery annotationQuery, Integer limit, long offset,
       Map<String, CohortAnnotationDefinition> annotationDefinitions,
       ImmutableMap.Builder<String, Object> parameters) {
     Map<String, String> columnAliasMap = Maps.newHashMap();
@@ -200,7 +205,7 @@ public class AnnotationQueryBuilder {
 
   public Iterable<Map<String, Object>> materializeAnnotationQuery(CohortReview cohortReview,
       List<CohortStatus> statusFilter,
-      AnnotationQuery annotationQuery, int limit, long offset) {
+      AnnotationQuery annotationQuery, Integer limit, long offset) {
     if (statusFilter == null || statusFilter.isEmpty()) {
       throw new BadRequestException("statusFilter cannot be empty");
     }
