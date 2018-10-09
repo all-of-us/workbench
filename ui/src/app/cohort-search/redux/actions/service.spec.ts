@@ -17,6 +17,7 @@ const dummyItem = fromJS({
   searchParameters: ['param0', 'param1'],
   modifiers: [],
   count: null,
+  temporalGroup: 0,
   isRequesting: false,
 });
 
@@ -57,12 +58,22 @@ const DEMO_crit = fromJS({
 const groups = fromJS({
   include0: {
     id: 'include0',
+    temporal: false,
+    mention: '',
+    time: '',
+    timeValue: 0,
+    timeFrame: '',
     items: [],
     count: null,
     isRequesting: false,
   },
   exclude0: {
     id: 'exclude0',
+    temporal: false,
+    mention: '',
+    time: '',
+    timeValue: 0,
+    timeFrame: '',
     items: [],
     count: null,
     isRequesting: false,
@@ -81,9 +92,15 @@ const dummyState = initialState
 const expectedSR = {
   includes: [{
     id: 'include0',
+    temporal: false,
+    mention: '',
+    time: '',
+    timeValue: 0,
+    timeFrame: '',
     items: [{
       id: 'item001',
       type: TreeType[TreeType.ICD9],
+      temporalGroup: 0,
       searchParameters: [{
           parameterId: 'param0',
           name: 'CodeA',
@@ -184,6 +201,11 @@ describe('CohortSearchActions', () => {
     const secondItem = dummyItem.set('id', 'item002');
     const secondGroup = fromJS({
       id: 'include1',
+      temporal: false,
+      mention: '',
+      time: '',
+      timeValue: 0,
+      timeFrame: '',
       items: ['item002'],
       count: null,
       isRequesting: false,
@@ -201,9 +223,15 @@ describe('CohortSearchActions', () => {
     const newExpectedSR = {
       includes: [{
         id: 'include0',
+        temporal: false,
+        mention: '',
+        time: '',
+        timeValue: 0,
+        timeFrame: '',
         items: [{
           id: 'item001',
           type: TreeType[TreeType.ICD9],
+          temporalGroup: 0,
           searchParameters: [{
               parameterId: 'param0',
               name: 'CodeA',
@@ -229,9 +257,15 @@ describe('CohortSearchActions', () => {
         }]
       }, {
         id: 'include1',
+        temporal: false,
+        mention: '',
+        time: '',
+        timeValue: 0,
+        timeFrame: '',
         items: [{
           id: 'item002',
           type: TreeType[TreeType.ICD9],
+          temporalGroup: 0,
           searchParameters: [{
               parameterId: 'param0',
               name: 'CodeA',

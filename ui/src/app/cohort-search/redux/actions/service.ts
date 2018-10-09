@@ -442,7 +442,14 @@ export class CohortSearchActions {
     if (isImmutable(items)) {
       items = items.toJS();
     }
-    return <SearchGroup>{id: groupId, items};
+    return <SearchGroup>{
+      id: groupId,
+      temporal: group.get('temporal'),
+      mention: group.get('mention'),
+      time: group.get('time'),
+      timeValue: group.get('timeValue'),
+      timeFrame: group.get('timeFrame'),
+      items};
   }
 
   mapGroupItem = (itemId: string): SearchGroupItem => {
@@ -459,6 +466,7 @@ export class CohortSearchActions {
     return <SearchGroupItem>{
       id: itemId,
       type: item.get('type', '').toUpperCase(),
+      temporalGroup: item.get('temporalGroup'),
       searchParameters: params,
       modifiers: item.get('modifiers', List()).toJS(),
     };

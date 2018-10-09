@@ -429,10 +429,28 @@ definitions:
       A SearchGroup is a container for groups of criteria which are `AND`ed together.
     type: object
     required:
+      - temporal
       - items
     properties:
       id:
         description: Unique within the cohort definition
+        type: string
+      temporal:
+        description: indicates if this search group relates to time
+        type: boolean
+        default: false
+      mention:
+        description: first, last or any mention(used in temporal realtionships)
+        type: string
+      time:
+        description: time frame between temporal items
+        type: string
+      timeValue:
+        description: time value between temporal items
+        type: integer
+        format: int64
+      timeFrame:
+        description: time increments(Day, Month or Year)
         type: string
       items:
         type: "array"
@@ -457,6 +475,9 @@ definitions:
       type:
         description: type of criteria
         type: string
+      temporalGroup:
+        description: temporal group that this item belongs to
+        type: integer
       searchParameters:
         description: values that help search for subjects
         type: "array"

@@ -318,6 +318,11 @@ export const rootReducer: Reducer<CohortSearchState> =
               id: action.groupId,
               items: [],
               count: null,
+              temporal: false,
+              mention: "",
+              time: "",
+              timeValue: 0,
+              timeFrame: "",
               isRequesting: false
             })
           )
@@ -433,6 +438,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             searchParameters: [],
             modifiers: [],
             count: null,
+            temporalGroup: 0,
             isRequesting: false,
           },
           selections: {},
