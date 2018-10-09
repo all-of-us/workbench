@@ -11,16 +11,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
@@ -56,6 +46,17 @@ import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Nullable;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class CohortMaterializationService {
@@ -268,14 +269,15 @@ public class CohortMaterializationService {
     }
     ParticipantCriteria criteria = getParticipantCriteria(statusFilter, cohortReview,
         searchRequest);
+    TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(
+        dataTableSpecification.getTableQuery(), conceptIds);
+    cdrQuery.setColumns(tableQueryAndConfig.getTableQuery().getColumns());
     if (criteria.getParticipantIdsToInclude() != null
         && criteria.getParticipantIdsToInclude().isEmpty()) {
       // There is no cohort review, or no participants matching the status filter;
       // return a query with no SQL, indicating there should be no results.
       return cdrQuery;
     }
-    TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(
-        dataTableSpecification.getTableQuery(), conceptIds);
     QueryJobConfiguration jobConfiguration = fieldSetQueryBuilder.getQueryJobConfiguration(
         criteria, tableQueryAndConfig,  dataTableSpecification.getMaxResults());
     cdrQuery.setSql(jobConfiguration.getQuery());
@@ -386,7 +388,7 @@ public class CohortMaterializationService {
         return response;
       }
       results = annotationQueryBuilder.materializeAnnotationQuery(cohortReview, statusFilter,
-          fieldSet.getAnnotationQuery(), limit, offset);
+          fieldSet.getAnnotationQuery(), limit, offset).getResults();
     } else {
       throw new BadRequestException("Must specify tableQuery or annotationQuery");
     }
@@ -414,9 +416,10 @@ public class CohortMaterializationService {
     if (statusFilter == null) {
       statusFilter = NOT_EXCLUDED;
     }
-    Iterable<Map<String, Object>> results =
+    AnnotationQueryBuilder.AnnotationResults results =
         annotationQueryBuilder.materializeAnnotationQuery(cohortReview, statusFilter,
             request.getAnnotationQuery(), null, 0L);
-    return new CohortAnnotationsResponse().results(ImmutableList.copyOf(results));
+    return new CohortAnnotationsResponse().results(ImmutableList.copyOf(results.getResults()))
+        .columns(results.getColumns());
   }
 }
