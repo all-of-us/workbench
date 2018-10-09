@@ -654,7 +654,7 @@ round((case when m1.value_as_number < p10_value then p10_value
      end) as string) as stratum_4,
 COUNT(distinct p1.PERSON_ID) as count_value, COUNT(distinct p1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 on p1.person_id = m1.person_id
-join measurement_quartile_data on m1.measurement_concept_id=concept
+join measurement_quartile_data on m1.measurement_source_concept_id=concept
 where m1.measurement_source_concept_id != 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
 and m1.value_as_number is not null and p1.gender_concept_id=gender and (cast(m1.unit_concept_id as string)=unit or lower(m1.unit_source_value)=unit)
 group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4
@@ -983,4 +983,12 @@ echo "Binning counts < 20"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 set count_value = 20, source_count_value = 20 where analysis_id in (1900,1901) and ((count_value>0 and count_value<20) or (source_count_value>0 and source_count_value<20))"
+
+# Replace the unit_concept_id in achilles_results with concept_name for the display purpose
+echo "Replacing unit_concept_id with concept_name"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` ar
+set ar.stratum_3 = (select distinct c.concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c where cast(c.concept_id as string)=ar.stratum_3)
+where ar.stratum_3 in ('9289','9117','8876','8653','9529','9531','9484','8555','8582')"
+
 

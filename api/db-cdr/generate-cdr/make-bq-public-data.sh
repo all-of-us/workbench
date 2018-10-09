@@ -187,7 +187,7 @@ set count_value =
         else
             0.00
     end
-where count_value >= 0 and vocabulary_id = 'ppi' "
+where count_value = 0 and vocabulary_id = 'ppi' "
 
 #delete concepts with 0 count / source count value
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
