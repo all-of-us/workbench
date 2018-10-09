@@ -612,6 +612,7 @@ count(distinct p1.person_id) as count_value,
 0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 on p1.person_id = m1.person_id
 join measurement_quartile_data on m1.measurement_concept_id=concept
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 where m1.measurement_concept_id != 0
 and m1.value_as_number is not null and p1.gender_concept_id=gender and (cast(m1.unit_concept_id as string)=unit or lower(m1.unit_source_value)=unit)
 group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4
@@ -655,6 +656,7 @@ round((case when m1.value_as_number < p10_value then p10_value
 COUNT(distinct p1.PERSON_ID) as count_value, COUNT(distinct p1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 on p1.person_id = m1.person_id
 join measurement_quartile_data on m1.measurement_source_concept_id=concept
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_source_concept_id=c1.concept_id
 where m1.measurement_source_concept_id != 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
 and m1.value_as_number is not null and p1.gender_concept_id=gender and (cast(m1.unit_concept_id as string)=unit or lower(m1.unit_source_value)=unit)
 group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4
@@ -675,6 +677,7 @@ count(distinct p1.person_id) as count_value,
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 where m1.value_as_concept_id != 0
 and m1.measurement_concept_id > 0
 group by m1.measurement_concept_id,c2.concept_name,p1.gender_concept_id,m1.value_as_concept_id
@@ -688,6 +691,7 @@ count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_source_concept_id=c1.concept_id
 where m1.value_as_concept_id != 0
 and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id != m1.measurement_concept_id
 group by m1.measurement_source_concept_id,c2.concept_name,p1.gender_concept_id,m1.unit_concept_id,m1.value_as_concept_id"
@@ -745,6 +749,7 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join measurement_quartile_data ar on
 m1.measurement_concept_id=ar.concept
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 where m1.measurement_concept_id > 0
 and m1.value_as_number is not null
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
@@ -793,6 +798,7 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join measurement_quartile_data ar on
 m1.measurement_source_concept_id=ar.concept
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_source_concept_id=c1.concept_id
 where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
 and (cast(m1.unit_concept_id as string)=unit or lower(m1.unit_source_value)=unit)
@@ -854,6 +860,7 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join measurement_quartile_data ar on
 m1.measurement_concept_id=ar.concept
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 where m1.measurement_concept_id > 0
 and m1.value_as_number is not null
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
@@ -902,6 +909,7 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join measurement_quartile_data ar on
 m1.measurement_source_concept_id=ar.concept
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_source_concept_id=c1.concept_id
 where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
 and (cast(m1.unit_concept_id as string)=unit or lower(m1.unit_source_value)=unit)
@@ -924,6 +932,7 @@ count(distinct p1.person_id) as count_value,
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 where m1.value_as_concept_id != 0
 and m1.measurement_concept_id > 0
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3

@@ -210,7 +210,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .dataType(cdr.getDataType())
                             .unitName(cdr.getUnitName())
                             .results(results)
-                            .distResults(distResults);
+                            .distResults(distResults)
+                            .unitName(cdr.getUnitName());
 
                 }
             };
@@ -531,14 +532,16 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     HashMap<String,List<AchillesResult>> results = seperateUnitResults(aa);
                     List<AchillesAnalysis> unitSeperateAnalysis = new ArrayList<>();
                     HashMap<String,List<AchillesResultDist>> distResults = analysisDistResults.get(MEASUREMENT_GENDER_DIST_ANALYSIS_ID);
-                    List<AchillesResultDist> conceptDistResults = distResults.get(conceptId);
-                    Multimap<String,AchillesResultDist> unitDistResults = Multimaps.index(conceptDistResults,AchillesResultDist::getStratum2);
-                    for(String unit: results.keySet()){
-                        AchillesAnalysis unitGenderAnalysis = new AchillesAnalysis(aa);
-                        unitGenderAnalysis.setResults(results.get(unit));
-                        unitGenderAnalysis.setUnitName(unit);
-                        processMeasurementGenderMissingBins(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,unitGenderAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
-                        unitSeperateAnalysis.add(unitGenderAnalysis);
+                    if (distResults != null) {
+                        List<AchillesResultDist> conceptDistResults = distResults.get(conceptId);
+                        Multimap<String,AchillesResultDist> unitDistResults = Multimaps.index(conceptDistResults,AchillesResultDist::getStratum2);
+                        for(String unit: results.keySet()){
+                            AchillesAnalysis unitGenderAnalysis = new AchillesAnalysis(aa);
+                            unitGenderAnalysis.setResults(results.get(unit));
+                            unitGenderAnalysis.setUnitName(unit);
+                            processMeasurementGenderMissingBins(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,unitGenderAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                            unitSeperateAnalysis.add(unitGenderAnalysis);
+                        }
                     }
                     isMeasurement = true;
                     conceptAnalysis.setMeasurementValueGenderAnalysis(unitSeperateAnalysis.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
@@ -546,15 +549,17 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     HashMap<String,List<AchillesResult>> results = seperateUnitResults(aa);
                     List<AchillesAnalysis> unitSeperateAnalysis = new ArrayList<>();
                     HashMap<String,List<AchillesResultDist>> distResults = analysisDistResults.get(MEASUREMENT_AGE_DIST_ANALYSIS_ID);
-                    List<AchillesResultDist> conceptDistResults = distResults.get(conceptId);
-                    Multimap<String,AchillesResultDist> unitDistResults = Multimaps.index(conceptDistResults,AchillesResultDist::getStratum2);
-                    for(String unit: results.keySet()){
-                        AchillesAnalysis unitAgeAnalysis = new AchillesAnalysis(aa);
-                        unitAgeAnalysis.setResults(results.get(unit));
-                        unitAgeAnalysis.setUnitName(unit);
-                        processMeasurementAgeDecileMissingBins(MEASUREMENT_AGE_DIST_ANALYSIS_ID,unitAgeAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
-                        addAgeStratum(unitAgeAnalysis,conceptId);
-                        unitSeperateAnalysis.add(unitAgeAnalysis);
+                    if (distResults != null) {
+                        List<AchillesResultDist> conceptDistResults = distResults.get(conceptId);
+                        Multimap<String,AchillesResultDist> unitDistResults = Multimaps.index(conceptDistResults,AchillesResultDist::getStratum2);
+                        for(String unit: results.keySet()){
+                            AchillesAnalysis unitAgeAnalysis = new AchillesAnalysis(aa);
+                            unitAgeAnalysis.setResults(results.get(unit));
+                            unitAgeAnalysis.setUnitName(unit);
+                            processMeasurementAgeDecileMissingBins(MEASUREMENT_AGE_DIST_ANALYSIS_ID,unitAgeAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                            addAgeStratum(unitAgeAnalysis,conceptId);
+                            unitSeperateAnalysis.add(unitAgeAnalysis);
+                        }
                     }
                     isMeasurement = true;
                     conceptAnalysis.setMeasurementValueAgeAnalysis(unitSeperateAnalysis.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));

@@ -7,6 +7,7 @@ import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.servi
 import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
 import {DbConfigService} from '../../utils/db-config.service';
+import {ConceptWithAnalysis} from "../../utils/conceptWithAnalysis";
 
 @Component({
   selector: 'app-concept-charts',
@@ -35,6 +36,9 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   sourceConcepts: Concept[] = null;
   analyses: ConceptAnalysis;
   genderResults: AchillesResult[] = [];
+  unitNames: string[] = [];
+  selectedUnit: string;
+  toDisplayMeasurementGenderAnalysis: Analysis;
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
 
@@ -55,6 +59,16 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
         if (this.showMeasurementGenderBins) {
           this.genderResults = this.analyses.genderAnalysis.results;
         }
+        this.unitNames = [];
+        if (this.analyses.measurementValueGenderAnalysis) {
+            for (const aa of this.analyses.measurementValueGenderAnalysis) {
+                this.unitNames.push(aa.unitName);
+            }
+            this.selectedUnit = this.unitNames[0];
+            this.toDisplayMeasurementGenderAnalysis =  this.analyses.measurementValueGenderAnalysis.
+            find(aa => aa.unitName === this.selectedUnit);
+        }
+
         this.loadingStack.pop();
       }));
 
@@ -78,7 +92,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     const others = [];
 
     // No need to do anything if only one gender
-    if (analysis.results.length <= 1) {
+    if (analysis && analysis.results.length <= 1) {
       return;
     }
     const results = [];
@@ -112,4 +126,10 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       analysis.results.push(this.otherGenderResult);
     }
   }
+
+    showHistogram(unit: string) {
+        this.selectedUnit = unit;
+        this.toDisplayMeasurementGenderAnalysis = this.analyses.measurementValueGenderAnalysis.
+        find(aa => aa.unitName === unit);
+    }
 }
