@@ -369,8 +369,29 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(String workspaceNamespace,
       String workspaceId, CohortAnnotationsRequest request) {
-    // TODO: implement this
-    return null;
+    Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    CdrVersion cdrVersion = workspace.getCdrVersion();
+    if (request.getCdrVersionName() != null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
+        throw new NotFoundException(String.format("Couldn't find CDR version with name %s",
+            request.getCdrVersionName()));
+      }
+    }
+    org.pmiops.workbench.db.model.Cohort cohort =
+        cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
+    if (cohort == null) {
+      throw new NotFoundException(
+          String.format("Couldn't find cohort with name %s in workspace %s/%s",
+              request.getCohortName(), workspaceNamespace, workspaceId));
+    }
+    CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohort.getCohortId(),
+          cdrVersion.getCdrVersionId());
+    if (cohortReview == null) {
+      return ResponseEntity.ok(new CohortAnnotationsResponse());
+    }
+    return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
   }
 
   private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceNamespace,

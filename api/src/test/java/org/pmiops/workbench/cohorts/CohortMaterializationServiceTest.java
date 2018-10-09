@@ -1,11 +1,17 @@
 package org.pmiops.workbench.cohorts;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+
 import com.google.cloud.bigquery.BigQuery;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +40,8 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CdrQuery;
+import org.pmiops.workbench.model.CohortAnnotationsRequest;
+import org.pmiops.workbench.model.CohortAnnotationsResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataTableSpecification;
@@ -56,12 +64,6 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -234,6 +236,15 @@ public class CohortMaterializationServiceTest {
     assertThat(response2.getNextPageToken()).isNull();
   }
 
+  @Test
+  public void testGetAnnotations() {
+    CohortAnnotationsResponse response =
+        cohortMaterializationService.getAnnotations(cohortReview,
+            new CohortAnnotationsRequest().annotationQuery(new AnnotationQuery()));
+    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
+    assertResults(response.getResults(), p1Map);
+  }
+
   private MaterializeCohortRequest makeRequest(int pageSize) {
     return new MaterializeCohortRequest().pageSize(pageSize);
   }
@@ -254,13 +265,18 @@ public class CohortMaterializationServiceTest {
 
   private void assertResults(MaterializeCohortResponse actualResponse,
       ImmutableMap<String, Object>... expectedResults) {
-    if (actualResponse.getResults().size() != expectedResults.length) {
-      fail("Expected " + expectedResults.length + ", got " + actualResponse.getResults().size()
-          + "; actual results: " + actualResponse.getResults());
+    assertResults(actualResponse.getResults(), expectedResults);
+  }
+
+  private void assertResults(List<Object> actualResults,
+      ImmutableMap<String, Object>... expectedResults) {
+    if (actualResults.size() != expectedResults.length) {
+      fail("Expected " + expectedResults.length + ", got " + actualResults.size()
+          + "; actual results: " + actualResults);
     }
-    for (int i = 0; i < actualResponse.getResults().size(); i++) {
+    for (int i = 0; i < actualResults.size(); i++) {
       MapDifference<String, Object> difference =
-          Maps.difference((Map<String, Object>) actualResponse.getResults().get(i),
+          Maps.difference((Map<String, Object>) actualResults.get(i),
               expectedResults[i]);
       if (!difference.areEqual()) {
         fail("Result " + i + " had difference: " + difference.entriesDiffering()
