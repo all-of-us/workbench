@@ -16,7 +16,7 @@
     "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "Synthetic Dataset v2",
+    "defaultCdrVersion": 2,
     "debugQueries": true
   },
   "googleCloudStorageService": {

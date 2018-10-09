@@ -39,7 +39,7 @@ public class WorkbenchConfig {
   }
 
   public static class CdrConfig {
-    public String defaultCdrVersion;
+    public Long defaultCdrVersion;
     public boolean debugQueries;
   }
 

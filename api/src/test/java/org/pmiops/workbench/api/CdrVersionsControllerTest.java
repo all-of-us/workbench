@@ -71,7 +71,7 @@ public class CdrVersionsControllerTest {
     public WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.cdr = new CdrConfig();
-      workbenchConfig.cdr.defaultCdrVersion = "Test Registered CDR";
+      workbenchConfig.cdr.defaultCdrVersion = 1L;
       workbenchConfig.firecloud = new FireCloudConfig();
       workbenchConfig.firecloud.enforceRegistered = true;
       return workbenchConfig;

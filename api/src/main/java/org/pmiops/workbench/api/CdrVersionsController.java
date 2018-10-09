@@ -63,22 +63,10 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
     // TODO: consider different default CDR versions for different access levels
-    String defaultCdrVersionName = workbenchConfigProvider.get().cdr.defaultCdrVersion;
-    String defaultCdrVersionId = null;
-    for (CdrVersion version : cdrVersions) {
-      if (defaultCdrVersionName.equals(version.getName())) {
-        defaultCdrVersionId = String.valueOf(version.getCdrVersionId());
-      }
-    }
-    if (defaultCdrVersionId == null) {
-      // This shouldn't happen.
-      throw new ServerErrorException("User does not have access to default CDR version");
-    }
-    CdrVersionListResponse response = new CdrVersionListResponse();
-    response.setItems(cdrVersions.stream()
+    return ResponseEntity.ok(new CdrVersionListResponse()
+      .items(cdrVersions.stream()
         .map(TO_CLIENT_CDR_VERSION)
-        .collect(Collectors.toList()));
-    response.setDefaultCdrVersionId(defaultCdrVersionId);
-    return ResponseEntity.ok(response);
+        .collect(Collectors.toList()))
+      .defaultCdrVersionId(Long.toString(workbenchConfigProvider.get().cdr.defaultCdrVersion)));
   }
 }

@@ -69,12 +69,7 @@ public class CdrDbConfig {
       // TODO: find a way to make sure CDR versions aren't shown in the UI until they are in use by
       // all servers.
       Map<Object, Object> cdrVersionDataSourceMap = new HashMap<>();
-      Long cdrVersionId = null;
       for (CdrVersion cdrVersion : cdrVersionDao.findAll()) {
-        if (cdrVersion.getName().equals(workbenchConfig.cdr.defaultCdrVersion)) {
-          cdrVersionId = cdrVersion.getCdrVersionId();
-        }
-
         String dbName = "public".equals(dbUser) ? cdrVersion.getPublicDbName() : cdrVersion.getCdrDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
         String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName + "?useSSL=false";
@@ -111,10 +106,12 @@ public class CdrDbConfig {
         }
         cdrVersionDataSourceMap.put(cdrVersion.getCdrVersionId(), dataSource);
       }
-      this.defaultCdrVersionId = cdrVersionId;
-      if (this.defaultCdrVersionId == null) {
+
+
+      if (!cdrVersionDataSourceMap.containsKey(workbenchConfig.cdr.defaultCdrVersion)) {
         throw new ServerErrorException("Default CDR version not found!");
       }
+      this.defaultCdrVersionId = workbenchConfig.cdr.defaultCdrVersion;
       setTargetDataSources(cdrVersionDataSourceMap);
       afterPropertiesSet();
     }
