@@ -54,5 +54,5 @@
   <include file="changelog/db.changelog-44-user-recent-resource.xml"/>
   <include file="changelog/db.changelog-45-concept-set.xml"/>
   <include file="changelog/db.changelog-46-add-concept-set-count.xml"/>
-  <include file="changelog/db.changelog-47-add-concept-set-to-user-recent-resource.xml"/>
+  <include file="changelog/db.changelog-48-add-concept-set-to-user-recent-resource.xml"/>
 </databaseChangeLog>
