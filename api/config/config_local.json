@@ -30,7 +30,8 @@
   },
   "server": {
     "publicApiKeyForErrorReports": "",
-    "projectId": "all-of-us-workbench-test"
+    "projectId": "all-of-us-workbench-test",
+    "shortName": "Local"
   },
   "admin": {
     "loginUrl": "http:\/\/localhost:4200/login",
