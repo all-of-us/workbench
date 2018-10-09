@@ -35,6 +35,7 @@ describe('OptionInfoComponent', () => {
       subtype: 'BRAND',
       type: 'DRUG',
     };
+    component.searchTerm = 'carbenoxolone';
     fixture.detectChanges();
   });
 

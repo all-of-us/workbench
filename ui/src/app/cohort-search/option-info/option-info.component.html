@@ -2,6 +2,7 @@
   class="dropdown-item"
   type="button"
   [class.active]="highlighted"
+  [class.truncated]="isTruncated"
   [innerHTML]="option.displayName | safeHtml"
   popper="{{option.displayName}}"
   [popperTrigger]="'hover'"

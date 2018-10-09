@@ -104,14 +104,9 @@ export function subtypeToTitle(subtype: string): string {
   return title;
 }
 
-export function highlightMatches(terms: Array<string>, name: string, id?: string, width?: number) {
+export function highlightMatches(terms: Array<string>, name: string, id?: string) {
   terms.forEach(term => {
     id = id || '';
-    if (width) {
-      console.log(width);
-      console.log(name);
-    }
-    const percentage = width ? width.toString() + '%' : '100%';
     const start = name.toLowerCase().indexOf(term.toLowerCase());
     if (start > -1) {
       const end = start + term.length;
