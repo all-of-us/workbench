@@ -31,6 +31,24 @@ import java.util.stream.Collectors;
 // TODO(RW-499): use a library to construct the SQL below, rather than concatenating strings
 public class AnnotationQueryBuilder {
 
+  public static class AnnotationResults {
+    private final Iterable<Map<String, Object>> results;
+    private final List<String> columns;
+
+    public AnnotationResults(Iterable<Map<String, Object>> results, List<String> columns) {
+      this.results = results;
+      this.columns = columns;
+    }
+
+    public Iterable<Map<String, Object>> getResults() {
+      return results;
+    }
+
+    public List<String> getColumns() {
+      return columns;
+    }
+  }
+
   public static final String PERSON_ID_COLUMN = "person_id";
   public static final String REVIEW_STATUS_COLUMN = "review_status";
 
@@ -204,7 +222,7 @@ public class AnnotationQueryBuilder {
     return sqlBuilder.toString();
   }
 
-  public Iterable<Map<String, Object>> materializeAnnotationQuery(CohortReview cohortReview,
+  public AnnotationResults materializeAnnotationQuery(CohortReview cohortReview,
       List<CohortStatus> statusFilter,
       AnnotationQuery annotationQuery, Integer limit, long offset) {
     if (statusFilter == null || statusFilter.isEmpty()) {
@@ -229,7 +247,7 @@ public class AnnotationQueryBuilder {
     ImmutableMap.Builder<String, Object> parameters = ImmutableMap.builder();
     String sql = getSql(cohortReview, statusFilter, annotationQuery, limit, offset,
         annotationDefinitions, parameters);
-    return namedParameterJdbcTemplate.query(sql, parameters.build(),
+    Iterable<Map<String, Object>> results = namedParameterJdbcTemplate.query(sql, parameters.build(),
         new RowMapper<Map<String, Object>>() {
       @Override
       public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -251,5 +269,6 @@ public class AnnotationQueryBuilder {
         return result.build();
       }
     });
+    return new AnnotationResults(results, annotationQuery.getColumns());
   }
 }
