@@ -17,7 +17,6 @@
     "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": 1,
     "debugQueries": false
   },
   "googleCloudStorageService": {

@@ -13,6 +13,7 @@
   },
   {
     "cdrVersionId": 2,
+    "isDefault": true,
     "name": "Synthetic Dataset v2",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",

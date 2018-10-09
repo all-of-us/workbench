@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -48,7 +50,9 @@ public class UpdateCdrVersions {
           .create();
       List<CdrVersion> cdrVersions =
           gson.fromJson(cdrVersionsReader, new TypeToken<List<CdrVersion>>() {}.getType());
+
       Set<Long> ids = new HashSet<>();
+      Set<Long> defaultIds = new HashSet<>();
       for (CdrVersion v : cdrVersions) {
         if (v.getCdrVersionId() == 0) {
           throw new IllegalArgumentException(
@@ -58,6 +62,14 @@ public class UpdateCdrVersions {
           throw new IllegalArgumentException(
               String.format("Input JSON contains duplicated CDR version ID %d", v.getCdrVersionId()));
         }
+        if (Optional.ofNullable(v.getIsDefault()).orElse(false)) {
+          defaultIds.add(v.getCdrVersionId());
+        }
+      }
+      if (defaultIds.size() != 1) {
+        throw new IllegalArgumentException(
+            String.format("Must be exactly one default CDR version, got %d: %s",
+                defaultIds.size(), Joiner.on(", ").join(defaultIds)));
       }
 
       Map<Long, CdrVersion> currentCdrVersions = Maps.newHashMap();

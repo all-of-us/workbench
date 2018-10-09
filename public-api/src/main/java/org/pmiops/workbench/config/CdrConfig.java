@@ -13,9 +13,8 @@ public class CdrConfig {
 
   @Bean(name = "defaultCdr")
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public CdrVersion getDefaultCdrVersion(WorkbenchConfig workbenchConfig,
-      CdrVersionDao cdrVersionDao) {
-    CdrVersion cdrVersion = cdrVersionDao.find(workbenchConfig.cdr.defaultCdrVersion);
+  public CdrVersion getDefaultCdrVersion(CdrVersionDao cdrVersionDao) {
+    CdrVersion cdrVersion = cdrVersionDao.findByIsDefault(true);
     if (cdrVersion == null) {
       throw new ServerErrorException("No default CDR version found");
     }

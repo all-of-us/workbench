@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CdrVersionsController implements CdrVersionsApiDelegate {
+  private static final Logger log = Logger.getLogger(CdrVersionsController.class.getName());
 
   @VisibleForTesting
   static final Function<CdrVersion, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
@@ -53,6 +55,8 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
 
   @Override
   public ResponseEntity<CdrVersionListResponse> getCdrVersions() {
+    // TODO: Consider filtering this based on what is currently instantiated as a data source. Newly
+    // added CDR versions will not function until a server restart.
     WorkbenchConfig config = workbenchConfigProvider.get();
     DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
     if (!config.firecloud.enforceRegistered) {
@@ -62,11 +66,22 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
     if (cdrVersions.isEmpty()) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
+    List<Long> defaultVersions = cdrVersions.stream()
+      .filter(v -> v.getIsDefault())
+      .map(CdrVersion::getCdrVersionId)
+      .collect(Collectors.toList());
+    if (defaultVersions.isEmpty()) {
+      throw new ForbiddenException("User does not have access to a default CDR version");
+    }
+    if (defaultVersions.size() > 1) {
+      log.severe(String.format(
+          "Found multiple (%d) default CDR versions, picking one", defaultVersions.size()));
+    }
     // TODO: consider different default CDR versions for different access levels
     return ResponseEntity.ok(new CdrVersionListResponse()
       .items(cdrVersions.stream()
         .map(TO_CLIENT_CDR_VERSION)
         .collect(Collectors.toList()))
-      .defaultCdrVersionId(Long.toString(workbenchConfigProvider.get().cdr.defaultCdrVersion)));
+      .defaultCdrVersionId(Long.toString(defaultVersions.get(0))));
   }
 }
