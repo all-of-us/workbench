@@ -91,6 +91,9 @@ public class ProfileService {
     if (user.getFirstSignInTime() != null) {
       profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
     }
+    if (user.getIdVerificationRequestTime() != null) {
+      profile.setIdVerificationRequestTime(user.getIdVerificationRequestTime().getTime());
+    }
     if (user.getDataAccessLevelEnum() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevelEnum());
     }
