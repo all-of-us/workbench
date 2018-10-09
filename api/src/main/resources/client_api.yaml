@@ -226,7 +226,6 @@ definitions:
   CohortAnnotationsResponse:
     type: object
     required:
-      - columns
       - results
     properties:
       columns:
