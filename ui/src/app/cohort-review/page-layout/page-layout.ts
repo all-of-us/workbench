@@ -10,6 +10,8 @@ import {ReviewStateService} from '../review-state.service';
   styleUrls: ['./page-layout.css']
 })
 export class PageLayout implements OnInit {
+
+  create = false;
   constructor(
     private state: ReviewStateService,
     private route: ActivatedRoute,
@@ -23,7 +25,8 @@ export class PageLayout implements OnInit {
     this.state.review.next(review);
 
     if (review.reviewStatus === ReviewStatus.NONE) {
-      this.router.navigate(['create'], {relativeTo: this.route});
+      // this.router.navigate(['create'], {relativeTo: this.route});
+      this.create = true;
     }
   }
 }
