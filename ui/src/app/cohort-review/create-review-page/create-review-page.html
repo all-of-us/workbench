@@ -4,18 +4,22 @@
     <div *ngIf="create" class="modal-title-text">Generate Review Set</div>
   </div>
   <div class="modal-body">
-    Cohort {{ cohort.name }} has {{ review.matchedParticipantCount }}
+    Cohort {{ cohort.name }} has {{ review.matchedParticipantCount | number }}
     participants for possible review.  How many would you like to review?
-    <span *ngIf="review.matchedParticipantCount > 10000">(max 10000)</span>
-    <input
-      id="numParticipants"
-      type="number"
-      min="0" max="maxParticipants">
+    <span *ngIf="review.matchedParticipantCount > 10000">(max 10,000)</span>
+    <div>
+      <input
+        id="numParticipants"
+        class="num-participants"
+        placeholder="NUMBER OF PARTICIPANTS"
+        type="number"
+        min="0" max="maxParticipants">
+    </div>
   </div>
   <div class="modal-footer">
     <button
       type="button"
-      class="btn btn-outline"
+      class="btn btn-link"
       (click)="cancelReview()">
       Cancel
     </button>
@@ -25,7 +29,7 @@
       [disabled]="reviewParamForm.invalid"
       [clrLoading]="creating"
       (click)="createReview()">
-      Save Review Set
+      Generate Set
     </button>
   </div>
 </clr-modal>

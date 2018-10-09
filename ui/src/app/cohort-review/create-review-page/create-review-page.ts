@@ -14,6 +14,7 @@ import {
 @Component({
   selector: 'app-create-review-page',
   templateUrl: './create-review-page.html',
+  styleUrls: ['./create-review-page.css']
 })
 export class CreateReviewPage implements OnInit {
   create = true;
