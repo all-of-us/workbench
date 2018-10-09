@@ -17,7 +17,6 @@ FILE=
 # get options
 USAGE="./generate-clousql-cdr/cloudsql-import.sh --project <PROJECT> --instance <INSTANCE> --bucket <BUCKET> \
 --database <database> [--create-db-sql-file <filename.sql>] [--file <just_import_me_filename>]"
-# example account for test : all-of-us-workbench-test@appspot.gserviceaccount.com
 while [ $# -gt 0 ]; do
   case "$1" in
     --project) PROJECT=$2; shift 2;;
@@ -99,7 +98,7 @@ function grant_access_to_files () {
 # if [ $(db_exists($DATABASE)) == 1 ]; then echo "database exists"; fi
 function db_exists () {
   local db_name=$1
-  local db=$(gcloud sql databases list -i workbenchmaindb --project all-of-us-workbench-test --filter="NAME = $db_name" \
+  local db=$(gcloud sql databases list -i $INSTANCE --project $PROJECT --filter="NAME = $db_name" \
 --format="csv [no-heading] (NAME)")
   if [ "$db" == "$db_name" ]
   then
