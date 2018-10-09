@@ -1,6 +1,6 @@
 .dropdown-item {
   height: 25px;
-  overflow: auto;
+  overflow: visible;
 }
 
 .dropdown-item.truncated {
