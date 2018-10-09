@@ -57,7 +57,7 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
       .map(CdrVersion::getCdrVersionId)
       .collect(Collectors.toList());
     if (defaultVersions.isEmpty()) {
-      throw new ForbiddenException("Did not find a default CDR version");
+      throw new ServerErrorException("Did not find a default CDR version");
     }
     if (defaultVersions.size() > 1) {
       log.severe(String.format(
