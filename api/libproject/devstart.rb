@@ -672,8 +672,13 @@ Generates databases in bigquery with data from a cdr that will be imported to my
 })
 
 def generate_cloudsql_db(cmd_name, *args)
-  ensure_docker cmd_name, args
+  #ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project for Cloud Sql instancer"
+  )
   op.add_option(
     "--instance [instance]",
     ->(opts, v) { opts.instance = v},
@@ -689,11 +694,11 @@ def generate_cloudsql_db(cmd_name, *args)
     ->(opts, v) { opts.bucket = v},
     "Name of the GCS bucket containing the SQL dump"
   )
-  gcc = GcloudContextV2.new(op)
+  #gcc = GcloudContextV2.new(op)
   op.parse.validate
-  gcc.validate
+  #gcc.validate
 
-  ServiceAccountContext.new(gcc.project).run do
+  ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
     common.run_inline %W{docker-compose run db-generate-cloudsql-db
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
