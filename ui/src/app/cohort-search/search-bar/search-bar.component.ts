@@ -15,8 +15,6 @@ import {
   subtreeSelected,
 } from '../redux';
 
-import {highlightMatches, stripHtml} from '../utils';
-
 const trigger = 2;
 
 @Component({
