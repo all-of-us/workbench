@@ -45,6 +45,9 @@ input {
     min-height: 30px;
     overflow-y: auto;
 }
+.dropdown-menu.overflow {
+  overflow-y: visible;
+}
 .search-keyword {
     color: #659F3D;
     font-weight: bolder;

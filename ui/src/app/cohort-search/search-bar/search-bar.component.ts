@@ -166,6 +166,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     return this.searchTerm.value.length >= trigger;
   }
 
+  get showOverflow() {
+    return this.options && this.options.length <= 10;
+  }
+
   selectOption(option: any) {
     this.optionSelected = true;
     this.searchTerm.setValue(option.name, {emitEvent: false});
