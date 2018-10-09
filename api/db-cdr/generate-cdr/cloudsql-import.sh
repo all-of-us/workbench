@@ -98,7 +98,7 @@ function grant_access_to_files () {
 # if [ $(db_exists($DATABASE)) == 1 ]; then echo "database exists"; fi
 function db_exists () {
   local db_name=$1
-  local db=$(gcloud sql databases list -i workbenchmaindb --project $PROJECT --filter="NAME = $db_name" \
+  local db=$(gcloud sql databases list -i $INSTANCE --project $PROJECT --filter="NAME = $db_name" \
 --format="csv [no-heading] (NAME)")
   if [ "$db" == "$db_name" ]
   then
