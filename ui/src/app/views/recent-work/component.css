@@ -4,6 +4,8 @@
     display: flex;
     width: 100%;
     flex-shrink: 2;
+    /*justify-content:space-between;*/
+    /*flex-direction:row;*/
 }
 
 .card {

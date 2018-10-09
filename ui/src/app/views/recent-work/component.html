@@ -13,12 +13,9 @@
     <div *ngFor="let resource of resourceList">
       <app-resource-card [resourceCard]="resource" (onUpdate)="updateList($event)"></app-resource-card>
     </div>
-  </div>
-<!--
-  TODO: make right scroll relative to last card
--->
-  <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
-       style="float: right; top: 3.2rem; right: -10%;" (click)="scrollRight()">
-    <app-right-scroll-icon></app-right-scroll-icon>
+    <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
+         style="float: right; top: 3.2rem; right:-5%;" (click)="scrollRight()">
+      <app-right-scroll-icon></app-right-scroll-icon>
+    </div>
   </div>
 </div>
