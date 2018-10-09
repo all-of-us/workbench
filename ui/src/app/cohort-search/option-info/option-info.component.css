@@ -1,5 +1,9 @@
 .dropdown-item {
   height: 25px;
+  overflow: auto;
+}
+
+.dropdown-item.truncated {
   overflow: hidden;
   text-overflow: ellipsis;
 }
