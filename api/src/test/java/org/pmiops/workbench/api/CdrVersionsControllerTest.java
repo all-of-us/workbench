@@ -70,8 +70,6 @@ public class CdrVersionsControllerTest {
     @Bean
     public WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-      workbenchConfig.cdr = new CdrConfig();
-      workbenchConfig.cdr.defaultCdrVersion = 1L;
       workbenchConfig.firecloud = new FireCloudConfig();
       workbenchConfig.firecloud.enforceRegistered = true;
       return workbenchConfig;
@@ -83,9 +81,9 @@ public class CdrVersionsControllerTest {
     user = new User();
     user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     cdrVersionsController.setUserProvider(Providers.of(user));
-    defaultCdrVersion = makeCdrVersion(1L, "Test Registered CDR",
+    defaultCdrVersion = makeCdrVersion(1L, /* isDefault */ true, "Test Registered CDR",
         123L, DataAccessLevel.REGISTERED);
-    protectedCdrVersion = makeCdrVersion(2L, "Test Protected CDR",
+    protectedCdrVersion = makeCdrVersion(2L, /* isDefault */ false, "Test Protected CDR",
         456L, DataAccessLevel.PROTECTED);
 
   }
@@ -121,9 +119,10 @@ public class CdrVersionsControllerTest {
         String.valueOf(defaultCdrVersion.getCdrVersionId()));
   }
 
-  private CdrVersion makeCdrVersion(long cdrVersionId, String name, long creationTime,
+  private CdrVersion makeCdrVersion(long cdrVersionId, boolean isDefault, String name, long creationTime,
       DataAccessLevel dataAccessLevel) {
     CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
     cdrVersion.setBigqueryProject("b");
     cdrVersion.setCdrDbName("c");
