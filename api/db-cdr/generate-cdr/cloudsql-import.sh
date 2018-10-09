@@ -57,18 +57,18 @@ fi
 # Function for waiting on import to finish.
 # import_wait($file, $seconds_wait_interval)
 function import_wait () {
-  gs_file=$1
-  wait_interval=$2
+  local gs_file=$1
+  local wait_interval=$2
   # Sleep an initial 5 seconds before checking for small files to import
   sleep 5
   seconds_waited=5
   while true; do
-    if [[ $(gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep "IMPORT.*RUNNING") ]]
+    if [[ $(gcloud sql operations list --instance $INSTANCE --project $PROJECT | grep ".*RUNNING") ]]
     then
         sleep $wait_interval
         seconds_waited=$((seconds_waited + wait_interval))
     else
-        echo "Import of $gs_file finished after ${seconds_waited} seconds."
+        echo "Operation $gs_file finished after ${seconds_waited} seconds."
         break
     fi
   done
@@ -116,6 +116,10 @@ then
     create_gs_file=$create_gs_file$BUCKET/$CREATE_DB_SQL_FILE
     grant_access_to_files $create_gs_file
     echo "Creating cloudsql DB from sql file ${CREATE_DB_SQL_FILE}"
+
+    # Wait on any running job to finish before starting.
+    import_wait "any job" 10
+
     gcloud sql import sql $INSTANCE $create_gs_file --project $PROJECT  \
         --account $SERVICE_ACCOUNT --quiet --async
     import_wait $create_gs_file 10
@@ -163,9 +167,16 @@ do
     then
         echo "Skipping create db sql file ";
     else
+        # Wait on any running job to finish before starting. Sometimes a backup or other operation starts
+        # between iterations of this loop
+        import_wait "any job" 10
+
         # Don't pass database to sql import . Use use <db> inside sql.
         gcloud sql import sql $INSTANCE $gs_file --project $PROJECT --account $SERVICE_ACCOUNT --quiet --async
+
+        # Wait for this file to import
         import_wait $gs_file 10
+
         # Move file to imported dir
         gsutil mv $gs_file gs://$BUCKET/imported_to_cloudsql/
     fi
@@ -189,10 +200,16 @@ do
    table=${filename%%.*}      # truncates everything starting with first .
    if [[ $table ]]
    then
+        # Wait on any running job to finish before starting.
+        import_wait "any job" 10
+
         echo "Importing file into $table. If table does not exist in the database, this file is moved to imported."
         gcloud sql import csv $INSTANCE $gs_file --project $PROJECT --quiet --account $SERVICE_ACCOUNT \
         --database=$DATABASE --table=$table --async
+
+        # Wait for this file to import
         import_wait $gs_file 10
+
         # Move file to imported dir
         gsutil mv $gs_file gs://$BUCKET/imported_to_cloudsql/
    else
