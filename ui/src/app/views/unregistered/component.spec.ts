@@ -46,6 +46,8 @@ class TrainingCompletesRegistrationStub extends ProfileServiceStub {
   }
 }
 
+const pendingText = 'pending verification';
+
 @Component({
   selector: 'app-test',
   template: '<router-outlet></router-outlet>'
@@ -139,7 +141,7 @@ describe('UnregisteredComponent', () => {
     tick();
     fixture.detectChanges();
 
-    expect(de.nativeElement.textContent).toContain('Awaiting identity verification');
+    expect(de.nativeElement.textContent).toContain(pendingText);
   }));
 
   it('should submit incomplete registration steps', fakeAsync(() => {
@@ -167,7 +169,7 @@ describe('UnregisteredComponent', () => {
     tick(1000);
     fixture.detectChanges();
 
-    expect(de.nativeElement.textContent).toContain('Awaiting identity verification');
+    expect(de.nativeElement.textContent).toContain(pendingText);
     expectAllRegistrationSubmitted(profileStub.profile);
   }));
 

@@ -174,6 +174,19 @@ public class UserMetricsControllerTest {
   }
 
   @Test
+  public void testGetUserRecentResourceWithSpacesInPath() {
+    resource1.setNotebookName("gs://bucketFile/note books/My favorite notebook.ipynb");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Collections.singletonList(resource1));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/note books/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "My favorite notebook.ipynb");
+  }
+
+  @Test
   public void testGetUserRecentResourceInvalidURINotebookPath() {
     resource1.setNotebookName("my local notebook directory: notebook.ipynb");
     when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
@@ -183,6 +196,20 @@ public class UserMetricsControllerTest {
         .getUserRecentResources().getBody();
     assertNotNull(recentResources);
     assertNull(recentResources.get(0).getNotebook());
+  }
+
+  @Test
+  public void testGetUserRecentResourceNotebookPathEndsWithSlash() {
+    resource1.setNotebookName("gs://bucketFile/notebooks/notebook.ipynb/");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Collections.singletonList(resource1));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertNotNull(recentResources.get(0).getNotebook());
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/notebook.ipynb/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "");
   }
 
   @Test
@@ -246,4 +273,3 @@ public class UserMetricsControllerTest {
     assertEquals(addedEntry.getNotebook().getPath(), "gs://newBucket/notebooks/");
   }
 }
-

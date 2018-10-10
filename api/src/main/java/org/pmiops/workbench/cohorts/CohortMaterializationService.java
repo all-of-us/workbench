@@ -1,22 +1,17 @@
 package org.pmiops.workbench.cohorts;
 
+import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
@@ -29,13 +24,18 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.CdrQuery;
+import org.pmiops.workbench.model.CohortAnnotationsRequest;
+import org.pmiops.workbench.model.CohortAnnotationsResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
+import org.pmiops.workbench.model.DataTableSpecification;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -47,11 +47,50 @@ import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Service
 public class CohortMaterializationService {
 
-  private static final String DOMAIN_CONCEPT_STANDARD = "standard";
-  private static final String DOMAIN_CONCEPT_SOURCE = "source";
+  // Transforms a name, query parameter value pair into a map that will be converted into a JSON
+  // dictionary representing the named query parameter value, to be used as a part of a BigQuery
+  // job configuration when executing SQL queries on the client.
+  // See https://cloud.google.com/bigquery/docs/parameterized-queries for JSON configuration of query parameters
+  private static final Function<Map.Entry<String, QueryParameterValue>, Map<String, Object>> TO_QUERY_PARAMETER_MAP =
+      (entry) -> {
+        QueryParameterValue value = entry.getValue();
+        ImmutableMap.Builder<String, Object> builder = ImmutableMap.<String, Object>builder()
+            .put("name", entry.getKey());
+        ImmutableMap.Builder<String, Object> parameterTypeMap = ImmutableMap.builder();
+        parameterTypeMap.put("type", value.getType().toString());
+        ImmutableMap.Builder<String, Object> parameterValueMap = ImmutableMap.builder();
+        if (value.getArrayType() == null) {
+          parameterValueMap.put("value", value.getValue());
+        } else {
+          ImmutableMap.Builder<String, Object> arrayTypeMap = ImmutableMap.builder();
+          arrayTypeMap.put("type", value.getArrayType().toString());
+          parameterTypeMap.put("arrayType", arrayTypeMap.build());
+          ImmutableList.Builder<Map<String, Object>> values = ImmutableList.<Map<String, Object>>builder();
+          for (QueryParameterValue arrayValue : value.getArrayValues()) {
+            ImmutableMap.Builder<String, Object> valueMap = ImmutableMap.<String, Object>builder();
+            valueMap.put("value", arrayValue.getValue());
+            values.add(valueMap.build());
+          }
+          parameterValueMap.put("arrayValues", values.build().<Map<String, Object>>toArray());
+        }
+        builder.put("parameterType", parameterTypeMap.build());
+        builder.put("parameterValue", parameterValueMap.build());
+        return builder.build();
+      };
 
   @VisibleForTesting
   static final String PERSON_ID = "person_id";
@@ -107,19 +146,13 @@ public class CohortMaterializationService {
     throw new IllegalStateException("Table lacks primary key!");
   }
 
-  private TableQueryAndConfig getTableQueryAndConfig(FieldSet fieldSet,
+  private TableQueryAndConfig getTableQueryAndConfig(@Nullable TableQuery tableQuery,
       @Nullable Set<Long> conceptIds) {
-    TableQuery tableQuery;
-    if (fieldSet == null) {
+    if (tableQuery == null) {
       tableQuery = new TableQuery();
       tableQuery.setTableName(PERSON_TABLE);
       tableQuery.setColumns(ImmutableList.of(PERSON_ID));
     } else {
-      tableQuery = fieldSet.getTableQuery();
-      if (tableQuery == null) {
-        // TODO: support other kinds of field sets besides tableQuery
-        throw new BadRequestException("tableQuery must be specified in field sets");
-      }
       String tableName = tableQuery.getTableName();
       if (Strings.isNullOrEmpty(tableName)) {
         throw new BadRequestException("Table name must be specified in field sets");
@@ -223,6 +256,51 @@ public class CohortMaterializationService {
     }
   }
 
+  @VisibleForTesting
+  CdrQuery getCdrQuery(SearchRequest searchRequest, DataTableSpecification dataTableSpecification,
+      @Nullable CohortReview cohortReview, @Nullable Set<Long> conceptIds) {
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    CdrQuery cdrQuery = new CdrQuery()
+        .bigqueryDataset(cdrVersion.getBigqueryDataset())
+        .bigqueryProject(cdrVersion.getBigqueryProject());
+    List<CohortStatus> statusFilter = dataTableSpecification.getStatusFilter();
+    if (statusFilter == null) {
+      statusFilter = NOT_EXCLUDED;
+    }
+    ParticipantCriteria criteria = getParticipantCriteria(statusFilter, cohortReview,
+        searchRequest);
+    TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(
+        dataTableSpecification.getTableQuery(), conceptIds);
+    cdrQuery.setColumns(tableQueryAndConfig.getTableQuery().getColumns());
+    if (criteria.getParticipantIdsToInclude() != null
+        && criteria.getParticipantIdsToInclude().isEmpty()) {
+      // There is no cohort review, or no participants matching the status filter;
+      // return a query with no SQL, indicating there should be no results.
+      return cdrQuery;
+    }
+    QueryJobConfiguration jobConfiguration = fieldSetQueryBuilder.getQueryJobConfiguration(
+        criteria, tableQueryAndConfig,  dataTableSpecification.getMaxResults());
+    cdrQuery.setSql(jobConfiguration.getQuery());
+    ImmutableMap.Builder<String, Object> configurationMap = ImmutableMap.builder();
+    ImmutableMap.Builder<String, Object> queryConfigurationMap = ImmutableMap.builder();
+    queryConfigurationMap.put("queryParameters",
+        jobConfiguration.getNamedParameters().entrySet().stream().map(TO_QUERY_PARAMETER_MAP)
+            .<Map<String, Object>>toArray());
+    configurationMap.put("query", queryConfigurationMap.build());
+    cdrQuery.setConfiguration(configurationMap.build());
+    return cdrQuery;
+  }
+
+  public CdrQuery getCdrQuery(String cohortSpec, DataTableSpecification dataTableSpecification,
+      @Nullable CohortReview cohortReview, @Nullable Set<Long> conceptIds) {
+    SearchRequest searchRequest;
+    try {
+      searchRequest = new Gson().fromJson(cohortSpec, SearchRequest.class);
+    } catch (JsonSyntaxException e) {
+      throw new BadRequestException("Invalid cohort spec");
+    }
+    return getCdrQuery(searchRequest, dataTableSpecification, cohortReview, conceptIds);
+  }
 
   /**
    * Materializes a cohort.
@@ -301,7 +379,8 @@ public class CohortMaterializationService {
         // return an empty response.
         return response;
       }
-      results = fieldSetQueryBuilder.materializeTableQuery(getTableQueryAndConfig(fieldSet,
+      TableQuery tableQuery = fieldSet == null ? null : fieldSet.getTableQuery();
+      results = fieldSetQueryBuilder.materializeTableQuery(getTableQueryAndConfig(tableQuery,
           conceptIds), criteria, limit, offset);
     } else if (fieldSet.getAnnotationQuery() != null) {
       if (cohortReview == null) {
@@ -309,7 +388,7 @@ public class CohortMaterializationService {
         return response;
       }
       results = annotationQueryBuilder.materializeAnnotationQuery(cohortReview, statusFilter,
-          fieldSet.getAnnotationQuery(), limit, offset);
+          fieldSet.getAnnotationQuery(), limit, offset).getResults();
     } else {
       throw new BadRequestException("Must specify tableQuery or annotationQuery");
     }
@@ -329,5 +408,18 @@ public class CohortMaterializationService {
       response.setNextPageToken(nextToken);
     }
     return response;
+  }
+
+  public CohortAnnotationsResponse getAnnotations(CohortReview cohortReview,
+      CohortAnnotationsRequest request) {
+    List<CohortStatus> statusFilter = request.getStatusFilter();
+    if (statusFilter == null) {
+      statusFilter = NOT_EXCLUDED;
+    }
+    AnnotationQueryBuilder.AnnotationResults results =
+        annotationQueryBuilder.materializeAnnotationQuery(cohortReview, statusFilter,
+            request.getAnnotationQuery(), null, 0L);
+    return new CohortAnnotationsResponse().results(ImmutableList.copyOf(results.getResults()))
+        .columns(results.getColumns());
   }
 }

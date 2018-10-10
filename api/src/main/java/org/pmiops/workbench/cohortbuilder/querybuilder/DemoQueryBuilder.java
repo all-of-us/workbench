@@ -11,14 +11,42 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.betweenOperator;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.notBetweenOperator;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotNumbers;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotOne;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotTwo;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operatorNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.attributesEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.containsAgeAndDec;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.demoSubtypeInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.demoTypeInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.subTypeGenRaceEth;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.subtypeBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.AGE_DEC_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTES;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ONE_OPERAND_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS_NUMERIC_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERATOR;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETER;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETERS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.SUBTYPE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TWO_OPERAND_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TYPE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.operatorText;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 /**
  * DemoQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -57,34 +85,31 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   private static final String AND_TEMPLATE = "and\n";
 
   @Override
-  public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
+  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
     from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     from(containsAgeAndDec()).test(parameters.getParameters()).throwException(AGE_DEC_MESSAGE);
     ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(parameters.getParameters());
-    Map<String, QueryParameterValue> queryParams = new HashMap<>();
     List<String> queryParts = new ArrayList<>();
 
     for (TreeSubType key : paramMap.keySet()) {
-      String namedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
 
       switch (key) {
         case GEN:
-          queryParts.add(DEMO_GEN.replace("${gen}", "@" + namedParameter));
           Long[] demoIds = paramMap.get(key).stream().filter(Long.class::isInstance).map(Long.class::cast).toArray(Long[]::new);
-          queryParams.put(namedParameter, QueryParameterValue.array(demoIds, Long.class));
+          String genParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(demoIds, Long.class));
+          queryParts.add(DEMO_GEN.replace("${gen}", "@" + genParameter));
           break;
         case RACE:
-          queryParts.add(DEMO_RACE.replace("${race}", "@" + namedParameter));
           Long[] raceIds = paramMap.get(key).stream().filter(Long.class::isInstance).map(Long.class::cast).toArray(Long[]::new);
-          queryParams.put(namedParameter, QueryParameterValue.array(raceIds, Long.class));
+          String raceParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(raceIds, Long.class));
+          queryParts.add(DEMO_RACE.replace("${race}", "@" + raceParameter));
           break;
         case AGE:
           Attribute attribute = (Attribute) paramMap.get(key).get(0);
           List<String> operandParts = new ArrayList<>();
           for (String operand : attribute.getOperands()) {
-            String ageNamedParameter = key.name().toLowerCase() + getUniqueNamedParameterPostfix();
+            String ageNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.int64(new Long(operand)));
             operandParts.add("@" + ageNamedParameter);
-            queryParams.put(ageNamedParameter, QueryParameterValue.int64(new Long(operand)));
           }
           queryParts.add(DEMO_AGE.replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
             + String.join(" and ", operandParts) + "\n");
@@ -94,22 +119,15 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
           queryParts.add(DEMO_DEC);
           break;
         case ETH:
-          queryParts.add(DEMO_ETH.replace("${eth}", "@" + namedParameter));
           Long[] ethIds = paramMap.get(key).stream().filter(Long.class::isInstance).map(Long.class::cast).toArray(Long[]::new);
-          queryParams.put(namedParameter, QueryParameterValue.array(ethIds, Long.class));
+          String ethParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(ethIds, Long.class));
+          queryParts.add(DEMO_ETH.replace("${eth}", "@" + ethParameter));
           break;
         default:
           break;
       }
     }
-
-    String finalSql = SELECT + String.join(AND_TEMPLATE, queryParts);
-
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(queryParams)
-      .setUseLegacySql(false)
-      .build();
+    return SELECT + String.join(AND_TEMPLATE, queryParts);
   }
 
   @Override
