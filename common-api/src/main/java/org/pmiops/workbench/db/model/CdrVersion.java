@@ -17,6 +17,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 public class CdrVersion {
 
   private long cdrVersionId;
+  private boolean isDefault;
   private String name;
   private Short dataAccessLevel;
   private short releaseNumber;
@@ -36,6 +37,15 @@ public class CdrVersion {
 
   public void setCdrVersionId(long cdrVersionId) {
     this.cdrVersionId = cdrVersionId;
+  }
+
+  @Column(name = "is_default")
+  public boolean getIsDefault() {
+    return isDefault;
+  }
+
+  public void setIsDefault(boolean isDefault) {
+    this.isDefault = isDefault;
   }
 
   @Column(name = "name")
@@ -122,8 +132,8 @@ public class CdrVersion {
 
   @Override
   public int hashCode() {
-    return Objects.hash(cdrVersionId, name, dataAccessLevel, releaseNumber, bigqueryProject,
-        bigqueryDataset, creationTime, numParticipants, publicDbName, cdrDbName);
+    return Objects.hash(cdrVersionId, isDefault, name, dataAccessLevel, releaseNumber,
+        bigqueryProject, bigqueryDataset, creationTime, numParticipants, publicDbName, cdrDbName);
   }
 
   @Override
@@ -133,6 +143,7 @@ public class CdrVersion {
     }
     CdrVersion that = (CdrVersion) obj;
     return new EqualsBuilder().append(this.cdrVersionId, that.cdrVersionId)
+        .append(this.isDefault, that.isDefault)
         .append(this.name, that.name)
         .append(this.dataAccessLevel, that.dataAccessLevel)
         .append(this.releaseNumber, that.releaseNumber)
