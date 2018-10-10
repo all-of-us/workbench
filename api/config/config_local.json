@@ -17,7 +17,6 @@
     "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "Synthetic Dataset v1",
     "debugQueries": false
   },
   "googleCloudStorageService": {
@@ -30,7 +29,8 @@
   },
   "server": {
     "publicApiKeyForErrorReports": "",
-    "projectId": "all-of-us-workbench-test"
+    "projectId": "all-of-us-workbench-test",
+    "shortName": "Local"
   },
   "admin": {
     "loginUrl": "http:\/\/localhost:4200/login",

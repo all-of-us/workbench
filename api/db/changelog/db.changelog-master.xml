@@ -55,5 +55,6 @@
   <include file="changelog/db.changelog-45-concept-set.xml"/>
   <include file="changelog/db.changelog-46-add-concept-set-count.xml"/>
   <include file="changelog/db.changelog-47-request-id-verification-time.xml"/>
+  <include file="changelog/db.changelog-48-default-cdr.xml"/>
   <include file="changelog/db.changelog-49-add-concept-set-to-user-recent-resource.xml"/>
 </databaseChangeLog>

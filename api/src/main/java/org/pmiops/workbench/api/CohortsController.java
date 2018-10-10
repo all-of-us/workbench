@@ -389,7 +389,7 @@ public class CohortsController implements CohortsApiDelegate {
     CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohort.getCohortId(),
           cdrVersion.getCdrVersionId());
     if (cohortReview == null) {
-      return ResponseEntity.ok(new CohortAnnotationsResponse());
+      return ResponseEntity.ok(new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));
     }
     return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
   }

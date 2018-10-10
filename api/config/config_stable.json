@@ -16,7 +16,6 @@
     "serviceAccountApiUsers": [ "all-of-us-rw-stable@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "Synthetic Dataset v2",
     "debugQueries": true
   },
   "googleCloudStorageService": {
@@ -29,7 +28,8 @@
   },
   "server": {
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
-    "projectId": "all-of-us-rw-stable"
+    "projectId": "all-of-us-rw-stable",
+    "shortName": "Stable"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",
