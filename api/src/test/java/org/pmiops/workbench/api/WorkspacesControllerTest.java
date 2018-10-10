@@ -242,8 +242,6 @@ public class WorkspacesControllerTest {
   CohortReviewController cohortReviewController;
   @Autowired
   ConceptBigQueryService conceptBigQueryService;
-  @Autowired
-  UserRecentResourceService userRecentResourceService;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
@@ -255,6 +253,7 @@ public class WorkspacesControllerTest {
     workspacesController.setUserProvider(userProvider);
     cohortsController.setUserProvider(userProvider);
     cohortReviewController.setUserProvider(userProvider);
+    conceptSetsController.setUserProvider(userProvider);
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
     //set the db name to be empty since test cases currently
