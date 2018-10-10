@@ -18,7 +18,7 @@ export class DetailPage implements OnInit, OnDestroy {
   sidebarOpen = true;
   participant: Participant;
   subscription: Subscription;
-
+  participantId: number;
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
@@ -38,5 +38,10 @@ export class DetailPage implements OnInit, OnDestroy {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+  getNavigatedParticipantId(id) {
+    if (id) {
+      this.participantId = id;
+    }
   }
 }

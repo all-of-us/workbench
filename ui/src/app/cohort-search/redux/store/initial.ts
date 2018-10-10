@@ -41,4 +41,8 @@ export const initialState = fromJS({
     domainCharts: {},
   },
 
+  individualChartData: {
+    chartsData: {},
+  },
+
 });

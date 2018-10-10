@@ -11,5 +11,11 @@
       <div class="and-circle">AND</div>
     </div>
   </div>
+  <button
+    *ngIf="(initShowChart$ | async)"
+    type="button"
+    class="btn btn-info-outline btn-sm">
+    DELETE GROUP
+  </button>
   <app-search-group-select [role]="role"></app-search-group-select>
 </div>

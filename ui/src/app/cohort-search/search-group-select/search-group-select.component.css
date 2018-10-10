@@ -13,3 +13,6 @@
 .dropdown-item:hover {
   background-color: rgb(219, 228, 233);
 }
+.card {
+  border-color: rgba(215, 215, 215, 0.5);
+}

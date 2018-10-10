@@ -20,7 +20,7 @@
       </button>
     </div>
   </div>
-
+<ng-container *ngIf="(total$ | async) > 0 && !(isRequesting$ | async)">
   <ng-container *ngIf="chartData$ | async as chartData">
     <div class="card bg-faded">
       <div class="card-header header-text">
@@ -56,6 +56,7 @@
       </div>
     </div>
   </ng-container>
+</ng-container>
 </div>
 
 <clr-modal #saveModal
