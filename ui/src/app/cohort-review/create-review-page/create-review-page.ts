@@ -53,15 +53,6 @@ export class CreateReviewPage implements OnInit {
     ]);
   }
 
-  open(): void {
-    this.create = true;
-  }
-
-  close(): void {
-    console.log('close');
-    this.cancelReview();
-  }
-
   cancelReview() {
     const {ns, wsid} = this.route.parent.snapshot.params;
     console.dir(this.route);
