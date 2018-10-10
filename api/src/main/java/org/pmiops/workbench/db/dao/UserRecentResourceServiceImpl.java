@@ -56,7 +56,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       handleUserLimit(userId);
       recentResource = new UserRecentResource(workspaceId, userId, notebookNameWithPath, lastAccessDateTime);
     }
-    resource.setLastAccessDate(lastAccessDateTime);
+    recentResource.setLastAccessDate(lastAccessDateTime);
     getDao().save(recentResource);
     return recentResource;
   }
