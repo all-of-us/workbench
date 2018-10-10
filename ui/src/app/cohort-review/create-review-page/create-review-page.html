@@ -1,7 +1,7 @@
 <clr-modal [(clrModalOpen)]="create" [clrModalSize]="'md'" [clrModalClosable]="false">
   <div class="modal-title">
     <!--The ngIf is to avoid null pointers before the modal is opened.-->
-    <div *ngIf="create" class="modal-title-text">Generate Review Set</div>
+    <div *ngIf="create" class="modal-title-text">Create Review Set</div>
   </div>
   <div class="modal-body">
     Cohort {{ cohort.name }} has {{ review.matchedParticipantCount | number }}
@@ -55,7 +55,7 @@
       [disabled]="reviewParamForm.invalid || creating"
       [clrLoading]="creating"
       (click)="createReview()">
-      Generate Set
+      Create Set
     </button>
   </div>
 </clr-modal>
