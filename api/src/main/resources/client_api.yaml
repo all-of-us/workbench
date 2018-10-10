@@ -168,6 +168,7 @@ definitions:
     required:
       - bigqueryProject
       - bigqueryDataset
+      - columns
 
     properties:
       sql:
@@ -175,6 +176,14 @@ definitions:
           Google SQL to use when querying the CDR. If empty, it means no participants can possibly
           match the data table specification, and an empty data table should be returned.
         type: string
+      columns:
+        description: >
+          An array of names to be used for the columns being returned by the query.
+          (Note that related table aliases will be returned with '.' as a separator, whereas '__' is used in the SQL.)
+          This will be populated even if sql is empty (i.e. there are no results.)
+        type: array
+        items:
+          type: string
       configuration:
         description: >
           configuration for the BigQuery job (includes named parameters); you can pass this JSON
@@ -219,6 +228,12 @@ definitions:
     required:
       - results
     properties:
+      columns:
+        description: >
+            An array of columns for the annotations being returned.
+        type: array
+        items:
+          type: string
       results:
         description: >
           An array of JSON dictionaries, with each dictionary representing the requested

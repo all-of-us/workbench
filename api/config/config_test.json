@@ -17,7 +17,6 @@
     "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "New Test Registered CDR",
     "debugQueries": true
   },
   "googleCloudStorageService": {
@@ -30,7 +29,8 @@
   },
   "server": {
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
-    "projectId": "all-of-us-workbench-test"
+    "projectId": "all-of-us-workbench-test",
+    "shortName": "Test"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-workbench-test.appspot.com/login",

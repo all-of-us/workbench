@@ -13,6 +13,7 @@ import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
+import org.pmiops.workbench.model.IdVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ public class MailServiceImpl implements MailService {
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
+  private static final String ID_VERIFICATION_RESOURCE = "emails/idverificationemail/content.html";
 
   enum Status {REJECTED, API_ERROR, SUCCESSFUL}
 
@@ -60,7 +62,7 @@ public class MailServiceImpl implements MailService {
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(workbenchConfig.admin.adminIdVerification);
     msg.setTo(Collections.singletonList(toAddress));
-    msg.setSubject("[Id Verification Request]: " + userName);
+    msg.setSubject("[Id Verification Request: " + workbenchConfig.server.shortName + "]: " + userName);
     msg.setHtml(ID_VERIFICATION_TEXT + userName);
     msg.setFromEmail(workbenchConfig.mandrill.fromEmail);
 
@@ -77,6 +79,18 @@ public class MailServiceImpl implements MailService {
     }
     MandrillMessage msg = buildWelcomeMessage(contactEmail, password, user);
     sendWithRetries(msg, String.format("Welcome for %s", user.getName()));
+  }
+
+  @Override
+  public void sendIdVerificationCompleteEmail(String contactEmail, IdVerificationStatus status, String username) throws MessagingException {
+    try {
+      InternetAddress email = new InternetAddress(contactEmail);
+      email.validate();
+    } catch (AddressException e) {
+      throw new MessagingException("Email: " + contactEmail + " is invalid.");
+    }
+    MandrillMessage msg = buildIdVerificationCompleteMessage(contactEmail, status, username);
+    sendWithRetries(msg, String.format("ID Verification Complete for %s", contactEmail));
   }
 
   private void sendWithRetries(MandrillMessage msg, String description) throws MessagingException {
@@ -121,16 +135,16 @@ public class MailServiceImpl implements MailService {
     } while (retries > 0);
   }
 
-  private MandrillMessage buildWelcomeMessage(String contactEmail, String password, User user) throws MessagingException{
+  private MandrillMessage buildWelcomeMessage(String contactEmail, String password, User user) throws MessagingException {
     MandrillMessage msg = new MandrillMessage();
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(contactEmail);
     msg.setTo(Collections.singletonList(toAddress));
     try {
       String msgHtml = buildWelcomeEmailHtml(password, user);
-      msg.setHtml(msgHtml);
-      msg.setSubject("Your new All of Us Account");
-      msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+      msg.html(msgHtml)
+          .subject("Your new All of Us Account")
+          .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
       return msg;
     } catch (IOException e) {
       throw new MessagingException("Error reading in email");
@@ -154,6 +168,48 @@ public class MailServiceImpl implements MailService {
       .put("BULLET_1", cloudStorageService.getImageUrl("bullet_1.png"))
       .put("BULLET_2", cloudStorageService.getImageUrl("bullet_2.png"))
       .build();
+    return new StrSubstitutor(replaceMap).replace(string);
+  }
+
+  private MandrillMessage buildIdVerificationCompleteMessage(String contactEmail, IdVerificationStatus status, String username) throws MessagingException {
+    MandrillMessage msg = new MandrillMessage();
+    RecipientAddress toAddress = new RecipientAddress();
+    toAddress.setEmail(contactEmail);
+    msg.setTo(Collections.singletonList(toAddress));
+    try {
+      String msgHtml = buildIdVerificationCompleteHtml(status, username);
+      msg.html(msgHtml)
+          .subject("All of Us ID Verification Complete")
+          .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+      return msg;
+    } catch (IOException e) {
+      throw new MessagingException("Error reading in email");
+    }
+  }
+
+  private String buildIdVerificationCompleteHtml(IdVerificationStatus status, String username) throws IOException {
+    CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
+    StringBuilder contentBuilder = new StringBuilder();
+    URL emailContent = Resources.getResource(ID_VERIFICATION_RESOURCE);
+    Resources
+        .readLines(emailContent, StandardCharsets.UTF_8)
+        .forEach(s -> contentBuilder.append(s).append("\n"));
+    String string = contentBuilder.toString();
+    String idVerificationReport;
+    String action;
+    if (status.equals(IdVerificationStatus.REJECTED)) {
+      idVerificationReport = "rejected";
+      action = "contact our support team at support@researchallofus.org for further information";
+    } else {
+      idVerificationReport = "approved for use";
+      action = "login to the workbench via <a class=\"link\">" + workbenchConfigProvider.get().admin.loginUrl + "</a>";
+    }
+    ImmutableMap<String, String> replaceMap = new ImmutableMap.Builder<String, String>()
+        .put("ACTION", action)
+        .put("ID_VERIFICATION_REPORT", idVerificationReport)
+        .put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"))
+        .put("USERNAME", username)
+        .build();
     return new StrSubstitutor(replaceMap).replace(string);
   }
 

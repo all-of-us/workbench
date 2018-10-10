@@ -104,16 +104,20 @@ export function subtypeToTitle(subtype: string): string {
   return title;
 }
 
-export function highlightMatches(terms: Array<string>, name: string) {
+export function highlightMatches(terms: Array<string>, name: string, id?: string) {
   terms.forEach(term => {
+    id = id || '';
     const start = name.toLowerCase().indexOf(term.toLowerCase());
     if (start > -1) {
       const end = start + term.length;
       name = name.slice(0, start)
-        + '<span style="color: #659F3D;'
+        + '<span '
+        + (id !== '' ? 'id="match' + id + '" '
+        + 'style="color: #659F3D;'
         + 'font-weight: bolder;'
-        + 'background-color: rgba(101,159,61,0.2);'
-        + 'padding: 2px 0;">'
+        + 'background: transparent;'
+        + 'padding: 2px 0;"' : '')
+        + 'class="search-keyword">'
         + name.slice(start, end) + '</span>'
         + name.slice(end);
     }
