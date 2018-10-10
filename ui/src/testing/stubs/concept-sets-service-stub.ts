@@ -22,6 +22,16 @@ export class ConceptSetsServiceStub {
         name: 'Mock Concept Set',
         description: 'Mocked for tests',
         domain: Domain.CONDITION
+      },  {
+        id: 346,
+        name: 'Mock Concept Set Measurement',
+        description: 'Mocked for tests',
+        domain: Domain.MEASUREMENT
+      },  {
+        id: 347,
+        name: 'Mock Concept Set for condition',
+        description: 'Mocked for tests',
+        domain: Domain.CONDITION
       }
     ];
   }

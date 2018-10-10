@@ -27,10 +27,11 @@ export class ConceptAddModalComponent {
   selectedConceptSet: ConceptSet;
   selectConceptList: Concept[] = [];
   selectDomain: Domain;
-  existingSetSelected = true;
-  nameExistError = false;
+  addToExistingSetSelected = true;
   errorSaving = false;
+  errorNameReq = false;
   errorMsg: string;
+
   @Input() selectedDomain: Domain;
   @Input() selectedConcepts: Concept[];
 
@@ -49,41 +50,39 @@ export class ConceptAddModalComponent {
           this.conceptSets = response.items.filter((concept) => {
             return concept.domain === this.selectedDomain;
           });
+          this.addToExistingSetSelected = this.conceptSets && this.conceptSets.length > 0;
           if (this.conceptSets && this.conceptSets.length > 0) {
             this.selectedConceptSet = this.conceptSets[0];
-            this.existingSetSelected = true;
-          } else {
-            this.existingSetSelected = false;
           }
           this.loading = false;
         }, (error) => {
           this.loading = false;
         });
     this.modalOpen = true;
-    this.reset();
-  }
-
-  reset() {
     this.selectDomain = this.selectedDomain;
     this.selectConceptList = this.selectedConcepts
         .filter((concepts) => concepts.domainId.toUpperCase() ===
             this.selectDomain.toString().toUpperCase());
-    this.existingSetSelected = !this.existingSetSelected;
-    this.nameExistError = false;
-    this.errorSaving = false;
     this.name = '';
     this.description = '';
+    this.errorNameReq = false;
+    this.errorSaving = false;
+    this.errorMsg = '';
   }
 
   close(): void {
     this.modalOpen = false;
   }
 
-  createConceptSet(): void {
-    this.nameExistError = false;
-    this.errorSaving = false;
+  selectChange(): void {
+    this.addToExistingSetSelected = !this.addToExistingSetSelected;
+  }
 
-    if (this.existingSetSelected) {
+  save(): void {
+    this.errorSaving = false;
+    this.errorNameReq = false;
+
+    if (this.addToExistingSetSelected) {
       const conceptIds = [];
       this.selectConceptList.forEach((selected) => {
         conceptIds.push(selected.conceptId);
@@ -92,8 +91,8 @@ export class ConceptAddModalComponent {
         etag: this.selectedConceptSet.etag  ,
         addedIds: conceptIds
       };
-      this.conceptSetsService.updateConceptSetConcepts(this.wsNamespace, this.wsId,
-          this.selectedConceptSet.id, updateConceptSetReq)
+      this.conceptSetsService.updateConceptSetConcepts(
+          this.wsNamespace, this.wsId, this.selectedConceptSet.id, updateConceptSetReq)
           .subscribe((response) => {
             this.modalOpen = false;
           }, (error) => {
@@ -102,8 +101,17 @@ export class ConceptAddModalComponent {
       return;
     }
 
-    this.conceptSetsService
-        .createConceptSet(this.wsNamespace, this.wsId, {
+    if (!this.name) {
+      setTimeout(() => {
+        this.errorNameReq = false;
+        this.errorMsg = '';
+      }, 5000);
+      this.errorNameReq = true;
+      this.errorMsg = 'Name is a required field';
+      return;
+    }
+
+    this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, {
           name: this.name,
           description: this.description,
           domain: this.selectDomain,
@@ -113,10 +121,15 @@ export class ConceptAddModalComponent {
           this.modalOpen = false;
         }, (error) => {
           this.errorSaving = true;
-          this.existingSetSelected = false;
-          // TODO(Neha) : better error message handling
+          if (error.status === 400) {
+            this.errorMsg = 'Concept with same name already exist';
+          } else {
+            this.errorMsg = 'Error while saving concept please try again';
+          }
+          setTimeout(() => {
+            this.errorSaving = false;
+            this.errorMsg = '';
+           }, 5000);
         });
   }
-
-
 }

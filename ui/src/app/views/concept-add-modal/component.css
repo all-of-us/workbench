@@ -20,11 +20,11 @@
   padding-left: 0.5rem;
 }
 
-.createHeader {
+.create-header {
   padding-bottom: 1.5rem;
 }
 
-.inputName, .conceptSelect {
+.inputName, .concept-select {
   height: 35px;
   width: 406px;
   border: 1px solid #979797;

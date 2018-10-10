@@ -102,7 +102,7 @@ describe('ConceptSetListComponent', () => {
   it('displays correct concept sets', fakeAsync(() => {
     const de = fixture.debugElement;
     const conceptCards = de.queryAll(By.css('.item-card'));
-    expect(conceptCards.length).toEqual(1);
+    expect(conceptCards.length).toEqual(3);
     expect(conceptCards[0].nativeElement.innerText).toMatch('Mock Concept Set');
     expect(conceptCards[0].nativeElement.innerText).toMatch('Mocked for tests');
   }));

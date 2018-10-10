@@ -3,31 +3,33 @@
     Add to set
   </div>
   <div class="modal-body">
-    <label *ngIf="errorSaving" class="error">Error while adding Concept to concept set</label>
-    <label *ngIf="errorMsg" class="error">{{errorMsg}}</label>
+    <label *ngIf="errorSaving" class="error">{{errorMsg}}</label>
     <div *ngIf="conceptSets?.length > 0" class="form-section">
       <div style="display:flex; flex-direction: row;">
-        <input name="selectOptions" type="radio" [(ngModel)]="existingSetSelected" [value]="true" [checked]="reset()"/>
+        <input id="select-add" type="radio" [(ngModel)]="addToExistingSetSelected" [value]="true"
+               [checked]="selectChange()"/>
         <label class="header">Add to Concept Set</label>
-        <input name="selectOptions" type="radio" [(ngModel)]="existingSetSelected" [value]="false" [checked]="reset()"/>
-        <label class="header createHeader">Create new</label>
+        <input id="select-create" type="radio" [(ngModel)]="addToExistingSetSelected" [value]="false"
+               [checked]="selectChange()"/>
+        <label class="header create-header">Create new</label>
       </div>
-      <select *ngIf="existingSetSelected" class="concept-select" [(ngModel)]="selectedConceptSet">
+      <select *ngIf="addToExistingSetSelected" class="concept-select" [(ngModel)]="selectedConceptSet">
         <option *ngFor="let conceptSet of conceptSets" [ngValue]="conceptSet">{{conceptSet.name}}</option>
       </select>
     </div>
     <div class="form-section">
+      <label *ngIf="errorNameReq" class="error">{{errorMsg}}</label>
       <label class="header" style="padding-left: 0rem;" *ngIf="conceptSets?.length === 0">Create a new Concept Set</label>
-      <input *ngIf="!existingSetSelected || conceptSets?.length === 0" id="new-name" type="text" class="inputName" placeholder="Name"
+      <input *ngIf="!addToExistingSetSelected || conceptSets?.length === 0" id="new-name" type="text" class="inputName" placeholder="Name"
              [(ngModel)]="name">
-      <textarea *ngIf="!existingSetSelected || conceptSets?.length === 0" name="description" class="description" placeholder="Add a Description"
+      <textarea *ngIf="!addToExistingSetSelected || conceptSets?.length === 0" name="description" class="description" placeholder="Add a Description"
                 [(ngModel)]="description"></textarea>
     </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="close()">Cancel</button>
-    <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
-            (click)="createConceptSet()" [clrLoading]="loading" [disabled]="loading">
+    <button type="button" class="btn btn-primary"
+            (click)="save()" [clrLoading]="loading" [disabled]="loading">
       Save
     </button>
   </div>
