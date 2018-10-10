@@ -85,7 +85,7 @@ const activatedRouteStub  = {
 };
 
 describe('ConceptSetAddComponent', () => {
-  let conceptSetCreatePage: ConceptSetAddPage;
+  let conceptSetAddCreatePage: ConceptSetAddPage;
   const conceptServiceStub = new ConceptsServiceStub();
   const conceptSetServiceStub = new ConceptSetsServiceStub();
   beforeEach(fakeAsync(() => {
@@ -106,13 +106,13 @@ describe('ConceptSetAddComponent', () => {
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub() }
       ]
     }).compileComponents().then(() => {
-      conceptSetCreatePage = new ConceptSetAddPage(TestBed);
+      conceptSetAddCreatePage = new ConceptSetAddPage(TestBed);
     });
     tick();
   }));
 
   it('gets domain list', fakeAsync(() => {
-    console.log(this.conceptSetCreatePage);
+    console.log(this.conceptSetAddCreatePage);
   }));
 
 });
