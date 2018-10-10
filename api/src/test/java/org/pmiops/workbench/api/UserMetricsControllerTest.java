@@ -199,6 +199,20 @@ public class UserMetricsControllerTest {
   }
 
   @Test
+  public void testGetUserRecentResourceNotebookPathEndsWithSlash() {
+    resource1.setNotebookName("gs://bucketFile/notebooks/notebook.ipynb/");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Collections.singletonList(resource1));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertNotNull(recentResources.get(0).getNotebook());
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/notebook.ipynb/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "");
+  }
+
+  @Test
   public void testGetUserRecentResource() {
     RecentResourceResponse recentResources = userMetricsController
         .getUserRecentResources().getBody();
