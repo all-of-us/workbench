@@ -142,9 +142,9 @@ public class MailServiceImpl implements MailService {
     msg.setTo(Collections.singletonList(toAddress));
     try {
       String msgHtml = buildWelcomeEmailHtml(password, user);
-      msg.setHtml(msgHtml);
-      msg.setSubject("Your new All of Us Account");
-      msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+      msg.html(msgHtml)
+          .subject("Your new All of Us Account")
+          .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
       return msg;
     } catch (IOException e) {
       throw new MessagingException("Error reading in email");
@@ -178,9 +178,9 @@ public class MailServiceImpl implements MailService {
     msg.setTo(Collections.singletonList(toAddress));
     try {
       String msgHtml = buildIdVerificationCompleteHtml(status, username);
-      msg.setHtml(msgHtml);
-      msg.setSubject("All of Us ID Verification Complete");
-      msg.setFromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+      msg.html(msgHtml)
+          .subject("All of Us ID Verification Complete")
+          .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
       return msg;
     } catch (IOException e) {
       throw new MessagingException("Error reading in email");

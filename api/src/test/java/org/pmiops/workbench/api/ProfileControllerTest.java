@@ -680,6 +680,18 @@ public class ProfileControllerTest {
     verify(directoryService, times(1)).resetUserPassword(anyString());
   }
 
+  @Test
+  public void reviewIdVerification_sendsEmail() throws Exception {
+    Profile profile = createUser();
+    IdVerificationStatus status = IdVerificationStatus.REJECTED;
+    IdVerificationReviewRequest request = new IdVerificationReviewRequest().newStatus(status);
+    doNothing().when(mailService).sendIdVerificationCompleteEmail(any(), any(), any());
+
+    profileController.reviewIdVerification(
+        user.getUserId(), request);
+    verify(mailService, times(1)).sendIdVerificationCompleteEmail(any(), any(), any());
+  }
+
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
