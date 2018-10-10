@@ -44,7 +44,6 @@
             </button>
           </div>
           <div class="content" *ngIf="open">
-            <!--style= "min-height: 25rem; max-height: 25rem"-->
             <ng-container [ngSwitch]="ctype">
               <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
                                  [selectedTypes]="demoItemsType"
