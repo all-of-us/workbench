@@ -30,4 +30,8 @@ export class PageLayout implements OnInit {
       this.router.navigate(['participants'], {relativeTo: this.route});
     }
   }
+
+  reviewCreated(created: boolean) {
+    this.create = !created;
+  }
 }
