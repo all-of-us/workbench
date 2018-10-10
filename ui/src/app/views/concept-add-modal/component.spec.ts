@@ -31,10 +31,7 @@ class ConceptSetAddPage {
   workspaceNamespace: string;
   workspaceId: string;
   conceptList: string[] = [];
-  name: DebugElement;
-  description: DebugElement;
   conceptSelect: DebugElement;
-  save: DebugElement;
 
 
   constructor(testBed: typeof TestBed) {
@@ -56,9 +53,6 @@ class ConceptSetAddPage {
     this.workspaceNamespace = this.route[1].path;
     this.workspaceId = this.route[2].path;
     const de = this.fixture.debugElement;
-    this.name = de.query(By.css('.input-name'));
-    this.description = de.query(By.css('.input-description'));
-    this.save = de.query(By.css('.btn-primary'));
     const selects = de.queryAll(By.css('.concept-select'));
     this.conceptSelect = selects[0];
     this.conceptList = [];

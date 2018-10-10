@@ -12,7 +12,7 @@
         <input name="selectOptions" type="radio" [(ngModel)]="existingSetSelected" [value]="false" [checked]="reset()"/>
         <label class="header createHeader">Create new</label>
       </div>
-      <select *ngIf="existingSetSelected" class="conceptSelect" [(ngModel)]="selectedConceptSet">
+      <select *ngIf="existingSetSelected" class="concept-select" [(ngModel)]="selectedConceptSet">
         <option *ngFor="let conceptSet of conceptSets" [ngValue]="conceptSet">{{conceptSet.name}}</option>
       </select>
     </div>
