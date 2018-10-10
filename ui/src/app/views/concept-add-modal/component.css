@@ -1,3 +1,12 @@
+
+:host::ng-deep .modal-dialog{
+  width: auto;
+}
+
+:host::ng-deep .modal-content{
+  width: 20rem;
+}
+
 .header {
   height: 19px;
   width: 357px;
@@ -13,10 +22,6 @@
 
 .createHeader {
   padding-bottom: 1.5rem;
-}
-
-modal-dialog {
-  width: 15rem;
 }
 
 .inputName, .conceptSelect {

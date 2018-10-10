@@ -27,9 +27,10 @@ export class ConceptAddModalComponent {
   selectedConceptSet: ConceptSet;
   selectConceptList: Concept[] = [];
   selectDomain: Domain;
-  existingSetSelected = false;
+  existingSetSelected = true;
   nameExistError = false;
   errorSaving = false;
+  errorMsg: string;
   @Input() selectedDomain: Domain;
   @Input() selectedConcepts: Concept[];
 
@@ -42,6 +43,7 @@ export class ConceptAddModalComponent {
   }
 
   open(): void {
+    this.loading = true;
     this.conceptSetsService.getConceptSetsInWorkspace(this.wsNamespace, this.wsId).subscribe(
         (response) => {
           this.conceptSets = response.items.filter((concept) => {
@@ -49,6 +51,9 @@ export class ConceptAddModalComponent {
           });
           if (this.conceptSets && this.conceptSets.length > 0) {
             this.selectedConceptSet = this.conceptSets[0];
+            this.existingSetSelected = true;
+          } else {
+            this.existingSetSelected = false;
           }
           this.loading = false;
         }, (error) => {
@@ -59,7 +64,6 @@ export class ConceptAddModalComponent {
   }
 
   reset() {
-    this.loading = true;
     this.selectDomain = this.selectedDomain;
     this.selectConceptList = this.selectedConcepts
         .filter((concepts) => concepts.domainId.toUpperCase() ===
@@ -93,7 +97,7 @@ export class ConceptAddModalComponent {
           .subscribe((response) => {
             this.modalOpen = false;
           }, (error) => {
-            this.errorSaving = true;
+            this.errorMsg = error.toString();
           });
       return;
     }

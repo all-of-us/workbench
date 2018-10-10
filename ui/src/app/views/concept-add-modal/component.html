@@ -1,22 +1,26 @@
-<clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'">
+<clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'" *ngIf="!loading">
+  <div class="modal-header">
+    Add to set
+  </div>
   <div class="modal-body">
     <label *ngIf="errorSaving" class="error">Error while adding Concept to concept set</label>
-    <div *ngIf="!loading && conceptSets?.length > 0" class="form-section">
+    <label *ngIf="errorMsg" class="error">{{errorMsg}}</label>
+    <div *ngIf="conceptSets?.length > 0" class="form-section">
       <div style="display:flex; flex-direction: row;">
         <input name="selectOptions" type="radio" [(ngModel)]="existingSetSelected" [value]="true" [checked]="reset()"/>
         <label class="header">Add to Concept Set</label>
         <input name="selectOptions" type="radio" [(ngModel)]="existingSetSelected" [value]="false" [checked]="reset()"/>
-        <label class="header createHeader">Create a new Concept Set</label>
+        <label class="header createHeader">Create new</label>
       </div>
       <select *ngIf="existingSetSelected" class="conceptSelect" [(ngModel)]="selectedConceptSet">
         <option *ngFor="let conceptSet of conceptSets" [ngValue]="conceptSet">{{conceptSet.name}}</option>
       </select>
     </div>
     <div class="form-section">
-      <label class="header" *ngIf="conceptSets?.length === 0">Create a new Concept Set</label>
-      <input *ngIf="!existingSetSelected" id="new-name" type="text" class="inputName" placeholder="Name"
+      <label class="header" style="padding-left: 0rem;" *ngIf="conceptSets?.length === 0">Create a new Concept Set</label>
+      <input *ngIf="!existingSetSelected || conceptSets?.length === 0" id="new-name" type="text" class="inputName" placeholder="Name"
              [(ngModel)]="name">
-      <textarea *ngIf="!existingSetSelected" name="description" class="description" placeholder="Add a Description"
+      <textarea *ngIf="!existingSetSelected || conceptSets?.length === 0" name="description" class="description" placeholder="Add a Description"
                 [(ngModel)]="description"></textarea>
     </div>
   </div>
