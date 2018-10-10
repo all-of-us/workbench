@@ -6,7 +6,7 @@
   <router-outlet></router-outlet>
 </div>
 
-<app-create-review-page *ngIf="create"></app-create-review-page>
+<app-create-review-page *ngIf="create" (created)="reviewCreated($event)"></app-create-review-page>
 
 <!--
   set-annotation-modal: A manager for creating, updating, removing annotation
