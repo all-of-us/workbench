@@ -2,7 +2,7 @@
 <div class="crit-modal-container" [class.show]="open">
   <div class="crit-modal-content">
     <div class="container title-margin">
-      <div class="row">
+      <div class="row modal-height">
         <div class="col col-sm-8 padding-zero">
           <div class="title-bar">
             <div class="btn-group btn-link">
@@ -44,6 +44,7 @@
             </button>
           </div>
           <div class="content" *ngIf="open">
+            <!--style= "min-height: 25rem; max-height: 25rem"-->
             <ng-container [ngSwitch]="ctype">
               <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"
                                  [selectedTypes]="demoItemsType"
