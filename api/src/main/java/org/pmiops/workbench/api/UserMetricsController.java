@@ -51,7 +51,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         String notebookName = userRecentResource.getNotebookName();
         if (notebookName != null && !notebookName.isEmpty()) {
           try {
-            URI notebookUri = new URI(notebookName);
+            URI notebookUri = convertToURI(notebookName);
             Path path = Paths.get(notebookUri.getPath());
             String fileName = path.getFileName().toString();
             String filePath = notebookName.replaceFirst(fileName + "$", "");
@@ -172,6 +172,29 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
   }
+
+  /**
+   * Utility method to parse a URI from a string that may or may not have spaces in the path.
+   *
+   * @param str The string to convert
+   * @return The converted URI
+   * @throws URISyntaxException The URISyntaxException
+   */
+  private URI convertToURI(String str) throws URISyntaxException {
+    try {
+      return new URI(str);
+    } catch (URISyntaxException e) {
+      // Handle edge case of path with spaces
+      String newStr = str.replace(" ", "%20");
+      URI uri = new URI(newStr);
+      if (uri.getScheme() == null) {
+        throw new URISyntaxException(str, "No scheme in string");
+      }
+      if (uri.getPath() == null) {
+        throw new URISyntaxException(str, "No path in string");
+      }
+      return uri;
+    }
+  }
+
 }
-
-
