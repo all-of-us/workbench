@@ -682,7 +682,7 @@ public class ProfileControllerTest {
 
   @Test
   public void reviewIdVerification_sendsEmail() throws Exception {
-    Profile profile = createUser();
+    createUser();
     IdVerificationStatus status = IdVerificationStatus.REJECTED;
     IdVerificationReviewRequest request = new IdVerificationReviewRequest().newStatus(status);
     doNothing().when(mailService).sendIdVerificationCompleteEmail(any(), any(), any());
