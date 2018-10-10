@@ -32,3 +32,9 @@
   height: auto;
   background: #302C71;
 }
+.btn.btn-primary:disabled {
+  background: #9B9B9B;
+  color: #C9C8C8;
+  border: 1px solid #9B9B9B;
+  opacity: 1;
+}
