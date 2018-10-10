@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 @RestController
@@ -160,7 +161,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     if (str != null && str.startsWith("gs://")) {
       int pos = str.lastIndexOf('/') + 1;
       String fileName = str.substring(pos);
-      String filePath = str.replaceFirst(fileName + "$", "");
+      String replacement = Matcher.quoteReplacement(fileName) + "$";
+      String filePath = str.replaceFirst(replacement, "");
       return new FileDetail().name(fileName).path(filePath);
     }
     log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", str));
