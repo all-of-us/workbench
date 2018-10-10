@@ -51,7 +51,6 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -77,7 +76,7 @@ import org.springframework.context.annotation.Import;
         TestJpaConfig.class, ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class,
         AnnotationQueryBuilder.class, CdrBigQuerySchemaConfigService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
-public class CohortMaterializationServiceTest extends BigQueryBaseTest {
+public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   private CohortMaterializationService cohortMaterializationService;
   private CohortReview cohortReview;
@@ -1373,37 +1372,6 @@ public class CohortMaterializationServiceTest extends BigQueryBaseTest {
     assertThat(response.getNextPageToken()).isNull();
   }
 
-  @Test
-  public void testMaterializeAnnotationQueryNoPagination() {
-    FieldSet fieldSet = new FieldSet();
-    fieldSet.setAnnotationQuery(new AnnotationQuery());
-    MaterializeCohortResponse response =
-        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(),
-            null, 0, makeRequest(fieldSet, 1000));
-    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
-    assertResults(response, p1Map);
-    assertThat(response.getNextPageToken()).isNull();
-  }
-
-  @Test
-  public void testMaterializeAnnotationQueryWithPagination() {
-    FieldSet fieldSet = new FieldSet();
-    fieldSet.setAnnotationQuery(new AnnotationQuery());
-    MaterializeCohortRequest request = makeRequest(fieldSet, 1);
-    request.setStatusFilter(ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.EXCLUDED));
-    MaterializeCohortResponse response =
-        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), null, 0, request);
-    ImmutableMap<String, Object> p1Map = ImmutableMap.of("person_id", 1L, "review_status", "INCLUDED");
-    assertResults(response, p1Map);
-    assertThat(response.getNextPageToken()).isNotNull();
-
-    request.setPageToken(response.getNextPageToken());
-    MaterializeCohortResponse response2 =
-        cohortMaterializationService.materializeCohort(cohortReview, SearchRequests.allGenders(), null, 0, request);
-    ImmutableMap<String, Object> p2Map = ImmutableMap.of("person_id", 2L, "review_status", "EXCLUDED");
-    assertResults(response2, p2Map);
-    assertThat(response2.getNextPageToken()).isNull();
-  }
 
   @Test(expected = BadRequestException.class)
   public void testMaterializeCohortConceptSetNoConcepts() {

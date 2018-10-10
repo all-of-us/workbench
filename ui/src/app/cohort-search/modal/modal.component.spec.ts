@@ -13,6 +13,7 @@ import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
 import {MultiSelectComponent} from '../multi-select/multi-select.component';
 import {NodeInfoComponent} from '../node-info/node-info.component';
 import {NodeComponent} from '../node/node.component';
+import {OptionInfoComponent} from '../option-info/option-info.component';
 import {
 activeCriteriaTreeType,
 activeCriteriaType,
@@ -56,6 +57,7 @@ describe('ModalComponent', () => {
         MultiSelectComponent,
         NodeComponent,
         NodeInfoComponent,
+        OptionInfoComponent,
         SafeHtmlPipe,
         SearchBarComponent,
         SelectionInfoComponent,

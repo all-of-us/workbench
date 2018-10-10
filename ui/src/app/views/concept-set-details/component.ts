@@ -25,6 +25,7 @@ import {
 })
 export class ConceptSetDetailsComponent {
   @ViewChild(ConfirmDeleteModalComponent) deleteModal;
+  @ViewChild(ConceptTableComponent) conceptTable;
 
   wsNamespace: string;
   wsId: string;
@@ -36,6 +37,9 @@ export class ConceptSetDetailsComponent {
   editSubmitting = false;
   editName: string;
   editDescription: string;
+
+  removing = false;
+  removeSubmitting = false;
 
   constructor(
     private conceptSetsService: ConceptSetsService,
@@ -81,12 +85,34 @@ export class ConceptSetDetailsComponent {
       });
   }
 
-  openRemoveModal() {
-    // TODO(calbach): Implement.
+  removeConcepts() {
+    this.conceptSetsService.updateConceptSetConcepts(
+      this.wsNamespace, this.wsId, this.conceptSet.id, {
+        etag: this.conceptSet.etag,
+        removedIds: this.conceptTable.selectedConcepts.map(c => c.conceptId)
+      }).subscribe((cs) => {
+        this.conceptSet = cs;
+        this.removing = false;
+        this.removeSubmitting = false;
+      }, () => {
+        // TODO(calbach): Handle errors.
+        this.removeSubmitting = false;
+      });
   }
 
   get canEdit(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
         || this.accessLevel === WorkspaceAccessLevel.WRITER;
+  }
+
+  get selectedConceptsCount(): number {
+    if (!this.conceptTable) {
+      return 0;
+    }
+    return this.conceptTable.selectedConcepts.length;
+  }
+
+  get showRemoveFab(): boolean {
+    return this.canEdit && this.selectedConceptsCount > 0;
   }
 }

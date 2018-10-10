@@ -4,7 +4,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
+import {NgxPopperModule} from 'ngx-popper';
 
+import {OptionInfoComponent} from '../option-info/option-info.component';
 import {CohortSearchActions} from '../redux';
 import {SafeHtmlPipe} from '../safe-html.pipe';
 import {SearchBarComponent} from './search-bar.component';
@@ -21,10 +23,12 @@ describe('SearchBarComponent', () => {
     mockReduxInst.getState = _wrapped;
 
     TestBed.configureTestingModule({
-      declarations: [ SearchBarComponent, SafeHtmlPipe ],
+      declarations: [ OptionInfoComponent, SearchBarComponent, SafeHtmlPipe ],
       imports: [
         ClarityModule,
-        ReactiveFormsModule],
+        NgxPopperModule,
+        ReactiveFormsModule
+      ],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
         CohortSearchActions,
