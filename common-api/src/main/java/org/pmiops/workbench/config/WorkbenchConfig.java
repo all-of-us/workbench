@@ -39,7 +39,6 @@ public class WorkbenchConfig {
   }
 
   public static class CdrConfig {
-    public String defaultCdrVersion;
     public boolean debugQueries;
   }
 
@@ -56,6 +55,7 @@ public class WorkbenchConfig {
   public static class ServerConfig {
     public String publicApiKeyForErrorReports;
     public String projectId;
+    public String shortName;
   }
 
   public static class AdminConfig {

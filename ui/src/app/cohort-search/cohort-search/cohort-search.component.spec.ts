@@ -20,6 +20,7 @@ import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
 import {MultiSelectComponent} from '../multi-select/multi-select.component';
 import {NodeInfoComponent} from '../node-info/node-info.component';
 import {NodeComponent} from '../node/node.component';
+import {OptionInfoComponent} from '../option-info/option-info.component';
 import {OverviewComponent} from '../overview/overview.component';
 import {
   cancelWizard,
@@ -71,6 +72,7 @@ describe('CohortSearchComponent', () => {
         MultiSelectComponent,
         NodeComponent,
         NodeInfoComponent,
+        OptionInfoComponent,
         OverviewComponent,
         SafeHtmlPipe,
         SearchBarComponent,

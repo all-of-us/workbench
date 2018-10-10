@@ -60,7 +60,7 @@ public class MailServiceImpl implements MailService {
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(workbenchConfig.admin.adminIdVerification);
     msg.setTo(Collections.singletonList(toAddress));
-    msg.setSubject("[Id Verification Request]: " + userName);
+    msg.setSubject("[Id Verification Request: " + workbenchConfig.server.shortName + "]: " + userName);
     msg.setHtml(ID_VERIFICATION_TEXT + userName);
     msg.setFromEmail(workbenchConfig.mandrill.fromEmail);
 
