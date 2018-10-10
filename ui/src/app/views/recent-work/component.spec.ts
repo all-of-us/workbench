@@ -142,14 +142,19 @@ describe('RecentWorkComponent', () => {
   fit('should resize when screen resizes', fakeAsync( () => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(5)));
     updateAndTick(fixture);
+    console.log(fixture.nativeElement.offsetWidth);
     const de = fixture.debugElement;
     const cardsOnPage = de.queryAll(By.css('.card'));
     expect(cardsOnPage.length).toEqual(4);
 
+    fixture.nativeElement.style.width = 500;
+    console.log(fixture.nativeElement.offsetWidth);
+
     // fixture.nativeElement.offsetWidth = 1024;
 
     // this does not do any resizing, just triggers the onResize listener
-    // window.dispatchEvent(new Event('resize'));
+    window.dispatchEvent(new Event('resize'));
+    updateAndTick(fixture);
 
     // this does not work
     // page.triggerEventHandler("window:resize", null);

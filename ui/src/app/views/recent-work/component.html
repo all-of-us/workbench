@@ -1,7 +1,7 @@
 <div *ngIf="resourcesLoading" class="spinner-container">
   <span class="spinner spinner-lg"></span>
 </div>
-<div #recentWork style="display: flex; flex-grow: 1; justify-content: flex-end;">
+<div #recentWork style="display: flex; flex-grow: 1;">
   <div class="recent-work" style="display:inline-block" *ngIf="resourceList && resourceList.length !== 0">
     <div class="title" style="margin-bottom: 0.5rem;">
       {{headerText}}

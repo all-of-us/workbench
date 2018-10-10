@@ -38,13 +38,21 @@ export class RecentWorkComponent implements OnInit {
     const width = this.eMainFrame.nativeElement.offsetWidth;
     if ((this.resourcesLoading === false) && (width)) {
       this.size = this.calculateSize(this.eMainFrame);
+      console.log(this.size);
       this.updateList();
     }
   }
 
   calculateSize(el: ElementRef): number {
     const width = el.nativeElement.offsetWidth;
-    return Math.floor((width - 100) / 200) || 1;
+    console.log(width);
+
+    const division = Math.floor((width - 50) / 200);
+    if (division >= 2) {
+      return division;
+    } else {
+      return 2;
+    }
   }
 
   updateList(): void {
