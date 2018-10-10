@@ -129,6 +129,6 @@ describe('ConceptSetListComponent', () => {
     simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
     updateAndTick(fixture);
     const conceptCards = de.queryAll(By.css('.item-card'));
-    expect(conceptCards.length).toBe(0);
+    expect(conceptCards.length).toBe(2);
   }));
 });
