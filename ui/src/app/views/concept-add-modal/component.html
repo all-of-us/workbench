@@ -11,16 +11,16 @@
                [checked]="selectChange()"/>
         <label class="header create-header">Create new set</label>
       </div>
-      <select *ngIf="addToExistingSetSelected" class="concept-select" [(ngModel)]="selectedConceptSet">
+      <select *ngIf="existingSetSelected" class="concept-select" [(ngModel)]="selectedConceptSet">
         <option *ngFor="let conceptSet of conceptSets" [ngValue]="conceptSet">{{conceptSet.name}}</option>
       </select>
     </div>
     <div class="form-section">
       <label *ngIf="errorNameReq" class="error">{{errorMsg}}</label>
       <label class="header" style="padding-left: 0rem;" *ngIf="conceptSets?.length === 0">Create a new Concept Set</label>
-      <input *ngIf="!addToExistingSetSelected || conceptSets?.length === 0" id="new-name" type="text" class="inputName" placeholder="Name"
+      <input *ngIf="!existingSetSelected || conceptSets?.length === 0" id="new-name" type="text" class="inputName" placeholder="Name"
              [(ngModel)]="name">
-      <textarea *ngIf="!addToExistingSetSelected || conceptSets?.length === 0" name="description" class="description" placeholder="Add a Description"
+      <textarea *ngIf="!existingSetSelected || conceptSets?.length === 0" name="description" class="description" placeholder="Add a Description"
                 [(ngModel)]="description"></textarea>
     </div>
   </div>
