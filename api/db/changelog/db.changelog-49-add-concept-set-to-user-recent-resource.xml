@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-    <changeSet author="ursas" id="changelog-47">
+    <changeSet author="ursas" id="changelog-49-add-concept-set-to-user-recent-resource">
         <addColumn tableName="user_recent_resource">
             <column name="concept_set_id" type="bigint">
                 <constraints nullable="true"/>
