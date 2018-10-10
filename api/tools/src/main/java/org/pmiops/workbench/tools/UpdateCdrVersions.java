@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -62,7 +61,7 @@ public class UpdateCdrVersions {
           throw new IllegalArgumentException(
               String.format("Input JSON contains duplicated CDR version ID %d", v.getCdrVersionId()));
         }
-        if (Optional.ofNullable(v.getIsDefault()).orElse(false)) {
+        if (v.getIsDefault()) {
           defaultIds.add(v.getCdrVersionId());
         }
       }
