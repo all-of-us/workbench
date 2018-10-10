@@ -1,17 +1,15 @@
 <clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'" *ngIf="!loading">
-  <div class="modal-header">
-    Add to set
-  </div>
+  <h3 class="modal-title">Add to set</h3>
   <div class="modal-body">
     <label *ngIf="errorSaving" class="error">{{errorMsg}}</label>
     <div *ngIf="conceptSets?.length > 0" class="form-section">
       <div style="display:flex; flex-direction: row;">
-        <input id="select-add" type="radio" [(ngModel)]="addToExistingSetSelected" [value]="true"
+        <input id="select-add" type="radio" [(ngModel)]="existingSetSelected" [value]="true"
                [checked]="selectChange()"/>
-        <label class="header">Add to Concept Set</label>
-        <input id="select-create" type="radio" [(ngModel)]="addToExistingSetSelected" [value]="false"
+        <label class="header">Choose existing set</label>
+        <input id="select-create" type="radio" style="margin-left: 0.7rem;" [(ngModel)]="existingSetSelected" [value]="false"
                [checked]="selectChange()"/>
-        <label class="header create-header">Create new</label>
+        <label class="header create-header">Create new set</label>
       </div>
       <select *ngIf="addToExistingSetSelected" class="concept-select" [(ngModel)]="selectedConceptSet">
         <option *ngFor="let conceptSet of conceptSets" [ngValue]="conceptSet">{{conceptSet.name}}</option>

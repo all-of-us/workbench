@@ -1,18 +1,28 @@
 
-:host::ng-deep .modal-dialog{
+:host::ng-deep .modal-dialog {
   width: auto;
 }
 
-:host::ng-deep .modal-content{
+:host::ng-deep .modal-content {
   width: 20rem;
 }
 
-.header {
+:host::ng-deep .modal-title {
   height: 19px;
   width: 357px;
   color: #262262;
   font-family: Montserrat, sans-serif;
   font-size: 16px;
+  font-weight: 500;
+  line-height: 19px;
+}
+
+.header {
+  height: 18px;
+  width: 153px;
+  color: #000000;
+  font-size: 14px;
+  font-family: Montserrat, sans-serif;
   font-weight: 500;
   line-height: 19px;
   background-color: transparent;

@@ -113,7 +113,8 @@ describe('ConceptSetAddComponent', () => {
 
   it('gets concept set list filtered by domain selected', fakeAsync(() => {
     conceptSetAddCreatePage.fixture.componentInstance.selectedDomain = Domain.CONDITION;
-    conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts = ConceptStubVariables.STUB_CONCEPTS;
+    conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts =
+        ConceptStubVariables.STUB_CONCEPTS;
     conceptSetAddCreatePage.fixture.componentInstance.open();
     conceptSetAddCreatePage.readPageData();
     tick();

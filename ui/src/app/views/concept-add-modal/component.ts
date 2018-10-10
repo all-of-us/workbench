@@ -27,7 +27,7 @@ export class ConceptAddModalComponent {
   selectedConceptSet: ConceptSet;
   selectConceptList: Concept[] = [];
   selectDomain: Domain;
-  addToExistingSetSelected = true;
+  existingSetSelected = true;
   errorSaving = false;
   errorNameReq = false;
   errorMsg: string;
@@ -50,7 +50,7 @@ export class ConceptAddModalComponent {
           this.conceptSets = response.items.filter((concept) => {
             return concept.domain === this.selectedDomain;
           });
-          this.addToExistingSetSelected = this.conceptSets && this.conceptSets.length > 0;
+          this.existingSetSelected = this.conceptSets && this.conceptSets.length > 0;
           if (this.conceptSets && this.conceptSets.length > 0) {
             this.selectedConceptSet = this.conceptSets[0];
           }
@@ -75,14 +75,14 @@ export class ConceptAddModalComponent {
   }
 
   selectChange(): void {
-    this.addToExistingSetSelected = !this.addToExistingSetSelected;
+    this.existingSetSelected = !this.existingSetSelected;
   }
 
   save(): void {
     this.errorSaving = false;
     this.errorNameReq = false;
 
-    if (this.addToExistingSetSelected) {
+    if (this.existingSetSelected) {
       const conceptIds = [];
       this.selectConceptList.forEach((selected) => {
         conceptIds.push(selected.conceptId);
