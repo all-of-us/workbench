@@ -19,11 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -31,6 +26,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 @RestController
@@ -48,20 +44,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       userRecentResource -> {
         RecentResource resource = new RecentResource();
         resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
-        String notebookName = userRecentResource.getNotebookName();
-        if (notebookName != null && !notebookName.isEmpty()) {
-          try {
-            URI notebookUri = new URI(notebookName);
-            Path path = Paths.get(notebookUri.getPath());
-            String fileName = path.getFileName().toString();
-            String filePath = notebookName.replaceFirst(fileName + "$", "");
-            FileDetail fileDetail = new FileDetail().name(fileName).path(filePath);
-            resource.setNotebook(fileDetail);
-          } catch (InvalidPathException | URISyntaxException e) {
-            log.log(Level.SEVERE,
-                String.format("Invalid notebook file path found: %s", notebookName));
-          }
-        }
+        FileDetail fileDetail = convertStringToFileDetail(userRecentResource.getNotebookName());
+        resource.setNotebook(fileDetail);
         resource.setModifiedTime(userRecentResource.getLastAccessDate().toString());
         resource.setWorkspaceId(userRecentResource.getWorkspaceId());
         return resource;
@@ -172,6 +156,17 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
   }
+
+  private FileDetail convertStringToFileDetail(String str) {
+    if (str != null && str.startsWith("gs://")) {
+      int pos = str.lastIndexOf('/') + 1;
+      String fileName = str.substring(pos);
+      String replacement = Matcher.quoteReplacement(fileName) + "$";
+      String filePath = str.replaceFirst(replacement, "");
+      return new FileDetail().name(fileName).path(filePath);
+    }
+    log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", str));
+    return null;
+  }
+
 }
-
-

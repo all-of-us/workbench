@@ -587,7 +587,8 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     IdVerificationStatus status = review.getNewStatus();
-    Boolean oldVerification = userDao.findUserByUserId(userId).getIdVerificationIsValid();
+    User user = userDao.findUserByUserId(userId);
+    Boolean oldVerification = user.getIdVerificationIsValid();
     String newValue;
 
     if (status == IdVerificationStatus.VERIFIED) {
@@ -597,7 +598,11 @@ public class ProfileController implements ProfileApiDelegate {
       userService.setIdVerificationApproved(userId, false);
       newValue = "false";
     }
-
+    try {
+      mailServiceProvider.get().sendIdVerificationCompleteEmail(user.getContactEmail(), status, user.getEmail());
+    } catch (MessagingException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
     userService.logAdminUserAction(
         userId,
         "manual ID verification",
