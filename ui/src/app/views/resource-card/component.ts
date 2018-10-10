@@ -57,7 +57,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       private workspacesService: WorkspacesService,
       private conceptSetsService: ConceptSetsService,
       private signInService: SignInService,
-      private route: Router,
+      private router: Router,
   ) {}
 
   ngOnInit() {
@@ -127,7 +127,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       case ResourceType.COHORT: {
         const url =
           '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?cohortId=';
-        this.route.navigateByUrl(url + resource.cohort.id);
+        this.router.navigateByUrl(url + resource.cohort.id);
         this.onUpdate.emit();
         break;
       }
@@ -182,7 +182,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         const url =
           '/workspaces/' + this.wsNamespace
           + '/' + this.wsId + '/concepts/sets/' + resource.conceptSet.id;
-        this.route.navigateByUrl(url);
+        this.router.navigate(['workspaces', this.wsNamespace, this.wsId,
+        'concepts', 'sets', resource.conceptSet.id], {relativeTo: null});
         break;
       }
       case ResourceType.NOTEBOOK: {
@@ -233,7 +234,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     const url =
         '/workspaces/' + this.wsNamespace
         + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
-    this.route.navigateByUrl(url);
+    this.router.navigateByUrl(url);
   }
 
   get resourceTypeInvalidError(): boolean {
