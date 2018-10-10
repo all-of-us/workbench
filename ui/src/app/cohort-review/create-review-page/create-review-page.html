@@ -7,14 +7,38 @@
     Cohort {{ cohort.name }} has {{ review.matchedParticipantCount | number }}
     participants for possible review.  How many would you like to review?
     <span *ngIf="review.matchedParticipantCount > 10000">(max 10,000)</span>
-    <div>
+    <form [formGroup]="reviewParamForm" (ngSubmit)="createReview()">
+      <clr-alert
+        *ngIf="numParticipants.invalid && (numParticipants.dirty || numParticipants.touched)"
+        [clrAlertType]="'alert-danger'"
+        [clrAlertClosable]="false"
+        [clrAlertSizeSmall]="true">
+        <div clr-alert-item class="alert-item">
+          <span
+            *ngIf="numParticipants.errors?.required"
+            class="alert-text">
+            You must select a number of participants for review.
+          </span>
+          <span
+            *ngIf="numParticipants.errors?.min"
+            class="alert-text">
+            You must review more than zero participants.
+          </span>
+          <span
+            *ngIf="numParticipants.errors?.max"
+            class="alert-text">
+            You may only review up to {{ maxParticipants | number }}.
+          </span>
+        </div>
+      </clr-alert>
       <input
         id="numParticipants"
+        formControlName="numParticipants"
         class="num-participants"
         placeholder="NUMBER OF PARTICIPANTS"
         type="number"
         min="0" max="maxParticipants">
-    </div>
+    </form>
   </div>
   <div class="modal-footer">
     <button
@@ -26,71 +50,10 @@
     <button
       type="button"
       class="btn btn-primary"
-      [disabled]="reviewParamForm.invalid"
+      [disabled]="reviewParamForm.invalid || creating"
       [clrLoading]="creating"
       (click)="createReview()">
       Generate Set
     </button>
   </div>
 </clr-modal>
-
-<!--<h3>Generate Review Set</h3>-->
-
-<!--<div>-->
-  <!--<p>-->
-    <!--Cohort {{ cohort.name }} has {{ review.matchedParticipantCount }}-->
-    <!--participants for possible review.  How many would you like to review?-->
-    <!--<span *ngIf="review.matchedParticipantCount > 10000">(max 10000)</span>-->
-  <!--</p>-->
-  <!--<form [formGroup]="reviewParamForm" (ngSubmit)="createReview()">-->
-    <!--<label>Cohort Review Parameters</label>-->
-    <!--<section class="form-block">-->
-      <!--<div class="form-group">-->
-        <!--<label for="numParticipants" class="required">Number of Participants</label>-->
-        <!--<label-->
-          <!--role="tooltip"-->
-          <!--class="tooltip tooltip-validation tooltip-sm"-->
-          <!--[class.invalid]="numParticipants.invalid && (numParticipants.dirty || numParticipants.touched)">-->
-          <!--<input-->
-            <!--id="numParticipants"-->
-            <!--formControlName="numParticipants"-->
-            <!--type="number"-->
-            <!--min="0" max="maxParticipants">-->
-          <!--<span-->
-            <!--*ngIf="numParticipants.errors?.required"-->
-            <!--class="tooltip-content">-->
-            <!--You must select a number of participants for review.-->
-          <!--</span>-->
-          <!--<span-->
-            <!--*ngIf="numParticipants.errors?.min"-->
-            <!--class="tooltip-content">-->
-            <!--You must review more than zero participants.-->
-          <!--</span>-->
-          <!--<span-->
-            <!--*ngIf="numParticipants.errors?.max"-->
-            <!--class="tooltip-content">-->
-            <!--You may only review up to {{ maxParticipants }}.-->
-          <!--</span>-->
-        <!--</label>-->
-      <!--</div>-->
-    <!--</section>-->
-  <!--</form>-->
-<!--</div>-->
-
-<!--<div>-->
-  <!--<button-->
-    <!--type="button"-->
-    <!--class="btn btn-outline"-->
-    <!--(click)="cancelReview()">-->
-    <!--Cancel-->
-  <!--</button>-->
-
-  <!--<button-->
-    <!--type="button"-->
-    <!--class="btn btn-primary"-->
-    <!--[disabled]="reviewParamForm.invalid"-->
-    <!--[clrLoading]="creating"-->
-    <!--(click)="createReview()">-->
-    <!--Save Review Set-->
-  <!--</button>-->
-<!--</div>-->

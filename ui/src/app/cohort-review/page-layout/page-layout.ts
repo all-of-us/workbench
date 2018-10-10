@@ -25,8 +25,9 @@ export class PageLayout implements OnInit {
     this.state.review.next(review);
 
     if (review.reviewStatus === ReviewStatus.NONE) {
-      // this.router.navigate(['create'], {relativeTo: this.route});
       this.create = true;
+    } else {
+      this.router.navigate(['participants'], {relativeTo: this.route});
     }
   }
 }
