@@ -70,5 +70,22 @@ public class UserRecentResource {
   public ConceptSet getConceptSet() { return conceptSet; }
 
   public void setConceptSet(ConceptSet conceptSet) {this.conceptSet = conceptSet;}
-}
 
+  public UserRecentResource() {}
+
+  public UserRecentResource(long workspaceId, long userId, String notebookName, Timestamp lastAccessDate) {
+    this.workspaceId = workspaceId;
+    this.userId = userId;
+    this.notebookName = notebookName;
+    this.lastAccessDate = lastAccessDate;
+    this.cohort = null;
+    this.conceptSet = null;
+  }
+
+  public UserRecentResource(long workspaceId, long userId, Timestamp lastAccessDate) {
+    this.workspaceId;
+    this.userId;
+    this.notebookName = null;
+    this.lastAccessDate = lastAccessDate;
+  }
+}

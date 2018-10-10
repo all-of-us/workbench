@@ -54,13 +54,9 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     UserRecentResource recentResource = getDao().findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookNameWithPath);
     if (recentResource == null) {
       handleUserLimit(userId);
-      recentResource = new UserRecentResource();
-      recentResource.setUserId(userId);
-      recentResource.setWorkspaceId(workspaceId);
-      recentResource.setCohort(null);
-      recentResource.setNotebookName(notebookNameWithPath);
+      recentResource = new UserRecentResource(workspaceId, userId, notebookNameWithPath, lastAccessDateTime);
     }
-    recentResource.setLastAccessDate(lastAccessDateTime);
+    resource.setLastAccessDate(lastAccessDateTime);
     getDao().save(recentResource);
     return recentResource;
   }
@@ -78,11 +74,9 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
     if (resource == null) {
       handleUserLimit(userId);
-      resource = new UserRecentResource();
-      resource.setUserId(userId);
-      resource.setWorkspaceId(workspaceId);
+      resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
       resource.setCohort(cohort);
-      resource.setNotebookName(null);
+      resource.setConceptSet(null);
     }
     resource.setLastAccessDate(lastAccessDateTime);
     getDao().save(resource);
@@ -95,11 +89,9 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndConceptSet(userId, workspaceId, conceptSet);
     if (resource == null) {
       handleUserLimit(userId);
-      resource = new UserRecentResource();
-      resource.setUserId(userId);
-      resource.setWorkspaceId(workspaceId);
+      resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
       resource.setConceptSet(conceptSet);
-      resource.setNotebookName(null);
+      resource.cohort(null);
     }
     resource.setLastAccessDate(lastAccessDateTime);
     getDao().save(resource);
