@@ -37,13 +37,15 @@
         class="num-participants"
         placeholder="NUMBER OF PARTICIPANTS"
         type="number"
-        min="0" max="maxParticipants">
+        min="0" max="maxParticipants"
+        [attr.disabled]="creating ? '' : null">
     </form>
   </div>
   <div class="modal-footer">
     <button
       type="button"
       class="btn btn-link"
+      [disabled]="creating"
       (click)="cancelReview()">
       Cancel
     </button>
