@@ -259,4 +259,3 @@ public class UserMetricsControllerTest {
     assertEquals(addedEntry.getNotebook().getPath(), "gs://newBucket/notebooks/");
   }
 }
-

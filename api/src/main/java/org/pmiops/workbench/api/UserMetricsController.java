@@ -19,23 +19,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
-  private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
   private Provider<User> userProvider;
   private UserRecentResourceService userRecentResourceService;
   private WorkspaceService workspaceService;
@@ -48,20 +40,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       userRecentResource -> {
         RecentResource resource = new RecentResource();
         resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
-        String notebookName = userRecentResource.getNotebookName();
-        if (notebookName != null && !notebookName.isEmpty()) {
-          try {
-            URI notebookUri = convertToURI(notebookName);
-            Path path = Paths.get(notebookUri.getPath());
-            String fileName = path.getFileName().toString();
-            String filePath = notebookName.replaceFirst(fileName + "$", "");
-            FileDetail fileDetail = new FileDetail().name(fileName).path(filePath);
-            resource.setNotebook(fileDetail);
-          } catch (InvalidPathException | URISyntaxException e) {
-            log.log(Level.SEVERE,
-                String.format("Invalid notebook file path found: %s", notebookName));
-          }
-        }
+        FileDetail fileDetail = convertStringToFileDetail(userRecentResource.getNotebookName());
+        resource.setNotebook(fileDetail);
         resource.setModifiedTime(userRecentResource.getLastAccessDate().toString());
         resource.setWorkspaceId(userRecentResource.getWorkspaceId());
         return resource;
@@ -173,28 +153,14 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return dbWorkspace.getWorkspaceId();
   }
 
-  /**
-   * Utility method to parse a URI from a string that may or may not have spaces in the path.
-   *
-   * @param str The string to convert
-   * @return The converted URI
-   * @throws URISyntaxException The URISyntaxException
-   */
-  private URI convertToURI(String str) throws URISyntaxException {
-    try {
-      return new URI(str);
-    } catch (URISyntaxException e) {
-      // Handle edge case of path with spaces
-      String newStr = str.replace(" ", "%20");
-      URI uri = new URI(newStr);
-      if (uri.getScheme() == null) {
-        throw new URISyntaxException(str, "No scheme in string");
-      }
-      if (uri.getPath() == null) {
-        throw new URISyntaxException(str, "No path in string");
-      }
-      return uri;
+  private FileDetail convertStringToFileDetail(String str) {
+    if (str != null && str.startsWith("gs://")) {
+      int pos = str.lastIndexOf('/') + 1;
+      String fileName = str.substring(pos);
+      String filePath = str.replaceFirst(fileName + "$", "");
+      return new FileDetail().name(fileName).path(filePath);
     }
+    return null;
   }
 
 }
