@@ -3,6 +3,7 @@ import {Injectable} from '@angular/core';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
+import {stripHtml} from '../../utils';
 
 import {
   activeGroupId,
@@ -265,7 +266,14 @@ export class CohortSearchActions {
   fetchAllChildren(node: any): void {
     const kind = node.get('type');
     const id = node.get('id');
-    this.requestAllChildren(this.cdrVersionId, kind, id);
+    if (kind === TreeType[TreeType.DRUG]) {
+      this.requestAllChildren(this.cdrVersionId, kind, id);
+    } else {
+      const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`;
+      const param = node.set('parameterId', paramId);
+      this.addParameter(param);
+      this.selectChildren(kind, id);
+    }
   }
 
   fetchAttributes(node: any): void {
@@ -468,7 +476,7 @@ export class CohortSearchActions {
   mapParameter = (immParam): SearchParameter => {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
-      name: immParam.get('name', ''),
+      name: stripHtml(immParam.get('name', '')),
       value: TreeSubType[TreeSubType.DEC] === immParam.get('subtype')
           ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
