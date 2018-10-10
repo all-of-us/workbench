@@ -242,6 +242,8 @@ public class WorkspacesControllerTest {
   CohortReviewController cohortReviewController;
   @Autowired
   ConceptBigQueryService conceptBigQueryService;
+  @Autowired
+  UserRecentResourceService userRecentResourceService;
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
