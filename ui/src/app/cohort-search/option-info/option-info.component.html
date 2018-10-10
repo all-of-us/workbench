@@ -1,0 +1,12 @@
+<button #button
+  class="dropdown-item"
+  type="button"
+  [class.active]="highlighted"
+  [class.truncated]="isTruncated"
+  [innerHTML]="option.displayName | safeHtml"
+  popper="{{option.displayName}}"
+  [popperTrigger]="'hover'"
+  [popperPlacement]="'auto'"
+  [popperDisabled]="!isTruncated"
+  [popperApplyClass]="'popper-content'">
+</button>
