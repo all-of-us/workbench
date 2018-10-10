@@ -143,7 +143,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                 participantCohortAnnotation.getCohortAnnotationDefinitionId(),
                 participantCohortAnnotation.getParticipantId()) != null) {
             throw new BadRequestException(
-                    String.format("Invalid Request: Cohort annotation definition exists for id: %s",
+                    String.format("Bad Request: Cohort annotation definition exists for id: %s",
                             participantCohortAnnotation.getCohortAnnotationDefinitionId()));
         }
         return participantCohortAnnotationDao.save(participantCohortAnnotation);

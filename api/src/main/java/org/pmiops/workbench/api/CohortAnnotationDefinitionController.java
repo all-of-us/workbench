@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -16,6 +17,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ModifyCohortAnnotationDefinitionRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -119,8 +121,12 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
             throw new ConflictException(String.format("Conflict: Cohort Annotation Definition name exists for: %s",
                     request.getColumnName()));
         }
+        try {
+            cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException(ExceptionUtils.getRootCause(e).getMessage());
+        }
 
-        cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
