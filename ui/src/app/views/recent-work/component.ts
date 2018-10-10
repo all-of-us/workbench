@@ -44,7 +44,7 @@ export class RecentWorkComponent implements OnInit {
 
   calculateSize(el: ElementRef): number {
     const width = el.nativeElement.offsetWidth;
-    return Math.floor((width - 100) / 200) || 1
+    return Math.floor((width - 100) / 200) || 1;
   }
 
   updateList(): void {

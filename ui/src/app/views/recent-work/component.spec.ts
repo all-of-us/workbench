@@ -78,7 +78,8 @@ describe('RecentWorkComponent', () => {
     const cardNames = de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText);
     expect(cardsOnPage.length).toEqual(4);
     // should match LAST 3, and NOT include the "oldest"
-    expect(cardNames).toEqual(['mockFile5.ipynb', 'mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
+    expect(cardNames).toEqual(
+        ['mockFile5.ipynb', 'mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
   }));
 
   // it should not render the component at all if user has no cache
