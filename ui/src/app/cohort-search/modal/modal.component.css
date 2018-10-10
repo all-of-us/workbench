@@ -232,7 +232,6 @@ h6.selection-header {
   }
 }
 
-/* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) and  (min-height: 400px){
   .crit-modal-content {
     position: absolute;
@@ -306,7 +305,7 @@ h6.selection-header {
     background-color: white;
   }
 }
-/* Extra large devices (large laptops and desktops, 1200px and up) */
+
 @media only screen and (min-width: 1300px) and  (min-height: 400px){
   .crit-modal-content {
     position: absolute;
