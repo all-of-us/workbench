@@ -83,8 +83,8 @@ public class UserRecentResource {
   }
 
   public UserRecentResource(long workspaceId, long userId, Timestamp lastAccessDate) {
-    this.workspaceId;
-    this.userId;
+    this.workspaceId = workspaceId;
+    this.userId = userId;
     this.notebookName = null;
     this.lastAccessDate = lastAccessDate;
   }

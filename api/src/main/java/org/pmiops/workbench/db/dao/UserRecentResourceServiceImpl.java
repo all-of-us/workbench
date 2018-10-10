@@ -38,6 +38,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     this.cohortDao = cohortDao;
   }
 
+  @VisibleForTesting
+  public void setConceptSetDao(ConceptSetDao conceptSetDao) { this.conceptSetDao = conceptSetDao; }
 
   @VisibleForTesting
   public int getUserEntryCount() {return USER_ENTRY_COUNT;}
@@ -91,7 +93,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       handleUserLimit(userId);
       resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
       resource.setConceptSet(conceptSet);
-      resource.cohort(null);
+      resource.setCohort(null);
     }
     resource.setLastAccessDate(lastAccessDateTime);
     getDao().save(resource);

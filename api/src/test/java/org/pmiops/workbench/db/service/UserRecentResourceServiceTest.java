@@ -7,11 +7,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
@@ -45,10 +47,13 @@ public class UserRecentResourceServiceTest {
   CohortDao cohortDao;
   @Autowired
   UserRecentResourceDao notebookCohortCacheDao;
+  @Autowired
+  ConceptSetDao conceptSetDao;
 
   private User newUser = new User();
   private Workspace newWorkspace = new Workspace();
   private Long cohortId;
+  private Long conceptSetId;
   private long workspaceId = 1l;
   private long userId = 1l;
   private FakeClock clock;
@@ -63,9 +68,13 @@ public class UserRecentResourceServiceTest {
     Cohort cohort = new Cohort();
     cohort.setWorkspaceId(workspaceId);
     cohortId = cohortDao.save(cohort).getCohortId();
+    ConceptSet conceptSet = new ConceptSet();
+    conceptSet.setWorkspaceId(workspaceId);
+    conceptSetId = conceptSetDao.save(conceptSet).getConceptSetId();
     userRecentResourceService = new UserRecentResourceServiceImpl();
     userRecentResourceService.setDao(notebookCohortCacheDao);
     userRecentResourceService.setCohortDao(cohortDao);
+    userRecentResourceService.setConceptSetDao(conceptSetDao);
     clock = new FakeClock(NOW);
   }
 
@@ -78,6 +87,19 @@ public class UserRecentResourceServiceTest {
     cohort.setWorkspaceId(workspaceId);
     cohortId = cohortDao.save(cohort).getCohortId();
     userRecentResourceService.updateCohortEntry(workspaceId, userId, cohortId, new Timestamp(clock.millis()));
+    rowsCount = userRecentResourceService.getDao().count();
+    assertEquals(rowsCount, 2);
+  }
+
+  @Test
+  public void testInsertConceptSetEntry() {
+    userRecentResourceService.updateConceptSetEntry(workspaceId, userId, conceptSetId, new Timestamp(clock.millis()));
+    long rowsCount = userRecentResourceService.getDao().count();
+    assertEquals(rowsCount, 1);
+    ConceptSet conceptSet = new ConceptSet();
+    conceptSet.setWorkspaceId(workspaceId);
+    conceptSetId = conceptSetDao.save(conceptSet).getConceptSetId();
+    userRecentResourceService.updateConceptSetEntry(workspaceId, userId, conceptSetId, new Timestamp(clock.millis()));
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 2);
   }
@@ -100,6 +122,17 @@ public class UserRecentResourceServiceTest {
     assertEquals(rowsCount, 1);
     clock.increment(20000);
     userRecentResourceService.updateCohortEntry(workspaceId, userId, cohortId, new Timestamp(clock.millis()));
+    rowsCount = userRecentResourceService.getDao().count();
+    assertEquals(rowsCount, 1);
+  }
+
+  @Test
+  public void testUpdateConceptSetAccessTime() {
+    userRecentResourceService.updateConceptSetEntry(workspaceId, userId, conceptSetId, new Timestamp(clock.millis()));
+    long rowsCount = userRecentResourceService.getDao().count();
+    assertEquals(rowsCount, 1);
+    clock.increment(20000);
+    userRecentResourceService.updateConceptSetEntry(workspaceId, userId, conceptSetId, new Timestamp(clock.millis()));
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 1);
   }
