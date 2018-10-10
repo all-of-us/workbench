@@ -24,10 +24,13 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
+  private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
   private Provider<User> userProvider;
   private UserRecentResourceService userRecentResourceService;
   private WorkspaceService workspaceService;
@@ -160,6 +163,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       String filePath = str.replaceFirst(fileName + "$", "");
       return new FileDetail().name(fileName).path(filePath);
     }
+    log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", str));
     return null;
   }
 
