@@ -32,7 +32,6 @@ export class OverviewPage implements OnInit, OnDestroy {
   showTitle = false;
   loading: any;
   domainItems = [];
-  spinner = false;
   selectedCohortName: string;
   review: CohortReview;
   totalParticipantCount: number;
@@ -52,9 +51,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // this.buttonsDisableFlag = true;
     this.selectedCohortName = this.route.parent.snapshot.data.cohort.name;
-    this.spinner = true;
     const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
     this.subscription = this.state.cohort$
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
@@ -62,7 +59,6 @@ export class OverviewPage implements OnInit, OnDestroy {
       .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => {
         this.data = fromJS(data);
-        this.spinner = false;
         this.buttonsDisableFlag = false;
       });
     this.subscription = this.state.review$.subscribe(review => {
@@ -76,12 +72,10 @@ export class OverviewPage implements OnInit, OnDestroy {
 
 
   getDemoCharts () {
-    this.spinner = true;
     this.buttonsDisableFlag = true;
     setTimeout(() => {
        this.demoGraph = true;
       if (this.data.size) {
-        this.spinner = false;
         this.buttonsDisableFlag = false;
       }
     }, 1000);
@@ -103,7 +97,8 @@ export class OverviewPage implements OnInit, OnDestroy {
   fetchChartsData(name) {
 
     this.demoGraph = false;
-    this.spinner = true;
+
+    this.buttonsDisableFlag = true;
     this.showTitle = false;
     const domain = name;
     const limit = 10;
@@ -112,7 +107,6 @@ export class OverviewPage implements OnInit, OnDestroy {
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     if (this.trackClickedDomains) {
       setTimeout(() => {
-        this.spinner = false;
         this.getCharts(name, cid);
       }, 2000);
     } else {
@@ -127,11 +121,11 @@ export class OverviewPage implements OnInit, OnDestroy {
       .select(isChartLoading(name, cid))
       .filter(domain => !!domain)
       .subscribe(loading => {
-        this.buttonsDisableFlag = false;
+        // this.buttonsDisableFlag = false;
         this.loading = loading;
         const totalCount = this.loading.toJS().count;
         if (name === this.domainTitle) {
-          this.spinner = false;
+          this.buttonsDisableFlag = false;
           this.showTitle = true;
           this.domainItems = this.loading.toJS().items;
           this.domainItems.forEach(itemCount => {
