@@ -191,7 +191,7 @@ export class WorkspaceEditComponent implements OnInit {
   researchPurposeItems = ResearchPurposeItems;
   cloneUserRoles = false;
   fillDetailsLater = false;
-  hideDetailsLaterOption = false;
+  hideDetailsLaterOption = true;
   canEditResearchPurpose = true;
   cdrVersions: CdrVersion[] = [];
 
