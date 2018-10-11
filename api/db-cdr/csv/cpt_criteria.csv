@@ -3,53 +3,53 @@
 309996,0,"CPT","","Level 1: 0001M-0010M","Administrative Codes for Multianalyte Assays with Algorithmic Analyses (MAAA)",1,0,"","","",0,""
 309997,0,"CPT","","Level 1: 0001T-0504T","Category III Codes",1,0,"","","",0,""
 309998,309995,"CPT","","Level 2: 0001F-0015F","Composite Measures",1,0,"","","",0,309995
-309999,309996,"CPT","","0001M","Infectious disease, HCV, six biochemical assays (ALT, A2-macroglobulin, apolipoprotein A-1, total bilirubin, GGT, and haptoglobin) utilizing serum, prognostic algorithm reported as scores for fibrosis and necroinflammatory activity in liver",0,1,"","Procedure",46257721,0,309996
-310000,309997,"CPT","","0001T","[EXPIRED]-Endovas repr abdo ao ane",0,1,"","Procedure",42739901,0,309997
-310001,309996,"CPT","","0002M","Liver disease, ten biochemical assays (ALT, A2-macroglobulin, apolipoprotein A-1, total bilirubin, GGT, haptoglobin, AST, glucose, total cholesterol and triglycerides) utilizing serum, prognostic algorithm reported as quantitative scores for fibrosis, steatosis and alcoholic steatohepatitis (ASH)",0,1,"","Procedure",46257430,0,309996
-310002,309997,"CPT","","0002T","[EXPIRED]-Endovas repr abdo ao ane",0,1,"","Procedure",42739902,0,309997
-310003,309996,"CPT","","0003M","Liver disease, ten biochemical assays (ALT, A2-macroglobulin, apolipoprotein A-1, total bilirubin, GGT, haptoglobin, AST, glucose, total cholesterol and triglycerides) utilizing serum, prognostic algorithm reported as quantitative scores for fibrosis, steatosis and nonalcoholic steatohepatitis (NASH)",0,1,"","Procedure",46257483,0,309996
-310004,309996,"CPT","","0004M","Scoliosis, DNA analysis of 53 single nucleotide polymorphisms (SNPs), using saliva, prognostic algorithm reported as a risk score",0,1,"","Procedure",46257537,0,309996
-310005,309997,"CPT","","0005T","[EXPIRED]-Perc cath stent/brain cv",0,1,"","Procedure",42739904,0,309997
-310006,309996,"CPT","","0006M","Oncology (hepatic), mRNA expression levels of 161 genes, utilizing fresh hepatocellular carcinoma tumor tissue, with alpha-fetoprotein level, algorithm reported as a risk classifier",0,1,"","Procedure",46257387,0,309996
-310007,309996,"CPT","","0007M","Oncology (gastrointestinal neuroendocrine tumors), real-time PCR expression analysis of 51 genes, utilizing whole peripheral blood, algorithm reported as a nomogram of tumor disease index",0,1,"","Procedure",46257686,0,309996
-310008,309997,"CPT","","0007T","[EXPIRED]-Perc cath stent/brain cv",0,1,"","Procedure",42739906,0,309997
-310009,309996,"CPT","","0008M","[EXPIRED]-Oncology (breast), mRNA analysis of 58 genes using hybrid capture, on formalin-fixed paraffin-embedded (FFPE) tissue, prognostic algorithm reported as a risk score",0,1,"","Procedure",46257431,0,309996
-310010,309997,"CPT","","0008T","[EXPIRED]-Upper gi endoscopy w/sut",0,1,"","Procedure",42739907,0,309997
-310011,309996,"CPT","","0009M","Fetal aneuploidy (trisomy 21, and 18) DNA sequence analysis of selected regions using maternal plasma, algorithm reported as a risk score for each trisomy",0,1,"","Procedure",42628619,0,309996
-310013,309997,"CPT","","0013T","[EXPIRED]-Osteochondral knee allog",0,1,"","Procedure",42739911,0,309997
-310014,309997,"CPT","","0016T","[EXPIRED]-Destruction of localized lesion of choroid (eg, choroidal neovascularization), transpupillary thermotherapy",0,1,"","Procedure",42739912,0,309997
-310015,309997,"CPT","","0017T","[EXPIRED]-Destruction of macular drusen, photocoagulation",0,1,"","Procedure",42739913,0,309997
-310016,309997,"CPT","","0019T","[EXPIRED]-Extracorporeal shock wave involving musculoskeletal system, not otherwise specified, low energy",0,1,"","Procedure",2100698,0,309997
-310017,309997,"CPT","","0024T","[EXPIRED]-Transcath cardiac reduct",0,1,"","Procedure",42739918,0,309997
-310018,309997,"CPT","","0025T","[EXPIRED]-Ultrasonic pachymetry",0,1,"","Procedure",42739919,0,309997
-310019,309997,"CPT","","0029T","[EXPIRED]-Magnetic tx for incontin",0,1,"","Procedure",42740406,0,309997
-310020,309997,"CPT","","0030T","[EXPIRED]-Antiprothrombin (phospholipid cofactor) antibody, each ig class",0,1,"","Procedure",2100738,0,309997
-310021,309997,"CPT","","0033T","[EXPIRED]-Endovasc taa repr incl s",0,1,"","Procedure",42740410,0,309997
-310022,309997,"CPT","","0034T","[EXPIRED]-Endovasc taa repr w/o su",0,1,"","Procedure",42740411,0,309997
-310023,309997,"CPT","","0035T","[EXPIRED]-Insert endovasc prosth,",0,1,"","Procedure",42740412,0,309997
-310024,309997,"CPT","","0036T","[EXPIRED]-Endovasc prosth, taa, ad",0,1,"","Procedure",42740413,0,309997
-310025,309997,"CPT","","0037T","[EXPIRED]-Artery transpose/endovas",0,1,"","Procedure",42740414,0,309997
-310026,309997,"CPT","","0038T","[EXPIRED]-Rad endovasc taa rpr w/c",0,1,"","Procedure",42740415,0,309997
-310027,309997,"CPT","","0039T","[EXPIRED]-Rad s/i, endovasc taa re",0,1,"","Procedure",42740416,0,309997
-310028,309997,"CPT","","0040T","[EXPIRED]-Rad s/i, endovasc taa pr",0,1,"","Procedure",42740439,0,309997
-310029,309997,"CPT","","0042T","Cerebral perfusion analysis using computed tomography with contrast administration, including post-processing of parametric maps with determination of cerebral blood flow, cerebral blood volume, and mean transit time",0,1,"","Procedure",2100780,0,309997
-310030,309997,"CPT","","0048T","[EXPIRED]-Implantation of a ventricular assist device, extracorporeal, percutaneous transseptal access, single or dual cannulation",0,1,"","Procedure",2100812,0,309997
-310031,309997,"CPT","","0050T","[EXPIRED]-Removal of a ventricular assist device, extracorporeal, percutaneous transseptal access, single or dual cannulation",0,1,"","Procedure",2100815,0,309997
-310032,309997,"CPT","","0051T","[EXPIRED]-Implantation of a total replacement heart system (artificial heart) with recipient cardiectomy",0,1,"","Procedure",2100816,0,309997
-310033,309997,"CPT","","0052T","[EXPIRED]-Replacement or repair of thoracic unit of a total replacement heart system (artificial heart)",0,1,"","Procedure",2100822,0,309997
-310034,309997,"CPT","","0053T","[EXPIRED]-Replacement or repair of implantable component or components of total replacement heart system (artificial heart), excluding thoracic unit",0,1,"","Procedure",2100828,0,309997
-310035,309997,"CPT","","0054T","Computer-assisted musculoskeletal surgical navigational orthopedic procedure, with image-guidance based on fluoroscopic images (List separately in addition to code for primary procedure)",0,1,"","Procedure",2100845,0,309997
-310036,309997,"CPT","","0055T","Computer-assisted musculoskeletal surgical navigational orthopedic procedure, with image-guidance based on CT/MRI images (List separately in addition to code for primary procedure)",0,1,"","Procedure",2100847,0,309997
-310037,309997,"CPT","","0057T","[EXPIRED]-Uppr gi scope w/ thrml t",0,1,"","Procedure",42740600,0,309997
+309999,309996,"CPT","","0001M","Infectious disease, HCV, six biochemical assays (ALT, A2-macroglobulin, apolipoprotein A-1, total bilirubin, GGT, and haptoglobin) utilizing serum, prognostic algorithm reported as scores for fibrosis and necroinflammatory activity in liver",0,1,0,"Procedure",46257721,0,309996
+310000,309997,"CPT","","0001T","[EXPIRED]-Endovas repr abdo ao ane",0,1,0,"Procedure",42739901,0,309997
+310001,309996,"CPT","","0002M","Liver disease, ten biochemical assays (ALT, A2-macroglobulin, apolipoprotein A-1, total bilirubin, GGT, haptoglobin, AST, glucose, total cholesterol and triglycerides) utilizing serum, prognostic algorithm reported as quantitative scores for fibrosis, steatosis and alcoholic steatohepatitis (ASH)",0,1,0,"Procedure",46257430,0,309996
+310002,309997,"CPT","","0002T","[EXPIRED]-Endovas repr abdo ao ane",0,1,0,"Procedure",42739902,0,309997
+310003,309996,"CPT","","0003M","Liver disease, ten biochemical assays (ALT, A2-macroglobulin, apolipoprotein A-1, total bilirubin, GGT, haptoglobin, AST, glucose, total cholesterol and triglycerides) utilizing serum, prognostic algorithm reported as quantitative scores for fibrosis, steatosis and nonalcoholic steatohepatitis (NASH)",0,1,0,"Procedure",46257483,0,309996
+310004,309996,"CPT","","0004M","Scoliosis, DNA analysis of 53 single nucleotide polymorphisms (SNPs), using saliva, prognostic algorithm reported as a risk score",0,1,0,"Procedure",46257537,0,309996
+310005,309997,"CPT","","0005T","[EXPIRED]-Perc cath stent/brain cv",0,1,0,"Procedure",42739904,0,309997
+310006,309996,"CPT","","0006M","Oncology (hepatic), mRNA expression levels of 161 genes, utilizing fresh hepatocellular carcinoma tumor tissue, with alpha-fetoprotein level, algorithm reported as a risk classifier",0,1,0,"Procedure",46257387,0,309996
+310007,309996,"CPT","","0007M","Oncology (gastrointestinal neuroendocrine tumors), real-time PCR expression analysis of 51 genes, utilizing whole peripheral blood, algorithm reported as a nomogram of tumor disease index",0,1,0,"Procedure",46257686,0,309996
+310008,309997,"CPT","","0007T","[EXPIRED]-Perc cath stent/brain cv",0,1,0,"Procedure",42739906,0,309997
+310009,309996,"CPT","","0008M","[EXPIRED]-Oncology (breast), mRNA analysis of 58 genes using hybrid capture, on formalin-fixed paraffin-embedded (FFPE) tissue, prognostic algorithm reported as a risk score",0,1,0,"Procedure",46257431,0,309996
+310010,309997,"CPT","","0008T","[EXPIRED]-Upper gi endoscopy w/sut",0,1,3,"Procedure",42739907,0,309997
+310011,309996,"CPT","","0009M","Fetal aneuploidy (trisomy 21, and 18) DNA sequence analysis of selected regions using maternal plasma, algorithm reported as a risk score for each trisomy",0,1,0,"Procedure",42628619,0,309996
+310013,309997,"CPT","","0013T","[EXPIRED]-Osteochondral knee allog",0,1,0,"Procedure",42739911,0,309997
+310014,309997,"CPT","","0016T","[EXPIRED]-Destruction of localized lesion of choroid (eg, choroidal neovascularization), transpupillary thermotherapy",0,1,0,"Procedure",42739912,0,309997
+310015,309997,"CPT","","0017T","[EXPIRED]-Destruction of macular drusen, photocoagulation",0,1,0,"Procedure",42739913,0,309997
+310016,309997,"CPT","","0019T","[EXPIRED]-Extracorporeal shock wave involving musculoskeletal system, not otherwise specified, low energy",0,1,0,"Procedure",2100698,0,309997
+310017,309997,"CPT","","0024T","[EXPIRED]-Transcath cardiac reduct",0,1,8,"Procedure",42739918,0,309997
+310018,309997,"CPT","","0025T","[EXPIRED]-Ultrasonic pachymetry",0,1,0,"Procedure",42739919,0,309997
+310019,309997,"CPT","","0029T","[EXPIRED]-Magnetic tx for incontin",0,1,0,"Procedure",42740406,0,309997
+310020,309997,"CPT","","0030T","[EXPIRED]-Antiprothrombin (phospholipid cofactor) antibody, each ig class",0,1,14,"Procedure",2100738,0,309997
+310021,309997,"CPT","","0033T","[EXPIRED]-Endovasc taa repr incl s",0,1,3,"Procedure",42740410,0,309997
+310022,309997,"CPT","","0034T","[EXPIRED]-Endovasc taa repr w/o su",0,1,5,"Procedure",42740411,0,309997
+310023,309997,"CPT","","0035T","[EXPIRED]-Insert endovasc prosth,",0,1,2,"Procedure",42740412,0,309997
+310024,309997,"CPT","","0036T","[EXPIRED]-Endovasc prosth, taa, ad",0,1,0,"Procedure",42740413,0,309997
+310025,309997,"CPT","","0037T","[EXPIRED]-Artery transpose/endovas",0,1,1,"Procedure",42740414,0,309997
+310026,309997,"CPT","","0038T","[EXPIRED]-Rad endovasc taa rpr w/c",0,1,3,"Procedure",42740415,0,309997
+310027,309997,"CPT","","0039T","[EXPIRED]-Rad s/i, endovasc taa re",0,1,4,"Procedure",42740416,0,309997
+310028,309997,"CPT","","0040T","[EXPIRED]-Rad s/i, endovasc taa pr",0,1,2,"Procedure",42740439,0,309997
+310029,309997,"CPT","","0042T","Cerebral perfusion analysis using computed tomography with contrast administration, including post-processing of parametric maps with determination of cerebral blood flow, cerebral blood volume, and mean transit time",0,1,1394,"Procedure",2100780,0,309997
+310030,309997,"CPT","","0048T","[EXPIRED]-Implantation of a ventricular assist device, extracorporeal, percutaneous transseptal access, single or dual cannulation",0,1,53,"Procedure",2100812,0,309997
+310031,309997,"CPT","","0050T","[EXPIRED]-Removal of a ventricular assist device, extracorporeal, percutaneous transseptal access, single or dual cannulation",0,1,4,"Procedure",2100815,0,309997
+310032,309997,"CPT","","0051T","[EXPIRED]-Implantation of a total replacement heart system (artificial heart) with recipient cardiectomy",0,1,0,"Procedure",2100816,0,309997
+310033,309997,"CPT","","0052T","[EXPIRED]-Replacement or repair of thoracic unit of a total replacement heart system (artificial heart)",0,1,0,"Procedure",2100822,0,309997
+310034,309997,"CPT","","0053T","[EXPIRED]-Replacement or repair of implantable component or components of total replacement heart system (artificial heart), excluding thoracic unit",0,1,0,"Procedure",2100828,0,309997
+310035,309997,"CPT","","0054T","Computer-assisted musculoskeletal surgical navigational orthopedic procedure, with image-guidance based on fluoroscopic images (List separately in addition to code for primary procedure)",0,1,7,"Procedure",2100845,0,309997
+310036,309997,"CPT","","0055T","Computer-assisted musculoskeletal surgical navigational orthopedic procedure, with image-guidance based on CT/MRI images (List separately in addition to code for primary procedure)",0,1,0,"Procedure",2100847,0,309997
+310037,309997,"CPT","","0057T","[EXPIRED]-Uppr gi scope w/ thrml t",0,1,0,"Procedure",42740600,0,309997
 310038,309997,"CPT","","Level 2: 0058T-0357T","Cryopreservation",1,0,"","","",0,309997
-310039,309997,"CPT","","0062T","[EXPIRED]-Percutaneous intradiscal annuloplasty, any method except electrothermal, unilateral or bilateral including fluoroscopic guidance; single level",0,1,"","Procedure",42740709,0,309997
-310040,309997,"CPT","","0063T","[EXPIRED]-Percutaneous intradiscal annuloplasty, any method except electrothermal, unilateral or bilateral including fluoroscopic guidance; 1 or more additional levels (list separately in addition to 0062t for primary procedure)",0,1,"","Procedure",42740710,0,309997
-310041,309997,"CPT","","0064T","[EXPIRED]-Spectroscopy, expired gas analysis (eg, nitric oxide/carbon dioxide test)",0,1,"","Procedure",42740711,0,309997
-310042,309997,"CPT","","0066T","[EXPIRED]-Computed tomographic (ct) colonography (ie, virtual colonoscopy); screening",0,1,"","Procedure",42740713,0,309997
-310043,309997,"CPT","","0067T","[EXPIRED]-Computed tomographic (ct) colonography (ie, virtual colonoscopy); diagnostic",0,1,"","Procedure",42740714,0,309997
-310044,309997,"CPT","","0068T","[EXPIRED]-Acoustic heart sound recording and computer analysis; with interpretation and report",0,1,"","Procedure",42740715,0,309997
-310045,309997,"CPT","","0069T","[EXPIRED]-Acoustic heart sound recording and computer analysis; acoustic heart sound recording and computer analysis only",0,1,"","Procedure",42740716,0,309997
-310046,309997,"CPT","","0070T","[EXPIRED]-Acoustic heart sound recording and computer analysis; interpretation and report only",0,1,"","Procedure",42740717,0,309997
+310039,309997,"CPT","","0062T","[EXPIRED]-Percutaneous intradiscal annuloplasty, any method except electrothermal, unilateral or bilateral including fluoroscopic guidance; single level",0,1,0,"Procedure",42740709,0,309997
+310040,309997,"CPT","","0063T","[EXPIRED]-Percutaneous intradiscal annuloplasty, any method except electrothermal, unilateral or bilateral including fluoroscopic guidance; 1 or more additional levels (list separately in addition to 0062t for primary procedure)",0,1,0,"Procedure",42740710,0,309997
+310041,309997,"CPT","","0064T","[EXPIRED]-Spectroscopy, expired gas analysis (eg, nitric oxide/carbon dioxide test)",0,1,0,"Procedure",42740711,0,309997
+310042,309997,"CPT","","0066T","[EXPIRED]-Computed tomographic (ct) colonography (ie, virtual colonoscopy); screening",0,1,0,"Procedure",42740713,0,309997
+310043,309997,"CPT","","0067T","[EXPIRED]-Computed tomographic (ct) colonography (ie, virtual colonoscopy); diagnostic",0,1,0,"Procedure",42740714,0,309997
+310044,309997,"CPT","","0068T","[EXPIRED]-Acoustic heart sound recording and computer analysis; with interpretation and report",0,1,0,"Procedure",42740715,0,309997
+310045,309997,"CPT","","0069T","[EXPIRED]-Acoustic heart sound recording and computer analysis; acoustic heart sound recording and computer analysis only",0,1,0,"Procedure",42740716,0,309997
+310046,309997,"CPT","","0070T","[EXPIRED]-Acoustic heart sound recording and computer analysis; interpretation and report only",0,1,0,"Procedure",42740717,0,309997
 310047,309997,"CPT","","Level 2: 0071T-0072T","Focused ultrasound ablation of uterine leiomyomata, including MR guidance",1,0,"","","",0,309997
 310048,309997,"CPT","","0073T","[EXPIRED]-Compensator-based beam modulation treatment delivery of inverse planned treatment using 3 or more high resolution (milled or cast) compensator convergent beam modulated fields, per treatment session",0,1,"","Procedure",2100937,0,309997
 310049,309997,"CPT","","Level 2: 0075T-0076T","Transcatheter placement of extracranial vertebral artery stent(s), including radiologic supervision and interpretation, open or percutaneous",1,0,"","","",0,309997
