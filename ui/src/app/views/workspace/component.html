@@ -4,39 +4,41 @@
   <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times-circle" size="32px" style="position: absolute; right: 1rem; width: 32px; margin-top: .3rem"></clr-icon></div>
 </div>
 <div class="workspace-container">
-  <div class="main-body">
-    <div style="display: flex; flex-direction: row">
-      <h2 class="greeting" style="width: 200px">Actions</h2>
-      <h2 class="greeting" style="padding-left: 10%; margin-left:2rem">Recently Modified</h2>
-    </div>
-    <div style="display: flex; flex-direction: row; align-items: center">
-      <div style="width: 200px;">
-        <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
-          <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
-          <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
-            <div class="create-text">
-              Create a <br/>New Cohort
-              <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+  <app-top-box style="width: 78%">
+    <div class="padding-wrapper">
+      <div class="main-body">
+        <div style="display: flex; flex-direction: row">
+          <h2 class="greeting" style="width: 200px; padding-left: .5%">Actions</h2>
+          <h2 class="greeting" style="padding-left: 10%; margin-left:2rem">Recently Modified</h2>
+        </div>
+        <div style="display: flex; flex-direction: row; align-items: center">
+          <div style="width: 200px;">
+            <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+              <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
+              <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
+                <div class="create-text">
+                  Create a <br/>New Cohort
+                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+                </div>
+              </div>
+            </div>
+            <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+              <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
+              <div class="card add-card" [ngClass]="{'disabled' : !writePermission }" style="margin-top: 13px;" (click)="!writePermission || newNotebook()">
+                <div class="create-text">
+                  Create a<br/>New Notebook
+                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
-          <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
-          <div class="card add-card" [ngClass]="{'disabled' : !writePermission }" style="margin-top: 13px;" (click)="!writePermission || newNotebook()">
-            <div class="create-text">
-              Create a<br/>New Notebook
-              <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
-            </div>
+          <div style="padding-left: 10%">
+            <app-recent-work [workspace]="workspace"></app-recent-work>
           </div>
         </div>
-      </div>
-      <div style="padding-left: 10%">
-        <app-recent-work [workspace]="workspace"></app-recent-work>
-      </div>
-    </div>
-    <div style="padding-top: 1rem;">
-      <h4 class="subheader">Research Purpose
-        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
+        <div style="padding-top: 1rem;">
+          <h4 class="subheader">Research Purpose
+            <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
           <button [disabled]="!writePermission"
                   [class.disabled]="!writePermission"
                   routerLink="/workspaces/{{workspace.namespace}}/{{workspace.id}}/edit"
@@ -45,24 +47,26 @@
           </button>
           <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
         </span>
-      </h4>
-      <div class="description-text">
-        {{workspace.description}}
-      </div>
-      <div class="research-purpose-items">
-        <div class="column">
-          <div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">
-            {{researchPurposeDescription}}
+          </h4>
+          <div class="description-text">
+            {{workspace.description}}
           </div>
-        </div>
-        <div class="column">
-          <div class="research-purpose-item" *ngFor="let researchPurposeDescription of rightResearchPurposes">
-            {{researchPurposeDescription}}
+          <div class="research-purpose-items">
+            <div class="column">
+              <div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">
+                {{researchPurposeDescription}}
+              </div>
+            </div>
+            <div class="column">
+              <div class="research-purpose-item" *ngFor="let researchPurposeDescription of rightResearchPurposes">
+                {{researchPurposeDescription}}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </app-top-box>
   <div class="right-sidebar">
     <div>
       <h6 class="collaborator-text">Collaborators:</h6>

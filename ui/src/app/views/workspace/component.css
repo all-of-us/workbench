@@ -183,3 +183,7 @@ app-workspace-nav-bar {
 .action-item.disabled {
   outline: none;
 }
+
+.padding-wrapper {
+  padding-left: 1rem;
+}
