@@ -158,15 +158,18 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   private FileDetail convertStringToFileDetail(String str) {
-    if (str != null && str.startsWith("gs://")) {
-      int pos = str.lastIndexOf('/') + 1;
-      String fileName = str.substring(pos);
-      String replacement = Matcher.quoteReplacement(fileName) + "$";
-      String filePath = str.replaceFirst(replacement, "");
-      return new FileDetail().name(fileName).path(filePath);
+    if (str == null) {
+      return null;
     }
-    log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", str));
-    return null;
+    if (!str.startsWith("gs://")) {
+      log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", str));
+      return null;
+    }
+    int pos = str.lastIndexOf('/') + 1;
+    String fileName = str.substring(pos);
+    String replacement = Matcher.quoteReplacement(fileName) + "$";
+    String filePath = str.replaceFirst(replacement, "");
+    return new FileDetail().name(fileName).path(filePath);
   }
 
 }
