@@ -25,9 +25,9 @@ tags:
 
 security:
   - googleoauth:
-      - openid
-      - email
-      - profile
+    - openid
+    - email
+    - profile
 
 securityDefinitions:
   googleoauth:
@@ -115,9 +115,9 @@ paths:
             $ref: '#/definitions/ErrorReport'
       security:
         - googleoauth:
-            - openid
-            - email
-            - profile
+          - openid
+          - email
+          - profile
 
   '/api/cluster/{googleProject}/{clusterName}':
     get:
@@ -152,9 +152,9 @@ paths:
             $ref: '#/definitions/ErrorReport'
       security:
         - googleoauth:
-            - openid
-            - email
-            - profile
+          - openid
+          - email
+          - profile
     delete:
       summary: Deletes an existing Dataproc cluster in the given project
       description: deletes a Dataproc cluster
@@ -230,9 +230,9 @@ paths:
             $ref: '#/definitions/ErrorReport'
       security:
         - googleoauth:
-            - openid
-            - email
-            - profile
+          - openid
+          - email
+          - profile
 
 
   '/api/cluster/{googleProject}/{clusterName}/stop':
