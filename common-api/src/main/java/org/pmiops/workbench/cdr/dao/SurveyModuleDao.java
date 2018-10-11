@@ -23,8 +23,8 @@ public interface SurveyModuleDao extends CrudRepository<SurveyModule, Long> {
       "where r.analysis_id = 3110\n" +
       // Because we're using a native query we use MySQL match() here directly instead of matchConcept()
       // TODO: add AchillesResults entity, replace this with JQL
-      "and ((match(c.concept_name, c.concept_code, c.vocabulary_id, c.synonyms) against (?1 in boolean mode) > 0) or\n" +
-      "(match(r.stratum_4) against(?1 in boolean mode) > 0))\n" +
+      "and (match(c.concept_name, c.concept_code, c.vocabulary_id, c.synonyms) against (?1 in boolean mode) > 0 or\n" +
+      "match(r.stratum_4) against(?1 in boolean mode) > 0)\n" +
       "group by m.name, m.description, m.concept_id\n" +
       "order by m.name")
   List<SurveyModule> findSurveyModuleQuestionCounts(String matchExpression);

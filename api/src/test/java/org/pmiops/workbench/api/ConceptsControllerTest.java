@@ -100,7 +100,7 @@ public class ConceptsControllerTest {
           .standardConcept(true)
           .conceptCode("conceptD")
           .conceptClassId("classId4")
-          .vocabularyId("V4")
+          .vocabularyId("V456")
           .domainId("Observation")
           .countValue(1250L)
           .prevalence(0.5F)
@@ -423,8 +423,17 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsConceptIdMatch() throws Exception {
     saveConcepts();
+    // ID matching currently includes substrings.
     assertResults(conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("123")), CLIENT_CONCEPT_1);
+        new SearchConceptsRequest().query("123")), CLIENT_CONCEPT_4, CLIENT_CONCEPT_1);
+  }
+
+
+  @Test
+  public void testSearchConceptsVocabIdMatch() throws Exception {
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("V456")), CLIENT_CONCEPT_4);
   }
 
   @Test
@@ -684,6 +693,7 @@ public class ConceptsControllerTest {
     result.setCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
     result.setSynonyms(new ArrayList<ConceptSynonym>());
+    result.setSynonymsStr(String.valueOf(concept.getConceptId()) + '|' + concept.getConceptName());
     return result;
   }
 

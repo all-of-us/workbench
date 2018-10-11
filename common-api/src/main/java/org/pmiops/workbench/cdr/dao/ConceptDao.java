@@ -53,7 +53,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
      */
     @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
         "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-        "(matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0) and\n" +
+        "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
         "c.standardConcept IN ('S', 'C') and\n" +
         "c.domainId = ?2\n" +
         "group by c.vocabularyId\n" +
@@ -70,7 +70,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
      */
     @Query(value = "select c.vocabularyId as vocabularyId, count(*) as conceptCount from Concept c\n" +
         "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-        "(matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0) and\n" +
+        "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
         "c.domainId = ?2\n" +
         "group by c.vocabularyId\n" +
         "order by c.vocabularyId\n")

@@ -24,7 +24,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
       "from DomainInfo d\n" +
       "join Concept c ON d.domainId = c.domainId\n" +
       "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-      "(matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0) and\n" +
+      "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
       "(c.standardConcept IN ('S', 'C') or c.conceptId = ?3 or c.conceptCode = ?2)\n" +
       "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n" +
       "order by d.domainId")
@@ -43,7 +43,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
       "from DomainInfo d\n" +
       "join Concept c ON d.domainId = c.domainId\n" +
       "where (c.countValue > 0 or c.sourceCountValue > 0) \n" +
-      "and (matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0) and\n" +
+      "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
       "c.standardConcept IN ('S', 'C')\n" +
       "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n" +
       "order by d.domainId")
@@ -62,7 +62,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
       "from DomainInfo d\n" +
       "join Concept c ON d.domainId = c.domainId\n" +
       "where (c.countValue > 0 or c.sourceCountValue > 0) \n" +
-      "and (matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0)\n" +
+      "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0\n" +
       "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n" +
       "order by d.domainId")
   List<DomainInfo> findAllMatchConceptCounts(String matchExpression);

@@ -653,6 +653,8 @@ public class DataBrowserControllerTest {
         result.setSourceCountValue(concept.getSourceCountValue());
         result.setPrevalence(concept.getPrevalence());
         result.setSynonyms(concept.getSynonyms());
+        result.setSynonymsStr(
+            String.valueOf(concept.getConceptId()) + '|' + concept.getConceptName());
         return result;
     }
 

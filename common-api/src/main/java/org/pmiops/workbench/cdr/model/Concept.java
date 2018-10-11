@@ -41,7 +41,8 @@ public class Concept {
                 .count(a.getCountValue())
                 .sourceCountValue(a.getSourceCountValue())
                 .prevalence(a.getPrevalence())
-                .synonyms(new ArrayList<>());
+                .synonyms(new ArrayList<>())
+                .synonymsStr(a.getSynonymsStr());
     }
 
     @Id
