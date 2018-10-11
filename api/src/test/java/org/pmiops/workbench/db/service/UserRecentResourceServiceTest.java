@@ -176,6 +176,9 @@ public class UserRecentResourceServiceTest {
     assertNull(cache);
   }
 
+//  We do test notebook deletion because it is a path reference
+//  We do not test cohort or concept deletion because these are fk refs with
+//  on delete cascade rule in place (no need to test db functionality)
   @Test
   public void testDeleteNotebookEntry() {
     userRecentResourceService.updateNotebookEntry(workspaceId, userId, "gs://someDirectory1/notebooks/notebook1", new Timestamp(clock.millis()));
