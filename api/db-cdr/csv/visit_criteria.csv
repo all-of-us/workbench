@@ -1,7 +1,89 @@
 "id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","path"
-325387,0,"VISIT","","","Emergency Room Visit",1,1,501263,"Visit",9203,0,""
-325389,0,"VISIT","","","Inpatient Visit",1,1,432068,"Visit",9201,0,""
-325392,0,"VISIT","","","Outpatient Visit",1,1,1763346,"Visit",9202,0,""
-325399,325387,"VISIT","","","Emergency Room Visit",0,1,501263,"Visit",9203,0,325387
-325400,325389,"VISIT","","","Inpatient Visit",0,1,432068,"Visit",9201,0,325389
-325403,325392,"VISIT","","","Outpatient Visit",0,1,1763346,"Visit",9202,0,325392
+3273044,0,"VISIT","","","Emergency Room Visit",1,1,"","Visit",9203,0,""
+3273045,0,"VISIT","","","Emergency Room and Inpatient Visit",0,1,"","Visit",262,0,""
+3273046,0,"VISIT","","","Inpatient Visit",1,1,"","Visit",9201,0,""
+3273047,0,"VISIT","","","Intensive Care",1,1,"","Visit",32037,0,""
+3273048,0,"VISIT","","","Long Term Care Visit",1,1,"","Visit",42898160,0,""
+3273049,0,"VISIT","","","Outpatient Visit",1,1,"","Visit",9202,0,""
+3273050,0,"VISIT","","","Pharmacy visit",1,1,"","Visit",581458,0,""
+3273051,0,"VISIT","","","Rehabilitation Visit",1,1,"","Visit",581479,0,""
+3273052,3273049,"VISIT","","","Ambulance Visit",1,1,"","Visit",581478,0,3273049
+3273053,3273049,"VISIT","","","Home Visit",1,1,"","Visit",581476,0,3273049
+3273054,3273049,"VISIT","","","Laboratory Visit",1,1,"","Visit",32036,0,3273049
+3273055,3273049,"VISIT","","","Office Visit",1,1,"","Visit",581477,0,3273049
+3273056,3273044,"VISIT","","","Emergency Room Visit",0,1,"","Visit",9203,0,3273044
+3273057,3273046,"VISIT","","","Inpatient Visit",0,1,"","Visit",9201,0,3273046
+3273058,3273047,"VISIT","","","Intensive Care",0,1,"","Visit",32037,0,3273047
+3273059,3273048,"VISIT","","","Long Term Care Visit",0,1,"","Visit",42898160,0,3273048
+3273060,3273049,"VISIT","","","Outpatient Visit",0,1,"","Visit",9202,0,3273049
+3273061,3273050,"VISIT","","","Pharmacy visit",0,1,"","Visit",581458,0,3273050
+3273062,3273051,"VISIT","","","Rehabilitation Visit",0,1,"","Visit",581479,0,3273051
+3273063,3273052,"VISIT","","","Ambulance Visit",0,1,"","Visit",581478,0,3273049.3273052
+3273064,3273053,"VISIT","","","Home Visit",0,1,"","Visit",581476,0,3273049.3273053
+3273065,3273054,"VISIT","","","Laboratory Visit",0,1,"","Visit",32036,0,3273049.3273054
+3273066,3273055,"VISIT","","","Office Visit",0,1,"","Visit",581477,0,3273049.3273055
+3273067,3273053,"VISIT","","","Adult Living Care Facility",0,1,"","Visit",8882,0,3273049.3273053
+3273068,3273052,"VISIT","","","Ambulance - Air or Water",0,1,"","Visit",8850,0,3273049.3273052
+3273069,3273052,"VISIT","","","Ambulance - Land",0,1,"","Visit",8668,0,3273049.3273052
+3273070,3273049,"VISIT","","","Ambulatory Surgical Center",0,1,"","Visit",8883,0,3273049
+3273071,3273053,"VISIT","","","Assisted Living Facility",0,1,"","Visit",8615,0,3273049.3273053
+3273072,3273049,"VISIT","","","Birthing Center",0,1,"","Visit",8650,0,3273049
+3273073,3273049,"VISIT","","","Community Mental Health Center",0,1,"","Visit",8964,0,3273049
+3273074,3273046,"VISIT","","","Comprehensive Inpatient Rehabilitation Facility",0,1,"","Visit",8920,0,3273046
+3273075,3273051,"VISIT","","","Comprehensive Inpatient Rehabilitation Facility",0,1,"","Visit",8920,0,3273051
+3273076,3273049,"VISIT","","","Comprehensive Outpatient Rehabilitation Facility",0,1,"","Visit",8947,0,3273049
+3273077,3273051,"VISIT","","","Comprehensive Outpatient Rehabilitation Facility",0,1,"","Visit",8947,0,3273051
+3273078,3273053,"VISIT","","","Custodial Care Facility",0,1,"","Visit",8827,0,3273049.3273053
+3273079,3273044,"VISIT","","","Emergency Room - Hospital",0,1,"","Visit",8870,0,3273044
+3273080,3273047,"VISIT","","","Emergency Room Critical Care Facility",0,1,"","Visit",581381,0,3273047
+3273081,3273044,"VISIT","","","Emergency Room Critical Care Facility",0,1,"","Visit",581381,0,3273044
+3273082,3273049,"VISIT","","","End-Stage Renal Disease Treatment Facility",0,1,"","Visit",8949,0,3273049
+3273083,3273055,"VISIT","","","Federally Qualified Health Center",0,1,"","Visit",8966,0,3273049.3273055
+3273084,3273053,"VISIT","","","Group Home",0,1,"","Visit",8851,0,3273049.3273053
+3273085,3273053,"VISIT","","","Home",0,1,"","Visit",8536,0,3273049.3273053
+3273086,3273053,"VISIT","","","Homeless Shelter",0,1,"","Visit",8672,0,3273049.3273053
+3273087,3273049,"VISIT","","","Hospice",0,1,"","Visit",8546,0,3273049
+3273088,3273055,"VISIT","","","Independent Clinic",0,1,"","Visit",8716,0,3273049.3273055
+3273089,3273054,"VISIT","","","Independent Laboratory",0,1,"","Visit",8809,0,3273049.3273054
+3273090,3273049,"VISIT","","","Indian Health Service Free-standing Facility",0,1,"","Visit",8968,0,3273049
+3273091,3273049,"VISIT","","","Indian Health Service Provider-based Facility",0,1,"","Visit",8969,0,3273049
+3273092,3273046,"VISIT","","","Inpatient Cardiac Care Facility",0,1,"","Visit",581383,0,3273046
+3273093,3273047,"VISIT","","","Inpatient Cardiac Care Facility",0,1,"","Visit",581383,0,3273047
+3273094,3273046,"VISIT","","","Inpatient Critical Care Facility",0,1,"","Visit",581379,0,3273046
+3273095,3273047,"VISIT","","","Inpatient Critical Care Facility",0,1,"","Visit",581379,0,3273047
+3273096,3273046,"VISIT","","","Inpatient Hospital",0,1,"","Visit",8717,0,3273046
+3273097,3273047,"VISIT","","","Inpatient Intensive Care Facility",0,1,"","Visit",581382,0,3273047
+3273098,3273046,"VISIT","","","Inpatient Intensive Care Facility",0,1,"","Visit",581382,0,3273046
+3273099,3273048,"VISIT","","","Inpatient Long-term Care",0,1,"","Visit",8970,0,3273048
+3273100,3273046,"VISIT","","","Inpatient Long-term Care",0,1,"","Visit",8970,0,3273046
+3273101,3273046,"VISIT","","","Inpatient Nursery",0,1,"","Visit",581384,0,3273046
+3273102,3273046,"VISIT","","","Inpatient Psychiatric Facility",0,1,"","Visit",8971,0,3273046
+3273103,3273049,"VISIT","","","Intermediate Care Facility/Mentally Retarded",0,1,"","Visit",8951,0,3273049
+3273104,3273055,"VISIT","","","Mass Immunization Center",0,1,"","Visit",8858,0,3273049.3273055
+3273105,3273049,"VISIT","","","Military Treatment Facility",0,1,"","Visit",8905,0,3273049
+3273106,3273049,"VISIT","","","Mobile Unit",0,1,"","Visit",8584,0,3273049
+3273107,3273049,"VISIT","","","Non-residential Substance Abuse Treatment Facility",0,1,"","Visit",8974,0,3273049
+3273108,3273053,"VISIT","","","Nursing Facility",0,1,"","Visit",8676,0,3273049.3273053
+3273109,3273049,"VISIT","","","Observation Room",0,1,"","Visit",581385,0,3273049
+3273110,3273049,"VISIT","","","Off Campus-Outpatient Hospital",0,1,"","Visit",5084,0,3273049
+3273111,3273055,"VISIT","","","Office",0,1,"","Visit",8940,0,3273049.3273055
+3273112,3273046,"VISIT","","","Other Inpatient Care",0,1,"","Visit",8892,0,3273046
+3273113,3273049,"VISIT","","","Outpatient Critical Care Facility",0,1,"","Visit",581380,0,3273049
+3273114,3273047,"VISIT","","","Outpatient Critical Care Facility",0,1,"","Visit",581380,0,3273047
+3273115,3273049,"VISIT","","","Outpatient Hospital",0,1,"","Visit",8756,0,3273049
+3273116,3273049,"VISIT","","","Outpatient NEC",0,1,"","Visit",8677,0,3273049
+3273117,3273050,"VISIT","","","Pharmacy",0,1,"","Visit",8562,0,3273050
+3273118,3273053,"VISIT","","","Place of Employment-Worksite",0,1,"","Visit",581475,0,3273049.3273053
+3273119,3273049,"VISIT","","","Prison/Correctional Facility",0,1,"","Visit",38003619,0,3273049
+3273120,3273049,"VISIT","","","Psychiatric Facility-Partial Hospitalization",0,1,"","Visit",8913,0,3273049
+3273121,3273049,"VISIT","","","Psychiatric Residential Treatment Center",0,1,"","Visit",8976,0,3273049
+3273122,3273055,"VISIT","","","Public Health Clinic",0,1,"","Visit",8977,0,3273049.3273055
+3273123,3273053,"VISIT","","","Residential Substance Abuse Treatment Facility",0,1,"","Visit",8957,0,3273049.3273053
+3273124,3273055,"VISIT","","","Rural Health Clinic",0,1,"","Visit",8761,0,3273049.3273055
+3273125,3273053,"VISIT","","","School",0,1,"","Visit",8537,0,3273049.3273053
+3273126,3273046,"VISIT","","","Skilled Nursing Facility",0,1,"","Visit",8863,0,3273046
+3273127,3273053,"VISIT","","","Temporary Lodging",0,1,"","Visit",8602,0,3273049.3273053
+3273128,3273049,"VISIT","","","Tribal 638 Free-standing Facility",0,1,"","Visit",8941,0,3273049
+3273129,3273049,"VISIT","","","Tribal 638 Provider-based Facility",0,1,"","Visit",8960,0,3273049
+3273130,3273055,"VISIT","","","Urgent Care Facility",0,1,"","Visit",8782,0,3273049.3273055
+3273131,3273055,"VISIT","","","Walk-in Retail Health Clinic",0,1,"","Visit",38003620,0,3273049.3273055
