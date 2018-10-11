@@ -16,6 +16,7 @@ import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {CohortSearchActions} from '../../cohort-search/redux';
 import {AnnotationItemComponent} from '../annotation-item/annotation-item.component';
 import {AnnotationListComponent} from '../annotation-list/annotation-list.component';
+import {CreateReviewPage} from '../create-review-page/create-review-page';
 import {DetailAllEventsComponent} from '../detail-all-events/detail-all-events.component';
 import {DetailHeaderComponent} from '../detail-header/detail-header.component';
 import {DetailTabTableComponent} from '../detail-tab-table/detail-tab-table.component';
@@ -74,6 +75,7 @@ describe('DetailPage', () => {
       declarations: [
         AnnotationItemComponent,
         AnnotationListComponent,
+        CreateReviewPage,
         DetailAllEventsComponent,
         DetailHeaderComponent,
         DetailPage,

@@ -3,6 +3,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {Observable} from 'rxjs/Observable';
+import {CreateReviewPage} from '../create-review-page/create-review-page';
 import {Participant} from '../participant.model';
 import {ParticipantStatusComponent} from './participant-status.component';
 
@@ -46,8 +47,8 @@ describe('ParticipantStatusComponent', () => {
 
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
+      declarations: [CreateReviewPage, ParticipantStatusComponent],
       imports: [ReactiveFormsModule, ClarityModule],
-      declarations: [ParticipantStatusComponent],
       providers: [
         {provide: ReviewStateService, useClass: ReviewStateService},
         {provide: CohortReviewService, useValue: new ApiSpy()},

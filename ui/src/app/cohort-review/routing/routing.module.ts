@@ -35,10 +35,6 @@ const routes: Routes = [{
       breadcrumb: 'Create a New Cohort Review',
     },
   }, {
-    path: '',
-    redirectTo: 'participants',
-    pathMatch: 'full',
-  }, {
     path: 'participants',
     component: TablePage,
       resolve: {
