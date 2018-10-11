@@ -319,10 +319,10 @@ export const rootReducer: Reducer<CohortSearchState> =
               items: [],
               count: null,
               temporal: false,
-              mention: "",
-              time: "",
+              mention: '',
+              time: '',
               timeValue: 0,
-              timeFrame: "",
+              timeFrame: '',
               isRequesting: false
             })
           )
