@@ -450,7 +450,7 @@ export class WorkspaceEditComponent implements OnInit {
     if (this.savingWorkspace) {
       return false;
     }
-    return this.isValidWorkspace || this.fillDetailsLater;
+    return this.isValidWorkspace;
   }
 
   openStigmatizationLink() {
