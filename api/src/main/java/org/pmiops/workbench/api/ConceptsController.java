@@ -97,9 +97,9 @@ public class ConceptsController implements ConceptsApiDelegate {
       domainInfos = allDomainInfos;
     } else {
       if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
-        domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp, request.getQuery(), conceptId);
+        domainInfos = domainInfoDao.findAllMatchConceptCounts(matchExp);
       } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
-        domainInfos = domainInfoDao.findStandardConceptCounts(matchExp, request.getQuery(), conceptId);
+        domainInfos = domainInfoDao.findStandardConceptCounts(matchExp);
       } else {
         return;
       }
@@ -130,16 +130,14 @@ public class ConceptsController implements ConceptsApiDelegate {
       if (matchExp == null) {
         vocabularyCounts = conceptDao.findVocabularyAllConceptCountsInDomain(domainId);
       } else {
-        vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, request.getQuery(),
-            conceptId, domainId);
+        vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, domainId);
       }
     } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
       if (matchExp == null) {
         vocabularyCounts = conceptDao.findVocabularyStandardConceptCountsInDomain(domainId);
       } else {
         vocabularyCounts = conceptDao
-            .findVocabularyStandardConceptCounts(matchExp, request.getQuery(),
-                conceptId, domainId);
+            .findVocabularyStandardConceptCounts(matchExp, domainId);
       }
     } else {
       return;

@@ -14,6 +14,8 @@ public class MySQLDialect extends org.hibernate.dialect.MySQL57InnoDBDialect {
     registerFunction("match", new SQLFunctionTemplate(StandardBasicTypes.DOUBLE,
         "match(?1) against  (?2 in boolean mode)"));
 
+    registerFunction("matchConcept", new SQLFunctionTemplate(StandardBasicTypes.DOUBLE,
+        "match(concept_name, concept_code, vocabulary_id, synonyms) against (?1 in boolean mode)"));
   }
 
 }
