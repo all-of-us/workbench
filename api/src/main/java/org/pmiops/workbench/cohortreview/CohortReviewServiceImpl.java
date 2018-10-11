@@ -238,7 +238,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
                 Date date = new Date(sdf.parse(participantCohortAnnotation.getAnnotationValueDateString()).getTime());
                 participantCohortAnnotation.setAnnotationValueDate(date);
             } catch (ParseException e) {
-                throw new BadRequestException(String.format("Invalid Request: Please provide a valid %s value (%s) for annotation defintion id: %s",
+                throw new BadRequestException(String.format("Bad Request: Please provide a valid %s value (%s) for annotation defintion id: %s",
                         AnnotationType.DATE.name(),
                         sdf.toPattern(),
                         participantCohortAnnotation.getCohortAnnotationDefinitionId()));
@@ -270,7 +270,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
      */
     private BadRequestException createBadRequestException(String annotationType, Long cohortAnnotationDefinitionId) {
         return new BadRequestException(
-                String.format("Invalid Request: Please provide a valid %s value for annotation defintion id: %s", annotationType, cohortAnnotationDefinitionId)
+                String.format("Bad Request: Please provide a valid %s value for annotation defintion id: %s", annotationType, cohortAnnotationDefinitionId)
         );
     }
 }
