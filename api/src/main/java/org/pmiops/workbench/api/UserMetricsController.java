@@ -97,7 +97,16 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   public ResponseEntity<RecentResource> updateRecentResource(String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
-    UserRecentResource recentResource = userRecentResourceService.updateNotebookEntry(wId, userProvider.get().getUserId(), recentResourceRequest.getNotebookName(), now);
+    String notebookPath =  new String();
+    if (recentResourceRequest.getNotebookName().startsWith("gs://")) {
+      notebookPath = recentResourceRequest.getNotebookName();
+    } else {
+      String bucket = fireCloudService.getWorkspace(workspaceNamespace, workspaceId)
+      .getWorkspace()
+      .getBucketName();
+      notebookPath = "gs://" + bucket + "/notebooks/" + recentResourceRequest.getNotebookName();
+    }
+    UserRecentResource recentResource = userRecentResourceService.updateNotebookEntry(wId, userProvider.get().getUserId(), notebookPath, now);
     return ResponseEntity.ok(TO_CLIENT.apply(recentResource));
   }
 

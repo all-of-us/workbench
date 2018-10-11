@@ -4,9 +4,10 @@ import {SignInService} from 'app/services/sign-in.service';
 import {isBlank} from 'app/utils/index';
 import {Kernels} from 'app/utils/notebook-kernels';
 
+
 import {environment} from 'environments/environment';
 
-import {FileDetail, Workspace} from 'generated';
+import {FileDetail, Workspace, UserMetricsService} from 'generated';
 
 
 @Component({
@@ -31,6 +32,7 @@ export class NewNotebookModalComponent implements OnDestroy {
 
   constructor(
     private signInService: SignInService,
+    private userMetricsService: UserMetricsService,
   ) {}
 
   ngOnDestroy(): void {
@@ -54,6 +56,7 @@ export class NewNotebookModalComponent implements OnDestroy {
       this.nameConflict = true;
       return;
     }
+    this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id, {notebookName: this.newName}).subscribe();
     const nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/` +
         `notebooks/create/?notebook-name=` + encodeURIComponent(this.newName) +
         `&kernel-type=${this.kernelType}`;
