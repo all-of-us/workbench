@@ -301,7 +301,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // TODO: consider parallelizing these lookups
 
         List<DomainInfo> domains = domainInfoDao.findStandardOrCodeMatchConceptCounts(keyword, query, conceptId);
-        List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(keyword, query);
+        List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(keyword);
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
         response.setDomainInfos(domains.stream()
             .map(DomainInfo.TO_CLIENT_DOMAIN_INFO)

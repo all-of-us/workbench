@@ -44,10 +44,6 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
       nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
 
-    @Query(value = "select distinct c.conceptId from Concept c left join c.synonyms as cs " +
-            "where matchConcept(?1) > 0 > 0")
-    List<Long> findConceptSynonyms(String query);
-
     /**
      * Return the number of standard concepts in each vocabulary for the specified domain matching the
      * specified expression, matching concept name, synonym, ID, or code.
@@ -56,9 +52,8 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
      * @return per-vocabulary concept counts
      */
     @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
-        "left join c.synonyms cs\n" +
         "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-        "matchConcept(?1) > 0 and\n" +
+        "(matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0) and\n" +
         "c.standardConcept IN ('S', 'C') and\n" +
         "c.domainId = ?2\n" +
         "group by c.vocabularyId\n" +
@@ -73,10 +68,9 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
      * @param domainId domain ID to use when filtering concepts
      * @return per-vocabulary concept counts
      */
-    @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
-        "left join c.synonyms cs\n" +
+    @Query(value = "select c.vocabularyId as vocabularyId, count(*) as conceptCount from Concept c\n" +
         "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-        "matchConcept(?1) > 0 and\n" +
+        "(matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0) and\n" +
         "c.domainId = ?2\n" +
         "group by c.vocabularyId\n" +
         "order by c.vocabularyId\n")
@@ -87,7 +81,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
      * @param domainId domain ID to use when filtering concepts
      * @return per-vocabulary concept counts
      */
-    @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
+    @Query(value = "select c.vocabularyId as vocabularyId, count(*) as conceptCount from Concept c\n" +
         "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
              "c.standardConcept IN ('S', 'C') and\n" +
         "c.domainId = ?1\n" +
@@ -101,8 +95,7 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
      * @param domainId domain ID to use when filtering concepts
      * @return per-vocabulary concept counts
      */
-    @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
-        "left join c.synonyms cs\n" +
+    @Query(value = "select c.vocabularyId as vocabularyId, count(*) as conceptCount from Concept c\n" +
         "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
         "c.domainId = ?1\n" +
         "group by c.vocabularyId\n" +

@@ -25,6 +25,7 @@ public class Concept {
     private Long sourceCountValue;
     private float prevalence;
     private List<ConceptSynonym> synonyms = new ArrayList<>();
+    private String synonymsStr;
 
     public Concept() {}
 
@@ -183,6 +184,19 @@ public class Concept {
         this.prevalence = prevalence;
         return this;
     }
+
+    @Column(name = "synonyms")
+    public String getSynonymsStr() {
+        return synonymsStr;
+    }
+
+    public void setSynonymsStr(String synonymsStr) { this.synonymsStr = synonymsStr; }
+
+    public Concept synonymsStr(String synonymsStr) {
+        this.synonymsStr = synonymsStr;
+        return this;
+    }
+
 
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "concept")
     public List<ConceptSynonym> getSynonyms() {

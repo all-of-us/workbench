@@ -128,8 +128,9 @@ public class ConceptService {
                     final String keyword = modifyMultipleMatchKeyword(query);
 
                     if(keyword != null){
-                      Expression<Double> matchExp = criteriaBuilder.function("match", Double.class,
-                                criteriaBuilder.literal(keyword));
+                      Expression<Double> matchExp = criteriaBuilder.function("matchConcept", Double.class,
+                                root.get("conceptName"), root.get("conceptCode"), root.get("vocabularyId"),
+                          root.get("synonymsStr"), criteriaBuilder.literal(keyword));
                       predicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
                     }
 
