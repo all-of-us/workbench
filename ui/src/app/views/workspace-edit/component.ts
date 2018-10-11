@@ -434,8 +434,16 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   get isValidWorkspace() {
-    return !isBlank(this.workspace.name) &&
-        (!(isBlank(this.workspace.description) && !this.fillDetailsLater));
+    return !this.missingFields && !this.nameValidationError;
+  }
+
+  get missingFields() {
+    return isBlank(this.workspace.name) ||
+      ((isBlank(this.workspace.description) && !this.fillDetailsLater));
+  }
+
+  get nameValidationError() {
+    return this.workspace.name && this.workspace.name.length > 80;
   }
 
   get allowSave() {
