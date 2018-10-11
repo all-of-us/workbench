@@ -10,6 +10,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortsService} from 'generated/api/cohorts.service';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
@@ -19,8 +20,8 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
@@ -48,10 +49,11 @@ describe('RecentWorkComponent', () => {
         ResourceCardComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
-        CohortEditModalComponent,
+        EditModalComponent,
       ],
       providers: [
         {provide: CohortsService, useValue: new CohortsServiceStub()},
+        {provide: ConceptSetsService },
         {provide: SignInService, useValue: new SignInServiceStub()},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
         {provide: UserMetricsService, useValue: spy},
@@ -67,6 +69,21 @@ describe('RecentWorkComponent', () => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of([]));
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
+  }));
+
+  // test that it displays related resources when handed workspace
+  it('should display related resources when handed workspace', fakeAsync(() => {
+    fixture.debugElement.componentInstance.workspace = WorkspacesServiceStub.stubWorkspace();
+    fixture.debugElement.componentInstance.route.snapshot.data.workspace =
+      WorkspacesServiceStub.stubWorkspaceData();
+    tick();
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    const cardsOnPage = fixture.debugElement.queryAll(By.css('.card'));
+    expect(cardsOnPage.length).toEqual(3);
+    const cardNames = fixture.debugElement.queryAll(By.css('.name'))
+      .map((card) => card.nativeElement.innerText);
+    expect(cardNames).toEqual(['sample name', 'sample name 2', 'mockFile.ipynb']);
   }));
 
   // test that it displays 4 most recent resources from UserMetrics cache

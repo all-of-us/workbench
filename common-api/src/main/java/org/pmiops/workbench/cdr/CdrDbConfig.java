@@ -14,6 +14,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
@@ -67,13 +68,9 @@ public class CdrDbConfig {
       // server in order for it to be used.
       // TODO: find a way to make sure CDR versions aren't shown in the UI until they are in use by
       // all servers.
+      Long defaultId = null;
       Map<Object, Object> cdrVersionDataSourceMap = new HashMap<>();
-      Long cdrVersionId = null;
       for (CdrVersion cdrVersion : cdrVersionDao.findAll()) {
-        if (cdrVersion.getName().equals(workbenchConfig.cdr.defaultCdrVersion)) {
-          cdrVersionId = cdrVersion.getCdrVersionId();
-        }
-
         String dbName = "public".equals(dbUser) ? cdrVersion.getPublicDbName() : cdrVersion.getCdrDbName();
         int slashIndex = originalDbUrl.lastIndexOf('/');
         String dbUrl = originalDbUrl.substring(0, slashIndex + 1) + dbName + "?useSSL=false";
@@ -93,25 +90,35 @@ public class CdrDbConfig {
           // explicitly initialize the pool parameters here. We override the primary connection
           // info, as the autowired PoolConfiguration is initialized from the same set of properties
           // as the workbench DB.
-          basePoolConfig.setUsername(dbUser);
-          basePoolConfig.setPassword(dbPassword);
-          basePoolConfig.setUrl(dbUrl);
-          tomcatSource.setPoolProperties(basePoolConfig);
+          PoolConfiguration cdrPool = new PoolProperties();
+          BeanUtils.copyProperties(basePoolConfig, cdrPool);
+          cdrPool.setUsername(dbUser);
+          cdrPool.setPassword(dbPassword);
+          cdrPool.setUrl(dbUrl);
+          tomcatSource.setPoolProperties(cdrPool);
 
           // The Spring autowiring is a bit of a maze here, log something concrete which will allow
           // verification that the DB settings in application.properties are actually being loaded.
           log.info("using Tomcat pool for CDR data source, with minIdle: " +
-              basePoolConfig.getMinIdle());
+            cdrPool.getMinIdle());
         } else {
           log.warn("not using Tomcat pool or initializing pool configuration; " +
               "this should only happen within tests");
         }
         cdrVersionDataSourceMap.put(cdrVersion.getCdrVersionId(), dataSource);
+        if (cdrVersion.getIsDefault()) {
+          if (defaultId != null) {
+            throw new ServerErrorException(String.format(
+                "Multiple CDR versions are marked as the default: %d, %d",
+                defaultId, cdrVersion.getCdrVersionId()));
+          }
+          defaultId = cdrVersion.getCdrVersionId();
+        }
       }
-      this.defaultCdrVersionId = cdrVersionId;
-      if (this.defaultCdrVersionId == null) {
+      if (defaultId == null) {
         throw new ServerErrorException("Default CDR version not found!");
       }
+      this.defaultCdrVersionId = defaultId;
       setTargetDataSources(cdrVersionDataSourceMap);
       afterPropertiesSet();
     }

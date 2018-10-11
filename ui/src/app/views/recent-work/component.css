@@ -7,14 +7,14 @@
 }
 
 .card {
-    height: 9.2rem;
-    border-radius: .3125rem;
-    box-shadow: 0 0 0 0;
-    width: 5.5rem;
-    display: inline-block;
-    margin-left: .45rem;
-    margin-top: 1rem;
-    position: relative;
+  height: 9.2rem;
+  border-radius: .3125rem;
+  box-shadow: 0 0 0 0;
+  width: 5.5rem;
+  display: inline-block;
+  margin-left: .45rem;
+  margin-top: 1rem;
+  position: relative;
 }
 
 .scroll-indicator {
@@ -32,9 +32,8 @@
     left: 2.7rem;
     margin-top: -1.7rem;
     color: #FFFFFF;
-    width: calc(100% - 2.7rem);
-    position: relative;
-    font-size: 16px;
+    width: 100%;
+    position: relative
 }
 
 .recent-work {

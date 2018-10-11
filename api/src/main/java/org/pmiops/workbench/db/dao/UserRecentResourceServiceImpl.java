@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,9 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Autowired
   CohortDao cohortDao;
 
+  @Autowired
+  ConceptSetDao conceptSetDao;
+
   public UserRecentResourceDao getDao() {
     return userRecentResourceDao;
   }
@@ -34,6 +38,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     this.cohortDao = cohortDao;
   }
 
+  @VisibleForTesting
+  public void setConceptSetDao(ConceptSetDao conceptSetDao) { this.conceptSetDao = conceptSetDao; }
 
   @VisibleForTesting
   public int getUserEntryCount() {return USER_ENTRY_COUNT;}
@@ -50,11 +56,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     UserRecentResource recentResource = getDao().findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookNameWithPath);
     if (recentResource == null) {
       handleUserLimit(userId);
-      recentResource = new UserRecentResource();
-      recentResource.setUserId(userId);
-      recentResource.setWorkspaceId(workspaceId);
-      recentResource.setCohort(null);
-      recentResource.setNotebookName(notebookNameWithPath);
+      recentResource = new UserRecentResource(workspaceId, userId, notebookNameWithPath, lastAccessDateTime);
     }
     recentResource.setLastAccessDate(lastAccessDateTime);
     getDao().save(recentResource);
@@ -74,11 +76,24 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
     UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
     if (resource == null) {
       handleUserLimit(userId);
-      resource = new UserRecentResource();
-      resource.setUserId(userId);
-      resource.setWorkspaceId(workspaceId);
+      resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
       resource.setCohort(cohort);
-      resource.setNotebookName(null);
+      resource.setConceptSet(null);
+    }
+    resource.setLastAccessDate(lastAccessDateTime);
+    getDao().save(resource);
+  }
+
+  @Override
+  public void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId,
+                                   Timestamp lastAccessDateTime) {
+    ConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
+    UserRecentResource resource = getDao().findByUserIdAndWorkspaceIdAndConceptSet(userId, workspaceId, conceptSet);
+    if (resource == null) {
+      handleUserLimit(userId);
+      resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
+      resource.setConceptSet(conceptSet);
+      resource.setCohort(null);
     }
     resource.setLastAccessDate(lastAccessDateTime);
     getDao().save(resource);

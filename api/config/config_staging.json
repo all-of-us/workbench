@@ -16,7 +16,6 @@
     "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "Test Registered CDR 20180920",
     "debugQueries": true
   },
   "googleCloudStorageService": {
@@ -29,7 +28,8 @@
   },
   "server": {
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
-    "projectId": "all-of-us-rw-staging"
+    "projectId": "all-of-us-rw-staging",
+    "shortName": "Staging"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-staging.appspot.com/login",

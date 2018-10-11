@@ -15,69 +15,71 @@ import {
 
 /* tslint:disable:ordered-imports */
 import {
-    BEGIN_CRITERIA_REQUEST,
-    BEGIN_SUBTYPE_CRITERIA_REQUEST,
-    BEGIN_ALL_CRITERIA_REQUEST,
-    BEGIN_DRUG_CRITERIA_REQUEST,
-    BEGIN_CHART_DATA_REQUEST,
-    LOAD_CRITERIA_RESULTS,
-    LOAD_CRITERIA_SUBTYPE_RESULTS,
-    LOAD_DEMO_CRITERIA_RESULTS,
-    LOAD_CRITERIA_SUBTREE,
-    CANCEL_CRITERIA_REQUEST,
-    SET_CRITERIA_SEARCH,
-    BEGIN_AUTOCOMPLETE_REQUEST,
-    BEGIN_INGREDIENT_REQUEST,
-    LOAD_AUTOCOMPLETE_OPTIONS,
-    CLEAR_AUTOCOMPLETE_OPTIONS,
-    LOAD_INGREDIENT_LIST,
-    LOAD_CHILDREN_LIST,
-    SELECT_CHILDREN_LIST,
-    LOAD_ATTRIBUTE_LIST,
-    AUTOCOMPLETE_REQUEST_ERROR,
-    ATTRIBUTE_REQUEST_ERROR,
-    CRITERIA_REQUEST_ERROR,
-    CHANGE_CODE_OPTION,
-    SET_SCROLL_ID,
+  BEGIN_CRITERIA_REQUEST,
+  BEGIN_SUBTYPE_CRITERIA_REQUEST,
+  BEGIN_ALL_CRITERIA_REQUEST,
+  BEGIN_DRUG_CRITERIA_REQUEST,
+  BEGIN_CHART_DATA_REQUEST,
+  LOAD_CRITERIA_RESULTS,
+  LOAD_CRITERIA_SUBTYPE_RESULTS,
+  LOAD_DEMO_CRITERIA_RESULTS,
+  LOAD_CRITERIA_SUBTREE,
+  CANCEL_CRITERIA_REQUEST,
+  SET_CRITERIA_SEARCH,
+  BEGIN_AUTOCOMPLETE_REQUEST,
+  BEGIN_INGREDIENT_REQUEST,
+  LOAD_AUTOCOMPLETE_OPTIONS,
+  CLEAR_AUTOCOMPLETE_OPTIONS,
+  LOAD_INGREDIENT_LIST,
+  LOAD_CHILDREN_LIST,
+  SELECT_CHILDREN_LIST,
+  LOAD_ATTRIBUTE_LIST,
+  AUTOCOMPLETE_REQUEST_ERROR,
+  ATTRIBUTE_REQUEST_ERROR,
+  CRITERIA_REQUEST_ERROR,
+  CHANGE_CODE_OPTION,
+  SET_SCROLL_ID,
 
-    BEGIN_COUNT_REQUEST,
-    BEGIN_ATTR_PREVIEW_REQUEST,
-    LOAD_ATTR_PREVIEW_RESULTS,
-    ADD_ATTR_FOR_PREVIEW,
-    LOAD_COUNT_RESULTS,
-    CANCEL_COUNT_REQUEST,
-    COUNT_REQUEST_ERROR,
+  BEGIN_COUNT_REQUEST,
+  BEGIN_ATTR_PREVIEW_REQUEST,
+  LOAD_ATTR_PREVIEW_RESULTS,
+  ADD_ATTR_FOR_PREVIEW,
+  LOAD_COUNT_RESULTS,
+  CANCEL_COUNT_REQUEST,
+  COUNT_REQUEST_ERROR,
 
-    BEGIN_PREVIEW_REQUEST,
-    LOAD_PREVIEW_RESULTS,
-    PREVIEW_REQUEST_ERROR,
+  BEGIN_PREVIEW_REQUEST,
+  LOAD_PREVIEW_RESULTS,
+  PREVIEW_REQUEST_ERROR,
 
-    BEGIN_CHARTS_REQUEST,
-    LOAD_CHARTS_RESULTS,
-    CANCEL_CHARTS_REQUEST,
-    CHARTS_REQUEST_ERROR,
+  BEGIN_CHARTS_REQUEST,
+  LOAD_CHARTS_RESULTS,
+  CANCEL_CHARTS_REQUEST,
+  CHARTS_REQUEST_ERROR,
 
-    INIT_SEARCH_GROUP,
-    ADD_PARAMETER,
-    REMOVE_PARAMETER,
-    ADD_MODIFIER,
-    REMOVE_MODIFIER,
-    SET_WIZARD_FOCUS,
-    CLEAR_WIZARD_FOCUS,
-    REMOVE_ITEM,
-    REMOVE_GROUP,
-    OPEN_WIZARD,
-    REOPEN_WIZARD,
-    WIZARD_FINISH,
-    WIZARD_CANCEL,
-    SET_WIZARD_CONTEXT,
-    SHOW_ATTRIBUTES_PAGE,
-    HIDE_ATTRIBUTES_PAGE,
+  INIT_SEARCH_GROUP,
+  ADD_PARAMETER,
+  REMOVE_PARAMETER,
+  ADD_MODIFIER,
+  REMOVE_MODIFIER,
+  SET_WIZARD_FOCUS,
+  CLEAR_WIZARD_FOCUS,
+  REMOVE_ITEM,
+  REMOVE_GROUP,
+  OPEN_WIZARD,
+  REOPEN_WIZARD,
+  WIZARD_FINISH,
+  WIZARD_CANCEL,
+  SET_WIZARD_CONTEXT,
+  SHOW_ATTRIBUTES_PAGE,
+  HIDE_ATTRIBUTES_PAGE,
 
-    LOAD_ENTITIES,
-    RESET_STORE,
-    RootAction,
-    LOAD_CHART_RESULTS,
+  LOAD_ENTITIES,
+  RESET_STORE,
+  RootAction,
+  LOAD_CHART_RESULTS,
+  BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
+  LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS,
 } from './actions/types';
 /* tslint:enable:ordered-imports */
 
@@ -176,7 +178,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       case LOAD_CHILDREN_LIST:
         action.children.forEach(child => {
           child.parameterId = `param${(child.conceptId ?
-              (child.conceptId + child.code) : child.id)}`;
+            (child.conceptId + child.code) : child.id)}`;
           const path = child.path.split('.');
           const parents = path.slice(path.indexOf(action.parentId.toString()));
           state = state
@@ -197,11 +199,11 @@ export const rootReducer: Reducer<CohortSearchState> =
         const parentId = action.parentId.toString();
         return state
           .updateIn(
-          ['wizard', 'item', 'selectedGroups'],
-          List(),
-          groupIdList => groupIdList.includes(parentId)
-            ? groupIdList
-            : groupIdList.push(parentId));
+            ['wizard', 'item', 'selectedGroups'],
+            List(),
+            groupIdList => groupIdList.includes(parentId)
+              ? groupIdList
+              : groupIdList.push(parentId));
 
       case LOAD_ATTRIBUTE_LIST:
         const node = action.node.set('attributes', action.attributes);
@@ -255,8 +257,8 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case BEGIN_CHARTS_REQUEST:
         return state
-            .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
-            .set('initShowChart', true);
+          .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
+          .set('initShowChart', true);
 
       case BEGIN_COUNT_REQUEST:
         return state
@@ -390,7 +392,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['wizard', 'item', 'attributes', 'node'], Map())
           .deleteIn(['wizard', 'calculate', 'count']);
 
-        case REMOVE_ITEM: {
+      case REMOVE_ITEM: {
         state = state
           .updateIn(
             ['entities', 'groups', action.groupId, 'items'],
@@ -510,26 +512,47 @@ export const rootReducer: Reducer<CohortSearchState> =
       case RESET_STORE:
         return initialState;
 
-    /**
-     * Cohort Review Charts
-     */
+      /**
+       * Cohort Review Charts
+       */
       case BEGIN_CHART_DATA_REQUEST:
-          return state
-              .deleteIn(
-                  ['reviewChartData', 'request', action.domain])
-              .setIn(
-                  ['reviewChartData', 'request', action.ns,
-                      action.wsid, action.cid, action.cdrid, action.domain, action.limit],
-                  true);
+        return state
+          .deleteIn(
+            ['reviewChartData', 'request', action.cid, action.domain])
+          .setIn(
+            ['reviewChartData', 'request', action.cid, action.domain],
+            true);
 
-        case LOAD_CHART_RESULTS:
-          return state
-              .setIn(
-                  ['reviewChartData', 'domainCharts', action.domain]
-                  , fromJS(action.results ))
-              .deleteIn(
-                  ['reviewChartData', 'request', action.ns,
-                    action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
+      case LOAD_CHART_RESULTS:
+        return state
+          .setIn(
+            ['reviewChartData', 'domainCharts', action.cid, action.domain]
+            , fromJS(action.results))
+          .deleteIn(
+            ['reviewChartData', 'request', action.cid, action.domain]);
+      /**
+       * Cohort Individual Participants Charts
+       */
+
+      case BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST:
+        return state
+          .deleteIn(
+            ['individualChartData', 'request', action.cid , action.participantsId, action.domain])
+          .setIn(
+            ['individualChartData', 'request',
+              action.cid, action.participantsId, action.domain],
+            true);
+
+
+      case LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS:
+        return state
+          .setIn(
+            ['individualChartData', 'chartsData', action.cid , action.participantsId, action.domain]
+            , fromJS(action.results._body))
+          .deleteIn(
+            ['individualChartData', 'request', action.ns,
+              action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
       default: return state;
     }
-};
+
+  };

@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute} from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
@@ -11,12 +12,10 @@ describe('CreateReviewPage', () => {
   let component: CreateReviewPage;
   let fixture: ComponentFixture<CreateReviewPage>;
   const activatedRouteStub = {
-    parent: {
-      snapshot: {
-        data: {
-          review: {},
-          cohort: {}
-        }
+    snapshot: {
+      data: {
+        review: {},
+        cohort: {}
       }
     }
   };
@@ -26,7 +25,12 @@ describe('CreateReviewPage', () => {
 
     TestBed.configureTestingModule({
       declarations: [ CreateReviewPage ],
-      imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule.withRoutes([])],
+      imports: [
+        BrowserAnimationsModule,
+        ClarityModule,
+        ReactiveFormsModule,
+        RouterTestingModule.withRoutes([])
+      ],
       providers: [
         {provide: CohortReviewService, useValue: {}},
         {provide: ActivatedRoute, useValue: activatedRouteStub},

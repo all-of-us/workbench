@@ -2,11 +2,6 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
 import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
@@ -16,6 +11,12 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringJoiner;
 
 @Service
 public class CohortQueryBuilder {
@@ -98,14 +99,13 @@ public class CohortQueryBuilder {
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
       for (SearchGroupItem includeItem : includeGroup.getItems()) {
-        QueryJobConfiguration queryRequest = QueryBuilderFactory
+        String query = QueryBuilderFactory
             .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-            .buildQueryJobConfig(new QueryParameters()
+            .buildQuery(params, new QueryParameters()
                 .type(includeItem.getType())
                 .parameters(includeItem.getSearchParameters())
                 .modifiers(includeItem.getModifiers()));
-        params.putAll(queryRequest.getNamedParameters());
-        queryParts.add(queryRequest.getQuery());
+        queryParts.add(query);
       }
       if (excludeSQL) {
         joiner.add(EXCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)

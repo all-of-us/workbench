@@ -671,17 +671,46 @@ Generates databases in bigquery with data from a cdr that will be imported to my
   :fn => ->(*args) { generate_cdr_counts(*args) }
 })
 
-def generate_cloudsql_db(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run db-generate-cloudsql-db} + args
-end
+def generate_cloudsql_db(cmd_name, *args)
+  #ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project for Cloud Sql instancer"
+  )
+  op.add_option(
+    "--instance [instance]",
+    ->(opts, v) { opts.instance = v},
+    "Cloud SQL instance"
+  )
+  op.add_option(
+      "--database [database]",
+      ->(opts, v) { opts.database = v},
+      "Database name"
+  )
+  op.add_option(
+    "--bucket [bucket]",
+    ->(opts, v) { opts.bucket = v},
+    "Name of the GCS bucket containing the SQL dump"
+  )
+  #gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  #gcc.validate
 
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    common.run_inline %W{docker-compose run db-generate-cloudsql-db
+          --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
+          --bucket #{op.opts.bucket}}
+  end
+end
 Common.register_command({
   :invocation => "generate-cloudsql-db",
-  :description => "./generate-cdr/generate-cloudsql-db.sh --project <PROJECT> --instance <INSTANCE> \
+  :description => "generate-cloudsql-db  --project <PROJECT> --instance <INSTANCE> \
 --database <cdrYYYYMMDD> --bucket <BUCKET>
 Generates a cloudsql database from data in a bucket. Used to make cdr and public count databases.",
-  :fn => ->(*args) { generate_cloudsql_db(*args) }
+  :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
 })
 
 def generate_local_cdr_db(*args)

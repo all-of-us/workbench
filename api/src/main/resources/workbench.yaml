@@ -1933,9 +1933,12 @@ definitions:
           $ref: "#/definitions/InstitutionalAffiliation"
       requestedIdVerification:
         type: boolean
+      idVerificationRequestTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user requests identity verification.
       twoFactorEnabled:
         type: boolean
-
 
   InstitutionalAffiliation:
     type: object
@@ -2186,6 +2189,8 @@ definitions:
         $ref: "#/definitions/Cohort"
       notebook:
         $ref: '#/definitions/FileDetail'
+      conceptSet:
+        $ref: '#/definitions/ConceptSet'
       modifiedTime:
         type: string
 

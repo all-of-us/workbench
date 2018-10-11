@@ -19,6 +19,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
@@ -48,6 +49,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final ConceptDao conceptDao;
   private final ConceptService conceptService;
   private final ConceptSynonymDao conceptSynonymDao;
+  private final UserRecentResourceService userRecentResourceService;
   private final ConceptBigQueryService conceptBigQueryService;
   private final Clock clock;
 
@@ -99,13 +101,15 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Autowired
   ConceptSetsController(WorkspaceService workspaceService, ConceptSetDao conceptSetDao,
       ConceptDao conceptDao, ConceptSynonymDao conceptSynonymDao, ConceptService conceptService,
-      ConceptBigQueryService conceptBigQueryService, Provider<User> userProvider, Clock clock) {
+      ConceptBigQueryService conceptBigQueryService, UserRecentResourceService userRecentResourceService,
+                        Provider<User> userProvider, Clock clock) {
     this.workspaceService = workspaceService;
     this.conceptSetDao = conceptSetDao;
     this.conceptDao = conceptDao;
     this.conceptService = conceptService;
     this.conceptSynonymDao = conceptSynonymDao;
     this.conceptBigQueryService = conceptBigQueryService;
+    this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.clock = clock;
     this.maxConceptsPerSet = MAX_CONCEPTS_PER_SET;
@@ -131,7 +135,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setParticipantCount(0);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
-      // TODO: add recent resource entry for concept sets [RW-1129]
+      userRecentResourceService.updateConceptSetEntry(workspace.getWorkspaceId(), userProvider.get().getUserId(), dbConceptSet.getConceptSetId(), now);
     } catch (DataIntegrityViolationException e) {
       throw new BadRequestException(String.format(
           "Concept set \"/%s/%s/%s\" already exists.",
