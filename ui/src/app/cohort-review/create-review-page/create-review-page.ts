@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -12,12 +12,16 @@ import {
 
 
 @Component({
+  selector: 'app-create-review-page',
   templateUrl: './create-review-page.html',
+  styleUrls: ['./create-review-page.css']
 })
 export class CreateReviewPage implements OnInit {
+  create = true;
   creating = false;
   cohort: Cohort;
   review: CohortReview;
+  @Output() created = new EventEmitter<boolean>();
 
   reviewParamForm = new FormGroup({
     numParticipants: new FormControl(),
@@ -38,7 +42,7 @@ export class CreateReviewPage implements OnInit {
   }
 
   ngOnInit() {
-    const {review, cohort} = this.route.parent.snapshot.data;
+    const {review, cohort} = this.route.snapshot.data;
     this.review = review;
     this.cohort = cohort;
 
@@ -64,6 +68,7 @@ export class CreateReviewPage implements OnInit {
     this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request)
       .subscribe(_ => {
         this.creating = false;
+        this.created.emit(true);
         this.router.navigate(['participants'], {relativeTo: this.route.parent});
       });
   }

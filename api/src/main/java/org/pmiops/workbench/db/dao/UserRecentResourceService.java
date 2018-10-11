@@ -13,6 +13,8 @@ public interface UserRecentResourceService {
 
   void updateCohortEntry(long workspaceId, long userId, long cohortId, Timestamp lastAccessDateTime);
 
+  void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId, Timestamp lastAccessDateTime);
+
   void deleteNotebookEntry(long workspaceId, long userId, String notebookName);
 
   List<UserRecentResource> findAllResourcesByUser(long userId);

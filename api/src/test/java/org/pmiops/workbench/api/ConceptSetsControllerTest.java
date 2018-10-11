@@ -203,7 +203,7 @@ public class ConceptSetsControllerTest {
 
     ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
-        conceptSynonymDao, conceptService, conceptBigQueryService, userProvider, CLOCK);
+        conceptSynonymDao, conceptService, conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider,
             fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);

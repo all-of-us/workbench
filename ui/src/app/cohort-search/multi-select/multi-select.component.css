@@ -49,12 +49,12 @@
 }
 
 .option-list {
-  height: 11.7rem;
+  height: 10rem;
   overflow: auto;
 }
 
 .search-option-list {
-  height: 9.77rem;
+  height: 8rem;
   overflow: auto;
 }
 .option {
