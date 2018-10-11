@@ -7,7 +7,7 @@ import {Kernels} from 'app/utils/notebook-kernels';
 
 import {environment} from 'environments/environment';
 
-import {FileDetail, Workspace, UserMetricsService} from 'generated';
+import {FileDetail, UserMetricsService, Workspace} from 'generated';
 
 
 @Component({
@@ -56,7 +56,8 @@ export class NewNotebookModalComponent implements OnDestroy {
       this.nameConflict = true;
       return;
     }
-    this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id, {notebookName: this.newName}).subscribe();
+    this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id,
+      {notebookName: this.newName}).subscribe();
     const nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/` +
         `notebooks/create/?notebook-name=` + encodeURIComponent(this.newName) +
         `&kernel-type=${this.kernelType}`;
