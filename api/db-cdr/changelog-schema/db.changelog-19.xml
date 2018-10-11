@@ -6,6 +6,14 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
+  <changeSet id="drop fulltext concept_name index" author="srushtigangireddy" runAlways="true" onValidationFail="MARK_RAN">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="concept_name_index" tableName="concept"></indexExists>
+    </preConditions>
+    <dropIndex tableName="concept" indexName="concept_name_index"></dropIndex>
+  </changeSet>
+
   <changeSet id="drop fulltext concept_code index" author="srushtigangireddy" runAlways="true" onValidationFail="MARK_RAN">
     <validCheckSum>ANY</validCheckSum>
     <preConditions onFail="MARK_RAN">
