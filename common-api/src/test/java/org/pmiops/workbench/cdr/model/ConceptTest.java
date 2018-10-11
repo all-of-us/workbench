@@ -1,7 +1,10 @@
 package org.pmiops.workbench.cdr.model;
 
 import static com.google.common.truth.Truth.assertThat;
+<<<<<<< HEAD
 
+=======
+>>>>>>> Trying to populate synonyms from string (in progress)
 import org.junit.Test;
 
 public class ConceptTest {
