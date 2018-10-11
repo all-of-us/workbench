@@ -63,7 +63,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public Cluster createCluster(String googleProject, String clusterName, String userEmail) {
     ClusterApi clusterApi = clusterApiProvider.get();
     return retryHandler.run((context) ->
-        clusterApi.createCluster(googleProject, clusterName, createFirecloudClusterRequest(userEmail)));
+        clusterApi.createClusterV2(googleProject, clusterName, createFirecloudClusterRequest(userEmail)));
   }
 
   @Override
