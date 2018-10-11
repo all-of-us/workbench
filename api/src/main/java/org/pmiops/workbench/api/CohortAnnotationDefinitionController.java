@@ -127,7 +127,6 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
             throw new BadRequestException(ExceptionUtils.getRootCause(e).getMessage());
         }
 
-
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
 
@@ -218,7 +217,11 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         }
 
         cohortAnnotationDefinition.columnName(columnName);
-        cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+        try {
+            cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException(ExceptionUtils.getRootCause(e).getMessage());
+        }
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
     }
