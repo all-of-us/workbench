@@ -66,7 +66,7 @@
   width: 25.86%;
   display: flex;
   min-width: 21rem;
-  margin-left: 1.56%;
+  margin-left: 3%;
   margin-top: 2.58%;
   letter-spacing: normal;
 }
@@ -80,18 +80,14 @@
   width: 25.86%;
   display: flex;
   min-width: 21rem;
-  margin-left: 1.56%;
+  margin-left: 3%;
   margin-top: 2.58%;
   letter-spacing: normal;
 }
 
 .heading-links {
-  right: -4.9%;
   margin-top: 2.74%;
   height: 2.68%;
-  width: 28.52%;
-  position: absolute;
-  min-width: 18rem;
   font-size: 14px;
   color: #FFFFFF;
 }
@@ -179,7 +175,7 @@
   font-size: 28px;
   font-weight: 500;
   line-height: 34px;
-  margin-left: 12%;
+  width: 87.34%;
   margin-top: 1.4rem;
 }
 
@@ -194,17 +190,26 @@
   font-size: 16px;
   font-weight: 300;
   line-height: 30px;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.textGroup.ng-star-inserted {
-  width: 33%;
+.linksBlock {
+  display: flex;
+  margin-bottom: 1.4rem;
+  margin-left: 1.4rem;
+  flex-direction: column;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .footerText .title {
   color: white;
   margin-top: 2%;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .linkGroup {
@@ -227,7 +232,7 @@
   align-items: flex-start;
   background-color: #FFFFFF;
   align-content: left;
-  margin-left: 25px;
+  margin-left: 3%;
   margin-top: 1.9rem;
   cursor: pointer;
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
@@ -252,18 +257,16 @@
 
 .bullets {
   color: #83C3EC;
-  white-space: nowrap;
-  overflow: hidden;
 }
 
 .footerRtLink {
   display: flex;
-  justify-content: space-evenly;
-  margin-left: 75%;
+  justify-content: flex-end;
 }
 
 .footerLink {
   color: #FFFFFF;
+  font-size: 12px;
 }
 
 .bottom-banner {

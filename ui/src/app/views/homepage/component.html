@@ -1,9 +1,9 @@
 <div class="background-image">
   <div class="row" style="display:flex; justify-content:center">
     <div class="card single">
-      <div class="row" style="flex-direction: row; height: 17.47%; margin-bottom: 0.5rem">
+      <div class="row" style="flex-direction: row; height: 17.47%; margin-bottom: 0.5rem; justify-content: space-between; flex-wrap: nowrap;">
         <div class="col main-heading">Researcher Workbench</div>
-        <div class="col heading-links" style="display: flex;">
+        <div class="heading-links" style="display: flex; justify-content: flex-end">
           <div class="row">
             <a class="links" (click)="addWorkspace()">Create a
               Workspace</a>
@@ -24,30 +24,32 @@
     </div>
   </div>
   <div class="footer">
-    <div class="row">
-      <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
-    </div>
-    <div class="footerRtLink">
-      <div class="tooltip">
-        <a href="#" class="footerLink">
-          See all documentation</a>
-        <span class="tooltiptext">Coming Soon</span>
+    <div class="row" style="display: flex; flex-direction:column; margin-left:5%; margin-right: 5%;">
+      <div class="row">
+        <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
       </div>
-    </div>
-    <div class="row" style="margin-left: 12%">
-      <div *ngFor="let footer of footerLinks" class="row textGroup">
-        <div class="footerText">
-          <div class="title">{{footer.title}}</div>
-          <ul class="bullets">
-            <div *ngFor="let link of footer.links">
-              <div class="tooltip">
-                <li>
-                  <a href="#" class="bullets">{{link}}</a>
-                </li>
-                <span class="tooltiptext">Coming Soon</span>
+      <div class="footerRtLink">
+        <div class="tooltip">
+          <a href="#" class="footerLink">
+            See all documentation</a>
+          <span class="tooltiptext">Coming Soon</span>
+        </div>
+      </div>
+      <div class="row" style="display: flex; flex-grow: 1; flex-wrap: nowrap; justify-content: space-between; width: 87.34%;">
+        <div *ngFor="let footer of footerLinks" class="linksBlock">
+          <div class="footerText">
+            <div class="title">{{footer.title}}</div>
+            <ul class="bullets">
+              <div *ngFor="let link of footer.links">
+                <div class="tooltip">
+                  <li>
+                    <a href="#" class="bullets">{{link}}</a>
+                  </li>
+                  <span class="tooltiptext">Coming Soon</span>
+                </div>
               </div>
-            </div>
-          </ul>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
