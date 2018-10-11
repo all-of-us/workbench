@@ -113,7 +113,6 @@ button.tab.active {
 .content {
   flex: 1;
   overflow: auto;
-  /*height: 100%;*/
 }
 
 .footer {
@@ -180,13 +179,12 @@ button.tab.active {
 .title-margin {
   margin-left: 0px;
   margin-right: 0px;
-  /*width: 100%;*/
+  width: 100%;
 }
 
 .title-margin .padding-zero{
- padding-left: 0rem;
+  padding-left: 0rem;
   padding-right: 0rem;
-  /*height:83vh;*/
 }
 
 .btn-color{
@@ -234,216 +232,81 @@ h6.selection-header {
 
 @media only screen and (min-width: 992px) and  (min-height: 400px){
   .crit-modal-content {
-    position: absolute;
-    /*top: 50%;*/
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: calc(100vw - calc(1rem + 60px));
-    background-color: white;
-    border-radius: 4px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
     overflow-y: auto;
     height: 100%;
 
-  }
-
-  .title-margin {
-    margin-left: 0px;
-    margin-right: 0px;
-    width: 100%;
   }
 
   .panel-right.selected {
-    width: 95%;
-    border: 2px solid #262262;
-    height: 100%;
-    border-radius: 5px;
-    overflow-y: auto;
-    overflow-x: hidden;
     min-height: 26rem;
     max-height: 26rem;
-    overflow-y: auto;
-    background-color: white;
   }
 }
 
-@media only screen and (min-width: 992px) and  (min-height: 700px){
+@media only screen and (min-width: 992px) and  (min-height: 780px){
   .crit-modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: calc(100vw - calc(1rem + 60px));
-    background-color: white;
-    border-radius: 4px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
     overflow-y: auto;
     height: auto;
 
   }
 
-  .title-margin {
-    margin-left: 0px;
-    margin-right: 0px;
-    width: 100%;
-  }
-
   .panel-right.selected {
-    width: 95%;
-    border: 2px solid #262262;
-    height: 100%;
-    border-radius: 5px;
-    overflow-y: auto;
-    overflow-x: hidden;
     min-height: 26rem;
     max-height: 26rem;
-    overflow-y: auto;
-    background-color: white;
   }
 }
 
 @media only screen and (min-width: 1300px) and  (min-height: 400px){
   .crit-modal-content {
-    position: absolute;
-    /*top: 50%;*/
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: calc(100vw - calc(6rem + 60px));
-    background-color: white;
-    border-radius: 4px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
     overflow-y: auto;
     height: 100%;
   }
 
-  .title-margin {
-    margin-left: 0px;
-    margin-right: 0px;
-    width: 100%;
-  }
   .panel-right.selected {
-    width: 95%;
-    border: 2px solid #262262;
-    height: 100%;
-    border-radius: 5px;
-    overflow-y: auto;
-    overflow-x: hidden;
     min-height: 24.5rem;
     max-height: 24.5rem;
-    overflow-y: auto;
-    background-color: white;
   }
 }
 
-@media only screen and (min-width: 1300px) and  (min-height: 700px){
+@media only screen and (min-width: 1300px) and  (min-height: 780px){
   .crit-modal-content {
-    position: absolute;
-    /*top: 50%;*/
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: calc(100vw - calc(6rem + 60px));
-    background-color: white;
-    border-radius: 4px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
     overflow-y: auto;
     height: auto;
   }
 
-  .title-margin {
-    margin-left: 0px;
-    margin-right: 0px;
-    width: 100%;
-  }
   .panel-right.selected {
-    width: 95%;
-    border: 2px solid #262262;
-    height: 100%;
-    border-radius: 5px;
-    overflow-y: auto;
-    overflow-x: hidden;
     min-height: 24.5rem;
     max-height: 24.5rem;
-    overflow-y: auto;
-    background-color: white;
   }
 }
 
 @media only screen and (min-width: 1500px) and  (min-height: 400px){
   .crit-modal-content {
-    position: absolute;
-    /*top: 50%;*/
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: calc(100vw - calc(19rem + 60px));
-    background-color: white;
-    border-radius: 4px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
     height: 100%;
     overflow-y: auto;
 
   }
 
-  .title-margin {
-    margin-left: 0px;
-    margin-right: 0px;
-    width: 100%;
-  }
   .panel-right.selected {
-    width: 95%;
-    border: 2px solid #262262;
-    height: 100%;
-    border-radius: 5px;
-    overflow-y: auto;
-    overflow-x: hidden;
     min-height: 24.5rem;
     max-height: 24.5rem;
-    overflow-y: auto;
-    background-color: white;
   }
 }
 
-@media only screen and (min-width: 1500px) and  (min-height: 700px){
+@media only screen and (min-width: 1500px) and  (min-height: 780px){
   .crit-modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: calc(100vw - calc(19rem + 60px));
-    background-color: white;
-    border-radius: 4px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-between;
     overflow-y: auto;
     height: auto;
   }
-
-  .title-margin {
-    margin-left: 0px;
-    margin-right: 0px;
-    width: 100%;
-  }
   .panel-right.selected {
-    width: 95%;
-    border: 2px solid #262262;
-    height: 100%;
-    border-radius: 5px;
-    overflow-y: auto;
-    overflow-x: hidden;
     min-height: 24.5rem;
     max-height: 24.5rem;
-    overflow-y: auto;
-    background-color: white;
   }
 }
 @keyframes fadeEffect {
