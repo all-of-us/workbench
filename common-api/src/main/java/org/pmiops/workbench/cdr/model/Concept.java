@@ -1,11 +1,18 @@
 package org.pmiops.workbench.cdr.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import java.util.Objects;
+import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import javax.persistence.*;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 
 @Entity
@@ -191,15 +198,28 @@ public class Concept {
         return synonymsStr;
     }
 
-    public void setSynonymsStr(String synonymsStr) { this.synonymsStr = synonymsStr; }
+    public void setSynonymsStr(String synonymsStr) {
+        this.synonymsStr = synonymsStr;
+        synonyms.clear();
+        if (synonymsStr != null) {
+            String[] parts = synonymsStr.split("(?<!\\|)\\|");
+            if (parts.length > 2) {
+                synonyms.addAll(Arrays.asList(parts).subList(2, parts.length).stream()
+                    .filter((part) -> !Strings.isNullOrEmpty(part))
+                    .map((part) -> new ConceptSynonym().conceptSynonymName(
+                        part.replaceAll("\\|\\|", "|")))
+                    .collect(Collectors.toList()));
+            }
+        }
+    }
 
     public Concept synonymsStr(String synonymsStr) {
-        this.synonymsStr = synonymsStr;
+        setSynonymsStr(synonymsStr);
         return this;
     }
 
 
-    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL, mappedBy = "concept")
+    @Transient
     public List<ConceptSynonym> getSynonyms() {
         return synonyms;
     }
@@ -229,7 +249,8 @@ public class Concept {
                 Objects.equals(conceptClassId, concept.conceptClassId) &&
                 Objects.equals(vocabularyId, concept.vocabularyId) &&
                 Objects.equals(sourceCountValue,concept.sourceCountValue) &&
-                Objects.equals(domainId, concept.domainId);
+                Objects.equals(domainId, concept.domainId) &&
+                Objects.equals(synonymsStr, concept.synonymsStr);
     }
 
     @Override
