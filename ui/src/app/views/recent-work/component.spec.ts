@@ -63,7 +63,7 @@ describe('RecentWorkComponent', () => {
       userMetricsSpy = TestBed.get(UserMetricsService);
       tick();
       // Standard window size for this test suite.  should load 4 cards by default
-      fixture.nativeElement.style.width = "1024px";
+      fixture.nativeElement.style.width = '1024px';
     });
   }));
 
@@ -169,7 +169,7 @@ describe('RecentWorkComponent', () => {
     expect(cardsOnPage.length).toEqual(4);
 
     // Make it small - should show 3 cards
-    fixture.nativeElement.style.width = "800px";
+    fixture.nativeElement.style.width = '800px';
     window.dispatchEvent(new Event('resize'));
     updateAndTick(fixture);
     const deLess = fixture.debugElement;
@@ -177,7 +177,7 @@ describe('RecentWorkComponent', () => {
     expect(lessCards.length).toEqual(3);
 
     // Now make it big - should show 5 cards
-    fixture.nativeElement.style.width = "1200px";
+    fixture.nativeElement.style.width = '1200px';
     window.dispatchEvent(new Event('resize'));
     updateAndTick(fixture);
     const deMore = fixture.debugElement;
