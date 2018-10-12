@@ -4,12 +4,12 @@
     "name": "Synthetic Dataset v1",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
-    "bigqueryDataset": "test_merge_dec26",
+    "bigqueryDataset": "synthetic_cdr20180606",
     "creationTime": "2017-12-26 00:00:00Z",
     "releaseNumber": 1,
     "numParticipants": 946237,
-    "cdrDbName": "cdr20180831",
-    "publicDbName": "public20180920"
+    "cdrDbName": "cdr20181011",
+    "publicDbName": "public20181011"
   },
   {
     "cdrVersionId": 2,
@@ -17,11 +17,11 @@
     "name": "Synthetic Dataset v2",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
-    "bigqueryDataset": "test_merge_dec26",
+    "bigqueryDataset": "synthetic_cdr20180606",
     "creationTime": "2018-09-20 00:00:01Z",
     "releaseNumber": 2,
     "numParticipants": 946237,
-    "cdrDbName": "cdr20180921",
-    "publicDbName": "public20180921"
+    "cdrDbName": "cdr20181011",
+    "publicDbName": "public20181011"
   }
 ]
