@@ -183,7 +183,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       type: this.ctype,
       subtype: this.subtype,
       fullTree: this.fullTree,
-      id: 0,    // root parent ID is always 0
+      id: 0
     });
   }
 
