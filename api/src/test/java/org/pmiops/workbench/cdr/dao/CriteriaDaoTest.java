@@ -1,10 +1,5 @@
 package org.pmiops.workbench.cdr.dao;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
+import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -22,6 +18,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -38,6 +40,9 @@ public class CriteriaDaoTest {
 
   @Autowired
   private ConceptRelationshipDao conceptRelationshipDao;
+
+  @Autowired
+  private ConceptSynonymDao conceptSynonymDao;
 
   private Criteria icd9Criteria1;
   private Criteria icd9Criteria2;
@@ -107,7 +112,8 @@ public class CriteriaDaoTest {
         new ConceptRelationshipId().relationshipId("1").conceptId1(12345L).conceptId2(1L)
       )
     );
-    conceptDao.save(new Concept().conceptId(123L).synonymsStr("123|test1mywordTest"));
+    conceptDao.save(new Concept().conceptId(123L));
+    conceptSynonymDao.save(new ConceptSynonym().conceptId(123).conceptSynonymName("test1mywordTest"));
   }
 
   @After
