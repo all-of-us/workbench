@@ -62,6 +62,8 @@ describe('RecentWorkComponent', () => {
       fixture = TestBed.createComponent(RecentWorkComponent);
       userMetricsSpy = TestBed.get(UserMetricsService);
       tick();
+      // Standard window size for this test suite.  should load 4 cards by default
+      fixture.nativeElement.style.width = "1024px";
     });
   }));
 
@@ -156,30 +158,31 @@ describe('RecentWorkComponent', () => {
     expect(leftScroll()).toBe(null);
   }));
 
-  fit('should resize when screen resizes', fakeAsync( () => {
+  // test that when we resize the window, the component resizes too
+  //    when the window gets smaller, should show less cards
+  //    when the window gets larger, should see more cards
+  it('should resize when screen resizes', fakeAsync( () => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(5)));
     updateAndTick(fixture);
-    console.log(fixture.nativeElement.offsetWidth);
     const de = fixture.debugElement;
     const cardsOnPage = de.queryAll(By.css('.card'));
     expect(cardsOnPage.length).toEqual(4);
 
-    fixture.nativeElement.style.width = 500;
-    console.log(fixture.nativeElement.offsetWidth);
-
-    // fixture.nativeElement.offsetWidth = 1024;
-
-    // this does not do any resizing, just triggers the onResize listener
+    // Make it small - should show 3 cards
+    fixture.nativeElement.style.width = "800px";
     window.dispatchEvent(new Event('resize'));
     updateAndTick(fixture);
+    const deLess = fixture.debugElement;
+    const lessCards = deLess.queryAll(By.css('.card'));
+    expect(lessCards.length).toEqual(3);
 
-    // this does not work
-    // page.triggerEventHandler("window:resize", null);
-
-    const cardsOnPage2 = de.queryAll(By.css('.card'));
-    expect(cardsOnPage2.length).toEqual(3);
-
-
+    // Now make it big - should show 5 cards
+    fixture.nativeElement.style.width = "1200px";
+    window.dispatchEvent(new Event('resize'));
+    updateAndTick(fixture);
+    const deMore = fixture.debugElement;
+    const moreCards = deMore.queryAll(By.css('.card'));
+    expect(moreCards.length).toEqual(5);
   }));
 });
 

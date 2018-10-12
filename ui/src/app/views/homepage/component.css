@@ -65,7 +65,7 @@
   line-height: 34px;
   width: 25.86%;
   display: flex;
-  min-width: 21rem;
+  min-width: 18.2rem;
   margin-left: 3%;
   margin-top: 2.58%;
   letter-spacing: normal;
@@ -193,6 +193,7 @@
   display: flex;
   width: 100%;
   flex-direction: column;
+  flex-wrap: nowrap;
   overflow-y: scroll;
 }
 
@@ -226,6 +227,7 @@
   font-size: 14px;
   margin-top: 0.5rem;
   width: 7.5rem;
+  margin-right: 0.5rem;
 }
 
 .card.add-card {
