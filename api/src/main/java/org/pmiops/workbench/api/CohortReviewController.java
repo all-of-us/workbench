@@ -301,7 +301,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       throw new BadRequestException("Bad Request: Please provide a valid participant id.");
     }
 
-    CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
 
     org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
