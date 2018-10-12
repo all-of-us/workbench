@@ -18,7 +18,7 @@
               "name": "Dislocation and sprain of joints and ligaments of knee",
               "value": "S83",
               "type": "ICD10",
-              "subtype": "ICD10CM",
+              "subtype": "CM",
               "group": true,
               "conceptId": null,
               "domainId": ""

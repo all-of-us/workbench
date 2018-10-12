@@ -18,7 +18,7 @@
               "name": "Bipolar disorder, current episode depressed, mild or moderate severity, unspecified",
               "value": "F31.30",
               "type": "ICD10",
-              "subtype": "ICD10CM",
+              "subtype": "CM",
               "group": false,
               "attributes": [],
               "conceptId": 45571756,
