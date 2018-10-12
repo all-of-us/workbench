@@ -193,9 +193,12 @@
   display: flex;
   width: 100%;
   flex-direction: column;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-y: scroll;
+}
+
+.footerText::-webkit-scrollbar {
+  width: 6px;
+  background-color: #262262;
 }
 
 .linksBlock {
