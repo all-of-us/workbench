@@ -1,18 +1,14 @@
 package org.pmiops.workbench.cdr.dao;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,18 +54,13 @@ public class ConceptService {
     @Autowired
     private ConceptDao conceptDao;
 
-    @Autowired
-    private ConceptSynonymDao conceptSynonymDao;
-
     public ConceptService() {
     }
 
     // Used for tests
-    public ConceptService(EntityManager entityManager, ConceptDao conceptDao,
-        ConceptSynonymDao conceptSynonymDao) {
+    public ConceptService(EntityManager entityManager, ConceptDao conceptDao) {
         this.entityManager = entityManager;
         this.conceptDao = conceptDao;
-        this.conceptSynonymDao = conceptSynonymDao;
     }
 
     public static String modifyMultipleMatchKeyword(String query){
@@ -190,21 +181,7 @@ public class ConceptService {
                 new Sort(Direction.DESC, "countValue"));
         NoCountFindAllDao<Concept, Long> conceptDao = new NoCountFindAllDao<>(Concept.class,
                 entityManager);
-        Slice<Concept> conceptSlice = conceptDao.findAll(conceptSpecification, pageable);
-        fetchConceptSynonyms(conceptSlice.getContent());
-        return conceptSlice;
-    }
-
-    public List<Concept> fetchConceptSynonyms(List<Concept> concepts) {
-      List<Long> conceptIds = concepts.stream().map(Concept::getConceptId)
-          .collect(Collectors.toList());
-      Multimap<Long, ConceptSynonym> synonymMap = Multimaps
-          .index(conceptSynonymDao.findByConceptIdIn(conceptIds), ConceptSynonym::getConceptId);
-      for (Concept concept : concepts) {
-        concept.setSynonyms(
-            synonymMap.get(concept.getConceptId()).stream().collect(Collectors.toList()));
-      }
-      return concepts;
+        return conceptDao.findAll(conceptSpecification, pageable);
     }
 
     public ConceptIds classifyConceptIds(Set<Long> conceptIds) {

@@ -8,9 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.DomainInfo;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -51,7 +49,7 @@ public class ConceptsController implements ConceptsApiDelegate {
             .prevalence(concept.getPrevalence())
             .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
             .vocabularyId(concept.getVocabularyId())
-            .conceptSynonyms(concept.getSynonyms().stream().map(ConceptSynonym::getConceptSynonymName).collect(Collectors.toList()));
+            .conceptSynonyms(concept.getSynonyms());
 
   private static final Function<org.pmiops.workbench.cdr.model.VocabularyCount, VocabularyCount>
       TO_CLIENT_VOCAB_COUNT =
@@ -60,15 +58,10 @@ public class ConceptsController implements ConceptsApiDelegate {
           .vocabularyId(vocabCount.getVocabularyId());
 
   @Autowired
-  ConceptSynonymDao conceptSynonymDao;
-
-  @Autowired
   public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,
-                            ConceptSynonymDao conceptSynonymDao, DomainInfoDao domainInfoDao,
-                            ConceptDao conceptDao) {
+                            DomainInfoDao domainInfoDao, ConceptDao conceptDao) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
-    this.conceptSynonymDao = conceptSynonymDao;
     this.domainInfoDao = domainInfoDao;
     this.conceptDao = conceptDao;
   }

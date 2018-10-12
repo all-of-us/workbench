@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortService;
@@ -167,10 +166,6 @@ public class ConceptSetsControllerTest {
   @Autowired
   FireCloudService fireCloudService;
 
-
-  @Autowired
-  ConceptSynonymDao conceptSynonymDao;
-
   @PersistenceContext
   private EntityManager entityManager;
 
@@ -201,9 +196,9 @@ public class ConceptSetsControllerTest {
   @Before
   public void setUp() throws Exception {
 
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
-        conceptSynonymDao, conceptService, conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
+        conceptService, conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider,
             fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);

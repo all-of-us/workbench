@@ -57,7 +57,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
     conceptBigQueryService = new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService,
         conceptService);
 

@@ -4,8 +4,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Streams;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
@@ -17,7 +17,6 @@ import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -49,7 +48,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final ConceptSetDao conceptSetDao;
   private final ConceptDao conceptDao;
   private final ConceptService conceptService;
-  private final ConceptSynonymDao conceptSynonymDao;
   private final UserRecentResourceService userRecentResourceService;
   private final ConceptBigQueryService conceptBigQueryService;
   private final Clock clock;
@@ -101,14 +99,13 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @Autowired
   ConceptSetsController(WorkspaceService workspaceService, ConceptSetDao conceptSetDao,
-      ConceptDao conceptDao, ConceptSynonymDao conceptSynonymDao, ConceptService conceptService,
+      ConceptDao conceptDao, ConceptService conceptService,
       ConceptBigQueryService conceptBigQueryService, UserRecentResourceService userRecentResourceService,
                         Provider<User> userProvider, Clock clock) {
     this.workspaceService = workspaceService;
     this.conceptSetDao = conceptSetDao;
     this.conceptDao = conceptDao;
     this.conceptService = conceptService;
-    this.conceptSynonymDao = conceptSynonymDao;
     this.conceptBigQueryService = conceptBigQueryService;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
@@ -160,8 +157,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     ConceptSet result = TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
-      List<org.pmiops.workbench.cdr.model.Concept> conceptList = conceptService.fetchConceptSynonyms(Lists.newArrayList(concepts));
-      result.setConcepts(conceptList.stream()
+      result.setConcepts(Streams.stream(concepts)
               .map(ConceptsController.TO_CLIENT_CONCEPT)
               .sorted(CONCEPT_NAME_ORDERING)
               .collect(Collectors.toList()));

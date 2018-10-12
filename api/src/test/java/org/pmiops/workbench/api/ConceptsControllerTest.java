@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -14,9 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -204,8 +203,6 @@ public class ConceptsControllerTest {
   @Autowired
   private ConceptDao conceptDao;
   @Autowired
-  private ConceptSynonymDao conceptSynonymDao;
-  @Autowired
   private WorkspaceService workspaceService;
   @Autowired
   private WorkspaceDao workspaceDao;
@@ -226,8 +223,8 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
-    conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao,
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
+    conceptsController = new ConceptsController(conceptService, workspaceService,
         domainInfoDao, conceptDao);
 
     CdrVersion cdrVersion = new CdrVersion();
@@ -692,8 +689,9 @@ public class ConceptsControllerTest {
     result.setDomainId(concept.getDomainId());
     result.setCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
-    result.setSynonyms(new ArrayList<ConceptSynonym>());
-    result.setSynonymsStr(String.valueOf(concept.getConceptId()) + '|' + concept.getConceptName());
+    result.setSynonymsStr(
+        String.valueOf(concept.getConceptId()) + '|' +
+            Joiner.on("|").join(concept.getConceptSynonyms()));
     return result;
   }
 

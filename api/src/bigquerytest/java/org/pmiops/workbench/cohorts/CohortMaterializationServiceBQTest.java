@@ -170,7 +170,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
     participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
 
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
 
     this.cohortMaterializationService = new CohortMaterializationService(fieldSetQueryBuilder,
         annotationQueryBuilder, participantCohortStatusDao, cdrBigQuerySchemaConfigService, conceptService);

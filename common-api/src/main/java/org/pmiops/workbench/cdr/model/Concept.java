@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cdr.model;
 
-import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +30,7 @@ public class Concept {
     private long countValue;
     private Long sourceCountValue;
     private float prevalence;
-    private List<ConceptSynonym> synonyms = new ArrayList<>();
+    private List<String> synonyms = new ArrayList<>();
     private String synonymsStr;
 
     public Concept() {}
@@ -48,7 +47,6 @@ public class Concept {
                 .count(a.getCountValue())
                 .sourceCountValue(a.getSourceCountValue())
                 .prevalence(a.getPrevalence())
-                .synonyms(new ArrayList<>())
                 .synonymsStr(a.getSynonymsStr());
     }
 
@@ -202,12 +200,14 @@ public class Concept {
         this.synonymsStr = synonymsStr;
         synonyms.clear();
         if (synonymsStr != null) {
-            String[] parts = synonymsStr.split("(?<!\\|)\\|");
-            if (parts.length > 2) {
-                synonyms.addAll(Arrays.asList(parts).subList(2, parts.length).stream()
-                    .filter((part) -> !Strings.isNullOrEmpty(part))
-                    .map((part) -> new ConceptSynonym().conceptSynonymName(
-                        part.replaceAll("\\|\\|", "|")))
+            String[] parts = synonymsStr.split("(?<!\\|)\\|(?!\\|)");
+            if (parts.length > 1) {
+                // Skip the concept ID (which appears in synonymsStr first),
+                // and the concept name if it shows up in the pipe-concatenated synonyms;
+                // unescape || to |.
+                synonyms.addAll(Arrays.asList(parts).subList(1, parts.length).stream()
+                    .filter((part) -> !Strings.isNullOrEmpty(part) && !part.equals(conceptName))
+                    .map((part) -> part.replaceAll("\\|\\|", "|"))
                     .collect(Collectors.toList()));
             }
         }
@@ -220,20 +220,16 @@ public class Concept {
 
 
     @Transient
-    public List<ConceptSynonym> getSynonyms() {
+    public List<String> getSynonyms() {
         return synonyms;
     }
-    public void setSynonyms(List<ConceptSynonym> synonyms) {
+    public void setSynonyms(List<String> synonyms) {
         this.synonyms = synonyms;
     }
-    public Concept synonyms(List<ConceptSynonym> synonyms) {
+    public Concept synonyms(List<String> synonyms) {
         this.synonyms = synonyms;
         return this;
     }
-    public void addSynonym(ConceptSynonym conceptSynonym) {
-        this.synonyms.add(conceptSynonym);
-    }
-
 
     @Override
     public boolean equals(Object o) {
