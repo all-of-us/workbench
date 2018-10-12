@@ -55,7 +55,9 @@
     <div *ngIf="userNotFound" class="error-message">
       User {{toShare}} not found.
     </div>
-
+    <div *ngIf="workspaceShareError" class="error-message">
+      Failed to share workspace, please try again.
+    </div>
 
     <div *ngIf="usersLoading" class="loading-users">
       <span class="spinner spinner-sm"></span>
