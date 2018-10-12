@@ -80,7 +80,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response,
-                               String matchExp, Long conceptId, StandardConceptFilter standardConceptFilter) {
+                               String matchExp, StandardConceptFilter standardConceptFilter) {
     if (request.getIncludeDomainCounts() == null || !request.getIncludeDomainCounts()) {
       return;
     }
@@ -172,7 +172,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
     // TODO: consider doing these queries in parallel
     ConceptListResponse response = new ConceptListResponse();
-    addDomainCounts(request, response, matchExp, conceptId, standardConceptFilter);
+    addDomainCounts(request, response, matchExp, standardConceptFilter);
     addVocabularyCounts(request, response, matchExp, conceptId, standardConceptFilter);
 
     List<String> domainIds = null;
