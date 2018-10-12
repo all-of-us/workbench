@@ -8,5 +8,5 @@ export const environment = {
   publicApiUrl: 'http://localhost:8083',
   publicUiUrl: 'http://localhost:4201',
   debug: true,
-  gaId: 'UA-112406425-1'
+  gaId: 'UA-112406425-5'
 };
