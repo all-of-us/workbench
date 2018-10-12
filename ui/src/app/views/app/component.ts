@@ -107,7 +107,8 @@ export class AppComponent implements OnInit {
 
   /**
    * Setting the Google Analytics ID here.
-   * This first injects Google's gtag script via iife, then secondarily defines the global gtag function.
+   * This first injects Google's gtag script via iife, then secondarily defines
+   * the global gtag function.
    */
   private setGTagManager() {
     const s = this.doc.createElement('script');
