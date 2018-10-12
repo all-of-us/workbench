@@ -1,9 +1,5 @@
 package org.pmiops.workbench.cdr.model;
 
-<<<<<<< HEAD
-=======
-import com.google.common.base.Predicates;
->>>>>>> Trying to populate synonyms from string (in progress)
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Arrays;
