@@ -191,7 +191,7 @@ export class WorkspaceEditComponent implements OnInit {
   researchPurposeItems = ResearchPurposeItems;
   cloneUserRoles = false;
   fillDetailsLater = false;
-  hideDetailsLaterOption = false;
+  hideDetailsLaterOption = true;
   canEditResearchPurpose = true;
   cdrVersions: CdrVersion[] = [];
 
@@ -434,15 +434,23 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   get isValidWorkspace() {
-    return !isBlank(this.workspace.name) &&
-        (!(isBlank(this.workspace.description) && !this.fillDetailsLater));
+    return !this.missingFields && !this.nameValidationError;
+  }
+
+  get missingFields() {
+    return isBlank(this.workspace.name) ||
+      ((isBlank(this.workspace.description) && !this.fillDetailsLater));
+  }
+
+  get nameValidationError() {
+    return this.workspace.name && this.workspace.name.length > 80;
   }
 
   get allowSave() {
     if (this.savingWorkspace) {
       return false;
     }
-    return this.isValidWorkspace || this.fillDetailsLater;
+    return this.isValidWorkspace;
   }
 
   openStigmatizationLink() {
