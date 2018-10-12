@@ -4,7 +4,10 @@ import {ActivatedRoute} from '@angular/router';
 import {
   Concept,
   ConceptSet,
-  ConceptSetsService, ConceptsService, Domain, UpdateConceptSetRequest
+  ConceptSetsService,
+  ConceptsService,
+  Domain,
+  UpdateConceptSetRequest
 } from 'generated';
 
 @Component({
