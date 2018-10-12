@@ -328,11 +328,18 @@
               </button>
             </ng-container>
             <div *ngIf="!isValidWorkspace" class="tooltip-text">
-              Missing Required Fields:
-              <ul>
-                <li *ngIf="isBlank(workspace.name)">Name</li>
-                <li *ngIf="isBlank(workspace.description)">Description</li>
-              </ul>
+              <div *ngIf="missingFields else nameValidationError">
+                Missing Required Fields:
+                <ul>
+                  <li *ngIf="isBlank(workspace.name)">Name</li>
+                  <li *ngIf="isBlank(workspace.description)">Description</li>
+                </ul>
+              </div>
+              <ng-template #nameValidationError>
+                <div *ngIf="nameValidationError">
+                  Name must be shorter than 80 characters
+                </div>
+              </ng-template>
             </div>
           </div>
         </div>
