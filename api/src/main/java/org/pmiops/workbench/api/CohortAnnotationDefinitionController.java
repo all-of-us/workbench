@@ -124,7 +124,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         try {
             cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
         } catch (DataIntegrityViolationException e) {
-            throw new BadRequestException(ExceptionUtils.getRootCause(e).getMessage());
+            throw new BadRequestException("Bad Request: " + ExceptionUtils.getRootCause(e).getMessage());
         }
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
@@ -220,7 +220,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         try {
             cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
         } catch (DataIntegrityViolationException e) {
-            throw new BadRequestException(ExceptionUtils.getRootCause(e).getMessage());
+            throw new BadRequestException("Bad Request: " + ExceptionUtils.getRootCause(e).getMessage());
         }
 
         return ResponseEntity.ok(TO_CLIENT_COHORT_ANNOTATION_DEFINITION.apply(cohortAnnotationDefinition));
