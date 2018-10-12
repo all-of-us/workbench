@@ -163,11 +163,6 @@ public class ConceptsController implements ConceptsApiDelegate {
     if (standardConceptFilter == null) {
       standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
     }
-    Long conceptId = null;
-    try {
-      conceptId = Long.parseLong(request.getQuery());
-    } catch (NumberFormatException e) {
-    }
 
     String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
     // TODO: consider doing these queries in parallel

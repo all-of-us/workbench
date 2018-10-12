@@ -162,7 +162,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired
   FireCloudService fireCloudService;
-  
+
   private ConceptSetsController conceptSetsController;
 
   @Autowired
