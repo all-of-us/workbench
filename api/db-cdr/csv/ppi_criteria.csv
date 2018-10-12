@@ -1,355 +1,355 @@
-"id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","path"
-3272493,0,"PPI","BASICS","","The Basics",1,0,"","Observation",1586134,0,""
-3272494,3272493,"PPI","BASICS","","In what country were you born?",1,0,"","Observation",1586135,0,3272493
-3272495,3272494,"PPI","BASICS",1586135,"USA",0,1,"","Observation",1586136,0,3272493.3272494
-3272496,3272494,"PPI","BASICS",1586135,"Other",0,1,"","Observation",1586137,0,3272493.3272494
-3272497,3272493,"PPI","BASICS","","Race",1,0,"","Observation",1586140,0,3272493
-3272498,3272497,"PPI","BASICS",1586140,"White Alone",0,1,"","Observation",1586146,0,3272493.3272497
-3272499,3272497,"PPI","BASICS",1586140,"Black Alone",0,1,"","Observation",1586143,0,3272493.3272497
-3272500,3272497,"PPI","BASICS",1586140,"Asian Alone",0,1,"","Observation",1586142,0,3272493.3272497
-3272501,3272497,"PPI","BASICS",1586140,"Other Alone",0,1,"","Observation","",0,3272493.3272497
-3272502,3272497,"PPI","BASICS",1586140,"Mixed Racial Group",0,1,"","Observation","",0,3272493.3272497
-3272503,3272497,"PPI","BASICS",1586140,"Unknown",0,1,"","Observation","",0,3272493.3272497
-3272504,3272493,"PPI","BASICS","","What was your biological sex assigned at birth?",1,0,"","Observation",1585845,0,3272493
-3272505,3272504,"PPI","BASICS",1585845,"Female",0,1,"","Observation",1585846,0,3272493.3272504
-3272506,3272504,"PPI","BASICS",1585845,"Male",0,1,"","Observation",1585846,0,3272493.3272504
-3272507,3272504,"PPI","BASICS",1585845,"Other or Unknown",0,1,"","Observation","",0,3272493.3272504
-3272508,3272493,"PPI","BASICS","","What terms best express how you describe your gender identity?",1,0,"","Observation",1585838,0,3272493
-3272509,3272508,"PPI","BASICS",1585838,"Man",0,1,"","Observation",1585839,0,3272493.3272508
-3272510,3272508,"PPI","BASICS",1585838,"Woman",0,1,"","Observation",1585840,0,3272493.3272508
-3272511,3272508,"PPI","BASICS",1585838,"Other or Unknown",0,1,"","Observation","",0,3272493.3272508
-3272512,3272493,"PPI","BASICS","","Which of the following best represents how you think of yourself?",1,0,"","Observation",1585899,0,3272493
-3272513,3272512,"PPI","BASICS",1585899,"Straight; that is, not gay or lesbian, etc.",0,1,"","Observation",1585900,0,3272493.3272512
-3272514,3272512,"PPI","BASICS",1585899,"Non-straight or unknown",0,1,"","Observation","",0,3272493.3272512
-3272515,3272493,"PPI","BASICS","","What is the highest grade or year of school you completed?",1,0,"","Observation",1585940,0,3272493
-3272516,3272515,"PPI","BASICS",1585940,"Advanced degree",0,1,"","Observation",1585948,0,3272493.3272515
-3272517,3272515,"PPI","BASICS",1585940,"1 to 3 years (Some college, Associate's Degree or technical school)",0,1,"","Observation",1585946,0,3272493.3272515
-3272518,3272515,"PPI","BASICS",1585940,"Grade 12 or GED (High school graduate)",0,1,"","Observation",1585945,0,3272493.3272515
-3272519,3272515,"PPI","BASICS",1585940,"Other",0,1,"","Observation","",0,3272493.3272515
-3272520,3272493,"PPI","BASICS","","Have you ever served on active duty in the United States Armed forces, either in the regular military or in a National Guard or military reserve unit?",1,0,"","Observation",1585852,0,3272493
-3272521,3272520,"PPI","BASICS",1585852,"Yes",0,1,"","Observation",1585853,0,3272493.3272520
-3272522,3272520,"PPI","BASICS",1585852,"No",0,1,"","Observation",1585854,0,3272493.3272520
-3272523,3272493,"PPI","BASICS","","What is your current marital status?",1,0,"","Observation",1585892,0,3272493
-3272524,3272523,"PPI","BASICS",1585892,"Married",0,1,"","Observation",1585893,0,3272493.3272523
-3272525,3272523,"PPI","BASICS",1585892,"Divorced",0,1,"","Observation",1585894,0,3272493.3272523
-3272526,3272523,"PPI","BASICS",1585892,"Widowed",0,1,"","Observation",1585895,0,3272493.3272523
-3272527,3272523,"PPI","BASICS",1585892,"Separated",0,1,"","Observation",1585896,0,3272493.3272523
-3272528,3272523,"PPI","BASICS",1585892,"Never married",0,1,"","Observation",1585897,0,3272493.3272523
-3272529,3272523,"PPI","BASICS",1585892,"Living with partner",0,1,"","Observation",1585898,0,3272493.3272523
-3272530,3272493,"PPI","BASICS","","Are you covered by health insurance or some other kind of health care plan?",1,0,"","Observation",1585386,0,3272493
-3272531,3272530,"PPI","BASICS",1585386,"Yes",0,1,"","Observation",1585387,0,3272493.3272530
-3272532,3272530,"PPI","BASICS",1585386,"No",0,1,"","Observation",1585388,0,3272493.3272530
-3272533,3272493,"PPI","BASICS","","Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",1,0,"","Observation",43529119,0,3272493
-3272534,3272533,"PPI","BASICS",43529119,"Insurance purchased directly from an insurance company (by you or another family member)",0,1,"","Observation",43529120,0,3272493.3272533
-3272535,3272533,"PPI","BASICS",43529119,"Medicare, for people 65 and older or people with certain disabilities",0,1,"","Observation",43529210,0,3272493.3272533
-3272536,3272533,"PPI","BASICS",43529119,"Medicaid, Medical Assistance, or any kind of government-assistance plan for those with low incomes or disability",0,1,"","Observation",43529209,0,3272493.3272533
-3272537,3272533,"PPI","BASICS",43529119,"TRICARE or other military health care",0,1,"","Observation",43529920,0,3272493.3272533
-3272538,3272533,"PPI","BASICS",43529119,"Veterans Affairs (VA) (including those who have ever used or enrolled for VA health care)",0,1,"","Observation",43529926,0,3272493.3272533
-3272539,3272533,"PPI","BASICS",43529119,"Indian Health Service",0,1,"","Observation",43529111,0,3272493.3272533
-3272540,3272533,"PPI","BASICS",43529119,"Any other type of health insurance or health coverage plan",0,1,"","Observation",43528423,0,3272493.3272533
-3272541,3272533,"PPI","BASICS",43529119,"I don't have health insurance, self-pay",0,1,"","Observation",43529095,0,3272493.3272533
-3272542,3272493,"PPI","BASICS","","What is your current employment status? Please select 1 or more of these categories.",1,0,"","Observation",1585952,0,3272493
-3272543,3272542,"PPI","BASICS",1585952,"Employed for wages (part--­time or full-­?time) or Self-­?employed",0,1,"","Observation","",0,3272493.3272542
-3272544,3272542,"PPI","BASICS",1585952,"Out of work",0,1,"","Observation","",0,3272493.3272542
-3272545,3272493,"PPI","BASICS","","What is your annual household income from all sources?",1,0,"","Observation",1585375,0,3272493
-3272546,3272545,"PPI","BASICS",1585375,"Less than $10,000",0,1,"","Observation",1585376,0,3272493.3272545
-3272547,3272545,"PPI","BASICS",1585375,"$10,000--$24,999",0,1,"","Observation",1585377,0,3272493.3272545
-3272548,3272545,"PPI","BASICS",1585375,"$25,000--$34,999",0,1,"","Observation",1585378,0,3272493.3272545
-3272549,3272545,"PPI","BASICS",1585375,"$35,000--$49,999",0,1,"","Observation",1585379,0,3272493.3272545
-3272550,3272545,"PPI","BASICS",1585375,"$50,000--$74,999",0,1,"","Observation",1585380,0,3272493.3272545
-3272551,3272545,"PPI","BASICS",1585375,"$75,000--$99,999",0,1,"","Observation",1585381,0,3272493.3272545
-3272552,3272545,"PPI","BASICS",1585375,"$100,000--$149,999",0,1,"","Observation",1585382,0,3272493.3272545
-3272553,3272545,"PPI","BASICS",1585375,"$150,000--$199,999",0,1,"","Observation",1585383,0,3272493.3272545
-3272554,3272545,"PPI","BASICS",1585375,"$200,000 or more",0,1,"","Observation",1585384,0,3272493.3272545
-3272555,3272493,"PPI","BASICS","","Do you own or rent the place where you live?",1,0,"","Observation",1585370,0,3272493
-3272556,3272555,"PPI","BASICS",1585370,"Own",0,1,"","Observation",1585371,0,3272493.3272555
-3272557,3272555,"PPI","BASICS",1585370,"Rent",0,1,"","Observation",1585372,0,3272493.3272555
-3272558,3272555,"PPI","BASICS",1585370,"Other arrangement",0,1,"","Observation",1585373,0,3272493.3272555
-3272559,3272493,"PPI","BASICS","","Where are you currently living?",1,0,"","Observation",1585402,0,3272493
-3272560,3272559,"PPI","BASICS",1585402,"On a college campus",0,1,"","Observation",1585403,0,3272493.3272559
-3272561,3272559,"PPI","BASICS",1585402,"With a friend/roommate",0,1,"","Observation",1585404,0,3272493.3272559
-3272562,3272559,"PPI","BASICS",1585402,"With family",0,1,"","Observation",1585405,0,3272493.3272559
-3272563,3272559,"PPI","BASICS",1585402,"Motel/hotel",0,1,"","Observation",1585406,0,3272493.3272559
-3272564,3272559,"PPI","BASICS",1585402,"Hospital, rehabilitation center, drug treatment center, or other temporary institution",0,1,"","Observation",1585407,0,3272493.3272559
-3272565,3272559,"PPI","BASICS",1585402,"In a group home, nursing home, or other residential facility",0,1,"","Observation",1585874,0,3272493.3272559
-3272566,3272559,"PPI","BASICS",1585402,"Transitional housing",0,1,"","Observation",1585875,0,3272493.3272559
-3272567,3272559,"PPI","BASICS",1585402,"Emergency shelter or homeless shelter",0,1,"","Observation",1585876,0,3272493.3272559
-3272568,3272559,"PPI","BASICS",1585402,"Anywhere outside (e.g., street, vehicle, abandoned building)",0,1,"","Observation",1585874,0,3272493.3272559
-3272569,3272559,"PPI","BASICS",1585402,"Other",0,1,"","Observation",1585878,0,3272493.3272559
-3272570,3272493,"PPI","BASICS","","How many years have you lived at your current address?",1,0,"","Observation",1585879,0,3272493
-3272571,3272570,"PPI","BASICS",1585879,"Less than 1 year",0,1,"","Observation",1585880,0,3272493.3272570
-3272572,3272570,"PPI","BASICS",1585879,"1--2 years",0,1,"","Observation",1585881,0,3272493.3272570
-3272573,3272570,"PPI","BASICS",1585879,"3--5 years",0,1,"","Observation",1585882,0,3272493.3272570
-3272574,3272570,"PPI","BASICS",1585879,"6--10 years",0,1,"","Observation",1585883,0,3272493.3272570
-3272575,3272570,"PPI","BASICS",1585879,"11--20 years",0,1,"","Observation",1585884,0,3272493.3272570
-3272576,3272570,"PPI","BASICS",1585879,"More than 20 years",0,1,"","Observation",1585885,0,3272493.3272570
-3272577,3272493,"PPI","BASICS","","In the past 6 months, have you been worried or concerned about NOT having a place to live?",1,0,"","Observation",1585886,0,3272493
-3272578,3272577,"PPI","BASICS",1585886,"Yes",0,1,"","Observation",1585887,0,3272493.3272577
-3272579,3272577,"PPI","BASICS",1585886,"No",0,1,"","Observation",1585888,0,3272493.3272577
-3272580,0,"PPI","LIFESTYLE","","Lifestyle",1,0,"","Observation",1585855,0,""
-3272581,3272580,"PPI","LIFESTYLE","","Smoking",1,0,"","Observation",1585856,0,3272580
-3272582,3272581,"PPI","LIFESTYLE","","Have you smoked at least 100 cigarettes in your entire life? (There are 20 cigarettes in a pack.)?",1,0,"","Observation",1585857,0,3272580.3272581
-3272583,3272582,"PPI","LIFESTYLE",1585857,"Yes",0,1,"","Observation",1585858,0,"3272580.3272581.3272582"
-3272584,3272582,"PPI","LIFESTYLE",1585857,"No",0,1,"","Observation",1585859,0,"3272580.3272581.3272582"
-3272585,3272581,"PPI","LIFESTYLE","","Do you now smoke cigarettes every day, some days, or not at all?",1,0,"","Observation",1585860,0,3272580.3272581
-3272586,3272585,"PPI","LIFESTYLE",1585860,"Every day",0,1,"","Observation",1585861,0,"3272580.3272581.3272585"
-3272587,3272585,"PPI","LIFESTYLE",1585860,"Some Days",0,1,"","Observation",1585862,0,"3272580.3272581.3272585"
-3272588,3272585,"PPI","LIFESTYLE",1585860,"Not at all",0,1,"","Observation",1585863,0,"3272580.3272581.3272585"
-3272589,3272581,"PPI","LIFESTYLE","","In the past, have you ever made a serious attempt to quit smoking? That is, have you stopped smoking for at least one day or longer because you were trying to quit?",1,0,"","Observation",1585867,0,3272580.3272581
-3272590,3272589,"PPI","LIFESTYLE",1585867,"Yes",0,1,"","Observation",1585868,0,"3272580.3272581.3272589"
-3272591,3272589,"PPI","LIFESTYLE",1585867,"No",0,1,"","Observation",1585869,0,"3272580.3272581.3272589"
-3272592,3272580,"PPI","LIFESTYLE","","Electronic Smoking",1,0,"","Observation",1586165,0,3272580
-3272593,3272592,"PPI","LIFESTYLE","","Have you ever used an electronic nicotine product, even one or two times? (Electronic nicotine products include e- cigarettes, vape pens, hookah pens, personal vaporizers and mods, e-cigars, e-pipes, and e-hookahs.)",1,0,"","Observation",1586166,0,3272580.3272592
-3272594,3272593,"PPI","LIFESTYLE",1586166,"Yes",0,1,"","Observation",1586167,0,"3272580.3272592.3272593"
-3272595,3272593,"PPI","LIFESTYLE",1586166,"No",0,1,"","Observation",1586168,0,"3272580.3272592.3272593"
-3272596,3272592,"PPI","LIFESTYLE","","Do you now use electronic nicotine products",1,0,"","Observation",1586169,0,3272580.3272592
-3272597,3272596,"PPI","LIFESTYLE",1586169,"Every day",0,1,"","Observation",1586170,0,"3272580.3272592.3272596"
-3272598,3272596,"PPI","LIFESTYLE",1586169,"Some Days",0,1,"","Observation",1586171,0,"3272580.3272592.3272596"
-3272599,3272596,"PPI","LIFESTYLE",1586169,"Not at all",0,1,"","Observation",1586172,0,"3272580.3272592.3272596"
-3272600,3272580,"PPI","LIFESTYLE","","Cigar Smoking",1,0,"","Observation",1586173,0,3272580
-3272601,3272600,"PPI","LIFESTYLE","","Have you ever smoked a traditional cigar, cigarillo, or filtered cigar, even one of two puffs?",1,0,"","Observation",1586174,0,3272580.3272600
-3272602,3272601,"PPI","LIFESTYLE",1586174,"Yes",0,1,"","Observation",1586175,0,"3272580.3272600.3272601"
-3272603,3272601,"PPI","LIFESTYLE",1586174,"No",0,1,"","Observation",1586176,0,"3272580.3272600.3272601"
-3272604,3272600,"PPI","LIFESTYLE","","Do you now smoke a traditional cigar, cigarillo, or filtered cigar",1,0,"","Observation",1586177,0,3272580.3272600
-3272605,3272604,"PPI","LIFESTYLE",1586177,"Every day",0,1,"","Observation",1586178,0,"3272580.3272600.3272604"
-3272606,3272604,"PPI","LIFESTYLE",1586177,"Some Days",0,1,"","Observation",1586179,0,"3272580.3272600.3272604"
-3272607,3272604,"PPI","LIFESTYLE",1586177,"Not at all",0,1,"","Observation",1586180,0,"3272580.3272600.3272604"
-3272608,3272580,"PPI","LIFESTYLE","","Hookah Smoking",1,0,"","Observation",1586181,0,3272580
-3272609,3272608,"PPI","LIFESTYLE","","Have you ever smoked tobacco in a hookah, even one or two puffs?",1,0,"","Observation",1586182,0,3272580.3272608
-3272610,3272609,"PPI","LIFESTYLE",1586182,"Yes",0,1,"","Observation",1586183,0,"3272580.3272608.3272609"
-3272611,3272609,"PPI","LIFESTYLE",1586182,"No",0,1,"","Observation",1586184,0,"3272580.3272608.3272609"
-3272612,3272608,"PPI","LIFESTYLE","","Do you smoke hookah",1,0,"","Observation",1586185,0,3272580.3272608
-3272613,3272612,"PPI","LIFESTYLE",1586185,"Every day",0,1,"","Observation",1586186,0,"3272580.3272608.3272612"
-3272614,3272612,"PPI","LIFESTYLE",1586185,"Some Days",0,1,"","Observation",1586187,0,"3272580.3272608.3272612"
-3272615,3272612,"PPI","LIFESTYLE",1586185,"Not at all",0,1,"","Observation",1586188,0,"3272580.3272608.3272612"
-3272616,3272580,"PPI","LIFESTYLE","","Smokeless Tobacco",1,0,"","Observation",1586189,0,3272580
-3272617,3272616,"PPI","LIFESTYLE","","Have you ever used smokeless tobacco products, even one or two times? (Smokeless tobacco products include snus pouches, Skoal Bandits, loose snus, moist snuff, dip, spit, and chewing tobacco.)",1,0,"","Observation",1586190,0,3272580.3272616
-3272618,3272617,"PPI","LIFESTYLE",1586190,"Yes",0,1,"","Observation",1586191,0,"3272580.3272616.3272617"
-3272619,3272617,"PPI","LIFESTYLE",1586190,"No",0,1,"","Observation",1586192,0,"3272580.3272616.3272617"
-3272620,3272616,"PPI","LIFESTYLE","","Do you now use smokeless tobacco products",1,0,"","Observation",1586193,0,3272580.3272616
-3272621,3272620,"PPI","LIFESTYLE",1586193,"Every day",0,1,"","Observation",1586194,0,"3272580.3272616.3272620"
-3272622,3272620,"PPI","LIFESTYLE",1586193,"Some Days",0,1,"","Observation",1586195,0,"3272580.3272616.3272620"
-3272623,3272620,"PPI","LIFESTYLE",1586193,"Not at all",0,1,"","Observation",1586196,0,"3272580.3272616.3272620"
-3272624,3272580,"PPI","LIFESTYLE","","Alcohol",1,0,"","Observation",1586197,0,3272580
-3272625,3272624,"PPI","LIFESTYLE","","In your entire life, have you had at least 1 drink of any kind of alcohol, not counting small tastes or sips? (By a drink, we mean a can or bottle of beer, a glass of wine or a wine cooler, a shot of liquor, or a mixed drink with liquor in it.)",1,0,"","Observation",1586198,0,3272580.3272624
-3272626,3272625,"PPI","LIFESTYLE",1586198,"Yes",0,1,"","Observation",1586199,0,"3272580.3272624.3272625"
-3272627,3272625,"PPI","LIFESTYLE",1586198,"No",0,1,"","Observation",1586200,0,"3272580.3272624.3272625"
-3272628,3272624,"PPI","LIFESTYLE","","How often did you have a drink containing alcohol in the past year?",1,0,"","Observation",1586201,0,3272580.3272624
-3272629,3272628,"PPI","LIFESTYLE",1586201,"Never",0,1,"","Observation",1586202,0,"3272580.3272624.3272628"
-3272630,3272628,"PPI","LIFESTYLE",1586201,"Monthly or less",0,1,"","Observation",1586203,0,"3272580.3272624.3272628"
-3272631,3272628,"PPI","LIFESTYLE",1586201,"Two to four times a month ",0,1,"","Observation",1586204,0,"3272580.3272624.3272628"
-3272632,3272628,"PPI","LIFESTYLE",1586201,"Two to three times a week ",0,1,"","Observation",1586205,0,"3272580.3272624.3272628"
-3272633,3272628,"PPI","LIFESTYLE",1586201,"Four or more times a week",0,1,"","Observation",1586206,0,"3272580.3272624.3272628"
-3272634,3272624,"PPI","LIFESTYLE","","On a typical day when you drink,  how many drinks do you have?",1,0,"","Observation",1586207,0,3272580.3272624
-3272635,3272634,"PPI","LIFESTYLE",1586207,"1 or 2",0,1,"","Observation",1586208,0,"3272580.3272624.3272634"
-3272636,3272634,"PPI","LIFESTYLE",1586207,"3 or 4",0,1,"","Observation",1586209,0,"3272580.3272624.3272634"
-3272637,3272634,"PPI","LIFESTYLE",1586207,"5 or 6 ",0,1,"","Observation",1586210,0,"3272580.3272624.3272634"
-3272638,3272634,"PPI","LIFESTYLE",1586207,"7 to 9 ",0,1,"","Observation",1586211,0,"3272580.3272624.3272634"
-3272639,3272634,"PPI","LIFESTYLE",1586207,"10 or more",0,1,"","Observation",1586212,0,"3272580.3272624.3272634"
-3272640,3272624,"PPI","LIFESTYLE","","How often did you have six or more drinks on one occasion in the past year?",1,0,"","Observation",1586213,0,3272580.3272624
-3272641,3272640,"PPI","LIFESTYLE",1586213,"Less than monthly",0,1,"","Observation",1586214,0,"3272580.3272624.3272640"
-3272642,3272640,"PPI","LIFESTYLE",1586213,"Monthly",0,1,"","Observation",1586215,0,"3272580.3272624.3272640"
-3272643,3272640,"PPI","LIFESTYLE",1586213,"Weekly",0,1,"","Observation",1586216,0,"3272580.3272624.3272640"
-3272644,3272640,"PPI","LIFESTYLE",1586213,"Daily or almost daily",0,1,"","Observation",1586217,0,"3272580.3272624.3272640"
-3272645,3272640,"PPI","LIFESTYLE",1586213,"Never in the last year",0,1,"","Observation",1585634,0,"3272580.3272624.3272640"
-3272646,3272580,"PPI","LIFESTYLE","","Recreational Drug Use",1,0,"","Observation",1585635,0,3272580
-3272647,3272646,"PPI","LIFESTYLE","","In your LIFETIME, which of the following substances have you ever used?",1,0,"","Observation",1585636,0,3272580.3272646
-3272648,3272647,"PPI","LIFESTYLE",1585636,"Marijuana (cannabis, pot, grass, hash, weed, etc.)",0,1,"","Observation",1585637,0,"3272580.3272646.3272647"
-3272649,3272647,"PPI","LIFESTYLE",1585636,"Cocaine (coke, crack, etc.)",0,1,"","Observation",1585638,0,"3272580.3272646.3272647"
-3272650,3272647,"PPI","LIFESTYLE",1585636,"Prescription stimulants for non-medical reasons (Ritalin, Concerta, Dexedrine, Adderall, diet pills,etc.)",0,1,"","Observation",1585639,0,"3272580.3272646.3272647"
-3272651,3272647,"PPI","LIFESTYLE",1585636,"Other stimulants (methamphetamine, speed, crystal meth, ice, k2/spice, bath salts, etc.)",0,1,"","Observation",1585640,0,"3272580.3272646.3272647"
-3272652,3272647,"PPI","LIFESTYLE",1585636,"Inhalants (nitrous oxide, glue, gas, paint thinner, etc.)",0,1,"","Observation",1585641,0,"3272580.3272646.3272647"
-3272653,3272647,"PPI","LIFESTYLE",1585636,"Sedatives or sleeping pills for non-medical reasons (Valium, Serepax, Ativan, Xanax, Librium, Rohypnol, GHB, etc.)",0,1,"","Observation",1585642,0,"3272580.3272646.3272647"
-3272654,3272647,"PPI","LIFESTYLE",1585636,"Hallucinogens (LSD, acid, mushrooms, PCP, Special K, ecstasy, etc.)",0,1,"","Observation",1585643,0,"3272580.3272646.3272647"
-3272655,3272647,"PPI","LIFESTYLE",1585636,"Street opioids (heroin, opium, etc.)",0,1,"","Observation",1585644,0,"3272580.3272646.3272647"
-3272656,3272647,"PPI","LIFESTYLE",1585636,"Prescription opioids for non-medical reasons (fentanyl, oxycodone [OxyContin, Percocet], hydrocodone [Vicodin], methadone, buprenorphine, etc.)",0,1,"","Observation",1585645,0,"3272580.3272646.3272647"
-3272657,3272647,"PPI","LIFESTYLE",1585636,"Other drugs",0,1,"","Observation",1585646,0,"3272580.3272646.3272647"
-3272658,3272646,"PPI","LIFESTYLE","","How often was the drug used",1,0,"","Observation",1585649,0,3272580.3272646
-3272659,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used marijuana (cannabis, pot, grass, hash, etc.)?",1,0,"","Observation",1585650,0,"3272580.3272646.3272658"
-3272660,3272659,"PPI","LIFESTYLE",1585650,"Never",0,1,"","Observation",1585651,0,"3272580.3272646.3272658.3272659"
-3272661,3272659,"PPI","LIFESTYLE",1585650,"Once or twice",0,1,"","Observation",1585652,0,"3272580.3272646.3272658.3272659"
-3272662,3272659,"PPI","LIFESTYLE",1585650,"Monthly",0,1,"","Observation",1585653,0,"3272580.3272646.3272658.3272659"
-3272663,3272659,"PPI","LIFESTYLE",1585650,"Weekly",0,1,"","Observation",1585654,0,"3272580.3272646.3272658.3272659"
-3272664,3272659,"PPI","LIFESTYLE",1585650,"Daily or almost daily",0,1,"","Observation",1585655,0,"3272580.3272646.3272658.3272659"
-3272665,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used cocaine (coke, crack, etc.)?",1,0,"","Observation",1585656,0,"3272580.3272646.3272658"
-3272666,3272665,"PPI","LIFESTYLE",1585656,"Never",0,1,"","Observation",1585657,0,"3272580.3272646.3272658.3272665"
-3272667,3272665,"PPI","LIFESTYLE",1585656,"Once or twice",0,1,"","Observation",1585658,0,"3272580.3272646.3272658.3272665"
-3272668,3272665,"PPI","LIFESTYLE",1585656,"Monthly",0,1,"","Observation",1585659,0,"3272580.3272646.3272658.3272665"
-3272669,3272665,"PPI","LIFESTYLE",1585656,"Weekly",0,1,"","Observation",1585660,0,"3272580.3272646.3272658.3272665"
-3272670,3272665,"PPI","LIFESTYLE",1585656,"Daily or almost daily",0,1,"","Observation",1585661,0,"3272580.3272646.3272658.3272665"
-3272671,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used prescription stimulants for non-medical reasons (Vyvanse, Ritalin, Concerta, Dexedrine, Adderall, diet pills, etc.)",1,0,"","Observation",1585662,0,"3272580.3272646.3272658"
-3272672,3272671,"PPI","LIFESTYLE",1585662,"Never",0,1,"","Observation",1585663,0,"3272580.3272646.3272658.3272671"
-3272673,3272671,"PPI","LIFESTYLE",1585662,"Once or twice",0,1,"","Observation",1585664,0,"3272580.3272646.3272658.3272671"
-3272674,3272671,"PPI","LIFESTYLE",1585662,"Monthly",0,1,"","Observation",1585665,0,"3272580.3272646.3272658.3272671"
-3272675,3272671,"PPI","LIFESTYLE",1585662,"Weekly",0,1,"","Observation",1585666,0,"3272580.3272646.3272658.3272671"
-3272676,3272671,"PPI","LIFESTYLE",1585662,"Daily or almost daily",0,1,"","Observation",1585667,0,"3272580.3272646.3272658.3272671"
-3272677,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used other stimulants (methamphetamine, speed, crystal meth, ice, k2/spice, bath salts, etc.)",1,0,"","Observation",1585668,0,"3272580.3272646.3272658"
-3272678,3272677,"PPI","LIFESTYLE",1585668,"Never",0,1,"","Observation",1585669,0,"3272580.3272646.3272658.3272677"
-3272679,3272677,"PPI","LIFESTYLE",1585668,"Once or twice",0,1,"","Observation",1585670,0,"3272580.3272646.3272658.3272677"
-3272680,3272677,"PPI","LIFESTYLE",1585668,"Monthly",0,1,"","Observation",1585671,0,"3272580.3272646.3272658.3272677"
-3272681,3272677,"PPI","LIFESTYLE",1585668,"Weekly",0,1,"","Observation",1585672,0,"3272580.3272646.3272658.3272677"
-3272682,3272677,"PPI","LIFESTYLE",1585668,"Daily or almost daily",0,1,"","Observation",1585673,0,"3272580.3272646.3272658.3272677"
-3272683,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used inhalants (nitrous oxide, glue, gas, paint thinner, etc.)?",1,0,"","Observation",1585674,0,"3272580.3272646.3272658"
-3272684,3272683,"PPI","LIFESTYLE",1585674,"Never",0,1,"","Observation",1585675,0,"3272580.3272646.3272658.3272683"
-3272685,3272683,"PPI","LIFESTYLE",1585674,"Once or twice",0,1,"","Observation",1585676,0,"3272580.3272646.3272658.3272683"
-3272686,3272683,"PPI","LIFESTYLE",1585674,"Monthly",0,1,"","Observation",1585677,0,"3272580.3272646.3272658.3272683"
-3272687,3272683,"PPI","LIFESTYLE",1585674,"Weekly",0,1,"","Observation",1585678,0,"3272580.3272646.3272658.3272683"
-3272688,3272683,"PPI","LIFESTYLE",1585674,"Daily or almost daily",0,1,"","Observation",1585679,0,"3272580.3272646.3272658.3272683"
-3272689,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used sedatives or sleeping pills for non-medical reasons (Valium, Serepax, Ativan, Xanax, Librium, Rohypnol, GHB, etc.)?",1,0,"","Observation",1585680,0,"3272580.3272646.3272658"
-3272690,3272689,"PPI","LIFESTYLE",1585680,"Never",0,1,"","Observation",1585681,0,"3272580.3272646.3272658.3272689"
-3272691,3272689,"PPI","LIFESTYLE",1585680,"Once or twice",0,1,"","Observation",1585682,0,"3272580.3272646.3272658.3272689"
-3272692,3272689,"PPI","LIFESTYLE",1585680,"Monthly",0,1,"","Observation",1585683,0,"3272580.3272646.3272658.3272689"
-3272693,3272689,"PPI","LIFESTYLE",1585680,"Weekly",0,1,"","Observation",1585684,0,"3272580.3272646.3272658.3272689"
-3272694,3272689,"PPI","LIFESTYLE",1585680,"Daily or almost daily",0,1,"","Observation",1585685,0,"3272580.3272646.3272658.3272689"
-3272695,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used hallucinogens (LSD, acid, mushrooms, PCP, Special K, ecstasy, etc.)?",1,0,"","Observation",1585686,0,"3272580.3272646.3272658"
-3272696,3272695,"PPI","LIFESTYLE",1585686,"Never",0,1,"","Observation",1585687,0,"3272580.3272646.3272658.3272695"
-3272697,3272695,"PPI","LIFESTYLE",1585686,"Once or twice",0,1,"","Observation",1585688,0,"3272580.3272646.3272658.3272695"
-3272698,3272695,"PPI","LIFESTYLE",1585686,"Monthly",0,1,"","Observation",1585689,0,"3272580.3272646.3272658.3272695"
-3272699,3272695,"PPI","LIFESTYLE",1585686,"Weekly",0,1,"","Observation",1585690,0,"3272580.3272646.3272658.3272695"
-3272700,3272695,"PPI","LIFESTYLE",1585686,"Daily or almost daily",0,1,"","Observation",1585691,0,"3272580.3272646.3272658.3272695"
-3272701,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used street opioids (heroin, opium, etc.)?",1,0,"","Observation",1585692,0,"3272580.3272646.3272658"
-3272702,3272701,"PPI","LIFESTYLE",1585692,"Never",0,1,"","Observation",1585693,0,"3272580.3272646.3272658.3272701"
-3272703,3272701,"PPI","LIFESTYLE",1585692,"Once or twice",0,1,"","Observation",1585694,0,"3272580.3272646.3272658.3272701"
-3272704,3272701,"PPI","LIFESTYLE",1585692,"Monthly",0,1,"","Observation",1585695,0,"3272580.3272646.3272658.3272701"
-3272705,3272701,"PPI","LIFESTYLE",1585692,"Weekly",0,1,"","Observation",1585696,0,"3272580.3272646.3272658.3272701"
-3272706,3272701,"PPI","LIFESTYLE",1585692,"Daily or almost daily",0,1,"","Observation",1585697,0,"3272580.3272646.3272658.3272701"
-3272707,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used prescription opioids for non-medical reasons (obana, fentanyl, oxycodone [OxyContin, Percocet], hydrocodone [Vicodin], methadone, buprenorphine [Supoxone], etc.)",1,0,"","Observation",1585698,0,"3272580.3272646.3272658"
-3272708,3272707,"PPI","LIFESTYLE",1585698,"Never",0,1,"","Observation",1585699,0,"3272580.3272646.3272658.3272707"
-3272709,3272707,"PPI","LIFESTYLE",1585698,"Once or twice",0,1,"","Observation",1585700,0,"3272580.3272646.3272658.3272707"
-3272710,3272707,"PPI","LIFESTYLE",1585698,"Monthly",0,1,"","Observation",1585701,0,"3272580.3272646.3272658.3272707"
-3272711,3272707,"PPI","LIFESTYLE",1585698,"Weekly",0,1,"","Observation",1585702,0,"3272580.3272646.3272658.3272707"
-3272712,3272707,"PPI","LIFESTYLE",1585698,"Daily or almost daily",0,1,"","Observation",1585703,0,"3272580.3272646.3272658.3272707"
-3272713,3272658,"PPI","LIFESTYLE","","In the PAST THREE MONTHS, how often have you used other drugs?",1,0,"","Observation",1585704,0,"3272580.3272646.3272658"
-3272714,3272713,"PPI","LIFESTYLE",1585704,"Never",0,1,"","Observation",1585705,0,"3272580.3272646.3272658.3272713"
-3272715,3272713,"PPI","LIFESTYLE",1585704,"Once or twice",0,1,"","Observation",1585706,0,"3272580.3272646.3272658.3272713"
-3272716,3272713,"PPI","LIFESTYLE",1585704,"Monthly",0,1,"","Observation",1585707,0,"3272580.3272646.3272658.3272713"
-3272717,3272713,"PPI","LIFESTYLE",1585704,"Weekly",0,1,"","Observation",1585708,0,"3272580.3272646.3272658.3272713"
-3272718,3272713,"PPI","LIFESTYLE",1585704,"Daily or almost daily",0,1,"","Observation",1585709,0,"3272580.3272646.3272658.3272713"
-3272719,0,"PPI","OVERALLHEALTH","","Overall Health",1,0,"","Observation",1585710,0,""
-3272720,3272719,"PPI","OVERALLHEALTH","","How confident are you filling out medical forms by yourself?",1,0,"","Observation",1585766,0,3272719
-3272721,3272720,"PPI","OVERALLHEALTH",1585766,"Extremely",0,1,"","Observation",1585767,0,3272719.3272720
-3272722,3272720,"PPI","OVERALLHEALTH",1585766,"Quite a bit",0,1,"","Observation",1585768,0,3272719.3272720
-3272723,3272720,"PPI","OVERALLHEALTH",1585766,"Somewhat",0,1,"","Observation",1585769,0,3272719.3272720
-3272724,3272720,"PPI","OVERALLHEALTH",1585766,"A little bit",0,1,"","Observation",1585770,0,3272719.3272720
-3272725,3272720,"PPI","OVERALLHEALTH",1585766,"Not at all",0,1,"","Observation",1585771,0,3272719.3272720
-3272726,3272719,"PPI","OVERALLHEALTH","","How often do you have someone help you read health-related materials?",1,0,"","Observation",1585772,0,3272719
-3272727,3272726,"PPI","OVERALLHEALTH",1585772,"Always",0,1,"","Observation",1585773,0,3272719.3272726
-3272728,3272726,"PPI","OVERALLHEALTH",1585772,"Often",0,1,"","Observation",1585774,0,3272719.3272726
-3272729,3272726,"PPI","OVERALLHEALTH",1585772,"Sometimes",0,1,"","Observation",1585775,0,3272719.3272726
-3272730,3272726,"PPI","OVERALLHEALTH",1585772,"Occasionally",0,1,"","Observation",1585776,0,3272719.3272726
-3272731,3272726,"PPI","OVERALLHEALTH",1585772,"Never",0,1,"","Observation",1585777,0,3272719.3272726
-3272732,3272719,"PPI","OVERALLHEALTH","","How often do you have problems learning about your medical condition because of difficulty understanding written information?",1,0,"","Observation",1585778,0,3272719
-3272733,3272732,"PPI","OVERALLHEALTH",1585778,"Always",0,1,"","Observation",1585779,0,3272719.3272732
-3272734,3272732,"PPI","OVERALLHEALTH",1585778,"Often",0,1,"","Observation",1585780,0,3272719.3272732
-3272735,3272732,"PPI","OVERALLHEALTH",1585778,"Sometimes",0,1,"","Observation",1585781,0,3272719.3272732
-3272736,3272732,"PPI","OVERALLHEALTH",1585778,"Occasionally",0,1,"","Observation",1585782,0,3272719.3272732
-3272737,3272732,"PPI","OVERALLHEALTH",1585778,"Never",0,1,"","Observation",1585783,0,3272719.3272732
-3272738,3272719,"PPI","OVERALLHEALTH","","In general, would you say your health is:",1,0,"","Observation",1585711,0,3272719
-3272739,3272738,"PPI","OVERALLHEALTH",1585711,"5 = Excellent",0,1,"","Observation",1585712,0,3272719.3272738
-3272740,3272738,"PPI","OVERALLHEALTH",1585711,"4 = Very Good",0,1,"","Observation",1585713,0,3272719.3272738
-3272741,3272738,"PPI","OVERALLHEALTH",1585711,"3 = Good",0,1,"","Observation",1585714,0,3272719.3272738
-3272742,3272738,"PPI","OVERALLHEALTH",1585711,"2 = Fair",0,1,"","Observation",1585715,0,3272719.3272738
-3272743,3272738,"PPI","OVERALLHEALTH",1585711,"1 = Poor",0,1,"","Observation",1585716,0,3272719.3272738
-3272744,3272719,"PPI","OVERALLHEALTH","","In general, would you say your quality of life is:",1,0,"","Observation",1585717,0,3272719
-3272745,3272744,"PPI","OVERALLHEALTH",1585717,"5 = Excellent",0,1,"","Observation",1585718,0,3272719.3272744
-3272746,3272744,"PPI","OVERALLHEALTH",1585717,"4 = Very Good",0,1,"","Observation",1585719,0,3272719.3272744
-3272747,3272744,"PPI","OVERALLHEALTH",1585717,"3 = Good",0,1,"","Observation",1585720,0,3272719.3272744
-3272748,3272744,"PPI","OVERALLHEALTH",1585717,"2 = Fair",0,1,"","Observation",1585721,0,3272719.3272744
-3272749,3272744,"PPI","OVERALLHEALTH",1585717,"1 = Poor",0,1,"","Observation",1585722,0,3272719.3272744
-3272750,3272719,"PPI","OVERALLHEALTH","","In general, how would you rate your physical health?",1,0,"","Observation",1585723,0,3272719
-3272751,3272750,"PPI","OVERALLHEALTH",1585723,"5 = Excellent",0,1,"","Observation",1585724,0,3272719.3272750
-3272752,3272750,"PPI","OVERALLHEALTH",1585723,"4 = Very Good",0,1,"","Observation",1585725,0,3272719.3272750
-3272753,3272750,"PPI","OVERALLHEALTH",1585723,"3 = Good",0,1,"","Observation",1585726,0,3272719.3272750
-3272754,3272750,"PPI","OVERALLHEALTH",1585723,"2 = Fair",0,1,"","Observation",1585727,0,3272719.3272750
-3272755,3272750,"PPI","OVERALLHEALTH",1585723,"1 = Poor",0,1,"","Observation",1585728,0,3272719.3272750
-3272756,3272719,"PPI","OVERALLHEALTH","","In general, how would you rate your mental health, including your mood and your ability to think?",1,0,"","Observation",1585729,0,3272719
-3272757,3272756,"PPI","OVERALLHEALTH",1585729,"5 = Excellent",0,1,"","Observation",1585730,0,3272719.3272756
-3272758,3272756,"PPI","OVERALLHEALTH",1585729,"4 = Very Good",0,1,"","Observation",1585731,0,3272719.3272756
-3272759,3272756,"PPI","OVERALLHEALTH",1585729,"3 = Good",0,1,"","Observation",1585732,0,3272719.3272756
-3272760,3272756,"PPI","OVERALLHEALTH",1585729,"2 = Fair",0,1,"","Observation",1585733,0,3272719.3272756
-3272761,3272756,"PPI","OVERALLHEALTH",1585729,"1 = Poor",0,1,"","Observation",1585734,0,3272719.3272756
-3272762,3272719,"PPI","OVERALLHEALTH","","In general, how would you rate your satisfaction with your social activities and relationships?",1,0,"","Observation",1585735,0,3272719
-3272763,3272762,"PPI","OVERALLHEALTH",1585735,"5 = Excellent",0,1,"","Observation",1585736,0,3272719.3272762
-3272764,3272762,"PPI","OVERALLHEALTH",1585735,"4 = Very Good",0,1,"","Observation",1585737,0,3272719.3272762
-3272765,3272762,"PPI","OVERALLHEALTH",1585735,"3 = Good",0,1,"","Observation",1585738,0,3272719.3272762
-3272766,3272762,"PPI","OVERALLHEALTH",1585735,"2 = Fair",0,1,"","Observation",1585739,0,3272719.3272762
-3272767,3272762,"PPI","OVERALLHEALTH",1585735,"1 = Poor",0,1,"","Observation",1585740,0,3272719.3272762
-3272768,3272719,"PPI","OVERALLHEALTH","","TO what extent are you able to carry out your everyday physical activities such as walking, climbing stairs, carrying groceries, or moving a chair?",1,0,"","Observation",1585741,0,3272719
-3272769,3272768,"PPI","OVERALLHEALTH",1585741,"5 = Completely",0,1,"","Observation",1585742,0,3272719.3272768
-3272770,3272768,"PPI","OVERALLHEALTH",1585741,"4 = Mostly",0,1,"","Observation",1585743,0,3272719.3272768
-3272771,3272768,"PPI","OVERALLHEALTH",1585741,"3 = Moderately",0,1,"","Observation",1585744,0,3272719.3272768
-3272772,3272768,"PPI","OVERALLHEALTH",1585741,"2 = A little",0,1,"","Observation",1585745,0,3272719.3272768
-3272773,3272768,"PPI","OVERALLHEALTH",1585741,"1 = Not at all",0,1,"","Observation",1585746,0,3272719.3272768
-3272774,3272719,"PPI","OVERALLHEALTH","","In the past 7 days, how would you rate your pain on average (0= No pain, 10= Worst pain imaginable)?",1,0,"","Observation",1585747,0,3272719
-3272775,3272774,"PPI","OVERALLHEALTH","",0,0,1,"","Observation",1585747,0,3272719.3272774
-3272776,3272774,"PPI","OVERALLHEALTH","",1,0,1,"","Observation",1585747,0,3272719.3272774
-3272777,3272774,"PPI","OVERALLHEALTH","",2,0,1,"","Observation",1585747,0,3272719.3272774
-3272778,3272774,"PPI","OVERALLHEALTH","",3,0,1,"","Observation",1585747,0,3272719.3272774
-3272779,3272774,"PPI","OVERALLHEALTH","",4,0,1,"","Observation",1585747,0,3272719.3272774
-3272780,3272774,"PPI","OVERALLHEALTH","",5,0,1,"","Observation",1585747,0,3272719.3272774
-3272781,3272774,"PPI","OVERALLHEALTH","",6,0,1,"","Observation",1585747,0,3272719.3272774
-3272782,3272774,"PPI","OVERALLHEALTH","",7,0,1,"","Observation",1585747,0,3272719.3272774
-3272783,3272774,"PPI","OVERALLHEALTH","",8,0,1,"","Observation",1585747,0,3272719.3272774
-3272784,3272774,"PPI","OVERALLHEALTH","",9,0,1,"","Observation",1585747,0,3272719.3272774
-3272785,3272774,"PPI","OVERALLHEALTH","",10,0,1,"","Observation",1585747,0,3272719.3272774
-3272786,3272719,"PPI","OVERALLHEALTH","","In the past 7 days, how would you rate your fatigue?",1,0,"","Observation",1585748,0,3272719
-3272787,3272786,"PPI","OVERALLHEALTH",1585748,"5 = None",0,1,"","Observation",1585749,0,3272719.3272786
-3272788,3272786,"PPI","OVERALLHEALTH",1585748,"4 = Mild",0,1,"","Observation",1585750,0,3272719.3272786
-3272789,3272786,"PPI","OVERALLHEALTH",1585748,"3 = Moderate",0,1,"","Observation",1585751,0,3272719.3272786
-3272790,3272786,"PPI","OVERALLHEALTH",1585748,"2 = Severe",0,1,"","Observation",1585752,0,3272719.3272786
-3272791,3272786,"PPI","OVERALLHEALTH",1585748,"1 = Very Severe",0,1,"","Observation",1585753,0,3272719.3272786
-3272792,3272719,"PPI","OVERALLHEALTH","","In general, please rate how well you carry out your usual social roles (This includes activities at home, at work and in your community, and responsibilities as a parent, child, spouse, employee, friend, etc.)",1,0,"","Observation",1585754,0,3272719
-3272793,3272792,"PPI","OVERALLHEALTH",1585754,"5 = Excellent",0,1,"","Observation",1585755,0,3272719.3272792
-3272794,3272792,"PPI","OVERALLHEALTH",1585754,"4 = Very Good",0,1,"","Observation",1585756,0,3272719.3272792
-3272795,3272792,"PPI","OVERALLHEALTH",1585754,"3 = Good",0,1,"","Observation",1585757,0,3272719.3272792
-3272796,3272792,"PPI","OVERALLHEALTH",1585754,"2 = Fair",0,1,"","Observation",1585758,0,3272719.3272792
-3272797,3272792,"PPI","OVERALLHEALTH",1585754,"1 = Poor",0,1,"","Observation",1585759,0,3272719.3272792
-3272798,3272719,"PPI","OVERALLHEALTH","","In the past 7 days, how often have you been bothered by emotional problems such as feeling anxious, depressed or irritable?",1,0,"","Observation",1585760,0,3272719
-3272799,3272798,"PPI","OVERALLHEALTH",1585760,"5 = Never",0,1,"","Observation",1585761,0,3272719.3272798
-3272800,3272798,"PPI","OVERALLHEALTH",1585760,"4 = Rarely",0,1,"","Observation",1585762,0,3272719.3272798
-3272801,3272798,"PPI","OVERALLHEALTH",1585760,"3 = Sometimes",0,1,"","Observation",1585763,0,3272719.3272798
-3272802,3272798,"PPI","OVERALLHEALTH",1585760,"2 = Often",0,1,"","Observation",1585764,0,3272719.3272798
-3272803,3272798,"PPI","OVERALLHEALTH",1585760,"1 = Always",0,1,"","Observation",1585765,0,3272719.3272798
-3272804,3272719,"PPI","OVERALLHEALTH","","Have your menstrual periods stopped permanently?",1,0,"","Observation",1585784,0,3272719
-3272805,3272804,"PPI","OVERALLHEALTH",1585784,"No",0,1,"","Observation",1585785,0,3272719.3272804
-3272806,3272804,"PPI","OVERALLHEALTH",1585784,"Yes, I have no menstrual periods",0,1,"","Observation",1585786,0,3272719.3272804
-3272807,3272804,"PPI","OVERALLHEALTH",1585784,"Yes, but I have periods induced by hormones",0,1,"","Observation",1585787,0,3272719.3272804
-3272808,3272804,"PPI","OVERALLHEALTH",1585784,"Not sure",0,1,"","Observation",1585788,0,3272719.3272804
-3272809,3272719,"PPI","OVERALLHEALTH","","Why did your periods stop?",1,0,"","Observation",1585789,0,3272719
-3272810,3272809,"PPI","OVERALLHEALTH",1585789,"Natural menopause (change of life)",0,1,"","Observation",1585821,0,3272719.3272809
-3272811,3272809,"PPI","OVERALLHEALTH",1585789,"Surgery (a hysterectomy to remove your uterus and/or an oophorectomy to remove your ovaries)",0,1,"","Observation",1585822,0,3272719.3272809
-3272812,3272809,"PPI","OVERALLHEALTH",1585789,"Endometrial ablation ( removal of the lining of the uterus) ",0,1,"","Observation",1585823,0,3272719.3272809
-3272813,3272809,"PPI","OVERALLHEALTH",1585789,"Medication, chemotherapy, or radiation",0,1,"","Observation",1585790,0,3272719.3272809
-3272814,3272719,"PPI","OVERALLHEALTH","","Are you currently pregnant?",1,0,"","Observation",1585811,0,3272719
-3272815,3272814,"PPI","OVERALLHEALTH",1585811,"Yes",0,1,"","Observation",1585812,0,3272719.3272814
-3272816,3272814,"PPI","OVERALLHEALTH",1585811,"No",0,1,"","Observation",1585813,0,3272719.3272814
-3272817,3272814,"PPI","OVERALLHEALTH",1585811,"Not sure",0,1,"","Observation",1585814,0,3272719.3272814
-3272818,3272719,"PPI","OVERALLHEALTH","","Have you ever had a hysterectomy (that is, surgery to remove your uterus or womb)?",1,0,"","Observation",1585791,0,3272719
-3272819,3272818,"PPI","OVERALLHEALTH",1585791,"Yes",0,1,"","Observation",1585793,0,3272719.3272818
-3272820,3272818,"PPI","OVERALLHEALTH",1585791,"No",0,1,"","Observation",1585792,0,3272719.3272818
-3272821,3272818,"PPI","OVERALLHEALTH",1585791,"Not sure",0,1,"","Observation",1585794,0,3272719.3272818
-3272822,3272719,"PPI","OVERALLHEALTH","","Have you ever had an ovary removed?",1,0,"","Observation",1585796,0,3272719
-3272823,3272822,"PPI","OVERALLHEALTH",1585796,"No",0,1,"","Observation",1585797,0,3272719.3272822
-3272824,3272822,"PPI","OVERALLHEALTH",1585796,"Yes, but only one ovary or part of one ovary",0,1,"","Observation",1585798,0,3272719.3272822
-3272825,3272822,"PPI","OVERALLHEALTH",1585796,"Yes, both ovaries",0,1,"","Observation",1585799,0,3272719.3272822
-3272826,3272822,"PPI","OVERALLHEALTH",1585796,"Yes, but don't know whether one or both ovaries",0,1,"","Observation",1585800,0,3272719.3272822
-3272827,3272822,"PPI","OVERALLHEALTH",1585796,"Not sure",0,1,"","Observation",1585801,0,3272719.3272822
-3272828,3272719,"PPI","OVERALLHEALTH","","Have you had a transplant of any type?",1,0,"","Observation",1585803,0,3272719
-3272829,3272828,"PPI","OVERALLHEALTH",1585803,"Yes",0,1,"","Observation",1585804,0,3272719.3272828
-3272830,3272828,"PPI","OVERALLHEALTH",1585803,"No",0,1,"","Observation",1585805,0,3272719.3272828
-3272831,3272719,"PPI","OVERALLHEALTH","","If yes, please check all that apply",1,0,"","Observation",1585806,0,3272719
-3272832,3272831,"PPI","OVERALLHEALTH",1585806,"Heart",0,1,"","Observation",1585824,0,3272719.3272831
-3272833,3272831,"PPI","OVERALLHEALTH",1585806,"Kidney",0,1,"","Observation",1585825,0,3272719.3272831
-3272834,3272831,"PPI","OVERALLHEALTH",1585806,"Liver",0,1,"","Observation",1585826,0,3272719.3272831
-3272835,3272831,"PPI","OVERALLHEALTH",1585806,"Lung",0,1,"","Observation",1585827,0,3272719.3272831
-3272836,3272831,"PPI","OVERALLHEALTH",1585806,"Pancreas",0,1,"","Observation",1585828,0,3272719.3272831
-3272837,3272831,"PPI","OVERALLHEALTH",1585806,"Intestine",0,1,"","Observation",1585829,0,3272719.3272831
-3272838,3272831,"PPI","OVERALLHEALTH",1585806,"Cornea",0,1,"","Observation",1585830,0,3272719.3272831
-3272839,3272831,"PPI","OVERALLHEALTH",1585806,"Bone",0,1,"","Observation",1585831,0,3272719.3272831
-3272840,3272831,"PPI","OVERALLHEALTH",1585806,"Valve",0,1,"","Observation",1585832,0,3272719.3272831
-3272841,3272831,"PPI","OVERALLHEALTH",1585806,"Skin",0,1,"","Observation",1585833,0,3272719.3272831
-3272842,3272831,"PPI","OVERALLHEALTH",1585806,"Blood vessels",0,1,"","Observation",1585834,0,3272719.3272831
-3272843,3272719,"PPI","OVERALLHEALTH","","Have you traveled outside of the country within the past 6 months - prior to taking the survey.",1,0,"","Observation",1585815,0,3272719
-3272844,3272843,"PPI","OVERALLHEALTH",1585815,"Yes",0,1,"","Observation",1585816,0,3272719.3272843
-3272845,3272843,"PPI","OVERALLHEALTH",1585815,"No",0,1,"","Observation",1585817,0,3272719.3272843
-3272846,3272843,"PPI","OVERALLHEALTH",1585815,"Don't know",0,1,"","Observation",1585818,0,3272719.3272843
+id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,domain_id,concept_id,has_attribute,path
+3272493,0,PPI,BASICS,,The Basics,1,0,,Observation,1586134,0,
+3272494,3272493,PPI,BASICS,,In what country were you born?,1,0,,Observation,1586135,0,3272493
+3272495,3272494,PPI,BASICS,1586136,USA,0,1,0,Observation,1586135,0,3272493.3272494
+3272496,3272494,PPI,BASICS,1586137,Other,0,1,0,Observation,1586135,0,3272493.3272494
+3272497,3272493,PPI,BASICS,,Race,1,0,,Observation,1586140,0,3272493
+3272498,3272497,PPI,BASICS,1586146,White Alone,0,1,0,Observation,1586140,0,3272493.3272497
+3272499,3272497,PPI,BASICS,1586143,Black Alone,0,1,0,Observation,1586140,0,3272493.3272497
+3272500,3272497,PPI,BASICS,1586142,Asian Alone,0,1,0,Observation,1586140,0,3272493.3272497
+3272501,3272497,PPI,BASICS,,Other Alone,0,1,0,Observation,1586140,0,3272493.3272497
+3272502,3272497,PPI,BASICS,,Mixed Racial Group,0,1,0,Observation,1586140,0,3272493.3272497
+3272503,3272497,PPI,BASICS,,Unknown,0,1,0,Observation,1586140,0,3272493.3272497
+3272504,3272493,PPI,BASICS,,What was your biological sex assigned at birth?,1,0,,Observation,1585845,0,3272493
+3272505,3272504,PPI,BASICS,1585846,Female,0,1,0,Observation,1585845,0,3272493.3272504
+3272506,3272504,PPI,BASICS,1585846,Male,0,1,0,Observation,1585845,0,3272493.3272504
+3272507,3272504,PPI,BASICS,,Other or Unknown,0,1,0,Observation,1585845,0,3272493.3272504
+3272508,3272493,PPI,BASICS,,What terms best express how you describe your gender identity?,1,0,,Observation,1585838,0,3272493
+3272509,3272508,PPI,BASICS,1585839,Man,0,1,0,Observation,1585838,0,3272493.3272508
+3272510,3272508,PPI,BASICS,1585840,Woman,0,1,0,Observation,1585838,0,3272493.3272508
+3272511,3272508,PPI,BASICS,,Other or Unknown,0,1,0,Observation,1585838,0,3272493.3272508
+3272512,3272493,PPI,BASICS,,Which of the following best represents how you think of yourself?,1,0,,Observation,1585899,0,3272493
+3272513,3272512,PPI,BASICS,1585900,"Straight; that is, not gay or lesbian, etc.",0,1,0,Observation,1585899,0,3272493.3272512
+3272514,3272512,PPI,BASICS,,Non-straight or unknown,0,1,0,Observation,1585899,0,3272493.3272512
+3272515,3272493,PPI,BASICS,,What is the highest grade or year of school you completed?,1,0,,Observation,1585940,0,3272493
+3272516,3272515,PPI,BASICS,1585948,Advanced degree,0,1,0,Observation,1585940,0,3272493.3272515
+3272517,3272515,PPI,BASICS,1585946,"1 to 3 years (Some college, Associate's Degree or technical school)",0,1,0,Observation,1585940,0,3272493.3272515
+3272518,3272515,PPI,BASICS,1585945,Grade 12 or GED (High school graduate),0,1,0,Observation,1585940,0,3272493.3272515
+3272519,3272515,PPI,BASICS,,Other,0,1,0,Observation,1585940,0,3272493.3272515
+3272520,3272493,PPI,BASICS,,"Have you ever served on active duty in the United States Armed forces, either in the regular military or in a National Guard or military reserve unit?",1,0,,Observation,1585852,0,3272493
+3272521,3272520,PPI,BASICS,1585853,Yes,0,1,0,Observation,1585852,0,3272493.3272520
+3272522,3272520,PPI,BASICS,1585854,No,0,1,0,Observation,1585852,0,3272493.3272520
+3272523,3272493,PPI,BASICS,,What is your current marital status?,1,0,,Observation,1585892,0,3272493
+3272524,3272523,PPI,BASICS,1585893,Married,0,1,0,Observation,1585892,0,3272493.3272523
+3272525,3272523,PPI,BASICS,1585894,Divorced,0,1,0,Observation,1585892,0,3272493.3272523
+3272526,3272523,PPI,BASICS,1585895,Widowed,0,1,0,Observation,1585892,0,3272493.3272523
+3272527,3272523,PPI,BASICS,1585896,Separated,0,1,0,Observation,1585892,0,3272493.3272523
+3272528,3272523,PPI,BASICS,1585897,Never married,0,1,0,Observation,1585892,0,3272493.3272523
+3272529,3272523,PPI,BASICS,1585898,Living with partner,0,1,0,Observation,1585892,0,3272493.3272523
+3272530,3272493,PPI,BASICS,,Are you covered by health insurance or some other kind of health care plan?,1,0,,Observation,1585386,0,3272493
+3272531,3272530,PPI,BASICS,1585387,Yes,0,1,0,Observation,1585386,0,3272493.3272530
+3272532,3272530,PPI,BASICS,1585388,No,0,1,0,Observation,1585386,0,3272493.3272530
+3272533,3272493,PPI,BASICS,,Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group,1,0,,Observation,43529119,0,3272493
+3272534,3272533,PPI,BASICS,43529120,Insurance purchased directly from an insurance company (by you or another family member),0,1,0,Observation,43529119,0,3272493.3272533
+3272535,3272533,PPI,BASICS,43529210,"Medicare, for people 65 and older or people with certain disabilities",0,1,0,Observation,43529119,0,3272493.3272533
+3272536,3272533,PPI,BASICS,43529209,"Medicaid, Medical Assistance, or any kind of government-assistance plan for those with low incomes or disability",0,1,0,Observation,43529119,0,3272493.3272533
+3272537,3272533,PPI,BASICS,43529920,TRICARE or other military health care,0,1,0,Observation,43529119,0,3272493.3272533
+3272538,3272533,PPI,BASICS,43529926,Veterans Affairs (VA) (including those who have ever used or enrolled for VA health care),0,1,0,Observation,43529119,0,3272493.3272533
+3272539,3272533,PPI,BASICS,43529111,Indian Health Service,0,1,0,Observation,43529119,0,3272493.3272533
+3272540,3272533,PPI,BASICS,43528423,Any other type of health insurance or health coverage plan,0,1,0,Observation,43529119,0,3272493.3272533
+3272541,3272533,PPI,BASICS,43529095,"I don't have health insurance, self-pay",0,1,0,Observation,43529119,0,3272493.3272533
+3272542,3272493,PPI,BASICS,,What is your current employment status? Please select 1 or more of these categories.,1,0,,Observation,1585952,0,3272493
+3272543,3272542,PPI,BASICS,,Employed for wages (part--­time or full-­?time) or Self-­?employed,0,1,0,Observation,1585952,0,3272493.3272542
+3272544,3272542,PPI,BASICS,,Out of work,0,1,0,Observation,1585952,0,3272493.3272542
+3272545,3272493,PPI,BASICS,,What is your annual household income from all sources?,1,0,,Observation,1585375,0,3272493
+3272546,3272545,PPI,BASICS,1585376,"Less than $10,000",0,1,0,Observation,1585375,0,3272493.3272545
+3272547,3272545,PPI,BASICS,1585377,"$10,000--$24,999",0,1,0,Observation,1585375,0,3272493.3272545
+3272548,3272545,PPI,BASICS,1585378,"$25,000--$34,999",0,1,0,Observation,1585375,0,3272493.3272545
+3272549,3272545,PPI,BASICS,1585379,"$35,000--$49,999",0,1,0,Observation,1585375,0,3272493.3272545
+3272550,3272545,PPI,BASICS,1585380,"$50,000--$74,999",0,1,0,Observation,1585375,0,3272493.3272545
+3272551,3272545,PPI,BASICS,1585381,"$75,000--$99,999",0,1,0,Observation,1585375,0,3272493.3272545
+3272552,3272545,PPI,BASICS,1585382,"$100,000--$149,999",0,1,0,Observation,1585375,0,3272493.3272545
+3272553,3272545,PPI,BASICS,1585383,"$150,000--$199,999",0,1,0,Observation,1585375,0,3272493.3272545
+3272554,3272545,PPI,BASICS,1585384,"$200,000 or more",0,1,0,Observation,1585375,0,3272493.3272545
+3272555,3272493,PPI,BASICS,,Do you own or rent the place where you live?,1,0,,Observation,1585370,0,3272493
+3272556,3272555,PPI,BASICS,1585371,Own,0,1,0,Observation,1585370,0,3272493.3272555
+3272557,3272555,PPI,BASICS,1585372,Rent,0,1,0,Observation,1585370,0,3272493.3272555
+3272558,3272555,PPI,BASICS,1585373,Other arrangement,0,1,0,Observation,1585370,0,3272493.3272555
+3272559,3272493,PPI,BASICS,,Where are you currently living?,1,0,,Observation,1585402,0,3272493
+3272560,3272559,PPI,BASICS,1585403,On a college campus,0,1,0,Observation,1585402,0,3272493.3272559
+3272561,3272559,PPI,BASICS,1585404,With a friend/roommate,0,1,0,Observation,1585402,0,3272493.3272559
+3272562,3272559,PPI,BASICS,1585405,With family,0,1,0,Observation,1585402,0,3272493.3272559
+3272563,3272559,PPI,BASICS,1585406,Motel/hotel,0,1,0,Observation,1585402,0,3272493.3272559
+3272564,3272559,PPI,BASICS,1585407,"Hospital, rehabilitation center, drug treatment center, or other temporary institution",0,1,0,Observation,1585402,0,3272493.3272559
+3272565,3272559,PPI,BASICS,1585874,"In a group home, nursing home, or other residential facility",0,1,0,Observation,1585402,0,3272493.3272559
+3272566,3272559,PPI,BASICS,1585875,Transitional housing,0,1,0,Observation,1585402,0,3272493.3272559
+3272567,3272559,PPI,BASICS,1585876,Emergency shelter or homeless shelter,0,1,0,Observation,1585402,0,3272493.3272559
+3272568,3272559,PPI,BASICS,1585874,"Anywhere outside (e.g., street, vehicle, abandoned building)",0,1,0,Observation,1585402,0,3272493.3272559
+3272569,3272559,PPI,BASICS,1585878,Other,0,1,0,Observation,1585402,0,3272493.3272559
+3272570,3272493,PPI,BASICS,,How many years have you lived at your current address?,1,0,,Observation,1585879,0,3272493
+3272571,3272570,PPI,BASICS,1585880,Less than 1 year,0,1,0,Observation,1585879,0,3272493.3272570
+3272572,3272570,PPI,BASICS,1585881,1--2 years,0,1,0,Observation,1585879,0,3272493.3272570
+3272573,3272570,PPI,BASICS,1585882,3--5 years,0,1,0,Observation,1585879,0,3272493.3272570
+3272574,3272570,PPI,BASICS,1585883,6--10 years,0,1,0,Observation,1585879,0,3272493.3272570
+3272575,3272570,PPI,BASICS,1585884,11--20 years,0,1,0,Observation,1585879,0,3272493.3272570
+3272576,3272570,PPI,BASICS,1585885,More than 20 years,0,1,0,Observation,1585879,0,3272493.3272570
+3272577,3272493,PPI,BASICS,,"In the past 6 months, have you been worried or concerned about NOT having a place to live?",1,0,,Observation,1585886,0,3272493
+3272578,3272577,PPI,BASICS,1585887,Yes,0,1,0,Observation,1585886,0,3272493.3272577
+3272579,3272577,PPI,BASICS,1585888,No,0,1,0,Observation,1585886,0,3272493.3272577
+3272580,0,PPI,LIFESTYLE,,Lifestyle,1,0,,Observation,1585855,0,
+3272581,3272580,PPI,LIFESTYLE,,Smoking,1,0,,Observation,1585856,0,3272580
+3272582,3272581,PPI,LIFESTYLE,,Have you smoked at least 100 cigarettes in your entire life? (There are 20 cigarettes in a pack.)?,1,0,,Observation,1585857,0,3272580.3272581
+3272583,3272582,PPI,LIFESTYLE,1585858,Yes,0,1,0,Observation,1585857,0,3272580.3272581.3272582
+3272584,3272582,PPI,LIFESTYLE,1585859,No,0,1,0,Observation,1585857,0,3272580.3272581.3272582
+3272585,3272581,PPI,LIFESTYLE,,"Do you now smoke cigarettes every day, some days, or not at all?",1,0,,Observation,1585860,0,3272580.3272581
+3272586,3272585,PPI,LIFESTYLE,1585861,Every day,0,1,0,Observation,1585860,0,3272580.3272581.3272585
+3272587,3272585,PPI,LIFESTYLE,1585862,Some Days,0,1,0,Observation,1585860,0,3272580.3272581.3272585
+3272588,3272585,PPI,LIFESTYLE,1585863,Not at all,0,1,0,Observation,1585860,0,3272580.3272581.3272585
+3272589,3272581,PPI,LIFESTYLE,,"In the past, have you ever made a serious attempt to quit smoking? That is, have you stopped smoking for at least one day or longer because you were trying to quit?",1,0,,Observation,1585867,0,3272580.3272581
+3272590,3272589,PPI,LIFESTYLE,1585868,Yes,0,1,0,Observation,1585867,0,3272580.3272581.3272589
+3272591,3272589,PPI,LIFESTYLE,1585869,No,0,1,0,Observation,1585867,0,3272580.3272581.3272589
+3272592,3272580,PPI,LIFESTYLE,,Electronic Smoking,1,0,,Observation,1586165,0,3272580
+3272593,3272592,PPI,LIFESTYLE,,"Have you ever used an electronic nicotine product, even one or two times? (Electronic nicotine products include e- cigarettes, vape pens, hookah pens, personal vaporizers and mods, e-cigars, e-pipes, and e-hookahs.)",1,0,,Observation,1586166,0,3272580.3272592
+3272594,3272593,PPI,LIFESTYLE,1586167,Yes,0,1,0,Observation,1586166,0,3272580.3272592.3272593
+3272595,3272593,PPI,LIFESTYLE,1586168,No,0,1,0,Observation,1586166,0,3272580.3272592.3272593
+3272596,3272592,PPI,LIFESTYLE,,Do you now use electronic nicotine products,1,0,,Observation,1586169,0,3272580.3272592
+3272597,3272596,PPI,LIFESTYLE,1586170,Every day,0,1,0,Observation,1586169,0,3272580.3272592.3272596
+3272598,3272596,PPI,LIFESTYLE,1586171,Some Days,0,1,0,Observation,1586169,0,3272580.3272592.3272596
+3272599,3272596,PPI,LIFESTYLE,1586172,Not at all,0,1,0,Observation,1586169,0,3272580.3272592.3272596
+3272600,3272580,PPI,LIFESTYLE,,Cigar Smoking,1,0,,Observation,1586173,0,3272580
+3272601,3272600,PPI,LIFESTYLE,,"Have you ever smoked a traditional cigar, cigarillo, or filtered cigar, even one of two puffs?",1,0,,Observation,1586174,0,3272580.3272600
+3272602,3272601,PPI,LIFESTYLE,1586175,Yes,0,1,0,Observation,1586174,0,3272580.3272600.3272601
+3272603,3272601,PPI,LIFESTYLE,1586176,No,0,1,0,Observation,1586174,0,3272580.3272600.3272601
+3272604,3272600,PPI,LIFESTYLE,,"Do you now smoke a traditional cigar, cigarillo, or filtered cigar",1,0,,Observation,1586177,0,3272580.3272600
+3272605,3272604,PPI,LIFESTYLE,1586178,Every day,0,1,0,Observation,1586177,0,3272580.3272600.3272604
+3272606,3272604,PPI,LIFESTYLE,1586179,Some Days,0,1,0,Observation,1586177,0,3272580.3272600.3272604
+3272607,3272604,PPI,LIFESTYLE,1586180,Not at all,0,1,0,Observation,1586177,0,3272580.3272600.3272604
+3272608,3272580,PPI,LIFESTYLE,,Hookah Smoking,1,0,,Observation,1586181,0,3272580
+3272609,3272608,PPI,LIFESTYLE,,"Have you ever smoked tobacco in a hookah, even one or two puffs?",1,0,,Observation,1586182,0,3272580.3272608
+3272610,3272609,PPI,LIFESTYLE,1586183,Yes,0,1,0,Observation,1586182,0,3272580.3272608.3272609
+3272611,3272609,PPI,LIFESTYLE,1586184,No,0,1,0,Observation,1586182,0,3272580.3272608.3272609
+3272612,3272608,PPI,LIFESTYLE,,Do you smoke hookah,1,0,,Observation,1586185,0,3272580.3272608
+3272613,3272612,PPI,LIFESTYLE,1586186,Every day,0,1,0,Observation,1586185,0,3272580.3272608.3272612
+3272614,3272612,PPI,LIFESTYLE,1586187,Some Days,0,1,0,Observation,1586185,0,3272580.3272608.3272612
+3272615,3272612,PPI,LIFESTYLE,1586188,Not at all,0,1,0,Observation,1586185,0,3272580.3272608.3272612
+3272616,3272580,PPI,LIFESTYLE,,Smokeless Tobacco,1,0,,Observation,1586189,0,3272580
+3272617,3272616,PPI,LIFESTYLE,,"Have you ever used smokeless tobacco products, even one or two times? (Smokeless tobacco products include snus pouches, Skoal Bandits, loose snus, moist snuff, dip, spit, and chewing tobacco.)",1,0,,Observation,1586190,0,3272580.3272616
+3272618,3272617,PPI,LIFESTYLE,1586191,Yes,0,1,0,Observation,1586190,0,3272580.3272616.3272617
+3272619,3272617,PPI,LIFESTYLE,1586192,No,0,1,0,Observation,1586190,0,3272580.3272616.3272617
+3272620,3272616,PPI,LIFESTYLE,,Do you now use smokeless tobacco products,1,0,,Observation,1586193,0,3272580.3272616
+3272621,3272620,PPI,LIFESTYLE,1586194,Every day,0,1,0,Observation,1586193,0,3272580.3272616.3272620
+3272622,3272620,PPI,LIFESTYLE,1586195,Some Days,0,1,0,Observation,1586193,0,3272580.3272616.3272620
+3272623,3272620,PPI,LIFESTYLE,1586196,Not at all,0,1,0,Observation,1586193,0,3272580.3272616.3272620
+3272624,3272580,PPI,LIFESTYLE,,Alcohol,1,0,,Observation,1586197,0,3272580
+3272625,3272624,PPI,LIFESTYLE,,"In your entire life, have you had at least 1 drink of any kind of alcohol, not counting small tastes or sips? (By a drink, we mean a can or bottle of beer, a glass of wine or a wine cooler, a shot of liquor, or a mixed drink with liquor in it.)",1,0,,Observation,1586198,0,3272580.3272624
+3272626,3272625,PPI,LIFESTYLE,1586199,Yes,0,1,0,Observation,1586198,0,3272580.3272624.3272625
+3272627,3272625,PPI,LIFESTYLE,1586200,No,0,1,0,Observation,1586198,0,3272580.3272624.3272625
+3272628,3272624,PPI,LIFESTYLE,,How often did you have a drink containing alcohol in the past year?,1,0,,Observation,1586201,0,3272580.3272624
+3272629,3272628,PPI,LIFESTYLE,1586202,Never,0,1,0,Observation,1586201,0,3272580.3272624.3272628
+3272630,3272628,PPI,LIFESTYLE,1586203,Monthly or less,0,1,0,Observation,1586201,0,3272580.3272624.3272628
+3272631,3272628,PPI,LIFESTYLE,1586204,"Two to four times a month ",0,1,0,Observation,1586201,0,3272580.3272624.3272628
+3272632,3272628,PPI,LIFESTYLE,1586205,"Two to three times a week ",0,1,0,Observation,1586201,0,3272580.3272624.3272628
+3272633,3272628,PPI,LIFESTYLE,1586206,Four or more times a week,0,1,0,Observation,1586201,0,3272580.3272624.3272628
+3272634,3272624,PPI,LIFESTYLE,,"On a typical day when you drink,  how many drinks do you have?",1,0,,Observation,1586207,0,3272580.3272624
+3272635,3272634,PPI,LIFESTYLE,1586208,1 or 2,0,1,0,Observation,1586207,0,3272580.3272624.3272634
+3272636,3272634,PPI,LIFESTYLE,1586209,3 or 4,0,1,0,Observation,1586207,0,3272580.3272624.3272634
+3272637,3272634,PPI,LIFESTYLE,1586210,"5 or 6 ",0,1,0,Observation,1586207,0,3272580.3272624.3272634
+3272638,3272634,PPI,LIFESTYLE,1586211,"7 to 9 ",0,1,0,Observation,1586207,0,3272580.3272624.3272634
+3272639,3272634,PPI,LIFESTYLE,1586212,10 or more,0,1,0,Observation,1586207,0,3272580.3272624.3272634
+3272640,3272624,PPI,LIFESTYLE,,How often did you have six or more drinks on one occasion in the past year?,1,0,,Observation,1586213,0,3272580.3272624
+3272641,3272640,PPI,LIFESTYLE,1586214,Less than monthly,0,1,0,Observation,1586213,0,3272580.3272624.3272640
+3272642,3272640,PPI,LIFESTYLE,1586215,Monthly,0,1,0,Observation,1586213,0,3272580.3272624.3272640
+3272643,3272640,PPI,LIFESTYLE,1586216,Weekly,0,1,0,Observation,1586213,0,3272580.3272624.3272640
+3272644,3272640,PPI,LIFESTYLE,1586217,Daily or almost daily,0,1,0,Observation,1586213,0,3272580.3272624.3272640
+3272645,3272640,PPI,LIFESTYLE,1585634,Never in the last year,0,1,0,Observation,1586213,0,3272580.3272624.3272640
+3272646,3272580,PPI,LIFESTYLE,,Recreational Drug Use,1,0,,Observation,1585635,0,3272580
+3272647,3272646,PPI,LIFESTYLE,,"In your LIFETIME, which of the following substances have you ever used?",1,0,,Observation,1585636,0,3272580.3272646
+3272648,3272647,PPI,LIFESTYLE,1585637,"Marijuana (cannabis, pot, grass, hash, weed, etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272649,3272647,PPI,LIFESTYLE,1585638,"Cocaine (coke, crack, etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272650,3272647,PPI,LIFESTYLE,1585639,"Prescription stimulants for non-medical reasons (Ritalin, Concerta, Dexedrine, Adderall, diet pills,etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272651,3272647,PPI,LIFESTYLE,1585640,"Other stimulants (methamphetamine, speed, crystal meth, ice, k2/spice, bath salts, etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272652,3272647,PPI,LIFESTYLE,1585641,"Inhalants (nitrous oxide, glue, gas, paint thinner, etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272653,3272647,PPI,LIFESTYLE,1585642,"Sedatives or sleeping pills for non-medical reasons (Valium, Serepax, Ativan, Xanax, Librium, Rohypnol, GHB, etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272654,3272647,PPI,LIFESTYLE,1585643,"Hallucinogens (LSD, acid, mushrooms, PCP, Special K, ecstasy, etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272655,3272647,PPI,LIFESTYLE,1585644,"Street opioids (heroin, opium, etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272656,3272647,PPI,LIFESTYLE,1585645,"Prescription opioids for non-medical reasons (fentanyl, oxycodone [OxyContin, Percocet], hydrocodone [Vicodin], methadone, buprenorphine, etc.)",0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272657,3272647,PPI,LIFESTYLE,1585646,Other drugs,0,1,0,Observation,1585636,0,3272580.3272646.3272647
+3272658,3272646,PPI,LIFESTYLE,,How often was the drug used,1,0,,Observation,1585649,0,3272580.3272646
+3272659,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used marijuana (cannabis, pot, grass, hash, etc.)?",1,0,,Observation,1585650,0,3272580.3272646.3272658
+3272660,3272659,PPI,LIFESTYLE,1585651,Never,0,1,0,Observation,1585650,0,3272580.3272646.3272658.3272659
+3272661,3272659,PPI,LIFESTYLE,1585652,Once or twice,0,1,0,Observation,1585650,0,3272580.3272646.3272658.3272659
+3272662,3272659,PPI,LIFESTYLE,1585653,Monthly,0,1,0,Observation,1585650,0,3272580.3272646.3272658.3272659
+3272663,3272659,PPI,LIFESTYLE,1585654,Weekly,0,1,0,Observation,1585650,0,3272580.3272646.3272658.3272659
+3272664,3272659,PPI,LIFESTYLE,1585655,Daily or almost daily,0,1,0,Observation,1585650,0,3272580.3272646.3272658.3272659
+3272665,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used cocaine (coke, crack, etc.)?",1,0,,Observation,1585656,0,3272580.3272646.3272658
+3272666,3272665,PPI,LIFESTYLE,1585657,Never,0,1,0,Observation,1585656,0,3272580.3272646.3272658.3272665
+3272667,3272665,PPI,LIFESTYLE,1585658,Once or twice,0,1,0,Observation,1585656,0,3272580.3272646.3272658.3272665
+3272668,3272665,PPI,LIFESTYLE,1585659,Monthly,0,1,0,Observation,1585656,0,3272580.3272646.3272658.3272665
+3272669,3272665,PPI,LIFESTYLE,1585660,Weekly,0,1,0,Observation,1585656,0,3272580.3272646.3272658.3272665
+3272670,3272665,PPI,LIFESTYLE,1585661,Daily or almost daily,0,1,0,Observation,1585656,0,3272580.3272646.3272658.3272665
+3272671,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used prescription stimulants for non-medical reasons (Vyvanse, Ritalin, Concerta, Dexedrine, Adderall, diet pills, etc.)",1,0,,Observation,1585662,0,3272580.3272646.3272658
+3272672,3272671,PPI,LIFESTYLE,1585663,Never,0,1,0,Observation,1585662,0,3272580.3272646.3272658.3272671
+3272673,3272671,PPI,LIFESTYLE,1585664,Once or twice,0,1,0,Observation,1585662,0,3272580.3272646.3272658.3272671
+3272674,3272671,PPI,LIFESTYLE,1585665,Monthly,0,1,0,Observation,1585662,0,3272580.3272646.3272658.3272671
+3272675,3272671,PPI,LIFESTYLE,1585666,Weekly,0,1,0,Observation,1585662,0,3272580.3272646.3272658.3272671
+3272676,3272671,PPI,LIFESTYLE,1585667,Daily or almost daily,0,1,0,Observation,1585662,0,3272580.3272646.3272658.3272671
+3272677,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used other stimulants (methamphetamine, speed, crystal meth, ice, k2/spice, bath salts, etc.)",1,0,,Observation,1585668,0,3272580.3272646.3272658
+3272678,3272677,PPI,LIFESTYLE,1585669,Never,0,1,0,Observation,1585668,0,3272580.3272646.3272658.3272677
+3272679,3272677,PPI,LIFESTYLE,1585670,Once or twice,0,1,0,Observation,1585668,0,3272580.3272646.3272658.3272677
+3272680,3272677,PPI,LIFESTYLE,1585671,Monthly,0,1,0,Observation,1585668,0,3272580.3272646.3272658.3272677
+3272681,3272677,PPI,LIFESTYLE,1585672,Weekly,0,1,0,Observation,1585668,0,3272580.3272646.3272658.3272677
+3272682,3272677,PPI,LIFESTYLE,1585673,Daily or almost daily,0,1,0,Observation,1585668,0,3272580.3272646.3272658.3272677
+3272683,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used inhalants (nitrous oxide, glue, gas, paint thinner, etc.)?",1,0,,Observation,1585674,0,3272580.3272646.3272658
+3272684,3272683,PPI,LIFESTYLE,1585675,Never,0,1,0,Observation,1585674,0,3272580.3272646.3272658.3272683
+3272685,3272683,PPI,LIFESTYLE,1585676,Once or twice,0,1,0,Observation,1585674,0,3272580.3272646.3272658.3272683
+3272686,3272683,PPI,LIFESTYLE,1585677,Monthly,0,1,0,Observation,1585674,0,3272580.3272646.3272658.3272683
+3272687,3272683,PPI,LIFESTYLE,1585678,Weekly,0,1,0,Observation,1585674,0,3272580.3272646.3272658.3272683
+3272688,3272683,PPI,LIFESTYLE,1585679,Daily or almost daily,0,1,0,Observation,1585674,0,3272580.3272646.3272658.3272683
+3272689,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used sedatives or sleeping pills for non-medical reasons (Valium, Serepax, Ativan, Xanax, Librium, Rohypnol, GHB, etc.)?",1,0,,Observation,1585680,0,3272580.3272646.3272658
+3272690,3272689,PPI,LIFESTYLE,1585681,Never,0,1,0,Observation,1585680,0,3272580.3272646.3272658.3272689
+3272691,3272689,PPI,LIFESTYLE,1585682,Once or twice,0,1,0,Observation,1585680,0,3272580.3272646.3272658.3272689
+3272692,3272689,PPI,LIFESTYLE,1585683,Monthly,0,1,0,Observation,1585680,0,3272580.3272646.3272658.3272689
+3272693,3272689,PPI,LIFESTYLE,1585684,Weekly,0,1,0,Observation,1585680,0,3272580.3272646.3272658.3272689
+3272694,3272689,PPI,LIFESTYLE,1585685,Daily or almost daily,0,1,0,Observation,1585680,0,3272580.3272646.3272658.3272689
+3272695,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used hallucinogens (LSD, acid, mushrooms, PCP, Special K, ecstasy, etc.)?",1,0,,Observation,1585686,0,3272580.3272646.3272658
+3272696,3272695,PPI,LIFESTYLE,1585687,Never,0,1,0,Observation,1585686,0,3272580.3272646.3272658.3272695
+3272697,3272695,PPI,LIFESTYLE,1585688,Once or twice,0,1,0,Observation,1585686,0,3272580.3272646.3272658.3272695
+3272698,3272695,PPI,LIFESTYLE,1585689,Monthly,0,1,0,Observation,1585686,0,3272580.3272646.3272658.3272695
+3272699,3272695,PPI,LIFESTYLE,1585690,Weekly,0,1,0,Observation,1585686,0,3272580.3272646.3272658.3272695
+3272700,3272695,PPI,LIFESTYLE,1585691,Daily or almost daily,0,1,0,Observation,1585686,0,3272580.3272646.3272658.3272695
+3272701,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used street opioids (heroin, opium, etc.)?",1,0,,Observation,1585692,0,3272580.3272646.3272658
+3272702,3272701,PPI,LIFESTYLE,1585693,Never,0,1,0,Observation,1585692,0,3272580.3272646.3272658.3272701
+3272703,3272701,PPI,LIFESTYLE,1585694,Once or twice,0,1,0,Observation,1585692,0,3272580.3272646.3272658.3272701
+3272704,3272701,PPI,LIFESTYLE,1585695,Monthly,0,1,0,Observation,1585692,0,3272580.3272646.3272658.3272701
+3272705,3272701,PPI,LIFESTYLE,1585696,Weekly,0,1,0,Observation,1585692,0,3272580.3272646.3272658.3272701
+3272706,3272701,PPI,LIFESTYLE,1585697,Daily or almost daily,0,1,0,Observation,1585692,0,3272580.3272646.3272658.3272701
+3272707,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used prescription opioids for non-medical reasons (obana, fentanyl, oxycodone [OxyContin, Percocet], hydrocodone [Vicodin], methadone, buprenorphine [Supoxone], etc.)",1,0,,Observation,1585698,0,3272580.3272646.3272658
+3272708,3272707,PPI,LIFESTYLE,1585699,Never,0,1,0,Observation,1585698,0,3272580.3272646.3272658.3272707
+3272709,3272707,PPI,LIFESTYLE,1585700,Once or twice,0,1,0,Observation,1585698,0,3272580.3272646.3272658.3272707
+3272710,3272707,PPI,LIFESTYLE,1585701,Monthly,0,1,0,Observation,1585698,0,3272580.3272646.3272658.3272707
+3272711,3272707,PPI,LIFESTYLE,1585702,Weekly,0,1,0,Observation,1585698,0,3272580.3272646.3272658.3272707
+3272712,3272707,PPI,LIFESTYLE,1585703,Daily or almost daily,0,1,0,Observation,1585698,0,3272580.3272646.3272658.3272707
+3272713,3272658,PPI,LIFESTYLE,,"In the PAST THREE MONTHS, how often have you used other drugs?",1,0,,Observation,1585704,0,3272580.3272646.3272658
+3272714,3272713,PPI,LIFESTYLE,1585705,Never,0,1,0,Observation,1585704,0,3272580.3272646.3272658.3272713
+3272715,3272713,PPI,LIFESTYLE,1585706,Once or twice,0,1,0,Observation,1585704,0,3272580.3272646.3272658.3272713
+3272716,3272713,PPI,LIFESTYLE,1585707,Monthly,0,1,0,Observation,1585704,0,3272580.3272646.3272658.3272713
+3272717,3272713,PPI,LIFESTYLE,1585708,Weekly,0,1,0,Observation,1585704,0,3272580.3272646.3272658.3272713
+3272718,3272713,PPI,LIFESTYLE,1585709,Daily or almost daily,0,1,0,Observation,1585704,0,3272580.3272646.3272658.3272713
+3272719,0,PPI,OVERALLHEALTH,,Overall Health,1,0,,Observation,1585710,0,
+3272720,3272719,PPI,OVERALLHEALTH,,How confident are you filling out medical forms by yourself?,1,0,,Observation,1585766,0,3272719
+3272721,3272720,PPI,OVERALLHEALTH,1585767,Extremely,0,1,0,Observation,1585766,0,3272719.3272720
+3272722,3272720,PPI,OVERALLHEALTH,1585768,Quite a bit,0,1,0,Observation,1585766,0,3272719.3272720
+3272723,3272720,PPI,OVERALLHEALTH,1585769,Somewhat,0,1,0,Observation,1585766,0,3272719.3272720
+3272724,3272720,PPI,OVERALLHEALTH,1585770,A little bit,0,1,0,Observation,1585766,0,3272719.3272720
+3272725,3272720,PPI,OVERALLHEALTH,1585771,Not at all,0,1,0,Observation,1585766,0,3272719.3272720
+3272726,3272719,PPI,OVERALLHEALTH,,How often do you have someone help you read health-related materials?,1,0,,Observation,1585772,0,3272719
+3272727,3272726,PPI,OVERALLHEALTH,1585773,Always,0,1,0,Observation,1585772,0,3272719.3272726
+3272728,3272726,PPI,OVERALLHEALTH,1585774,Often,0,1,0,Observation,1585772,0,3272719.3272726
+3272729,3272726,PPI,OVERALLHEALTH,1585775,Sometimes,0,1,0,Observation,1585772,0,3272719.3272726
+3272730,3272726,PPI,OVERALLHEALTH,1585776,Occasionally,0,1,0,Observation,1585772,0,3272719.3272726
+3272731,3272726,PPI,OVERALLHEALTH,1585777,Never,0,1,0,Observation,1585772,0,3272719.3272726
+3272732,3272719,PPI,OVERALLHEALTH,,How often do you have problems learning about your medical condition because of difficulty understanding written information?,1,0,,Observation,1585778,0,3272719
+3272733,3272732,PPI,OVERALLHEALTH,1585779,Always,0,1,0,Observation,1585778,0,3272719.3272732
+3272734,3272732,PPI,OVERALLHEALTH,1585780,Often,0,1,0,Observation,1585778,0,3272719.3272732
+3272735,3272732,PPI,OVERALLHEALTH,1585781,Sometimes,0,1,0,Observation,1585778,0,3272719.3272732
+3272736,3272732,PPI,OVERALLHEALTH,1585782,Occasionally,0,1,0,Observation,1585778,0,3272719.3272732
+3272737,3272732,PPI,OVERALLHEALTH,1585783,Never,0,1,0,Observation,1585778,0,3272719.3272732
+3272738,3272719,PPI,OVERALLHEALTH,,"In general, would you say your health is:",1,0,,Observation,1585711,0,3272719
+3272739,3272738,PPI,OVERALLHEALTH,1585712,5 = Excellent,0,1,0,Observation,1585711,0,3272719.3272738
+3272740,3272738,PPI,OVERALLHEALTH,1585713,4 = Very Good,0,1,0,Observation,1585711,0,3272719.3272738
+3272741,3272738,PPI,OVERALLHEALTH,1585714,3 = Good,0,1,0,Observation,1585711,0,3272719.3272738
+3272742,3272738,PPI,OVERALLHEALTH,1585715,2 = Fair,0,1,0,Observation,1585711,0,3272719.3272738
+3272743,3272738,PPI,OVERALLHEALTH,1585716,1 = Poor,0,1,0,Observation,1585711,0,3272719.3272738
+3272744,3272719,PPI,OVERALLHEALTH,,"In general, would you say your quality of life is:",1,0,,Observation,1585717,0,3272719
+3272745,3272744,PPI,OVERALLHEALTH,1585718,5 = Excellent,0,1,0,Observation,1585717,0,3272719.3272744
+3272746,3272744,PPI,OVERALLHEALTH,1585719,4 = Very Good,0,1,0,Observation,1585717,0,3272719.3272744
+3272747,3272744,PPI,OVERALLHEALTH,1585720,3 = Good,0,1,0,Observation,1585717,0,3272719.3272744
+3272748,3272744,PPI,OVERALLHEALTH,1585721,2 = Fair,0,1,0,Observation,1585717,0,3272719.3272744
+3272749,3272744,PPI,OVERALLHEALTH,1585722,1 = Poor,0,1,0,Observation,1585717,0,3272719.3272744
+3272750,3272719,PPI,OVERALLHEALTH,,"In general, how would you rate your physical health?",1,0,,Observation,1585723,0,3272719
+3272751,3272750,PPI,OVERALLHEALTH,1585724,5 = Excellent,0,1,0,Observation,1585723,0,3272719.3272750
+3272752,3272750,PPI,OVERALLHEALTH,1585725," 4 = Very Good",0,1,0,Observation,1585723,0,3272719.3272750
+3272753,3272750,PPI,OVERALLHEALTH,1585726,3 = Good,0,1,0,Observation,1585723,0,3272719.3272750
+3272754,3272750,PPI,OVERALLHEALTH,1585727,2 = Fair,0,1,0,Observation,1585723,0,3272719.3272750
+3272755,3272750,PPI,OVERALLHEALTH,1585728,1 = Poor,0,1,0,Observation,1585723,0,3272719.3272750
+3272756,3272719,PPI,OVERALLHEALTH,,"In general, how would you rate your mental health, including your mood and your ability to think?",1,0,,Observation,1585729,0,3272719
+3272757,3272756,PPI,OVERALLHEALTH,1585730,5 = Excellent,0,1,0,Observation,1585729,0,3272719.3272756
+3272758,3272756,PPI,OVERALLHEALTH,1585731,4 = Very Good,0,1,0,Observation,1585729,0,3272719.3272756
+3272759,3272756,PPI,OVERALLHEALTH,1585732,3 = Good,0,1,0,Observation,1585729,0,3272719.3272756
+3272760,3272756,PPI,OVERALLHEALTH,1585733,2 = Fair,0,1,0,Observation,1585729,0,3272719.3272756
+3272761,3272756,PPI,OVERALLHEALTH,1585734,1 = Poor,0,1,0,Observation,1585729,0,3272719.3272756
+3272762,3272719,PPI,OVERALLHEALTH,,"In general, how would you rate your satisfaction with your social activities and relationships?",1,0,,Observation,1585735,0,3272719
+3272763,3272762,PPI,OVERALLHEALTH,1585736,5 = Excellent,0,1,0,Observation,1585735,0,3272719.3272762
+3272764,3272762,PPI,OVERALLHEALTH,1585737,4 = Very Good,0,1,0,Observation,1585735,0,3272719.3272762
+3272765,3272762,PPI,OVERALLHEALTH,1585738,3 = Good,0,1,0,Observation,1585735,0,3272719.3272762
+3272766,3272762,PPI,OVERALLHEALTH,1585739,2 = Fair,0,1,0,Observation,1585735,0,3272719.3272762
+3272767,3272762,PPI,OVERALLHEALTH,1585740,1 = Poor,0,1,0,Observation,1585735,0,3272719.3272762
+3272768,3272719,PPI,OVERALLHEALTH,,"TO what extent are you able to carry out your everyday physical activities such as walking, climbing stairs, carrying groceries, or moving a chair?",1,0,,Observation,1585741,0,3272719
+3272769,3272768,PPI,OVERALLHEALTH,1585742,5 = Completely,0,1,0,Observation,1585741,0,3272719.3272768
+3272770,3272768,PPI,OVERALLHEALTH,1585743,4 = Mostly,0,1,0,Observation,1585741,0,3272719.3272768
+3272771,3272768,PPI,OVERALLHEALTH,1585744,3 = Moderately,0,1,0,Observation,1585741,0,3272719.3272768
+3272772,3272768,PPI,OVERALLHEALTH,1585745,2 = A little,0,1,0,Observation,1585741,0,3272719.3272768
+3272773,3272768,PPI,OVERALLHEALTH,1585746,1 = Not at all,0,1,0,Observation,1585741,0,3272719.3272768
+3272774,3272719,PPI,OVERALLHEALTH,,"In the past 7 days, how would you rate your pain on average (0= No pain, 10= Worst pain imaginable)?",1,0,,Observation,1585747,0,3272719
+3272775,3272774,PPI,OVERALLHEALTH,,0,0,1,0,Observation,1585747,0,3272719.3272774
+3272776,3272774,PPI,OVERALLHEALTH,,1,0,1,0,Observation,1585747,0,3272719.3272774
+3272777,3272774,PPI,OVERALLHEALTH,,2,0,1,0,Observation,1585747,0,3272719.3272774
+3272778,3272774,PPI,OVERALLHEALTH,,3,0,1,0,Observation,1585747,0,3272719.3272774
+3272779,3272774,PPI,OVERALLHEALTH,,4,0,1,0,Observation,1585747,0,3272719.3272774
+3272780,3272774,PPI,OVERALLHEALTH,,5,0,1,0,Observation,1585747,0,3272719.3272774
+3272781,3272774,PPI,OVERALLHEALTH,,6,0,1,0,Observation,1585747,0,3272719.3272774
+3272782,3272774,PPI,OVERALLHEALTH,,7,0,1,0,Observation,1585747,0,3272719.3272774
+3272783,3272774,PPI,OVERALLHEALTH,,8,0,1,0,Observation,1585747,0,3272719.3272774
+3272784,3272774,PPI,OVERALLHEALTH,,9,0,1,0,Observation,1585747,0,3272719.3272774
+3272785,3272774,PPI,OVERALLHEALTH,,10,0,1,0,Observation,1585747,0,3272719.3272774
+3272786,3272719,PPI,OVERALLHEALTH,,"In the past 7 days, how would you rate your fatigue?",1,0,,Observation,1585748,0,3272719
+3272787,3272786,PPI,OVERALLHEALTH,1585749,5 = None,0,1,0,Observation,1585748,0,3272719.3272786
+3272788,3272786,PPI,OVERALLHEALTH,1585750,4 = Mild,0,1,0,Observation,1585748,0,3272719.3272786
+3272789,3272786,PPI,OVERALLHEALTH,1585751,3 = Moderate,0,1,0,Observation,1585748,0,3272719.3272786
+3272790,3272786,PPI,OVERALLHEALTH,1585752,2 = Severe,0,1,0,Observation,1585748,0,3272719.3272786
+3272791,3272786,PPI,OVERALLHEALTH,1585753,1 = Very Severe,0,1,0,Observation,1585748,0,3272719.3272786
+3272792,3272719,PPI,OVERALLHEALTH,,"In general, please rate how well you carry out your usual social roles (This includes activities at home, at work and in your community, and responsibilities as a parent, child, spouse, employee, friend, etc.)",1,0,,Observation,1585754,0,3272719
+3272793,3272792,PPI,OVERALLHEALTH,1585755,5 = Excellent,0,1,0,Observation,1585754,0,3272719.3272792
+3272794,3272792,PPI,OVERALLHEALTH,1585756,4 = Very Good,0,1,0,Observation,1585754,0,3272719.3272792
+3272795,3272792,PPI,OVERALLHEALTH,1585757,3 = Good,0,1,0,Observation,1585754,0,3272719.3272792
+3272796,3272792,PPI,OVERALLHEALTH,1585758,2 = Fair,0,1,0,Observation,1585754,0,3272719.3272792
+3272797,3272792,PPI,OVERALLHEALTH,1585759,1 = Poor,0,1,0,Observation,1585754,0,3272719.3272792
+3272798,3272719,PPI,OVERALLHEALTH,,"In the past 7 days, how often have you been bothered by emotional problems such as feeling anxious, depressed or irritable?",1,0,,Observation,1585760,0,3272719
+3272799,3272798,PPI,OVERALLHEALTH,1585761,5 = Never,0,1,0,Observation,1585760,0,3272719.3272798
+3272800,3272798,PPI,OVERALLHEALTH,1585762,4 = Rarely,0,1,0,Observation,1585760,0,3272719.3272798
+3272801,3272798,PPI,OVERALLHEALTH,1585763,3 = Sometimes,0,1,0,Observation,1585760,0,3272719.3272798
+3272802,3272798,PPI,OVERALLHEALTH,1585764,2 = Often,0,1,0,Observation,1585760,0,3272719.3272798
+3272803,3272798,PPI,OVERALLHEALTH,1585765,1 = Always,0,1,0,Observation,1585760,0,3272719.3272798
+3272804,3272719,PPI,OVERALLHEALTH,,Have your menstrual periods stopped permanently?,1,0,,Observation,1585784,0,3272719
+3272805,3272804,PPI,OVERALLHEALTH,1585785,No,0,1,0,Observation,1585784,0,3272719.3272804
+3272806,3272804,PPI,OVERALLHEALTH,1585786,"Yes, I have no menstrual periods",0,1,0,Observation,1585784,0,3272719.3272804
+3272807,3272804,PPI,OVERALLHEALTH,1585787,"Yes, but I have periods induced by hormones",0,1,0,Observation,1585784,0,3272719.3272804
+3272808,3272804,PPI,OVERALLHEALTH,1585788,Not sure,0,1,0,Observation,1585784,0,3272719.3272804
+3272809,3272719,PPI,OVERALLHEALTH,,Why did your periods stop?,1,0,,Observation,1585789,0,3272719
+3272810,3272809,PPI,OVERALLHEALTH,1585821,Natural menopause (change of life),0,1,0,Observation,1585789,0,3272719.3272809
+3272811,3272809,PPI,OVERALLHEALTH,1585822,Surgery (a hysterectomy to remove your uterus and/or an oophorectomy to remove your ovaries),0,1,0,Observation,1585789,0,3272719.3272809
+3272812,3272809,PPI,OVERALLHEALTH,1585823,"Endometrial ablation ( removal of the lining of the uterus) ",0,1,0,Observation,1585789,0,3272719.3272809
+3272813,3272809,PPI,OVERALLHEALTH,1585790,"Medication, chemotherapy, or radiation",0,1,0,Observation,1585789,0,3272719.3272809
+3272814,3272719,PPI,OVERALLHEALTH,,Are you currently pregnant?,1,0,,Observation,1585811,0,3272719
+3272815,3272814,PPI,OVERALLHEALTH,1585812,Yes,0,1,0,Observation,1585811,0,3272719.3272814
+3272816,3272814,PPI,OVERALLHEALTH,1585813,No,0,1,0,Observation,1585811,0,3272719.3272814
+3272817,3272814,PPI,OVERALLHEALTH,1585814,Not sure,0,1,0,Observation,1585811,0,3272719.3272814
+3272818,3272719,PPI,OVERALLHEALTH,,"Have you ever had a hysterectomy (that is, surgery to remove your uterus or womb)?",1,0,,Observation,1585791,0,3272719
+3272819,3272818,PPI,OVERALLHEALTH,1585793,Yes,0,1,0,Observation,1585791,0,3272719.3272818
+3272820,3272818,PPI,OVERALLHEALTH,1585792,No,0,1,0,Observation,1585791,0,3272719.3272818
+3272821,3272818,PPI,OVERALLHEALTH,1585794,Not sure,0,1,0,Observation,1585791,0,3272719.3272818
+3272822,3272719,PPI,OVERALLHEALTH,,Have you ever had an ovary removed?,1,0,,Observation,1585796,0,3272719
+3272823,3272822,PPI,OVERALLHEALTH,1585797,No,0,1,0,Observation,1585796,0,3272719.3272822
+3272824,3272822,PPI,OVERALLHEALTH,1585798,"Yes, but only one ovary or part of one ovary",0,1,0,Observation,1585796,0,3272719.3272822
+3272825,3272822,PPI,OVERALLHEALTH,1585799,"Yes, both ovaries",0,1,0,Observation,1585796,0,3272719.3272822
+3272826,3272822,PPI,OVERALLHEALTH,1585800,"Yes, but don't know whether one or both ovaries",0,1,0,Observation,1585796,0,3272719.3272822
+3272827,3272822,PPI,OVERALLHEALTH,1585801,Not sure,0,1,0,Observation,1585796,0,3272719.3272822
+3272828,3272719,PPI,OVERALLHEALTH,,Have you had a transplant of any type?,1,0,,Observation,1585803,0,3272719
+3272829,3272828,PPI,OVERALLHEALTH,1585804,Yes,0,1,0,Observation,1585803,0,3272719.3272828
+3272830,3272828,PPI,OVERALLHEALTH,1585805,No,0,1,0,Observation,1585803,0,3272719.3272828
+3272831,3272719,PPI,OVERALLHEALTH,,"If yes, please check all that apply",1,0,,Observation,1585806,0,3272719
+3272832,3272831,PPI,OVERALLHEALTH,1585824,Heart,0,1,0,Observation,1585806,0,3272719.3272831
+3272833,3272831,PPI,OVERALLHEALTH,1585825,Kidney,0,1,0,Observation,1585806,0,3272719.3272831
+3272834,3272831,PPI,OVERALLHEALTH,1585826,Liver,0,1,0,Observation,1585806,0,3272719.3272831
+3272835,3272831,PPI,OVERALLHEALTH,1585827,Lung,0,1,0,Observation,1585806,0,3272719.3272831
+3272836,3272831,PPI,OVERALLHEALTH,1585828,Pancreas,0,1,0,Observation,1585806,0,3272719.3272831
+3272837,3272831,PPI,OVERALLHEALTH,1585829,Intestine,0,1,0,Observation,1585806,0,3272719.3272831
+3272838,3272831,PPI,OVERALLHEALTH,1585830,Cornea,0,1,0,Observation,1585806,0,3272719.3272831
+3272839,3272831,PPI,OVERALLHEALTH,1585831,Bone,0,1,0,Observation,1585806,0,3272719.3272831
+3272840,3272831,PPI,OVERALLHEALTH,1585832,Valve,0,1,0,Observation,1585806,0,3272719.3272831
+3272841,3272831,PPI,OVERALLHEALTH,1585833,Skin,0,1,0,Observation,1585806,0,3272719.3272831
+3272842,3272831,PPI,OVERALLHEALTH,1585834,Blood vessels,0,1,0,Observation,1585806,0,3272719.3272831
+3272843,3272719,PPI,OVERALLHEALTH,,Have you traveled outside of the country within the past 6 months - prior to taking the survey.,1,0,,Observation,1585815,0,3272719
+3272844,3272843,PPI,OVERALLHEALTH,1585816,Yes,0,1,0,Observation,1585815,0,3272719.3272843
+3272845,3272843,PPI,OVERALLHEALTH,1585817,No,0,1,0,Observation,1585815,0,3272719.3272843
+3272846,3272843,PPI,OVERALLHEALTH,1585818,Don't know,0,1,0,Observation,1585815,0,3272719.3272843
