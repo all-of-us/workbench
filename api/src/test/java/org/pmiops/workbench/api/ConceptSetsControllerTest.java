@@ -12,8 +12,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -164,10 +162,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired
   FireCloudService fireCloudService;
-
-  @PersistenceContext
-  private EntityManager entityManager;
-
+  
   private ConceptSetsController conceptSetsController;
 
   @Autowired

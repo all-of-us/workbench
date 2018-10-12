@@ -112,7 +112,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   private void addVocabularyCounts(SearchConceptsRequest request, ConceptListResponse response,
-                                   String matchExp, Long conceptId, StandardConceptFilter standardConceptFilter) {
+                                   String matchExp, StandardConceptFilter standardConceptFilter) {
     if (request.getDomain() == null || request.getIncludeVocabularyCounts() == null ||
         !request.getIncludeVocabularyCounts()) {
       return;
@@ -173,7 +173,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     // TODO: consider doing these queries in parallel
     ConceptListResponse response = new ConceptListResponse();
     addDomainCounts(request, response, matchExp, standardConceptFilter);
-    addVocabularyCounts(request, response, matchExp, conceptId, standardConceptFilter);
+    addVocabularyCounts(request, response, matchExp, standardConceptFilter);
 
     List<String> domainIds = null;
     if (request.getDomain() != null) {
