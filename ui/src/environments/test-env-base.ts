@@ -7,4 +7,5 @@ export const testEnvironmentBase = {
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicApiUrl: 'https://public-api-dot-all-of-us-workbench-test.appspot.com',
   publicUiUrl: 'https://public-ui-dot-all-of-us-workbench-test.appspot.com',
+  gaId: 'UA-112406425-1'
 };

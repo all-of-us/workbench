@@ -7,5 +7,6 @@ export const environment = {
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicApiUrl: 'http://localhost:8083',
   publicUiUrl: 'http://localhost:4201',
-  debug: true
+  debug: true,
+  gaId: 'UA-112406425-1'
 };
