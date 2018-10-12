@@ -37,8 +37,8 @@ public class ParameterPredicates {
   private static final List<String> CODE_SUBTYPES =
     Arrays.asList(TreeSubType.CM.toString(),
       TreeSubType.PROC.toString(),
-      TreeSubType.ICD10CM.toString(),
-      TreeSubType.ICD10PCS.toString(),
+      TreeSubType.CM.toString(),
+      TreeSubType.PCS.toString(),
       TreeSubType.CPT4.toString());
 
   private static final List<String> DEMO_SUBTYPES =
