@@ -36,7 +36,7 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   }
 
   get showDropDown() {
-    return !this.isEmpty && this.codes;
+    return !this.isEmpty && this.codes && this.node.get('type') !== TreeType[TreeType.SNOMED];
   }
 
   get isEmpty() {
