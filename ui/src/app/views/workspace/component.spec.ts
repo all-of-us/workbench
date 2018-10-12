@@ -139,14 +139,6 @@ describe('WorkspaceComponent', () => {
       });
   }));
 
-  it('loads notebooks', fakeAsync(() => {
-    // Mock notebook service in workspace stub will be called as part of ngInit
-    const app = fixture.debugElement.componentInstance;
-    expect(app.notebookList.length).toEqual(1);
-    expect(app.notebookList[0].name).toEqual('mockFile.ipynb');
-    expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile.ipynb');
-  }));
-
   it('displays research purpose', fakeAsync(() => {
     expect(fixture.debugElement.queryAll(
       By.css('.research-purpose-item')).length).toEqual(2);
