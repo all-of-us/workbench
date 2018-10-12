@@ -68,7 +68,8 @@ public enum ParticipantCohortStatusDbInfo {
                                 new Long(filter.getValues().get(0)) + wildcard);
             }
         } catch (Exception ex) {
-            throw new BadRequestException("Problems parsing " + filter.getProperty().toString() + ": " + ex.getMessage());
+            throw new BadRequestException(String.format("Bad Request: Problems parsing %s: " +
+              ex.getMessage(), filter.getProperty().toString()));
         }
         return buildSqlString(filter);
     }
@@ -86,7 +87,8 @@ public enum ParticipantCohortStatusDbInfo {
                 parameters.addValue(filter.getProperty().toString(), filter.getValues().get(0) + wildcard);
             }
         } catch (Exception ex) {
-            throw new BadRequestException("Problems parsing " + filter.getProperty().toString() + ": " + ex.getMessage());
+            throw new BadRequestException(String.format("Bad Request: Problems parsing %s: " +
+              ex.getMessage(), filter.getProperty().toString()));
         }
         return buildSqlString(filter);
     }
@@ -119,11 +121,11 @@ public enum ParticipantCohortStatusDbInfo {
 
     private static void validateFilterSize(Filter filter) {
         if (filter.getValues().isEmpty()) {
-            throw new BadRequestException("Invalid request: property: " + filter.getProperty().name() + " values: is empty.");
+            throw new BadRequestException(String.format("Bad Request: property %s is empty.", filter.getProperty().name()));
         }
         if (!filter.getOperator().equals(Operator.IN) && filter.getValues().size() > 1) {
-            throw new BadRequestException("Invalid request: property: " + filter.getProperty().name()
-                    + " using operartor: " + filter.getOperator().name() + " must have a single value.");
+            throw new BadRequestException(String.format("Bad Request: property %s using operator %s must have a single value.",
+              filter.getProperty().name(), filter.getOperator().name()));
         }
     }
 
@@ -132,7 +134,7 @@ public enum ParticipantCohortStatusDbInfo {
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             return new Date(df.parse(dateString).getTime());
         } catch (Exception ex) {
-            throw new BadRequestException("Problems parsing " + property + ": " + ex.getMessage());
+            throw new BadRequestException(String.format("Bad Request: Problems parsing %s: " + ex.getMessage(), property));
         }
     }
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+  <changeSet id="add synonyms_index full_text" author="srushtigangireddy" runAlways="true" onValidationFail="MARK_RAN">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+      <indexExists tableName="concept" indexName="concept_name_index"></indexExists>
+      </not>
+    </preConditions>
+    <sql dbms="mysql">
+      ALTER TABLE concept
+      ADD FULLTEXT INDEX concept_name_index
+      (concept_name);
+    </sql>
+  </changeSet>
+
+</databaseChangeLog>
