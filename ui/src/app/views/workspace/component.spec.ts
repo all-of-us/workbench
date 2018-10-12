@@ -118,6 +118,7 @@ describe('WorkspaceComponent', () => {
         {
           provide: CdrVersionStorageService,
           useValue: new CdrVersionStorageServiceStub({
+            defaultCdrVersion: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
             items: [{
               name: 'cdr1',
               cdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
