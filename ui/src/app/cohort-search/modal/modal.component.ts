@@ -1,20 +1,21 @@
 import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {DomainType, TreeType} from 'generated';
+import {ActivatedRoute} from '@angular/router';
+import {CohortBuilderService, DomainType, TreeSubType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {
-  activeCriteriaSubtype,
-  activeCriteriaTreeType,
-  activeCriteriaType,
-  activeItem,
-  activeParameterList,
-  CohortSearchActions,
-  nodeAttributes,
-  subtreeSelected,
-  wizardOpen,
+activeCriteriaSubtype,
+activeCriteriaTreeType,
+activeCriteriaType,
+activeItem,
+activeParameterList,
+CohortSearchActions,
+nodeAttributes,
+subtreeSelected,
+wizardOpen,
 } from '../redux';
 import {stripHtml, subtypeToTitle, typeToTitle} from '../utils';
 
@@ -54,7 +55,11 @@ export class ModalComponent implements OnInit, OnDestroy {
   demoItemsType: string;
   demoParam: string;
   count = 0;
-  constructor(private actions: CohortSearchActions) {}
+  constructor(
+    private route: ActivatedRoute,
+    private api: CohortBuilderService,
+    private actions: CohortSearchActions
+  ) {}
 
   ngOnInit() {
     this.subscription = this.open$
@@ -176,7 +181,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       type: this.ctype,
       subtype: this.subtype,
       fullTree: this.fullTree,
-      id: 0,    // root parent ID is always 0
+      id: 0
     });
   }
 
@@ -202,6 +207,24 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.itemType === TreeType[TreeType.CONDITION]
     || this.itemType === TreeType[TreeType.PROCEDURE]
     || this.itemType === TreeType[TreeType.DEMO];
+  }
+
+  get secondLevel() {
+    return this.ctype === TreeType[TreeType.ICD10]
+      || (this.ctype === TreeType[TreeType.ICD9] && this.subtype === TreeSubType[TreeSubType.PROC]);
+  }
+
+  get parentId() {
+    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
+    if (this.secondLevel) {
+      this.api.getCriteriaBy(cdrid, this.ctype, this.subtype, 0)
+        .subscribe(result => {
+          console.log(result);
+          return result.items[0].id;
+        });
+    } else {
+      return 0;
+    }
   }
 
   selectionHeader(_type: string) {
