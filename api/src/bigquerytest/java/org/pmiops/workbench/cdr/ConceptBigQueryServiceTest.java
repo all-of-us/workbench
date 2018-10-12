@@ -15,7 +15,6 @@ import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -35,9 +34,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @PersistenceContext
   private EntityManager entityManager;
-
-  @Autowired
-  private ConceptSynonymDao conceptSynonymDao;
 
   @Autowired
   private ConceptDao conceptDao;

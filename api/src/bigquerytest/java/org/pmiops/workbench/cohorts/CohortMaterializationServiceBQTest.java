@@ -27,7 +27,6 @@ import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.Criteria;
@@ -101,9 +100,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Autowired
   private ConceptDao conceptDao;
-
-  @Autowired
-  private ConceptSynonymDao conceptSynonymDao;
 
   @PersistenceContext
   private EntityManager entityManager;
