@@ -331,15 +331,15 @@ public class ParticipantCohortStatusDaoTest {
         List<Filter> filters = new ArrayList<>();
 
         filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).values(Arrays.asList("z")));
-        assertBadRequest(pageRequest, filters, "Problems parsing PARTICIPANTID: For input string: \"z\"");
+        assertBadRequest(pageRequest, filters, "Bad Request: Problems parsing PARTICIPANTID: For input string: \"z\"");
 
         filters.clear();
         filters.add(new Filter().property(ParticipantCohortStatusColumns.STATUS).operator(Operator.EQUAL).values(Arrays.asList("z")));
-        assertBadRequest(pageRequest, filters, "Problems parsing STATUS: No enum constant org.pmiops.workbench.model.CohortStatus.z");
+        assertBadRequest(pageRequest, filters, "Bad Request: Problems parsing STATUS: No enum constant org.pmiops.workbench.model.CohortStatus.z");
 
         filters.clear();
         filters.add(new Filter().property(ParticipantCohortStatusColumns.BIRTHDATE).operator(Operator.EQUAL).values(Arrays.asList("z")));
-        assertBadRequest(pageRequest, filters, "Problems parsing BIRTHDATE: Unparseable date: \"z\"");
+        assertBadRequest(pageRequest, filters, "Bad Request: Problems parsing BIRTHDATE: Unparseable date: \"z\"");
     }
 
     @Test
@@ -352,11 +352,11 @@ public class ParticipantCohortStatusDaoTest {
         List<Filter> filters = new ArrayList<>();
 
         filters.add(new Filter().property(ParticipantCohortStatusColumns.PARTICIPANTID).operator(Operator.EQUAL).values(Arrays.asList("1", "2")));
-        assertBadRequest(pageRequest, filters, "Invalid request: property: PARTICIPANTID using operartor: EQUAL must have a single value.");
+        assertBadRequest(pageRequest, filters, "Bad Request: property PARTICIPANTID using operator EQUAL must have a single value.");
 
         filters.clear();
         filters.add(new Filter().property(ParticipantCohortStatusColumns.STATUS).operator(Operator.EQUAL).values(new ArrayList<>()));
-        assertBadRequest(pageRequest, filters, "Invalid request: property: STATUS values: is empty.");
+        assertBadRequest(pageRequest, filters, "Bad Request: property STATUS is empty.");
     }
 
     private void assertBadRequest(PageRequest pageRequest, List<Filter> filters, String expectedException) {
