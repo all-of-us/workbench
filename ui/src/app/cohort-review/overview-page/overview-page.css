@@ -153,9 +153,16 @@
 .chart-width {
     margin: 0;
 }
+
 .btn-disable {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.btn-disable button {
     pointer-events: none;
 }
+
 .btn-outline {
     pointer-events: none;
 }

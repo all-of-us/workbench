@@ -1,17 +1,12 @@
 package org.pmiops.workbench.cohortreview;
 
-import static org.junit.Assert.fail;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
-import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +42,14 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -108,6 +111,7 @@ public class AnnotationQueryBuilderTest {
   private Map<String, CohortAnnotationEnumValue> enumValueMap;
   private ImmutableMap<String, Object> expectedResult1;
   private ImmutableMap<String, Object> expectedResult2;
+  private List<String> allColumns;
 
   @Before
   public void setUp() {
@@ -173,6 +177,7 @@ public class AnnotationQueryBuilderTest {
             .put("date annotation", "2017-02-15")
             .put("enum annotation", "aardvark")
             .build();
+    allColumns = ImmutableList.copyOf(expectedResult1.keySet());
   }
 
   private CohortAnnotationDefinition makeAnnotationDefinition(long cohortId, String columnName,
@@ -205,14 +210,14 @@ public class AnnotationQueryBuilderTest {
   @Test
   public void testQueryEmptyReview() {
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
-        new AnnotationQuery(), 10, 0));
+        new AnnotationQuery(), 10, 0), allColumns);
   }
 
   @Test
   public void testQueryOneIncluded() {
     saveReviewStatuses();
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
-        new AnnotationQuery(), 10, 0),
+        new AnnotationQuery(), 10, 0), allColumns,
         ImmutableMap.of("person_id", INCLUDED_PERSON_ID, "review_status", "INCLUDED"));
 
   }
@@ -221,7 +226,7 @@ public class AnnotationQueryBuilderTest {
   public void testQueryAllStatuses() {
     saveReviewStatuses();
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        new AnnotationQuery(), 10, 0),
+        new AnnotationQuery(), 10, 0), allColumns,
         ImmutableMap.of("person_id", INCLUDED_PERSON_ID, "review_status", "INCLUDED"),
         ImmutableMap.of("person_id", EXCLUDED_PERSON_ID, "review_status", "EXCLUDED"));
   }
@@ -232,7 +237,7 @@ public class AnnotationQueryBuilderTest {
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("review_status"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        annotationQuery, 10, 0),
+        annotationQuery, 10, 0), allColumns,
         ImmutableMap.of("person_id", EXCLUDED_PERSON_ID, "review_status", "EXCLUDED"),
         ImmutableMap.of("person_id", INCLUDED_PERSON_ID, "review_status", "INCLUDED"));
 
@@ -244,7 +249,7 @@ public class AnnotationQueryBuilderTest {
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(person_id)"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        annotationQuery, 10, 0),
+        annotationQuery, 10, 0), allColumns,
         ImmutableMap.of("person_id", EXCLUDED_PERSON_ID, "review_status", "EXCLUDED"),
         ImmutableMap.of("person_id", INCLUDED_PERSON_ID, "review_status", "INCLUDED"));
 
@@ -265,7 +270,7 @@ public class AnnotationQueryBuilderTest {
             .put("enum annotation", "zebra")
             .build();
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
-        new AnnotationQuery(), 10, 0), expectedResult);
+        new AnnotationQuery(), 10, 0), allColumns, expectedResult);
 
   }
 
@@ -286,7 +291,7 @@ public class AnnotationQueryBuilderTest {
     annotationQuery.setColumns(ImmutableList.of("person_id", "integer annotation", "string annotation",
         "boolean annotation", "date annotation", "enum annotation"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, INCLUDED_ONLY,
-        annotationQuery, 10, 0), expectedResult);
+        annotationQuery, 10, 0), annotationQuery.getColumns(), expectedResult);
   }
 
   @Test
@@ -296,7 +301,7 @@ public class AnnotationQueryBuilderTest {
     saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
 
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        new AnnotationQuery(), 10, 0), expectedResult1, expectedResult2);
+        new AnnotationQuery(), 10, 0), allColumns, expectedResult1, expectedResult2);
   }
 
   @Test
@@ -306,7 +311,7 @@ public class AnnotationQueryBuilderTest {
     saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
 
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        new AnnotationQuery(), 1, 0), expectedResult1);
+        new AnnotationQuery(), 1, 0), allColumns, expectedResult1);
   }
 
   @Test
@@ -316,7 +321,7 @@ public class AnnotationQueryBuilderTest {
     saveAnnotations(EXCLUDED_PERSON_ID, 456, null, false, "2017-02-15","aardvark");
 
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        new AnnotationQuery(), 1, 1), expectedResult2);
+        new AnnotationQuery(), 1, 1), allColumns, expectedResult2);
   }
 
   @Test
@@ -327,7 +332,7 @@ public class AnnotationQueryBuilderTest {
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(integer annotation)", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+        annotationQuery, 10, 0), allColumns, expectedResult2, expectedResult1);
   }
 
   @Test
@@ -338,7 +343,7 @@ public class AnnotationQueryBuilderTest {
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("boolean annotation", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+        annotationQuery, 10, 0), allColumns, expectedResult2, expectedResult1);
   }
 
   @Test
@@ -349,7 +354,7 @@ public class AnnotationQueryBuilderTest {
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("DESCENDING(date annotation)", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+        annotationQuery, 10, 0), allColumns, expectedResult2, expectedResult1);
   }
 
   @Test
@@ -360,7 +365,7 @@ public class AnnotationQueryBuilderTest {
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("string annotation", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+        annotationQuery, 10, 0), allColumns, expectedResult2, expectedResult1);
   }
 
   @Test
@@ -371,7 +376,7 @@ public class AnnotationQueryBuilderTest {
     AnnotationQuery annotationQuery = new AnnotationQuery();
     annotationQuery.setOrderBy(ImmutableList.of("enum annotation", "person_id"));
     assertResults(annotationQueryBuilder.materializeAnnotationQuery(cohortReview, ALL_STATUSES,
-        annotationQuery, 10, 0), expectedResult2, expectedResult1);
+        annotationQuery, 10, 0), allColumns, expectedResult2, expectedResult1);
   }
 
   private void saveReviewStatuses() {
@@ -426,9 +431,10 @@ public class AnnotationQueryBuilderTest {
     }
   }
 
-  private void assertResults(Iterable<Map<String, Object>> results,
-      ImmutableMap<String, Object>... expectedResults) {
-    List<Map<String, Object>> actualResults = Lists.newArrayList(results);
+  private void assertResults(AnnotationQueryBuilder.AnnotationResults results,
+      List<String> expectedColumns, ImmutableMap<String, Object>... expectedResults) {
+    assertThat(results.getColumns()).isEqualTo(expectedColumns);
+    List<Map<String, Object>> actualResults = Lists.newArrayList(results.getResults());
     if (actualResults.size() != expectedResults.length) {
       fail("Expected " + expectedResults.length + ", got " + actualResults.size() + "; actual results: " +
           actualResults);

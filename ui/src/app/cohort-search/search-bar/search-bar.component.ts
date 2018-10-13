@@ -15,7 +15,7 @@ import {
   subtreeSelected,
 } from '../redux';
 
-import {highlightMatches} from '../utils';
+const trigger = 2;
 
 const trigger = 2;
 
@@ -167,6 +167,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   get triggerSearch() {
     return this.searchTerm.value.length >= trigger;
+  }
+
+  get showOverflow() {
+    return this.options && this.options.length <= 10;
   }
 
   selectOption(option: any) {

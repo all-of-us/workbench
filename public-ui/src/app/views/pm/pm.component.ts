@@ -91,6 +91,7 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   showMeasurement(group: any, concept: any) {
     this.selectedGroup = group;
     this.selectedConcept = concept;
+    console.log(this.selectedConcept.analyses.measurementValueGenderAnalysis);
   }
 
 

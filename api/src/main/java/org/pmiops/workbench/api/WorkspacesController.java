@@ -327,6 +327,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'researchPurpose'");
     } else if (workspace.getDataAccessLevel() == null) {
       throw new BadRequestException("missing required field 'dataAccessLevel'");
+    } else if (workspace.getName().length() > 80) {
+      throw new BadRequestException("Workspace name must be 80 characters or less");
     }
     User user = userProvider.get();
     org.pmiops.workbench.db.model.Workspace existingWorkspace = workspaceService.getByName(
@@ -633,6 +635,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
+    dbWorkspace.setFirecloudUuid(toFcWorkspace.getWorkspaceId());
     dbWorkspace.setCreationTime(now);
     dbWorkspace.setLastModifiedTime(now);
     dbWorkspace.setVersion(1);

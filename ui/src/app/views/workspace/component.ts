@@ -4,6 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
+import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
@@ -11,6 +12,7 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {environment} from 'environments/environment';
 
 import {
+  CdrVersion,
   Cohort,
   CohortsService,
   FileDetail,
@@ -82,6 +84,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   shareModal: WorkspaceShareComponent;
   showTip: boolean;
   workspace: Workspace;
+  cdrVersion: CdrVersion;
   wsId: string;
   wsNamespace: string;
   cohortsLoading = true;
@@ -108,6 +111,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
+    private cdrVersionStorageService: CdrVersionStorageService,
     private profileService: ProfileService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
@@ -162,6 +166,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
+    this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
+      this.cdrVersion = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
+    });
   }
 
   private loadNotebookList() {

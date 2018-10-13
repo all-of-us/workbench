@@ -31,6 +31,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+<<<<<<< HEAD
+=======
+import java.util.regex.Matcher;
+>>>>>>> 445205d30e350d79d248595ed71c14d071a85e31
 import java.util.stream.Collectors;
 
 @RestController
@@ -62,6 +66,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 String.format("Invalid notebook file path found: %s", notebookName));
           }
         }
+        FileDetail fileDetail = convertStringToFileDetail(userRecentResource.getNotebookName());
+        resource.setNotebook(fileDetail);
         resource.setModifiedTime(userRecentResource.getLastAccessDate().toString());
         resource.setWorkspaceId(userRecentResource.getWorkspaceId());
         return resource;
@@ -172,6 +178,20 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
   }
+
+  private FileDetail convertStringToFileDetail(String str) {
+    if (str == null) {
+      return null;
+    }
+    if (!str.startsWith("gs://")) {
+      log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", str));
+      return null;
+    }
+    int pos = str.lastIndexOf('/') + 1;
+    String fileName = str.substring(pos);
+    String replacement = Matcher.quoteReplacement(fileName) + "$";
+    String filePath = str.replaceFirst(replacement, "");
+    return new FileDetail().name(fileName).path(filePath);
+  }
+
 }
-
-

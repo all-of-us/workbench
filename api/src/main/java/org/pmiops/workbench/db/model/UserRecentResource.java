@@ -19,6 +19,7 @@ public class UserRecentResource {
   private Long userId;
   private Long workspaceId;
   private Cohort cohort;
+  private ConceptSet conceptSet;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,5 +64,28 @@ public class UserRecentResource {
   public Cohort getCohort() { return cohort;}
 
   public void setCohort(Cohort cohort) {this.cohort = cohort;}
-}
 
+  @ManyToOne
+  @JoinColumn(name = "concept_set_id")
+  public ConceptSet getConceptSet() { return conceptSet; }
+
+  public void setConceptSet(ConceptSet conceptSet) {this.conceptSet = conceptSet;}
+
+  public UserRecentResource() {}
+
+  public UserRecentResource(long workspaceId, long userId, String notebookName, Timestamp lastAccessDate) {
+    this.workspaceId = workspaceId;
+    this.userId = userId;
+    this.notebookName = notebookName;
+    this.lastAccessDate = lastAccessDate;
+    this.cohort = null;
+    this.conceptSet = null;
+  }
+
+  public UserRecentResource(long workspaceId, long userId, Timestamp lastAccessDate) {
+    this.workspaceId = workspaceId;
+    this.userId = userId;
+    this.notebookName = null;
+    this.lastAccessDate = lastAccessDate;
+  }
+}
