@@ -83,7 +83,7 @@ export class WorkspaceShareComponent implements OnInit {
       return;
     }
     this.usersLoading = true;
-    this.workspaceShareError = true;
+    this.workspaceShareError = false;
     this.workspace.userRoles = this.userRolesList;
     this.workspacesService.shareWorkspace(
         this.workspace.namespace,
