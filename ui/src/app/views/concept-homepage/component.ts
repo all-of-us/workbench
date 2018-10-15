@@ -246,4 +246,11 @@ export class ConceptHomepageComponent implements OnInit {
   get noConceptsConstant() {
     return 'No concepts found for domain \'' + this.selectedDomain.name + '\' this search.';
   }
+  get countSelectedDomain() {
+    return 0;
+  }
+
+  get nameSelectedDomain() {
+    return 'Conditions';
+  }
 }
