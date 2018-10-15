@@ -6,8 +6,8 @@ import {Analysis} from '../../../publicGenerated/model/analysis';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
+import {ConceptWithAnalysis} from  '../../utils/conceptWithAnalysis';
 import {DbConfigService} from '../../utils/db-config.service';
-import {ConceptWithAnalysis} from "../../utils/conceptWithAnalysis";
 
 @Component({
   selector: 'app-concept-charts',
