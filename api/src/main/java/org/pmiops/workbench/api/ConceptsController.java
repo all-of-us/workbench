@@ -166,7 +166,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       minCount = 1;
     }
     if (request.getVocabularyIds() != null && request.getVocabularyIds().size() == 0) {
-      throw new BadRequestException("Zero vocabulary options selected");
+      throw new BadRequestException("No vocabulary options selected");
     }
     StandardConceptFilter standardConceptFilter = request.getStandardConceptFilter();
     if (standardConceptFilter == null) {
