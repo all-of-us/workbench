@@ -96,7 +96,7 @@ describe('RecentWorkComponent', () => {
     const cardsOnPage = de.queryAll(By.css('.card'));
     const cardNames = de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText);
     expect(cardsOnPage.length).toEqual(4);
-    // should match LAST 3, and NOT include the "oldest"
+    // should match LAST 4, and NOT include the "oldest"
     expect(cardNames).toEqual(
         ['mockFile5.ipynb', 'mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
   }));

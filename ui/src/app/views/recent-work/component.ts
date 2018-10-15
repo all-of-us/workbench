@@ -39,20 +39,20 @@ export class RecentWorkComponent implements OnInit {
   ) {}
   index: Number;
   @ViewChild('recentWork')
-  eMainFrame: ElementRef;
+  eRecentWork: ElementRef;
   size: number;
 
   ngOnInit(): void {
     this.resourcesLoading = true;
-    this.size = this.calculateSize(this.eMainFrame);
+    this.size = this.calculateSize(this.eRecentWork);
     this.updateList();
   }
 
   @HostListener('window:resize')
   onResize() {
-    const width = this.eMainFrame.nativeElement.offsetWidth;
+    const width = this.eRecentWork.nativeElement.offsetWidth;
     if ((this.resourcesLoading === false) && (width)) {
-      this.size = this.calculateSize(this.eMainFrame);
+      this.size = this.calculateSize(this.eRecentWork);
       this.updateList();
     }
   }

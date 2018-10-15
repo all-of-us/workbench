@@ -147,6 +147,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
     }
     // Don't show the banner after 1 week as their account would
     // have been disabled had they not enabled 2-factor auth.
-    return (new Date().getTime() - this.firstSignIn.getTime() > 7 * 24 * 60 * 60 * 1000);
+    return !(new Date().getTime() - this.firstSignIn.getTime() > 7 * 24 * 60 * 60 * 1000);
   }
 }
