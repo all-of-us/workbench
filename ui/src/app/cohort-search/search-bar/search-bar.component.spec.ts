@@ -28,7 +28,7 @@ describe('SearchBarComponent', () => {
         ClarityModule,
         ReactiveFormsModule],
         NgxPopperModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
       ],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
