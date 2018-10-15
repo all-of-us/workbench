@@ -31,10 +31,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-<<<<<<< HEAD
-=======
 import java.util.regex.Matcher;
->>>>>>> 445205d30e350d79d248595ed71c14d071a85e31
 import java.util.stream.Collectors;
 
 @RestController

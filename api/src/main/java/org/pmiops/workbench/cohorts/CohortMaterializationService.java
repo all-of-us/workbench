@@ -11,7 +11,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-<<<<<<< HEAD
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +21,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-=======
->>>>>>> 445205d30e350d79d248595ed71c14d071a85e31
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
@@ -44,11 +41,8 @@ import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CdrQuery;
-<<<<<<< HEAD
-=======
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
 import org.pmiops.workbench.model.CohortAnnotationsResponse;
->>>>>>> 445205d30e350d79d248595ed71c14d071a85e31
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
 import org.pmiops.workbench.model.DataTableSpecification;
