@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -14,9 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -100,7 +99,7 @@ public class ConceptsControllerTest {
           .standardConcept(true)
           .conceptCode("conceptD")
           .conceptClassId("classId4")
-          .vocabularyId("V4")
+          .vocabularyId("V456")
           .domainId("Observation")
           .countValue(1250L)
           .prevalence(0.5F)
@@ -204,8 +203,6 @@ public class ConceptsControllerTest {
   @Autowired
   private ConceptDao conceptDao;
   @Autowired
-  private ConceptSynonymDao conceptSynonymDao;
-  @Autowired
   private WorkspaceService workspaceService;
   @Autowired
   private WorkspaceDao workspaceDao;
@@ -226,8 +223,8 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
-    conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao,
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
+    conceptsController = new ConceptsController(conceptService, workspaceService,
         domainInfoDao, conceptDao);
 
     CdrVersion cdrVersion = new CdrVersion();
@@ -423,8 +420,17 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsConceptIdMatch() throws Exception {
     saveConcepts();
+    // ID matching currently includes substrings.
     assertResults(conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("123")), CLIENT_CONCEPT_1);
+        new SearchConceptsRequest().query("123")), CLIENT_CONCEPT_4, CLIENT_CONCEPT_1);
+  }
+
+
+  @Test
+  public void testSearchConceptsVocabIdMatch() throws Exception {
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("V456")), CLIENT_CONCEPT_4);
   }
 
   @Test
@@ -683,7 +689,9 @@ public class ConceptsControllerTest {
     result.setDomainId(concept.getDomainId());
     result.setCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
-    result.setSynonyms(new ArrayList<ConceptSynonym>());
+    result.setSynonymsStr(
+        String.valueOf(concept.getConceptId()) + '|' +
+            Joiner.on("|").join(concept.getConceptSynonyms()));
     return result;
   }
 
