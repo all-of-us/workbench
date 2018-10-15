@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {ConceptSet, ConceptsService, DomainInfo} from '../../../generated';
+import {ConceptSet, ConceptsService, CreateConceptSetRequest, DomainInfo} from '../../../generated';
 import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
 import {Domain} from '../../../generated/model/domain';
 
@@ -66,7 +66,10 @@ export class CreateConceptSetModalComponent {
       description: this.description,
       domain: this.domain
     };
-    this.conceptSetService.createConceptSet(this.wsNamespace, this.wsId, concept)
+    const request: CreateConceptSetRequest = {
+      conceptSet: concept
+    };
+    this.conceptSetService.createConceptSet(this.wsNamespace, this.wsId, request)
         .subscribe(() => {
       this.modalOpen = false;
       this.onUpdate.emit();

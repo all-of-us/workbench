@@ -7,12 +7,12 @@
 .btn.btn-link.nav-link.nav-item {
   color: #2691D0;
   font-size: 20px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 24px;
 }
 
 .btn.btn-link.nav-link.nav-item.active {
-  font-weight: bolder;
+  font-weight: 700;
   border-bottom: solid 3px;
 }
 
@@ -24,7 +24,7 @@
   width: 64.3%;
   background-color: #A3D3F232;
   font-size: 16px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 19px;
   color: #000000;
   padding-left: 2rem;
@@ -37,7 +37,7 @@
   border-radius: 3.5px;
   color: #216FB4;
   font-size: 9.8px;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -75,7 +75,7 @@
 .concept-name {
   color: #2691D0;
   font-size: 18px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 22px;
   margin-bottom: 0.2rem;
 }
@@ -83,7 +83,7 @@
 .card .concept-text {
   margin-top: 0.3rem;
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   color: #4A4A4A;
   display: flex;
   flex-direction: column;
@@ -98,13 +98,13 @@
 }
 
 .participant-count-text {
-  font-weight: bolder;
+  font-weight: 700;
 }
 
 .btn.btn-link {
   font-size: 14px;
   line-height: 18px;
-  font-weight: 500;
+  font-weight: 600;
   color: #2691D0;
   text-transform: none;
 }
@@ -120,7 +120,7 @@
 .chart-selector-tabs .btn.btn-link.nav-link.nav-item {
   color: #2691D0;
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 18px;
   text-align: start;
   box-shadow: none;
@@ -151,7 +151,7 @@
 }
 
 .chart-selector-tabs .btn.btn-link.nav-link.nav-item .chart-selector-header {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 16px;
   display: flex;
 }
@@ -166,7 +166,7 @@
   justify-content: flex-start;
   align-items: center;
   line-height: 15px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 12px;
   color: #4A4A4A;
 }
@@ -175,7 +175,7 @@
   width: 9rem;
   padding-left: 1rem;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: #4A4A4A;
 }
 

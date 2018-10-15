@@ -11,14 +11,14 @@
   font-size: 16px;
   line-height: 19px;
   color: #262262;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 label.modal-label {
   display: block;
   color: #262262;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 24px;
   padding-bottom: 0.2rem;
 }
