@@ -87,9 +87,11 @@ public class ClusterControllerTest {
   })
   static class Configuration {
     @Bean
-    @Qualifier("apiHostName")
-    String apiHostName() {
-      return "https://api.blah.com";
+    public WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig config = new WorkbenchConfig();
+      config.server = new WorkbenchConfig.ServerConfig();
+      config.server.apiBaseUrl = "https://api.stable.fake-research-aou.org";
+      return config;
     }
     @Bean
     Clock clock() {

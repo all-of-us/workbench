@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -83,7 +84,7 @@ public class ClusterController implements ClusterApiDelegate {
   private Provider<User> userProvider;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
-  private final String apiHostName;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
   private UserService userService;
   private UserRecentResourceService userRecentResourceService;
   private Clock clock;
@@ -93,7 +94,7 @@ public class ClusterController implements ClusterApiDelegate {
       Provider<User> userProvider,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
-      @Qualifier("apiHostName") String apiHostName,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
       UserRecentResourceService userRecentResourceService,
       Clock clock) {
@@ -101,7 +102,7 @@ public class ClusterController implements ClusterApiDelegate {
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
-    this.apiHostName = apiHostName;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.userRecentResourceService = userRecentResourceService;
     this.clock = clock;
@@ -241,7 +242,7 @@ public class ClusterController implements ClusterApiDelegate {
     config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
     config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
     config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
-    config.put(API_HOST_KEY, this.apiHostName);
+    config.put(API_HOST_KEY, workbenchConfigProvider.get().server.apiBaseUrl);
     config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
     config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
     config.put(BILLING_CLOUD_PROJECT, cdrBillingCloudProject);
