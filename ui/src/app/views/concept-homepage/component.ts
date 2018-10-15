@@ -45,7 +45,14 @@ export class ConceptHomepageComponent implements OnInit {
   searching = false;
   currentSearchString: string;
   searchLoading = false;
-  selectedDomain: DomainInfo;
+  selectedDomain: DomainInfo = {
+    name: '',
+    description: '',
+    standardConceptCount: 0,
+    allConceptCount: 0,
+    participantCount: 0,
+    domain: undefined
+  };
   addTextHovering = false;
   conceptSelected = false;
   selectedConcept: Concept[] = [];
