@@ -47,6 +47,7 @@
       <input
          class="integer-style"
         (blur)="textBlur()"
+        (keypress)="numberOnly($event)"
         type="number"
         [name]="machineName"
         [id]="machineName"
