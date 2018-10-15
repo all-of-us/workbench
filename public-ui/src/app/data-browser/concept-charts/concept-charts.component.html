@@ -4,31 +4,36 @@
   </span>
 </div>
 
+<div *ngIf="unitNames.length > 1" class="col-md">
+  <button *ngFor="let u of unitNames.slice(0,8)" [ngClass]="{active:selectedUnit === u}" (click)="showHistogram(u)" class="btn btn-link">{{u}} </button>
+</div>
+
 <div *ngIf="!loading()" class="row concept-charts chart">
   <!-- show measurements binned by gender if we want -->
   <!-- Loop through the genders we have measurement results for  for showing the graph
    This looping variable is set if showMeasurements is passed in to the component-->
+
   <div class="col-md-4 col-xs-12 chart" *ngFor="let gender of genderResults">
 
     <app-chart *ngIf="gender.stratum2 === dbc.FEMALE_GENDER_ID"
                [genderId]="dbc.FEMALE_GENDER_ID"
                [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                [chartType]="'histogram'"
-               [analysis]="analyses.measurementValueGenderAnalysis"
+               [analysis]="toDisplayMeasurementGenderAnalysis"
                [backgroundColor]="backgroundColor"></app-chart>
 
     <app-chart *ngIf="gender.stratum2 === dbc.MALE_GENDER_ID"
                [genderId]="dbc.MALE_GENDER_ID"
                [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                [chartType]="'histogram'"
-               [analysis]="analyses.measurementValueGenderAnalysis"
+               [analysis]="toDisplayMeasurementGenderAnalysis"
                [backgroundColor]="backgroundColor"></app-chart>
 
     <app-chart *ngIf="gender.stratum2 === dbc.OTHER_GENDER_ID"
                [genderId]="dbc.OTHER_GENDER_ID_GENDER_ID"
                [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                [chartType]="'histogram'"
-               [analysis]="analyses.measurementValueGenderAnalysis"
+               [analysis]="toDisplayMeasurementGenderAnalysis"
                [backgroundColor]="backgroundColor"></app-chart>
 
   </div>

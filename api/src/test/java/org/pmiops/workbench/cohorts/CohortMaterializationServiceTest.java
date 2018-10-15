@@ -265,24 +265,24 @@ public class CohortMaterializationServiceTest {
   }
 
   private void assertResults(MaterializeCohortResponse actualResponse,
-      ImmutableMap<String, Object>... expectedResults) {
+                             ImmutableMap<String, Object>... expectedResults) {
     assertResults(actualResponse.getResults(), expectedResults);
   }
 
   private void assertResults(List<Object> actualResults,
-      ImmutableMap<String, Object>... expectedResults) {
+                             ImmutableMap<String, Object>... expectedResults) {
     if (actualResults.size() != expectedResults.length) {
       fail("Expected " + expectedResults.length + ", got " + actualResults.size()
-          + "; actual results: " + actualResults);
+              + "; actual results: " + actualResults);
     }
     for (int i = 0; i < actualResults.size(); i++) {
       MapDifference<String, Object> difference =
-          Maps.difference((Map<String, Object>) actualResults.get(i),
-              expectedResults[i]);
+              Maps.difference((Map<String, Object>) actualResults.get(i),
+                      expectedResults[i]);
       if (!difference.areEqual()) {
         fail("Result " + i + " had difference: " + difference.entriesDiffering()
-            + "; unexpected entries: " + difference.entriesOnlyOnLeft()
-            + "; missing entries: " + difference.entriesOnlyOnRight());
+                + "; unexpected entries: " + difference.entriesOnlyOnLeft()
+                + "; missing entries: " + difference.entriesOnlyOnRight());
       }
     }
   }

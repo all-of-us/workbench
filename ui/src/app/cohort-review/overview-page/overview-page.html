@@ -38,17 +38,17 @@
                   Demographics
                 </button>
               </div>
-              <ng-container *ngFor = "let name of typesList" >
-              <div [ngClass]="{'btn-disable': buttonsDisableFlag}" >
-                  <button type="button"
-                          (click)="getDifferentCharts(name)"
-                          [ngClass]="[ name === domainTitle ?'btn-outline': 'btn-primary']"
-                          class="overview-buttons btn">
-                    {{name}}S
-                  </button>
+                <ng-container *ngFor = "let name of typesList" >
+                  <div [ngClass]="{'btn-disable': buttonsDisableFlag}" >
+                    <button type="button"
+                            (click)="getDifferentCharts(name)"
+                            [ngClass]="[ name === domainTitle ?'btn-outline': 'btn-primary']"
+                            class="overview-buttons btn">
+                      {{name}}S
+                    </button>
 
-              </div>
-              </ng-container>
+                  </div>
+                </ng-container>
             </div>
           </div>
           <div class="col-sm-10 col-lg-10 col-xl-10">

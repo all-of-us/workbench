@@ -287,7 +287,7 @@ Description of arguments these scripts take are as follows.
 ##### Result is
 1. The BigQuery dataset has new denormalized tables for cohort builder to work.
 #### Generate count data in BigQuery from a cdr release
-`./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180206 --bin-size 20 --bucket all-of-us-workbench-private-cloudsql`
+`./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180206 --bin-size 20 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is
 1. BigQuery datasets:  all-of-us-workbench-test:cdr20180206 and all-of-us-workbench-test:public20180206
 2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20180206/*.csv.gz and public20180206/*.csv.gz with public counts in multiples of bin-size
@@ -297,11 +297,11 @@ Description of arguments these scripts take are as follows.
 ##### * NOTE The cloudsql instance is set in code for each environment in /api/libproject/devstart.rb. Thus each cdr release will be on the same cloudsql instance for an environment.  
 `# Once for private cdr`
 
-`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database cdr20180913 --bucket all-of-us-workbench-private-cloudsql/cdr20180913`
+`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database cdr20180206 --bucket all-of-us-workbench-private-cloudsql/cdr20180206`
 
 `# Once for public cdr.`
 
-`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database public20180913 --bucket all-of-us-workbench-private-cloudsql/public20180913`
+`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database public20180206 --bucket all-of-us-workbench-private-cloudsql/public20180206`
 ##### Result is
 1. Databases are live on cloudsql.
 

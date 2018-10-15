@@ -31,7 +31,7 @@ export class ChartComponent implements OnChanges {
 
   // Render new chart on changes
   ngOnChanges() {
-    if ((this.analysis && this.analysis.results.length) ||
+    if ((this.analysis && this.analysis.results && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {
       // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
@@ -410,7 +410,7 @@ export class ChartComponent implements OnChanges {
     // Hack to filter gender
     let results = this.analysis.results.concat([]);
     if (this.genderId) {
-      results = results.filter(r => r.stratum2 === this.genderId);
+      results = results.filter(r => r.stratum3 === this.genderId);
     }
     for (const a  of results) {
       data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});

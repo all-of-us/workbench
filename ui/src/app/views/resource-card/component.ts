@@ -179,6 +179,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         break;
       }
       case ResourceType.CONCEPT_SET: {
+        // what do we need to happen here? Is this going to an edit window? What?
         this.route.navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts',
         'sets', resource.conceptSet.id], {relativeTo: null});
         break;

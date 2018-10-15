@@ -11,6 +11,16 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.ConceptService.ConceptIds;
@@ -278,6 +288,8 @@ public class CohortMaterializationService {
       // return a query with no SQL, indicating there should be no results.
       return cdrQuery;
     }
+     tableQueryAndConfig = getTableQueryAndConfig(
+        dataTableSpecification.getTableQuery(), conceptIds);
     QueryJobConfiguration jobConfiguration = fieldSetQueryBuilder.getQueryJobConfiguration(
         criteria, tableQueryAndConfig,  dataTableSpecification.getMaxResults());
     cdrQuery.setSql(jobConfiguration.getQuery());

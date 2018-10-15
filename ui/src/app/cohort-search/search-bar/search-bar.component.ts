@@ -17,6 +17,8 @@ import {
 
 const trigger = 2;
 
+const trigger = 2;
+
 @Component({
   selector: 'app-search-bar',
   templateUrl: './search-bar.component.html',
@@ -78,6 +80,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               this.highlightedOption = null;
               if (optionNames.indexOf(option.name) === -1) {
                 optionNames.push(option.name);
+                option.displayName = highlightMatches([this.searchTerm.value], option.name);
                 this.options.push(option);
               } else {
                 if (this.multiples[option.name]) {

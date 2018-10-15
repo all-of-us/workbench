@@ -659,8 +659,8 @@ Generates big query denormalized tables. Used by cohort builder. Must be run onc
   :fn => ->(*args) { make_bq_denormalized_tables(*args) }
 })
 def generate_cdr_counts(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
+    common = Common.new
+    common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
 end
 
 Common.register_command({

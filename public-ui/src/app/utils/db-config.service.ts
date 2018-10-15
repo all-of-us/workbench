@@ -70,6 +70,8 @@ export class DbConfigService {
 
   pmGroups: ConceptGroup[] = [];
   genderAnalysis: Analysis;
+  measurementGenderAnalysis: Analysis[];
+  conceptUnits: string[] = [];
 
   constructor(private api: DataBrowserService) {
     // Load up common simple data needed on pages
@@ -98,38 +100,38 @@ export class DbConfigService {
     let chartType = 'histogram';
     const pmGroups: ConceptGroup[] = [];
     let group = new ConceptGroup('blood-pressure', 'Mean Blood Pressure');
-    group.concepts.push(new ConceptWithAnalysis('903118', 'Systolic', chartType));
-    group.concepts.push(new ConceptWithAnalysis('903115', 'Diastolic', chartType));
+    group.concepts.push(new ConceptWithAnalysis('903118', 'Systolic', chartType, []));
+    group.concepts.push(new ConceptWithAnalysis('903115', 'Diastolic', chartType, []));
     pmGroups.push(group);
 
     group = new ConceptGroup('height', 'Height');
-    group.concepts.push(new ConceptWithAnalysis('903133', group.groupName, chartType));
+    group.concepts.push(new ConceptWithAnalysis('903133', group.groupName, chartType, []));
     pmGroups.push(group);
 
     group = new ConceptGroup('weight', 'Weight');
-    group.concepts.push(new ConceptWithAnalysis('903121', group.groupName, chartType));
+    group.concepts.push(new ConceptWithAnalysis('903121', group.groupName, chartType, []));
     pmGroups.push(group);
 
     group = new ConceptGroup('mean-waist', 'Mean waist circumference');
-    group.concepts.push(new ConceptWithAnalysis('903135', group.groupName, chartType));
+    group.concepts.push(new ConceptWithAnalysis('903135', group.groupName, chartType, []));
     pmGroups.push(group);
 
     group = new ConceptGroup('mean-hip', 'Mean hip circumference');
-    group.concepts.push(new ConceptWithAnalysis('903136', group.groupName, chartType));
+    group.concepts.push(new ConceptWithAnalysis('903136', group.groupName, chartType, []));
     pmGroups.push(group);
 
     group = new ConceptGroup('mean-heart-rate', 'Mean heart rate');
-    group.concepts.push(new ConceptWithAnalysis('903126', group.groupName, chartType));
+    group.concepts.push(new ConceptWithAnalysis('903126', group.groupName, chartType, []));
     pmGroups.push(group);
 
     chartType = 'column';
 
     group = new ConceptGroup('wheel-chair', 'Wheel chair use');
-    group.concepts.push(new ConceptWithAnalysis('903111', group.groupName, chartType));
+    group.concepts.push(new ConceptWithAnalysis('903111', group.groupName, chartType, []));
     pmGroups.push(group);
 
     group = new ConceptGroup('pregnancy', 'Pregnancy');
-    group.concepts.push(new ConceptWithAnalysis('903120', group.groupName, chartType));
+    group.concepts.push(new ConceptWithAnalysis('903120', group.groupName, chartType, []));
     pmGroups.push(group);
 
     // Get all the data for the concepts in the groups and put the analyses on the concepts
@@ -144,17 +146,15 @@ export class DbConfigService {
     return this.api.getConceptAnalysisResults(conceptIds).pipe(
       map(result => {
         // Put each concept analysis on the concept
-        for (const item of result.items) {
           for (const g of pmGroups) {
-            for (const c of g.concepts) {
-              if (c.conceptId === item.conceptId) {
-                c.analyses = item;
-                // Arrage arrange the data and genders
-                this.arrangeConceptAnalyses(c);
+              for (const c of g.concepts) {
+                  const item = result.items.find(temp => temp.conceptId === c.conceptId);
+                  c.analyses = item;
+                  // Arrange the data and genders
+                  this.arrangeConceptAnalyses(c);
+                  c.unitNames = this.conceptUnits;
               }
-            }
           }
-        }
         // Finally have our physical measurement groups
         this.pmGroups = pmGroups;
         return this.pmGroups;
@@ -165,6 +165,10 @@ export class DbConfigService {
   arrangeConceptAnalyses(concept: any) {
     if (concept.analyses.genderAnalysis) {
       this.organizeGenders(concept);
+    }
+    if (concept.analyses.measurementValueGenderAnalysis) {
+      this.measurementGenderAnalysis = concept.analyses.measurementValueGenderAnalysis;
+      this.fetchDistinctUnitNames(this.measurementGenderAnalysis);
     }
     /* Todo maybe will use this next version of graphing
      if (concept.conceptId === this.PREGNANCY_CONCEPT_ID) {
@@ -243,6 +247,14 @@ export class DbConfigService {
       results.push(otherResult);
     }
     analysis.results = results;
+  }
+
+  fetchDistinctUnitNames(mgAnalysis: Analysis[]) {
+    const unitNames: string[] = [];
+    for (const a of mgAnalysis) {
+      unitNames.push(a.unitName);
+      }
+      this.conceptUnits = unitNames;
   }
 
 }

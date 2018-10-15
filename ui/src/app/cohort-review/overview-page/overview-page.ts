@@ -107,6 +107,7 @@ export class OverviewPage implements OnInit, OnDestroy {
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     if (this.trackClickedDomains) {
       setTimeout(() => {
+        this.spinner = false;
         this.getCharts(name, cid);
       }, 2000);
     } else {

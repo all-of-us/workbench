@@ -559,16 +559,19 @@ definitions:
         $ref: "#/definitions/Analysis"
       measurementValueGenderAnalysis:
         description: measurement value gender analysis
-        type: object
-        $ref: "#/definitions/Analysis"
+        type: array
+        items:
+          $ref: "#/definitions/Analysis"
       measurementValueAgeAnalysis:
         description: age analysis for measurement values
-        type: object
-        $ref: "#/definitions/Analysis"
+        type: array
+        items:
+          $ref: "#/definitions/Analysis"
       measurementDistributionAnalysis:
         description: measurement distribution analysis
-        type: object
-        $ref: "#/definitions/Analysis"
+        type: array
+        items:
+          $ref: "#/definitions/Analysis"
 
   ConceptAnalysisListResponse:
     type: object
