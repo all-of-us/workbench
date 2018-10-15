@@ -12,8 +12,8 @@ import {SafeHtmlPipe} from '../safe-html.pipe';
 import {SearchBarComponent} from './search-bar.component';
 
 describe('SearchBarComponent', () => {
-  let component: SearchBarComponent;
-  let fixture: ComponentFixture<SearchBarComponent>;
+  const component: SearchBarComponent;
+  const fixture: ComponentFixture<SearchBarComponent>;
   let mockReduxInst;
 
   beforeEach(async(() => {
@@ -26,7 +26,7 @@ describe('SearchBarComponent', () => {
       declarations: [ OptionInfoComponent, SearchBarComponent, SafeHtmlPipe ],
       imports: [
         ClarityModule,
-        ReactiveFormsModule],
+        ReactiveFormsModule,
         NgxPopperModule,
         ReactiveFormsModule,
       ],
