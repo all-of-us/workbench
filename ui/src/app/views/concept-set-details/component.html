@@ -68,7 +68,7 @@
     </div>
   </div>
   <div *ngIf="conceptSet.concepts?.length" class="concept-table-wrap">
-    <app-concept-table [concepts]="conceptSet.concepts"></app-concept-table>
+    <app-concept-table [concepts]="conceptSet.concepts" [placeholderValue]="'No Concepts Found'"></app-concept-table>
   </div>
   <app-sliding-fab *ngIf="showRemoveFab" [expanded]="'Remove from set'" (submit)="removing=true">
     <clr-icon shape="trash" class="remove-icon"></clr-icon>
