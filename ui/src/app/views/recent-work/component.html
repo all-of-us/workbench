@@ -2,7 +2,7 @@
   <span class="spinner spinner-lg"></span>
 </div>
 <div #recentWork style="display: flex; flex-grow: 1;">
-  <div class="recent-work" style="display:inline-block" *ngIf="resourceList && resourceList.length !== 0">
+  <div class="recent-work" [class.no-title]="cssClass === 'for-list'" style="display:inline-block" *ngIf="resourceList && resourceList.length !== 0">
     <div class="title" style="margin-bottom: 0.5rem;">
       {{headerText}}
     </div>
