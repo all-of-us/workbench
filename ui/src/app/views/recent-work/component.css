@@ -1,7 +1,9 @@
 .card-area {
-  display: inline-block;
-  width: 40%;
-  margin-left: 1%;
+  margin-left: 2.3rem;
+  margin-top: -1rem;
+  display: flex;
+  justify-content: flex-end;
+  width: calc(100% - 2.3rem);
 }
 
 .card {
@@ -16,15 +18,14 @@
 }
 
 .scroll-indicator {
-  cursor: pointer;
   height: 2rem;
   width: 2rem;
-  top: 3rem;
+  align-self: center;
 }
 
-.placeholder {
-  min-width: 2rem;
-  min-height: 2rem;
+.scroll-indicator#left-scroll {
+  position: absolute;
+  left: 0;
 }
 
 .title {
@@ -33,4 +34,26 @@
   color: #FFFFFF;
   width: 100%;
   position: relative
+}
+
+.recent-work {
+  top: 2.1rem;
+  position: relative;
+}
+
+.recent-work.no-title {
+  top: 0.5rem;
+  position: relative;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  flex-flow: row wrap;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+.spinner {
+  margin-top: 1rem;
 }

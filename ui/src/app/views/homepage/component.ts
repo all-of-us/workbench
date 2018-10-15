@@ -37,19 +37,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
-  cardDetails = [
-    {
-      title: 'Browse All of Us Data',
-      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-      'dolore. Mirum est notare, quam littera gothica quam nunc.',
-      icon: '/assets/icons/browse-data.svg'
-    },
-    {
-      title: 'Explore Public Work',
-      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-      'dolore. Mirum est notare, quam littera gothica quam nunc.',
-      icon: '/assets/icons/explore.svg'
-    }];
   footerLinks = [
     {
       title: 'Working Within Researcher Workbench',
@@ -75,8 +62,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   firstTimeUser = false;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-  @ViewChild(RecentWorkComponent)
-  recentWorkComponent: RecentWorkComponent;
 
   constructor(
     private profileService: ProfileService,
@@ -162,9 +147,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
     }
     // Don't show the banner after 1 week as their account would
     // have been disabled had they not enabled 2-factor auth.
-    if (new Date().getTime() - this.firstSignIn.getTime() > 1 * 7 * 24 * 60 * 60 * 1000) {
-      return false;
-    }
-    return true;
+    return !(new Date().getTime() - this.firstSignIn.getTime() > 7 * 24 * 60 * 60 * 1000);
   }
 }

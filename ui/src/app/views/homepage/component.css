@@ -20,13 +20,17 @@
 }
 
 .card.single {
-  height: 379px;
-  max-width: 45rem;
+  height: 33.4%;
+  width: 87.34%;
+  max-width: 70rem;
+  min-height: 18rem;
+  max-height: 26rem;
+  display: flex;
+  flex-direction: column;
   border-radius: 5px;
   background-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
   border: none;
-  margin-left: 1rem;
 }
 
 .analyzeSingleHeader {
@@ -50,19 +54,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
-.analyzeHeading {
+.main-heading {
   opacity: 0.87;
   color: #FFFFFF;
   font-size: 28px;
-  font-weight: 500;
+  font-weight: 300;
   line-height: 34px;
-  width: 65%;
+  width: 25.86%;
   display: flex;
-  text-align: center;
-  margin-left: 18%;
-  margin-top: 1%;
+  min-width: 18.2rem;
+  margin-left: 3%;
+  margin-top: 2.58%;
+  letter-spacing: normal;
+}
+
+.minor-heading {
+  opacity: 0.87;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 34px;
+  width: 25.86%;
+  display: flex;
+  min-width: 21rem;
+  margin-left: 3%;
+  margin-top: 2.58%;
+  letter-spacing: normal;
+}
+
+.heading-links {
+  margin-top: 2.74%;
+  height: 2.68%;
+  font-size: 14px;
+  color: #FFFFFF;
 }
 
 .text {
@@ -148,7 +175,7 @@
   font-size: 28px;
   font-weight: 500;
   line-height: 34px;
-  margin-left: 12%;
+  width: 87.34%;
   margin-top: 1.4rem;
 }
 
@@ -163,10 +190,25 @@
   font-size: 16px;
   font-weight: 300;
   line-height: 30px;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  overflow-y: scroll;
 }
 
-.textGroup.ng-star-inserted {
-  width: 33%;
+.footerText::-webkit-scrollbar {
+  width: 6px;
+  background-color: #262262;
+}
+
+.linksBlock {
+  display: flex;
+  margin-bottom: 1.4rem;
+  margin-left: 1.4rem;
+  flex-direction: column;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .footerText .title {
@@ -185,15 +227,18 @@
   font-size: 14px;
   margin-top: 0.5rem;
   width: 7.5rem;
+  margin-right: 0.5rem;
 }
 
 .card.add-card {
+  display: flex;
   height: 223px;
   width: 300px;
+  align-items: flex-start;
   background-color: #FFFFFF;
   align-content: left;
-  margin-left: 25px;
-  margin-top: 1.3rem;
+  margin-left: 3%;
+  margin-top: 1.9rem;
   cursor: pointer;
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
   border-radius: 5px;
@@ -202,7 +247,7 @@
 .card-text {
   height: 56px;
   width: 284px;
-  color: #216FB4;
+  color: #2691D0;
   font-size: 20px;
   font-weight: 500;
   line-height: 28px;
@@ -221,12 +266,12 @@
 
 .footerRtLink {
   display: flex;
-  justify-content: space-evenly;
-  margin-left: 75%;
+  justify-content: flex-end;
 }
 
 .footerLink {
   color: #FFFFFF;
+  font-size: 12px;
 }
 
 .bottom-banner {
@@ -241,6 +286,7 @@
   display: flex;
   background-color: #483F4B;
   height: 5rem;
+  min-width: 960px;
 }
 
 .logo {
