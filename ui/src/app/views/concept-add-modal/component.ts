@@ -6,6 +6,7 @@ import {
   ConceptSet,
   ConceptSetsService,
   ConceptsService,
+  CreateConceptSetRequest,
   Domain,
   UpdateConceptSetRequest
 } from 'generated';
@@ -85,11 +86,11 @@ export class ConceptAddModalComponent {
     this.errorSaving = false;
     this.errorNameReq = false;
 
+    const conceptIds = [];
+    this.selectConceptList.forEach((selected) => {
+      conceptIds.push(selected.conceptId);
+    });
     if (this.existingSetSelected) {
-      const conceptIds = [];
-      this.selectConceptList.forEach((selected) => {
-        conceptIds.push(selected.conceptId);
-      });
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: this.selectedConceptSet.etag  ,
         addedIds: conceptIds
@@ -114,12 +115,17 @@ export class ConceptAddModalComponent {
       return;
     }
 
-    this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, {
-          name: this.name,
-          description: this.description,
-          domain: this.selectDomain,
-          concepts: this.selectConceptList
-        })
+    const conceptSet: ConceptSet = {
+      name: this.name,
+      description: this.description,
+      domain: this.selectDomain
+    };
+    const request: CreateConceptSetRequest = {
+      conceptSet: conceptSet,
+      addedIds: conceptIds
+    }
+
+    this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, request)
         .subscribe((response) => {
           this.modalOpen = false;
         }, (error) => {
