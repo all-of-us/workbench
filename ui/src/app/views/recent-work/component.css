@@ -41,6 +41,11 @@
     position: relative;
 }
 
+.recent-work.no-title {
+  top: 0.5rem;
+  position: relative;
+}
+
 .spinner-container {
     display: flex;
     justify-content: center;
