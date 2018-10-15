@@ -1,7 +1,19 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +42,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -50,19 +63,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -284,7 +284,8 @@ public class ConceptSetsControllerTest {
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
     conceptSet.setDomain(Domain.CONDITION);
-    conceptSet = conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
+    conceptSet = conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        new CreateConceptSetRequest().conceptSet(conceptSet))
         .getBody();
     assertThat(conceptSet.getConcepts()).isNull();
     assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
@@ -424,6 +425,20 @@ public class ConceptSetsControllerTest {
     assertThat(removed.getParticipantCount()).isEqualTo(123);
   }
 
+  @Test
+  public void testUpdateConceptSetConceptsAddManyOnCreate() {
+    saveConcepts();
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId(),
+            CLIENT_CONCEPT_4.getConceptId()))).thenReturn(456);
+    ConceptSet conceptSet = makeConceptSet1(CLIENT_CONCEPT_1.getConceptId(),
+                CLIENT_CONCEPT_3.getConceptId(),
+                CLIENT_CONCEPT_4.getConceptId());
+    assertThat(conceptSet.getConcepts()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_4,
+        CLIENT_CONCEPT_3);
+    assertThat(conceptSet.getParticipantCount()).isEqualTo(456);
+  }
+
   @Test(expected = BadRequestException.class)
   public void testUpdateConceptSetConceptsAddTooMany() {
     saveConcepts();
@@ -505,14 +520,17 @@ public class ConceptSetsControllerTest {
     return request;
   }
 
-  private ConceptSet makeConceptSet1() {
+  private ConceptSet makeConceptSet1(Long... addedIds) {
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
     conceptSet.setDomain(Domain.CONDITION);
-    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
-        .getBody();
-
+    CreateConceptSetRequest request = new CreateConceptSetRequest().conceptSet(conceptSet);
+    if (addedIds.length > 0) {
+      request = request.addedIds(ImmutableList.copyOf(addedIds));
+    }
+    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        request).getBody();
   }
 
   private ConceptSet makeConceptSet2() {
@@ -520,7 +538,8 @@ public class ConceptSetsControllerTest {
     conceptSet.setDescription("desc 2");
     conceptSet.setName("concept set 2");
     conceptSet.setDomain(Domain.MEASUREMENT);
-    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
+    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        new CreateConceptSetRequest().conceptSet(conceptSet))
         .getBody();
 
   }

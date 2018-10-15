@@ -28,6 +28,7 @@ interface VocabularyCountSelected extends VocabularyCount {
   selected: boolean;
 }
 
+
 @Component({
   styleUrls: ['../../styles/buttons.css',
     '../../styles/cards.css',
@@ -44,8 +45,17 @@ export class ConceptHomepageComponent implements OnInit {
   searching = false;
   currentSearchString: string;
   searchLoading = false;
-  selectedDomain: Domain;
+  selectedDomain: DomainInfo = {
+    name: '',
+    description: '',
+    standardConceptCount: 0,
+    allConceptCount: 0,
+    participantCount: 0,
+    domain: undefined
+  };
   addTextHovering = false;
+  conceptSelected = false;
+  selectedConcept: Concept[] = [];
 
   @ViewChild(ConceptTableComponent)
   conceptTable: ConceptTableComponent;
@@ -60,6 +70,8 @@ export class ConceptHomepageComponent implements OnInit {
   conceptsCache: Array<ConceptCacheSet> = [];
 
   completedDomainSearches: Array<Domain> = [];
+
+  placeholderValue = '';
 
   vocabularies: Array<VocabularyCountSelected> = [];
 
@@ -97,16 +109,18 @@ export class ConceptHomepageComponent implements OnInit {
         });
       });
       this.loadingDomains = false;
-      this.selectedDomain = this.conceptDomainList[0].domain;
+      this.selectedDomain = this.conceptDomainList[0];
     });
   }
 
   openAddModal(): void {
+    this.selectedConcept = this.conceptTable.selectedConcepts;
     this.conceptAddModal.open();
   }
 
-  selectDomain(domain: Domain) {
-    this.selectedDomain = domain;
+  selectDomain(domainInfo: DomainInfo) {
+    this.selectedDomain = domainInfo;
+    this.placeholderValue = this.noConceptsConstant;
     this.setConceptsAndVocabularies();
   }
 
@@ -117,13 +131,14 @@ export class ConceptHomepageComponent implements OnInit {
 
   browseDomain(domain: DomainInfo) {
     this.currentSearchString = '';
-    this.selectedDomain = domain.domain;
+    this.selectedDomain = domain;
     this.searchConcepts();
   }
 
   searchConcepts() {
     this.searching = true;
     this.searchLoading = true;
+    this.placeholderValue = this.noConceptsConstant;
     let standardConceptFilter: StandardConceptFilter;
     if (this.standardConceptsOnly) {
       standardConceptFilter = StandardConceptFilter.STANDARDCONCEPTS;
@@ -141,7 +156,7 @@ export class ConceptHomepageComponent implements OnInit {
     });
 
     this.conceptsCache.forEach((conceptDomain) => {
-      const activeTabSearch = conceptDomain.domain === this.selectedDomain;
+      const activeTabSearch = conceptDomain.domain === this.selectedDomain.domain;
       const request = {
         query: this.currentSearchString,
         standardConceptFilter: standardConceptFilter,
@@ -167,7 +182,7 @@ export class ConceptHomepageComponent implements OnInit {
 
   setConceptsAndVocabularies() {
     const cacheItem = this.conceptsCache.find(
-      conceptDomain => conceptDomain.domain === this.selectedDomain);
+      conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
     this.concepts = cacheItem.items;
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
@@ -191,6 +206,11 @@ export class ConceptHomepageComponent implements OnInit {
       this.blockMultipleSearchFromFilter = false;
       return;
     }
+    if (this.vocabularies.filter(vocabulary => vocabulary.selected).length === 0) {
+      this.concepts = [];
+      this.placeholderValue = 'No vocabularies selected. Please select at least one vocabulary.';
+      return;
+    }
     this.blockMultipleSearchFromFilter = true;
     let standardConceptFilter: StandardConceptFilter;
     if (this.standardConceptsOnly) {
@@ -199,10 +219,12 @@ export class ConceptHomepageComponent implements OnInit {
       standardConceptFilter = StandardConceptFilter.ALLCONCEPTS;
     }
     this.searchLoading = true;
+    this.placeholderValue = this.noConceptsConstant;
+
     const request = {
       query: this.currentSearchString,
       standardConceptFilter: standardConceptFilter,
-      domain: this.selectedDomain,
+      domain: this.selectedDomain.domain,
       vocabularyIds: this.vocabularies
         .filter(vocabulary => vocabulary.selected).map(vocabulary => vocabulary.vocabularyId),
       maxResults: this.maxConceptFetch
@@ -212,5 +234,16 @@ export class ConceptHomepageComponent implements OnInit {
         this.searchLoading = false;
         this.concepts = response.items;
       });
+  }
+
+  selectConcept(selectedConcepts) {
+    this.selectedConcept = selectedConcepts;
+    if (this.selectedConcept && this.selectedConcept.length > 0 ) {
+      this.conceptSelected = true;
+    }
+  }
+
+  get noConceptsConstant() {
+    return 'No concepts found for domain \'' + this.selectedDomain.name + '\' this search.';
   }
 }

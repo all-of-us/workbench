@@ -5,6 +5,7 @@ create table config (
 
 create table cdr_version (
   cdr_version_id bigint PRIMARY KEY,
+  is_default bit(1),
   name varchar(80) NOT NULL,
   data_access_level tinyint NOT NULL,
   release_number smallint NOT NULL,

@@ -1,24 +1,33 @@
-<clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'">
+<clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'" *ngIf="!loading">
+  <h3 class="modal-title">Add to set</h3>
   <div class="modal-body">
-    <div class="form-section">
-      <label>Add to Concept Set</label>
-      <select>
-        <option *ngFor="let conceptSet of conceptSets">{{conceptSet.name}}</option>
+    <label *ngIf="errorSaving" class="error">{{errorMsg}}</label>
+    <div *ngIf="conceptSets?.length > 0" class="form-section">
+      <div style="display:flex; flex-direction: row;">
+        <input id="select-add" type="radio" [(ngModel)]="existingSetSelected" [value]="true"
+               [checked]="selectChange()"/>
+        <label class="header">Choose existing set</label>
+        <input id="select-create" type="radio" style="margin-left: 0.7rem;" [(ngModel)]="existingSetSelected" [value]="false"
+               [checked]="selectChange()"/>
+        <label class="header create-header">Create new set</label>
+      </div>
+      <select *ngIf="existingSetSelected" class="concept-select" [(ngModel)]="selectedConceptSet">
+        <option *ngFor="let conceptSet of conceptSets" [ngValue]="conceptSet">{{conceptSet.name}}</option>
       </select>
     </div>
-    <div class="line-break"></div>
     <div class="form-section">
-      <label>Or Create a new Concept Set</label>
-      <input id="new-name" type="text" class="input">
-      <textarea
-        name="description">
-      </textarea>
+      <label *ngIf="errorNameReq" class="error">{{errorMsg}}</label>
+      <label class="header" style="padding-left: 0rem;" *ngIf="conceptSets?.length === 0">Create a new Concept Set</label>
+      <input *ngIf="!existingSetSelected || conceptSets?.length === 0" id="new-name" type="text" class="inputName" placeholder="Name"
+             [(ngModel)]="name">
+      <textarea *ngIf="!existingSetSelected || conceptSets?.length === 0" name="description" class="description" placeholder="Add a Description"
+                [(ngModel)]="description"></textarea>
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline" (click)="modalOpen=false">Cancel</button>
-    <button type="button" class="btn btn-primary confirm-rename-btn" id="rename"
-            (click)="createConceptSet()" [clrLoading]="loading" [disabled]="loading">
+    <button type="button" class="btn btn-outline" (click)="close()">Cancel</button>
+    <button type="button" class="btn btn-primary"
+            (click)="save()" [clrLoading]="loading" [disabled]="loading">
       Save
     </button>
   </div>

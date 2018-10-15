@@ -251,6 +251,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
             min.setValue(lo, {emitEvent: false});
             max.setValue(hi, {emitEvent: false});
+            setTimeout(() => this.centerAgeCount(), 300);
         }));
 
         this.subscription.add(min.valueChanges.subscribe(value => {

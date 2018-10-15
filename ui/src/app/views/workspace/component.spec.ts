@@ -9,6 +9,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {IconsModule} from 'app/icons/icons.module';
+import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
@@ -27,6 +28,7 @@ import {
   ClusterService,
   CohortsService,
   ConceptSetsService,
+  DataAccessLevel,
   ProfileService,
   UserMetricsService,
   UserService,
@@ -39,6 +41,7 @@ import {
 } from 'notebooks-generated';
 
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
+import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
@@ -53,43 +56,6 @@ import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {updateAndTick} from 'testing/test-helpers';
-
-class WorkspacePage {
-  fixture: ComponentFixture<WorkspaceComponent>;
-  cohortsService: CohortsService;
-  workspacesService: WorkspacesService;
-  route: UrlSegment[];
-  workspaceNamespace: string;
-  workspaceId: string;
-  cohortsTableRows: DebugElement[];
-  notebookTableRows: DebugElement[];
-  cdrText: DebugElement;
-  workspaceDescription: DebugElement;
-  loggedOutMessage: DebugElement;
-  createAndLaunch: DebugElement;
-
-  constructor(testBed: typeof TestBed) {
-    this.fixture = testBed.createComponent(WorkspaceComponent);
-    this.cohortsService = this.fixture.debugElement.injector.get(CohortsService);
-    this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
-    this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
-    this.readPageData();
-  }
-
-  readPageData() {
-    updateAndTick(this.fixture);
-    updateAndTick(this.fixture);
-    this.workspaceNamespace = this.route[1].path;
-    this.workspaceId = this.route[2].path;
-    const de = this.fixture.debugElement;
-    this.cohortsTableRows = de.queryAll(By.css('.cohort-table-row'));
-    this.notebookTableRows = de.queryAll(By.css('.notebook-table-row'));
-    this.cdrText = de.query(By.css('.cdr-version-text'));
-    this.workspaceDescription = de.query(By.css('.description-text'));
-    this.loggedOutMessage = de.query(By.css('.logged-out-message'));
-    this.createAndLaunch = de.query(By.css('#createAndLaunch'));
-  }
-}
 
 const activatedRouteStub  = {
   snapshot: {
@@ -112,7 +78,7 @@ const activatedRouteStub  = {
 };
 
 describe('WorkspaceComponent', () => {
-  let workspacePage: WorkspacePage;
+  let fixture: ComponentFixture<WorkspaceComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -150,25 +116,31 @@ describe('WorkspaceComponent', () => {
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: UserService, useValue: new UserServiceStub() },
         {
+          provide: CdrVersionStorageService,
+          useValue: new CdrVersionStorageServiceStub({
+            defaultCdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
+            items: [{
+              name: 'cdr1',
+              cdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
+              dataAccessLevel: DataAccessLevel.Registered,
+              creationTime: 0
+            }]
+          })
+        },
+        {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
         }
       ]}).compileComponents().then(() => {
-        workspacePage = new WorkspacePage(TestBed);
+        fixture = TestBed.createComponent(WorkspaceComponent);
+        updateAndTick(fixture);
       });
-      tick();
   }));
 
-  it('displays correct notebook information', fakeAsync(() => {
-    // Mock notebook service in workspace stub will be called as part of ngInit
-    const fixture = workspacePage.fixture;
-    const app = fixture.debugElement.componentInstance;
-    expect(app.notebookList.length).toEqual(1);
-    expect(app.notebookList[0].name).toEqual('mockFile.ipynb');
-    expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile.ipynb');
-    expect(workspacePage.fixture.debugElement.queryAll(
+  it('displays research purpose', fakeAsync(() => {
+    expect(fixture.debugElement.queryAll(
       By.css('.research-purpose-item')).length).toEqual(2);
   }));
 });

@@ -1,22 +1,23 @@
-<div *ngIf="elementVisible()" class="recent-work" style="display: flex; flex-direction: row; align-items: center">
-  <div *ngIf="leftScrollVisible()" class="scroll-indicator" id="left-scroll"
-       (click)="scrollLeft()">
-    <app-left-scroll-icon></app-left-scroll-icon>
-  </div>
-  <div *ngIf="!leftScrollVisible()" class="placeholder"></div>
-  <div class="card-area">
-    <div style="display: flex">
-      <div *ngIf="resourcesLoading" class="spinner-container">
-        <span class="spinner spinner-lg"></span>
+<div *ngIf="resourcesLoading" class="spinner-container">
+  <span class="spinner spinner-lg"></span>
+</div>
+<div #recentWork style="display: flex; flex-grow: 1;">
+  <div class="recent-work" [class.no-title]="cssClass === 'for-list'" style="display:inline-block" *ngIf="resourceList && resourceList.length !== 0">
+    <div class="title" style="margin-bottom: 0.5rem;">
+      {{headerText}}
+    </div>
+    <div class="card-area">
+      <div *ngIf="leftScrollVisible()" class="scroll-indicator" id="left-scroll"
+           (click)="scrollLeft()">
+        <app-left-scroll-icon></app-left-scroll-icon>
       </div>
       <div *ngFor="let resource of resourceList">
         <app-resource-card [resourceCard]="resource" [cssClass]="cssClass" (onUpdate)="updateList($event)"></app-resource-card>
       </div>
+      <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
+           style="position: absolute; right: -1.5rem;" (click)="scrollRight()">
+        <app-right-scroll-icon></app-right-scroll-icon>
+      </div>
     </div>
   </div>
-  <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
-       style="margin-left: auto;" (click)="scrollRight()">
-    <app-right-scroll-icon></app-right-scroll-icon>
-  </div>
-  <div *ngIf="!rightScrollVisible()" class="placeholder"></div>
 </div>

@@ -43,7 +43,7 @@
     <div class="chart-box lower-box">
       <div class="chart-selector-tabs">
         <div *ngFor="let domain of conceptDomainCounts" class="chart-selector-tab">
-          <button (click)="selectDomain(domain.domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain" [disabled]="searchLoading || !completedDomainSearches.includes(domain.domain)">
+          <button (click)="selectDomain(domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain.domain" [disabled]="searchLoading || !completedDomainSearches.includes(domain.domain)">
             <div class="chart-selector-header">
               {{domain.name}}
             </div>
@@ -57,11 +57,18 @@
           {{vocabulary.vocabularyId}} ({{vocabulary.conceptCount}})
         </clr-checkbox>
       </div>
-      <app-concept-table [concepts]="concepts" [loading]="searchLoading" [searchTerm]="currentSearchString"></app-concept-table>
+      <app-concept-table [concepts]="concepts"
+                         [loading]="searchLoading" [searchTerm]="currentSearchString"
+                         [placeholderValue]="placeholderValue"
+                         (getSelectedConcepts)="selectConcept($event)">
+      </app-concept-table>
+      <div *ngIf="conceptSelected" (mouseenter)="addTextHovering=true" (mouseleave)="addTextHovering=false" (click)="openAddModal()" class="add-section">
+        <div class="add-text" [class.hovering]="addTextHovering">Add to set</div>
       <app-sliding-fab [expanded]="'Add to set'" (submit)="openAddModal()">
         <clr-icon class="add-icon" shape="plus"></clr-icon>
       </app-sliding-fab>
     </div>
+    </div>
   </ng-template>
 </app-top-box>
-<app-concept-add-modal></app-concept-add-modal>
+<app-concept-add-modal [selectedDomain]="selectedDomain.domain" [selectedConcepts]="selectedConcept"></app-concept-add-modal>
