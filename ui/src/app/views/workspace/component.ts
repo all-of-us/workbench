@@ -11,6 +11,7 @@ import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {environment} from 'environments/environment';
 
+import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {
   CdrVersion,
   Cohort,
@@ -22,7 +23,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-import {NewNotebookModalComponent} from '../new-notebook-modal/component';
 
 /*
  * Search filters used by the cohort and notebook data tables to
