@@ -102,7 +102,7 @@ describe('ConceptSetListComponent', () => {
   it('displays correct concept sets', fakeAsync(() => {
     const de = fixture.debugElement;
     const conceptCards = de.queryAll(By.css('.item-card'));
-    expect(conceptCards.length).toEqual(1);
+    expect(conceptCards.length).toEqual(3);
     expect(conceptCards[0].nativeElement.innerText).toMatch('Mock Concept Set');
     expect(conceptCards[0].nativeElement.innerText).toMatch('Mocked for tests');
   }));
@@ -129,6 +129,6 @@ describe('ConceptSetListComponent', () => {
     simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
     updateAndTick(fixture);
     const conceptCards = de.queryAll(By.css('.item-card'));
-    expect(conceptCards.length).toBe(0);
+    expect(conceptCards.length).toBe(2);
   }));
 });

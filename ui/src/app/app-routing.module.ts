@@ -28,8 +28,9 @@ import {CohortResolver} from './resolvers/cohort';
 import {ConceptSetResolver} from './resolvers/concept-set';
 import {WorkspaceResolver} from './resolvers/workspace';
 
+import {environment} from 'environments/environment';
+
 declare let gtag: Function;
-declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
@@ -239,7 +240,7 @@ export class AppRoutingModule {
  constructor(public router: Router) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        gtag('config', ga_tracking_id, { 'page_path': event.urlAfterRedirects });
+        gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });
       }
     });
   }

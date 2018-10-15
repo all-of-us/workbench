@@ -40,6 +40,7 @@ export class WorkspaceShareComponent implements OnInit {
   userEmail: string;
   usersLoading = true;
   userNotFound = false;
+  workspaceShareError = false;
   workspaceUpdateConflictError = false;
   public sharing = false;
   gsuiteDomain: string;
@@ -82,6 +83,7 @@ export class WorkspaceShareComponent implements OnInit {
       return;
     }
     this.usersLoading = true;
+    this.workspaceShareError = false;
     this.workspace.userRoles = this.userRolesList;
     this.workspacesService.shareWorkspace(
         this.workspace.namespace,
@@ -103,6 +105,8 @@ export class WorkspaceShareComponent implements OnInit {
             this.userNotFound = true;
           } else if (error.status === 409) {
             this.workspaceUpdateConflictError = true;
+          } else {
+            this.workspaceShareError = true;
           }
           this.usersLoading = false;
         });
@@ -188,8 +192,8 @@ export class WorkspaceShareComponent implements OnInit {
 
   open(): void {
     this.userRolesList = [];
+    this.resetModalState();
     this.sharing = true;
-    this.userRolesList = this.workspace.userRoles;
   }
 
   closeModal() {
@@ -200,12 +204,15 @@ export class WorkspaceShareComponent implements OnInit {
   }
 
   reloadConflictingWorkspace(): void {
-    this.reloadWorkspace().subscribe(() => this.resetWorkspaceEditor());
+    this.reloadWorkspace().subscribe(() => this.resetModalState());
   }
 
-  resetWorkspaceEditor(): void {
+  resetModalState(): void {
+    this.userNotFound = false;
+    this.workspaceShareError = false;
     this.workspaceUpdateConflictError = false;
     this.usersLoading = false;
+    this.userRolesList = this.workspace.userRoles;
   }
 
 

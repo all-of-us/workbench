@@ -21,7 +21,7 @@ import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, updateAndTick} from 'testing/test-helpers';
+import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
 import {
   DataAccessLevel,
@@ -296,6 +296,21 @@ describe('WorkspaceEditComponent', () => {
         expect(workspacesService.workspaces[0].name).toBe('created');
         expect(workspacesService.workspaces[0].description).toBe('');
       }));
+
+  it('should not create a workspace with name greater than 80 characters', fakeAsync(() => {
+    spyOn(TestBed.get(Router), 'navigate');
+    workspacesService.workspaces = [];
+    setupComponent(WorkspaceEditMode.Create);
+    simulateInput(fixture, fixture.debugElement.query(By.css('.input.name')),
+      'this is more than 80 characters look at how long this is ' +
+      'and why dont I add some more characters and make this really very long');
+    simulateInput(fixture, fixture.debugElement.query(By.css('.input.description')),
+      'foo');
+    testComponent.fillDetailsLater = false;
+    fixture.detectChanges();
+    tick();
+    expect(fixture.debugElement.query(By.css('.add-button')).properties.disabled).toBeTruthy();
+  }));
 
   it('should allow editing unset underserved population on clone', fakeAsync(() => {
     spyOn(TestBed.get(Router), 'navigate');

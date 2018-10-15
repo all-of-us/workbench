@@ -905,7 +905,7 @@ public class CohortReviewControllerTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Invalid Request: Please provide a valid " + type + " value for annotation defintion id: "
+        .isEqualTo("Bad Request: Please provide a valid " + type + " value for annotation defintion id: "
           + cohortAnnotationDefId);
     }
   }
