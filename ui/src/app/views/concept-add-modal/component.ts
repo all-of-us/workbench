@@ -123,7 +123,7 @@ export class ConceptAddModalComponent {
     const request: CreateConceptSetRequest = {
       conceptSet: conceptSet,
       addedIds: conceptIds
-    }
+    };
 
     this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, request)
         .subscribe((response) => {
