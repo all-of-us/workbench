@@ -288,7 +288,7 @@ public class CohortMaterializationService {
       // return a query with no SQL, indicating there should be no results.
       return cdrQuery;
     }
-    TableQueryAndConfig tableQueryAndConfig = getTableQueryAndConfig(
+     tableQueryAndConfig = getTableQueryAndConfig(
         dataTableSpecification.getTableQuery(), conceptIds);
     QueryJobConfiguration jobConfiguration = fieldSetQueryBuilder.getQueryJobConfiguration(
         criteria, tableQueryAndConfig,  dataTableSpecification.getMaxResults());
