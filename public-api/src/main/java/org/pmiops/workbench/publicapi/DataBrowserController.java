@@ -542,9 +542,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                     unitGenderAnalysis.setUnitName(unit);
                                     processMeasurementGenderMissingBins(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,unitGenderAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
                                     unitSeperateAnalysis.add(unitGenderAnalysis);
-                                }else if(unit.length() == 0){
-                                    if(results.keySet().contains("No matching concept")) {
-                                    }
                                 }
                             }
                         }else {
@@ -853,19 +850,19 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         for(AchillesResult ar: aa.getResults()){
             String analysisStratumName=ar.getAnalysisStratumName();
-            if(ar.getStratum2() == "2" && bin_ranges_2.contains(Float.parseFloat(ar.getStratum4()))){
+            if(ar.getStratum2().equals("2") && bin_ranges_2.contains(Float.parseFloat(ar.getStratum4()))){
                 bin_ranges_2.remove(Float.parseFloat(ar.getStratum4()));
-            }else if(ar.getStratum2() == "3" && bin_ranges_3.contains(Float.parseFloat(ar.getStratum4()))){
+            }else if(ar.getStratum2().equals("3") && bin_ranges_3.contains(Float.parseFloat(ar.getStratum4()))){
                 bin_ranges_3.remove(Float.parseFloat(ar.getStratum4()));
-            }else if(ar.getStratum2() == "4" && bin_ranges_4.contains(Float.parseFloat(ar.getStratum4()))){
+            }else if(ar.getStratum2().equals("4") && bin_ranges_4.contains(Float.parseFloat(ar.getStratum4()))){
                 bin_ranges_4.remove(Float.parseFloat(ar.getStratum4()));
-            }else if(ar.getStratum2() == "5" && bin_ranges_5.contains(Float.parseFloat(ar.getStratum4()))){
+            }else if(ar.getStratum2().equals("5") && bin_ranges_5.contains(Float.parseFloat(ar.getStratum4()))){
                 bin_ranges_5.remove(Float.parseFloat(ar.getStratum4()));
-            }else if(ar.getStratum2() == "6" && bin_ranges_6.contains(Float.parseFloat(ar.getStratum4()))){
+            }else if(ar.getStratum2().equals("6") && bin_ranges_6.contains(Float.parseFloat(ar.getStratum4()))){
                 bin_ranges_6.remove(Float.parseFloat(ar.getStratum4()));
-            }else if(ar.getStratum2() == "7" && bin_ranges_7.contains(Float.parseFloat(ar.getStratum4()))){
+            }else if(ar.getStratum2().equals("7") && bin_ranges_7.contains(Float.parseFloat(ar.getStratum4()))){
                 bin_ranges_7.remove(Float.parseFloat(ar.getStratum4()));
-            }else if(ar.getStratum2() == "8" && bin_ranges_8.contains(Float.parseFloat(ar.getStratum4()))){
+            }else if(ar.getStratum2().equals("8") && bin_ranges_8.contains(Float.parseFloat(ar.getStratum4()))){
                 bin_ranges_8.remove(Float.parseFloat(ar.getStratum4()));
             }
 
