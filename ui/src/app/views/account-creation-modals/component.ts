@@ -20,6 +20,7 @@ export class AccountCreationModalsComponent {
   contactEmail: string;
   emailOffFocus = true;
   waiting = false;
+  tslint:disable-next-line:no-input-rename
   @Input('username') username: string;
   @Input('gsuiteDomain') gsuiteDomain: string;
 
