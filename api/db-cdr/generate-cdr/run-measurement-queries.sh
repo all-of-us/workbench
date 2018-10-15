@@ -97,12 +97,12 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on m.unit_source_
 where m.value_as_number is not null and m.measurement_source_concept_id != 0 and m.measurement_concept_id != m.measurement_source_concept_id
 and m.unit_concept_id = 0 and m.unit_source_value is not null
 union all
-select measurement_concept_id as subject_id, '' as unit, p.gender_concept_id as gender,
+select measurement_concept_id as subject_id, cast('0' as string), p.gender_concept_id as gender,
 cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.value_as_number is not null and m.measurement_concept_id != 0 and (m.unit_concept_id = 0 and m.unit_source_value is null)
 union all
-select measurement_source_concept_id as subject_id, '' as unit,p.gender_concept_id as gender,
+select measurement_source_concept_id as subject_id, cast('0' as string),p.gender_concept_id as gender,
 cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.value_as_number is not null and m.measurement_source_concept_id != 0 and m.measurement_concept_id != m.measurement_source_concept_id
@@ -161,11 +161,11 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on m.unit_source_
 where m.value_as_number is not null and m.measurement_source_concept_id != 0 and m.measurement_concept_id != m.measurement_source_concept_id
 and m.unit_concept_id = 0 and m.unit_source_value is not null
 union all
-select measurement_concept_id as subject_id, '' as unit,cast(value_as_number as float64) as count_value
+select measurement_concept_id as subject_id, cast('0' as string),cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.value_as_number is not null and m.measurement_concept_id != 0 and m.unit_concept_id = 0 and m.unit_source_value is null
 union all
-select measurement_source_concept_id as subject_id, '' as unit,cast(value_as_number as float64) as count_value
+select measurement_source_concept_id as subject_id, cast('0' as string),cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.value_as_number is not null and m.measurement_source_concept_id != 0 and m.measurement_concept_id != m.measurement_source_concept_id
 and m.unit_concept_id = 0 and m.unit_source_value is null
@@ -260,26 +260,26 @@ where m.value_as_number is not null and m.measurement_source_concept_id != 0 and
 and (extract(year from m.measurement_date) - p.year_of_birth) >= 18 and (extract(year from m.measurement_date) - p.year_of_birth) < 30
 and m.unit_concept_id = 0 and m.unit_source_value is not null
 union all
-select measurement_concept_id as subject_id, '' as unit, CAST(floor((extract(year from m.measurement_date) - p.year_of_birth)/10) AS STRING) as age_decile,
+select measurement_concept_id as subject_id, cast('0' as string), CAST(floor((extract(year from m.measurement_date) - p.year_of_birth)/10) AS STRING) as age_decile,
 cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.value_as_number is not null and m.measurement_concept_id != 0 and floor((extract(year from m.measurement_date) - p.year_of_birth)/10) >=3
 and m.unit_concept_id = 0 and m.unit_source_value is null
 union all
-select measurement_source_concept_id as subject_id, '' as unit, CAST(floor((extract(year from m.measurement_date) - p.year_of_birth)/10) AS STRING) as age_decile,
+select measurement_source_concept_id as subject_id, cast('0' as string), CAST(floor((extract(year from m.measurement_date) - p.year_of_birth)/10) AS STRING) as age_decile,
 cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.value_as_number is not null and m.measurement_source_concept_id != 0 and m.measurement_concept_id != m.measurement_source_concept_id
 and floor((extract(year from m.measurement_date) - p.year_of_birth)/10) >=3
 and m.unit_concept_id = 0 and m.unit_source_value is null
 union all
-select measurement_concept_id as subject_id, '' as unit, '2' as age_decile,
+select measurement_concept_id as subject_id, cast('0' as string), '2' as age_decile,
 cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.value_as_number is not null and m.measurement_concept_id != 0 and (extract(year from m.measurement_date) - p.year_of_birth) >= 18 and (extract(year from m.measurement_date) - p.year_of_birth) < 30
 and m.unit_concept_id = 0 and m.unit_source_value is null
 union all
-select measurement_source_concept_id as subject_id, '' as unit,'2' as age_decile,
+select measurement_source_concept_id as subject_id, cast('0' as string),'2' as age_decile,
 cast(value_as_number as float64) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.value_as_number is not null and m.measurement_source_concept_id != 0 and m.measurement_concept_id != m.measurement_source_concept_id
@@ -568,105 +568,6 @@ stratum_5 = cast(p90_value as string)
 where analysis_id in (1814,1815,1816)
 and stratum_4=stratum_5"
 
-# no unit gender histogram data
-echo "no unit histogram data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,count_value,source_count_value)
-with measurement_quartile_data as
-(
-select cast(stratum_1 as int64) as concept,0 as unit,cast(stratum_3 as int64)as gender,cast(stratum_4 as float64) as iqr_min,cast(stratum_5 as float64) as iqr_max,min_value,max_value,p10_value,p25_value,p75_value,p90_value,
-((cast(stratum_5 as float64)-cast(stratum_4 as float64))/11) as bin_width from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\` where analysis_id=1815 and stratum_2=''
-)
-select 0 as id,1900 as analysis_id,
-CAST(m1.measurement_concept_id AS STRING) as stratum_1,
-unit as stratum_2,
-CAST(p1.gender_concept_id AS STRING) as stratum_3,
-cast(
-(case when iqr_min != iqr_max then
-round((case when m1.value_as_number < iqr_min then iqr_min
-      when m1.value_as_number > iqr_max then iqr_max
-      when m1.value_as_number between iqr_min and iqr_min+bin_width then iqr_min+bin_width
-      when m1.value_as_number between iqr_min+bin_width and iqr_min+2*bin_width then iqr_min+2*bin_width
-      when m1.value_as_number between iqr_min+2*bin_width and iqr_min+3*bin_width then iqr_min+3*bin_width
-      when m1.value_as_number between iqr_min+3*bin_width and iqr_min+4*bin_width then iqr_min+4*bin_width
-      when m1.value_as_number between iqr_min+4*bin_width and iqr_min+5*bin_width then iqr_min+5*bin_width
-      when m1.value_as_number between iqr_min+5*bin_width and iqr_min+6*bin_width then iqr_min+6*bin_width
-      when m1.value_as_number between iqr_min+6*bin_width and iqr_min+7*bin_width then iqr_min+7*bin_width
-      when m1.value_as_number between iqr_min+7*bin_width and iqr_min+8*bin_width then iqr_min+8*bin_width
-      when m1.value_as_number between iqr_min+8*bin_width and iqr_min+9*bin_width then iqr_min+9*bin_width
-      when m1.value_as_number between iqr_min+9*bin_width and iqr_min+10*bin_width then iqr_min+10*bin_width
-      else iqr_max
-     end),2)
-else
-round((case when m1.value_as_number < p10_value then p10_value
-      when m1.value_as_number > p90_value then p90_value
-      when m1.value_as_number between p10_value and p10_value+((p90_value-p10_value)/11) then p10_value+((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+((p90_value-p10_value)/11) and p10_value+2*((p90_value-p10_value)/11) then p10_value+2*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+2*((p90_value-p10_value)/11) and p10_value+3*((p90_value-p10_value)/11) then p10_value+3*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+3*((p90_value-p10_value)/11) and p10_value+4*((p90_value-p10_value)/11) then p10_value+4*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+4*((p90_value-p10_value)/11) and p10_value+5*((p90_value-p10_value)/11) then p10_value+5*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+5*((p90_value-p10_value)/11) and p10_value+6*((p90_value-p10_value)/11) then p10_value+6*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+6*((p90_value-p10_value)/11) and p10_value+7*((p90_value-p10_value)/11) then p10_value+7*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+7*((p90_value-p10_value)/11) and p10_value+8*((p90_value-p10_value)/11) then p10_value+8*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+8*((p90_value-p10_value)/11) and p10_value+9*((p90_value-p10_value)/11) then p10_value+9*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+9*((p90_value-p10_value)/11) and p10_value+10*((p90_value-p10_value)/11) then p10_value+10*((p90_value-p10_value)/11)
-      else p90_value
-     end),2)
-     end) as string) as stratum_4,
-count(distinct p1.person_id) as count_value,
-0 as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
-join measurement_quartile_data on m1.measurement_concept_id=concept
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
-where m1.measurement_concept_id != 0
-and m1.value_as_number is not null and p1.gender_concept_id=gender
-group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4
-union all
-select 0 as id, 1900 as analysis_id,
-CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
-unit as stratum_2,
-CAST(p1.gender_concept_id AS STRING) as stratum_3,
-cast(
-(case when iqr_min != iqr_max then
-round((case when m1.value_as_number < iqr_min then iqr_min
-      when m1.value_as_number > iqr_max then iqr_max
-      when m1.value_as_number between iqr_min and iqr_min+bin_width then iqr_min+bin_width
-      when m1.value_as_number between iqr_min+bin_width and iqr_min+2*bin_width then iqr_min+2*bin_width
-      when m1.value_as_number between iqr_min+2*bin_width and iqr_min+3*bin_width then iqr_min+3*bin_width
-      when m1.value_as_number between iqr_min+3*bin_width and iqr_min+4*bin_width then iqr_min+4*bin_width
-      when m1.value_as_number between iqr_min+4*bin_width and iqr_min+5*bin_width then iqr_min+5*bin_width
-      when m1.value_as_number between iqr_min+5*bin_width and iqr_min+6*bin_width then iqr_min+6*bin_width
-      when m1.value_as_number between iqr_min+6*bin_width and iqr_min+7*bin_width then iqr_min+7*bin_width
-      when m1.value_as_number between iqr_min+7*bin_width and iqr_min+8*bin_width then iqr_min+8*bin_width
-      when m1.value_as_number between iqr_min+8*bin_width and iqr_min+9*bin_width then iqr_min+9*bin_width
-      when m1.value_as_number between iqr_min+9*bin_width and iqr_min+10*bin_width then iqr_min+10*bin_width
-      else iqr_max
-     end),2)
-else
-round((case when m1.value_as_number < p10_value then p10_value
-      when m1.value_as_number > p90_value then p90_value
-      when m1.value_as_number between p10_value and p10_value+((p90_value-p10_value)/11) then p10_value+((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+((p90_value-p10_value)/11) and p10_value+2*((p90_value-p10_value)/11) then p10_value+2*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+2*((p90_value-p10_value)/11) and p10_value+3*((p90_value-p10_value)/11) then p10_value+3*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+3*((p90_value-p10_value)/11) and p10_value+4*((p90_value-p10_value)/11) then p10_value+4*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+4*((p90_value-p10_value)/11) and p10_value+5*((p90_value-p10_value)/11) then p10_value+5*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+5*((p90_value-p10_value)/11) and p10_value+6*((p90_value-p10_value)/11) then p10_value+6*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+6*((p90_value-p10_value)/11) and p10_value+7*((p90_value-p10_value)/11) then p10_value+7*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+7*((p90_value-p10_value)/11) and p10_value+8*((p90_value-p10_value)/11) then p10_value+8*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+8*((p90_value-p10_value)/11) and p10_value+9*((p90_value-p10_value)/11) then p10_value+9*((p90_value-p10_value)/11)
-      when m1.value_as_number between p10_value+9*((p90_value-p10_value)/11) and p10_value+10*((p90_value-p10_value)/11) then p10_value+10*((p90_value-p10_value)/11)
-      else p90_value
-     end),2)
-     end) as string) as stratum_4,
-COUNT(distinct p1.PERSON_ID) as count_value, COUNT(distinct p1.PERSON_ID) as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
-join measurement_quartile_data on m1.measurement_source_concept_id=concept
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_source_concept_id=c1.concept_id
-where m1.measurement_source_concept_id != 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
-and m1.value_as_number is not null and p1.gender_concept_id=gender
-group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4"
-
 # 1900 Measurement numeric value counts (This query generates counts, source counts of the binned value and gender combination. It gets bin size from joining the achilles_results)
 # We do net yet generate the binned source counts of standard concepts
 echo "Getting measurements binned gender value counts"
@@ -915,113 +816,6 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
  group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4"
 
-# 1901 Measurement response, age decile no unit histogram data (age decile > 2)
-# We do not yet generate the binned source counts of standard concepts
-echo "Getting measurement response, age decile no unit histogram data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
- (id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,count_value,source_count_value)
- with measurement_quartile_data as
- (
- select cast(stratum_1 as int64) as concept,0 as unit,cast(stratum_3 as int64)as age_decile,cast(stratum_4 as float64) as iqr_min,cast(stratum_5 as float64) as iqr_max,min_value,max_value,p10_value,p25_value,p75_value,p90_value,
- ((cast(stratum_5 as float64)-cast(stratum_4 as float64))/11) as bin_width from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\` where analysis_id=1816 and stratum_2=''
- )
- select 0,1901 as analysis_id,
- CAST(m1.measurement_concept_id AS STRING) as stratum_1,
- unit as stratum_2,
- CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
- cast(
- (case when iqr_min != iqr_max then
- round((case when m1.value_as_number < iqr_min then iqr_min
-        when m1.value_as_number > iqr_max then iqr_max
-        when m1.value_as_number between iqr_min and iqr_min+bin_width then iqr_min+bin_width
-        when m1.value_as_number between iqr_min+bin_width and iqr_min+2*bin_width then iqr_min+2*bin_width
-        when m1.value_as_number between iqr_min+2*bin_width and iqr_min+3*bin_width then iqr_min+3*bin_width
-        when m1.value_as_number between iqr_min+3*bin_width and iqr_min+4*bin_width then iqr_min+4*bin_width
-        when m1.value_as_number between iqr_min+4*bin_width and iqr_min+5*bin_width then iqr_min+5*bin_width
-        when m1.value_as_number between iqr_min+5*bin_width and iqr_min+6*bin_width then iqr_min+6*bin_width
-        when m1.value_as_number between iqr_min+6*bin_width and iqr_min+7*bin_width then iqr_min+7*bin_width
-        when m1.value_as_number between iqr_min+7*bin_width and iqr_min+8*bin_width then iqr_min+8*bin_width
-        when m1.value_as_number between iqr_min+8*bin_width and iqr_min+9*bin_width then iqr_min+9*bin_width
-        when m1.value_as_number between iqr_min+9*bin_width and iqr_min+10*bin_width then iqr_min+10*bin_width
-        else iqr_max
-       end),2)
- else
- round((case when m1.value_as_number < p10_value then p10_value
-        when m1.value_as_number > p90_value then p90_value
-        when m1.value_as_number between p10_value and p10_value+((p90_value-p10_value)/11) then p10_value+((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+((p90_value-p10_value)/11) and p10_value+2*((p90_value-p10_value)/11) then p10_value+2*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+2*((p90_value-p10_value)/11) and p10_value+3*((p90_value-p10_value)/11) then p10_value+3*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+3*((p90_value-p10_value)/11) and p10_value+4*((p90_value-p10_value)/11) then p10_value+4*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+4*((p90_value-p10_value)/11) and p10_value+5*((p90_value-p10_value)/11) then p10_value+5*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+5*((p90_value-p10_value)/11) and p10_value+6*((p90_value-p10_value)/11) then p10_value+6*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+6*((p90_value-p10_value)/11) and p10_value+7*((p90_value-p10_value)/11) then p10_value+7*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+7*((p90_value-p10_value)/11) and p10_value+8*((p90_value-p10_value)/11) then p10_value+8*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+8*((p90_value-p10_value)/11) and p10_value+9*((p90_value-p10_value)/11) then p10_value+9*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+9*((p90_value-p10_value)/11) and p10_value+10*((p90_value-p10_value)/11) then p10_value+10*((p90_value-p10_value)/11)
-        else p90_value
-       end),2)
-       end) as string) as stratum_4,
- count(distinct p1.person_id) as count_value,
- 0 as source_count_value
- FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
- join measurement_quartile_data ar on
- m1.measurement_concept_id=ar.concept
- join  \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
- where m1.measurement_concept_id > 0
- and m1.value_as_number is not null
- and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
- and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
- group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4
- union all
- select 0, 1901 as analysis_id,
- CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
- unit as stratum_2,
- CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
- cast(
- (case when iqr_min != iqr_max then
- round((case when m1.value_as_number < iqr_min then iqr_min
-        when m1.value_as_number > iqr_max then iqr_max
-        when m1.value_as_number between iqr_min and iqr_min+bin_width then iqr_min+bin_width
-        when m1.value_as_number between iqr_min+bin_width and iqr_min+2*bin_width then iqr_min+2*bin_width
-        when m1.value_as_number between iqr_min+2*bin_width and iqr_min+3*bin_width then iqr_min+3*bin_width
-        when m1.value_as_number between iqr_min+3*bin_width and iqr_min+4*bin_width then iqr_min+4*bin_width
-        when m1.value_as_number between iqr_min+4*bin_width and iqr_min+5*bin_width then iqr_min+5*bin_width
-        when m1.value_as_number between iqr_min+5*bin_width and iqr_min+6*bin_width then iqr_min+6*bin_width
-        when m1.value_as_number between iqr_min+6*bin_width and iqr_min+7*bin_width then iqr_min+7*bin_width
-        when m1.value_as_number between iqr_min+7*bin_width and iqr_min+8*bin_width then iqr_min+8*bin_width
-        when m1.value_as_number between iqr_min+8*bin_width and iqr_min+9*bin_width then iqr_min+9*bin_width
-        when m1.value_as_number between iqr_min+9*bin_width and iqr_min+10*bin_width then iqr_min+10*bin_width
-        else iqr_max
-       end),2)
- else
- round((case when m1.value_as_number < p10_value then p10_value
-        when m1.value_as_number > p90_value then p90_value
-        when m1.value_as_number between p10_value and p10_value+((p90_value-p10_value)/11) then p10_value+((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+((p90_value-p10_value)/11) and p10_value+2*((p90_value-p10_value)/11) then p10_value+2*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+2*((p90_value-p10_value)/11) and p10_value+3*((p90_value-p10_value)/11) then p10_value+3*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+3*((p90_value-p10_value)/11) and p10_value+4*((p90_value-p10_value)/11) then p10_value+4*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+4*((p90_value-p10_value)/11) and p10_value+5*((p90_value-p10_value)/11) then p10_value+5*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+5*((p90_value-p10_value)/11) and p10_value+6*((p90_value-p10_value)/11) then p10_value+6*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+6*((p90_value-p10_value)/11) and p10_value+7*((p90_value-p10_value)/11) then p10_value+7*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+7*((p90_value-p10_value)/11) and p10_value+8*((p90_value-p10_value)/11) then p10_value+8*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+8*((p90_value-p10_value)/11) and p10_value+9*((p90_value-p10_value)/11) then p10_value+9*((p90_value-p10_value)/11)
-        when m1.value_as_number between p10_value+9*((p90_value-p10_value)/11) and p10_value+10*((p90_value-p10_value)/11) then p10_value+10*((p90_value-p10_value)/11)
-        else p90_value
-       end),2)
-       end) as string) as stratum_4,
- COUNT(distinct p1.PERSON_ID) as count_value, COUNT(distinct p1.PERSON_ID) as source_count_value
- FROM  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
- join  \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
- join measurement_quartile_data ar on
- m1.measurement_source_concept_id=ar.concept
- join  \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_source_concept_id=c1.concept_id
- where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
- and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
- and m1.value_as_number is not null
- and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
- group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4"
-
 
 # 1901 Measurement response, age decile histogram data (age decile = 2)
 # We do not yet generate the binned source counts of standard concepts
@@ -1134,112 +928,6 @@ and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extra
 group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4"
 
 
-# 1901 Measurement response, age decile no unit histogram data (age decile = 2)
-# We do not yet generate the binned source counts of standard concepts
-echo "Getting measurement response, age decile no unit histogram data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,count_value,source_count_value)
-with measurement_quartile_data as
-(
-select cast(stratum_1 as int64) as concept,0 as unit,cast(stratum_3 as int64)as age_decile,cast(stratum_4 as float64) as iqr_min,cast(stratum_5 as float64) as iqr_max,min_value,max_value,p10_value,p25_value,p75_value,p90_value,
-((cast(stratum_5 as float64)-cast(stratum_4 as float64))/11) as bin_width from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\` where analysis_id=1816 and stratum_2=''
-)
-select 0,1901 as analysis_id,
-CAST(m1.measurement_concept_id AS STRING) as stratum_1,
-unit as stratum_2,
-'2' as stratum_3,
-cast(
-(case when iqr_min != iqr_max then
-round((case when m1.value_as_number < iqr_min then iqr_min
-       when m1.value_as_number > iqr_max then iqr_max
-       when m1.value_as_number between iqr_min and iqr_min+bin_width then iqr_min+bin_width
-       when m1.value_as_number between iqr_min+bin_width and iqr_min+2*bin_width then iqr_min+2*bin_width
-       when m1.value_as_number between iqr_min+2*bin_width and iqr_min+3*bin_width then iqr_min+3*bin_width
-       when m1.value_as_number between iqr_min+3*bin_width and iqr_min+4*bin_width then iqr_min+4*bin_width
-       when m1.value_as_number between iqr_min+4*bin_width and iqr_min+5*bin_width then iqr_min+5*bin_width
-       when m1.value_as_number between iqr_min+5*bin_width and iqr_min+6*bin_width then iqr_min+6*bin_width
-       when m1.value_as_number between iqr_min+6*bin_width and iqr_min+7*bin_width then iqr_min+7*bin_width
-       when m1.value_as_number between iqr_min+7*bin_width and iqr_min+8*bin_width then iqr_min+8*bin_width
-       when m1.value_as_number between iqr_min+8*bin_width and iqr_min+9*bin_width then iqr_min+9*bin_width
-       when m1.value_as_number between iqr_min+9*bin_width and iqr_min+10*bin_width then iqr_min+10*bin_width
-       else iqr_max
-      end),2)
-else
-round((case when m1.value_as_number < p10_value then p10_value
-       when m1.value_as_number > p90_value then p90_value
-       when m1.value_as_number between p10_value and p10_value+((p90_value-p10_value)/11) then p10_value+((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+((p90_value-p10_value)/11) and p10_value+2*((p90_value-p10_value)/11) then p10_value+2*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+2*((p90_value-p10_value)/11) and p10_value+3*((p90_value-p10_value)/11) then p10_value+3*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+3*((p90_value-p10_value)/11) and p10_value+4*((p90_value-p10_value)/11) then p10_value+4*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+4*((p90_value-p10_value)/11) and p10_value+5*((p90_value-p10_value)/11) then p10_value+5*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+5*((p90_value-p10_value)/11) and p10_value+6*((p90_value-p10_value)/11) then p10_value+6*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+6*((p90_value-p10_value)/11) and p10_value+7*((p90_value-p10_value)/11) then p10_value+7*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+7*((p90_value-p10_value)/11) and p10_value+8*((p90_value-p10_value)/11) then p10_value+8*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+8*((p90_value-p10_value)/11) and p10_value+9*((p90_value-p10_value)/11) then p10_value+9*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+9*((p90_value-p10_value)/11) and p10_value+10*((p90_value-p10_value)/11) then p10_value+10*((p90_value-p10_value)/11)
-       else p90_value
-      end),2)
-      end) as string) as stratum_4,
-count(distinct p1.person_id) as count_value,
-0 as source_count_value
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
-join measurement_quartile_data ar on
-m1.measurement_concept_id=ar.concept
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
-where m1.measurement_concept_id > 0
-and m1.value_as_number is not null
-and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
-and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
-group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4
-union all
-select 0, 1901 as analysis_id,
-CAST(m1.measurement_source_concept_id AS STRING) as stratum_1,
-unit as stratum_2,
-'2' as stratum_3,
-cast(
-(case when iqr_min != iqr_max then
-round((case when m1.value_as_number < iqr_min then iqr_min
-       when m1.value_as_number > iqr_max then iqr_max
-       when m1.value_as_number between iqr_min and iqr_min+bin_width then iqr_min+bin_width
-       when m1.value_as_number between iqr_min+bin_width and iqr_min+2*bin_width then iqr_min+2*bin_width
-       when m1.value_as_number between iqr_min+2*bin_width and iqr_min+3*bin_width then iqr_min+3*bin_width
-       when m1.value_as_number between iqr_min+3*bin_width and iqr_min+4*bin_width then iqr_min+4*bin_width
-       when m1.value_as_number between iqr_min+4*bin_width and iqr_min+5*bin_width then iqr_min+5*bin_width
-       when m1.value_as_number between iqr_min+5*bin_width and iqr_min+6*bin_width then iqr_min+6*bin_width
-       when m1.value_as_number between iqr_min+6*bin_width and iqr_min+7*bin_width then iqr_min+7*bin_width
-       when m1.value_as_number between iqr_min+7*bin_width and iqr_min+8*bin_width then iqr_min+8*bin_width
-       when m1.value_as_number between iqr_min+8*bin_width and iqr_min+9*bin_width then iqr_min+9*bin_width
-       when m1.value_as_number between iqr_min+9*bin_width and iqr_min+10*bin_width then iqr_min+10*bin_width
-       else iqr_max
-      end),2)
-else
-round((case when m1.value_as_number < p10_value then p10_value
-       when m1.value_as_number > p90_value then p90_value
-       when m1.value_as_number between p10_value and p10_value+((p90_value-p10_value)/11) then p10_value+((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+((p90_value-p10_value)/11) and p10_value+2*((p90_value-p10_value)/11) then p10_value+2*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+2*((p90_value-p10_value)/11) and p10_value+3*((p90_value-p10_value)/11) then p10_value+3*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+3*((p90_value-p10_value)/11) and p10_value+4*((p90_value-p10_value)/11) then p10_value+4*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+4*((p90_value-p10_value)/11) and p10_value+5*((p90_value-p10_value)/11) then p10_value+5*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+5*((p90_value-p10_value)/11) and p10_value+6*((p90_value-p10_value)/11) then p10_value+6*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+6*((p90_value-p10_value)/11) and p10_value+7*((p90_value-p10_value)/11) then p10_value+7*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+7*((p90_value-p10_value)/11) and p10_value+8*((p90_value-p10_value)/11) then p10_value+8*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+8*((p90_value-p10_value)/11) and p10_value+9*((p90_value-p10_value)/11) then p10_value+9*((p90_value-p10_value)/11)
-       when m1.value_as_number between p10_value+9*((p90_value-p10_value)/11) and p10_value+10*((p90_value-p10_value)/11) then p10_value+10*((p90_value-p10_value)/11)
-       else p90_value
-      end),2)
-      end) as string) as stratum_4,
-COUNT(distinct p1.PERSON_ID) as count_value, COUNT(distinct p1.PERSON_ID) as source_count_value
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
-join measurement_quartile_data ar on
-m1.measurement_source_concept_id=ar.concept
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_source_concept_id=c1.concept_id
-where m1.measurement_source_concept_id > 0 and m1.measurement_concept_id!=m1.measurement_source_concept_id
-and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
-and m1.value_as_number is not null
-and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extract(year from m1.measurement_date) - p1.year_of_birth) < 30
-group by m1.measurement_source_concept_id,stratum_2,stratum_3,stratum_4"
-
 # 1901 Measurement response, age decile histogram data (For concepts that have text values)
 # We do not yet generate the binned source counts of standard concepts
 echo "Getting measurement response, age decile histogram data"
@@ -1316,6 +1004,13 @@ echo "Binning counts < 20"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 set count_value = 20, source_count_value = 20 where analysis_id in (1900,1901) and ((count_value>0 and count_value<20) or (source_count_value>0 and source_count_value<20))"
+
+# Set concept name in place of concept id for units
+echo "Replacing unit concept id with unit concept name"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
+set stratum_2 = (select distinct concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where cast(concept_id as string)=stratum_2)
+where analysis_id in (1815,1816,1814) and stratum_2 is not null and stratum_2 != '' "
 
 # Set concept name in place of concept id for units
 echo "Replacing unit concept id with unit concept name"

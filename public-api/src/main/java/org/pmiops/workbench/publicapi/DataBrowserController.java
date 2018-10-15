@@ -542,6 +542,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                     unitGenderAnalysis.setUnitName(unit);
                                     processMeasurementGenderMissingBins(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,unitGenderAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
                                     unitSeperateAnalysis.add(unitGenderAnalysis);
+                                }else if(unit.length() == 0){
+                                    if(results.keySet().contains("No matching concept")) {
+                                    }
                                 }
                             }
                         }else {
@@ -706,6 +709,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 female_bin_max = Float.valueOf(ard.getStratum5());
             }
         }
+
 
         TreeSet<Float> male_bin_ranges = new TreeSet<Float>();
         TreeSet<Float> female_bin_ranges = new TreeSet<Float>();
