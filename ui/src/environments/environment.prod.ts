@@ -5,5 +5,6 @@ export const environment = {
   leoApiUrl: 'https://notebooks.firecloud.org',
   publicApiUrl: 'https://public.api.researchallofus.org',
   publicUiUrl: 'https://databrowser.researchallofus.org',
-  debug: false
+  debug: false,
+  gaId: 'UA-112406425-4'
 };
