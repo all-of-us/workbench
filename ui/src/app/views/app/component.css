@@ -29,6 +29,7 @@
   padding-top: 1rem;
   padding-bottom: 0.5rem;
   background-color: white;
+  min-width: 960px;
 }
 
 .nav-link:hover {
@@ -97,9 +98,10 @@
   background-size: cover;
   right: 0rem;
   top: 3.3rem;
-  width: 50%;
+  width: 100%;
   position: absolute;
   height: 90%;
+  min-width: 960px;
 }
 
 button.btn:focus {

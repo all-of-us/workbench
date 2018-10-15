@@ -82,6 +82,7 @@ import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
@@ -824,10 +825,12 @@ public class WorkspacesControllerTest {
         ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
         .thenReturn(123);
     ConceptSet conceptSet1 = conceptSetsController.createConceptSet(workspace.getNamespace(),
-        workspace.getId(), new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+        workspace.getId(), new CreateConceptSetRequest().conceptSet(
+            new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION)))
             .getBody();
     ConceptSet conceptSet2 = conceptSetsController.createConceptSet(workspace.getNamespace(),
-        workspace.getId(), new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT))
+        workspace.getId(), new CreateConceptSetRequest().conceptSet(
+            new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT)))
             .getBody();
     conceptSet1 =
         conceptSetsController.updateConceptSetConcepts(workspace.getNamespace(), workspace.getId(),
@@ -941,13 +944,11 @@ public class WorkspacesControllerTest {
         ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
         .thenReturn(123);
     ConceptSet conceptSet1 = conceptSetsController.createConceptSet(workspace.getNamespace(),
-        workspace.getId(), new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+        workspace.getId(), new CreateConceptSetRequest().conceptSet(
+            new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+            .addedIds(ImmutableList.of(CLIENT_CONCEPT_1.getConceptId(),
+                CLIENT_CONCEPT_2.getConceptId())))
         .getBody();
-    conceptSet1 =
-        conceptSetsController.updateConceptSetConcepts(workspace.getNamespace(), workspace.getId(),
-            conceptSet1.getId(), new UpdateConceptSetRequest().etag(conceptSet1.getEtag())
-                .addedIds(ImmutableList.of(CLIENT_CONCEPT_1.getConceptId(),
-                    CLIENT_CONCEPT_2.getConceptId()))).getBody();
 
     stubGetWorkspace(workspace.getNamespace(), workspace.getName(),
         LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);

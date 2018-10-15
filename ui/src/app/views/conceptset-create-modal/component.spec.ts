@@ -7,7 +7,7 @@ import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {
-  ConceptSet, ConceptsService, Domain, WorkspaceResponse,
+  ConceptSet, ConceptsService, CreateConceptSetRequest, Domain, WorkspaceResponse,
   WorkspacesService
 } from '../../../generated';
 import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
@@ -142,8 +142,11 @@ describe('ConceptSetComponent', () => {
       description: 'Description',
       domain: Domain.CONDITION
     };
+    const request: CreateConceptSetRequest = {
+      conceptSet: concepts
+    };
     expect(spyObj).toHaveBeenCalledWith(WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, concepts);
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, request);
   }));
 });
 
