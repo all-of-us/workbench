@@ -1077,6 +1077,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsConditionsSnomed() throws Exception {
+    Criteria snomedCriteria =
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "", DomainType.CONDITION.name(), "6");
+    SearchParameter snomed = createSearchParameter(snomedCriteria, "");
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsProceduresSnomed() throws Exception {
+    Criteria snomedCriteria =
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.PCS.name(), 0, "", DomainType.PROCEDURE.name(), "4");
+    SearchParameter snomed = createSearchParameter(snomedCriteria, "");
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsCPTDrugExposure() throws Exception {
     Criteria cptDrug =
       createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "90703", DomainType.DRUG.name(), "11");
