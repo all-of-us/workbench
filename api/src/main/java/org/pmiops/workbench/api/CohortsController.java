@@ -256,7 +256,7 @@ public class CohortsController implements CohortsApiDelegate {
         throw new ServerErrorException("Couldn't find table for domain: " +
             conceptSet.getDomainEnum());
       }
-      if (tableName != tableQuery.getTableName()) {
+      if (!tableName.equals(tableQuery.getTableName())) {
         throw new BadRequestException(
             String.format("Can't use concept set for domain %s with table %s",
                 conceptSet.getDomainEnum(),
