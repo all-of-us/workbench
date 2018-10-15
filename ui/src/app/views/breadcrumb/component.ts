@@ -94,6 +94,21 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       if (label === 'Param: Concept Set Name') {
         label = child.snapshot.data['conceptSet'].name;
       }
+
+      if ((label === 'Cohorts') || (label === 'Notebooks')) {
+        console.log(child.url);
+        if (!child.firstChild) {
+          return breadcrumbs;
+        }
+        else {
+          if (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === 'Cohorts') {
+            if (!child.firstChild.firstChild) {
+              return breadcrumbs;
+            }
+          }
+        }
+      }
+      
       // Prevent processing children with duplicate urls
       if (!breadcrumbs.some(b => b.url === url)) {
         const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);
