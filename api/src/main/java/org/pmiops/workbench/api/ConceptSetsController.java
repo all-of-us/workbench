@@ -234,7 +234,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       List<Long> addedIds) {
     Domain domainEnum = dbConceptSet.getDomainEnum();
     Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(addedIds);
-    conceptService.fetchConceptSynonyms(Lists.newArrayList(concepts));
     List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
         ImmutableList.copyOf(concepts).stream().filter(concept -> {
           Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());
