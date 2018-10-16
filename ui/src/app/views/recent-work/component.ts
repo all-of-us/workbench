@@ -61,7 +61,7 @@ export class RecentWorkComponent implements OnInit {
     const width = el.nativeElement.offsetWidth;
     let division;
     if (this.workspace) {
-      division = Math.floor((width - 200)/ 200);
+      division = Math.floor((width - 200) / 200);
     } else {
       division = Math.floor((width - 50) / 200);
     }
