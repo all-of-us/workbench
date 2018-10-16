@@ -7,6 +7,6 @@ import {Component, Input} from '@angular/core';
 })
 
 export class RightScrollLightComponent {
-  @Input() rightScrollHover: boolean;
+  @Input() rightScrollLightHover: boolean;
   constructor() {}
 }
