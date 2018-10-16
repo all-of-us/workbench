@@ -340,14 +340,14 @@ union all
 select m.measurement_concept_id as subject_id, p.gender_concept_id as gender,
 '2' as age_decile, m.person_id, count(*) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
-where m.measurement_concept_id = 3025315 and (m.value_as_number is not null or m.value_as_concept_id != 0)
+where m.measurement_concept_id != 0 and (m.value_as_number is not null or m.value_as_concept_id != 0)
 and (extract(year from m.measurement_date) - p.year_of_birth) >= 18 and (extract(year from m.measurement_date) - p.year_of_birth) < 30
 group by m.measurement_concept_id,m.measurement_datetime,2,3,m.person_id
 union all
 select m.measurement_source_concept_id as subject_id, p.gender_concept_id as gender,
 '2' as age_decile, m.person_id, count(*) as count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
-where m.measurement_concept_id = 3025315 and (m.value_as_number is not null or m.value_as_concept_id != 0)
+where m.measurement_concept_id != 0 and (m.value_as_number is not null or m.value_as_concept_id != 0)
 and m.measurement_concept_id != m.measurement_source_concept_id
 and (extract(year from m.measurement_date) - p.year_of_birth) >= 18 and (extract(year from m.measurement_date) - p.year_of_birth) < 30
 group by m.measurement_source_concept_id,m.measurement_datetime,2,3,m.person_id
@@ -489,67 +489,6 @@ union all
 select * from age_gender_dist)
 select id,analysis_id,stratum1_id,stratum2_id,stratum3_id,cast(total as int64),min_value,max_value,avg_value,stdev_value,median_value,p10_value,p25_value,p75_value,p90_value from results
 "
-
-# 1806 Measurement age by gender distribution
-echo "Getting measurement age by gender distribution"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
-(id,analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value, p75_value, p90_value)
-WITH rawdata_1806 AS
-(SELECT o1.measurement_concept_id as subject_id, p1.gender_concept_id, o1.measurement_start_year - p1.year_of_birth as count_value
-FROM  \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
-(select  person_id, measurement_concept_id, min(EXTRACT(YEAR from measurement_date)) as measurement_start_year from  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` group by  1, 2 ) o1
-on p1.person_id = o1.person_id),
-overallstats  as
-( select  subject_id  as stratum1_id, gender_concept_id  as stratum2_id, cast(avg(1.0 * count_value)  as float64)  as avg_value,
-cast(STDDEV(count_value)  as float64)  as stdev_value, min(count_value)  as min_value, max(count_value)  as max_value,
-COUNT(*)  as total   from  rawdata_1806 group by  1, 2 ),
-statsview  as
-(select  subject_id  as stratum1_id, gender_concept_id  as stratum2_id, count_value as count_value, COUNT(*)  as total, row_number() over (partition by subject_id, gender_concept_id order by count_value)  as rn   from  rawdata_1806
- group by  1, 2, 3 ),
-priorstats  as
-(select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2_id, s.count_value as count_value, s.total as total, sum(p.total)  as accumulated   from  statsview s
-join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
-group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn)
-select 0 as id, 1806 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
-cast(o.total as int64) as count_value, round(o.min_value,2) as min_value, round(o.max_value,2) as max_value, round(o.avg_value,2) as avg_value,
-round(o.stdev_value,2) as stdev_value,
-min(case when p.accumulated >= .50 * o.total then count_value else round(o.max_value,2) end) as median_value,
-min(case when p.accumulated >= .10 * o.total then count_value else round(o.max_value,2) end) as p10_value,
-min(case when p.accumulated >= .25 * o.total then count_value else round(o.max_value,2) end) as p25_value,
-min(case when p.accumulated >= .75 * o.total then count_value else round(o.max_value,2) end) as p75_value,
-min(case when p.accumulated >= .90 * o.total then count_value else round(o.max_value,2) end) as p90_value
-FROM  priorstats p join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
-group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
-
-# 1806 Measurement response age distribution (source concepts)
-echo "Getting measurement response age distribution"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\`
-(id,analysis_id, stratum_1, stratum_2, count_value, min_value, max_value, avg_value, stdev_value, median_value, p10_value, p25_value, p75_value, p90_value)
-WITH rawdata_1806 AS
-(SELECT o1.measurement_source_concept_id as subject_id, p1.gender_concept_id, o1.measurement_start_year - p1.year_of_birth as count_value
-  FROM  \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1
-inner join
-(select  person_id, measurement_source_concept_id, min(EXTRACT(YEAR from measurement_date)) as measurement_start_year from  \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`
-where measurement_concept_id != measurement_source_concept_id group by  1, 2 ) o1
-on p1.person_id = o1.person_id),
-overallstats  as ( select  subject_id  as stratum1_id, gender_concept_id  as stratum2_id, cast(avg(1.0 * count_value)  as float64)  as avg_value, cast(STDDEV(count_value)  as float64)  as stdev_value, min(count_value)  as min_value, max(count_value)  as max_value, COUNT(*)  as total   from  rawdata_1806 group by  1, 2 ),
-statsview  as ( select  subject_id  as stratum1_id, gender_concept_id  as stratum2_id, count_value as count_value, COUNT(*)  as total, row_number() over (partition by subject_id, gender_concept_id order by count_value)  as rn   from  rawdata_1806
- group by  1, 2, 3 ),
-priorstats  as ( select  s.stratum1_id as stratum1_id, s.stratum2_id as stratum2_id, s.count_value as count_value, s.total as total, sum(p.total)  as accumulated   from  statsview s
-join statsview p on s.stratum1_id = p.stratum1_id and s.stratum2_id = p.stratum2_id and p.rn <= s.rn
-group by  s.stratum1_id, s.stratum2_id, s.count_value, s.total, s.rn)
-select 0 as id, 1806 as analysis_id, CAST(o.stratum1_id  AS STRING) as stratum1_id, CAST(o.stratum2_id  AS STRING) as stratum2_id,
-cast(o.total as int64) as count_value, round(o.min_value,2) as min_value, round(o.max_value,2) as max_value, round(o.avg_value,2) as avg_value,
-round(o.stdev_value,2) as stdev_value,
-min(case when p.accumulated >= .50 * o.total then count_value else round(o.max_value,2) end) as median_value,
-min(case when p.accumulated >= .10 * o.total then count_value else round(o.max_value,2) end) as p10_value,
-min(case when p.accumulated >= .25 * o.total then count_value else round(o.max_value,2) end) as p25_value,
-min(case when p.accumulated >= .75 * o.total then count_value else round(o.max_value,2) end) as p75_value,
-min(case when p.accumulated >= .90 * o.total then count_value else round(o.max_value,2) end) as p90_value
-FROM  priorstats p join overallstats o on p.stratum1_id = o.stratum1_id and p.stratum2_id = o.stratum2_id
-group by  o.stratum1_id, o.stratum2_id, o.total, o.min_value, o.max_value, o.avg_value, o.stdev_value"
 
 # Update iqr_min and iqr_max in distributions for debugging purposes
 echo "updating iqr_min and iqr_max"

@@ -119,16 +119,6 @@ set count_value =
     end
 where count_value >= 0"
 
-# achilles_results_dist
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results_dist\`
-set count_value =
-    case when count_value < ${BIN_SIZE}
-        then ${BIN_SIZE}
-    else
-        cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
-    end
-where count_value >= 0 and analysis_id in (1806,3005,3006,3007,3008)"
 
 #delete concepts with 0 count / source count value
 
