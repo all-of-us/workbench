@@ -65,31 +65,4 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
         "group by c.vocabularyId\n" +
         "order by c.vocabularyId\n")
     List<VocabularyCount> findVocabularyAllConceptCounts(String matchExp, String domainId);
-
-    /**
-     * Return the number of standard concepts in each vocabulary for the specified domain.
-     * @param domainId domain ID to use when filtering concepts
-     * @return per-vocabulary concept counts
-     */
-    @Query(value = "select c.vocabularyId as vocabularyId, count(*) as conceptCount from Concept c\n" +
-        "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-             "c.standardConcept IN ('S', 'C') and\n" +
-        "c.domainId = ?1\n" +
-        "group by c.vocabularyId\n" +
-        "order by c.vocabularyId\n")
-    List<VocabularyCount> findVocabularyStandardConceptCountsInDomain(String domainId);
-
-    /**
-     * Return the number of concepts (standard or non-standard) in each vocabulary
-     * for the specified domain.
-     * @param domainId domain ID to use when filtering concepts
-     * @return per-vocabulary concept counts
-     */
-    @Query(value = "select c.vocabularyId as vocabularyId, count(*) as conceptCount from Concept c\n" +
-        "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-        "c.domainId = ?1\n" +
-        "group by c.vocabularyId\n" +
-        "order by c.vocabularyId\n")
-    List<VocabularyCount> findVocabularyAllConceptCountsInDomain(String domainId);
-
 }
