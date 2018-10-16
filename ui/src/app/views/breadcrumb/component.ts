@@ -93,19 +93,18 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       }
       if (label === 'Param: Concept Set Name') {
         label = child.snapshot.data['conceptSet'].name;
-        // For the most part, we don't want to append the current label to the breadcrumbs since we want the
-        //      label to stop at the parent.
-        // In this case, we want the breadcrumb header to be the Concept Set Name (the current child)
+        // For the most part, we don't want to append the current label to the breadcrumbs
+        //      since we want the label to stop at the parent.
+        // In this case, we want the breadcrumb header to be the Concept Set Name
         const conceptSetBreadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);
         breadcrumbs.push(conceptSetBreadcrumb);
       }
-
-      // Return if the child is a leaf, or if the child's child has the same breadcrumb as its parent
-      if ((!child.firstChild) || (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === label)) {
+      // Return if  child is a leaf, or if child's child has same breadcrumb as its parent
+      if ((!child.firstChild) ||
+          (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === label)) {
         console.log(breadcrumbs);
         return breadcrumbs;
       }
-      
       // Prevent processing children with duplicate urls
       if (!breadcrumbs.some(b => b.url === url)) {
         const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);
