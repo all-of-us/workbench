@@ -2,12 +2,11 @@ package org.pmiops.workbench.publicapi;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.junit.Before;
@@ -19,20 +18,18 @@ import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.AchillesAnalysis;
 import org.pmiops.workbench.cdr.model.AchillesResult;
-import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.model.Analysis;
+import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptAnalysis;
 import org.pmiops.workbench.model.ConceptAnalysisListResponse;
 import org.pmiops.workbench.model.ConceptListResponse;
@@ -63,26 +60,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DataBrowserControllerTest {
 
-    private static final Function<org.pmiops.workbench.model.Concept, Concept>
-            TO_CLIENT_CONCEPT =
-            new Function<org.pmiops.workbench.model.Concept, Concept>() {
-                @Override
-                public Concept apply(org.pmiops.workbench.model.Concept concept) {
-                    return new Concept()
-                            .conceptId(concept.getConceptId())
-                            .conceptName(concept.getConceptName())
-                            .standardConcept(concept.getStandardConcept())
-                            .conceptCode(concept.getConceptCode())
-                            .conceptClassId(concept.getConceptClassId())
-                            .vocabularyId(concept.getVocabularyId())
-                            .domainId(concept.getDomainId())
-                            .count(concept.getCountValue())
-                            .sourceCountValue(concept.getSourceCountValue())
-                            .prevalence(concept.getPrevalence())
-                            .synonyms(new ArrayList<>());
-                }
-            };
-
     private static final Concept CLIENT_CONCEPT_1 = new Concept()
             .conceptId(123L)
             .conceptName("a concept")
@@ -91,10 +68,10 @@ public class DataBrowserControllerTest {
             .conceptClassId("classId")
             .vocabularyId("V1")
             .domainId("Condition")
-            .count(123L)
+            .countValue(123L)
             .sourceCountValue(20L)
             .prevalence(0.2F)
-            .synonyms(new ArrayList<ConceptSynonym>());
+            .conceptSynonyms(new ArrayList<String>());
 
     private static final Concept CLIENT_CONCEPT_2 = new Concept()
             .conceptId(456L)
@@ -103,10 +80,10 @@ public class DataBrowserControllerTest {
             .conceptClassId("classId2")
             .vocabularyId("V2")
             .domainId("Measurement")
-            .count(456L)
+            .countValue(456L)
             .sourceCountValue(25L)
             .prevalence(0.3F)
-            .synonyms(new ArrayList<ConceptSynonym>());
+            .conceptSynonyms(new ArrayList<String>());
 
     private static final Concept CLIENT_CONCEPT_3 = new Concept()
             .conceptId(789L)
@@ -116,10 +93,10 @@ public class DataBrowserControllerTest {
             .conceptClassId("classId3")
             .vocabularyId("V3")
             .domainId("Condition")
-            .count(789L)
+            .countValue(789L)
             .sourceCountValue(0L)
             .prevalence(0.4F)
-            .synonyms(new ArrayList<ConceptSynonym>());
+            .conceptSynonyms(new ArrayList<String>());
 
     private static final Concept CLIENT_CONCEPT_4 = new Concept()
             .conceptId(1234L)
@@ -129,10 +106,10 @@ public class DataBrowserControllerTest {
             .conceptClassId("classId4")
             .vocabularyId("V4")
             .domainId("Observation")
-            .count(1250L)
+            .countValue(1250L)
             .sourceCountValue(99L)
             .prevalence(0.5F)
-            .synonyms(new ArrayList<ConceptSynonym>());
+            .conceptSynonyms(new ArrayList<String>());
 
     private static final Concept CLIENT_CONCEPT_5 = new Concept()
             .conceptId(7890L)
@@ -142,10 +119,10 @@ public class DataBrowserControllerTest {
             .conceptClassId("classId5")
             .vocabularyId("V5")
             .domainId("Condition")
-            .count(7890L)
+            .countValue(7890L)
             .sourceCountValue(78L)
             .prevalence(0.9F)
-            .synonyms(new ArrayList<ConceptSynonym>());
+            .conceptSynonyms(new ArrayList<String>());
 
     private static final Concept CLIENT_CONCEPT_6 = new Concept()
             .conceptId(7891L)
@@ -155,12 +132,12 @@ public class DataBrowserControllerTest {
             .conceptClassId("classId6")
             .vocabularyId("V6")
             .domainId("Condition")
-            .count(0L)
+            .countValue(0L)
             .sourceCountValue(20L)
             .prevalence(0.1F)
-            .synonyms(new ArrayList<ConceptSynonym>());
+            .conceptSynonyms(ImmutableList.of("cstest 1", "cstest 2", "cstest 3"));
 
-    private static final Concept CLIENT_CONCEPT_7 = new Concept()
+  private static final Concept CLIENT_CONCEPT_7 = new Concept()
             .conceptId(7892L)
             .conceptName("conceptD test concept 3")
             .standardConcept("S")
@@ -168,22 +145,10 @@ public class DataBrowserControllerTest {
             .conceptClassId("classId7")
             .vocabularyId("V7")
             .domainId("Condition")
-            .count(0L)
+            .countValue(0L)
             .sourceCountValue(0L)
             .prevalence(0.0F)
-            .synonyms(new ArrayList<ConceptSynonym>());
-
-    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_1 = new ConceptSynonym()
-            .conceptId(7892L)
-            .conceptSynonymName("cstest 1");
-
-    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_2 = new ConceptSynonym()
-            .conceptId(7892L)
-            .conceptSynonymName("cstest 2");
-
-    private static final ConceptSynonym CLIENT_CONCEPT_SYNONYM_3 = new ConceptSynonym()
-            .conceptId(7892L)
-            .conceptSynonymName("cstest 3");
+            .conceptSynonyms(ImmutableList.of("cstest 1", "cstest 2", "cstest 3"));
 
     private static final DomainInfo CLIENT_DOMAIN_1 = new DomainInfo()
             .domain(Domain.CONDITION)
@@ -378,24 +343,20 @@ public class DataBrowserControllerTest {
     private static final AchillesResult ACHILLES_RESULT_8 = makeAchillesResult(CLIENT_RESULT_8);
     private static final AchillesResult ACHILLES_RESULT_9 = makeAchillesResult(CLIENT_RESULT_9);
 
-    private static final Concept CONCEPT_1 =
+    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
             makeConcept(CLIENT_CONCEPT_1);
-    private static final Concept CONCEPT_2 =
+    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
             makeConcept(CLIENT_CONCEPT_2);
-    private static final Concept CONCEPT_3 =
+    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
             makeConcept(CLIENT_CONCEPT_3);
-    private static final Concept CONCEPT_4 =
+    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4 =
             makeConcept(CLIENT_CONCEPT_4);
-    private static final Concept CONCEPT_5 =
+    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_5 =
             makeConcept(CLIENT_CONCEPT_5);
-    private static final Concept CONCEPT_6 =
+    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_6 =
             makeConcept(CLIENT_CONCEPT_6);
-    private static final Concept CONCEPT_7 =
+    private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_7 =
             makeConcept(CLIENT_CONCEPT_7);
-
-    private static final ConceptSynonym CONCEPT_SYNONYM_1 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_1);
-    private static final ConceptSynonym CONCEPT_SYNONYM_2 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_2);
-    private static final ConceptSynonym CONCEPT_SYNONYM_3 = makeConceptSynonym(CLIENT_CONCEPT_SYNONYM_3);
 
     private static final org.pmiops.workbench.cdr.model.DomainInfo DOMAIN_1 =
             makeDomain(CLIENT_DOMAIN_1, 1L);
@@ -423,8 +384,6 @@ public class DataBrowserControllerTest {
     @Autowired
     private AchillesResultDao achillesResultDao;
     @Autowired
-    private ConceptSynonymDao conceptSynonymDao;
-    @Autowired
     private AchillesResultDistDao achillesResultDistDao;
     @PersistenceContext
     private EntityManager entityManager;
@@ -436,7 +395,7 @@ public class DataBrowserControllerTest {
     @Before
     public void setUp() {
         saveData();
-        ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
+        ConceptService conceptService = new ConceptService(entityManager, conceptDao);
         dataBrowserController = new DataBrowserController(conceptService, conceptDao, domainInfoDao,
             surveyModuleDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao, entityManager,
             () -> cdrVersion);
@@ -446,9 +405,7 @@ public class DataBrowserControllerTest {
     @Test
     public void testGetSourceConcepts() throws Exception {
         ResponseEntity<ConceptListResponse> response = dataBrowserController.getSourceConcepts(7890L, 15);
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .containsExactly(CONCEPT_4, CONCEPT_2);
+        assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_4, CLIENT_CONCEPT_2);
     }
 
 
@@ -464,10 +421,8 @@ public class DataBrowserControllerTest {
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .domain(Domain.CONDITION)
                 .minCount(0));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .containsExactly(CONCEPT_1, CONCEPT_5, CONCEPT_6, CONCEPT_7)
-        ;
+      assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_5,
+          CLIENT_CONCEPT_6, CLIENT_CONCEPT_7);
     }
 
     @Test
@@ -476,54 +431,37 @@ public class DataBrowserControllerTest {
                 .domain(Domain.CONDITION)
                 .maxResults(1)
                 .minCount(0));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts.size()).isEqualTo(1);
+      assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_5);
     }
 
     @Test
     public void testCountConceptSearchEmptyQuery() throws Exception{
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .domain(Domain.CONDITION));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .containsExactly(CONCEPT_1, CONCEPT_5, CONCEPT_6)
-        ;
+        assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_5, CLIENT_CONCEPT_6);
     }
 
     @Test
     public void testConceptSearchStandardConcept() throws Exception{
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("002")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .doesNotContain(CONCEPT_2);
+        assertThat(response.getBody().getItems()).isEmpty();
     }
 
     @Test
     public void testConceptSynonymSearch() throws Exception{
-        assertResults(
-                dataBrowserController.searchConcepts(new SearchConceptsRequest().domain(Domain.CONDITION).query("cstest")
-                        .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)),CLIENT_CONCEPT_7);
-    }
-
-    @Test
-    public void testConceptSearchStandardCodeIdMatchFilter() throws Exception{
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("")
-                .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        List<Concept> standard_concepts = Arrays.asList(CONCEPT_1, CONCEPT_4, CONCEPT_5, CONCEPT_6, CONCEPT_7);
-        assertThat(concepts)
-                .doesNotContain(standard_concepts);
+      ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
+          .domain(Domain.CONDITION).query("cstest").standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+      // CLIENT_CONCEPT_7 excluded because it has a zero count
+      assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_6);
     }
 
     @Test
     public void testConceptSearchEmptyQuery() throws Exception{
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        List<Concept> non_standard_concepts = Arrays.asList(CONCEPT_2, CONCEPT_3);
-        assertThat(concepts)
-                .doesNotContain(non_standard_concepts);
+        assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_4,
+            CLIENT_CONCEPT_5, CLIENT_CONCEPT_6);
     }
 
     @Test
@@ -531,19 +469,14 @@ public class DataBrowserControllerTest {
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest()
                 .query("")
                 .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .containsExactly(CONCEPT_2, CONCEPT_3);
+      assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_2, CLIENT_CONCEPT_3);
     }
 
     @Test
     public void testConceptSearchNonStandardConcepts() throws Exception{
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("7891")
                 .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        //Search on concept id fetches the non standard concept
-        assertThat(concepts)
-                .doesNotContain(CONCEPT_6);
+      assertThat(response.getBody().getItems()).isEmpty();
     }
 
 
@@ -552,48 +485,29 @@ public class DataBrowserControllerTest {
         // We can't test limiting to count > 0 with a concept name search because the match function does not work in hibernate. So we make several concepts with same concept code and one with count 0. The limit > 0 works the same weather it is code or name match.
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("004")
                 .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .containsExactly(CONCEPT_4, CONCEPT_6)
-                .inOrder();
+        assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_4, CLIENT_CONCEPT_6);
     }
 
     @Test
     public void testConceptIdSearch() throws Exception{
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("456")
                 .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .containsExactly(CONCEPT_2)
-                .inOrder();
+      assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_2);
     }
 
     @Test
     public void testConceptSearchDomainFilter() throws Exception{
         ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("004").domain(Domain.CONDITION));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        assertThat(concepts)
-                .containsExactly(CONCEPT_6)
-                .inOrder();
+      assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_6);
     }
 
 
     @Test
     public void testConceptCodeMatch() throws Exception {
-        ResponseEntity<ConceptListResponse> response = dataBrowserController.searchConcepts(new SearchConceptsRequest().query("002")
-                .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
-        List<Concept> concepts = response.getBody().getItems().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-        List<org.pmiops.workbench.model.Concept> stds= response.getBody().getStandardConcepts();
-        if(stds.size() > 0){
-            List<Concept> std_concepts = response.getBody().getStandardConcepts().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList());
-            assertThat(std_concepts)
-                    .containsExactly(CONCEPT_5)
-                    .inOrder();
-        }
-
-        assertThat(concepts)
-                .containsExactly(CONCEPT_2)
-                .inOrder();
+      ResponseEntity<ConceptListResponse> response = dataBrowserController
+          .searchConcepts(new SearchConceptsRequest().query("002")
+              .standardConceptFilter(StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH));
+      assertThat(response.getBody().getItems()).containsExactly(CLIENT_CONCEPT_2);
     }
 
     @Test
@@ -639,22 +553,23 @@ public class DataBrowserControllerTest {
 
 
 
-    private static Concept makeConcept(Concept concept) {
-        Concept result = new Concept();
-        result.setConceptId(concept.getConceptId());
-        result.setConceptName(concept.getConceptName());
-        result.setStandardConcept(concept.getStandardConcept() == null ? null :
-                (concept.getStandardConcept()));
-        result.setConceptCode(concept.getConceptCode());
-        result.setConceptClassId(concept.getConceptClassId());
-        result.setVocabularyId(concept.getVocabularyId());
-        result.setDomainId(concept.getDomainId());
-        result.setCountValue(concept.getCountValue());
-        result.setSourceCountValue(concept.getSourceCountValue());
-        result.setPrevalence(concept.getPrevalence());
-        result.setSynonyms(concept.getSynonyms());
-        return result;
-    }
+  static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
+    org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
+    result.setConceptId(concept.getConceptId());
+    result.setConceptName(concept.getConceptName());
+    result.setStandardConcept(concept.getStandardConcept());
+    result.setConceptCode(concept.getConceptCode());
+    result.setConceptClassId(concept.getConceptClassId());
+    result.setVocabularyId(concept.getVocabularyId());
+    result.setDomainId(concept.getDomainId());
+    result.setCountValue(concept.getCountValue());
+    result.setSourceCountValue(concept.getSourceCountValue());
+    result.setPrevalence(concept.getPrevalence());
+    result.setSynonymsStr(
+        String.valueOf(concept.getConceptId()) + '|' +
+            Joiner.on("|").join(concept.getConceptSynonyms()));
+    return result;
+  }
 
     private ConceptRelationship makeConceptRelationship(long conceptId1, long conceptId2, String relationshipId) {
         ConceptRelationshipId key = new ConceptRelationshipId();
@@ -699,13 +614,6 @@ public class DataBrowserControllerTest {
         aa.setChartType(achillesAnalysis.getChartType());
         aa.setDataType(achillesAnalysis.getDataType());
         return aa;
-    }
-
-    private static ConceptSynonym makeConceptSynonym(ConceptSynonym conceptSynonym){
-        ConceptSynonym cs = new ConceptSynonym();
-        cs.setConceptId(conceptSynonym.getConceptId());
-        cs.setConceptSynonymName(conceptSynonym.getConceptSynonymName());
-        return cs;
     }
 
     private static AchillesResult makeAchillesResult(AchillesResult achillesResult){
@@ -756,15 +664,6 @@ public class DataBrowserControllerTest {
         achillesResultDao.save(ACHILLES_RESULT_7);
         achillesResultDao.save(ACHILLES_RESULT_8);
         achillesResultDao.save(ACHILLES_RESULT_9);
-
-        conceptSynonymDao.save(CONCEPT_SYNONYM_1);
-        conceptSynonymDao.save(CONCEPT_SYNONYM_2);
-        conceptSynonymDao.save(CONCEPT_SYNONYM_3);
-    }
-
-    private void assertResults(ResponseEntity<ConceptListResponse> response,
-                               Concept... expectedConcepts) {
-        assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
     }
 
     private CdrVersion makeCdrVersion(long cdrVersionId, String name, long creationTime,
