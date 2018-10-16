@@ -102,7 +102,6 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       // Return if  child is a leaf, or if child's child has same breadcrumb as its parent
       if ((!child.firstChild) ||
           (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === label)) {
-        console.log(breadcrumbs);
         return breadcrumbs;
       }
       // Prevent processing children with duplicate urls
