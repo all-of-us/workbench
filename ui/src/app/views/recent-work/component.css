@@ -18,6 +18,7 @@
 }
 
 .scroll-indicator {
+  cursor: pointer;
   height: 2rem;
   width: 2rem;
   align-self: center;
