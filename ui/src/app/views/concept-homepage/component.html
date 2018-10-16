@@ -54,7 +54,7 @@
         </div>
       </div>
       <div class="filter-options">
-        <div class="showing-count">Showing top {{concepts.length}} of {{countSelectedDomain}} {{nameSelectedDomain}}</div>
+        <div class="showing-count">Showing top {{concepts.length}} of {{selectedDomain.conceptCount}} {{selectedDomain.name}}</div>
         Filter by vocabulary:
         <clr-checkbox class="filter-checkbox" *ngFor="let vocabulary of vocabularies" (click)="filterList($event)" [(clrChecked)]="vocabulary.selected">
           {{vocabulary.vocabularyId}} ({{vocabulary.conceptCount}})
@@ -74,4 +74,4 @@
     </div>
   </app-top-box>
 </ng-template>
-<app-concept-add-modal [selectedDomain]="selectedDomain" [selectedConcepts]="selectedConcept"></app-concept-add-modal>
+<app-concept-add-modal [selectedDomain]="selectedDomain.domain" [selectedConcepts]="selectedConcept"></app-concept-add-modal>

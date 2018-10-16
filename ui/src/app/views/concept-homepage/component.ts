@@ -45,13 +45,10 @@ export class ConceptHomepageComponent implements OnInit {
   searching = false;
   currentSearchString: string;
   searchLoading = false;
-  selectedDomain: DomainInfo = {
+  selectedDomain: DomainCount = {
     name: '',
-    description: '',
-    standardConceptCount: 0,
-    allConceptCount: 0,
-    participantCount: 0,
-    domain: undefined
+    domain: undefined,
+    conceptCount: 0
   };
   addTextHovering = false;
   conceptSelected = false;
@@ -109,7 +106,7 @@ export class ConceptHomepageComponent implements OnInit {
         });
       });
       this.loadingDomains = false;
-      this.selectedDomain = this.conceptDomainList[0];
+      this.selectedDomain = this.conceptDomainCounts[0];
     });
   }
 
@@ -118,8 +115,8 @@ export class ConceptHomepageComponent implements OnInit {
     this.conceptAddModal.open();
   }
 
-  selectDomain(domainInfo: DomainInfo) {
-    this.selectedDomain = domainInfo;
+  selectDomain(domainCount: DomainCount) {
+    this.selectedDomain = domainCount;
     this.placeholderValue = this.noConceptsConstant;
     this.setConceptsAndVocabularies();
   }
@@ -131,7 +128,8 @@ export class ConceptHomepageComponent implements OnInit {
 
   browseDomain(domain: DomainInfo) {
     this.currentSearchString = '';
-    this.selectedDomain = domain;
+    this.selectedDomain =
+      this.conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain);
     this.searchConcepts();
   }
 
@@ -174,6 +172,8 @@ export class ConceptHomepageComponent implements OnInit {
           if (activeTabSearch) {
             this.searchLoading = false;
             this.conceptDomainCounts = response.domainCounts;
+            this.selectedDomain =
+              this.conceptDomainCounts.find(domainCount => domainCount.domain === request.domain);
             this.setConceptsAndVocabularies();
           }
       });
@@ -245,12 +245,5 @@ export class ConceptHomepageComponent implements OnInit {
 
   get noConceptsConstant() {
     return 'No concepts found for domain \'' + this.selectedDomain.name + '\' this search.';
-  }
-  get countSelectedDomain() {
-    return 0;
-  }
-
-  get nameSelectedDomain() {
-    return 'Conditions';
   }
 }
