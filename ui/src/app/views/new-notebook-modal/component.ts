@@ -4,11 +4,9 @@ import {SignInService} from 'app/services/sign-in.service';
 import {isBlank} from 'app/utils/index';
 import {Kernels} from 'app/utils/notebook-kernels';
 
-
 import {environment} from 'environments/environment';
 
 import {FileDetail, UserMetricsService, Workspace} from 'generated';
-
 
 @Component({
   selector: 'app-new-notebook-modal',

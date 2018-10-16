@@ -97,7 +97,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   public ResponseEntity<RecentResource> updateRecentResource(String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
-    String notebookPath =  new String();
+    String notebookPath;
     if (recentResourceRequest.getNotebookName().startsWith("gs://")) {
       notebookPath = recentResourceRequest.getNotebookName();
     } else {
