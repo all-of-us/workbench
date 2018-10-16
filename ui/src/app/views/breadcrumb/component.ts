@@ -86,28 +86,24 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
         label = child.snapshot.data['cohort'].name;
       }
       if (label === 'Param: Concept Sets Name') {
-        label = child.snapshot.data['workspace'].name + ' Concepts';
+        label = child.snapshot.data['workspace'].name;
         if (breadcrumbs.length > 2) {
           breadcrumbs = breadcrumbs.filter(b => !b.url.endsWith('/concepts'));
         }
       }
       if (label === 'Param: Concept Set Name') {
         label = child.snapshot.data['conceptSet'].name;
+        // For the most part, we don't want to append the current label to the breadcrumbs since we want the
+        //      label to stop at the parent.
+        // In this case, we want the breadcrumb header to be the Concept Set Name (the current child)
+        const conceptSetBreadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);
+        breadcrumbs.push(conceptSetBreadcrumb);
       }
 
-      if ((label === 'Cohorts') || (label === 'Notebooks') || (label === 'Concepts')) {
-        console.log(child.url);
-        if (!child.firstChild) {
-          return breadcrumbs;
-        }
-        else {
-          // some of these routes have repeats in the nested structure? looking for clarification 
-          if ((child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === 'Cohorts') || (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === 'Concepts')) {
-            if (!child.firstChild.firstChild) {
-              return breadcrumbs;
-            }
-          }
-        }
+      // Return if the child is a leaf, or if the child's child has the same breadcrumb as its parent
+      if ((!child.firstChild) || (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === label)) {
+        console.log(breadcrumbs);
+        return breadcrumbs;
       }
       
       // Prevent processing children with duplicate urls
